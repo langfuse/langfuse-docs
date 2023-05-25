@@ -1,0 +1,61 @@
+# Core Concepts
+
+A brief overview of how langfuse works
+
+## Langfuse architecture
+
+Langfuse consists of the following components
+
+**Application server** ([Quickstart](/docs))
+
+- [Admin UI](/docs/interface) to explore traces, identify problems, and evaluate scores
+- [REST API](/docs/reference) to integrate with your application
+
+**SDKs** to simplify the integration ([Reference](/docs/sdk))
+
+- Trace execution of LLM application
+- Capture scores based on user interaction
+
+import MermaidDynamic from "/components/mdx/mermaid-dynamic.mdx";
+
+<MermaidDynamic />
+
+## Object model
+
+![Object Model](/object_model.png)
+
+### Trace
+
+A trace is a collection of observations that have occurred during the execution of the LLM-based application. Each trace is assigned a unique `traceId` used to identify the trace and attach observations and scores to it. Traces of the same application part are grouped under the same `name`.
+
+### Observation
+
+All steps of the application execution that are tracked are recorded as observations. Observations are an abstract object and there are 3 specific observation types: events, LLM-Calls, and spans. Observations can be nested and carry attributes such as a `name` to identify a step of the application execution, a `startTime`, and JSON `attributes` to attach whatever metadata is relevant to the observation.
+
+#### Event
+
+An Event is considered the base version of an Observation. Events can be used to track any step of the application execution that does not require further details. For example, an event can be used to track the execution flow of a function.
+
+#### LLM-Call
+
+This is a specialized form of an event specifically designed to track the execution of Large-Language-Models (LLMs). It includes additional attributes, like an optional endTime to signify when the LLM execution completed, a prompt (the input given to the LLM), tokens (the processed pieces of the input and output), the completion (the output of the LLM), and the specific model used.
+
+By using the LLM-Call observation type, you can use the [Admin UI](/docs/interface) to interactively explore prompt/completion pairs, and replay them in the langfuse playground (coming soon).
+
+#### Span
+
+A Span is another special form of an observation, which, in addition to the basic event data, also includes an endTime. This means it can track the duration of an operation or process, providing more insight into the time it takes for certain operations to be completed.
+
+### Score
+
+All signals that you want to track to evaluate the quality of application executions (traces) or single observations are recorded as scores. They are simple key-value pairs that can be attached to a trace and (optionally) also to an observation.
+
+Scores can be used to track any metric that is relevant to evaluate the performance/quality of the application, for example:
+
+- User feedback
+  - Explicit: thumbs up/down, star rating, etc.
+  - Implicit: user copied the completion, user clicked on a link, did not edit before submitting the suggested text
+- Application performance
+  - Duration of a specific operation
+
+Scores can be used in the [Admin UI](/docs/interface) to filter and sort traces, find problematic executions, and evaluate the quality of your application.

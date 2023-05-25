@@ -1,0 +1,37 @@
+```typescript
+import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+
+const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
+
+const trace = await client.trace.create({
+  name: 'chat-completion',
+  attributes: { env: 'http://localhost:3030' },
+  status: 'executing'
+})
+
+const llmCall = await client.span.createLlmCall({
+  traceId: trace.id,
+  startTime: new Date(),
+  name: 'chat-completion',
+  attributes: {
+    model: {
+      modelId: model.id,
+      modelName: model.name,
+    },
+    prompt: messages
+  },
+})
+
+const finalized llmCall = await client.span.updateLlmCall({
+  spanId: llmCall.id,
+  endTime: new Date(),
+  attributes: {
+    completion: completeResp,
+  },
+});
+
+const updatedTrace = await client.trace.update({
+  traceId: trace.id,
+  status: "success",
+});
+```

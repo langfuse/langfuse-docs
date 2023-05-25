@@ -1,0 +1,24 @@
+Simple feedback component in React
+
+```typescript
+import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+
+export default function FeedbackComponent(props: { traceId: string }) {
+  const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
+
+  const handleFeedback = async (value: number) => {
+    await client.score.create({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+  };
+
+  return (
+    <>
+      <button onClick={() => handleFeedback(1)}>👍</button>
+      <button onClick={() => handleFeedback(0)}>👎</button>
+    </>
+  );
+}
+```

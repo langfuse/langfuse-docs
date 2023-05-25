@@ -1,0 +1,161 @@
+# Typescript SDK
+
+The Typescript SDK can be imported into your project using npm or yarn.
+
+## Installation
+
+```bash
+# add a .npmrc file to your project root
+touch .npmrc
+
+# add a config to the file
+echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
+
+# install the package
+npm install @finto-fern/api-client
+```
+
+## Usage
+
+### Client
+
+Initialise the client with your environment. In the example below, the client will point to `http://localhost:3030` for all requests by default. If you want to change that, you can replace the enum with a String for your base URL.
+
+```typescript
+import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+
+const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
+```
+
+### Trace
+
+Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application. Traces can be created and updated.
+
+`trace.create()` takes the following parameters:
+- `name`: identifier of the trace
+- `attributes`: additional attributes of the trace. The content can be chosen freely.
+- `status`: the status of the trace. Can be one of `executing`, `success`, `error`
+- `statusMessage` (optional): a message describing the status of the trace
+
+`trace.update()` takes the following parameters:
+- `traceId`: the id of the trace to update
+- `status`: the status of the trace. Can be one of `executing`, `success`, `error`
+- `statusMessage` (optional): a message describing the status of the trace
+
+```typescript
+const trace = await client.trace.create({
+  name: "chat-completion",
+  attributes: { env: "http://localhost:3030" },
+  status: "executing",
+});
+
+const updatedTrace = await client.trace.update({
+  traceId: trace.id,
+  status: "success",
+  statusMessage: "Chat completion successful",
+});
+```
+
+### Span
+
+Spans represent durations of units of work in a trace. We generated convenient SDk functions for generic spans as well as LLM spans.
+
+`span.create()` and `span.createLlmCall()` take the following parameters:
+- `traceId`: the id of the trace to which the span should be attached
+- `name`: identifier of the span
+- `attributes`: additional attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
+- `parentObservationId` (optional): the id of the span or event to which the span should be attached
+
+`span.update()` and `span.updateLlmCall()` take the following parameters:
+- `spanId`: the id of the span to update
+- `endTime`: the time at which the span ended
+- `attributes` (optional): merges with existing attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
+
+
+```typescript
+const span = await client.span.create({
+  traceId: trace.id,
+  name: 'embedding-retrieval';
+  startTime: new Date(),
+  attributes: {
+    userId: user.id
+  }
+})
+
+const updatedSpan = await client.span.update({
+  spanId: span.id,
+  endTime: new Date(),
+})
+
+
+const llmCall = await client.span.createLlmCall({
+  traceId: trace.id,
+  startTime: new Date(),
+  name: 'chat-completion',
+  attributes: {
+    model: {
+      modelId: model.id,
+      modelName: model.name,
+    },
+    prompt: messages
+  },
+  parentObservationId: span.if
+})
+
+const finalized llmCall = await client.span.updateLlmCall({
+  spanId: llmCall.id,
+  endTime: new Date(),
+  attributes: {
+    completion: completeResp,
+  },
+});
+```
+
+### Events
+
+Events are used to track discrete events in a trace. They are similar to spans just that they don't have a duration.
+- `traceId`: the id of the trace to which the event should be attached
+- `name`: identifier of the event
+- `attributes`: additional attributes of the event. The content can be chosen freely.
+- `parentObservationId` (optional): the id of the span or event to which the event should be attached
+- `startTime`: the time at which the event occurred
+
+```typescript
+
+await client.event.create({
+  traceId: trace.id,
+  name: 'chat-completion-retried',
+  attributes: {
+    attempt: 2,
+    userId: user.id
+  },
+  parentObservationId: llmCall.id,
+  startTime: new Date(),
+})
+
+```
+
+### Scores
+
+Scores are used to evaluate the quality of LLM applications. They can be attached to spans, events, or traces.
+- `traceId` (optional): the id of the trace to which the score should be attached
+- `name`: identifier of the score
+- `value`: the value of the score
+- `observationId` (optional): the id of the span or event to which the score should be attached
+
+Either the traceId or the observationId must be provided.
+
+```typescript
+client.score.create({
+  traceId: message.traceId,
+  name: 'user-feedback',
+  value: 1,
+  observationId: llmCall.id,
+})
+```
+
+
+
+## Troubleshooting
+
+If you encounter any issue, we are happy to help on [Discord](https://discord.com/invite/DNDAarxE) or shoot us an email: help@langfuse.com

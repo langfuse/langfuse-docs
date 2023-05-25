@@ -1,0 +1,43 @@
+# Self-Hosting Instructions
+
+If you want to run `langfuse` in your infrastructure, you can easily generate a Docker container.
+
+## 1. Postgres database
+
+You need to have a permanent Postgres database to persist the state of `langfuse`. You can use a managed service on AWS, Azure, or GCP, or you can run it yourself. After setting it up, copy the connection string.
+
+## 2. Create docker image from repository
+
+```bash copy
+# clone the repo and cd into the directory
+git clone https://github.com/langfuse/langfuse.git && cd langfuse
+
+# create the env file and add your postgres connection string
+cp .env.dev.example .env
+
+# build the container
+docker build -t langfuse .
+```
+
+## 3. Deploy the container
+
+Deploy the container to your infrastructure. You can use a managed service like AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can run it yourself.
+
+```bash copy
+docker run -p 3030:3000 langfuse
+```
+
+## Update the application
+
+If you want to update the application, you can simply rebuild the container and redeploy it.
+
+```bash copy
+# pull the latest changes
+git pull
+# rebuild the container
+docker build -t langfuse .
+```
+
+## Troubleshooting
+
+If you encounter any issue, we are happy to help on [Discord](https://discord.com/invite/DNDAarxE) or shoot us an email: help@langfuse.com

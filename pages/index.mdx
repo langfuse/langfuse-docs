@@ -1,0 +1,82 @@
+import { Card, Cards } from "nextra-theme-docs";
+import { SiGithub } from "react-icons/si";
+
+<h1 style={{ marginTop: "100px" }}>`🪢 langfuse`</h1>
+<span
+  style={{
+    display: "block",
+    fontSize: "1.5rem",
+    textAlign: "center",
+  }}
+>
+  open-source tracing and feedback collection for LLM applications
+</span>
+
+<div
+  style={{
+    marginTop: "30px",
+    marginBottom: "100px",
+    display: "flex",
+    gap: "20px",
+    justifyContent: "center",
+  }}
+>
+  <Card icon={<span>🚀</span>} title="Quickstart" href="/docs/get-started" />
+  <Card
+    icon={<SiGithub size="24" />}
+    title="Repo"
+    href="https://github.com/langfuse/langfuse"
+  />
+</div>
+
+## Walkthrough (3 min)
+
+_Video: Integration with Next.js `Chatbot UI` app using the Typescript SDK & demo of `langfuse` interface_
+
+import Demo from "/components/demoVideo";
+
+<Demo />
+
+## `langfuse` overview
+
+> Debug and improve your LLM-based application by logging/analyzing all user interactions, backend traces, and explicit/implicit user feedback.
+
+**Features**
+
+1. Data collection
+   - Tracing LLM application, chain, agent via backend SDK
+   - Feedback collection from users via frontend SDKs
+2. Data exploration
+   - Identify issues
+   - Debug LLM application
+3. Store user-generated prompt/completion/feedback sets
+   - For few-shot prompts
+   - For fine-tuning
+
+**Chart**
+
+import MermaidDynamic from "/components/mdx/mermaid-dynamic.mdx";
+
+<MermaidDynamic />
+
+## Why are we building `langfuse`?
+
+1. **Situation:** LLMs introduce a _'black box'_ character to Software Engineering: outputs of LLM-based applications are unpredictable
+2. **Problem:** Quality of application in production cannot be assured with testing before launching the feature
+3. **Consequence:** Engineers need to embrace active learning from users in production to improve their LLM-based applications. Many teams build UX around their LLM-based application to make the imperfect outputs usable and to collect feedback from users.
+4. **Need:** Holistic tracing of what happens in production, linked to user feedback and other signals to understand how to improve the application.
+
+--> `langfuse` helps with exactly that
+
+## Feedback collection
+
+Kinds of feedback that can be collected using `langfuse`:
+
+- Explicit, e.g., thumbs up/down, star rating
+- Implicit, e.g., user copied the completion, user clicked on a link, user did not edit before submitting the suggested text
+
+Generally there is the tradeoff of quantity and quality of feedback; with langfuse you can collect all sorts of feedback and analyze it in a holistic way.
+
+## Get in touch
+
+`langfuse` is being actively developed in open source together with the community. Join our [Discord](https://discord.com/invite/DNDAarxE)! Provide feedback, report bugs, or request features via GitHub issues. If you want to chat about your use case, reach out to us via email: contact@langfuse.com
