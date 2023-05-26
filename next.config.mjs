@@ -10,17 +10,4 @@ const withNextra = nextra({
   defaultShowCopyCode: true,
 })
 
-export default withNextra({
-  async headers() {
-    const headers = [{
-      headers: [
-        {
-          key: 'X-Robots-Tag',
-          value: 'noindex',
-        },
-      ],
-      source: '/:path*',
-    }];
-    return headers;
-  },
-});
+export default withNextra();
