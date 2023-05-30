@@ -14,7 +14,7 @@ git clone https://github.com/langfuse/langfuse.git && cd langfuse
 
 # build the container
 docker build \
---build-arg DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
+--build-arg DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
 --build-arg NEXTAUTH_SECRET=mysecret \
 --build-arg NEXTAUTH_URL=http:localhost:3030 \
 -t langfuse .
