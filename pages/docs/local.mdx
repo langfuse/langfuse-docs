@@ -15,9 +15,6 @@ git clone https://github.com/langfuse/langfuse.git
 # switch into langfuse directory
 cd langfuse
 
-# create an env file
-cp .env.local.example .env
-
 # start langfuse
 docker-compose up
 ```
@@ -40,6 +37,9 @@ npm install
 
 # Run the db
 docker-compose -f docker-compose.dev.yml up
+
+# create an env file
+cp .env.dev.example .env
 
 # Migration
 npx prisma migrate dev

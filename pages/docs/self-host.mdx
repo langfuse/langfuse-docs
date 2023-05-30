@@ -12,11 +12,12 @@ You need to have a permanent Postgres database to persist the state of `langfuse
 # clone the repo and cd into the directory
 git clone https://github.com/langfuse/langfuse.git && cd langfuse
 
-# create the env file and add your postgres connection string
-cp .env.dev.example .env
-
 # build the container
-docker build -t langfuse .
+docker build \
+--build-arg DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
+--build-arg NEXTAUTH_SECRET=mysecret \
+--build-arg NEXTAUTH_URL=http:localhost:3030 \
+-t langfuse .
 ```
 
 ## 3. Deploy the container
@@ -24,7 +25,11 @@ docker build -t langfuse .
 Deploy the container to your infrastructure. You can use a managed service like AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can run it yourself.
 
 ```bash copy
-docker run -p 3030:3000 langfuse
+docker run \
+--env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
+--env NEXTAUTH_SECRET=mysecret \
+--env NEXTAUTH_URL=http:localhost:3030 \
+-dp 3030:3000 langfuse
 ```
 
 ## Update the application
@@ -35,7 +40,11 @@ If you want to update the application, you can simply rebuild the container and 
 # pull the latest changes
 git pull
 # rebuild the container
-docker build -t langfuse .
+docker build \
+--build-arg DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
+--build-arg NEXTAUTH_SECRET=mysecret \
+--build-arg NEXTAUTH_URL=http:localhost:3030 \
+-t langfuse .
 ```
 
 ## Troubleshooting
