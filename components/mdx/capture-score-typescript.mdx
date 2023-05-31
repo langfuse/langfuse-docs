@@ -9,8 +9,8 @@ export default function FeedbackComponent(props: { traceId: string }) {
   const handleFeedback = async (value: number) => {
     await client.score.create({
       traceId: props.traceId,
-      name: "user_feedback",
-      value,
+      name: "user_feedback", // arbitrary name to identify the type of score
+      value, // float, optional: scale it to e.g. 0..1
     });
   };
 

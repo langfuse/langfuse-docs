@@ -4,9 +4,9 @@ import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
 const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
 
 const trace = await client.trace.create({
-  name: 'chat-completion',
+  name: 'chat-completion', // identify the kind of the trace
   attributes: { env: 'http://localhost:3030' },
-  status: 'executing'
+  status: 'executing' // execution, success, error
 })
 
 const llmCall = await client.span.createLlmCall({
