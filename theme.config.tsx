@@ -41,12 +41,6 @@ const config: DocsThemeConfig = {
           }
         />
         <meta property="og:image" content="https://langfuse.com/og.png" />
-        <script
-          async
-          defer
-          data-website-id="39e22d92-2b6d-480d-bbba-28549a348027"
-          src="https://umami.langfuse.com/umm.js"
-        ></script>
       </>
     );
   },
