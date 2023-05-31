@@ -1,8 +1,87 @@
 # Langfuse Cloud
 
-import { Callout } from "nextra/components";
+import { Steps } from "nextra-theme-docs";
 
-<Callout type="info" emoji="ℹ️">
-  We are currently building a managed cloud version of the langfuse server.
-  Contact us to join the early-access group: cloud@langfuse.com
-</Callout>
+## Overview
+
+Langfuse cloud is a managed version of the langfuse server.
+
+The langfuse core team takes care of:
+
+- Deployment
+- Scaling
+- Upgrades and security patches
+- Availability
+
+## Get started
+
+<Steps>
+
+### Create an account
+
+Create an account on [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up).
+
+### Create a project to get your API keys
+
+### Configure SDKs to use the cloud environment
+
+#### Server
+
+```typescript
+import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+
+const client = new LangfuseClient({
+  environment: LangfuseEnvironment.Cloud,
+  secretKey: env.LANGFUSE_SECRET_KEY,
+  publishableKey: env.LANGFUSE_PUBLISHABLE_KEY,
+});
+```
+
+#### Client
+
+```typescript
+import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+
+const client = new LangfuseClient({
+  environment: LangfuseEnvironment.Cloud,
+  publishableKey: env.LANGFUSE_PUBLISHABLE_KEY,
+});
+```
+
+### Monitor your events
+
+Go to [cloud.langfuse.com](https://cloud.langfuse.com) to monitor your events.
+
+</Steps>
+
+## Pricing
+
+### Free-tier
+
+The free-tier is a great way to get started with langfuse. It includes:
+
+- 50,000 tracked events per month
+- 30 days of history
+
+### Usage-based pricing
+
+Above the free-tier, pricing is based on the number of tracked events per month.
+
+| Tracked events per month | Price              |
+| ------------------------ | ------------------ |
+| 50,000                   | $0                 |
+| 50,000 - 100,000,000     | $1 / 10,000 events |
+| 100,000,000+             | Contact us         |
+
+### Enterprise
+
+For enterprise customers, we offer more customized pricing, support and features:
+
+- Dedicated server
+- Managed deployment in your VPC
+- SLAs
+- Unlimited events
+- Own tracking domain
+- Support SLAs
+
+More information: enteprise@langfuse.com
