@@ -32,12 +32,14 @@ const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
 Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application. Traces can be created and updated.
 
 `trace.create()` takes the following parameters:
+
 - `name`: identifier of the trace
 - `attributes`: additional attributes of the trace. The content can be chosen freely.
 - `status`: the status of the trace. Can be one of `executing`, `success`, `error`
 - `statusMessage` (optional): a message describing the status of the trace
 
 `trace.update()` takes the following parameters:
+
 - `traceId`: the id of the trace to update
 - `status`: the status of the trace. Can be one of `executing`, `success`, `error`
 - `statusMessage` (optional): a message describing the status of the trace
@@ -61,16 +63,17 @@ const updatedTrace = await client.trace.update({
 Spans represent durations of units of work in a trace. We generated convenient SDk functions for generic spans as well as LLM spans.
 
 `span.create()` and `span.createLlmCall()` take the following parameters:
+
 - `traceId`: the id of the trace to which the span should be attached
 - `name`: identifier of the span
 - `attributes`: additional attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
 - `parentObservationId` (optional): the id of the span or event to which the span should be attached
 
 `span.update()` and `span.updateLlmCall()` take the following parameters:
+
 - `spanId`: the id of the span to update
 - `endTime`: the time at which the span ended
 - `attributes` (optional): merges with existing attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
-
 
 ```typescript
 const span = await client.span.create({
@@ -114,6 +117,7 @@ const finalized llmCall = await client.span.updateLlmCall({
 ### Events
 
 Events are used to track discrete events in a trace. They are similar to spans just that they don't have a duration.
+
 - `traceId`: the id of the trace to which the event should be attached
 - `name`: identifier of the event
 - `attributes`: additional attributes of the event. The content can be chosen freely.
@@ -121,26 +125,25 @@ Events are used to track discrete events in a trace. They are similar to spans j
 - `startTime`: the time at which the event occurred
 
 ```typescript
-
 await client.event.create({
   traceId: trace.id,
-  name: 'chat-completion-retried',
+  name: "chat-completion-retried",
   attributes: {
     attempt: 2,
-    userId: user.id
+    userId: user.id,
   },
   parentObservationId: llmCall.id,
   startTime: new Date(),
-})
-
+});
 ```
 
 ### Scores
 
 Scores are used to evaluate the quality of LLM applications. They can be attached to spans, events, or traces.
-- `traceId` (optional): the id of the trace to which the score should be attached
+
+- `traceId`: the id of the trace to which the score should be attached
 - `name`: identifier of the score
-- `value`: the value of the score
+- `value`: the value of the score; float; optional: scale it to e.g. 0..1
 - `observationId` (optional): the id of the span or event to which the score should be attached
 
 Either the traceId or the observationId must be provided.
@@ -148,13 +151,11 @@ Either the traceId or the observationId must be provided.
 ```typescript
 client.score.create({
   traceId: message.traceId,
-  name: 'user-feedback',
+  name: "user-feedback",
   value: 1,
   observationId: llmCall.id,
-})
+});
 ```
-
-
 
 ## Troubleshooting
 
