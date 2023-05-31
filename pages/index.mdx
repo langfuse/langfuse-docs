@@ -10,7 +10,8 @@ import { AiOutlineCloud } from "react-icons/ai";
     textAlign: "center",
   }}
 >
-  open-source tracing and feedback collection for LLM applications
+  open-source tracing and feedback collection for applications built on top of
+  LLMs
 </span>
 
 <div className="flex pt-5 gap-3 justify-center flex-wrap pb-20">
@@ -43,19 +44,19 @@ import Demo from "/components/demoVideo";
 
 1. Data collection
    - Tracing LLM application, chain, agent via backend SDK
-   - Feedback collection from users via frontend SDKs
-2. Data exploration
+   - Scoring of traces based on user feedback/interaction via frontend SDKs
+2. Data exploration in langfuse UI
    - Identify issues
    - Debug LLM application
-3. Store user-generated prompt/completion/feedback sets
-   - For few-shot prompts
-   - For fine-tuning
 
-**Chart**
+**Architecture**
 
-import MermaidDynamic from "/components/mdx/mermaid-dynamic.mdx";
-
-<MermaidDynamic />
+- Server (**cloud**, local, self-hosted)
+  - API server on top database
+  - Web app to explore data
+- Client SDKs to integrate with LLM application
+  - Backend SDK for tracing
+  - Frontend SDK for scoring of traces based on user feedback/interaction
 
 ## Why are we building `langfuse`?
 
@@ -65,15 +66,6 @@ import MermaidDynamic from "/components/mdx/mermaid-dynamic.mdx";
 4. **Need:** Holistic tracing of what happens in production, linked to user feedback and other signals to understand how to improve the application.
 
 --> `langfuse` helps with exactly that
-
-## Feedback collection
-
-Kinds of feedback that can be collected using `langfuse`:
-
-- Explicit, e.g., thumbs up/down, star rating
-- Implicit, e.g., user copied the completion, user clicked on a link, user did not edit before submitting the suggested text
-
-Generally there is the tradeoff of quantity and quality of feedback; with langfuse you can collect all sorts of feedback and analyze it in a holistic way.
 
 ## Get in touch
 
