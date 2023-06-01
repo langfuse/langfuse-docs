@@ -14,8 +14,8 @@ npm install @finto-fern/langfuse-node
 Add to server project
 
 ```typescript filename="server.ts"
-import { LangfuseClient } from '@finto-fern/langfuse-node';
-import { TraceStatus } from '@finto-fern/langfuse-node/api';
+import { LangfuseClient } from "@finto-fern/langfuse-node";
+import { TraceStatus } from "@finto-fern/langfuse-node/api";
 
 const serverClient = new LangfuseClient({
   environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
@@ -24,15 +24,15 @@ const serverClient = new LangfuseClient({
 });
 
 const trace = await serverClient.trace.create({
-  name: 'chat-completion', // identify the kind of the trace
-  attributes: { userId: '8eb2db56-a582-4cf6-87ac-cab96edb24fa' }, // any custom attributes
-  status: TraceStatus.Executing
-})
+  name: "chat-completion", // identify the kind of the trace
+  attributes: { userId: "8eb2db56-a582-4cf6-87ac-cab96edb24fa" }, // any custom attributes
+  status: TraceStatus.Executing,
+});
 
 const llmCall = await serverClient.span.createLlmCall({
   traceId: trace.id,
   startTime: new Date(),
-  name: 'chat-completion',
+  name: "chat-completion",
   attributes: {
     model: {
       modelId: model.id,
@@ -40,9 +40,9 @@ const llmCall = await serverClient.span.createLlmCall({
     },
     prompt: messages,
   },
-})
+});
 
-const finalized llmCall = await serverClient.span.updateLlmCall({
+const finalizedllmCall = await serverClient.span.updateLlmCall({
   spanId: llmCall.id,
   endTime: new Date(),
   attributes: {

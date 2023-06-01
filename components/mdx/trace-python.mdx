@@ -1,0 +1,60 @@
+Install SDK
+
+```bash
+pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
+```
+
+```python filename="server.py"
+from finto.client import FintoLangfuse
+
+client = FintoLangfuse(
+  environment = "https://cloud.langfuse.com", # or any custom host, e.g. http://localhost:3030
+  username = "pk-lf-..." # publishable key
+  password = "sk-sk-..." # secret key
+)
+
+trace = client.trace.create(
+  request = {
+    "name": "chat-completion",
+    "attributes": {
+      "key": "value"
+    },
+    "status": "EXECUTING",
+    "status_message": "test"
+  }
+)
+
+llmCall = client.span.create_llm_call(
+  request = {
+    "traceId": trace.id,
+    "name": 'chat-completion',
+    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    "attributes": {
+      "model": {
+        "model_name": "gpt-3.5-turbo",
+        "temperature": 0.9,
+      },
+      "prompt": "Hello, how are you?",
+    },
+    "parentObservationId": span.id,
+  }
+)
+
+finalizedLlmCall = client.span.update_llm_call(
+  request = {
+    "spanId": llmCall.id,
+    "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    "attributes": {
+      "completion": "I am fine, thank you.",
+    }
+  }
+)
+
+updatedTrace = client.trace.update(
+  request = {
+    "id": trace.id,
+    "status": "SUCCESS",
+    "status_message": "Chat completion successful"
+  }
+)
+```
