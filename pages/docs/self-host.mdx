@@ -38,9 +38,9 @@ docker run \
 -a STDOUT langfuse
 ```
 
-</Steps>
 
-## Update the application
+
+### Update the application
 
 If you want to update the application, you can simply rebuild the container and redeploy it.
 
@@ -49,11 +49,13 @@ If you want to update the application, you can simply rebuild the container and 
 git pull
 # rebuild the container
 docker build \
---build-arg DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
+--build-arg DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
 --build-arg NEXTAUTH_SECRET=mysecret \
 --build-arg NEXTAUTH_URL=http:localhost:3030 \
 -t langfuse .
 ```
+
+</Steps>
 
 ## Troubleshooting
 
