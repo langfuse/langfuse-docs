@@ -1,18 +1,176 @@
 # Python SDK
 
-import { Callout } from "nextra/components";
-
 The Python SDK can be imported into your project using pip.
 
 ## Installation
 
 ```bash
-# install the package
 pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
 ```
 
-<Callout type="warning" emoji="🚧">
-  Will be added soon. In the meantime, join our
-  [Discord](https://discord.com/invite/DNDAarxE) or reach out if you have any
-  questions: docs@langfuse.com
-</Callout>
+## Usage
+
+### Initialize client
+
+Initialize the client with your environment and api keys. In the example we are using the cloud environment. The Python client can modify all entities in the Langfuse API and requires the secret key.
+
+```python filename="server.py"
+from finto.client import FintoLangfuse
+
+client = FintoLangfuse(
+  environment = "https://cloud.langfuse.com", # or any custom host, e.g. http://localhost:3030
+  username = "pk-lf-..." # publishable key
+  password = "sk-sk-..." # secret key
+)
+```
+
+### Trace
+
+Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application. Traces can be created and updated.
+
+`trace.create()` takes the following parameters:
+
+- `name`: identifier of the trace
+- `attributes`: additional attributes of the trace. The content can be chosen freely.
+- `status`: the status of the trace. Can be one of `EXECUTING`, `SUCCESS`, `ERROR`
+- `statusMessage` (optional): a message describing the status of the trace
+
+`trace.update()` takes the following parameters:
+
+- `traceId`: the id of the trace to update
+- `status`: the status of the trace. Can be one of `EXECUTING`, `SUCCESS`, `ERROR`
+- `statusMessage` (optional): a message describing the status of the trace
+
+```python filename="server.py"
+trace = client.trace.create(
+  request={
+    "name": "chat-completion",
+    "attributes": {
+      "key": "value"
+    },
+    "status": "EXECUTING",
+    "status_message": "test"
+  }
+)
+
+updatedTrace = client.trace.update(
+  request={
+    "id": trace.id,
+    "status": "SUCCESS",
+    "status_message": "Chat completion successful"
+  }
+)
+```
+
+### Span
+
+Spans represent durations of units of work in a trace. We generated convenient SDk functions for generic spans as well as LLM spans.
+
+`span.create()` and `span.createLlmCall()` take the following parameters:
+
+- `traceId`: the id of the trace to which the span should be attached
+- `name`: identifier of the span
+- `attributes`: additional attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
+- `parentObservationId` (optional): the id of the span or event to which the span should be attached
+
+`span.update()` and `span.updateLlmCall()` take the following parameters:
+
+- `spanId`: the id of the span to update
+- `endTime`: the time at which the span ended
+- `attributes` (optional): merges with existing attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
+
+```python filename="server.py"
+span = client.span.create(
+  request={
+    "traceId": trace.id,
+    "name": 'embedding-retrieval',
+    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    "attributes": {
+      "key": "value"
+    }
+  }
+)
+
+updatedSpan = client.span.update(
+  request={
+    "spanId": span.id,
+    "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+  }
+)
+
+llmCall = client.span.create_llm_call(
+  request={
+    "traceId": trace.id,
+    "name": 'chat-completion',
+    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    "attributes": {
+      "model": {
+        "model_name": "gpt-3.5-turbo",
+        "temperature": 0.9,
+      },
+      "prompt": "Hello, how are you?",
+    },
+    "parentObservationId": span.id,
+  }
+)
+
+updatedLlmCall = client.span.update_llm_call(
+  request={
+    "spanId": llmCall.id,
+    "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    "attributes": {
+      "completion": "I am fine, thank you.",
+    }
+  }
+)
+```
+
+### Events
+
+Events are used to track discrete events in a trace. They are similar to spans just that they don't have a duration.
+
+- `traceId`: the id of the trace to which the event should be attached
+- `name`: identifier of the event
+- `attributes`: additional attributes of the event. The content can be chosen freely.
+- `parentObservationId` (optional): the id of the span or event to which the event should be attached
+- `startTime`: the time at which the event occurred
+
+```python filename="server.py"
+event = client.event.create(
+  request={
+    "traceId": trace.id,
+    "name": 'chat-docs-retrieval',
+    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    "attributes": {
+      "key": "value"
+    },
+    "parentObservationId": llmCall.id,
+  }
+)
+```
+
+### Scores
+
+Scores are used to evaluate the quality of LLM applications. They can be attached to spans, events, or traces.
+
+- `traceId`: the id of the trace to which the score should be attached
+- `name`: identifier of the score
+- `value`: the value of the score; float; optional: scale it to e.g. 0..1
+- `observationId` (optional): the id of the span or event to which the score should be attached
+
+Either the traceId or the observationId must be provided.
+
+```python filename="server.py"
+score = client.score.create(
+  request={
+    "traceId": trace.id,
+    "name": 'user-explicit-feedback',
+    "value": 1,
+    "observationId": llmCall.id,
+  }
+)
+```
+
+## Troubleshooting
+
+If you encounter any issue, we are happy to help on [Discord](https://discord.com/invite/DNDAarxE) or shoot us an email: help@langfuse.com
