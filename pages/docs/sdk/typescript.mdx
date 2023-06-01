@@ -101,34 +101,33 @@ Spans represent durations of units of work in a trace. We generated convenient S
 ```typescript filename="server.ts"
 const span = await serverClient.span.create({
   traceId: trace.id,
-  name: 'embedding-retrieval',
+  name: "embedding-retrieval",
   startTime: new Date(),
   attributes: {
-    userId: user.id
-  }
-})
+    userId: user.id,
+  },
+});
 
 const updatedSpan = await serverClient.span.update({
   spanId: span.id,
   endTime: new Date(),
-})
-
+});
 
 const llmCall = await serverClient.span.createLlmCall({
   traceId: trace.id,
   startTime: new Date(),
-  name: 'chat-completion',
+  name: "chat-completion",
   attributes: {
     model: {
       modelId: model.id,
       modelName: model.name,
     },
-    prompt: messages
+    prompt: messages,
   },
-  parentObservationId: span.id
-})
+  parentObservationId: span.id,
+});
 
-const finalized llmCall = await serverClient.span.updateLlmCall({
+const updatedllmCall = await serverClient.span.updateLlmCall({
   spanId: llmCall.id,
   endTime: new Date(),
   attributes: {
