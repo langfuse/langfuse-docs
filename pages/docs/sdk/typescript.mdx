@@ -26,7 +26,7 @@ Initialise the client with your environment and api keys. In the example we are 
 The server client can modify all entities in the Langfuse API and requires the secret key.
 
 ```typescript filename="server.ts"
-import { LangfuseClient } from '@finto-fern/langfuse-node';
+import { LangfuseClient } from "@finto-fern/langfuse-node";
 
 const serverClient = new LangfuseClient({
   environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
@@ -101,7 +101,7 @@ Spans represent durations of units of work in a trace. We generated convenient S
 ```typescript filename="server.ts"
 const span = await serverClient.span.create({
   traceId: trace.id,
-  name: 'embedding-retrieval';
+  name: 'embedding-retrieval',
   startTime: new Date(),
   attributes: {
     userId: user.id
@@ -125,7 +125,7 @@ const llmCall = await serverClient.span.createLlmCall({
     },
     prompt: messages
   },
-  parentObservationId: span.if
+  parentObservationId: span.id
 })
 
 const finalized llmCall = await serverClient.span.updateLlmCall({
