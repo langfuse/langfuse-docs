@@ -43,7 +43,7 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 
 ```python filename="server.py"
 trace = client.trace.create(
-  request={
+  request = {
     "name": "chat-completion",
     "attributes": {
       "key": "value"
@@ -54,7 +54,7 @@ trace = client.trace.create(
 )
 
 updatedTrace = client.trace.update(
-  request={
+  request = {
     "id": trace.id,
     "status": "SUCCESS",
     "status_message": "Chat completion successful"
@@ -92,14 +92,14 @@ span = client.span.create(
 )
 
 updatedSpan = client.span.update(
-  request={
+  request = {
     "spanId": span.id,
     "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
   }
 )
 
 llmCall = client.span.create_llm_call(
-  request={
+  request = {
     "traceId": trace.id,
     "name": 'chat-completion',
     "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -115,7 +115,7 @@ llmCall = client.span.create_llm_call(
 )
 
 updatedLlmCall = client.span.update_llm_call(
-  request={
+  request = {
     "spanId": llmCall.id,
     "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
     "attributes": {
@@ -137,7 +137,7 @@ Events are used to track discrete events in a trace. They are similar to spans j
 
 ```python filename="server.py"
 event = client.event.create(
-  request={
+  request = {
     "traceId": trace.id,
     "name": 'chat-docs-retrieval',
     "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -162,7 +162,7 @@ Either the traceId or the observationId must be provided.
 
 ```python filename="server.py"
 score = client.score.create(
-  request={
+  request = {
     "traceId": trace.id,
     "name": 'user-explicit-feedback',
     "value": 1,
