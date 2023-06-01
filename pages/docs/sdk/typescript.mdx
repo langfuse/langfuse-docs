@@ -19,12 +19,33 @@ npm install @finto-fern/api-client
 
 ### Client
 
-Initialise the client with your environment. In the example below, the client will point to `http://localhost:3030` for all requests by default. If you want to change that, you can replace the enum with a String for your base URL.
+Initialise the client with your environment and api keys. In the example we are using the cloud environment.
 
-```typescript
-import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+#### Server
 
-const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
+The server client can modify all entities in the Langfuse API and requires the secret key.
+
+```typescript filename="server.ts"
+import { LangfuseClient, LangfuseEnvironment } from "@finto-fern/api-client";
+
+const serverClient = new LangfuseClient({
+  environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+  username: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
+  password: env.LANGFUSE_SECRET_KEY, // pk-sk-...
+});
+```
+
+#### Frontend
+
+The frontend client is used to send scores to the Langfuse API. It can be initialised with the publishable key.
+
+```typescript filename="frontend.ts"
+import { LangfuseClient, LangfuseEnvironment } from "@finto-fern/react-client";
+
+const frontendClient = new LangfuseClient({
+  environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+  token: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
+});
 ```
 
 ### Trace
@@ -44,16 +65,18 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 - `status`: the status of the trace. Can be one of `executing`, `success`, `error`
 - `statusMessage` (optional): a message describing the status of the trace
 
-```typescript
-const trace = await client.trace.create({
+```typescript filename="server.ts"
+import { TraceStatus } from "@finto-fern/api-client/api";
+
+const trace = await serverClient.trace.create({
   name: "chat-completion",
   attributes: { env: "http://localhost:3030" },
-  status: "executing",
+  status: TraceStatus.Executing,
 });
 
-const updatedTrace = await client.trace.update({
+const updatedTrace = await serverClient.trace.update({
   traceId: trace.id,
-  status: "success",
+  status: TraceStatus.Success,
   statusMessage: "Chat completion successful",
 });
 ```
@@ -75,8 +98,8 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `endTime`: the time at which the span ended
 - `attributes` (optional): merges with existing attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
 
-```typescript
-const span = await client.span.create({
+```typescript filename="server.ts"
+const span = await serverClient.span.create({
   traceId: trace.id,
   name: 'embedding-retrieval';
   startTime: new Date(),
@@ -85,13 +108,13 @@ const span = await client.span.create({
   }
 })
 
-const updatedSpan = await client.span.update({
+const updatedSpan = await serverClient.span.update({
   spanId: span.id,
   endTime: new Date(),
 })
 
 
-const llmCall = await client.span.createLlmCall({
+const llmCall = await serverClient.span.createLlmCall({
   traceId: trace.id,
   startTime: new Date(),
   name: 'chat-completion',
@@ -105,7 +128,7 @@ const llmCall = await client.span.createLlmCall({
   parentObservationId: span.if
 })
 
-const finalized llmCall = await client.span.updateLlmCall({
+const finalized llmCall = await serverClient.span.updateLlmCall({
   spanId: llmCall.id,
   endTime: new Date(),
   attributes: {
@@ -124,8 +147,8 @@ Events are used to track discrete events in a trace. They are similar to spans j
 - `parentObservationId` (optional): the id of the span or event to which the event should be attached
 - `startTime`: the time at which the event occurred
 
-```typescript
-await client.event.create({
+```typescript filename="server.ts"
+await serverClient.event.create({
   traceId: trace.id,
   name: "chat-completion-retried",
   attributes: {
@@ -148,8 +171,10 @@ Scores are used to evaluate the quality of LLM applications. They can be attache
 
 Either the traceId or the observationId must be provided.
 
-```typescript
-client.score.create({
+Scores can also be modified by the serverClient.
+
+```typescript filename="frontend.ts"
+frontendClient.score.create({
   traceId: message.traceId,
   name: "user-feedback",
   value: 1,

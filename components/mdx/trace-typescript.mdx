@@ -1,15 +1,20 @@
-```typescript
+```typescript filename="server.ts"
 import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+import { TraceStatus } from '@finto-fern/api-client/api';
 
-const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
+const serverClient = new LangfuseClient({
+  environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+  username: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
+  password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
+});
 
-const trace = await client.trace.create({
+const trace = await serverClient.trace.create({
   name: 'chat-completion', // identify the kind of the trace
-  attributes: { env: 'http://localhost:3030' },
-  status: 'executing' // execution, success, error
+  attributes: { version: 'v1.0.5' }, // any custom attributes
+  status: TraceStatus.Executing
 })
 
-const llmCall = await client.span.createLlmCall({
+const llmCall = await serverClient.span.createLlmCall({
   traceId: trace.id,
   startTime: new Date(),
   name: 'chat-completion',
@@ -18,11 +23,11 @@ const llmCall = await client.span.createLlmCall({
       modelId: model.id,
       modelName: model.name,
     },
-    prompt: messages
+    prompt: messages,
   },
 })
 
-const finalized llmCall = await client.span.updateLlmCall({
+const finalized llmCall = await serverClient.span.updateLlmCall({
   spanId: llmCall.id,
   endTime: new Date(),
   attributes: {
@@ -30,8 +35,8 @@ const finalized llmCall = await client.span.updateLlmCall({
   },
 });
 
-const updatedTrace = await client.trace.update({
+const updatedTrace = await serverClient.trace.update({
   traceId: trace.id,
-  status: "success",
+  status: TraceStatus.Success,
 });
 ```

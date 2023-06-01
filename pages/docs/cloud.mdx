@@ -32,19 +32,22 @@ import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
 
 const client = new LangfuseClient({
   environment: LangfuseEnvironment.Cloud,
-  secretKey: env.LANGFUSE_SECRET_KEY,
-  publishableKey: env.LANGFUSE_PUBLISHABLE_KEY,
+  username: env.LANGFUSE_PUBLISHABLE_KEY,
+  password: env.LANGFUSE_SECRET_KEY,
 });
 ```
 
-#### Client
+#### Frontend
 
 ```typescript
-import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+import {
+  LangfuseClient,
+  LangfuseEnvironment,
+} from "@langfuse-fern/react-client";
 
 const client = new LangfuseClient({
   environment: LangfuseEnvironment.Cloud,
-  publishableKey: env.LANGFUSE_PUBLISHABLE_KEY,
+  token: env.LANGFUSE_PUBLISHABLE_KEY,
 });
 ```
 

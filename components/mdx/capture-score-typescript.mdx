@@ -1,10 +1,13 @@
 Simple feedback component in React
 
-```typescript
+```typescript file="UserFeedbackComponent.tsx"
 import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
 
-export default function FeedbackComponent(props: { traceId: string }) {
-  const client = new LangfuseClient({ environment: LangfuseEnvironment.Local });
+export default function UserFeedbackComponent(props: { traceId: string }) {
+  const frontendClient = new LangfuseClient({
+    environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+    token: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
+  });
 
   const handleFeedback = async (value: number) => {
     await client.score.create({
