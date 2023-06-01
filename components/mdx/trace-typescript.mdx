@@ -14,11 +14,11 @@ npm install @finto-fern/api-client
 Add to server project
 
 ```typescript filename="server.ts"
-import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+import { LangfuseClient } from "@langfuse-fern/api-client";
 import { TraceStatus } from '@finto-fern/api-client/api';
 
 const serverClient = new LangfuseClient({
-  environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
   username: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
   password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
 });

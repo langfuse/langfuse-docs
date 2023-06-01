@@ -26,10 +26,10 @@ Initialise the client with your environment and api keys. In the example we are 
 The server client can modify all entities in the Langfuse API and requires the secret key.
 
 ```typescript filename="server.ts"
-import { LangfuseClient, LangfuseEnvironment } from "@finto-fern/api-client";
+import { LangfuseClient } from "@finto-fern/api-client";
 
 const serverClient = new LangfuseClient({
-  environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
   username: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
   password: env.LANGFUSE_SECRET_KEY, // pk-sk-...
 });
@@ -40,10 +40,10 @@ const serverClient = new LangfuseClient({
 The frontend client is used to send scores to the Langfuse API. It can be initialised with the publishable key.
 
 ```typescript filename="frontend.ts"
-import { LangfuseClient, LangfuseEnvironment } from "@finto-fern/react-client";
+import { LangfuseClient } from "@finto-fern/react-client";
 
 const frontendClient = new LangfuseClient({
-  environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
   token: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
 });
 ```

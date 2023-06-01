@@ -7,11 +7,11 @@ npm install @finto-fern/react-client
 Simple feedback component in React
 
 ```typescript filename="UserFeedbackComponent.tsx"
-import { LangfuseClient, LangfuseEnvironment } from "@finto-fern/react-client";
+import { LangfuseClient } from "@finto-fern/react-client";
 
 export default function UserFeedbackComponent(props: { traceId: string }) {
   const frontendClient = new LangfuseClient({
-    environment: LangfuseEnvironment.Cloud, // or any custom host, e.g. http://localhost:3030
+    environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
     token: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
   });
 

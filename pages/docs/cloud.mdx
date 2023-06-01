@@ -28,10 +28,10 @@ Create an account on [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-u
 #### Server
 
 ```typescript
-import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
+import { LangfuseClient } from "@langfuse-fern/api-client";
 
 const client = new LangfuseClient({
-  environment: LangfuseEnvironment.Cloud,
+  environment: "https://cloud.langfuse.com",
   username: env.LANGFUSE_PUBLISHABLE_KEY,
   password: env.LANGFUSE_SECRET_KEY,
 });
@@ -40,13 +40,10 @@ const client = new LangfuseClient({
 #### Frontend
 
 ```typescript
-import {
-  LangfuseClient,
-  LangfuseEnvironment,
-} from "@langfuse-fern/react-client";
+import { LangfuseClient } from "@langfuse-fern/react-client";
 
 const client = new LangfuseClient({
-  environment: LangfuseEnvironment.Cloud,
+  environment: "https://cloud.langfuse.com",
   token: env.LANGFUSE_PUBLISHABLE_KEY,
 });
 ```
