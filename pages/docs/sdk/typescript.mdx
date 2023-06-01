@@ -12,7 +12,7 @@ touch .npmrc
 echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
 
 # install the packages
-npm install @finto-fern/api-client @finto-fern/react-client
+npm install @finto-fern/langfuse-node @finto-fern/react-client
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ Initialise the client with your environment and api keys. In the example we are 
 The server client can modify all entities in the Langfuse API and requires the secret key.
 
 ```typescript filename="server.ts"
-import { LangfuseClient } from "@finto-fern/api-client";
+import { LangfuseClient } from '@finto-fern/langfuse-node';
 
 const serverClient = new LangfuseClient({
   environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
