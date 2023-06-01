@@ -1,3 +1,18 @@
+Install SDK
+
+```bash
+# add a .npmrc file to your project root
+touch .npmrc
+
+# add a config to the file
+echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
+
+# install the package
+npm install @finto-fern/api-client
+```
+
+Add to server project
+
 ```typescript filename="server.ts"
 import { LangfuseClient, LangfuseEnvironment } from "@langfuse-fern/api-client";
 import { TraceStatus } from '@finto-fern/api-client/api';
