@@ -1,10 +1,10 @@
-export const spec = `
+export const openApiSpecServer = `
 openapi: 3.0.1
 info:
   title: langfuse
   version: ''
 paths:
-  /api/events:
+  /api/public/events:
     post:
       description: Add an event to the database
       operationId: event_create
@@ -18,13 +18,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+      security: &ref_0
+        - BasicAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateEventRequest'
-  /api/scores:
+  /api/public/scores:
     post:
       description: Add a score to the database
       operationId: score_create
@@ -38,13 +40,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Score'
+      security: *ref_0
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateScoreRequest'
-  /api/llm-span:
+  /api/public/llm-span:
     post:
       description: a
       operationId: span_createLLMCall
@@ -58,6 +61,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Span'
+      security: *ref_0
       requestBody:
         required: true
         content:
@@ -77,13 +81,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Span'
+      security: *ref_0
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateLLMSpanRequest'
-  /api/spans:
+  /api/public/spans:
     post:
       description: Add a span to the database
       operationId: span_create
@@ -97,6 +102,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Span'
+      security: *ref_0
       requestBody:
         required: true
         content:
@@ -116,13 +122,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Span'
+      security: *ref_0
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateSpanRequest'
-  /api/traces:
+  /api/public/traces:
     post:
       description: Add a trace to the database
       operationId: trace_create
@@ -136,6 +143,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trace'
+      security: *ref_0
       requestBody:
         required: true
         content:
@@ -155,6 +163,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trace'
+      security: *ref_0
       requestBody:
         required: true
         content:
@@ -366,7 +375,7 @@ components:
           type: string
         attributes: {}
         status:
-          type: string
+          $ref: '#/components/schemas/TraceStatus'
         statusMessage:
           type: string
       required:
@@ -380,7 +389,7 @@ components:
         id:
           type: string
         status:
-          type: string
+          $ref: '#/components/schemas/TraceStatus'
         statusMessage:
           type: string
       required:
@@ -408,8 +417,15 @@ components:
         - name
         - attributes
         - status
-  securitySchemes: {}
-servers:
-  - url: http://localhost:3001
-    description: local sever
+    TraceStatus:
+      title: TraceStatus
+      type: string
+      enum:
+        - EXECUTING
+        - SUCCESS
+        - ERROR
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
 `;
