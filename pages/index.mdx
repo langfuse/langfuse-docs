@@ -73,29 +73,89 @@ import screenDashboard from "../src/screen_dashboard.png";
 
 import { TwoCards, StartCard } from "/components/cards";
 
-<TwoCards>
-<StartCard>
+<TwoCards className="my-24">
+<StartCard isOutline>
   
 ### Open source
 
 - Powered by NextJs and postgres
 - Fully typed SDKs for Typescript and Python
-- Easy deployments with docker or in the cloud
+- Simple self-hosting on your own infrastructure
 
 </StartCard>
-<StartCard>
+<StartCard isOutline>
   
 ### Build your data moat (coming soon)
 
-Log executions and prompt/completion pairs for future fine tuning, prompt engineering and few shotting.
-
-1. Retrieval API for good prompt completion pairs for few-shotting
-2. Create exports of high-quality prompt/completions for fine tuning models for your use case
+- Retrieval API to query prompts/completions based on similarity to current prompt
+- Exports of high-quality prompt/completions for fine tuning; e.g. use GPT-4 completions to train own Llama models
 
 </StartCard>
 </TwoCards>
 
-**Architecture**
+## Get started
+
+<div className="grid md:grid-cols-2 md:gap-7">
+<div>
+
+### 1. Capture execution data
+
+<span>Backend: API & SDKs for Python & Typescript</span>
+
+```python filename="server.py"
+# LLM-based server route
+trace = langfuseClient.trace.create( request = {
+    "name": "chat-completion",
+    "attributes": {
+        "prompt": "Hi there!",
+        "completion": "Hi 👋",
+        "model": ...
+    },
+    ...
+}))
+```
+
+</div>
+<div>
+
+### 2. Capture scores from user feedback
+
+<span>API & Typescript SDK</span>
+
+```typescript filename="UserFeedbackComponent.tsx"
+// feedback button handler
+const handleUserFeedback = (value: number) =>
+  langfuseClient.score.create({
+    traceId: props.traceId,
+    name: "user_feedback",
+    value,
+  });
+```
+
+</div>
+</div>
+
+### 3. Run langfuse server
+
+<TwoCards className="mt-6">
+<StartCard isDark>
+  
+### Langfuse cloud
+
+- Powered by NextJs and postgres
+- Fully typed SDKs for Typescript and Python
+- Simple self-hosting on your own infrastructure
+
+</StartCard>
+<StartCard>
+  
+### Opensource
+
+- Retrieval API to query prompts/completions based on similarity to current prompt
+- Exports of high-quality prompt/completions for fine tuning; e.g. use GPT-4 completions to train own Llama models
+
+</StartCard>
+</TwoCards>
 
 - Server ([cloud](/docs/cloud), [local](/docs/local), [self-hosted](/docs/self-host))
   - API server on top database
