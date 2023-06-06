@@ -25,21 +25,26 @@ export default function Buttons() {
   const [open, setOpen] = useState<boolean>(false)
   return (
     <>
-      <Card
-        icon={<Clapperboard size="24" />}
-        title="Demo (3:33 min)"
-        onClick={() => setOpen(true)}
-      />
-      <Card icon={<span>🚀</span>} title="Quickstart" href="/docs/get-started" />
+      <div onClick={() => setOpen(true)}>
+        <Card
+          icon={<Clapperboard size="24" />}
+          title="Demo (3:33 min)"
+          children={null}
+          href="#"
+        />
+      </div>
+      <Card icon={<span>🚀</span>} title="Quickstart" href="/docs/get-started" children={null}/>
       <Card
         icon={<SiGithub size="24" />}
         title="Repo"
         href="https://github.com/langfuse/langfuse"
+        children={null}
       />
       <Card
         icon={<AiOutlineCloud size="24" />}
         title="Sign in"
         href="https://cloud.langfuse.com"
+        children={null}
       />
       <DemoVideo open={open} setOpen={setOpen} />
   </>
