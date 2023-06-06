@@ -1,0 +1,13 @@
+### 2. Scoring
+
+<span>API & Typescript SDK</span>
+
+```typescript filename="UserFeedbackComponent.tsx"
+// feedback button handler
+const handleUserFeedback = (value: number) =>
+  langfuseClient.score.create({
+    traceId: props.traceId,
+    name: "user_feedback",
+    value,
+  });
+```
