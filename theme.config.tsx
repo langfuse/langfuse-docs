@@ -9,7 +9,7 @@ const config: DocsThemeConfig = {
     link: "https://github.com/finto-technologies/langfuse",
   },
   chat: {
-    link: "https://discord.com/invite/DNDAarxE",
+    link: "https://discord.gg/7NXusRtqYU",
   },
   docsRepositoryBase:
     "https://github.com/finto-technologies/langfuse-docs/tree/main",
