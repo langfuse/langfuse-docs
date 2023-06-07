@@ -9,7 +9,7 @@ export function Feature(props: {
   return (
     <div className="md:grid md:grid-cols-5 md:gap-7 my-16">
       {props.imagePosition === "right" ? (
-        <div className="md:col-span-3">{props.children}</div>
+        <div className="md:col-span-2">{props.children}</div>
       ) : (
         <div className="md:hidden">{props.children}</div>
       )}
@@ -18,11 +18,11 @@ export function Feature(props: {
         alt={props.imageAlt}
         src={props.src}
         full={false}
-        className="col-span-2"
+        className="col-span-3"
       />
 
       {props.imagePosition === "left" ? (
-        <div className="hidden md:block md:col-span-3">{props.children}</div>
+        <div className="hidden md:block md:col-span-2">{props.children}</div>
       ) : null}
     </div>
   );

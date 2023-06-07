@@ -1,9 +1,15 @@
 import { Card, Cards } from "nextra-theme-docs";
-import { SiGithub } from "react-icons/si";
+import { SiGithub, SiTypescript, SiPython } from "react-icons/si";
 import { AiOutlineCloud } from "react-icons/ai";
+import { BsCode } from "react-icons/bs";
+import { Button } from "/components/ui/button";
+import Link from "next/link";
 
-<div className="gap-3 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30">
-  <h1>`🪢 langfuse`</h1>
+<div className="container">
+<div className="flex flex-col gap-5 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30">
+  <div className="text-center text-2xl">
+   `🪢 langfuse`
+  </div>
   <div className="text-xl text-center">
     open-source tracing and feedback collection for applications built on top of
     LLMs
@@ -23,23 +29,6 @@ import { AiOutlineCloud } from "react-icons/ai";
     />
   </div>
 </div>
-
-import Demo from "/components/demoVideo";
-
-<div className="mb-20">
-  <Demo />
-  <div className="text-center -mt-4 text-gray-500">Walkthrough (3:33 min)</div>
-</div>
-
-## `langfuse` overview
-
-> Debug and improve your LLM-based application by logging/analyzing all user interactions, backend traces, and user feedback.
-
-import Overview from "/components/start/overview.mdx";
-
-<Overview />
-
-## Features
 
 import { Feature } from "/components/feature";
 import screenDashboard from "../src/screen_dashboard.png";
@@ -93,14 +82,33 @@ import { TwoCards, StartCard } from "/components/cards";
 </StartCard>
 </TwoCards>
 
-## Get started
+## Langfuse is easy to get started with
 
-<div className="grid md:grid-cols-2 md:gap-7">
+<div className="grid lg:grid-cols-2 lg:gap-7">
 <div>
 
 ### 1. Capture execution data
 
-<span>Backend: API & SDKs for Python & Typescript</span>
+<div className="flex gap-3 my-2 flex-wrap">
+  <Button variant="outline" asChild>
+    <Link href="/docs/reference">
+      <BsCode className="mr-2 h-5 w-5" />
+      API
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/python">
+      <SiPython className="mr-2" />
+      Python SDK
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript">
+      <SiTypescript className="mr-2" />
+      Typescript SDK
+    </Link>
+  </Button>
+</div>
 
 ```python filename="server.py"
 # LLM-based server route
@@ -120,7 +128,20 @@ trace = langfuseClient.trace.create( request = {
 
 ### 2. Capture scores from user feedback
 
-<span>API & Typescript SDK</span>
+<div className="flex gap-3 my-2 flex-wrap">
+  <Button variant="outline" asChild>
+    <Link href="/docs/reference#restricted-access-with-publishable-client-side">
+      <BsCode className="mr-2 h-5 w-5" />
+      API
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript#frontend">
+      <SiTypescript className="mr-2" />
+      Typescript SDK
+    </Link>
+  </Button>
+</div>
 
 ```typescript filename="UserFeedbackComponent.tsx"
 // feedback button handler
@@ -142,27 +163,44 @@ const handleUserFeedback = (value: number) =>
   
 ### Langfuse cloud
 
-- Powered by NextJs and postgres
-- Fully typed SDKs for Typescript and Python
-- Simple self-hosting on your own infrastructure
+- Fully managed
+- Generous free tier to get started ([pricing](/docs/cloud#pricing))
+
+<div className="flex gap-2 pt-3">
+  <Button asChild>
+    <Link href="https://forms.reform.app/hYLlrw/langfuse-cloud">
+      <AiOutlineCloud className="mr-2 h-4 w-4" />
+      Sign up for early access
+    </Link>
+  </Button>
+  <Button variant="ghost">Docs</Button>
+</div>
 
 </StartCard>
-<StartCard>
+<StartCard isOutline>
   
 ### Opensource
 
-- Retrieval API to query prompts/completions based on similarity to current prompt
-- Exports of high-quality prompt/completions for fine tuning; e.g. use GPT-4 completions to train own Llama models
+- Full data ownership
+- Within your own VPS
+
+<div className="flex gap-2 pt-3 items-end">
+  <Button asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiGithub className="mr-2" />
+      GitHub
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="/docs/local">Run locally</Link>
+  </Button>
+  <Button variant="secondary">
+    <Link href="/docs/self-host">Self-host</Link>
+  </Button>
+</div>
 
 </StartCard>
 </TwoCards>
-
-- Server ([cloud](/docs/cloud), [local](/docs/local), [self-hosted](/docs/self-host))
-  - API server on top database
-  - Web app to explore data
-- [Client SDKs](/docs/sdk) to integrate with LLM application
-  - Backend SDK for tracing
-  - Frontend SDK for scoring of traces based on user feedback/interaction
 
 ## Why are we building `langfuse`?
 
@@ -190,3 +228,5 @@ const handleUserFeedback = (value: number) =>
 - [ ] LLM playground to interactively adapt prompts based on production examples
 
 Want to see something else? Share your thoughts by creating a [GitHub issue](https://github.com/langfuse/langfuse/issues/new/choose) or on [Discord](https://discord.com/invite/DNDAarxE)
+
+</div>
