@@ -11,10 +11,12 @@ export function Divider({ text }) {
         className="absolute inset-0 flex flex-col items-center"
         aria-hidden="true"
       >
-        <div className="h-full border-l border-gray-300" />
+        <div className="h-full border-l border-gray-300 dark:border-gray-800" />
       </div>
       <div className="relative flex flex-col h-full justify-center">
-        <div className="bg-white py-2 text-sm text-gray-500">{text}</div>
+        <div className="bg-white dark:bg-transparent py-2 text-sm text-gray-500 dark:text-white">
+          {text}
+        </div>
       </div>
     </div>
   );
