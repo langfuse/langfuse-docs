@@ -78,7 +78,7 @@ function DemoVideo(props: DemoVideoProps) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 dark:bg-gray-950 bg-opacity-50 dark:bg-opacity-70 transition-opacity" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -96,7 +96,7 @@ function DemoVideo(props: DemoVideoProps) {
                   <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
                     <button
                       type="button"
-                      className="rounded-md text-black"
+                      className="rounded-md text-black dark:text-white"
                       onClick={() => props.setOpen(false)}
                     >
                       <span className="sr-only">Close</span>
