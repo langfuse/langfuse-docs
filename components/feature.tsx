@@ -1,4 +1,4 @@
-import { Screenshot } from "./screenshot";
+import Image from "next/image";
 
 export function Feature(props: {
   src;
@@ -14,10 +14,10 @@ export function Feature(props: {
         <div className="md:hidden">{props.children}</div>
       )}
 
-      <Screenshot
+      <Image
         alt={props.imageAlt}
         src={props.src}
-        full={false}
+        style={{ objectFit: "contain" }}
         className="col-span-3"
       />
 
