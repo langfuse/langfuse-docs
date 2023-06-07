@@ -1,57 +1,211 @@
 import { Card, Cards } from "nextra-theme-docs";
-import { SiGithub } from "react-icons/si";
+import { SiGithub, SiTypescript, SiPython } from "react-icons/si";
 import { AiOutlineCloud } from "react-icons/ai";
+import { BsCode } from "react-icons/bs";
+import { Button } from "/components/ui/button";
+import Link from "next/link";
+import { Buttons } from "/components/demoVideo";
 
-<div className="gap-3 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30">
-  <h1>`🪢 langfuse`</h1>
-  <div className="text-xl text-center">
-    open-source tracing and feedback collection for applications built on top of
-    LLMs
+<div className="container">
+<div className="flex flex-col gap-9 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30 items-center">
+  <div className="text-center text-4xl">
+   `🪢 langfuse`
+  </div>
+  <div className="max-w-2xl">
+    <div className="text-xl text-center font-semibold mb-2">
+      Open-source experimentation platform for LLM-based applications
+    </div>
+    <div className="text-md text-center">
+      Improve LLM features in production by capturing their I/O, add attributes, enriching it with user feedback, and identifying quality bottlenecks in use cases and chains
+    </div>
   </div>
 
-  <div className="flex mt-3 gap-3 justify-center flex-wrap">
-    <Card icon={<span>🚀</span>} title="Quickstart" href="/docs/get-started" />
-    <Card
-      icon={<SiGithub size="24" />}
-      title="Repo"
-      href="https://github.com/langfuse/langfuse"
-    />
-    <Card
-      icon={<AiOutlineCloud size="24" />}
-      title="Sign in"
-      href="https://cloud.langfuse.com"
-    />
+  <div className="flex gap-3 justify-center flex-wrap">
+    <Buttons />
   </div>
 </div>
 
-import Demo from "/components/demoVideo";
+import { Feature } from "/components/feature";
+import screenDashboard from "../src/screenshots_dashboard.png";
+import screenSegmentTraces from "../src/screenshots_segment_traces.png";
+import screenSideBySide from "../src/screenshots_side_by_side.png";
 
-<div className="mb-20">
-  <Demo />
-  <div className="text-center -mt-4 text-gray-500">Walkthrough (3:33 min)</div>
+<Feature src={screenDashboard} imageAlt="test" imagePosition="left">
+
+## Monitor
+
+Fast overview: Have a quick view on output quality and feature adoption in real-time
+
+Track token usage by feature (coming soon)
+
+</Feature>
+
+<Feature src={screenSegmentTraces} imageAlt="test" imagePosition="right">
+
+## Understand and segment use cases
+
+Powerful filtering: filter LLM traces by dimensions like user attributes or scores to find clusters of underperforming outputs
+
+Model-based clustering of use cases (coming soon)
+
+</Feature>
+
+<Feature src={screenSideBySide} imageAlt="test" imagePosition="left">
+
+## View all executions of a subset side-by-side
+
+Browse LLM data side-by-side to gain a deep understanding on why chains did not perform well and derive how to improve them.
+
+Model-based comparison of traces (coming soon)
+
+</Feature>
+
+import { TwoCards, StartCard, Divider } from "/components/cards";
+
+<TwoCards className="my-24">
+<StartCard isOutline>
+  
+## Open source
+
+- Powered by NextJs and postgres
+- Fully typed SDKs for Typescript and Python
+- Simple self-hosting on your own infrastructure
+
+</StartCard>
+<StartCard isOutline>
+  
+## Build your data moat
+
+- Retrieval API (coming soon) to query prompts/completions based on similarity to current prompt
+- Exports of high-quality prompt/completions for fine tuning; e.g. use GPT-4 completions to train own Llama models
+
+</StartCard>
+</TwoCards>
+
+## Langfuse is easy to get started with
+
+Follow the full [quickstart instructions](/docs/get-started) to get started with langfuse.
+
+<div className="grid lg:grid-cols-2 lg:gap-7">
+<div>
+
+### 1. Capture execution data
+
+<div className="flex gap-3 my-2 flex-wrap">
+  <Button variant="outline" asChild>
+    <Link href="/docs/reference">
+      <BsCode className="mr-2 h-5 w-5" />
+      API
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/python">
+      <SiPython className="mr-2" />
+      Python SDK
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript">
+      <SiTypescript className="mr-2" />
+      Typescript SDK
+    </Link>
+  </Button>
 </div>
 
-## `langfuse` overview
+```python filename="server.py"
+# LLM-based server route
+trace = langfuseClient.trace.create( request = {
+    "name": "chat-completion",
+    "attributes": {
+        "prompt": "Hi there!",
+        "completion": "Hi 👋",
+        "model": ...
+    },
+    ...
+}))
+```
 
-> Debug and improve your LLM-based application by logging/analyzing all user interactions, backend traces, and user feedback.
+</div>
+<div>
 
-**Features**
+### 2. Capture scores from user feedback
 
-1. Data collection
-   - Tracing LLM application, chain, agent via backend SDK
-   - Scoring of traces based on user feedback/interaction via frontend SDKs
-2. Data exploration in langfuse UI
-   - Identify issues
-   - Debug LLM application
+<div className="flex gap-3 my-2 flex-wrap">
+  <Button variant="outline" asChild>
+    <Link href="/docs/reference#restricted-access-with-publishable-client-side">
+      <BsCode className="mr-2 h-5 w-5" />
+      API
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript#frontend">
+      <SiTypescript className="mr-2" />
+      Typescript SDK
+    </Link>
+  </Button>
+</div>
 
-**Architecture**
+```typescript filename="UserFeedbackComponent.tsx"
+// feedback button handler
+const handleUserFeedback = (value: number) =>
+  langfuseClient.score.create({
+    traceId: props.traceId,
+    name: "user_feedback",
+    value,
+  });
+```
 
-- Server ([cloud](/docs/cloud), [local](/docs/local), [self-hosted](/docs/self-host))
-  - API server on top database
-  - Web app to explore data
-- [Client SDKs](/docs/sdk) to integrate with LLM application
-  - Backend SDK for tracing
-  - Frontend SDK for scoring of traces based on user feedback/interaction
+</div>
+</div>
+
+### 3. Run langfuse server
+
+<TwoCards className="mt-6">
+<StartCard isDark>
+  
+### Langfuse cloud
+
+- Fully managed
+- Generous free tier to get started ([pricing](/docs/cloud#pricing))
+
+<div className="flex gap-2 pt-3">
+  <Button asChild>
+    <Link href="https://forms.reform.app/hYLlrw/langfuse-cloud">
+      <AiOutlineCloud className="mr-2 h-4 w-4" />
+      Sign up for early access
+    </Link>
+  </Button>
+  <Button variant="ghost">Docs</Button>
+</div>
+
+</StartCard>
+<Divider text="OR" />
+<StartCard isOutline>
+  
+### Open source
+
+- Full data ownership
+- Within your own VPS
+
+<div className="flex gap-2 pt-3 items-end">
+  <Button asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiGithub className="mr-2" />
+      GitHub
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="/docs/local">Local</Link>
+  </Button>
+  <Button variant="secondary">
+    <Link href="/docs/self-host">Self-host</Link>
+  </Button>
+</div>
+
+</StartCard>
+</TwoCards>
+
+<div className="h-24" />
 
 ## Why are we building `langfuse`?
 
@@ -66,7 +220,7 @@ import Demo from "/components/demoVideo";
 
 ## Roadmap
 
-- [x] MVP: API server for collecting traces, scores, and basic UI to explore data, runs locally or self-hosted
+- [x] API server for collecting traces, scores, and basic UI to explore data, runs locally or self-hosted
 - [x] [SDKs](/docs/sdk) for tracing and scoring, typescript and python
 - [x] [Docs](/docs) and walkthrough (v1) ([video](#), [NextJS example](https://github.com/langfuse/langfuse-demo), [Jupyter Notebook example](https://github.com/langfuse/langfuse-demo-python/blob/main/notebook.ipynb))
 - [x] [Dashboard](/docs/interface#dashboard) to explore data
@@ -79,3 +233,5 @@ import Demo from "/components/demoVideo";
 - [ ] LLM playground to interactively adapt prompts based on production examples
 
 Want to see something else? Share your thoughts by creating a [GitHub issue](https://github.com/langfuse/langfuse/issues/new/choose) or on [Discord](https://discord.com/invite/DNDAarxE)
+
+</div>

@@ -9,6 +9,9 @@ const withNextra = nextra({
     remarkPlugins: [remarkMermaid, remarkGfm],
   },
   defaultShowCopyCode: true,
+  experimental: {
+    scrollRestoration: true,
+  }
 })
 
 export default withNextra();
