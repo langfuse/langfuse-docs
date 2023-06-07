@@ -1,5 +1,5 @@
 import { Card, Cards } from "nextra-theme-docs";
-import { SiGithub, SiTypescript, SiPython } from "react-icons/si";
+import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
 import { AiOutlineCloud } from "react-icons/ai";
 import { BsCode } from "react-icons/bs";
 import { Button } from "/components/ui/button";
@@ -34,9 +34,9 @@ import screenSideBySide from "../src/screenshots_side_by_side.png";
 
 ## Monitor
 
-Fast overview: Have a quick view on output quality and feature adoption in real-time
+Stay on top of trends in output quality and feature adoption
 
-Track token usage by feature (coming soon)
+Track token usage by feature, user, and model (coming soon)
 
 </Feature>
 
@@ -44,19 +44,19 @@ Track token usage by feature (coming soon)
 
 ## Understand and segment use cases
 
-Powerful filtering: filter LLM traces by dimensions like user attributes or scores to find clusters of underperforming outputs
+Filter executions by dimensions like user attributes or scores to find clusters of underperforming outputs
 
-Model-based clustering of use cases (coming soon)
+Model-based clustering of use cases to help understand how users are using the features (coming soon)
 
 </Feature>
 
 <Feature src={screenSideBySide} imageAlt="test" imagePosition="left">
 
-## View all executions of a subset side-by-side
+## Identify quality bottlenecks
 
-Browse LLM data side-by-side to gain a deep understanding on why chains did not perform well and derive how to improve them.
+Compare low-quality executions side-by-side to gain a deep understanding on why chains did not perform well
 
-Model-based comparison of traces (coming soon)
+Model-based comparison of traces with automated suggestions (coming soon)
 
 </Feature>
 
@@ -70,6 +70,21 @@ import { TwoCards, StartCard, Divider } from "/components/cards";
 - Powered by NextJs and postgres
 - Fully typed SDKs for Typescript and Python
 - Simple self-hosting on your own infrastructure
+
+<div className="flex gap-3 mt-3 flex-wrap">
+  <Button asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiGithub className="mr-2" />
+      GitHub
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiDiscord className="mr-2" />
+      Discord
+    </Link>
+  </Button>
+</div>
 
 </StartCard>
 <StartCard isOutline>
