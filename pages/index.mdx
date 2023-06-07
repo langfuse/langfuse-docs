@@ -7,17 +7,17 @@ import Link from "next/link";
 import { Buttons } from "/components/demoVideo";
 
 <div className="container">
-<div className="flex flex-col gap-9 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30">
+<div className="flex flex-col gap-9 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30 items-center">
   <div className="text-center text-4xl">
    `🪢 langfuse`
   </div>
-  <div>
-  <div className="text-xl text-center font-semibold">
-    Open-source experimentation platform for LLM-based applications
-  </div>
-  <div className="text-md text-center text-">
-    Improve LLM features in production by capturing their I/O, add attributes, enriching it with user feedback, and identifying quality bottlenecks in use cases and chains
-  </div>
+  <div className="max-w-2xl">
+    <div className="text-xl text-center font-semibold mb-2">
+      Open-source experimentation platform for LLM-based applications
+    </div>
+    <div className="text-md text-center">
+      Improve LLM features in production by capturing their I/O, add attributes, enriching it with user feedback, and identifying quality bottlenecks in use cases and chains
+    </div>
   </div>
 
   <div className="flex gap-3 justify-center flex-wrap">
@@ -83,6 +83,8 @@ import { TwoCards, StartCard, Divider } from "/components/cards";
 </TwoCards>
 
 ## Langfuse is easy to get started with
+
+Follow the full [quickstart instructions](/docs/get-started) to get started with langfuse.
 
 <div className="grid lg:grid-cols-2 lg:gap-7">
 <div>
@@ -180,7 +182,7 @@ const handleUserFeedback = (value: number) =>
 <Divider text="OR" />
 <StartCard isOutline>
   
-### Opensource
+### Open source
 
 - Full data ownership
 - Within your own VPS
@@ -193,7 +195,7 @@ const handleUserFeedback = (value: number) =>
     </Link>
   </Button>
   <Button variant="secondary" asChild>
-    <Link href="/docs/local">Run locally</Link>
+    <Link href="/docs/local">Local</Link>
   </Button>
   <Button variant="secondary">
     <Link href="/docs/self-host">Self-host</Link>
