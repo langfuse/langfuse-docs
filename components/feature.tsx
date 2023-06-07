@@ -7,7 +7,7 @@ export function Feature(props: {
   children;
 }) {
   return (
-    <div className="my-16 md:my-32 md:grid md:grid-cols-5 md:gap-7 md:items-center">
+    <div className="my-16 md:my-32 md:grid md:grid-cols-5 md:gap-10 xl:gap-20 md:items-center">
       {props.imagePosition === "right" ? (
         <div className="mb-8 md:mb-0 md:col-span-2 md:text-center [&>h2]:mt-0">
           {props.children}
