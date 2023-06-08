@@ -5,9 +5,11 @@ import { BsCode } from "react-icons/bs";
 import { Button } from "/components/ui/button";
 import Link from "next/link";
 import { Buttons } from "/components/demoVideo";
+import Image from "next/image";
+import ycImg from "../src/yc.svg";
 
 <div className="container">
-<div className="flex flex-col gap-9 mt-0 mb-10 md:mt-24 md:mb-20 lg:my-30 items-center">
+<div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
   <div className="text-center text-4xl">
    `🪢 langfuse`
   </div>
@@ -22,6 +24,10 @@ import { Buttons } from "/components/demoVideo";
 
   <div className="flex gap-3 justify-center flex-wrap">
     <Buttons />
+  </div>
+  <div>
+    <div className="text-center text-gray-500 pb-3 pt-10">Backed by</div>
+    <Image src={ycImg} height={30} />
   </div>
 </div>
 
@@ -227,7 +233,7 @@ const handleUserFeedback = (value: number) =>
 1. **Situation:** LLMs introduce a _'black box'_ character to Software Engineering: outputs of LLM-based applications are unpredictable
 2. **Problem:** Quality of application in production cannot be assured with testing before launching the feature
 3. **Consequence:** Engineers need to embrace active learning from users in production to improve their LLM-based applications. Many teams build UX around their applications to make the imperfect outputs usable and to collect feedback from users.
-4. **Need:** Holistic tracing of what happens in production, linked to user feedback and other signals to understand how to improve the application.
+4. **Need:** Holistic monitoring of what happens in production, linked to user feedback and other signals to understand how to improve the application.
 
 ## Get in touch
 
