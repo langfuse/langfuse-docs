@@ -1,12 +1,16 @@
 import cn from "clsx";
 
 export function TwoCards({ children, className }) {
-  return <div className={cn("md:flex gap-5", className)}>{children}</div>;
+  return (
+    <div className={cn("flex flex-col md:flex-row gap-5", className)}>
+      {children}
+    </div>
+  );
 }
 
 export function Divider({ text }) {
   return (
-    <div className="relative">
+    <div className="hidden md:relative">
       <div
         className="absolute inset-0 flex flex-col items-center"
         aria-hidden="true"
