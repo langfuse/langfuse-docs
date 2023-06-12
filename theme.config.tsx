@@ -2,6 +2,7 @@ import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Logo } from "./components/logo";
 import { useRouter } from "next/router";
+import Footer from "./components/footer";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -15,7 +16,8 @@ const config: DocsThemeConfig = {
     "https://github.com/finto-technologies/langfuse-docs/tree/main",
   footer: {
     text: "langfuse",
-  },
+    component: Footer
+    },
   useNextSeoProps() {
     const { asPath } = useRouter();
     return {
