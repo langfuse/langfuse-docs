@@ -2,7 +2,12 @@ import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Logo } from "./components/logo";
 import { useRouter } from "next/router";
-import Footer from "./components/footer";
+import Link from "next/link";
+
+const footerNav = [
+  { name: "Imprint", href: "/imprint" },
+  { name: "Contact", href: "mailto:contact@langfuse.com" },
+];
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -15,9 +20,23 @@ const config: DocsThemeConfig = {
   docsRepositoryBase:
     "https://github.com/finto-technologies/langfuse-docs/tree/main",
   footer: {
-    text: "langfuse",
-    component: Footer
-    },
+    text: (
+      <div>
+        <div className="mb-2">
+          {footerNav.map((nav) => (
+            <Link
+              key={nav.name}
+              href={nav.href}
+              className="px-2 first-of-type:pl-0 border-l border-gray-500 first-of-type:border-l-0 rounded-none leading-6 text-gray-600 hover:text-gray-900"
+            >
+              {nav.name}
+            </Link>
+          ))}
+        </div>
+        <span>MIT {new Date().getFullYear()} © Finto Technologies GmbH</span>
+      </div>
+    ),
+  },
   useNextSeoProps() {
     const { asPath } = useRouter();
     return {
