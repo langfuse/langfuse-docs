@@ -32,10 +32,10 @@ llmCall = client.span.create_llm_call(
     "name": 'chat-completion',
     "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
     "attributes": {
-      "model": {
-        "model_name": "gpt-3.5-turbo",
-        "temperature": 0.9,
-      },
+      "model": "gpt-3.5-turbo",
+      "temperature": 0.9,
+      "topP": 1,
+      "maxTokens": 100,
       "prompt": "Hello, how are you?",
     },
     "parentObservationId": span.id,

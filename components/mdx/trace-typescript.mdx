@@ -34,10 +34,10 @@ const llmCall = await serverClient.span.createLlmCall({
   startTime: new Date(),
   name: "chat-completion",
   attributes: {
-    model: {
-      modelId: model.id,
-      modelName: model.name,
-    },
+    model: 'gpt-3.5-turbo',
+    temperature: 0.9,
+    maxTokens: 1000,
+    topP: 1,
     prompt: messages,
   },
 });
