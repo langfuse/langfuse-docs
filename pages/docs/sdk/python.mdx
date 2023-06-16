@@ -116,7 +116,7 @@ llmCall = client.span.create_llm_call(
       "model": "gpt-3.5-turbo",
       "temperature": 0.9,
       "maxTokens": 1000,
-      "prompt": "Hello, how are you?",
+      "prompt": [{"role": "user", "content": "Hello, how are you?"}],
     },
     "parentObservationId": span.id,
   }
