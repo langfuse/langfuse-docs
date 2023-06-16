@@ -139,7 +139,7 @@ const llmCall = await serverClient.span.createLlmCall({
     temperature: 1,
     maxTokens: 2000,
     topP: undefined,
-    prompt: messages,
+    prompt: [{"role": "user", "content": "Hello, how are you?"}],
   },
   parentObservationId: span.id,
 });

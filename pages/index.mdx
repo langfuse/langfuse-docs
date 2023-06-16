@@ -138,7 +138,7 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
 trace = langfuseClient.trace.create( request = {
     "name": "chat-completion",
     "attributes": {
-        "prompt": "Hi there!",
+        "prompt": [{"role": "client", "content": "Hi there!"}],
         "completion": "Hi 👋",
         "model": ...
     },

@@ -36,7 +36,7 @@ llmCall = client.span.create_llm_call(
       "temperature": 0.9,
       "topP": 1,
       "maxTokens": 100,
-      "prompt": "Hello, how are you?",
+      "prompt": [{"role": "user", "content": "Hello, how are you?"}],
     },
     "parentObservationId": span.id,
   }
