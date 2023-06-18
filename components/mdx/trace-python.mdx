@@ -15,20 +15,8 @@ client = FintoLangfuse(
   password = "sk-sk-..." # secret key
 )
 
-trace = client.trace.create(
-  request = {
-    "name": "chat-completion",
-    "attributes": {
-      "key": "value"
-    },
-    "status": "EXECUTING",
-    "status_message": "test"
-  }
-)
-
 llmCall = client.span.create_llm_call(
   request = {
-    "traceId": trace.id,
     "name": 'chat-completion',
     "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
     "attributes": {
@@ -49,14 +37,6 @@ finalizedLlmCall = client.span.update_llm_call(
     "attributes": {
       "completion": "I am fine, thank you.",
     }
-  }
-)
-
-updatedTrace = client.trace.update(
-  request = {
-    "id": trace.id,
-    "status": "SUCCESS",
-    "status_message": "Chat completion successful"
   }
 )
 ```

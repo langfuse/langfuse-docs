@@ -23,14 +23,7 @@ const serverClient = new LangfuseClient({
   password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
 });
 
-const trace = await serverClient.trace.create({
-  name: "chat-completion", // identify the kind of the trace
-  attributes: { userId: "8eb2db56-a582-4cf6-87ac-cab96edb24fa" }, // any custom attributes
-  status: TraceStatus.Executing,
-});
-
 const llmCall = await serverClient.span.createLlmCall({
-  traceId: trace.id,
   startTime: new Date(),
   name: "chat-completion",
   attributes: {
@@ -48,10 +41,5 @@ const finalizedllmCall = await serverClient.span.updateLlmCall({
   attributes: {
     completion: completeResp,
   },
-});
-
-const updatedTrace = await serverClient.trace.update({
-  traceId: trace.id,
-  status: TraceStatus.Success,
 });
 ```

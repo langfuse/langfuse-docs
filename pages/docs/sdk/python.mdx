@@ -44,12 +44,6 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 - `status`: the status of the trace. Can be one of `EXECUTING`, `SUCCESS`, `ERROR`
 - `statusMessage` (optional): a message describing the status of the trace
 
-`trace.update()` takes the following parameters:
-
-- `traceId`: the id of the trace to update
-- `status`: the status of the trace. Can be one of `EXECUTING`, `SUCCESS`, `ERROR`
-- `statusMessage` (optional): a message describing the status of the trace
-
 ```python filename="server.py"
 trace = client.trace.create(
   request = {
@@ -57,16 +51,6 @@ trace = client.trace.create(
     "attributes": {
       "key": "value"
     },
-    "status": "EXECUTING",
-    "status_message": "test"
-  }
-)
-
-updatedTrace = client.trace.update(
-  request = {
-    "id": trace.id,
-    "status": "SUCCESS",
-    "status_message": "Chat completion successful"
   }
 )
 ```
@@ -77,7 +61,7 @@ Spans represent durations of units of work in a trace. We generated convenient S
 
 `span.create()` and `span.createLlmCall()` take the following parameters:
 
-- `traceId`: the id of the trace to which the span should be attached
+- `traceId` (optional): the id of the trace to which the span should be attached
 - `name`: identifier of the span
 - `attributes`: additional attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
 - `parentObservationId` (optional): the id of the span or event to which the span should be attached

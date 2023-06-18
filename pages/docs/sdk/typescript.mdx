@@ -76,12 +76,6 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 - `status`: the status of the trace. Can be one of `executing`, `success`, `error`
 - `statusMessage` (optional): a message describing the status of the trace
 
-`trace.update()` takes the following parameters:
-
-- `traceId`: the id of the trace to update
-- `status`: the status of the trace. Can be one of `executing`, `success`, `error`
-- `statusMessage` (optional): a message describing the status of the trace
-
 ```typescript filename="server.ts"
 import { TraceStatus } from "@finto-fern/api-client/api";
 
@@ -89,12 +83,6 @@ const trace = await serverClient.trace.create({
   name: "chat-completion",
   attributes: { env: "http://localhost:3030" },
   status: TraceStatus.Executing,
-});
-
-const updatedTrace = await serverClient.trace.update({
-  traceId: trace.id,
-  status: TraceStatus.Success,
-  statusMessage: "Chat completion successful",
 });
 ```
 
@@ -104,7 +92,7 @@ Spans represent durations of units of work in a trace. We generated convenient S
 
 `span.create()` and `span.createLlmCall()` take the following parameters:
 
-- `traceId`: the id of the trace to which the span should be attached
+- `traceId` (optional): the id of the trace to which the span should be attached
 - `name`: identifier of the span
 - `attributes`: additional attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
 - `parentObservationId` (optional): the id of the span or event to which the span should be attached
