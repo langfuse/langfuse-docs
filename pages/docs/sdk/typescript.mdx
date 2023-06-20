@@ -17,9 +17,9 @@ import { Callout } from "nextra/components";
   </ul>
 </Callout>
 
-The Typescript SDK can be imported into your project using npm or yarn.
+## 1. Initializing the client
 
-## Installation
+Currently the langfuse SDKs are hosted in a private npm registry by [Fern](https://buildwithfern.com/). Add the registry to your project before installing them.
 
 ```bash
 # add a .npmrc file to your project root
@@ -27,135 +27,92 @@ touch .npmrc
 
 # add a config to the file
 echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
-
-# install the packages
-npm install @finto-fern/langfuse-node @finto-fern/react-client
 ```
 
-## Usage
+### Server
 
-### Client
+The server client can modify all entities in the Langfuse API and requires the secret key. The secret key must not be exposed to users.
 
-Initialize the client with your environment and api keys. In the example we are using the cloud environment.
-
-#### Server
-
-The server client can modify all entities in the Langfuse API and requires the secret key.
+```bash
+# install the packages
+npm install @finto-fern/langfuse-node
+```
 
 ```typescript filename="server.ts"
 import { LangfuseClient } from "@finto-fern/langfuse-node";
 
 const serverClient = new LangfuseClient({
   environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
-  username: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
+  username: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
   password: env.LANGFUSE_SECRET_KEY, // pk-sk-...
 });
 ```
 
-#### Frontend
+### Frontend
 
-The frontend client is used to send scores to the Langfuse API. It can be initialised with the publishable key.
+The frontend client can be used to send scores directly to the Langfuse API. This is useful when scores are based on user feedback that is explicitly or implicitly given in the frontend. It is initialised with the public key which can be exposed to users.
+
+```bash
+# install the packages
+npm install @finto-fern/react-client
+```
 
 ```typescript filename="frontend.ts"
 import { LangfuseClient } from "@finto-fern/react-client";
 
 const frontendClient = new LangfuseClient({
   environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
-  token: env.LANGFUSE_PUBLISHABLE_KEY, // pk-lf-...
+  token: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
 });
 ```
 
-### Trace
+## 2. Trace execution of backend
 
-Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application. Traces can be created and updated.
+- Each backend execution is logged with a single `trace`.
+- Each trace can contain multiple `observations` to log the individual steps of the execution.
+  - Observations can be nested.
+  - Observations can be of different types
+    - `Events` are the basic building block. They are used to track discrete events in a trace.
+    - `Spans` represent durations of units of work in a trace.
+    - `Generations` are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
+### Traces
+
+Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
+
+Traces can be created and updated.
 
 `trace.create()` takes the following parameters:
 
-- `name`: identifier of the trace
-- `attributes`: additional attributes of the trace. The content can be chosen freely.
-- `status`: the status of the trace. Can be one of `executing`, `success`, `error`
-- `statusMessage` (optional): a message describing the status of the trace
+- `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
+- `metadata` (optional): additional metadata of the trace. Can be any JSON object.
 
 ```typescript filename="server.ts"
 import { TraceStatus } from "@finto-fern/api-client/api";
 
 const trace = await serverClient.trace.create({
   name: "chat-completion",
-  attributes: { env: "http://localhost:3030" },
-  status: TraceStatus.Executing,
+  metadata: { env: "production", user: "6784367" },
 });
 ```
 
-### Span
-
-Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans as well as LLM spans.
-
-`span.create()` and `span.createLlmCall()` take the following parameters:
-
-- `traceId` (optional): the id of the trace to which the span should be attached
-- `name`: identifier of the span
-- `attributes`: additional attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
-- `parentObservationId` (optional): the id of the span or event to which the span should be attached
-
-`span.update()` and `span.updateLlmCall()` take the following parameters:
-
-- `spanId`: the id of the span to update
-- `endTime`: the time at which the span ended
-- `attributes` (optional): merges with existing attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
-
-```typescript filename="server.ts"
-const span = await serverClient.span.create({
-  traceId: trace.id,
-  name: "embedding-retrieval",
-  startTime: new Date(),
-  attributes: {
-    userId: user.id,
-  },
-});
-
-const updatedSpan = await serverClient.span.update({
-  spanId: span.id,
-  endTime: new Date(),
-});
-
-const llmCall = await serverClient.span.createLlmCall({
-  traceId: trace.id,
-  startTime: new Date(),
-  name: "chat-completion",
-  attributes: {
-    model: 'gpt-3.5-turbo',
-    temperature: 1,
-    maxTokens: 2000,
-    topP: undefined,
-    prompt: [{"role": "user", "content": "Hello, how are you?"}],
-  },
-  parentObservationId: span.id,
-});
-
-const updatedllmCall = await serverClient.span.updateLlmCall({
-  spanId: llmCall.id,
-  endTime: new Date(),
-  attributes: {
-    completion: completeResp,
-  },
-});
-```
+### Observations
 
 ### Events
 
-Events are used to track discrete events in a trace. They are similar to spans just that they don't have a duration.
+Events are used to track discrete events in a trace.
 
-- `traceId`: the id of the trace to which the event should be attached
-- `name`: identifier of the event
-- `attributes`: additional attributes of the event. The content can be chosen freely.
+- `traceId` (optional): the id of the trace to which the event should be attached. If no traceId is provided, the event will be attached to a new trace.
+- `startTime`: the time at which the event started.
+- `name` (optional): identifier of the event. Useful for sorting/filtering in the UI.
+- `metadata` (optional): additional metadata of the event. JSON object.
 - `parentObservationId` (optional): the id of the span or event to which the event should be attached
-- `startTime`: the time at which the event occurred
 
 ```typescript filename="server.ts"
 await serverClient.event.create({
   traceId: trace.id,
   name: "chat-completion-retried",
-  attributes: {
+  metadata: {
     attempt: 2,
     userId: user.id,
   },
@@ -164,27 +121,129 @@ await serverClient.event.create({
 });
 ```
 
-### Scores
+### Span
 
-Scores are used to evaluate the quality of LLM applications. They can be attached to spans, events, or traces.
+Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans as well as LLM spans.
+
+`span.create()` take the following parameters:
+
+- `traceId` (optional): the id of the trace to which the span should be attached. If no traceId is provided, the span will be attached to a new trace.
+- `startTime` (optional): the time at which the span started. If no startTime is provided, the current time will be used.
+- `endTime` (optional): the time at which the span ended. Can also be set using `span.update()`.
+- `name` (optional): identifier of the span. Useful for sorting/filtering in the UI.
+- `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
+- `parentObservationId` (optional): the id of the observation to which the span should be attached
+
+```typescript filename="server.ts"
+const retrievalStart = new Date();
+
+// const retrievedDoc = await retrieveDoc();
+
+const retrieval = await client.span.create({
+  traceId: trace.id,
+  startTime: retrievalStart,
+  endTime: new Date(),
+  name: "embedding-retrieval",
+  metadata: {
+    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+  },
+});
+```
+
+`span.update()` take the following parameters:
+
+- `spanId`: the id of the span to update
+- `endTime` (optional): the time at which the span ended
+- `metadata` (optional): merges with existing metadata of the span. Can be any JSON object.
+
+### Generation
+
+Generations are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
+`generation.log()` take the following parameters:
+
+- `traceId` (optional): the id of the trace to which the generation should be attached. If no traceId is provided, the generation will be attached to a new trace.
+- `startTime` (optional): the time at which the generation started.
+- `endTime` (optional): the time at which the generation ended.
+- `name` (optional): identifier of the generation. Useful for sorting/filtering in the UI.
+- `model` (optional): the name of the model used for the generation
+- `modelParameters` (optional): the parameters of the model used for the generation; can be any key-value pairs
+- `prompt` (optional): the prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input)
+- `completion` (optional): the completion generated by the model
+- `usage` (optional): the usage of the model during the generation; takes two optional key-value pairs: `promptTokens` and `completionTokens`
+- `metadata` (optional): additional metadata of the generation. Can be any JSON object.
+- `parentObservationId` (optional): the id of the observation to which the generation should be attached as a child.
+
+```typescript filename="server.ts"
+const startTime = new Date();
+
+// const chatCompletion = await callLLM(retrievedDoc);
+
+const generation = await client.generations.log({
+  traceId: trace.id,
+  startTime: generationStart,
+  endTime: new Date(),
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+    topP: undefined,
+  },
+  prompt: messagesToSend,
+  completion: chatCompletion.data.choices[0].message?.content,
+  usage: {
+    promptTokens: chatCompletion.data.usage?.prompt_tokens,
+    completionTokens: chatCompletion.data.usage?.completion_tokens,
+  },
+  metadata: {
+    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+  },
+});
+```
+
+## 3. Collect scores
+
+Scores are used to evaluate executions/traces. They are always attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be atatched to the observation to enable evaluating it specifically.
 
 - `traceId`: the id of the trace to which the score should be attached
-- `name`: identifier of the score
-- `value`: the value of the score; float; optional: scale it to e.g. 0..1
-- `observationId` (optional): the id of the span or event to which the score should be attached
-
-Either the traceId or the observationId must be provided.
+- `name`: identifier of the score, string
+- `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
+- `observationId` (optional): the id of the span, event or generation to which the score should be attached
 
 Scores can also be modified by the serverClient.
 
 ```typescript filename="frontend.ts"
-frontendClient.score.create({
+await frontendClient.score.create({
   traceId: message.traceId,
   name: "user-feedback",
   value: 1,
   observationId: llmCall.id,
 });
 ```
+
+## 4. Optimize performance
+
+When tracing complex applications, the number of observations can quickly grow large. To optimize performance, the SDK shall best be used asynchronously and not be awaited. Then it should add only minimal overhead to the execution of the application.
+
+```typescript filename="server.ts"
+const langfusePromises = [];
+
+// execution
+
+langfusePromises.push(
+  serverClient.event.create({
+    // ...
+  })
+);
+
+// respond to user
+
+// await all langfuse calls
+await Promises.all(langfusePromises);
+```
+
+For nesting of observations, the creation of the parent observation needs to be awaited before creating the child observation, we are working on the batch creation of observations to further optimize performance.
 
 ## Troubleshooting
 

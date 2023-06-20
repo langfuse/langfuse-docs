@@ -9,6 +9,16 @@ import { Callout } from "nextra/components";
   Colab](http://colab.research.google.com/github/langfuse/langfuse-demo-python/blob/main/notebook.ipynb))
 </Callout>
 
+<Callout type="warning" emoji="🚧">
+  We have recently shipped a new version of the Python SDK with many
+  improvements and simplifications. The documentation below is for the old
+  version. We are working on updating the documentation. In the meantime, please
+  refer to the [example
+  notebook](https://github.com/langfuse/langfuse-demo-python/blob/main/notebook.ipynb)
+  ([open in Google
+  Colab](http://colab.research.google.com/github/langfuse/langfuse-demo-python/blob/main/notebook.ipynb))
+</Callout>
+
 The Python SDK can be imported into your project using pip.
 
 ## Installation
@@ -46,12 +56,12 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 
 ```python filename="server.py"
 trace = client.trace.create(
-  request = {
-    "name": "chat-completion",
-    "attributes": {
-      "key": "value"
-    },
-  }
+  request = CreateTraceRequest(
+    name = "chat-completion",
+    metadata = {
+      "env": "production"
+    }
+  )
 )
 ```
 
@@ -73,47 +83,48 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `attributes` (optional): merges with existing attributes of the span. The content can be chosen freely for generic spans. For LLM spans, the attributes are predefined.
 
 ```python filename="server.py"
+retrievalStart = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+# const retrievedDoc = await retrieveDoc();
+
 span = client.span.create(
-  request={
-    "traceId": trace.id,
-    "name": 'embedding-retrieval',
-    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-    "attributes": {
-      "key": "value"
-    }
-  }
+  request = CreateSpanRequest(
+    traceId = trace.id,
+    name = "embedding-retrieval",
+    startTime = retrievalStart,
+    endTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    metadata = {
+      "userId": "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+    },
+  )
 )
 
-updatedSpan = client.span.update(
-  request = {
-    "spanId": span.id,
-    "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-  }
-)
+generationStart = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
-llmCall = client.span.create_llm_call(
-  request = {
-    "traceId": trace.id,
-    "name": 'chat-completion',
-    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-    "attributes": {
-      "model": "gpt-3.5-turbo",
+# const chat_completion = await callLLM([{"role": "user", "content": message_to_send}]);
+
+generation = client.generations.log(
+  request = CreateLog(
+    traceId = trace.id,
+    name = "chat-completion",
+    startTime = generationStart,
+    endTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    model = "gpt-3.5-turbo",
+    modelParameters = {
       "temperature": 0.9,
       "maxTokens": 1000,
-      "prompt": [{"role": "user", "content": "Hello, how are you?"}],
+      "topP": None,
     },
-    "parentObservationId": span.id,
-  }
-)
-
-updatedLlmCall = client.span.update_llm_call(
-  request = {
-    "spanId": llmCall.id,
-    "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-    "attributes": {
-      "completion": "I am fine, thank you.",
+    prompt= [{"role": "user", "content": message_to_send}],
+    completion=chat_response.json()["choices"][0]["message"],
+    usage = LlmUsage(
+      prompt_tokens = 512,
+      completion_tokens = 49
+    ),
+    metadata = {
+     "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
     }
-  }
+  )
 )
 ```
 
@@ -129,15 +140,16 @@ Events are used to track discrete events in a trace. They are similar to spans j
 
 ```python filename="server.py"
 event = client.event.create(
-  request = {
-    "traceId": trace.id,
-    "name": 'chat-docs-retrieval',
-    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-    "attributes": {
-      "key": "value"
+  request = CreateEventRequest(
+    traceId = trace.id,
+    name = "chat-completion-retried",
+    startTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    metadata = {
+      "attempt": 2,
+      "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
     },
-    "parentObservationId": llmCall.id,
-  }
+    parentObservationId = span.id,
+  )
 )
 ```
 
@@ -154,12 +166,12 @@ Either the traceId or the observationId must be provided.
 
 ```python filename="server.py"
 score = client.score.create(
-  request = {
-    "traceId": trace.id,
-    "name": 'user-explicit-feedback',
-    "value": 1,
-    "observationId": llmCall.id,
-  }
+  request = CreateScoreRequest(
+    traceId = trace.id,
+    name = "user-feedback",
+    value = 1,
+    observationId = generation.id
+  )
 )
 ```
 

@@ -15,28 +15,26 @@ client = FintoLangfuse(
   password = "sk-sk-..." # secret key
 )
 
-llmCall = client.span.create_llm_call(
-  request = {
-    "name": 'chat-completion',
-    "startTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-    "attributes": {
-      "model": "gpt-3.5-turbo",
-      "temperature": 0.9,
-      "topP": 1,
-      "maxTokens": 100,
-      "prompt": [{"role": "user", "content": "Hello, how are you?"}],
+generation = client.generations.log(
+  request=CreateLog(
+    name="chat-completion",
+    startTime=generationStart,
+    endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    model="gpt-3.5-turbo",
+    modelParameters= {
+      "temperature":0.9,
+      "maxTokens":1000,
+      "topP": None,
     },
-    "parentObservationId": span.id,
-  }
-)
-
-finalizedLlmCall = client.span.update_llm_call(
-  request = {
-    "spanId": llmCall.id,
-    "endTime": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-    "attributes": {
-      "completion": "I am fine, thank you.",
+    prompt=[{"role": "user", "content": message_to_send}],
+    completion=chat_response.json()["choices"][0]["message"],
+    usage=LlmUsage(
+      prompt_tokens=512,
+      completion_tokens=49
+    ),
+    metadata= {
+     "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
     }
-  }
+  )
 )
 ```

@@ -15,7 +15,6 @@ Add to server project
 
 ```typescript filename="server.ts"
 import { LangfuseClient } from "@finto-fern/langfuse-node";
-import { TraceStatus } from "@finto-fern/langfuse-node/api";
 
 const serverClient = new LangfuseClient({
   environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
@@ -23,23 +22,34 @@ const serverClient = new LangfuseClient({
   password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
 });
 
-const llmCall = await serverClient.span.createLlmCall({
-  startTime: new Date(),
-  name: "chat-completion",
-  attributes: {
-    model: 'gpt-3.5-turbo',
-    temperature: 0.9,
-    maxTokens: 1000,
-    topP: 1,
-    prompt: messages,
-  },
-});
+const startTime = new Date();
 
-const finalizedllmCall = await serverClient.span.updateLlmCall({
-  spanId: llmCall.id,
+// const chatCompletion = await callLLM(retrievedDoc);
+
+const generation = await client.generations.log({
+  startTime: generationStart,
   endTime: new Date(),
-  attributes: {
-    completion: completeResp,
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+    topP: undefined,
+  },
+  prompt: [
+    {
+      role: "system",
+      content: systemPrompt,
+    },
+    ...messagesToSend,
+  ],
+  completion: chatCompletion.data.choices[0].message?.content,
+  usage: {
+    promptTokens: chatCompletion.data.usage?.prompt_tokens,
+    completionTokens: chatCompletion.data.usage?.completion_tokens,
+  },
+  metadata: {
+    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
   },
 });
 ```
