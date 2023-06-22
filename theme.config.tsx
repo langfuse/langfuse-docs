@@ -1,6 +1,6 @@
 import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
-import { Logo } from "./components/logo";
+import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
