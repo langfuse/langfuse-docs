@@ -7,17 +7,44 @@
 
 The langfuse SDKs are hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
 
+
 ```python
 %pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
 ```
 
+    Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/, https://pypi.buildwithfern.com
+    Collecting finto-fern-langfuse
+      Downloading https://pypi.buildwithfern.com/finto-fern-langfuse/0.0.348/finto_fern_langfuse-0.0.348-py3-none-any.whl (20 kB)
+    Collecting httpx==0.23.3 (from finto-fern-langfuse)
+      Downloading httpx-0.23.3-py3-none-any.whl (71 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m71.5/71.5 kB[0m [31m3.1 MB/s[0m eta [36m0:00:00[0m
+    [?25hRequirement already satisfied: pydantic<2.0.0,>=1.9.2 in /usr/local/lib/python3.10/dist-packages (from finto-fern-langfuse) (1.10.7)
+    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx==0.23.3->finto-fern-langfuse) (2022.12.7)
+    Collecting httpcore<0.17.0,>=0.15.0 (from httpx==0.23.3->finto-fern-langfuse)
+      Downloading httpcore-0.16.3-py3-none-any.whl (69 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m69.6/69.6 kB[0m [31m8.2 MB/s[0m eta [36m0:00:00[0m
+    [?25hCollecting rfc3986[idna2008]<2,>=1.3 (from httpx==0.23.3->finto-fern-langfuse)
+      Downloading rfc3986-1.5.0-py2.py3-none-any.whl (31 kB)
+    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx==0.23.3->finto-fern-langfuse) (1.3.0)
+    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic<2.0.0,>=1.9.2->finto-fern-langfuse) (4.5.0)
+    Collecting h11<0.15,>=0.13 (from httpcore<0.17.0,>=0.15.0->httpx==0.23.3->finto-fern-langfuse)
+      Downloading h11-0.14.0-py3-none-any.whl (58 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m58.3/58.3 kB[0m [31m6.4 MB/s[0m eta [36m0:00:00[0m
+    [?25hRequirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.17.0,>=0.15.0->httpx==0.23.3->finto-fern-langfuse) (3.6.2)
+    Requirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from rfc3986[idna2008]<2,>=1.3->httpx==0.23.3->finto-fern-langfuse) (3.4)
+    Installing collected packages: rfc3986, h11, httpcore, httpx, finto-fern-langfuse
+    Successfully installed finto-fern-langfuse-0.0.348 h11-0.14.0 httpcore-0.16.3 httpx-0.23.3 rfc3986-1.5.0
+
+
 Initialize the client with your environment and api keys. In the example we are using the cloud environment. The Python client can modify all entities in the Langfuse API and requires the secret key.
+
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
 ENV_SECRET_KEY = "sk-lf-..."
 ENV_PUBLIC_KEY = "pk-lf-..."
 ```
+
 
 ```python
 from finto.client import FintoLangfuse
@@ -43,13 +70,19 @@ client = FintoLangfuse(
 
 All timestamps need to be formatted in the following way before being used in the SDK. This is a limitation of the current python SDK.
 
+
 ```python
 from datetime import datetime
 
 datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 ```
 
+
+
+
     '2023-06-22T11:56:38Z'
+
+
 
 ### Traces
 
@@ -61,6 +94,7 @@ Traces can be created and updated.
 
 - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
+
 
 ```python
 from finto.resources.trace.types.create_trace_request import CreateTraceRequest
@@ -87,6 +121,7 @@ Events are used to track discrete events in a trace.
 - `name` (optional): identifier of the event. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the event. JSON object.
 - `parentObservationId` (optional): the id of the span or event to which the event should be attached
+
 
 ```python
 from finto.resources.event.types.create_event_request import CreateEventRequest
@@ -115,6 +150,7 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `name` (optional): identifier of the span. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
 - `parentObservationId` (optional): the id of the observation to which the span should be attached
+
 
 ```python
 from finto.resources.span.types.create_span_request import CreateSpanRequest
@@ -162,6 +198,7 @@ Generations are used to log generations of AI model. They contain additional att
 - `metadata` (optional): additional metadata of the generation. Can be any JSON object.
 - `parentObservationId` (optional): the id of the observation to which the generation should be attached as a child.
 
+
 ```python
 from finto.resources.generations.types.create_log import CreateLog
 from finto.resources.generations.types.llm_usage import LlmUsage
@@ -205,7 +242,6 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
 - `observationId` (optional): the id of the span, event or generation to which the score should be attached
 
-Scores can also be modified by the serverClient.
 
 ```python
 from finto.resources.score.types.create_score_request import CreateScoreRequest
