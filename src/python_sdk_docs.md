@@ -123,8 +123,8 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `name` (optional): identifier of the span. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
 - `parentObservationId` (optional): the id of the observation to which the span should be attached
-- `input` (optional): the input to the event. Can be any JSON object.
-- `output` (optional): the output to the event. Can be any JSON object.
+- `input` (optional): the input to the span. Can be any JSON object.
+- `output` (optional): the output to the span. Can be any JSON object.
 
 ```python
 from finto.resources.span.types.create_span_request import CreateSpanRequest
