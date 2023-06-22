@@ -133,17 +133,31 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
   </Button>
 </div>
 
-```python filename="server.py"
-# LLM-based server route
-trace = langfuseClient.trace.create( request = {
-    "name": "chat-completion",
-    "attributes": {
-        "prompt": [{"role": "client", "content": "Hi there!"}],
-        "completion": "Hi 👋",
-        "model": ...
-    },
-    ...
-}))
+```typescript filename="server.ts"
+const startTime = new Date();
+
+// const chatCompletion = await llm.respond(prompt);
+
+const generation = await client.generations.log({
+  traceId: trace.id,
+  startTime: generationStart,
+  endTime: new Date(),
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+  },
+  prompt: "Hello, how are you?",
+  completion: "I'm fine, thanks. How are you?",
+  usage: {
+    promptTokens: 22,
+    completionTokens: 28,
+  },
+  metadata: {
+    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+  },
+});
 ```
 
 </div>

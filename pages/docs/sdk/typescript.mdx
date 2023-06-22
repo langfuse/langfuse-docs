@@ -175,7 +175,7 @@ Generations are used to log generations of AI model. They contain additional att
 ```typescript filename="server.ts"
 const startTime = new Date();
 
-// const chatCompletion = await callLLM(retrievedDoc);
+// const chatCompletion = await llm.respond(prompt);
 
 const generation = await client.generations.log({
   traceId: trace.id,
