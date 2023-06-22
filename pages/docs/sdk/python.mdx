@@ -19,17 +19,13 @@ import { Callout } from "nextra/components";
   Colab](http://colab.research.google.com/github/langfuse/langfuse-demo-python/blob/main/notebook.ipynb))
 </Callout>
 
-The Python SDK can be imported into your project using pip.
+## 1. Initializing the client
 
-## Installation
+The langfuse SDKs are hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
 
 ```bash
 pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
 ```
-
-## Usage
-
-### Initialize client
 
 Initialize the client with your environment and api keys. In the example we are using the cloud environment. The Python client can modify all entities in the Langfuse API and requires the secret key.
 
@@ -39,25 +35,38 @@ from finto.client import FintoLangfuse
 client = FintoLangfuse(
   environment = "https://cloud.langfuse.com", # or any custom host, e.g. http://localhost:3030
   username = "pk-lf-...", # public key
-  password = "sk-sk-...", # secret key
+  password = "sk-lf-...", # secret key
 )
 ```
 
-### Trace
+## 2. Trace execution of backend
 
-Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application. Traces can be created and updated.
+- Each backend execution is logged with a single `trace`.
+- Each trace can contain multiple `observations` to log the individual steps of the execution.
+  - Observations can be nested.
+  - Observations can be of different types
+    - `Events` are the basic building block. They are used to track discrete events in a trace.
+    - `Spans` represent durations of units of work in a trace.
+    - `Generations` are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
+### Traces
+
+Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
+
+Traces can be created and updated.
 
 `trace.create()` takes the following parameters:
 
-- `name`: identifier of the trace
-- `attributes`: additional attributes of the trace. The content can be chosen freely.
+- `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
+- `metadata` (optional): additional metadata of the trace. Can be any JSON object.
 
 ```python filename="server.py"
 trace = client.trace.create(
   request = CreateTraceRequest(
-    name = "chat-completion",
+    name = "chat-app-session",
     metadata = {
-      "env": "production"
+      "env": "production",
+      "user": "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     }
   )
 )
