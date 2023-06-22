@@ -1,7 +1,7 @@
 # Python SDK
 
-- [View as notebook on GitHub](https://github.com/langfuse/langfuse-demo-python/blob/main/notebook.ipynb)
-- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-demo-python/blob/main/notebook.ipynb)
+- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/python_sdk_docs.ipynb)
+- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/python_sdk_docs.ipynb)
 
 ## 1. Initializing the client
 
