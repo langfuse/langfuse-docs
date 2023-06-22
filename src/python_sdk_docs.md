@@ -1,69 +1,32 @@
-# Typescript SDK
+# Python SDK
 
-import { Callout } from "nextra/components";
-
-<Callout type="info" emoji="ℹ️">
-  As an example, we integrated the Typescript SDK into a fork of the Chatbot UI
-  project ([GitHub](https://github.com/langfuse/langfuse-demo-nextjs)):
-  <ul>
-    <li className="list-disc ml-8">
-      [`chat.ts`](https://github.com/langfuse/langfuse-demo-nextjs/blob/main/pages/api/chat.ts)
-      (tracing of LLM calls)
-    </li>
-    <li className="list-disc ml-8">
-      [`ChatMessage.tsx`](https://github.com/langfuse/langfuse-demo-nextjs/blob/main/components/Chat/ChatMessage.tsx#L40-L59)
-      (feedback collection in frontend)
-    </li>
-  </ul>
-</Callout>
+- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/python_sdk_docs.ipynb)
+- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/python_sdk_docs.ipynb)
 
 ## 1. Initializing the client
 
-The langfuse SDKs are hosted in a private npm registry by [Fern](https://buildwithfern.com/). Add the registry to your project before installing them.
+The langfuse SDKs are hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
 
-```bash
-# add a .npmrc file to your project root
-touch .npmrc
-
-# add a config to the file
-echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
+```python
+%pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
 ```
 
-### Server
+Initialize the client with your environment and api keys. In the example we are using the cloud environment. The Python client can modify all entities in the Langfuse API and requires the secret key.
 
-The server client can modify all entities in the Langfuse API and requires the secret key. The secret key must not be exposed to users.
-
-```bash
-# install the packages
-npm install @finto-fern/langfuse-node
+```python
+ENV_HOST = "https://cloud.langfuse.com"
+ENV_SECRET_KEY = "sk-lf-..."
+ENV_PUBLIC_KEY = "pk-lf-..."
 ```
 
-```typescript filename="server.ts"
-import { LangfuseClient } from "@finto-fern/langfuse-node";
+```python
+from finto.client import FintoLangfuse
 
-const serverClient = new LangfuseClient({
-  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
-  username: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
-  password: env.LANGFUSE_SECRET_KEY, // pk-sk-...
-});
-```
-
-### Frontend
-
-The frontend client can be used to send scores directly to the Langfuse API. This is useful when scores are based on user feedback that is explicitly or implicitly given in the frontend. It is initialised with the public key which can be exposed to users.
-
-```bash
-# install the packages
-npm install @finto-fern/react-client
-```
-
-```typescript filename="frontend.ts"
-import { LangfuseClient } from "@finto-fern/react-client";
-
-const frontendClient = new LangfuseClient({
-  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
-  token: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
-});
+client = FintoLangfuse(
+    environment=ENV_HOST,
+    password=ENV_SECRET_KEY,
+    username=ENV_PUBLIC_KEY
+)
 ```
 
 ## 2. Trace execution of backend
@@ -76,6 +39,18 @@ const frontendClient = new LangfuseClient({
     - `Spans` represent durations of units of work in a trace.
     - `Generations` are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
+**Timestamps**
+
+All timestamps need to be formatted in the following way before being used in the SDK. This is a limitation of the current python SDK.
+
+```python
+from datetime import datetime
+
+datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+```
+
+    '2023-06-22T11:56:38Z'
+
 ### Traces
 
 Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
@@ -87,11 +62,18 @@ Traces can be created and updated.
 - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
 
-```typescript filename="server.ts"
-const trace = await serverClient.trace.create({
-  name: "chat-app-session",
-  metadata: { env: "production", user: "6784367" },
-});
+```python
+from finto.resources.trace.types.create_trace_request import CreateTraceRequest
+
+trace = client.trace.create(
+    request = CreateTraceRequest(
+        name="chat-completion",
+        metadata= {
+            "env": "production",
+            "user": "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+        }
+    )
+)
 ```
 
 ### Observations
@@ -106,17 +88,19 @@ Events are used to track discrete events in a trace.
 - `metadata` (optional): additional metadata of the event. JSON object.
 - `parentObservationId` (optional): the id of the span or event to which the event should be attached
 
-```typescript filename="server.ts"
-await serverClient.event.create({
-  traceId: trace.id,
-  name: "chat-completion-retried",
-  metadata: {
-    attempt: 2,
-    userId: user.id,
-  },
-  parentObservationId: llmCall.id,
-  startTime: new Date(),
-});
+```python
+from finto.resources.event.types.create_event_request import CreateEventRequest
+
+event = client.event.create(
+    request=CreateEventRequest(
+        traceId=trace.id,
+        name="chat-docs-retrieval",
+        startTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        metadata={
+            "key": "value"
+        },
+    )
+)
 ```
 
 ### Span
@@ -132,20 +116,26 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
 - `parentObservationId` (optional): the id of the observation to which the span should be attached
 
-```typescript filename="server.ts"
-const retrievalStart = new Date();
+```python
+from finto.resources.span.types.create_span_request import CreateSpanRequest
 
-// const retrievedDoc = await retrieveDoc();
+retrievalStartTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
-const retrieval = await client.span.create({
-  traceId: trace.id,
-  startTime: retrievalStart,
-  endTime: new Date(),
-  name: "embedding-retrieval",
-  metadata: {
-    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  },
-});
+# retrieveDocs = retrieveDoc()
+# ...
+
+span = client.span.create(
+    request=CreateSpanRequest(
+        traceId=trace.id,
+        name="chat-completion",
+        startTime=retrievalStartTime,
+        endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        metadata={
+            "key": "value"
+        },
+        parentObservationId=event.id,
+    )
+)
 ```
 
 `span.update()` take the following parameters:
@@ -172,32 +162,38 @@ Generations are used to log generations of AI model. They contain additional att
 - `metadata` (optional): additional metadata of the generation. Can be any JSON object.
 - `parentObservationId` (optional): the id of the observation to which the generation should be attached as a child.
 
-```typescript filename="server.ts"
-const startTime = new Date();
+```python
+from finto.resources.generations.types.create_log import CreateLog
+from finto.resources.generations.types.llm_usage import LlmUsage
 
-// const chatCompletion = await callLLM(retrievedDoc);
+generationStartTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
-const generation = await client.generations.log({
-  traceId: trace.id,
-  startTime: generationStart,
-  endTime: new Date(),
-  name: "chat-completion",
-  model: "gpt-3.5-turbo",
-  modelParameters: {
-    temperature: 0.9,
-    maxTokens: 2000,
-    topP: undefined,
-  },
-  prompt: messagesToSend,
-  completion: chatCompletion.data.choices[0].message?.content,
-  usage: {
-    promptTokens: chatCompletion.data.usage?.prompt_tokens,
-    completionTokens: chatCompletion.data.usage?.completion_tokens,
-  },
-  metadata: {
-    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  },
-});
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+# ...
+
+generation = client.generations.log(
+    request=CreateLog(
+        traceId=trace.id,
+        name="test",
+        startTime=generationStartTime,
+        endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        model="gpt-3.5-turbo",
+        modelParameters= {
+            "temperature":0.9,
+            "maxTokens":1000,
+            "topP":None,
+        },
+        prompt=[{"role": "user", "content":"Hello, how are you?"}],
+        completion="I am fine, thank you",
+        usage=LlmUsage(
+            prompt_tokens=512,
+            completion_tokens=49
+        ),
+        metadata= {
+            "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
+        }
+    )
+)
 ```
 
 ## 3. Collect scores
@@ -211,37 +207,18 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 
 Scores can also be modified by the serverClient.
 
-```typescript filename="frontend.ts"
-await frontendClient.score.create({
-  traceId: message.traceId,
-  name: "user-feedback",
-  value: 1,
-  observationId: llmCall.id,
-});
+```python
+from finto.resources.score.types.create_score_request import CreateScoreRequest
+
+score = client.score.create(
+    request=CreateScoreRequest(
+        traceId=trace.id,                  # trace the score is related to
+        name="user-explicit-feedback",
+        value=1,
+        observationId=generation.id           # optionally: also attach the score to an individual observation
+    )
+)
 ```
-
-## 4. Optimize performance
-
-When tracing complex applications, the number of observations can quickly grow large. To optimize performance, the SDK shall best be used asynchronously and not be awaited. Then it should add only minimal overhead to the execution of the application.
-
-```typescript filename="server.ts"
-const langfusePromises = [];
-
-// execution
-
-langfusePromises.push(
-  serverClient.event.create({
-    // ...
-  })
-);
-
-// respond to user
-
-// await all langfuse calls
-await Promises.all(langfusePromises);
-```
-
-For nesting of observations, the creation of the parent observation needs to be awaited before creating the child observation, we are working on the batch creation of observations to further optimize performance.
 
 ## Troubleshooting
 
