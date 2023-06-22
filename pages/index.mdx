@@ -134,13 +134,13 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
 </div>
 
 ```typescript filename="server.ts"
-const startTime = new Date();
+const generationStartTime = new Date();
 
 // const chatCompletion = await llm.respond(prompt);
 
 const generation = await client.generations.log({
   traceId: trace.id,
-  startTime: generationStart,
+  startTime: generationStartTime,
   endTime: new Date(),
   name: "chat-completion",
   model: "gpt-3.5-turbo",

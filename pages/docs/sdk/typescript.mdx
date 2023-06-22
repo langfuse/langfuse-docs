@@ -133,13 +133,13 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `parentObservationId` (optional): the id of the observation to which the span should be attached
 
 ```typescript filename="server.ts"
-const retrievalStart = new Date();
+const retrievalStartTime = new Date();
 
 // const retrievedDoc = await retrieveDoc();
 
 const retrieval = await client.span.create({
   traceId: trace.id,
-  startTime: retrievalStart,
+  startTime: retrievalStartTime,
   endTime: new Date(),
   name: "embedding-retrieval",
   metadata: {
@@ -173,13 +173,13 @@ Generations are used to log generations of AI model. They contain additional att
 - `parentObservationId` (optional): the id of the observation to which the generation should be attached as a child.
 
 ```typescript filename="server.ts"
-const startTime = new Date();
+const generationStartTime = new Date();
 
 // const chatCompletion = await llm.respond(prompt);
 
 const generation = await client.generations.log({
   traceId: trace.id,
-  startTime: generationStart,
+  startTime: generationStartTime,
   endTime: new Date(),
   name: "chat-completion",
   model: "gpt-3.5-turbo",

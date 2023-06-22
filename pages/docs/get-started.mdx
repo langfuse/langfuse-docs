@@ -86,12 +86,12 @@ const serverClient = new LangfuseClient({
   password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
 });
 
-const startTime = new Date();
+const generationStartTime = new Date();
 
 // const chatCompletion = await callLLM(retrievedDoc);
 
 const generation = await serverClient.generations.log({
-  startTime: startTime,
+  startTime: generationStartTime,
   endTime: new Date(),
   name: "chat-completion",
   model: "gpt-3.5-turbo",
@@ -138,10 +138,14 @@ client = FintoLangfuse(
   password = "sk-sk-..." # secret key
 )
 
+generationStartTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+# chatCompletion = callLLM(prompt)
+
 generation = client.generations.log(
   request=CreateLog(
     name="chat-completion",
-    startTime=generationStart,
+    startTime=generationStartTime,
     endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
     model="gpt-3.5-turbo",
     modelParameters= {
