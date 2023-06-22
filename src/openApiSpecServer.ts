@@ -26,6 +26,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateEventRequest'
+  /api/public/generations:
+    post:
+      operationId: generations_log
+      tags:
+        - Generations
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Log'
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLog'
   /api/public/scores:
     post:
       description: Add a score to the database
@@ -47,47 +67,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateScoreRequest'
-  /api/public/llm-span:
-    post:
-      description: a
-      operationId: span_createLLMCall
-      tags:
-        - Span
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Span'
-      security: *ref_0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateLLMSpanRequest'
-    patch:
-      description: Update a span to the database
-      operationId: span_updateLLMCall
-      tags:
-        - Span
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Span'
-      security: *ref_0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateLLMSpanRequest'
   /api/public/spans:
     post:
       description: Add a span to the database
@@ -150,26 +129,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateTraceRequest'
-    patch:
-      description: Update the status of a trace
-      operationId: trace_update
-      tags:
-        - Trace
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Trace'
-      security: *ref_0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateTraceRequest'
 components:
   schemas:
     CreateEventRequest:
@@ -183,14 +142,19 @@ components:
         startTime:
           type: string
           format: date-time
-        attributes: {}
+        metadata: {}
+        input: {}
+        output: {}
         parentObservationId:
           type: string
+          nullable: true
       required:
         - traceId
         - name
         - startTime
-        - attributes
+        - metadata
+        - input
+        - output
     Event:
       title: Event
       type: object
@@ -206,16 +170,109 @@ components:
         startTime:
           type: string
           format: date-time
-        attributes: {}
+        metadata: {}
+        input: {}
+        output: {}
         parentObservationId:
           type: string
+          nullable: true
       required:
         - id
         - traceId
         - type
         - name
         - startTime
+        - metadata
+        - input
+        - output
+    CreateLog:
+      title: CreateLog
+      type: object
+      properties:
+        traceId:
+          type: string
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        modelParameters:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/MapValue'
+          nullable: true
+        prompt:
+          nullable: true
+        metadata:
+          nullable: true
+        completion:
+          type: string
+          nullable: true
+        usage:
+          $ref: '#/components/schemas/LLMUsage'
+          nullable: true
+        parentObservationId:
+          type: string
+          nullable: true
+    Log:
+      title: Log
+      type: object
+      properties:
+        id:
+          type: string
+        traceId:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        attributes: {}
+        parentObservationId:
+          type: string
+          nullable: true
+      required:
+        - id
+        - traceId
+        - type
         - attributes
+    LLMUsage:
+      title: LLMUsage
+      type: object
+      properties:
+        promptTokens:
+          type: integer
+          nullable: true
+        completionTokens:
+          type: integer
+          nullable: true
+    MapValue:
+      title: MapValue
+      oneOf:
+        - type: string
+          nullable: true
+        - type: integer
+          nullable: true
+        - type: boolean
+          nullable: true
     CreateScoreRequest:
       title: CreateScoreRequest
       type: object
@@ -228,6 +285,7 @@ components:
           type: integer
         observationId:
           type: string
+          nullable: true
       required:
         - traceId
         - name
@@ -244,6 +302,7 @@ components:
           type: integer
         observationId:
           type: string
+          nullable: true
         timestamp:
           type: string
           format: date-time
@@ -258,19 +317,28 @@ components:
       properties:
         traceId:
           type: string
+          nullable: true
         name:
           type: string
         startTime:
           type: string
           format: date-time
-        attributes: {}
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        metadata: {}
+        input: {}
+        output: {}
         parentObservationId:
           type: string
+          nullable: true
       required:
-        - traceId
         - name
         - startTime
-        - attributes
+        - metadata
+        - input
+        - output
     UpdateSpanRequest:
       title: UpdateSpanRequest
       type: object
@@ -283,21 +351,6 @@ components:
       required:
         - spanId
         - endTime
-    UpdateLLMSpanRequest:
-      title: UpdateLLMSpanRequest
-      type: object
-      properties:
-        spanId:
-          type: string
-        endTime:
-          type: string
-          format: date-time
-        attributes:
-          $ref: '#/components/schemas/LLMAttributes'
-      required:
-        - spanId
-        - endTime
-        - attributes
     Span:
       title: Span
       type: object
@@ -316,85 +369,32 @@ components:
         endTime:
           type: string
           format: date-time
-        attributes: {}
+          nullable: true
+        metadata: {}
+        input: {}
+        output: {}
         parentObservationId:
           type: string
+          nullable: true
       required:
         - id
         - traceId
         - type
         - name
         - startTime
-        - attributes
-    CreateLLMSpanRequest:
-      title: CreateLLMSpanRequest
-      type: object
-      properties:
-        traceId:
-          type: string
-        name:
-          type: string
-        startTime:
-          type: string
-          format: date-time
-        parentObservationId:
-          type: string
-        attributes:
-          $ref: '#/components/schemas/LLMAttributes'
-      required:
-        - traceId
-        - name
-        - startTime
-        - attributes
-    LLMAttributes:
-      title: LLMAttributes
-      type: object
-      properties:
-        model: {}
-        prompt:
-          type: string
-        completion:
-          type: string
-        tokens:
-          $ref: '#/components/schemas/LLMTokens'
-      required:
-        - model
-    LLMTokens:
-      title: LLMTokens
-      type: object
-      properties:
-        prompt_amount:
-          type: integer
-        completion_amount:
-          type: integer
+        - metadata
+        - input
+        - output
     CreateTraceRequest:
       title: CreateTraceRequest
       type: object
       properties:
         name:
           type: string
-        attributes: {}
-        status:
-          $ref: '#/components/schemas/TraceStatus'
-        statusMessage:
-          type: string
+        metadata: {}
       required:
         - name
-        - attributes
-        - status
-    UpdateTraceRequest:
-      title: UpdateTraceRequest
-      type: object
-      properties:
-        id:
-          type: string
-        status:
-          $ref: '#/components/schemas/TraceStatus'
-        statusMessage:
-          type: string
-      required:
-        - id
-        - status
+        - metadata
     Trace:
       title: Trace
       type: object
@@ -406,24 +406,12 @@ components:
           format: date-time
         name:
           type: string
-        attributes: {}
-        status:
-          type: string
-        statusMessage:
-          type: string
+        metadata: {}
       required:
         - id
         - timestamp
         - name
-        - attributes
-        - status
-    TraceStatus:
-      title: TraceStatus
-      type: string
-      enum:
-        - EXECUTING
-        - SUCCESS
-        - ERROR
+        - metadata
   securitySchemes:
     BasicAuth:
       type: http
