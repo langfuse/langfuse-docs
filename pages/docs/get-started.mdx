@@ -1,23 +1,250 @@
-# Quickstart
+import { Steps, Tab, Tabs } from "nextra-theme-docs";
 
-import RunAll from "../../components/mdx/run-all.mdx";
-import TraceAll from "../../components/mdx/trace-all.mdx";
-import CaptureAll from "../../components/mdx/capture-score-all.mdx";
-import { Steps } from "nextra-theme-docs";
+# Quickstart
 
 <Steps>
 
 ### Run langfuse
 
-<RunAll />
+The fastest way to get started is to use the Langfuse Cloud. Alternatively you can run langfuse locally to test it out or self-host it.
+
+<Tabs items={["langfuse cloud", "local", "self-hosted"]}>
+<Tab>
+
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com)
+2. Copy API keys for your
+   project
+
+   ```bash filename=".env"
+   LANGFUSE_SECRET_KEY="sk-lf-...";
+   LANGFUSE_PUBLIC_KEY="pk-lf-...";
+   ```
+
+</Tab>
+<Tab>
+
+1.  Run langfuse
+    ```bash copy
+    git clone https://github.com/langfuse/langfuse.git
+    cd langfuse
+    docker compose up
+    ```
+2.  Open http://localhost:3030, create a project
+3.  Copy API keys for your project
+    ```bash filename=".env"
+    LANGFUSE_SECRET_KEY="sk-lf-...";
+    LANGFUSE_PUBLIC_KEY="pk-lf-...";
+    ```
+
+Problems? Read more about running langfuse [locally with
+docker](local.md)
+
+</Tab>
+<Tab>
+
+1. Run postgres database
+2. Run `langfuse` docker container
+3. Go to langfuse UI on your host and create a project
+4. Copy API keys for your project
+   ```bash filename=".env"
+   LANGFUSE_SECRET_KEY="sk-lf-...";
+   LANGFUSE_PUBLIC_KEY="pk-lf-...";
+   ```
+
+To run langfuse in production, see [self-host instructions](self-host.mdx)
+
+</Tab>
+</Tabs>
 
 ### Add tracing to your backend
 
-<TraceAll />
+<Tabs items={["Typescript", "Python", "API"]}>
+<Tab>
+
+The langfuse SDKs are hosted in a private npm registry by [Fern](https://buildwithfern.com/). To install the sdk, you need to add the registry to your project before installing them.
+
+```bash
+# add a .npmrc file to your project root
+touch .npmrc
+
+# add a config to the file
+echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
+
+# install the package
+npm install @finto-fern/langfuse-node
+```
+
+Example usage, most of the paramters are optional and depend on the use case. For more information, see the [typescript docs](/docs/sdk/typescript).
+
+```typescript filename="server.ts"
+import { LangfuseClient } from "@finto-fern/langfuse-node";
+
+const serverClient = new LangfuseClient({
+  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
+  username: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
+});
+
+const startTime = new Date();
+
+// const chatCompletion = await callLLM(retrievedDoc);
+
+const generation = await serverClient.generations.log({
+  startTime: startTime,
+  endTime: new Date(),
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+    topP: undefined,
+  },
+  prompt: [
+    {
+      role: "system",
+      content: systemPrompt,
+    },
+    ...messagesToSend,
+  ],
+  completion: chatCompletion.data.choices[0].message?.content,
+  usage: {
+    promptTokens: chatCompletion.data.usage?.prompt_tokens,
+    completionTokens: chatCompletion.data.usage?.completion_tokens,
+  },
+  metadata: {
+    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+  },
+});
+```
+
+</Tab>
+<Tab>
+
+The langfuse SDKs are hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
+
+```bash
+pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
+```
+
+Example usage, most of the paramters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
+
+```python filename="server.py"
+from finto.client import FintoLangfuse
+
+client = FintoLangfuse(
+  environment = "https://cloud.langfuse.com", # or any custom host, e.g. http://localhost:3030
+  username = "pk-lf-..." # public key
+  password = "sk-sk-..." # secret key
+)
+
+generation = client.generations.log(
+  request=CreateLog(
+    name="chat-completion",
+    startTime=generationStart,
+    endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    model="gpt-3.5-turbo",
+    modelParameters= {
+      "temperature":0.9,
+      "maxTokens":1000,
+      "topP": None,
+    },
+    prompt=[{"role": "user", "content": message_to_send}],
+    completion=chat_response.json()["choices"][0]["message"],
+    usage=LlmUsage(
+      prompt_tokens=512,
+      completion_tokens=49
+    ),
+    metadata= {
+     "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
+    }
+  )
+)
+```
+
+</Tab>
+<Tab>
+
+API reference, quickstart will be updated soon
+
+</Tab>
+</Tabs>
 
 ### Capture scoring (optional)
 
-<CaptureAll />
+<Tabs items={["Typescript", "Python", "API"]}>
+<Tab>
+
+For typescript we offer a dedicated frontend package to directly report scores.
+
+Install the package
+
+```bash
+npm install @finto-fern/react-client
+```
+
+Simple feedback component in React
+
+```typescript filename="UserFeedbackComponent.tsx"
+import { LangfuseClient } from "@finto-fern/react-client";
+
+export default function UserFeedbackComponent(props: { traceId: string }) {
+  const frontendClient = new LangfuseClient({
+    environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
+    token: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  });
+
+  const handleFeedback = async (value: number) => {
+    await frontendClient.score.create({
+      traceId: props.traceId,
+      name: "user_feedback", // arbitrary name to identify the type of score
+      value, // float, optional: scale it to e.g. 0..1
+    });
+  };
+
+  return (
+    <>
+      <button onClick={() => handleFeedback(1)}>👍</button>
+      <button onClick={() => handleFeedback(0)}>👎</button>
+    </>
+  );
+}
+```
+
+</Tab>
+<Tab>
+
+You can use the Python SDK to report a score via your Python server. Alternatively, you can use the Typescript SDK or REST API to directly report scores from the frontend.
+
+```python filename="server.py"
+score = client.score.create(
+  request = {
+    "traceId": trace.id,
+    "name": 'user-explicit-feedback',
+    "value": 1,
+    "observationId": llmCall.id,
+  }
+)
+```
+
+</Tab>
+<Tab>
+
+```bash
+curl --location 'http://cloud.langfuse.com/api/public/metrics' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--header "Authorization: Bearer {langfuse_public_key}"
+--data '{
+  "traceId": "<string>",
+  "name": "<string>",
+  "value": "<integer>",
+  "observationId": "<optional_string>"
+}'
+```
+
+</Tab>
+</Tabs>
 
 ### Explore
 
