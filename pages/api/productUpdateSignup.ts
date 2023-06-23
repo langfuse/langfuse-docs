@@ -18,6 +18,7 @@ export default async function handler(
         body: JSON.stringify({
           email: req.body.email,
           source: "Website signup",
+          receiveProductUpdates: true,
         }),
         headers: {
           "Content-Type": "application/json",
