@@ -12,6 +12,11 @@ const footerNav = [
 const config: DocsThemeConfig = {
   logo: <Logo />,
   darkMode: false,
+  nextThemes: {
+    defaultTheme: "light",
+    forcedTheme: "light",
+    storageKey: "nextra-theme-docs-color-mode",
+  },
   project: {
     link: "https://github.com/finto-technologies/langfuse",
   },
