@@ -11,6 +11,7 @@ const footerNav = [
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
+  darkMode: false,
   project: {
     link: "https://github.com/finto-technologies/langfuse",
   },
