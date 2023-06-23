@@ -2,17 +2,16 @@ import { Card, Cards } from "nextra-theme-docs";
 import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
 import { AiOutlineCloud } from "react-icons/ai";
 import { BsCode } from "react-icons/bs";
-import { Button } from "/components/ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Buttons } from "/components/demoVideo";
+import { Buttons } from "@/components/demoVideo";
 import Image from "next/image";
-import ycImg from "../src/yc.svg";
+import ycImg from "@/src/yc.svg";
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
 <div className="lg:container">
 <div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
-  <div className="text-center text-4xl">
-   `🪢 langfuse`
-  </div>
+  <h1 className="text-center text-4xl">`🪢 langfuse`</h1>
   <div className="max-w-3xl">
     <div className="text-2xl text-center font-semibold mb-3">
       Open-source experimentation platform for LLM-based applications
@@ -25,16 +24,17 @@ import ycImg from "../src/yc.svg";
   <div className="flex gap-3 justify-center flex-wrap">
     <Buttons />
   </div>
+  <ProductUpdateSignup />
   <div>
     <div className="text-center text-gray-500 pb-3 pt-10">Backed by</div>
     <Image src={ycImg} height={30} />
   </div>
 </div>
 
-import { Feature } from "/components/feature";
-import screenDashboard from "../src/screenshots_dashboard.png";
-import screenSegmentTraces from "../src/screenshots_segment_traces.png";
-import screenSideBySide from "../src/screenshots_side_by_side.png";
+import { Feature } from "@/components/feature";
+import screenDashboard from "@/src/screenshots_dashboard.png";
+import screenSegmentTraces from "@/src/screenshots_segment_traces.png";
+import screenSideBySide from "@/src/screenshots_side_by_side.png";
 
 <Feature src={screenDashboard} imageAlt="test" imagePosition="left">
 
@@ -66,7 +66,7 @@ Model-based comparison of executions with automated suggestions (coming soon)
 
 </Feature>
 
-import { TwoCards, StartCard, Divider } from "/components/cards";
+import { TwoCards, StartCard, Divider } from "@/components/cards";
 
 <TwoCards className="my-24">
 <StartCard isOutline>
@@ -81,13 +81,13 @@ import { TwoCards, StartCard, Divider } from "/components/cards";
   <Button asChild>
     <Link href="https://github.com/langfuse/langfuse/">
       <SiGithub className="mr-2" />
-      GitHub
+      <span>GitHub</span>
     </Link>
   </Button>
   <Button variant="secondary" asChild>
     <Link href="https://discord.gg/7NXusRtqYU">
       <SiDiscord className="mr-2" />
-      Discord
+      <span>Discord</span>
     </Link>
   </Button>
 </div>
@@ -116,19 +116,19 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
   <Button variant="outline" asChild>
     <Link href="/docs/reference">
       <BsCode className="mr-2 h-5 w-5" />
-      API
+      <span>API</span>
     </Link>
   </Button>
   <Button variant="outline" asChild>
     <Link href="/docs/sdk/python">
       <SiPython className="mr-2" />
-      Python SDK
+      <span>Python SDK</span>
     </Link>
   </Button>
   <Button variant="outline" asChild>
     <Link href="/docs/sdk/typescript">
       <SiTypescript className="mr-2" />
-      Typescript SDK
+      <span>Typescript SDK</span>
     </Link>
   </Button>
 </div>
@@ -169,13 +169,13 @@ const generationLog = await client.generations.log({
   <Button variant="outline" asChild>
     <Link href="/docs/reference#restricted-access-with-public-key-client-side">
       <BsCode className="mr-2 h-5 w-5" />
-      API
+      <span>API</span>
     </Link>
   </Button>
   <Button variant="outline" asChild>
     <Link href="/docs/sdk/typescript#frontend">
       <SiTypescript className="mr-2" />
-      Typescript SDK
+      <span>Typescript SDK</span>
     </Link>
   </Button>
 </div>
@@ -207,7 +207,7 @@ const handleUserFeedback = (value: number) =>
   <Button asChild>
     <Link href="https://cal.com/marc-kl/langfuse-cloud">
       <AiOutlineCloud className="mr-2 h-4 w-4" />
-      Early access
+      <span>Early access</span>
     </Link>
   </Button>
   <Button variant="ghost">Docs</Button>
@@ -226,7 +226,7 @@ const handleUserFeedback = (value: number) =>
   <Button asChild>
     <Link href="https://github.com/langfuse/langfuse/">
       <SiGithub className="mr-2" />
-      GitHub
+      <span>GitHub</span>
     </Link>
   </Button>
   <Button variant="secondary" asChild>

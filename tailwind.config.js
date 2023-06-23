@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ["class"],
   content: [
     "./components/**/*.{js,jsx,ts,tsx,mdx}",
     "./pages/**/*.{js,jsx,ts,tsx,mdx}",
@@ -13,7 +14,7 @@ module.exports = {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1200px",
+        "2xl": "1400px",
       },
     },
     extend: {
@@ -53,8 +54,8 @@ module.exports = {
         },
       },
       borderRadius: {
-        lg: `var(--radius)`,
-        md: `calc(var(--radius) - 2px)`,
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
@@ -73,7 +74,5 @@ module.exports = {
       },
     },
   },
-  darkMode: 'class',
   plugins: [require("tailwindcss-animate")],
 }
-
