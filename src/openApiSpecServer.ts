@@ -137,24 +137,29 @@ components:
       properties:
         traceId:
           type: string
+          nullable: true
         name:
           type: string
+          nullable: true
         startTime:
           type: string
           format: date-time
-        metadata: {}
-        input: {}
-        output: {}
+          nullable: true
+        metadata:
+          nullable: true
+        input:
+          nullable: true
+        output:
+          nullable: true
+        level:
+          $ref: '#/components/schemas/ObservationLevelEvent'
+          nullable: true
+        statusMessage:
+          type: string
+          nullable: true
         parentObservationId:
           type: string
           nullable: true
-      required:
-        - traceId
-        - name
-        - startTime
-        - metadata
-        - input
-        - output
     Event:
       title: Event
       type: object
@@ -167,12 +172,21 @@ components:
           type: string
         name:
           type: string
+          nullable: true
         startTime:
           type: string
           format: date-time
-        metadata: {}
-        input: {}
-        output: {}
+        metadata:
+          nullable: true
+        input:
+          nullable: true
+        output:
+          nullable: true
+        level:
+          $ref: '#/components/schemas/ObservationLevelEvent'
+        statusMessage:
+          type: string
+          nullable: true
         parentObservationId:
           type: string
           nullable: true
@@ -180,16 +194,24 @@ components:
         - id
         - traceId
         - type
-        - name
         - startTime
-        - metadata
-        - input
-        - output
+        - level
+    ObservationLevelEvent:
+      title: ObservationLevelEvent
+      type: string
+      enum:
+        - DEBUG
+        - DEFAULT
+        - WARNING
+        - ERROR
     CreateLog:
       title: CreateLog
       type: object
       properties:
         traceId:
+          type: string
+          nullable: true
+        name:
           type: string
           nullable: true
         startTime:
@@ -199,9 +221,6 @@ components:
         endTime:
           type: string
           format: date-time
-          nullable: true
-        name:
-          type: string
           nullable: true
         model:
           type: string
@@ -220,6 +239,12 @@ components:
           nullable: true
         usage:
           $ref: '#/components/schemas/LLMUsage'
+          nullable: true
+        level:
+          $ref: '#/components/schemas/ObservationLevelGeneration'
+          nullable: true
+        statusMessage:
+          type: string
           nullable: true
         parentObservationId:
           type: string
@@ -240,12 +265,33 @@ components:
         startTime:
           type: string
           format: date-time
-          nullable: true
         endTime:
           type: string
           format: date-time
           nullable: true
-        attributes: {}
+        model:
+          type: string
+          nullable: true
+        modelParameters:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/MapValue'
+          nullable: true
+        prompt:
+          nullable: true
+        metadata:
+          nullable: true
+        completion:
+          type: string
+          nullable: true
+        usage:
+          $ref: '#/components/schemas/LLMUsage'
+          nullable: true
+        level:
+          $ref: '#/components/schemas/ObservationLevelGeneration'
+        statusMessage:
+          type: string
+          nullable: true
         parentObservationId:
           type: string
           nullable: true
@@ -253,7 +299,8 @@ components:
         - id
         - traceId
         - type
-        - attributes
+        - startTime
+        - level
     LLMUsage:
       title: LLMUsage
       type: object
@@ -273,6 +320,14 @@ components:
           nullable: true
         - type: boolean
           nullable: true
+    ObservationLevelGeneration:
+      title: ObservationLevelGeneration
+      type: string
+      enum:
+        - DEBUG
+        - DEFAULT
+        - WARNING
+        - ERROR
     CreateScoreRequest:
       title: CreateScoreRequest
       type: object
@@ -320,25 +375,30 @@ components:
           nullable: true
         name:
           type: string
+          nullable: true
         startTime:
           type: string
           format: date-time
+          nullable: true
         endTime:
           type: string
           format: date-time
           nullable: true
-        metadata: {}
-        input: {}
-        output: {}
+        metadata:
+          nullable: true
+        input:
+          nullable: true
+        output:
+          nullable: true
+        level:
+          $ref: '#/components/schemas/ObservationLevelSpan'
+          nullable: true
+        statusMessage:
+          type: string
+          nullable: true
         parentObservationId:
           type: string
           nullable: true
-      required:
-        - name
-        - startTime
-        - metadata
-        - input
-        - output
     UpdateSpanRequest:
       title: UpdateSpanRequest
       type: object
@@ -363,6 +423,7 @@ components:
           type: string
         name:
           type: string
+          nullable: true
         startTime:
           type: string
           format: date-time
@@ -370,9 +431,17 @@ components:
           type: string
           format: date-time
           nullable: true
-        metadata: {}
-        input: {}
-        output: {}
+        metadata:
+          nullable: true
+        input:
+          nullable: true
+        output:
+          nullable: true
+        level:
+          $ref: '#/components/schemas/ObservationLevelSpan'
+        statusMessage:
+          type: string
+          nullable: true
         parentObservationId:
           type: string
           nullable: true
@@ -380,21 +449,25 @@ components:
         - id
         - traceId
         - type
-        - name
         - startTime
-        - metadata
-        - input
-        - output
+        - level
+    ObservationLevelSpan:
+      title: ObservationLevelSpan
+      type: string
+      enum:
+        - DEBUG
+        - DEFAULT
+        - WARNING
+        - ERROR
     CreateTraceRequest:
       title: CreateTraceRequest
       type: object
       properties:
         name:
           type: string
-        metadata: {}
-      required:
-        - name
-        - metadata
+          nullable: true
+        metadata:
+          nullable: true
     Trace:
       title: Trace
       type: object
@@ -406,14 +479,15 @@ components:
           format: date-time
         name:
           type: string
-        metadata: {}
+          nullable: true
+        metadata:
+          nullable: true
       required:
         - id
         - timestamp
-        - name
-        - metadata
   securitySchemes:
     BasicAuth:
       type: http
       scheme: basic
+
 `;
