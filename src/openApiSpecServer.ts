@@ -311,6 +311,9 @@ components:
         completionTokens:
           type: integer
           nullable: true
+        totalTokens:
+          type: integer
+          nullable: true
     MapValue:
       title: MapValue
       oneOf:
