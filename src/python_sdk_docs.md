@@ -61,6 +61,7 @@ Traces can be created and updated.
 
 - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
+- `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the langfuse `traceId`.
 
 ```python
 from finto.resources.trace.types.create_trace_request import CreateTraceRequest
@@ -166,7 +167,7 @@ span = client.span.create(
 
 ### Generation
 
-Generations are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
 `generation.log()` take the following parameters:
 
@@ -226,6 +227,7 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 - `name`: identifier of the score, string
 - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
 - `observationId` (optional): the id of the span, event or generation to which the score should be attached
+- `traceIdType` (option): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
 
 ```python
 from finto.resources.score.types.create_score_request import CreateScoreRequest
