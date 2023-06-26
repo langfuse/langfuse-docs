@@ -34,6 +34,8 @@ components:
       properties:
         traceId:
           type: string
+        traceIdType:
+          $ref: '#/components/schemas/TraceIdType'
         name:
           type: string
         value:
@@ -50,6 +52,8 @@ components:
       properties:
         id:
           type: string
+        traceId:
+          type: string
         name:
           type: string
         value:
@@ -61,9 +65,16 @@ components:
           format: date-time
       required:
         - id
+        - traceId
         - name
         - value
         - timestamp
+    TraceIdType:
+      title: TraceIdType
+      type: string
+      enum:
+        - LANGFUSE
+        - EXTERNAL
   securitySchemes:
     BearerAuth:
       type: http
