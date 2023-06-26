@@ -46,7 +46,7 @@ export function Buttons() {
       />
       <Card
         icon={<AiOutlineCloud size="24" />}
-        title="Sign in"
+        title="Sign up"
         href="https://cloud.langfuse.com"
         children={null}
       />
