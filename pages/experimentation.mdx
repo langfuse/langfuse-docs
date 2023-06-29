@@ -1,0 +1,148 @@
+import { Steps, Card, Cards } from "nextra-theme-docs";
+import { Callout } from "nextra/components";
+import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
+import { AiOutlineCloud } from "react-icons/ai";
+import { BsCode } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Buttons } from "@/components/demoVideo";
+import Image from "next/image";
+import ycImg from "@/src/yc.svg";
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+<div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
+  <h1 className="text-center text-4xl">`🪢 langfuse`</h1>
+  <div className="text-xl text-center">
+    <div className="mb-2">
+      **Developer-friendly experimentation** to iterate quickly on your LLM
+      application's
+    </div>
+    <div>
+      `prompts`, `chains`, `agents`, `models`, `embeddings`, `chunking`, ...
+    </div>
+  </div>
+  <ProductUpdateSignup source="Experimentation [Landingpage test]" />
+  <div>
+    <div className="text-center text-gray-500 pb-3 pt-10">Backed by</div>
+    <Image src={ycImg} height={30} />
+  </div>
+</div>
+
+## Why langfuse?
+
+**Bring the fun back into building applications with LLMs**
+
+- ~~Slow feedback loop in development~~
+  → Fast feedback loop to make rapid changes with confidence
+- ~~Experiment by looking at outputs~~
+  → Experiment based on metrics and data
+- ~~Remember which changes led to improvements~~
+  → Dashboard to track experimentation evolution
+- ~~Dont know where to start with evaluation/scoring~~
+  → Prebuilt library of popular metrics and evals
+
+## ~~Complex setup~~ -> First experiment running in 5 minutes
+
+<Callout type="warning" emoji="🚧">
+  `v1` of _langfuse experimentation_ is currently in alpha. [Reach
+  out](#interested) to the builders if you are interested to give it a try.
+</Callout>
+
+<Steps>
+
+### Add langfuse to dev dependencies
+
+```console filename="terminal"
+npm i -D langfuse
+```
+
+### Configure Experiment
+
+```typescript filename="./experiment.ts"
+import langfuse from "langfuse";
+import { hallucination, kindness, sameLanguage } from "langfuse/metrics";
+import { factEval } from "langfuse/metrics/openAiEvals";
+
+import { retrieveFromVectorStore, runChain } from "./app";
+
+// Define example inputs
+const experimentInputs = [
+  "What is Max' role?",
+  "How do we do continuous deployment at Acme?",
+];
+
+// Optional: Define ideal outputs to compare outputs to via evals
+const experimentIdealOutputs = ["co-founder", "via Github Actions"];
+
+langfuse.runExperiment({
+  input: experimentInputs,
+  fn: async (input) => {
+    const context = await retrieveFromVectorStore(input);
+    const response = await runChain(input, context);
+    return response;
+  },
+  metrics: [factEval(OPENAI_API_KEY), hallucination, kindness, sameLanguage],
+  idealOutputs: experimentIdealOutputs,
+});
+```
+
+### Run experiment from cli
+
+```console filename="terminal"
+foo@bar:~$ langfuse new experiment
+
+? Name of experiment: (Press <enter> for current timestamp) smaller_doc_chunks
+Running experiment ..
+
+Experiment completed
+
+Result
+Aggregated metrics: 0.81 (+10%)
+ - factEval (based on ideal output): 0.65 (+2%)
+ - hallucination: 0.99 (+- 0)
+ - kindness: 0.85
+ - sameLanguage: 0.78
+ - avg. execution time: 503.42 ms
+
+Want to add manual eval? https://localhost:8420/eval/
+Compare to previous experiment? https://localhost:8420/dashboard
+```
+
+### Manual evaluation (optional)
+
+Add a baseline by manually evaluating a few outputs
+
+// Add screenshot here
+
+</Steps>
+
+## Prebuilt metrics
+
+Types of metrics
+
+- Deterministic scoring: sentiment, grammar, readability, complexity
+- Model-based scoring: hallucination, prompt injection prevention
+- Model-based eval with ideal output: factual correctness, matching style
+- String based comparisons with ideal output: equality, fuzzyMatch
+- Manual evaluation using langfuse UI
+
+Integrated packages
+
+- openAI https://github.com/openai/evals
+- whylabs https://github.com/whylabs/langkit
+
+## Understand which metrics work for your use case
+
+langfuse helps you correlate metrics with your (team’s) manual evaluation to gain confidence in the relevance of a metric
+
+// Add graph here
+
+## Interested?
+
+Sign up for product updates
+
+<div className="mt-2">
+  <ProductUpdateSignup source="Experimentation [Landingpage test]" />
+</div>
+
+We are currently working on `v1` of _langfuse experimentation_ with alpha users. If you are interested, [contact us](experimentation@langfuse.com), join our [discord](https://discord.gg/7NXusRtqYU), or [book a short call](https://cal.com/marc-kl) with one of the builders if you'd like to share more about your use case.

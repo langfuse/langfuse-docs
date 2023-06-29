@@ -17,7 +17,7 @@ export default async function handler(
         method: "POST",
         body: JSON.stringify({
           email: req.body.email,
-          source: "Website signup",
+          source: req.body.source,
           receiveProductUpdates: true,
         }),
         headers: {
