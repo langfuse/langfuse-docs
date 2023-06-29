@@ -16,7 +16,7 @@ const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
 
-export function ProductUpdateSignup() {
+export function ProductUpdateSignup(props: { source?: string }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -27,7 +27,10 @@ export function ProductUpdateSignup() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const res = await fetch("/api/productUpdateSignup", {
       method: "POST",
-      body: JSON.stringify(values),
+      body: JSON.stringify({
+        ...values,
+        source: props.source ?? "Website signup",
+      }),
       headers: {
         "Content-Type": "application/json",
       },
