@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Buttons } from "@/components/demoVideo";
 import Image from "next/image";
 import ycImg from "@/src/yc.svg";
+import { Calendar, Video } from "lucide-react";
 import dashboardImg from "@/src/screen_experimentation_dashboard.svg";
 import experimentationChart from "@/src/experimentation_chart.png";
 import experimentationMetricEvalFact from "@/src/experimentation_metric_eval_fact.png";
@@ -25,7 +26,26 @@ import { ProductUpdateSignup } from "@/components/productUpdateSignup";
       `prompts`, `chains`, `agents`, `models`, `embeddings`, `chunking`, ...
     </div>
   </div>
-  <ProductUpdateSignup source="Experimentation [Landingpage test]" />
+  <div className="flex flex-col items-center gap-4">
+    <ProductUpdateSignup source="Experimentation [Landingpage test]" />
+    <div className="flex flex-col gap-1 flex-wrap">
+      <Button variant="ghost" asChild>
+        <a href="https://cal.com/marc-kl/experimentation" target="_blank">
+          <Calendar className="h-4 w-4 mr-2" />
+          <span>Interested? Chat with us to join alpha</span>
+        </a>
+      </Button>
+      <Button variant="ghost" asChild>
+        <a
+          href="https://www.loom.com/share/903d50e5d6d341d2aa7f1678562dfaba"
+          target="_blank"
+        >
+          <Video className="h-4 w-4 mr-2" />
+          <span>Why do we build langfuse? (3 min)</span>
+        </a>
+      </Button>
+    </div>
+  </div>
   <div>
     <div className="text-center text-gray-500 pb-3 pt-10">Backed by</div>
     <Image src={ycImg} height={30} />
