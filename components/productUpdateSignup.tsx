@@ -48,7 +48,7 @@ export function ProductUpdateSignup(props: { source?: string }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex gap-y-2 flex-col sm:flex-row"
+        className="flex gap-y-2 w-full flex-col sm:flex-row"
       >
         <FormField
           control={form.control}
