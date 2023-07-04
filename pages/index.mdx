@@ -135,12 +135,23 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
 </div>
 
 ```typescript filename="server.ts"
+const trace = langfuse.trace({
+  name: "chat-completion",
+  metadata: {
+    userId: "user__935d7d1d",
+  },
+});
+
+const event = trace.event({
+  name: "context-retrieved",
+  output: "...",
+});
+
 const generationStartTime = new Date();
 
 // const chatCompletion = await llm.respond(prompt);
 
-const generationLog = await client.generations.log({
-  traceId: trace.id,
+const generation = trace.generation({
   startTime: generationStartTime,
   endTime: new Date(),
   name: "chat-completion",
@@ -154,9 +165,6 @@ const generationLog = await client.generations.log({
   usage: {
     promptTokens: 22,
     completionTokens: 28,
-  },
-  metadata: {
-    userId: "user__935d7d1d",
   },
 });
 ```
@@ -183,8 +191,8 @@ const generationLog = await client.generations.log({
 
 ```typescript filename="UserFeedbackComponent.tsx"
 // feedback button handler
-const handleUserFeedback = (value: number) =>
-  langfuseClient.score.create({
+const handleUserFeedback = async (value: number) =>
+  await langfuseWeb.score({
     traceId: props.traceId,
     name: "user_feedback",
     value,

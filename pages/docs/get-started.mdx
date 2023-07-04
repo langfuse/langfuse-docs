@@ -62,35 +62,28 @@ To run langfuse in production, see [self-host instructions](self-host.mdx)
 <Tabs items={["Typescript", "Python", "API"]}>
 <Tab>
 
-The langfuse SDKs are hosted in a private npm registry by [Fern](https://buildwithfern.com/). To install the sdk, you need to add the registry to your project before installing them.
-
 ```bash
-# add a .npmrc file to your project root
-touch .npmrc
-
-# add a config to the file
-echo "@finto-fern:registry=https://npm.buildwithfern.com" >> .npmrc
-
-# install the package
-npm install @finto-fern/langfuse-node
+npm install langfuse
 ```
 
-Example usage, most of the paramters are optional and depend on the use case. For more information, see the [typescript docs](/docs/sdk/typescript).
+Example usage, most of the paramters are optional and depend on the use case.
+
+For more information, see the [typescript docs](/docs/sdk/typescript).
 
 ```typescript filename="server.ts"
-import { LangfuseClient } from "@finto-fern/langfuse-node";
+import { Langfuse } from "langfuse";
 
-const serverClient = new LangfuseClient({
-  environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
-  username: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
-  password: env.LANGFUSE_SECRET_KEY, // sk-lf-...
+const langfuse = new Langfuse({
+  secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  // baseUrl: defaults to "https://cloud.langfuse.com"
 });
 
 const generationStartTime = new Date();
 
-// const chatCompletion = await callLLM(retrievedDoc);
+// const chatCompletion = await llm.respond(prompt);
 
-const generation = await serverClient.generations.log({
+langfuse.generation({
   startTime: generationStartTime,
   endTime: new Date(),
   name: "chat-completion",
@@ -100,13 +93,7 @@ const generation = await serverClient.generations.log({
     maxTokens: 2000,
     topP: undefined,
   },
-  prompt: [
-    {
-      role: "system",
-      content: systemPrompt,
-    },
-    ...messagesToSend,
-  ],
+  prompt: messagesToSend,
   completion: chatCompletion.data.choices[0].message?.content,
   usage: {
     promptTokens: chatCompletion.data.usage?.prompt_tokens,
@@ -121,7 +108,7 @@ const generation = await serverClient.generations.log({
 </Tab>
 <Tab>
 
-The langfuse SDKs are hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
+The langfuse Python SDK is hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
 
 ```bash
 pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
@@ -179,27 +166,21 @@ API reference, quickstart will be updated soon
 <Tabs items={["Typescript", "Python", "API"]}>
 <Tab>
 
-For typescript we offer a dedicated frontend package to directly report scores.
+For typescript we offer a dedicated frontend package to directly report scores via the `publicKey`.
 
-Install the package
-
-```bash
-npm install @finto-fern/react-client
-```
-
-Simple feedback component in React
+Simple feedback component in React:
 
 ```typescript filename="UserFeedbackComponent.tsx"
-import { LangfuseClient } from "@finto-fern/react-client";
+import { LangfuseWeb } from "langfuse";
 
 export default function UserFeedbackComponent(props: { traceId: string }) {
-  const frontendClient = new LangfuseClient({
-    environment: "https://cloud.langfuse.com", // or any custom host, e.g. http://localhost:3030
-    token: env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY, // pk-lf-...
+    // baseUrl: defaults to "https://cloud.langfuse.com"
   });
 
   const handleFeedback = async (value: number) => {
-    await frontendClient.score.create({
+    await langfuseWeb.score({
       traceId: props.traceId,
       name: "user_feedback", // arbitrary name to identify the type of score
       value, // float, optional: scale it to e.g. 0..1
@@ -258,7 +239,11 @@ Visit [langfuse interface](interface) to explore your data.
 
 ## More information
 
-To integrate with `langfuse`, have a look at the detailed SDK documentation:
+This is a very short summary of how to get started with `langfuse`, have a look at the detailed SDK documentation for features such as:
+
+- Nesting of observations to capture complex chains and agents
+- Use of existing `externalIds` to group traces, observations and scores
+- Optimizing asynchronous behavior of the SDK
 
 import { Card, Cards } from "nextra-theme-docs";
 import { SiTypescript, SiPython } from "react-icons/si";
