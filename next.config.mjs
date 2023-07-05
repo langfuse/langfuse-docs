@@ -14,4 +14,12 @@ const withNextra = nextra({
   }
 })
 
-export default withNextra();
+export default withNextra({
+  redirects: async () => [
+    {
+      source: "/analytics",
+      destination: "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY",
+      permanent: false,
+    }
+  ]
+});

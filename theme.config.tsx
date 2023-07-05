@@ -81,6 +81,18 @@ const config: DocsThemeConfig = {
     ),
   },
   faviconGlyph: "🪢",
+  banner: {
+    key: "analytics",
+    dismissible: false,
+    text: (
+      <a href="/analytics" target="_blank">
+        <span className="sm:hidden">Soon: 📈 LLM Analytics →</span>
+        <span className="hidden sm:inline">
+          Coming soon: 📈 Langfuse LLM Analytics →
+        </span>
+      </a>
+    ),
+  },
 };
 
 export default config;
