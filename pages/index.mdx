@@ -1,4 +1,3 @@
-import { Card, Cards } from "nextra-theme-docs";
 import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
 import { AiOutlineCloud } from "react-icons/ai";
 import { BsCode } from "react-icons/bs";
@@ -8,16 +7,25 @@ import { Buttons } from "@/components/demoVideo";
 import Image from "next/image";
 import ycImg from "@/src/yc.svg";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 <div className="lg:container">
 <div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
   <h1 className="text-center text-4xl">`🪢 langfuse`</h1>
   <div className="max-w-3xl">
     <div className="text-2xl text-center font-semibold mb-3">
-      Open-source monitoring platform for LLM-based applications
+      Open-source observability for LLM applications
     </div>
     <div className="text-lg text-center">
-      Improve LLM-based applications by logging how they are used in production, capturing user feedback and identifying quality bottlenecks
+      Investigate how LLM `agent`, `chains`, `chats`, `embeddings` behave in production. Collect user feedback, and identify root causes that lead to quality problems.
     </div>
   </div>
   <div className="flex gap-3 justify-center flex-wrap">
@@ -31,6 +39,145 @@ import { ProductUpdateSignup } from "@/components/productUpdateSignup";
     <Image src={ycImg} height={30} />
   </div>
 </div>
+
+## 1. Observe
+
+Monitoring LLM applications requires including the context. This can be the full user session of a chat application, retrieval results of a QA-chain, or the full execution trace of an agent. `langfuse` was designed to capture the full context, be flexibly extendible while being incrementally adoptable.
+
+_Available data sources:_
+
+<div className="flex gap-3 my-2 flex-wrap mb-2">
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript">
+      <SiTypescript className="mr-2" />
+      <span>Typescript SDK</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/python">
+      <SiPython className="mr-2" />
+      <span>Python SDK</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/reference">
+      <BsCode className="mr-2 h-5 w-5" />
+      <span>API (Swagger)</span>
+    </Link>
+  </Button>
+</div>
+
+_View examples by application type_
+
+<Tabs defaultValue="chat">
+<TabsList>
+  <TabsTrigger value="chat">Chat applications</TabsTrigger>
+  <TabsTrigger value="chain" disabled>LLM Chain</TabsTrigger>
+  <TabsTrigger value="agent" disabled>LLM Agent</TabsTrigger>
+  <TabsTrigger value="single-generation" disabled>Single LLM generation</TabsTrigger>
+  <TabsTrigger value="other" disabled>Other</TabsTrigger>
+</TabsList>
+<TabsContent value="chat">
+<Card>
+<CardHeader>
+<CardTitle>Chat</CardTitle>
+<CardDescription>
+Chat conversation with repeated user interactions and LLM completions.
+</CardDescription>
+</CardHeader>
+<CardContent className="grid lg:grid-cols-2 gap-4">
+
+<div>
+
+**Capture**
+
+```typescript {4, 10, 16, 28, 33} filename="route.ts"
+import { Langfuse } from "langfuse";
+// more imports
+
+const langfuse = new Langfuse({ publicKey, privateKey });
+
+export async function POST(req: Request) {
+  const { messages, conversationId, userId } = await req.json();
+
+  // upsert
+  const langfuseConversation = langfuse.trace({
+    externalId: `conversation_${conversationId}`,
+    metadata: { userId },
+  });
+
+  const additionalContext = await getContext(messages);
+  langfuseConversation.event({
+    name: "context-retrieved",
+    output: additionalContext,
+  });
+
+  const res = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages,
+  });
+
+  const stream = OpenAIStream(res, {
+    async onCompletion(completion) {
+      langfuseConversation.generation({
+        name: "chat-completion",
+        prompt: messages,
+        completion,
+      });
+      await languse.flush();
+    },
+  });
+
+  return new StreamingTextResponse(stream);
+}
+```
+
+</div>
+<div>
+
+**Explore**
+
+```
+https://cloud.langfuse.com/...
+```
+
+</div>
+
+</CardContent>
+<CardFooter>
+
+_This is a simplified example. Visit the docs for further details. For a production example, see [`route.ts`](https://github.com/langfuse/ai-chatbot/blob/main/app/api/chat/route.ts) of the [example chat app](https://chat.langfuse.com) (NextJS, streaming, edge)._
+
+</CardFooter>
+</Card>
+
+</TabsContent>
+<TabsContent value="chain">Coming soon</TabsContent>
+<TabsContent value="agent">Coming soon</TabsContent>
+<TabsContent value="single-generation">Coming soon</TabsContent>
+<TabsContent value="other">Coming soon</TabsContent>
+</Tabs>
+
+## 2. Collect feedback
+
+- right from the frontend
+- see the full context when they want to examine, for example, executions that have received negative customer feedback.
+
+## 3. Dashboards
+
+- usage & costs
+- overall sentiment of users
+
+## 4. Benefits
+
+- open source
+- model agnostic
+- fully async, does not add latency
+- managed or self-hosted
+
+## get started
+
+- link to quickstart
 
 import { Feature } from "@/components/feature";
 import screenDashboard from "@/src/screenshots_dashboard.png";
@@ -71,7 +218,7 @@ import { TwoCards, StartCard, Divider } from "@/components/cards";
 
 <TwoCards className="my-24">
 <StartCard isOutline>
-  
+
 ## Open source
 
 - Powered by NextJs and postgres
@@ -95,7 +242,7 @@ import { TwoCards, StartCard, Divider } from "@/components/cards";
 
 </StartCard>
 <StartCard isOutline>
-  
+
 ## Build your data moat
 
 - Retrieval API (coming soon) to query prompts/completions based on similarity to current prompt
@@ -251,13 +398,6 @@ const handleUserFeedback = async (value: number) =>
 
 <div className="h-24" />
 
-## Why are we building `langfuse`?
-
-1. **Situation:** LLMs introduce a _'black box'_ character to Software Engineering: outputs of LLM-based applications are unpredictable
-2. **Problem:** Quality of application in production cannot be assured with testing before launching the feature
-3. **Consequence:** Engineers need to embrace active learning from users in production to improve their LLM-based applications. Many teams build UX around their applications to make the imperfect outputs usable and to collect feedback from users.
-4. **Need:** Holistic monitoring of what happens in production, linked to user feedback and other signals to understand how to improve the application.
-
 ## Get in touch
 
 `langfuse` is being actively developed in open source together with the community. Join our [Discord](https://discord.gg/7NXusRtqYU)! Provide feedback, report bugs, or request features via GitHub issues. If you want to chat about your use case, reach out to us via email: contact@langfuse.com
@@ -270,9 +410,11 @@ const handleUserFeedback = async (value: number) =>
 - [x] [Dashboard](/docs/interface#dashboard) to explore data
 - [x] Authentication and authorization on project level in UI, API, SDKs
 - [x] [langfuse cloud](/docs/cloud) to simplify setup
+- [x] New typescript SDK with support for edge-runtimes, advanced nesting, and custom ids
+- [ ] Integration with frameworks, e.g. langchain
+- [ ] Wrapper of SDKs to simplify data integration, e.g. OpenAI, Anthropic
 - [ ] Model-based evaluation of execution logs and LLM calls
 - [ ] Pre-built SDK functions for best-practice scoring
-- [ ] Tracing integration with frameworks, e.g. langchain
 - [ ] API to retrieve few-shot examples based on embedding similarity to current prompt
 - [ ] LLM playground to interactively adapt prompts based on production examples
 
