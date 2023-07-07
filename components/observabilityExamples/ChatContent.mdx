@@ -1,0 +1,111 @@
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+
+<h3 className="text-xl font-bold">Chat application</h3>
+<span className="text-sm text-gray-500">
+  Chat conversation with repeated user interactions and LLM completions.
+</span>
+
+<div className="mt-5 flex flex-col lg:flex-row gap-4">
+<div className="flex-1">
+
+**Capture**
+
+```typescript {4, 10, 16, 28, 33} filename="route.ts"
+import { Langfuse } from "langfuse";
+// more imports
+
+const langfuse = new Langfuse({ publicKey, privateKey });
+
+export async function POST(req: Request) {
+  const { messages, conversationId, userId } = await req.json();
+
+  // upsert
+  const langfuseConversation = langfuse.trace({
+    externalId: `conversation_${conversationId}`,
+    metadata: { userId },
+  });
+
+  const execution = langfuseConversation.span({
+    name: "single-response",
+    input: messages.slice(-1),
+  });
+
+  const additionalContext = await getContext(messages);
+  langfuseConversation.event({
+    name: "context-retrieved",
+    output: additionalContext,
+  });
+
+  const res = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages,
+  });
+
+  const stream = OpenAIStream(res, {
+    async onCompletion(completion) {
+      langfuseConversation.generation({
+        name: "chat-completion",
+        prompt: messages,
+        completion,
+      });
+      await languse.flush();
+    },
+  });
+
+  return new StreamingTextResponse(stream);
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Explore**
+
+```
+https://cloud.langfuse.com/...
+```
+
+<div className="p-3 ring-1 ring-gray-200 rounded-xl flex flex-col gap-2">
+<div>
+<div className="font-bold">Trace</div>
+<div className="text-gray-500 mb-5">External id: conversation \<conversation_id\></div>
+
+</div>
+<div className="p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="font-bold">Span: single-response</div>
+  <div className="text-gray-500">Input: What do users like about langfuse?</div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="font-bold">Event: context-retrieved</div>
+  <div className="text-gray-500">Output: \<output\></div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="font-bold">Generation: chat-completion</div>
+  <div className="text-gray-500">prompt: [ ... ]</div>
+  <div className="text-gray-500">completion: \<completion\></div>
+</div>
+<div className="p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="text-gray-500">Output: That it makes chat interactions easily observable</div>
+</div>
+
+<div className="mt-4 p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="font-bold">Span: single-response</div>
+  <div className="text-gray-500">Input: What features of langfuse are helpful for developers of chat aplications?</div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="font-bold">Event: context-retrieved</div>
+  <div className="text-gray-500">Output: \<output\></div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="font-bold">Generation: chat-completion</div>
+  <div className="text-gray-500">prompt: [ ... ]</div>
+  <div className="text-gray-500">completion: \<completion\></div>
+</div>
+<div className="p-3 ring-1 ring-gray-200 rounded-sm">
+  <div className="text-gray-500">Output: (1) Grouping of executions into traces (sessions), (2) nested tracking of intermediary steps that help with debugging, (3) SDKs for simple intergation with their application.</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>

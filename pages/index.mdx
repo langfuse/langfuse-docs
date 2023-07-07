@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ObservabilityExamples from "@/components/observabilityExamples/index.mdx";
 
 <div className="lg:container">
 <div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
@@ -69,94 +70,7 @@ _Available data sources:_
 
 _View examples by application type_
 
-<Tabs defaultValue="chat">
-<TabsList>
-  <TabsTrigger value="chat">Chat applications</TabsTrigger>
-  <TabsTrigger value="chain" disabled>LLM Chain</TabsTrigger>
-  <TabsTrigger value="agent" disabled>LLM Agent</TabsTrigger>
-  <TabsTrigger value="single-generation" disabled>Single LLM generation</TabsTrigger>
-  <TabsTrigger value="other" disabled>Other</TabsTrigger>
-</TabsList>
-<TabsContent value="chat">
-<Card>
-<CardHeader>
-<CardTitle>Chat</CardTitle>
-<CardDescription>
-Chat conversation with repeated user interactions and LLM completions.
-</CardDescription>
-</CardHeader>
-<CardContent className="grid lg:grid-cols-2 gap-4">
-
-<div>
-
-**Capture**
-
-```typescript {4, 10, 16, 28, 33} filename="route.ts"
-import { Langfuse } from "langfuse";
-// more imports
-
-const langfuse = new Langfuse({ publicKey, privateKey });
-
-export async function POST(req: Request) {
-  const { messages, conversationId, userId } = await req.json();
-
-  // upsert
-  const langfuseConversation = langfuse.trace({
-    externalId: `conversation_${conversationId}`,
-    metadata: { userId },
-  });
-
-  const additionalContext = await getContext(messages);
-  langfuseConversation.event({
-    name: "context-retrieved",
-    output: additionalContext,
-  });
-
-  const res = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages,
-  });
-
-  const stream = OpenAIStream(res, {
-    async onCompletion(completion) {
-      langfuseConversation.generation({
-        name: "chat-completion",
-        prompt: messages,
-        completion,
-      });
-      await languse.flush();
-    },
-  });
-
-  return new StreamingTextResponse(stream);
-}
-```
-
-</div>
-<div>
-
-**Explore**
-
-```
-https://cloud.langfuse.com/...
-```
-
-</div>
-
-</CardContent>
-<CardFooter>
-
-_This is a simplified example. Visit the docs for further details. For a production example, see [`route.ts`](https://github.com/langfuse/ai-chatbot/blob/main/app/api/chat/route.ts) of the [example chat app](https://chat.langfuse.com) (NextJS, streaming, edge)._
-
-</CardFooter>
-</Card>
-
-</TabsContent>
-<TabsContent value="chain">Coming soon</TabsContent>
-<TabsContent value="agent">Coming soon</TabsContent>
-<TabsContent value="single-generation">Coming soon</TabsContent>
-<TabsContent value="other">Coming soon</TabsContent>
-</Tabs>
+<ObservabilityExamples />
 
 ## 2. Collect feedback
 
