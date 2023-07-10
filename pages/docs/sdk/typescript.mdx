@@ -313,7 +313,8 @@ Scores are used to evaluate executions/traces. They are attached to a single [tr
 > - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
 > - `observationId` (optional): the id of the span, event or generation to which the score should be attached
 >   - Passed from backend, e.g.: `observationId = (await generation.data).id`
-> - `traceIdType` (option): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
+> - `traceIdType` (optional): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
+> - `comment` (optional): additional context/explanation of the score
 
 Scores can be modified by both Langfuse and LangfuseWeb clients.
 
@@ -326,6 +327,7 @@ await langfuseWeb.score({
   name: "user-feedback",
   value: 1,
   observationId: generation.id,
+  comment: "I like how personalized the response is",
 });
 ```
 

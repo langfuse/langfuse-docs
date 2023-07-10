@@ -421,6 +421,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        completionStartTime:
+          type: string
+          format: date-time
+          nullable: true
         model:
           type: string
           nullable: true
@@ -458,6 +462,10 @@ components:
           type: string
           nullable: true
         endTime:
+          type: string
+          format: date-time
+          nullable: true
+        completionStartTime:
           type: string
           format: date-time
           nullable: true
@@ -504,6 +512,10 @@ components:
           type: string
           format: date-time
         endTime:
+          type: string
+          format: date-time
+          nullable: true
+        completionStartTime:
           type: string
           format: date-time
           nullable: true
@@ -591,6 +603,9 @@ components:
         observationId:
           type: string
           nullable: true
+        comment:
+          type: string
+          nullable: true
       required:
         - traceId
         - name
@@ -613,6 +628,9 @@ components:
         timestamp:
           type: string
           format: date-time
+        comment:
+          type: string
+          nullable: true
       required:
         - id
         - traceId
@@ -746,6 +764,9 @@ components:
         name:
           type: string
           nullable: true
+        userId:
+          type: string
+          nullable: true
         externalId:
           type: string
           nullable: true
@@ -764,6 +785,9 @@ components:
           type: string
           nullable: true
         name:
+          type: string
+          nullable: true
+        userId:
           type: string
           nullable: true
         metadata:

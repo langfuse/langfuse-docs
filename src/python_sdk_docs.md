@@ -229,7 +229,8 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 - `name`: identifier of the score, string
 - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
 - `observationId` (optional): the id of the span, event or generation to which the score should be attached
-- `traceIdType` (option): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
+- `traceIdType` (optional): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
+- `comment` (optional): additional context/explanation of the score
 
 ```python
 from finto.resources.score.types.create_score_request import CreateScoreRequest
@@ -239,7 +240,8 @@ score = client.score.create(
         traceId=trace.id,                  # trace the score is related to
         name="user-explicit-feedback",
         value=1,
-        observationId=generation.id           # optionally: also attach the score to an individual observation
+        observationId=generation.id,           # optionally: also attach the score to an individual observation
+        comment="I like how personalized the response is"
     )
 )
 ```
