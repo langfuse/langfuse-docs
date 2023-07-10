@@ -64,7 +64,7 @@ const config: DocsThemeConfig = {
           content={
             frontMatter.description ?? asPath !== "/"
               ? "langfuse documentation"
-              : "Open-source experimentation platform for LLM-based applications"
+              : "Open-source observability for LLM applications"
           }
         />
         <meta property="og:image" content="https://langfuse.com/og.png" />
