@@ -88,7 +88,7 @@ export default function FeedbackPreview() {
           timestamp: new Date(),
           traceId: "67329_78d",
           userId: "user-1",
-          name: "feedback",
+          name: "user_feedback",
           score: feedback === "positive" ? 1 : 0,
         },
         ...data.slice(0, 2),
@@ -147,7 +147,7 @@ export default function FeedbackPreview() {
           </Button>
         </div>
       </div>
-      <div className="font-bold text-xs text-gray-600 mb-2 mt-5">Langfuse</div>
+      <div className="font-bold text-xs text-gray-600 mb-2 mt-5">langfuse</div>
       <DataTable columns={columns} data={data} />
     </div>
   );

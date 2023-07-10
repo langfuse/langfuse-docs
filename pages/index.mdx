@@ -109,8 +109,9 @@ _Example_
 
 **Collect**
 
-```typescript filename="UserFeedbackComponent.tsx"
-// feedback button handler
+```typescript {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
+import { LangfuseWeb } from "langfuse";
+
 export function UserFeedbackComponent(props: { traceId: string }) {
   const langfuseWeb = new LangfuseWeb({
     publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
