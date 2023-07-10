@@ -16,7 +16,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import FeedbackPreview from "@/components/feedbackPreview";
 import ObservabilityExamples from "@/components/observabilityExamples/index.mdx";
+import { TwoCards, StartCard, Divider } from "@/components/cards";
 
 <div className="lg:container">
 <div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
@@ -74,13 +76,89 @@ _View examples by application type_
 
 ## 2. Collect feedback
 
-- right from the frontend
-- see the full context when they want to examine, for example, executions that have received negative customer feedback.
+Collect user feedback to understand how well your LLM-based features are performing. `langfuse` makes it easy to collect feedback from users directly in the frontend (using [`LangfuseWeb`](/docs/sdk/typescript#frontend-langfuseweb)) and to associate it with the execution trace (via the trace id).
 
-## 3. Dashboards
+_Available data sources:_
 
-- usage & costs
-- overall sentiment of users
+<div className="flex gap-3 my-2 flex-wrap">
+  <Button variant="outline" asChild>
+    <Link href="/docs/reference#restricted-access-with-public-key-client-side">
+      <BsCode className="mr-2 h-5 w-5" />
+      <span>API</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript#frontend">
+      <SiTypescript className="mr-2" />
+      <span>Typescript SDK</span>
+    </Link>
+  </Button>
+</div>
+
+_Example_
+
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+
+<h3 className="text-xl font-bold">Chat application</h3>
+<span className="text-sm text-gray-500">
+  User feedback on individual responses
+</span>
+
+<div className="mt-5 flex flex-col lg:flex-row gap-4">
+<div className="flex-1">
+
+**Collect**
+
+```typescript filename="UserFeedbackComponent.tsx"
+// feedback button handler
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Preview**
+
+<FeedbackPreview />
+
+</div>
+</div>
+</div>
+
+## 3. Dashboard
+
+Based on the ingested data, the dashboard makes it simple to have an aggreagted view on the number of executions and LLM usage.
+
+<Image src={screenDashboard} className="w-full max-w-md" />
+
+Charts
+
+- Trace executions
+- LLM generations and tokens used
+- User feedback over time
+
+Coming soon
+
+- Latency variance and distribution
+- Cost breakdown per user / use case
 
 ## 4. Benefits
 
@@ -88,6 +166,79 @@ _View examples by application type_
 - model agnostic
 - fully async, does not add latency
 - managed or self-hosted
+
+<div className="flex flex-col md:flex-row gap-4">
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<h3 className="text-xl font-bold">Open source</h3>
+<span className="text-sm text-gray-500">
+  Built for self-hosting and extendibility
+</span>
+
+- Simple self-hosting on your own infrastructure
+
+<div className="flex gap-3 mt-4 flex-wrap">
+  <Button asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiGithub className="mr-2" />
+      <span>GitHub</span>
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="https://discord.gg/7NXusRtqYU">
+      <SiDiscord className="mr-2" />
+      <span>Discord</span>
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="/docs/self-host">Self-host</Link>
+  </Button>
+</div>
+</div>
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<h3 className="text-xl font-bold">langfuse cloud</h3>
+<span className="text-sm text-gray-500">
+  Fully-managed version
+</span>
+
+- Generous free tier to get started ([pricing](/docs/cloud#pricing))
+
+<div className="flex gap-2 pt-3 flex-wrap">
+  <Button asChild>
+    <Link href="https://cloud.langfuse.com/auth/sign-up">
+      <AiOutlineCloud className="mr-2 h-4 w-4" />
+      <span>Sign up</span>
+    </Link>
+  </Button>
+  <Button variant="ghost">Docs</Button>
+</div>
+</div>
+</div>
+
+<TwoCards className="my-24">
+<StartCard isOutline>
+
+### Open source
+
+</StartCard>
+<StartCard isDark>
+  
+### Langfuse cloud
+
+- Fully managed
+- Generous free tier to get started ([pricing](/docs/cloud#pricing))
+
+<div className="flex gap-2 pt-3 flex-wrap">
+  <Button asChild>
+    <Link href="https://cloud.langfuse.com/auth/sign-up">
+      <AiOutlineCloud className="mr-2 h-4 w-4" />
+      <span>Sign up</span>
+    </Link>
+  </Button>
+  <Button variant="ghost">Docs</Button>
+</div>
+
+</StartCard>
+</TwoCards>
 
 ## get started
 
@@ -127,43 +278,6 @@ Compare low-quality executions side-by-side to gain a deep understanding on why 
 Model-based comparison of executions with automated suggestions (coming soon)
 
 </Feature>
-
-import { TwoCards, StartCard, Divider } from "@/components/cards";
-
-<TwoCards className="my-24">
-<StartCard isOutline>
-
-## Open source
-
-- Powered by NextJs and postgres
-- Fully typed SDKs for Typescript and Python
-- Simple self-hosting on your own infrastructure
-
-<div className="flex gap-3 mt-3 flex-wrap">
-  <Button asChild>
-    <Link href="https://github.com/langfuse/langfuse/">
-      <SiGithub className="mr-2" />
-      <span>GitHub</span>
-    </Link>
-  </Button>
-  <Button variant="secondary" asChild>
-    <Link href="https://discord.gg/7NXusRtqYU">
-      <SiDiscord className="mr-2" />
-      <span>Discord</span>
-    </Link>
-  </Button>
-</div>
-
-</StartCard>
-<StartCard isOutline>
-
-## Build your data moat
-
-- Retrieval API (coming soon) to query prompts/completions based on similarity to current prompt
-- Exports of high-quality prompt/completions for fine tuning; e.g. use GPT-4 completions to train own Llama models
-
-</StartCard>
-</TwoCards>
 
 ## Langfuse is easy to get started with
 
@@ -235,21 +349,6 @@ const generation = trace.generation({
 
 ### 2. Capture scores from user feedback
 
-<div className="flex gap-3 my-2 flex-wrap">
-  <Button variant="outline" asChild>
-    <Link href="/docs/reference#restricted-access-with-public-key-client-side">
-      <BsCode className="mr-2 h-5 w-5" />
-      <span>API</span>
-    </Link>
-  </Button>
-  <Button variant="outline" asChild>
-    <Link href="/docs/sdk/typescript#frontend">
-      <SiTypescript className="mr-2" />
-      <span>Typescript SDK</span>
-    </Link>
-  </Button>
-</div>
-
 ```typescript filename="UserFeedbackComponent.tsx"
 // feedback button handler
 const handleUserFeedback = async (value: number) =>
@@ -271,17 +370,6 @@ const handleUserFeedback = async (value: number) =>
 ### Langfuse cloud
 
 - Fully managed
-- Generous free tier to get started ([pricing](/docs/cloud#pricing))
-
-<div className="flex gap-2 pt-3 flex-wrap">
-  <Button asChild>
-    <Link href="https://cloud.langfuse.com/auth/sign-up">
-      <AiOutlineCloud className="mr-2 h-4 w-4" />
-      <span>Sign up</span>
-    </Link>
-  </Button>
-  <Button variant="ghost">Docs</Button>
-</div>
 
 </StartCard>
 <Divider text="OR" />
