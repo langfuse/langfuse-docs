@@ -75,11 +75,13 @@ Traces can be created and updated.
 > - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 > - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
 > - `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the langfuse `traceId` (see association via external Id).
+> - `userId` (optional): the id of the user that triggered the execution.
 
 ```typescript filename="api.ts"
 const trace = langfuse.trace({
   name: "chat-app-session",
-  metadata: { env: "production", user: "6784367" },
+  userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+  metadata: { env: "production", user: "user@langfuse.com" },
 });
 ```
 
