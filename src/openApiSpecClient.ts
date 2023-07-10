@@ -2,7 +2,7 @@ export const openApiSpecClient = `
 openapi: 3.0.1
 info:
   title: langfuse
-  version: ''
+  version: ""
 paths:
   /api/public/scores:
     post:
@@ -12,12 +12,36 @@ paths:
         - Score
       parameters: []
       responses:
-        '200':
-          description: ''
+        "200":
+          description: ""
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Score'
+                $ref: "#/components/schemas/Score"
+        "400":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: string
+        "405":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: string
       security:
         - BearerAuth: []
       requestBody:
@@ -25,7 +49,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateScoreRequest'
+              $ref: "#/components/schemas/CreateScoreRequest"
 components:
   schemas:
     CreateScoreRequest:
@@ -35,7 +59,7 @@ components:
         traceId:
           type: string
         traceIdType:
-          $ref: '#/components/schemas/TraceIdType'
+          $ref: "#/components/schemas/TraceIdType"
         name:
           type: string
         value:

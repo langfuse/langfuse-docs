@@ -1,0 +1,212 @@
+"use client";
+
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useState, useEffect } from "react";
+import clsx from "clsx";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+type Feedback = {
+  timestamp: Date;
+  traceId: string;
+  userId: string;
+  name: string;
+  score: number;
+};
+
+const columns: ColumnDef<Feedback>[] = [
+  {
+    header: "Timestamp",
+    accessorKey: "timestamp",
+    cell: ({ row }) => row.getValue("timestamp").toLocaleString(),
+  },
+  {
+    header: "Trace ID",
+    accessorKey: "traceId",
+  },
+  {
+    header: "User ID",
+    accessorKey: "userId",
+  },
+  {
+    header: "Name",
+    accessorKey: "name",
+  },
+  {
+    header: "Score",
+    accessorKey: "score",
+  },
+];
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+}
+
+export default function FeedbackPreview() {
+  const { toast } = useToast();
+  const [state, setState] = useState<
+    null | "loading-positive" | "loading-negative" | "positive" | "negative"
+  >(null);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [data, setData] = useState<Feedback[]>([]);
+
+  // Quick solution to hydration error
+  useEffect(() => {
+    setTimeout(() => {
+      setInitialLoading(false);
+    }, 500);
+  }, []);
+
+  const handleFeedback = (feedback: "positive" | "negative") => {
+    if (state === feedback) return;
+    setState("loading-" + feedback);
+    setTimeout(() => {
+      toast({
+        title:
+          "New user feedback score: " + feedback === "positive" ? "1" : "0",
+        description: `traceId: 67329_78d, time: ${new Date().toLocaleString()}`,
+      });
+      setData([
+        {
+          timestamp: new Date(),
+          traceId: "67329_78d",
+          userId: "user-1",
+          name: "user_feedback",
+          score: feedback === "positive" ? 1 : 0,
+        },
+        ...data.slice(0, 2),
+      ]);
+
+      setState(feedback);
+    }, 1000);
+  };
+
+  if (initialLoading) return <div>Loading...</div>;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="font-bold text-xs text-gray-600 mb-2 mt-5">
+        Application
+      </div>
+      <div className="flex flex-col p-3 ring-1 ring-gray-300 rounded-lg">
+        <div className="font-bold text-xs text-gray-600 mb-2">User</div>
+        <div className="p-3 ring-1 ring-gray-300 rounded-lg">
+          What is the simplest way to make user feedback in my LLM application
+          actionable?
+        </div>
+        <div className="font-bold text-xs text-gray-600 mb-2 mt-5">
+          Assistant
+        </div>
+        <div className="p-3 ring-1 ring-gray-300 rounded-lg">
+          As a helpful assistant I cannot help you with this question
+        </div>
+        <div className="flex gap-3 mt-3">
+          <Button
+            variant={state === "positive" ? "default" : "secondary"}
+            className={clsx(
+              state === "positive" && "bg-green-500 text-white",
+              "hover:bg-green-600 hover:text-white"
+            )}
+            disabled={state === "loading-positive"}
+            onClick={() => handleFeedback("positive")}
+          >
+            {state === "loading-positive" ? (
+              <AiOutlineLoading3Quarters className="animate-spin" />
+            ) : (
+              <FaThumbsUp />
+            )}
+          </Button>
+          <Button
+            variant={state === "negative" ? "destructive" : "secondary"}
+            disabled={state === "loading-negative"}
+            className="hover:bg-red-600 hover:text-white"
+            onClick={() => handleFeedback("negative")}
+          >
+            {state === "loading-negative" ? (
+              <AiOutlineLoading3Quarters className="animate-spin" />
+            ) : (
+              <FaThumbsDown />
+            )}
+          </Button>
+        </div>
+      </div>
+      <div className="font-bold text-xs text-gray-600 mb-2 mt-5">langfuse</div>
+      <DataTable columns={columns} data={data} />
+    </div>
+  );
+}
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="ring-1 ring-gray-300 rounded-lg">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-8 text-center">
+                No feedback yet
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}

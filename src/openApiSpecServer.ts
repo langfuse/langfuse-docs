@@ -18,6 +18,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: &ref_0
         - BasicAuth: []
       requestBody:
@@ -39,6 +63,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Log'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: *ref_0
       requestBody:
         required: true
@@ -58,6 +106,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Log'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: *ref_0
       requestBody:
         required: true
@@ -79,6 +151,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Score'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: *ref_0
       requestBody:
         required: true
@@ -100,6 +196,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Span'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: *ref_0
       requestBody:
         required: true
@@ -120,6 +240,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Span'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: *ref_0
       requestBody:
         required: true
@@ -141,6 +285,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trace'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '405':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
       security: *ref_0
       requestBody:
         required: true
@@ -156,6 +324,9 @@ components:
       properties:
         traceId:
           type: string
+          nullable: true
+        traceIdType:
+          $ref: '#/components/schemas/TraceIdTypeEvent'
           nullable: true
         name:
           type: string
@@ -223,12 +394,21 @@ components:
         - DEFAULT
         - WARNING
         - ERROR
+    TraceIdTypeEvent:
+      title: TraceIdTypeEvent
+      type: string
+      enum:
+        - LANGFUSE
+        - EXTERNAL
     CreateLog:
       title: CreateLog
       type: object
       properties:
         traceId:
           type: string
+          nullable: true
+        traceIdType:
+          $ref: '#/components/schemas/TraceIdTypeGenerations'
           nullable: true
         name:
           type: string
@@ -389,6 +569,12 @@ components:
         - DEFAULT
         - WARNING
         - ERROR
+    TraceIdTypeGenerations:
+      title: TraceIdTypeGenerations
+      type: string
+      enum:
+        - LANGFUSE
+        - EXTERNAL
     CreateScoreRequest:
       title: CreateScoreRequest
       type: object
@@ -445,6 +631,9 @@ components:
       properties:
         traceId:
           type: string
+          nullable: true
+        traceIdType:
+          $ref: '#/components/schemas/TraceIdTypeSpan'
           nullable: true
         name:
           type: string
@@ -544,6 +733,12 @@ components:
         - DEFAULT
         - WARNING
         - ERROR
+    TraceIdTypeSpan:
+      title: TraceIdTypeSpan
+      type: string
+      enum:
+        - LANGFUSE
+        - EXTERNAL
     CreateTraceRequest:
       title: CreateTraceRequest
       type: object

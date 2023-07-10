@@ -1,4 +1,3 @@
-import { Card, Cards } from "nextra-theme-docs";
 import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
 import { AiOutlineCloud } from "react-icons/ai";
 import { BsCode } from "react-icons/bs";
@@ -8,16 +7,29 @@ import { Buttons } from "@/components/demoVideo";
 import Image from "next/image";
 import ycImg from "@/src/yc.svg";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import FeedbackPreview from "@/components/feedbackPreview";
+import ObservabilityExamples from "@/components/observabilityExamples/index.mdx";
+import { TwoCards, StartCard, Divider } from "@/components/cards";
+import screenDashboard from "@/src/screenshots_dashboard.png";
 
 <div className="lg:container">
 <div className="flex flex-col gap-9 mt-20 mb-10 md:mt-24 md:mb-20 lg:my-40 items-center">
   <h1 className="text-center text-4xl">`🪢 langfuse`</h1>
   <div className="max-w-3xl">
     <div className="text-2xl text-center font-semibold mb-3">
-      Open-source monitoring platform for LLM-based applications
+      Open-source observability for LLM applications
     </div>
     <div className="text-lg text-center">
-      Improve LLM-based applications by logging how they are used in production, capturing user feedback and identifying quality bottlenecks
+      Investigate how LLM `agent`, `chains`, `chats`, `embeddings` behave in production. Collect user feedback, and identify root causes that lead to quality problems.
     </div>
   </div>
   <div className="flex gap-3 justify-center flex-wrap">
@@ -32,92 +44,17 @@ import { ProductUpdateSignup } from "@/components/productUpdateSignup";
   </div>
 </div>
 
-import { Feature } from "@/components/feature";
-import screenDashboard from "@/src/screenshots_dashboard.png";
-import screenSegmentTraces from "@/src/screenshots_segment_traces.png";
-import screenSideBySide from "@/src/screenshots_side_by_side.png";
+## 1. Observe
 
-<Feature src={screenDashboard} imageAlt="test" imagePosition="left">
+Monitoring LLM applications requires including the context. This can be the full user session of a chat application, retrieval results of a QA-chain, or the full execution trace of an agent. `langfuse` was designed to capture the full context, be flexibly extendible while being incrementally adoptable.
 
-## Monitor
+_Available data sources:_
 
-Stay on top of trends in output quality and adoption of your LLM-based features
-
-Track token usage by application, user, and model (coming soon)
-
-</Feature>
-
-<Feature src={screenSegmentTraces} imageAlt="test" imagePosition="right">
-
-## Understand and segment use cases
-
-LLM-based features can be used in all sorts of ways. With langfuse, you can easily segment executions by user attributes, scores, and other dimensions.
-
-Model-based clustering of prompts/completions to understand popular use cases (coming soon)
-
-</Feature>
-
-<Feature src={screenSideBySide} imageAlt="test" imagePosition="left">
-
-## Identify quality bottlenecks
-
-Compare low-quality executions side-by-side to gain a deep understanding on why chains did not perform well
-
-Model-based comparison of executions with automated suggestions (coming soon)
-
-</Feature>
-
-import { TwoCards, StartCard, Divider } from "@/components/cards";
-
-<TwoCards className="my-24">
-<StartCard isOutline>
-  
-## Open source
-
-- Powered by NextJs and postgres
-- Fully typed SDKs for Typescript and Python
-- Simple self-hosting on your own infrastructure
-
-<div className="flex gap-3 mt-3 flex-wrap">
-  <Button asChild>
-    <Link href="https://github.com/langfuse/langfuse/">
-      <SiGithub className="mr-2" />
-      <span>GitHub</span>
-    </Link>
-  </Button>
-  <Button variant="secondary" asChild>
-    <Link href="https://discord.gg/7NXusRtqYU">
-      <SiDiscord className="mr-2" />
-      <span>Discord</span>
-    </Link>
-  </Button>
-</div>
-
-</StartCard>
-<StartCard isOutline>
-  
-## Build your data moat
-
-- Retrieval API (coming soon) to query prompts/completions based on similarity to current prompt
-- Exports of high-quality prompt/completions for fine tuning; e.g. use GPT-4 completions to train own Llama models
-
-</StartCard>
-</TwoCards>
-
-## Langfuse is easy to get started with
-
-Follow the full [quickstart instructions](/docs/get-started) to get started with langfuse.
-
-<div className="lg:grid lg:grid-cols-2 lg:gap-7">
-<div>
-
-### 1. Capture execution data
-
-<div className="flex gap-3 my-2 flex-wrap">
+<div className="flex gap-3 my-2 flex-wrap mb-2">
   <Button variant="outline" asChild>
-    <Link href="/docs/reference">
-      <BsCode className="mr-2 h-5 w-5" />
-      <span>API</span>
+    <Link href="/docs/sdk/typescript">
+      <SiTypescript className="mr-2" />
+      <span>Typescript SDK</span>
     </Link>
   </Button>
   <Button variant="outline" asChild>
@@ -127,52 +64,22 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
     </Link>
   </Button>
   <Button variant="outline" asChild>
-    <Link href="/docs/sdk/typescript">
-      <SiTypescript className="mr-2" />
-      <span>Typescript SDK</span>
+    <Link href="/docs/reference">
+      <BsCode className="mr-2 h-5 w-5" />
+      <span>API (Swagger)</span>
     </Link>
   </Button>
 </div>
 
-```typescript filename="server.ts"
-const trace = langfuse.trace({
-  name: "chat-completion",
-  metadata: {
-    userId: "user__935d7d1d",
-  },
-});
+_View examples by application type_
 
-const event = trace.event({
-  name: "context-retrieved",
-  output: "...",
-});
+<ObservabilityExamples />
 
-const generationStartTime = new Date();
+## 2. Collect feedback
 
-// const chatCompletion = await llm.respond(prompt);
+Collect user feedback to understand how well your LLM-based features are performing. `langfuse` makes it easy to collect feedback from users directly in the frontend (using [`LangfuseWeb`](/docs/sdk/typescript#frontend-langfuseweb)) and to associate it with the execution trace (via the trace id).
 
-const generation = trace.generation({
-  startTime: generationStartTime,
-  endTime: new Date(),
-  name: "chat-completion",
-  model: "gpt-3.5-turbo",
-  modelParameters: {
-    temperature: 0.9,
-    maxTokens: 2000,
-  },
-  prompt: "Hello, how are you?",
-  completion: "I'm fine, thanks. How are you?",
-  usage: {
-    promptTokens: 22,
-    completionTokens: 28,
-  },
-});
-```
-
-</div>
-<div>
-
-### 2. Capture scores from user feedback
+_Available data sources:_
 
 <div className="flex gap-3 my-2 flex-wrap">
   <Button variant="outline" asChild>
@@ -189,27 +96,115 @@ const generation = trace.generation({
   </Button>
 </div>
 
-```typescript filename="UserFeedbackComponent.tsx"
-// feedback button handler
-const handleUserFeedback = async (value: number) =>
-  await langfuseWeb.score({
-    traceId: props.traceId,
-    name: "user_feedback",
-    value,
+_Example_
+
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+
+<h3 className="text-xl font-bold">Chat application</h3>
+<span className="text-sm text-gray-500">
+  User feedback on individual responses
+</span>
+
+<div className="mt-5 flex flex-col lg:flex-row gap-4">
+<div className="flex-1">
+
+**Collect**
+
+```typescript {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
   });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
 ```
 
 </div>
+<div className="flex-1">
+
+**Preview**
+
+<FeedbackPreview />
+
+</div>
+</div>
 </div>
 
-### 3. Run langfuse server
+## 3. Dashboard
 
-<TwoCards className="mt-6">
-<StartCard isDark>
-  
-### Langfuse cloud
+Based on the ingested data, the dashboard makes it simple to have an aggreagted view on the number of executions and LLM usage.
 
-- Fully managed
+<Image src={screenDashboard} className="w-full max-w-lg" />
+
+Charts
+
+- Trace executions
+- LLM generations and tokens used
+- User feedback over time
+
+Coming soon
+
+- Latency variance and distribution
+- Cost breakdown per user / use case
+
+## 4. Benefits
+
+- open source, managed or self-hosted
+- model agnostic
+- fully async, does not add latency
+
+## Get started
+
+Follow the full [quickstart instructions](/docs/get-started) to get started with langfuse.
+
+<div className="flex flex-col md:flex-row gap-4 mt-6">
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<h3 className="text-xl font-bold">Open source</h3>
+<span className="text-sm text-gray-500">
+  Built for self-hosting and extendibility
+</span>
+
+- Simple self-hosting on your own infrastructure
+
+<div className="flex gap-3 mt-4 flex-wrap">
+  <Button asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiGithub className="mr-2" />
+      <span>GitHub</span>
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="https://discord.gg/7NXusRtqYU">
+      <SiDiscord className="mr-2" />
+      <span>Discord</span>
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="/docs/self-host">Self-host</Link>
+  </Button>
+</div>
+</div>
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<h3 className="text-xl font-bold">langfuse cloud</h3>
+<span className="text-sm text-gray-500">
+  Fully-managed version
+</span>
+
 - Generous free tier to get started ([pricing](/docs/cloud#pricing))
 
 <div className="flex gap-2 pt-3 flex-wrap">
@@ -221,42 +216,8 @@ const handleUserFeedback = async (value: number) =>
   </Button>
   <Button variant="ghost">Docs</Button>
 </div>
-
-</StartCard>
-<Divider text="OR" />
-<StartCard isOutline>
-  
-### Open source
-
-- Full data ownership
-- Within your own VPS
-
-<div className="flex gap-2 pt-3 items-end flex-wrap">
-  <Button asChild>
-    <Link href="https://github.com/langfuse/langfuse/">
-      <SiGithub className="mr-2" />
-      <span>GitHub</span>
-    </Link>
-  </Button>
-  <Button variant="secondary" asChild>
-    <Link href="/docs/local">Local</Link>
-  </Button>
-  <Button variant="secondary">
-    <Link href="/docs/self-host">Self-host</Link>
-  </Button>
 </div>
-
-</StartCard>
-</TwoCards>
-
-<div className="h-24" />
-
-## Why are we building `langfuse`?
-
-1. **Situation:** LLMs introduce a _'black box'_ character to Software Engineering: outputs of LLM-based applications are unpredictable
-2. **Problem:** Quality of application in production cannot be assured with testing before launching the feature
-3. **Consequence:** Engineers need to embrace active learning from users in production to improve their LLM-based applications. Many teams build UX around their applications to make the imperfect outputs usable and to collect feedback from users.
-4. **Need:** Holistic monitoring of what happens in production, linked to user feedback and other signals to understand how to improve the application.
+</div>
 
 ## Get in touch
 
@@ -270,9 +231,11 @@ const handleUserFeedback = async (value: number) =>
 - [x] [Dashboard](/docs/interface#dashboard) to explore data
 - [x] Authentication and authorization on project level in UI, API, SDKs
 - [x] [langfuse cloud](/docs/cloud) to simplify setup
+- [x] New typescript SDK with support for edge-runtimes, advanced nesting, and custom ids
+- [ ] Integration with frameworks, e.g. langchain
+- [ ] Wrapper of SDKs to simplify data integration, e.g. OpenAI, Anthropic
 - [ ] Model-based evaluation of execution logs and LLM calls
 - [ ] Pre-built SDK functions for best-practice scoring
-- [ ] Tracing integration with frameworks, e.g. langchain
 - [ ] API to retrieve few-shot examples based on embedding similarity to current prompt
 - [ ] LLM playground to interactively adapt prompts based on production examples
 
