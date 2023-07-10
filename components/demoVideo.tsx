@@ -24,7 +24,7 @@ export function Buttons() {
   const [open, setOpen] = useState<boolean>(false);
   return (
     <>
-      <div onClick={() => setOpen(true)}>
+      <div onClick={() => setOpen(true)} className="hidden">
         <Card
           icon={<Clapperboard size="24" />}
           title="Demo (3:33 min)"
