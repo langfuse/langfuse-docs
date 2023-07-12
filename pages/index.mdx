@@ -145,6 +145,8 @@ export function UserFeedbackComponent(props: { traceId: string }) {
 </div>
 </div>
 
+<div className="grid md:grid-cols-2 gap-8">
+<div>
 ## 3. Dashboard
 
 Based on the ingested data, the dashboard makes it simple to have an aggreagted view on the number of executions and LLM usage.
@@ -161,18 +163,28 @@ Coming soon
 - Quality monitoring
 - Cost breakdown per user / use case
 
+</div>
+<div>
+
 ## 4. Benefits
 
-- Open source, managed or self-hosted
+- Open source
+- Run langfuse self-hosted, locally, or use langfuse cloud
 - Model agnostic
 - Fully async, does not add latency
+- Fully typed SDKs for typescript and python
+- Report user feedback from front-end
+- Incrementally adoptable, start with a single LLM call, expand to full tracing of complex chains/agents
+
+</div>
+</div>
 
 ## Get started
 
-Follow the full [quickstart instructions](/docs/get-started) to get started with langfuse.
+Follow the full [**quickstart instructions**](/docs/get-started) to get started with langfuse.
 
 <div className="flex flex-col md:flex-row gap-4 mt-6">
-<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<div className="flex-1 px-6 py-4 ring-1 rounded-xl ring-gray-200">
 <h3 className="text-xl font-bold">Open source</h3>
 <span className="text-sm text-gray-500">
   Built for self-hosting and extendibility
@@ -198,7 +210,7 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
   </Button>
 </div>
 </div>
-<div className="px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<div className="flex-1 px-6 py-4 ring-1 rounded-xl ring-gray-200">
 <h3 className="text-xl font-bold">langfuse cloud</h3>
 <span className="text-sm text-gray-500">
   Fully-managed version
@@ -221,23 +233,5 @@ Follow the full [quickstart instructions](/docs/get-started) to get started with
 ## Get in touch
 
 `langfuse` is being actively developed in open source together with the community. Join our [Discord](https://discord.gg/7NXusRtqYU)! Provide feedback, report bugs, or request features via GitHub issues. If you want to chat about your use case, reach out to us via email: contact@langfuse.com
-
-## Roadmap
-
-- [x] API server for collecting execution records, metadata, scores, and basic UI to explore data, runs locally or self-hosted
-- [x] [SDKs](/docs/sdk) for tracing and scoring, typescript and python
-- [x] [Docs](/docs) and walkthrough (v1) ([video](#), [NextJS example](https://github.com/langfuse/langfuse-demo), [Jupyter Notebook example](https://github.com/langfuse/langfuse-demo-python/blob/main/notebook.ipynb))
-- [x] [Dashboard](/docs/interface#dashboard) to explore data
-- [x] Authentication and authorization on project level in UI, API, SDKs
-- [x] [langfuse cloud](/docs/cloud) to simplify setup
-- [x] New typescript SDK with support for edge-runtimes, advanced nesting, and custom ids
-- [ ] Integration with frameworks, e.g. langchain
-- [ ] Wrapper of SDKs to simplify data integration, e.g. OpenAI, Anthropic
-- [ ] Model-based evaluation of execution logs and LLM calls
-- [ ] Pre-built SDK functions for best-practice scoring
-- [ ] API to retrieve few-shot examples based on embedding similarity to current prompt
-- [ ] LLM playground to interactively adapt prompts based on production examples
-
-Want to see something else? Share your thoughts by creating a [GitHub issue](https://github.com/langfuse/langfuse/issues/new/choose) or on [Discord](https://discord.gg/7NXusRtqYU)
 
 </div>
