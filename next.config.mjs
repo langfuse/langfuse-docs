@@ -15,6 +15,14 @@ const withNextra = nextra({
 })
 
 export default withNextra({
+  rewrites: async () => {
+    return [
+      {
+        source: '/',
+        destination: 'https://analytics.langfuse.com',
+      },
+    ]
+  },
   redirects: async () => [
     {
       source: "/analytics",
