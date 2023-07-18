@@ -55,13 +55,16 @@ dependencies:
     version: 0.3.6(next@13.0.6)(openapi-types@12.1.1)
   nextra:
     specifier: latest
-    version: 2.9.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0)
+    version: 2.10.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0)
   nextra-theme-docs:
     specifier: latest
-    version: 2.9.0(next@13.0.6)(nextra@2.9.0)(react-dom@18.2.0)(react@18.2.0)
+    version: 2.10.0(next@13.0.6)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0)
   postcss:
     specifier: ^8.4.24
     version: 8.4.24
+  posthog-js:
+    specifier: ^1.72.0
+    version: 1.72.0
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -1210,16 +1213,23 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
-  /@theguild/remark-mermaid@0.0.3(react@18.2.0):
-    resolution: {integrity: sha512-fccVR6o4UPUztrBjdUhM4ahwx+X7YHhoxsUoXv2vI07vz4dq+I03Ot0SjuZzDA/H7engxcb8ZxzCUEkZgGr/2g==}
+  /@theguild/remark-mermaid@0.0.4(react@18.2.0):
+    resolution: {integrity: sha512-C1gssw07eURtCwzXqZZdvyV/eawQ/cXfARaXIgBU9orffox+/YQ+exxmNu9v16NSGzAVsGF4qEVHvCOcCR/FpQ==}
     peerDependencies:
       react: ^18.2.0
     dependencies:
       mermaid: 10.2.3
       react: 18.2.0
-      unist-util-visit: 4.1.2
+      unist-util-visit: 5.0.0
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /@theguild/remark-npm2yarn@0.1.1:
+    resolution: {integrity: sha512-ZKwd/bjQ9V+pESLnu8+q8jqn15alXzJOuVckraebsXwqVBTw53Gmupiw9zCdLNHU829KTYNycJYea6m9HRLuOg==}
+    dependencies:
+      npm-to-yarn: 2.0.0
+      unist-util-visit: 5.0.0
     dev: false
 
   /@types/acorn@4.0.6:
@@ -2364,6 +2374,10 @@ packages:
     resolution: {integrity: sha512-CJ0HCB5tL5fYTEA7ToAq5+kTwd++Borf1/bifxd9iT70QcXr4MRrO3Llf8Ifs70q+SJcGHFtnIE/Nw6giCtECA==}
     dependencies:
       format: 0.2.2
+    dev: false
+
+  /fflate@0.4.8:
+    resolution: {integrity: sha512-FJqqoDBR00Mdj9ppamLa/Y7vxm+PRmNWA67N846RvsoYVMKB4q3y/de5PA7gUmRMYK/8CMz2GDZQmCRN1wBcWA==}
     dev: false
 
   /fill-range@7.0.1:
@@ -3892,11 +3906,11 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /nextra-theme-docs@2.9.0(next@13.0.6)(nextra@2.9.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Gbjx5atl63JKWOEV2hAefP4X0wmJoLtFX4NekvNu9Y9fAdvtFdW0O2p0f8ISMS1JJgAl1ZmXm411J7rHnRnhmg==}
+  /nextra-theme-docs@2.10.0(next@13.0.6)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-uXoqRoewbu0JoqQ1m67aIztWe9/nEhcSeHMimhLxZghKZxkYN0kTR5y5jmrwOHRPuJUTLL2YFwy1rvWJIZS2lw==}
     peerDependencies:
       next: '>=9.5.3'
-      nextra: 2.9.0
+      nextra: 2.10.0
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
@@ -3911,15 +3925,15 @@ packages:
       next: 13.0.6(react-dom@18.2.0)(react@18.2.0)
       next-seo: 6.0.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0)
       next-themes: 0.2.1(next@13.0.6)(react-dom@18.2.0)(react@18.2.0)
-      nextra: 2.9.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0)
+      nextra: 2.10.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.0.4
       zod: 3.21.4
     dev: false
 
-  /nextra@2.9.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-GwYFwuS0UzCXAUVvs9sVAFe4AQeZ0VACbqW8rzw2goxHvpTXAWbIdXShPGz+MEPB8aAckfHy1p39XbfcVU3cRA==}
+  /nextra@2.10.0(next@13.0.6)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-euv93UnWpdth8slMRJLqMrWvCCzR/VTVH6DPrn1JW7hZS03c2lzG2q+fsiYULGiy/kFyysmlxd4Nx5KGB1Txwg==}
     engines: {node: '>=16'}
     peerDependencies:
       next: '>=9.5.3'
@@ -3930,7 +3944,8 @@ packages:
       '@mdx-js/mdx': 2.3.0
       '@mdx-js/react': 2.3.0(react@18.2.0)
       '@napi-rs/simple-git': 0.1.8
-      '@theguild/remark-mermaid': 0.0.3(react@18.2.0)
+      '@theguild/remark-mermaid': 0.0.4(react@18.2.0)
+      '@theguild/remark-npm2yarn': 0.1.1
       clsx: 1.2.1
       github-slugger: 2.0.0
       graceful-fs: 4.2.11
@@ -4008,6 +4023,11 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       path-key: 2.0.1
+    dev: false
+
+  /npm-to-yarn@2.0.0:
+    resolution: {integrity: sha512-/IbjiJ7vqbxfxJxAZ+QI9CCRjnIbvGxn5KQcSY9xHh0lMKc/Sgqmm7yp7KPmd6TiTZX5/KiSBKlkGHo59ucZbg==}
+    engines: {node: '>=6.0.0'}
     dev: false
 
   /npmlog@4.1.2:
@@ -4259,6 +4279,12 @@ packages:
       nanoid: 3.3.6
       picocolors: 1.0.0
       source-map-js: 1.0.2
+    dev: false
+
+  /posthog-js@1.72.0:
+    resolution: {integrity: sha512-ERgeUnhIzliNVMYUAz1CD9tTLvHI1lOYVOxNkdAdJ//NT1z3tX/CrS1Wbozae9PcqVOJgfINnOVrhDayV5eKkQ==}
+    dependencies:
+      fflate: 0.4.8
     dev: false
 
   /prebuild-install@6.1.4:
