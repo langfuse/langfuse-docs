@@ -34,11 +34,16 @@ return (
     <>
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
-        <Script
-          id="umami"
-          data-website-id="39e22d92-2b6d-480d-bbba-28549a348027"
-          src="https://umami.langfuse.com/umm.js"
-        />
+        {
+          process.env.NEXT_PUBLIC_UMAMI_SRC &&
+          process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID ? (
+            <Script
+              id="umami"
+              data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+              src={process.env.NEXT_PUBLIC_UMAMI_SRC}
+            />
+          ) : null
+        }
         <Toaster />
       </PostHogProvider>
     </>
