@@ -1,28 +1,46 @@
 import dynamic from "next/dynamic";
 import "swagger-ui-react/swagger-ui.css";
-import { openApiSpecServer } from "../src/openApiSpecServer";
-import { openApiSpecClient } from "../src/openApiSpecClient";
 
 const SwaggerUI = dynamic<{
-  spec: any;
+  spec?: any;
+  url?: string;
   filter?: string | boolean;
+  supportedSubmitMethods?: (
+    | "get"
+    | "put"
+    | "post"
+    | "delete"
+    | "options"
+    | "head"
+    | "patch"
+    | "trace"
+  )[];
+  defaultModelRendering: "example" | "model";
+  defaultModelExpandDepth?: number;
 }>(import("swagger-ui-react"), { ssr: false });
 
-function ApiDoc(props: { filter?: string | boolean; spec: string }) {
-  return <SwaggerUI spec={props.spec} filter={props.filter} />;
+function ApiDoc(props: {
+  filter?: string | boolean;
+  spec?: string;
+  url?: string;
+}) {
+  return (
+    <SwaggerUI
+      spec={props.spec}
+      filter={props.filter}
+      supportedSubmitMethods={[]}
+      defaultModelRendering="model"
+      defaultModelExpandDepth={5}
+      url={props.url}
+    />
+  );
 }
 
-const cloudEnvironment = `
-servers:
-- url: https://cloud.langfuse.com
-  description: Langfuse Cloud
-`;
-
 export const ApiServerReference = () => (
-  <ApiDoc spec={openApiSpecServer + cloudEnvironment} />
+  <ApiDoc url="https://cloud.langfuse.com/openapi-server.yml" />
 );
 export const ApiClientReference = () => (
-  <ApiDoc spec={openApiSpecClient + cloudEnvironment} />
+  <ApiDoc url="https://cloud.langfuse.com/openapi-client.yml" />
 );
 
 export default ApiDoc;
