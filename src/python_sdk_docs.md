@@ -5,29 +5,76 @@
 
 ## 1. Initializing the client
 
-The langfuse SDKs are hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
+The langfuse SDKs are hosted on the pypi index.
+
 
 ```python
-%pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
+%pip install langfuse
 ```
 
-Initialize the client with your environment and api keys. In the example we are using the cloud environment. The Python client can modify all entities in the Langfuse API and requires the secret key.
+    Collecting langfuse==0.0.39
+      Downloading langfuse-0.0.39-py3-none-any.whl (35 kB)
+    Requirement already satisfied: attrs>=21.3.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (23.1.0)
+    Requirement already satisfied: httpx<0.25.0,>=0.15.4 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (0.24.1)
+    Requirement already satisfied: pydantic==1.10.7 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (1.10.7)
+    Requirement already satisfied: pytest<8.0.0,>=7.4.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (7.4.0)
+    Requirement already satisfied: pytest-asyncio<0.22.0,>=0.21.1 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (0.21.1)
+    Requirement already satisfied: pytest-timeout<3.0.0,>=2.1.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (2.1.0)
+    Requirement already satisfied: python-dateutil<3.0.0,>=2.8.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (2.8.2)
+    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic==1.10.7->langfuse==0.0.39) (4.7.1)
+    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (2023.5.7)
+    Requirement already satisfied: httpcore<0.18.0,>=0.15.0 in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (0.17.3)
+    Requirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (3.4)
+    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (1.3.0)
+    Requirement already satisfied: iniconfig in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (2.0.0)
+    Requirement already satisfied: packaging in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (23.1)
+    Requirement already satisfied: pluggy<2.0,>=0.12 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (1.2.0)
+    Requirement already satisfied: exceptiongroup>=1.0.0rc8 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (1.1.2)
+    Requirement already satisfied: tomli>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (2.0.1)
+    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil<3.0.0,>=2.8.0->langfuse==0.0.39) (1.16.0)
+    Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (0.14.0)
+    Requirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (3.7.1)
+    Installing collected packages: langfuse
+      Attempting uninstall: langfuse
+        Found existing installation: langfuse 0.0.38
+        Uninstalling langfuse-0.0.38:
+          Successfully uninstalled langfuse-0.0.38
+    Successfully installed langfuse-0.0.39
+
+
+Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
+
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-..."
-ENV_PUBLIC_KEY = "pk-lf-..."
+ENV_SECRET_KEY = "sk-lf-1234567890"
+ENV_PUBLIC_KEY = "pk-lf-1234567890"
 ```
+
 
 ```python
-from finto.client import FintoLangfuse
+from langfuse import Langfuse
 
-client = FintoLangfuse(
-    environment=ENV_HOST,
-    password=ENV_SECRET_KEY,
-    username=ENV_PUBLIC_KEY
-)
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 ```
+
+### Flushing
+
+The langfuse client is built asynchronous to not add latency. Only when calling the flush function, the network requests to the langfuse backend will be executed.
+
+Langfuse offers two different fush functions. `async_flush` returns a coroutine and hence can be used in async contexts such as this Notebook. `flush` is a synchronous function and takes care of asynchronous code in the background and is blocking.
+
+
+```python
+# result = await client.flush()
+# returns a result and executes a coroutine in the background
+
+result = await langfuse.async_flush() # returns a coroutine
+print(result)
+```
+
+    {'status': 'success'}
+
 
 ## 2. Trace execution of backend
 
@@ -38,18 +85,6 @@ client = FintoLangfuse(
     - `Events` are the basic building block. They are used to track discrete events in a trace.
     - `Spans` represent durations of units of work in a trace.
     - `Generations` are spans which are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
-
-**Timestamps**
-
-All timestamps need to be formatted in the following way before being used in the SDK. This is a limitation of the current python SDK.
-
-```python
-from datetime import datetime
-
-datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-```
-
-    '2023-06-22T11:56:38Z'
 
 ### Traces
 
@@ -64,56 +99,18 @@ Traces can be created and updated.
 - `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the langfuse `traceId`.
 - `userId` (optional): the id of the user who triggered the execution.
 
-```python
-from finto.resources.trace.types.create_trace_request import CreateTraceRequest
-
-trace = client.trace.create(
-    request = CreateTraceRequest(
-        name = "chat-completion",
-        userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-        metadata = {
-            "env": "production",
-            "email": "user@langfuse.com",
-        }
-    )
-)
-```
-
-### Observations
-
-### Events
-
-Events are used to track discrete events in a trace.
-
-- `traceId` (optional): the id of the trace to which the event should be attached. If no traceId is provided, the event will be attached to a new trace.
-- `startTime`: the time at which the event started.
-- `name` (optional): identifier of the event. Useful for sorting/filtering in the UI.
-- `metadata` (optional): additional metadata of the event. JSON object.
-- `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-- `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
-- `parentObservationId` (optional): the id of the span or event to which the event should be attached
-- `input` (optional): the input to the event. Can be any JSON object.
-- `output` (optional): the output to the event. Can be any JSON object.
 
 ```python
-from finto.resources.event.types.create_event_request import CreateEventRequest
+from langfuse.api.model import CreateTrace
 
-event = client.event.create(
-    request=CreateEventRequest(
-        traceId=trace.id,
-        name="chat-docs-retrieval",
-        startTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        metadata={
-            "key": "value"
-        },
-        input = {
-            "key": "value"
-        },
-        output = {
-            "key": "value"
-        }
-    )
-)
+trace = langfuse.trace(CreateTrace(
+    name = "docs-retrieval",
+    userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+    metadata = {
+        "env": "production",
+        "email": "user@langfuse.com",
+    }
+))
 ```
 
 ### Span
@@ -122,50 +119,38 @@ Spans represent durations of units of work in a trace. We generated convenient S
 
 `span.create()` take the following parameters:
 
-- `traceId` (optional): the id of the trace to which the span should be attached. If no traceId is provided, the span will be attached to a new trace.
 - `startTime` (optional): the time at which the span started. If no startTime is provided, the current time will be used.
 - `endTime` (optional): the time at which the span ended. Can also be set using `span.update()`.
 - `name` (optional): identifier of the span. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
 - `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
 - `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
-- `parentObservationId` (optional): the id of the observation to which the span should be attached
 - `input` (optional): the input to the span. Can be any JSON object.
 - `output` (optional): the output to the span. Can be any JSON object.
 
-```python
-from finto.resources.span.types.create_span_request import CreateSpanRequest
 
-retrievalStartTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+```python
+import datetime
+from langfuse.api.model import CreateSpan
+
+retrievalStartTime = datetime.datetime.now()
 
 # retrieveDocs = retrieveDoc()
 # ...
 
-span = client.span.create(
-    request=CreateSpanRequest(
-        traceId=trace.id,
-        name="chat-completion",
+span = trace.span(CreateSpan(
+        name="embedding-search",
         startTime=retrievalStartTime,
-        endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        metadata={
-            "key": "value"
-        },
-        input = {
-            "key": "value"
-        },
-        output = {
-            "key": "value"
-        },
-        parentObservationId=event.id,
+        endTime=datetime.datetime.now(),
+        metadata={"database": "pinecone"},
+        input = {'query': 'This document entails the OKR goals for ACME'},
+        output = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
     )
 )
 ```
 
-`span.update()` take the following parameters:
+    span body id=None trace_id_type=None name='embedding-search' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533465) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533560) metadata={'database': 'pinecone'} input={'query': 'This document entails the OKR goals for ACME'} output={'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"} level=None status_message=None <class 'langfuse.api.model.CreateSpan'> {'query': 'This document entails the OKR goals for ACME'} {'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
 
-- `spanId`: the id of the span to update
-- `endTime` (optional): the time at which the span ended
-- `metadata` (optional): merges with existing metadata of the span. Can be any JSON object.
 
 ### Generation
 
@@ -173,7 +158,6 @@ Generations are used to log generations of AI model. They contain additional met
 
 `generation.log()` take the following parameters:
 
-- `traceId` (optional): the id of the trace to which the generation should be attached. If no traceId is provided, the generation will be attached to a new trace.
 - `startTime` (optional): the time at which the generation started.
 - `endTime` (optional): the time at which the generation ended.
 - `name` (optional): identifier of the generation. Useful for sorting/filtering in the UI.
@@ -185,41 +169,96 @@ Generations are used to log generations of AI model. They contain additional met
 - `metadata` (optional): additional metadata of the generation. Can be any JSON object.
 - `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
 - `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
-- `parentObservationId` (optional): the id of the observation to which the generation should be attached as a child.
+
 
 ```python
-from finto.resources.generations.types.create_log import CreateLog
-from finto.resources.generations.types.llm_usage import LlmUsage
+from langfuse.api.model import CreateGeneration, Usage
+import datetime
 
-generationStartTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+generationStartTime = datetime.datetime.now()
 
 # chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
 # ...
 
-generation = client.generations.log(
-    request=CreateLog(
-        traceId=trace.id,
-        name="test",
-        startTime=generationStartTime,
-        endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        model="gpt-3.5-turbo",
-        modelParameters= {
-            "temperature":0.9,
-            "maxTokens":1000,
-            "topP":None,
-        },
-        prompt=[{"role": "user", "content":"Hello, how are you?"}],
-        completion="I am fine, thank you",
-        usage=LlmUsage(
-            prompt_tokens=512,
-            completion_tokens=49
-        ),
-        metadata= {
-            "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
-        }
+trace.generation(CreateGeneration(
+    name="summary-generation",
+    startTime=generationStartTime,
+    endTime=datetime.datetime.now(),
+    model="gpt-3.5-turbo",
+    modelParameters={"maxTokens": "1000", "temperature": "0.9"},
+    prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    completion="The Q3 OKRs contain goals for multiple teams...",
+    usage=Usage(promptTokens=50, completionTokens = 49),
+    metadata={"interface": "whatsapp"}
+))
+```
+
+    generation:  id=None trace_id_type=None name='summary-generation' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 559214) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 560850) completion_start_time=None model='gpt-3.5-turbo' model_parameters={'maxTokens': '1000', 'temperature': '0.9'} prompt=[{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals...'}] metadata={'interface': 'whatsapp'} completion='The Q3 OKRs contain goals for multiple teams...' usage=Usage(prompt_tokens=50, completion_tokens=49, total_tokens=None) level=None status_message=None ff1214d9-349a-4461-b491-cedebc31319d
+
+
+
+
+
+    <langfuse.client.StatefulGenerationClient at 0x7dfb47abf9d0>
+
+
+
+### Events
+
+Events are used to track discrete events in a trace.
+
+- `startTime`: the time at which the event started.
+- `name` (optional): identifier of the event. Useful for sorting/filtering in the UI.
+- `metadata` (optional): additional metadata of the event. JSON object.
+- `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
+- `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
+- `input` (optional): the input to the event. Can be any JSON object.
+- `output` (optional): the output to the event. Can be any JSON object.
+
+
+```python
+from langfuse.api.model import CreateEvent
+import datetime
+
+event = span.event(CreateEvent(
+        name="chat-docs-retrieval",
+        startTime=datetime.datetime.now(),
+        metadata={"key": "value"},
+        input = {"key": "value"},
+        output = {"key": "value"}
     )
 )
 ```
+
+`span.update()` take the following parameters:
+
+- `spanId`: the id of the span to update
+- `endTime` (optional): the time at which the span ended
+- `metadata` (optional): merges with existing metadata of the span. Can be any JSON object.
+
+### Nesting of observations
+
+Nesting of observations is helpful to structure the trace in a hierarchical way. This is especially helpful for complex chains and agents.
+
+```
+Simple example
+- trace: chat-app-session
+  - span: chat-interaction
+    - event: get-user-profile
+    - generation: chat-completion
+```
+
+
+```python
+trace = langfuse.trace(CreateTrace(name = "chat-app-session"))
+span = trace.span(CreateSpan(name = "chat-interaction"))
+event = span.event(CreateEvent(name = "get-user-profile"))
+generation = span.generation(CreateGeneration(name = "chat-completion"))
+```
+
+    span body id=None trace_id_type=None name='chat-interaction' start_time=None end_time=None metadata=None input=None output=None level=None status_message=None <class 'langfuse.api.model.CreateSpan'> None None
+    generation:  id=None trace_id_type=None name='chat-completion' start_time=None end_time=None completion_start_time=None model=None model_parameters=None prompt=None metadata=None completion=None usage=None level=None status_message=None ed1a5f59-72f2-43f9-8675-00610248d12c
+
 
 ## 3. Collect scores
 
@@ -228,23 +267,43 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 - `traceId`: the id of the trace to which the score should be attached
 - `name`: identifier of the score, string
 - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
-- `observationId` (optional): the id of the span, event or generation to which the score should be attached
 - `traceIdType` (optional): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
 - `comment` (optional): additional context/explanation of the score
 
-```python
-from finto.resources.score.types.create_score_request import CreateScoreRequest
 
-score = client.score.create(
-    request=CreateScoreRequest(
-        traceId=trace.id,                  # trace the score is related to
-        name="user-explicit-feedback",
-        value=1,
-        observationId=generation.id,           # optionally: also attach the score to an individual observation
-        comment="I like how personalized the response is"
-    )
-)
+```python
+from langfuse.api.model import CreateScore
+
+
+trace.score(CreateScore(
+    name="user-explicit-feedback",
+    value=1,
+    comment="I like how personalized the response is"
+))
 ```
+
+
+
+
+    <langfuse.client.StatefulClient at 0x7dfb2a5bbc10>
+
+
+
+
+```python
+result = await langfuse.async_flush()
+print(result)
+```
+
+    running task:  <function Langfuse.trace.<locals>.<lambda> at 0x7dfb2a56f370> () {}
+    parent id='clka6txk40003mg08yr9br90i' timestamp=datetime.datetime(2023, 7, 19, 20, 40, 28, 707000, tzinfo=datetime.timezone.utc) external_id=None name='docs-retrieval' user_id='user__935d7d1d-8625-4ef4-8651-544613e7bd22' metadata={'env': 'production', 'email': 'user@langfuse.com'}
+    new_body id='fa1a6271-4fc8-4b95-b9ee-b750c05ed425' trace_id_type=None name='embedding-search' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533465) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533560) metadata={'database': 'pinecone'} input={'query': 'This document entails the OKR goals for ACME'} output={'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"} level=None status_message=None trace_id='clka6txk40003mg08yr9br90i'
+    submitting span:  id='fa1a6271-4fc8-4b95-b9ee-b750c05ed425' trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='embedding-search' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533465) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533560) metadata={'database': 'pinecone'} input={'query': 'This document entails the OKR goals for ACME'} output={'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"} level=None status_message=None parent_observation_id=None
+    submitting generation:  id='ebc1170a-14fc-48a8-8a39-6533a57f62da' trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='summary-generation' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 559214) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 560850) completion_start_time=None model='gpt-3.5-turbo' model_parameters={'maxTokens': '1000', 'temperature': '0.9'} prompt=[{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals...'}] metadata={'interface': 'whatsapp'} completion='The Q3 OKRs contain goals for multiple teams...' usage=LlmUsage(prompt_tokens=50, completion_tokens=49, total_tokens=None) level=None status_message=None parent_observation_id=None
+    submitting score:  id=None trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='user-explicit-feedback' value=1 observation_id=None comment='I like how personalized the response is'
+    submitting event:  id='9ffafe1a-2d27-4f15-a82f-77e8007a7c68' trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='chat-docs-retrieval' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 545172) metadata={'key': 'value'} input={'key': 'value'} output={'key': 'value'} level=None status_message=None parent_observation_id='fa1a6271-4fc8-4b95-b9ee-b750c05ed425'
+    {'status': 'success'}
+
 
 ## Troubleshooting
 
