@@ -1,1 +1,44 @@
 # Analytics
+
+import { Callout } from "nextra/components";
+import Image from "next/image";
+import analyticsImage from "@/src/analytics.png";
+
+<Callout type="info" emoji="ℹ️">
+  Langfuse analytics is currently in alpha.
+</Callout>
+
+Langfuse analytics derives actionable insights from production data.
+
+People use langfuse analytics to answer questions such as:
+
+- _How helpful are my LLM app's outputs?_
+- _What is my LLM API spend by customer?_
+- _What do latencies look like across geographies and steps of LLM chains?_
+- _Did the quality of the application improve in newer versions? What was the impact of switching from zero-shotting GPT4 to using chained few-shotted Llama calls?_
+
+_Example: timeseries of core metrics incl tracking of relases_
+
+<Image
+  alt="Analytics screenshot"
+  src={analyticsImage}
+  style={{ objectFit: "contain" }}
+  className="max-h-96 mt-3"
+/>
+
+## Metrics
+
+- **Quality** is measured through user feedback, model-based scoring and human-in-the-loop scored samples. Quality is assessed over time as well as across prompt versions, LLMs and users.
+- **Cost and Latency** are accurately measured and broken down by user, session, geography, feature, model and prompt version.
+
+## Insights
+
+- **Monitor quality/cost/latency tradeoffs** by version to facilitate product and engineering decisions
+- **Cluster use cases** by employing a classifier to understand what users are doing
+- Break down **LLM usage by customer** for usage-based billing and profitability analysis
+
+## Get early-access
+
+Langfuse analytics is currently in a closed alpha as the core team works with a group of users to build the most useful analytics platform for LLM apps.
+
+Reach out if you are interested in early access: early-access@langfuse.com
