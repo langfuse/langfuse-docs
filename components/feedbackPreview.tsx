@@ -95,7 +95,7 @@ export default function FeedbackPreview() {
       ]);
 
       setState(feedback);
-    }, 1000);
+    }, 500);
   };
 
   if (initialLoading) return <div>Loading...</div>;
@@ -147,7 +147,9 @@ export default function FeedbackPreview() {
           </Button>
         </div>
       </div>
-      <div className="font-bold text-xs text-gray-600 mb-2 mt-5">langfuse</div>
+      <div className="font-bold text-xs text-gray-600 mb-2 mt-5">
+        Debugging UI
+      </div>
       <DataTable columns={columns} data={data} />
     </div>
   );

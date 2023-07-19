@@ -1,31 +1,81 @@
+import { Button } from "@/components/ui/button";
+import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
+import { AiOutlineCloud } from "react-icons/ai";
+import Link from "next/link";
+
 # Introduction
 
 `langfuse` is an open-source logging and feedback solution tailor-made for working with LLMs. By logging all user interactions as well as explicit and implicit user feedback, you can analyze, debug and ultimately improve your LLM-based application.
 
 ## Features
 
-1. Data collection via SDKs
+1. [Integrations](/docs/integrations): Data collection via SDKs
    - Tracing LLM chains by collecting specific data such as prompts, outputs, and configurations
    - Feedback collection from users
      - Explicit, e.g., thumbs up/down, star rating
      - Implicit, e.g., user copied the completion, user clicked on a link, user did not edit before submitting the suggested text
-1. Data exploration
-   - Segment traces based on user feedback to identify issues
-   - Debugging: find the root cause of issues by exploring traces and feedback
-1. Store high-quality prompt/completion pairs (positive feedback)
-   - Use them in few-shot prompts
-   - Use them for fine-tuning
+1. [Debugging UI](/docs/debugging-ui)
+   - Find the root cause of issues
+   - Segment traces based on user feedback and other metrics
+1. [Product analytics](/docs/analytics) (in alpha)
+   - Detailed monitoring of quality, cost and latency
 
-## Walkthrough
+## Benefits
 
-import { VideoPlayer } from "@/components/demoVideo";
+- Open source
+- Run langfuse self-hosted, locally, or use langfuse cloud
+- Model agnostic
+- Integration
+  - Fully async, does not add latency
+  - Fully typed SDKs for typescript and python
+  - Report user feedback from front-end
+  - Incrementally adoptable, start with a single LLM call, expand to full tracing of complex chains/agents
 
-<VideoPlayer />
+## Get started
 
-## Quickstart
+Follow the full [**quickstart instructions**](/docs/get-started) to get started with langfuse.
 
-import { Card, Cards } from "nextra-theme-docs";
+<div className="flex flex-col md:flex-row gap-4 mt-6">
+<div className="flex-1 px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<h3 className="text-xl font-bold">Open source</h3>
+<span className="text-sm text-gray-500">
+  Built for self-hosting and extendibility
+</span>
 
-<Cards>
-  <Card icon={<span>🚀</span>} title="Quickstart" href="/docs/get-started" />
-</Cards>
+- Simple self-hosting on your own infrastructure
+
+<div className="flex gap-3 mt-4 flex-wrap">
+  <Button asChild>
+    <Link href="https://github.com/langfuse/langfuse/">
+      <SiGithub className="mr-2" />
+      <span>GitHub</span>
+    </Link>
+  </Button>
+  <Button variant="secondary" asChild>
+    <Link href="/docs/self-host">Self-host</Link>
+  </Button>
+</div>
+</div>
+<div className="flex-1 px-6 py-4 ring-1 rounded-xl ring-gray-200">
+<h3 className="text-xl font-bold">langfuse cloud</h3>
+<span className="text-sm text-gray-500">
+  Fully-managed version
+</span>
+
+- Generous free tier to get started ([pricing](/docs/cloud#pricing))
+
+<div className="flex gap-2 pt-3 flex-wrap">
+  <Button asChild>
+    <Link href="https://cloud.langfuse.com/auth/sign-up">
+      <AiOutlineCloud className="mr-2 h-4 w-4" />
+      <span>Sign up</span>
+    </Link>
+  </Button>
+  <Button variant="ghost">Docs</Button>
+</div>
+</div>
+</div>
+
+## Get in touch
+
+`langfuse` is being actively developed in open source together with the community. Join our [Discord](https://discord.gg/7NXusRtqYU)! Provide feedback, report bugs, or request features via GitHub issues. If you want to chat about your use case, reach out to us via email: contact@langfuse.com

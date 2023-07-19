@@ -34,5 +34,10 @@ export default withNextra({
       destination: "/integrations",
       permanent: false,
     },
+    {
+      source: "/integrations",
+      destination: "/docs/integrations",
+      permanent: false,
+    },
   ]
 });
