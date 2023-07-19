@@ -63,8 +63,8 @@ Initialize the client with api keys and optionally your environment. In the exam
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-1234567890"
-ENV_PUBLIC_KEY = "pk-lf-1234567890"
+ENV_SECRET_KEY = "sk-lf-..."
+ENV_PUBLIC_KEY = "pk-lf-..."
 ```
 
 
