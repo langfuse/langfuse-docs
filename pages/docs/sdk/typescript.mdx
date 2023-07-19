@@ -89,18 +89,28 @@ const trace = langfuse.trace({
 
 ### Flushing
 
-The langfuse client is asynchronous to not add latency.
+By deafult, the langfuse Typescript SDK is asynchronous to not add latency. All objects returned by the SDK have a `data` property that is a promise.
 
-It is necessary to manually flush the client especially in short-lived execution environments (e.g. serverless functions). This makes sure all events are successfully sent to the langfuse server.
+In short lived execution environments (e.g. serverless functions), it is recommended to flush the langfuse client to make sure all events are successfully sent to the langfuse server before the execution ends. The langfuse client keeps track of all pending requests and `langfuse.flush()` returns a promise that resolves when all requests are completed.
 
 ```typescript filename="api.ts"
-langfuse.flush();
+await langfuse.flush();
 ```
 
-LangfuseWeb also supports flushing. However, it is mostly used to register a single user feedback synchronously and reach to the loading/success/error state.
+LangfuseWeb also supports flushing. However, synchronous use is recommended to adjust the frontend's loading/success/error state.
 
 ```typescript filename="frontend.ts"
-await langfuseWeb.score({});
+handleUserFeedback = async (value: number, comment: string) => {
+  setLoading(true);
+  await langfuseWeb.score({
+    traceId: message.traceId,
+    observationId: message.id,
+    name: "user-feedback",
+    value,
+    comment,
+  });
+  setLoading(false);
+};
 ```
 
 ### Observation types
