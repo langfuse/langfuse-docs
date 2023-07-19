@@ -12,34 +12,50 @@ The langfuse SDKs are hosted on the pypi index.
 %pip install langfuse
 ```
 
-    Collecting langfuse==0.0.39
-      Downloading langfuse-0.0.39-py3-none-any.whl (35 kB)
-    Requirement already satisfied: attrs>=21.3.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (23.1.0)
-    Requirement already satisfied: httpx<0.25.0,>=0.15.4 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (0.24.1)
-    Requirement already satisfied: pydantic==1.10.7 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (1.10.7)
-    Requirement already satisfied: pytest<8.0.0,>=7.4.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (7.4.0)
-    Requirement already satisfied: pytest-asyncio<0.22.0,>=0.21.1 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (0.21.1)
-    Requirement already satisfied: pytest-timeout<3.0.0,>=2.1.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (2.1.0)
-    Requirement already satisfied: python-dateutil<3.0.0,>=2.8.0 in /usr/local/lib/python3.10/dist-packages (from langfuse==0.0.39) (2.8.2)
-    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic==1.10.7->langfuse==0.0.39) (4.7.1)
-    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (2023.5.7)
-    Requirement already satisfied: httpcore<0.18.0,>=0.15.0 in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (0.17.3)
-    Requirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (3.4)
-    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (1.3.0)
-    Requirement already satisfied: iniconfig in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (2.0.0)
-    Requirement already satisfied: packaging in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (23.1)
-    Requirement already satisfied: pluggy<2.0,>=0.12 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (1.2.0)
-    Requirement already satisfied: exceptiongroup>=1.0.0rc8 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (1.1.2)
-    Requirement already satisfied: tomli>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse==0.0.39) (2.0.1)
-    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil<3.0.0,>=2.8.0->langfuse==0.0.39) (1.16.0)
-    Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (0.14.0)
-    Requirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse==0.0.39) (3.7.1)
-    Installing collected packages: langfuse
-      Attempting uninstall: langfuse
-        Found existing installation: langfuse 0.0.38
-        Uninstalling langfuse-0.0.38:
-          Successfully uninstalled langfuse-0.0.38
-    Successfully installed langfuse-0.0.39
+    Collecting langfuse
+      Downloading langfuse-0.0.40-py3-none-any.whl (34 kB)
+    Requirement already satisfied: attrs>=21.3.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (23.1.0)
+    Collecting httpx<0.25.0,>=0.15.4 (from langfuse)
+      Downloading httpx-0.24.1-py3-none-any.whl (75 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m75.4/75.4 kB[0m [31m2.6 MB/s[0m eta [36m0:00:00[0m
+    [?25hCollecting pydantic==1.10.7 (from langfuse)
+      Downloading pydantic-1.10.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.1 MB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3.1/3.1 MB[0m [31m10.8 MB/s[0m eta [36m0:00:00[0m
+    [?25hCollecting pytest<8.0.0,>=7.4.0 (from langfuse)
+      Downloading pytest-7.4.0-py3-none-any.whl (323 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m323.6/323.6 kB[0m [31m9.0 MB/s[0m eta [36m0:00:00[0m
+    [?25hCollecting pytest-asyncio<0.22.0,>=0.21.1 (from langfuse)
+      Downloading pytest_asyncio-0.21.1-py3-none-any.whl (13 kB)
+    Collecting pytest-timeout<3.0.0,>=2.1.0 (from langfuse)
+      Downloading pytest_timeout-2.1.0-py3-none-any.whl (12 kB)
+    Requirement already satisfied: python-dateutil<3.0.0,>=2.8.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (2.8.2)
+    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic==1.10.7->langfuse) (4.7.1)
+    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (2023.5.7)
+    Collecting httpcore<0.18.0,>=0.15.0 (from httpx<0.25.0,>=0.15.4->langfuse)
+      Downloading httpcore-0.17.3-py3-none-any.whl (74 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m74.5/74.5 kB[0m [31m3.2 MB/s[0m eta [36m0:00:00[0m
+    [?25hRequirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (3.4)
+    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (1.3.0)
+    Requirement already satisfied: iniconfig in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (2.0.0)
+    Requirement already satisfied: packaging in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (23.1)
+    Requirement already satisfied: pluggy<2.0,>=0.12 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (1.2.0)
+    Requirement already satisfied: exceptiongroup>=1.0.0rc8 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (1.1.2)
+    Requirement already satisfied: tomli>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (2.0.1)
+    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil<3.0.0,>=2.8.0->langfuse) (1.16.0)
+    Collecting h11<0.15,>=0.13 (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse)
+      Downloading h11-0.14.0-py3-none-any.whl (58 kB)
+    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m58.3/58.3 kB[0m [31m4.5 MB/s[0m eta [36m0:00:00[0m
+    [?25hRequirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (3.7.1)
+    Installing collected packages: pytest, pydantic, h11, pytest-timeout, pytest-asyncio, httpcore, httpx, langfuse
+      Attempting uninstall: pytest
+        Found existing installation: pytest 7.2.2
+        Uninstalling pytest-7.2.2:
+          Successfully uninstalled pytest-7.2.2
+      Attempting uninstall: pydantic
+        Found existing installation: pydantic 1.10.11
+        Uninstalling pydantic-1.10.11:
+          Successfully uninstalled pydantic-1.10.11
+    Successfully installed h11-0.14.0 httpcore-0.17.3 httpx-0.24.1 langfuse-0.0.40 pydantic-1.10.7 pytest-7.4.0 pytest-asyncio-0.21.1 pytest-timeout-2.1.0
 
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
@@ -149,9 +165,6 @@ span = trace.span(CreateSpan(
 )
 ```
 
-    span body id=None trace_id_type=None name='embedding-search' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533465) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533560) metadata={'database': 'pinecone'} input={'query': 'This document entails the OKR goals for ACME'} output={'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"} level=None status_message=None <class 'langfuse.api.model.CreateSpan'> {'query': 'This document entails the OKR goals for ACME'} {'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
-
-
 ### Generation
 
 Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
@@ -192,16 +205,6 @@ trace.generation(CreateGeneration(
     metadata={"interface": "whatsapp"}
 ))
 ```
-
-    generation:  id=None trace_id_type=None name='summary-generation' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 559214) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 560850) completion_start_time=None model='gpt-3.5-turbo' model_parameters={'maxTokens': '1000', 'temperature': '0.9'} prompt=[{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals...'}] metadata={'interface': 'whatsapp'} completion='The Q3 OKRs contain goals for multiple teams...' usage=Usage(prompt_tokens=50, completion_tokens=49, total_tokens=None) level=None status_message=None ff1214d9-349a-4461-b491-cedebc31319d
-
-
-
-
-
-    <langfuse.client.StatefulGenerationClient at 0x7dfb47abf9d0>
-
-
 
 ### Events
 
@@ -256,10 +259,6 @@ event = span.event(CreateEvent(name = "get-user-profile"))
 generation = span.generation(CreateGeneration(name = "chat-completion"))
 ```
 
-    span body id=None trace_id_type=None name='chat-interaction' start_time=None end_time=None metadata=None input=None output=None level=None status_message=None <class 'langfuse.api.model.CreateSpan'> None None
-    generation:  id=None trace_id_type=None name='chat-completion' start_time=None end_time=None completion_start_time=None model=None model_parameters=None prompt=None metadata=None completion=None usage=None level=None status_message=None ed1a5f59-72f2-43f9-8675-00610248d12c
-
-
 ## 3. Collect scores
 
 Scores are used to evaluate executions/traces. They are always attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be atatched to the observation to enable evaluating it specifically.
@@ -283,25 +282,11 @@ trace.score(CreateScore(
 ```
 
 
-
-
-    <langfuse.client.StatefulClient at 0x7dfb2a5bbc10>
-
-
-
-
 ```python
 result = await langfuse.async_flush()
 print(result)
 ```
 
-    running task:  <function Langfuse.trace.<locals>.<lambda> at 0x7dfb2a56f370> () {}
-    parent id='clka6txk40003mg08yr9br90i' timestamp=datetime.datetime(2023, 7, 19, 20, 40, 28, 707000, tzinfo=datetime.timezone.utc) external_id=None name='docs-retrieval' user_id='user__935d7d1d-8625-4ef4-8651-544613e7bd22' metadata={'env': 'production', 'email': 'user@langfuse.com'}
-    new_body id='fa1a6271-4fc8-4b95-b9ee-b750c05ed425' trace_id_type=None name='embedding-search' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533465) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533560) metadata={'database': 'pinecone'} input={'query': 'This document entails the OKR goals for ACME'} output={'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"} level=None status_message=None trace_id='clka6txk40003mg08yr9br90i'
-    submitting span:  id='fa1a6271-4fc8-4b95-b9ee-b750c05ed425' trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='embedding-search' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533465) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 533560) metadata={'database': 'pinecone'} input={'query': 'This document entails the OKR goals for ACME'} output={'response': "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"} level=None status_message=None parent_observation_id=None
-    submitting generation:  id='ebc1170a-14fc-48a8-8a39-6533a57f62da' trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='summary-generation' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 559214) end_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 560850) completion_start_time=None model='gpt-3.5-turbo' model_parameters={'maxTokens': '1000', 'temperature': '0.9'} prompt=[{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals...'}] metadata={'interface': 'whatsapp'} completion='The Q3 OKRs contain goals for multiple teams...' usage=LlmUsage(prompt_tokens=50, completion_tokens=49, total_tokens=None) level=None status_message=None parent_observation_id=None
-    submitting score:  id=None trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='user-explicit-feedback' value=1 observation_id=None comment='I like how personalized the response is'
-    submitting event:  id='9ffafe1a-2d27-4f15-a82f-77e8007a7c68' trace_id='clka6txk40003mg08yr9br90i' trace_id_type=None name='chat-docs-retrieval' start_time=datetime.datetime(2023, 7, 19, 20, 40, 27, 545172) metadata={'key': 'value'} input={'key': 'value'} output={'key': 'value'} level=None status_message=None parent_observation_id='fa1a6271-4fc8-4b95-b9ee-b750c05ed425'
     {'status': 'success'}
 
 
