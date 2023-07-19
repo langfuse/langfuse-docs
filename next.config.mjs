@@ -28,6 +28,11 @@ export default withNextra({
       source: "/analytics",
       destination: "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY",
       permanent: false,
-    }
+    },
+    {
+      source: "/observability",
+      destination: "/integrations",
+      permanent: false,
+    },
   ]
 });
