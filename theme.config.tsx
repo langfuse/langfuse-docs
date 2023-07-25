@@ -67,7 +67,10 @@ const config: DocsThemeConfig = {
               : "Open-source observability for LLM applications"
           }
         />
-        <meta property="og:image" content="https://langfuse.com/og.png" />
+        <meta
+          property="og:image"
+          content={frontMatter.ogImage ?? "https://langfuse.com/og.png"}
+        />
       </>
     );
   },

@@ -1,0 +1,45 @@
+---
+description: The latest updates and releases from Langfuse.
+---
+
+import { getPagesUnderRoute } from "nextra/context";
+import Link from "next/link";
+
+export function BlogItems() {
+  return getPagesUnderRoute("/blog").map((page) => {
+    return (
+      <Link key={page.route} href={page.route} className="block mb-8 group">
+        <div className="block font-semibold mt-8 text-2xl opacity-90 group-hover:opacity-100">
+          {page.meta?.title || page.frontMatter?.title || page.name}
+        </div>
+        <div className="opacity-80 mt-2 group-hover:opacity-100">
+          {page.frontMatter?.description} <span>Read more →</span>
+        </div>
+        <div className="mt-2">
+          {page.frontMatter?.tag ? (
+            <span className="block sm:inline-block opacity-80 text-xs py-0.5 px-1 bg-gray-200 rounded-sm mr-2">
+              {page.frontMatter.tag}
+            </span>
+          ) : null}
+          {page.frontMatter?.date ? (
+            <span className="block sm:inline-block opacity-50 text-sm">
+              {page.frontMatter.date}
+            </span>
+          ) : null}
+        </div>
+      </Link>
+    );
+  });
+}
+
+<div className="text-center">
+
+# Blog
+
+<span>The latest updates and releases from Langfuse</span>
+
+</div>
+
+---
+
+<BlogItems />
