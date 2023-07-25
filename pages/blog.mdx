@@ -15,9 +15,18 @@ export function BlogItems() {
         <div className="opacity-80 mt-2 group-hover:opacity-100">
           {page.frontMatter?.description} <span>Read more →</span>
         </div>
-        {page.frontMatter?.date ? (
-          <div className="opacity-50 text-sm mt-2">{page.frontMatter.date}</div>
-        ) : null}
+        <div className="mt-2">
+          {page.frontMatter?.tag ? (
+            <span className="block sm:inline-block opacity-80 text-xs py-0.5 px-1 bg-gray-200 rounded-sm mr-2">
+              {page.frontMatter.tag}
+            </span>
+          ) : null}
+          {page.frontMatter?.date ? (
+            <span className="block sm:inline-block opacity-50 text-sm">
+              {page.frontMatter.date}
+            </span>
+          ) : null}
+        </div>
       </Link>
     );
   });
