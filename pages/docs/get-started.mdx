@@ -112,32 +112,30 @@ langfuse.generation({
 </Tab>
 <Tab>
 
-The Langfuse Python SDK is hosted in a private pypi index by [Fern](https://buildwithfern.com/). To install the sdk, you need to specify the index.
-
 ```bash
-pip install --extra-index-url https://pypi.buildwithfern.com finto-fern-langfuse
+pip install langfuse
 ```
 
 Example usage, most of the paramters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
 
 ```python filename="server.py"
-from finto.client import FintoLangfuse
+from langfuse import Langfuse
+from langfuse.api.model import CreateGeneration
 
-client = FintoLangfuse(
-  environment = "https://cloud.langfuse.com", # or any custom host, e.g. http://localhost:3030
-  username = "pk-lf-..." # public key
-  password = "sk-sk-..." # secret key
+langfuse = Langfuse(
+  private_key="pk-lf-...",
+  secret_key="sk-sk-...",
+  host="https://cloud.langfuse.com"
 )
 
-generationStartTime = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+generationStartTime = datetime.datetime.now()
 
 # chatCompletion = callLLM(prompt)
 
-generation = client.generations.log(
-  request=CreateLog(
+generation = langfuse.generation(CreateGeneration(
     name="chat-completion",
     startTime=generationStartTime,
-    endTime=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    endTime=datetime.datetime.now(),
     model="gpt-3.5-turbo",
     modelParameters= {
       "temperature":0.9,
@@ -153,8 +151,7 @@ generation = client.generations.log(
     metadata= {
      "userid":'user__935d7d1d-8625-4ef4-8651-544613e7bd22',
     }
-  )
-)
+))
 ```
 
 </Tab>
@@ -206,13 +203,12 @@ export default function UserFeedbackComponent(props: { traceId: string }) {
 You can use the Python SDK to report a score via your Python server. Alternatively, you can use the Typescript SDK or REST API to directly report scores from the frontend.
 
 ```python filename="server.py"
-score = client.score.create(
-  request = {
-    "traceId": trace.id,
-    "name": 'user-explicit-feedback',
-    "value": 1,
-    "observationId": llmCall.id,
-  }
+from langfuse.api.model import CreateScore
+
+score = generation.score(CreateScore(
+    name='user-explicit-feedback',
+    value=1,
+    comment="I like how personalized the response is"
 )
 ```
 
