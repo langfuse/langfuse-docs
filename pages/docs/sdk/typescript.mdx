@@ -63,7 +63,7 @@ Hint for Next.js users: prefix the public key with `NEXT_PUBLIC_` to make it ava
   - Observations can be of different types
     - [Events](#event) are the basic building block. They are used to track discrete events in a trace.
     - [Spans](#spans) represent durations of units of work in a trace.
-    - [Generations](#generation) are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+    - [Generations](#generation) are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
   - Observations can be [nested](#nesting-of-observations).
 
 ### Trace
@@ -89,9 +89,9 @@ const trace = langfuse.trace({
 
 ### Flushing
 
-By deafult, the langfuse Typescript SDK is asynchronous to not add latency. All objects returned by the SDK have a `data` property that is a promise.
+By deafult, the Langfuse Typescript SDK is asynchronous to not add latency. All objects returned by the SDK have a `data` property that is a promise.
 
-In short lived execution environments (e.g. serverless functions), it is recommended to flush the langfuse client to make sure all events are successfully sent to the langfuse server before the execution ends. The langfuse client keeps track of all pending requests and `langfuse.flush()` returns a promise that resolves when all requests are completed.
+In short lived execution environments (e.g. serverless functions), it is recommended to flush the Langfuse client to make sure all events are successfully sent to the Langfuse server before the execution ends. The Langfuse client keeps track of all pending requests and `langfuse.flush()` returns a promise that resolves when all requests are completed.
 
 ```typescript filename="api.ts"
 await langfuse.flush();
@@ -191,7 +191,7 @@ trace.span({
 
 #### Generation
 
-Generations are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+Generations are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
 
 > `generation.log()` take the following parameters:
 >
@@ -333,7 +333,7 @@ Scores can be modified by both Langfuse and LangfuseWeb clients.
 langfuseWeb returns a promise that resolves when the score is created. Commonly the promise is awaited in the frontend to ensure that the score is created before the UI response is sent to the user.
 
 ```typescript filename="frontend.ts"
-// with langfuse trace id
+// with Langfuse trace id
 await langfuseWeb.score({
   traceId: message.traceId,
   name: "user-feedback",

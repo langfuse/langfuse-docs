@@ -5,58 +5,12 @@
 
 ## 1. Initializing the client
 
-The langfuse SDKs are hosted on the pypi index.
+The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
 %pip install langfuse
 ```
-
-    Collecting langfuse
-      Downloading langfuse-0.0.40-py3-none-any.whl (34 kB)
-    Requirement already satisfied: attrs>=21.3.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (23.1.0)
-    Collecting httpx<0.25.0,>=0.15.4 (from langfuse)
-      Downloading httpx-0.24.1-py3-none-any.whl (75 kB)
-    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m75.4/75.4 kB[0m [31m2.6 MB/s[0m eta [36m0:00:00[0m
-    [?25hCollecting pydantic==1.10.7 (from langfuse)
-      Downloading pydantic-1.10.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.1 MB)
-    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m3.1/3.1 MB[0m [31m10.8 MB/s[0m eta [36m0:00:00[0m
-    [?25hCollecting pytest<8.0.0,>=7.4.0 (from langfuse)
-      Downloading pytest-7.4.0-py3-none-any.whl (323 kB)
-    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m323.6/323.6 kB[0m [31m9.0 MB/s[0m eta [36m0:00:00[0m
-    [?25hCollecting pytest-asyncio<0.22.0,>=0.21.1 (from langfuse)
-      Downloading pytest_asyncio-0.21.1-py3-none-any.whl (13 kB)
-    Collecting pytest-timeout<3.0.0,>=2.1.0 (from langfuse)
-      Downloading pytest_timeout-2.1.0-py3-none-any.whl (12 kB)
-    Requirement already satisfied: python-dateutil<3.0.0,>=2.8.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (2.8.2)
-    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic==1.10.7->langfuse) (4.7.1)
-    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (2023.5.7)
-    Collecting httpcore<0.18.0,>=0.15.0 (from httpx<0.25.0,>=0.15.4->langfuse)
-      Downloading httpcore-0.17.3-py3-none-any.whl (74 kB)
-    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m74.5/74.5 kB[0m [31m3.2 MB/s[0m eta [36m0:00:00[0m
-    [?25hRequirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (3.4)
-    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (1.3.0)
-    Requirement already satisfied: iniconfig in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (2.0.0)
-    Requirement already satisfied: packaging in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (23.1)
-    Requirement already satisfied: pluggy<2.0,>=0.12 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (1.2.0)
-    Requirement already satisfied: exceptiongroup>=1.0.0rc8 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (1.1.2)
-    Requirement already satisfied: tomli>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from pytest<8.0.0,>=7.4.0->langfuse) (2.0.1)
-    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil<3.0.0,>=2.8.0->langfuse) (1.16.0)
-    Collecting h11<0.15,>=0.13 (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse)
-      Downloading h11-0.14.0-py3-none-any.whl (58 kB)
-    [2K     [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m58.3/58.3 kB[0m [31m4.5 MB/s[0m eta [36m0:00:00[0m
-    [?25hRequirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (3.7.1)
-    Installing collected packages: pytest, pydantic, h11, pytest-timeout, pytest-asyncio, httpcore, httpx, langfuse
-      Attempting uninstall: pytest
-        Found existing installation: pytest 7.2.2
-        Uninstalling pytest-7.2.2:
-          Successfully uninstalled pytest-7.2.2
-      Attempting uninstall: pydantic
-        Found existing installation: pydantic 1.10.11
-        Uninstalling pydantic-1.10.11:
-          Successfully uninstalled pydantic-1.10.11
-    Successfully installed h11-0.14.0 httpcore-0.17.3 httpx-0.24.1 langfuse-0.0.40 pydantic-1.10.7 pytest-7.4.0 pytest-asyncio-0.21.1 pytest-timeout-2.1.0
-
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
 
@@ -76,7 +30,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
 ### Flushing
 
-The langfuse client is built asynchronous to not add latency. Only when calling the flush function, the network requests to the langfuse backend will be executed.
+The Langfuse client is built asynchronous to not add latency. Only when calling the flush function, the network requests to the langfuse backend will be executed.
 
 Langfuse offers two different fush functions. `async_flush` returns a coroutine and hence can be used in async contexts such as this Notebook. `flush` is a synchronous function and takes care of asynchronous code in the background and is blocking.
 
@@ -112,7 +66,7 @@ Traces can be created and updated.
 
 - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
-- `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the langfuse `traceId`.
+- `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the Langfuse `traceId`.
 - `userId` (optional): the id of the user who triggered the execution.
 
 
