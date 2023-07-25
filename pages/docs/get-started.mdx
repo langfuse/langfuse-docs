@@ -120,7 +120,7 @@ Example usage, most of the paramters are optional and depend on the use case. Fo
 
 ```python filename="server.py"
 from langfuse import Langfuse
-from langfuse.api.model import CreateGeneration
+from langfuse.api.model import Generation
 
 langfuse = Langfuse(
   private_key="pk-lf-...",
@@ -132,7 +132,7 @@ generationStartTime = datetime.datetime.now()
 
 # chatCompletion = callLLM(prompt)
 
-generation = langfuse.generation(CreateGeneration(
+generation = langfuse.generation(Generation(
     name="chat-completion",
     startTime=generationStartTime,
     endTime=datetime.datetime.now(),
