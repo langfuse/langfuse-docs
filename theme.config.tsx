@@ -13,8 +13,8 @@ const config: DocsThemeConfig = {
   logo: <Logo />,
   darkMode: false,
   nextThemes: {
-    defaultTheme: "light",
-    forcedTheme: "light",
+    defaultTheme: "dark",
+    forcedTheme: "dark",
     storageKey: "nextra-theme-docs-color-mode",
   },
   project: {
@@ -27,13 +27,13 @@ const config: DocsThemeConfig = {
     "https://github.com/finto-technologies/langfuse-docs/tree/main",
   footer: {
     text: (
-      <div>
+      <div className="flex flex-col items-center md:items-start">
         <div className="mb-2">
           {footerNav.map((nav) => (
             <Link
               key={nav.name}
               href={nav.href}
-              className="px-2 first-of-type:pl-0 border-l border-gray-500 first-of-type:border-l-0 rounded-none leading-6 text-gray-600 hover:text-gray-900"
+              className="px-2 first-of-type:pl-0 border-l border-gray-500 first-of-type:border-l-0 rounded-none leading-6 hover:text-gray-100"
             >
               {nav.name}
             </Link>
