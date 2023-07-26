@@ -7,7 +7,13 @@ Langfuse integrates with Langchain using the [Langchain Callbacks](https://pytho
 
 E.g. to trace the full execution of an agent, you just need to add the Langfuse callback when executing the Langchain Agent:
 
-```
+```python /callbacks=[handler]/
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
+
+# Langchain implementation
+
+# Add handler as callback when running the Langchain agent
 agent.run("<user_input>", callbacks=[handler])
 ```
 
