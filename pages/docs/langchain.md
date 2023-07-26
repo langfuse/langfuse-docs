@@ -5,17 +5,32 @@
 
 Langfuse integrates with Langchain using the [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
 
-E.g. to trace the full execution of an agent, you just need to add the Langfuse callback when executing the Langchain Agent:
+Add the handler as a callback when running your Langchain model/chain/agent:
 
 ```python /callbacks=[handler]/
+# Initialize Langfuse handler
 from langfuse.callback import CallbackHandler
-handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
-
-# Langchain implementation
-
-# Add handler as callback when running the Langchain agent
-agent.run("<user_input>", callbacks=[handler])
+handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+ 
+# Setup Langchain
+from langchain.chains import LLMChain
+...
+chain = LLMChain(llm=llm, prompt=prompt)
+ 
+# Add Langfuse handler as callback
+chain.run(input="<user_input", callbacks=[handler])
 ```
+
+The Langfuse `CallbackHandler` tracks the following actions when using Langchain:
+
+- Chains: `on_chain_start`, `on_chain_end`. `on_chain_error`
+- Agents: `on_agent_start`, `on_agent_action`, `on_agent_finish`, `on_agent_end`
+- Tools: `on_tool_start`, `on_tool_end`, `on_tool_error`
+- Retriever: `on_retriever_start`, `on_retriever_end`
+- ChatModel: `on_chat_model_start`,
+- LLM: `on_llm_start`, `on_llm_end`, `on_llm_error`
+
+Missing some useful information/context in Langfuse? Join the [Discord](https://discord.gg/7NXusRtqYU) or share your feedback directly with us: feedback@langfuse.com
 
 ## Notebook Setup
 
