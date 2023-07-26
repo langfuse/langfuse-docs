@@ -12,7 +12,7 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 - Python: generate docs from [python_sdk_docs.ipynb](/src/python_sdk_docs.ipynb):
 
-  `jupyter nbconvert --to markdown src/python_sdk_docs.ipynb`
+  `jupyter nbconvert --to markdown src/ipynb/*.ipynb`
 
 ## API reference
 
