@@ -10,9 +10,9 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 ## SDK docs
 
-- Python: generate docs from [python_sdk_docs.ipynb](/src/python_sdk_docs.ipynb):
-
-  `jupyter nbconvert --to markdown src/ipynb/*.ipynb`
+- Python docs are in jupyter notebooks src/ipynb/\*.ipynb; we use `jupyter nbconvert` to convert them to markdown after making changes to the notebooks
+  1. Load python shell/env which has jupyter installed, e.g. `pyenv shell anaconda3-2023.03`
+  2. Convert all notebooks: `jupyter nbconvert --to markdown src/ipynb/*.ipynb`
 
 ## API reference
 
