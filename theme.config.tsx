@@ -18,13 +18,12 @@ const config: DocsThemeConfig = {
     storageKey: "nextra-theme-docs-color-mode",
   },
   project: {
-    link: "https://github.com/finto-technologies/langfuse",
+    link: "https://github.com/langfuse/langfuse",
   },
   chat: {
     link: "https://discord.gg/7NXusRtqYU",
   },
-  docsRepositoryBase:
-    "https://github.com/finto-technologies/langfuse-docs/tree/main",
+  docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
     text: (
       <div className="flex flex-col items-center md:items-start">
@@ -46,7 +45,12 @@ const config: DocsThemeConfig = {
   useNextSeoProps() {
     const { asPath } = useRouter();
     return {
-      titleTemplate: asPath !== "/" ? "%s - langfuse" : "langfuse",
+      titleTemplate:
+        asPath === "/"
+          ? "Langfuse"
+          : asPath.startsWith("/blog/")
+          ? "%s - Langfuse Blog"
+          : "%s - Langfuse",
     };
   },
   head: () => {
