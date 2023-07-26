@@ -17,14 +17,12 @@ export function BlogItems() {
         </div>
         <div className="mt-2">
           {page.frontMatter?.tag ? (
-            <span className="block sm:inline-block opacity-80 text-xs py-0.5 px-1 bg-gray-200 rounded-sm mr-2">
+            <span className="opacity-80 text-xs py-1 px-2 bg-gray-200 rounded-sm mr-2">
               {page.frontMatter.tag}
             </span>
           ) : null}
           {page.frontMatter?.date ? (
-            <span className="block sm:inline-block opacity-50 text-sm">
-              {page.frontMatter.date}
-            </span>
+            <span className="opacity-50 text-sm">{page.frontMatter.date}</span>
           ) : null}
         </div>
       </Link>
