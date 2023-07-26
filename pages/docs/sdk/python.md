@@ -5,7 +5,7 @@
 
 This section explains, how you can report LLM data to Langfuse while owning the APIs to your infrastructure such as LLM providers or databases.
 
-Using langchain? Use the [langchain integration](/docs/langchain)
+Using langchain? Use the [langchain integration](https://langfuse.com/docs/langchain)
 
 ## 1. Initializing the client
 
