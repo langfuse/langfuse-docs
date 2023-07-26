@@ -56,21 +56,30 @@ const config: DocsThemeConfig = {
       "https://langfuse.com" +
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
+    const description =
+      frontMatter.description ?? asPath !== "/"
+        ? "langfuse documentation"
+        : "Open-source analytics for LLM applications";
+
+    const image = frontMatter.ogImage
+      ? "https://langfuse.com" + frontMatter.ogImage
+      : "https://langfuse.com/og.png";
+
     return (
       <>
+        <meta name="theme-color" content="#000" />
         <meta property="og:url" content={url} />
-        <meta
-          property="og:description"
-          content={
-            frontMatter.description ?? asPath !== "/"
-              ? "langfuse documentation"
-              : "Open-source observability for LLM applications"
-          }
-        />
-        <meta
-          property="og:image"
-          content={frontMatter.ogImage ?? "https://langfuse.com/og.png"}
-        />
+        <meta httpEquiv="Content-Language" content="en" />
+
+        <meta name="description" content={description} />
+        <meta property="og:description" content={description} />
+
+        <meta property="og:image" content={image} />
+        <meta property="twitter:image" content={image} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site:domain" content="langfuse.com" />
+        <meta name="twitter:url" content="https://langfuse.com" />
       </>
     );
   },
