@@ -61,7 +61,7 @@ To run Langfuse in production, see [self-host instructions](self-host.mdx)
 
 ### Add tracing to your backend
 
-<Tabs items={["Typescript", "Python", "API"]}>
+<Tabs items={["Typescript", "Python", "Langchain", "API"]}>
 <Tab>
 
 ```sh npm2yarn
@@ -153,6 +153,29 @@ generation = langfuse.generation(Generation(
     }
 ))
 ```
+
+</Tab>
+<Tab>
+
+Install the Langfuse Python SDK
+
+```bash
+pip install langfuse
+```
+
+Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
+
+```python /callbacks=[handler]/
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
+
+# Langchain implementation
+
+# Add handler as callback when running the Langchain agent
+agent.run("<user_input>", callbacks=[handler])
+```
+
+For more examples, see the [Langchain integration docs](/docs/langchain).
 
 </Tab>
 <Tab>
