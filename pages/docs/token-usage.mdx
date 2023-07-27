@@ -1,0 +1,34 @@
+# Token usage
+
+Token usage (proxy for cost) is used across Langfuse. It is available on `generations`.
+
+```
+generation = {
+  ...
+  usage: {
+    promptTokens: number,
+    completionTokens: number,
+    totalTokens: number,
+  },
+  ...
+}
+```
+
+## Ingestion of usage
+
+During ingestion of LLM generations to Langfuse, the usage can be added to the generation object during create or update.
+
+LLM-APIs often return usage information in the response. It is recommended to use this information for ingestion for the most accurate token usage reporting.
+
+## Built-in token calculation
+
+For ingested generations without usage attributes, Langfuse automatically calculates token amounts. The correct tokenizer is selected based on the `model` attribute of the generation.
+
+This is helpful for LLM-APIs that do not return usage information in the response, e.g., when streaming OpenAI completions.
+
+| Model     | Tokenizer     | Package                   |
+| --------- | ------------- | ------------------------- |
+| `gpt*`    | `cl100k_base` | `tiktoken`                |
+| `claude*` | `claude`      | `@anthropic-ai/tokenizer` |
+
+Need another tokenizer? Open an issue on [GitHub](https://github.com/langfuse/langfuse).
