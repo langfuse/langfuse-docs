@@ -29,6 +29,10 @@ const config: DocsThemeConfig = {
   chat: {
     link: "https://discord.gg/7NXusRtqYU",
   },
+  sidebar: {
+    autoCollapse: true,
+    defaultMenuCollapseLevel: 1,
+  },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
     text: (
