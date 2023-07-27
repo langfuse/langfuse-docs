@@ -147,9 +147,7 @@ export default function FeedbackPreview() {
           </Button>
         </div>
       </div>
-      <div className="font-bold text-xs text-gray-300 mb-2 mt-5">
-        Debugging UI
-      </div>
+      <div className="font-bold text-xs text-gray-300 mb-2 mt-5">Trace</div>
       <DataTable columns={columns} data={data} />
     </div>
   );
