@@ -19,6 +19,12 @@ const config: DocsThemeConfig = {
   },
   project: {
     link: "https://github.com/langfuse/langfuse",
+    icon: (
+      <img
+        alt="Langfuse Github stars"
+        src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
+      />
+    ),
   },
   chat: {
     link: "https://discord.gg/7NXusRtqYU",
