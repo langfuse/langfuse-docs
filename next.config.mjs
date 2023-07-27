@@ -39,5 +39,10 @@ export default withNextra({
       destination: "/docs/integrations",
       permanent: false,
     },
+    {
+      source: "/docs/reference",
+      destination: "/docs/api",
+      permanent: false,
+    }
   ]
 });
