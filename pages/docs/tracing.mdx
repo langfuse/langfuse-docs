@@ -4,7 +4,7 @@ LLM apps use increasingly complex abstractions (chains, agents with tools, advan
 
 ## Introduction
 
-**Objects**
+Langfuse objects:
 
 - Each backend execution is logged with a single `trace`.
 - Each trace can contain multiple `observations` to log the individual steps of the execution.
@@ -14,11 +14,19 @@ LLM apps use increasingly complex abstractions (chains, agents with tools, advan
     - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage](/docs/token-usage) is automatically calculated.
   - Observations can be nested.
 
-## Ingestion
+Follow the integration docs to send traces to Langfuse. You can use:
 
-Follow the integration docs to send traces to Langfuse. You can use the [Langchain integration](/docs/langchain), the [Langfuse SDKs](/docs/sdk), or the [API](/docs/api).
+- [Langfuse SDKs](/docs/sdk)
+- [Langchain integration](/docs/langchain)
+- [API](/docs/api)
 
 ## Example
+
+Automatically traced with Langchain integration:
+
+<div className="rounded-sm lg:rounded-xl overflow-hidden w-fit mt-3">
+  ![Agent trace](/images/agent-trace.gif)
+</div>
 
 ## Detect and fix problems
 
