@@ -43,6 +43,11 @@ export default withNextra({
       source: "/docs/reference",
       destination: "/docs/api",
       permanent: false,
+    },
+    {
+      source: "/docs/debugging-ui",
+      destination: "/docs/tracing",
+      permanent: false,
     }
   ]
 });
