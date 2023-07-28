@@ -1,3 +1,7 @@
+---
+description: Langchain users can integrated with Langfuse in seconds using the integration
+---
+
 # Langchain integration (Python)
 
 - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_langchain_integration_python.ipynb)

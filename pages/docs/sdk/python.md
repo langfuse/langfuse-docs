@@ -1,3 +1,7 @@
+---
+description: Fully async and typed Python SDK. Uses Pydantic objects for verification.
+---
+
 # Python SDK
 
 [![PyPI](https://img.shields.io/pypi/v/langfuse?style=flat-square)](https://pypi.org/project/langfuse/)
