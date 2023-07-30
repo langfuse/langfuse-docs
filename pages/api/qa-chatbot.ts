@@ -162,7 +162,8 @@ export default async function handler(req: Request, res: Response) {
       Context sections:
       ${contextText}
       
-      Answer as markdown (including related code snippets if available)`,
+      Answer as markdown (including related code snippets if available), use highlights.
+      Add links to the context documents. Make sure to only add links that actually exist in the context.`,
     },
     ...messages,
   ];
