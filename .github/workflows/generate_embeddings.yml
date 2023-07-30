@@ -1,0 +1,17 @@
+name: "generate_embeddings"
+on: # run on main branch changes
+  push:
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: supabase/supabase-embeddings-generator@v0.0.x # Update this to the latest version.
+        with:
+          supabase-url: "https://your-project-ref.supabase.co" # Update this to your project URL.
+          supabase-service-role-key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          openai-key: ${{ secrets.OPENAI_KEY }}
+          docs-root-path: "pages" # the path to the root of your md(x) files
