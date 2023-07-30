@@ -1,9 +1,5 @@
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import {
-  Configuration,
-  CreateChatCompletionRequest,
-  OpenAIApi,
-} from "openai-edge";
+import { Configuration, OpenAIApi } from "openai-edge";
 import { createClient } from "@supabase/supabase-js";
 import GPT3Tokenizer from "gpt3-tokenizer";
 import { codeBlock, oneLine } from "common-tags";
@@ -159,12 +155,14 @@ export default async function handler(req: Request, res: Response) {
       You are a very enthusiastic Langfuse representative who loves
       to help people! Given the following sections from the Langfuse
       documentation, answer the question using only that information,
-      outputted in markdown format. If you are unsure and the answer
-      is not explicitly written in the documentation, say
+      outputted in markdown format. Refer to the respective links of the documentation.
+      If you are unsure and the answer is not explicitly written in the documentation, say
       "Sorry, I don't know how to help with that."`}
       
       Context sections:
-      ${contextText}`,
+      ${contextText}
+      
+      Answer as markdown (including related code snippets if available)`,
     },
     ...messages,
   ];
