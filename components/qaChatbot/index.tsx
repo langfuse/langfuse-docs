@@ -4,8 +4,11 @@ import { Message, useChat } from "ai/react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { ChatList } from "./ui/ChatList";
+import { ButtonScrollToBottom } from "./ui/ButtonScrollToBottom";
+import React from "react";
 
 export function Chat() {
+  const ref = React.useRef<HTMLDivElement>(null);
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/qa-chatbot",
   });
@@ -15,11 +18,13 @@ export function Chat() {
     : [welcomeMessage];
 
   return (
-    <div className="flex flex-col p-3 mt-10 h-[70vh] overflow-hidden">
-      <div className="flex-1 flex flex-col gap-4 overflow-y-scroll">
+    <div className="relative flex flex-col p-3 mt-10 h-[70vh] overflow-hidden">
+      <div className="flex-1 flex flex-col gap-4 overflow-y-scroll" ref={ref}>
         <ChatList messages={messagesWithWelcome} />
       </div>
-      <form onSubmit={handleSubmit} className="flex gap-2">
+
+      <form onSubmit={handleSubmit} className="relative flex gap-2">
+        <ButtonScrollToBottom outerDivRef={ref} />
         <Input
           value={input}
           onChange={handleInputChange}
