@@ -79,9 +79,13 @@ import { FileTree } from "nextra/components";
 
 ### Usage reporting
 
-Reporting of conversations, tokens, and aggregated user feedback:
+The reporting helps us to:
 
-<div className="max-w-lg overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
+- Monitor usage (cost control)
+- Understand what new users of Langfuse want to know which helps us to improve the docs
+- Track latency, quality (based on user feedback) and OpenAI errors
+
+<div className="max-w-2xl overflow-hidden mt-5 rounded-xl shadow-lg ring-1 ring-slate-700">
   ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
 </div>
 
@@ -96,7 +100,7 @@ Each response is based on the following steps which can go wrong, be slow or exp
 
 This is how a single trace looks like in Langfuse:
 
-<div className="max-w-3xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
+<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
   ![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)
 </div>
 
@@ -110,9 +114,17 @@ In this example, we can see how we do:
 3. Identification of the root cause of the low-quality response
    > Docs on Langchain integration are not included in embedding similarity search
 
-<div className="max-w-3xl overflow-hidden mt-10 rounded-xl shadow-lg ring-1 ring-slate-700">
+<div className="max-w-2xl overflow-hidden mt-10 rounded-xl shadow-lg ring-1 ring-slate-700">
   ![User feedback collection in
   Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
+</div>
+
+## Why build this?
+
+A user was surprised when I (a human) answered his/her question. It's 2023, a bot was expected. As we added a lot to the docs over the last days, building a retrieval-based chatbot finally made sense to help users explore the project. Also, I love to have an additional production app to dogfood new Langfuse features and demonstrate how Langfuse can be used.
+
+<div className="max-w-2xl overflow-hidden mt-10 rounded-xl shadow-lg ring-1 ring-slate-700">
+  ![User requesting chatbot](/images/blog/docs-qa-chatbot/user_message.jpg)
 </div>
 
 ## Get in touch
