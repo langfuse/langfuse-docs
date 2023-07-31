@@ -164,6 +164,7 @@ export default async function handler(req: Request, res: Response) {
       Context END
       
       Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
+      Use emojis in your answers.
       Only use information that is available in the context. If you are unsure and the answer is not explicitly written in the documentation, say
       "Sorry, I don't know how to help with that."`,
     },
