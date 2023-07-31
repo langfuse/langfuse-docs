@@ -90,8 +90,8 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
   };
 
   return (
-    <div className="codeblock relative w-full bg-zinc-950 font-sans">
-      <div className="flex w-full items-center justify-between bg-zinc-800 px-6 py-2 pr-4 text-zinc-100">
+    <div className="codeblock relative w-full bg-zinc-950 font-sans my-3">
+      <div className="flex w-full items-center justify-between bg-zinc-800 px-6 pr-4 text-zinc-100">
         <span className="text-xs lowercase">{language}</span>
         <div className="flex items-center space-x-1">
           <Button
@@ -100,7 +100,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
             onClick={downloadAsFile}
             size="icon"
           >
-            <Download />
+            <Download className="h-4 w-4" />
             <span className="sr-only">Download</span>
           </Button>
           <Button
@@ -109,7 +109,11 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
             className="text-xs hover:bg-zinc-800 focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0"
             onClick={onCopy}
           >
-            {isCopied ? <Check /> : <Copy />}
+            {isCopied ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
             <span className="sr-only">Copy code</span>
           </Button>
         </div>
@@ -118,17 +122,17 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
         language={language}
         style={coldarkDark}
         PreTag="div"
-        showLineNumbers
         customStyle={{
           margin: 0,
           width: "100%",
           background: "transparent",
-          padding: "1.5rem 1rem",
+          padding: "1rem 1rem",
         }}
         codeTagProps={{
           style: {
             fontSize: "0.9rem",
             fontFamily: "var(--font-mono)",
+            display: "block",
           },
         }}
       >

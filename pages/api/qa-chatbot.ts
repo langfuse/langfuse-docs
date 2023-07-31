@@ -155,15 +155,17 @@ export default async function handler(req: Request, res: Response) {
       You are a very enthusiastic Langfuse representative who loves
       to help people! Given the following sections from the Langfuse
       documentation, answer the question using only that information,
-      outputted in markdown format. Refer to the respective links of the documentation.
-      If you are unsure and the answer is not explicitly written in the documentation, say
-      "Sorry, I don't know how to help with that."`}
-      
-      Context sections:
+      outputted in markdown format. Refer to the respective links of the documentation.`}
+      s
+      Context START
+      """
       ${contextText}
+      """
+      Context END
       
-      Answer as markdown (including related code snippets if available), use highlights.
-      Add links to the context documents. Make sure to only add links that actually exist in the context.`,
+      Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
+      Only use information that is available in the context. If you are unsure and the answer is not explicitly written in the documentation, say
+      "Sorry, I don't know how to help with that."`,
     },
     ...messages,
   ];

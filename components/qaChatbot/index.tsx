@@ -13,9 +13,7 @@ export function Chat() {
     api: "/api/qa-chatbot",
   });
 
-  const messagesWithWelcome: Message[] = messages.length
-    ? messages
-    : [welcomeMessage];
+  const messagesWithWelcome: Message[] = [welcomeMessage, ...messages];
 
   return (
     <div className="relative flex flex-col p-3 mt-10 h-[70vh] overflow-hidden">
@@ -39,20 +37,18 @@ export function Chat() {
 const welcomeMessage: Message = {
   role: "assistant",
   id: "announcement-1",
-  content: `Welcome to our Langfuse chatbot which can answer questions about Langfuse and the Langfuse docs.
-
-**Uses:**
-
-- [supabase/headless-vector-search](https://github.com/supabase/headless-vector-search) for embedding of the Langfuse docs via GitHub Actions
-- pgvector on Supabase
-- Vercel AI SDK
-- GPT-3.5
-- Langfuse (of course)
-
-**Code:**
-
-- Frontend
-- Backend API route
-
-Read our blog post here: https://langfuse.com/blog/llm-chatbot`,
+  content: `Do you have any questions about Langfuse? Ask me!`,
 } as const;
+
+// **Uses:**
+
+// - [supabase/headless-vector-search](https://github.com/supabase/headless-vector-search) to embed the docs via GitHub Actions
+// - Supabase with pgvector
+// - [Vercel AI SDK](https://github.com/vercel-labs/ai)
+// - UI components from [ai-chatbot](https://github.com/vercel-labs/ai-chatbot)
+// - GPT-3.5
+// - Langfuse (of course)
+
+// **Code:**
+// - Frontend
+// - Backend API route
