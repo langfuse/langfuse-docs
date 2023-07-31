@@ -11,9 +11,14 @@ import Link from "next/link";
 
 export interface ChatMessageProps {
   message: Message;
+  conversationId: string;
 }
 
-export function ChatMessage({ message, ...props }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  conversationId,
+  ...props
+}: ChatMessageProps) {
   return (
     <div
       className={cn("group relative mb-4 flex items-start lg:-ml-12")}
@@ -84,7 +89,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
         >
           {message.content}
         </MemoizedReactMarkdown>
-        <ChatMessageActions message={message} />
+        <ChatMessageActions message={message} conversationId={conversationId} />
       </div>
     </div>
   );

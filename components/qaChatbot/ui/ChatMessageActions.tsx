@@ -27,10 +27,12 @@ type Feedback = "positive" | "negative";
 
 interface ChatMessageActionsProps extends React.ComponentProps<"div"> {
   message: Message;
+  conversationId: string;
 }
 
 export function ChatMessageActions({
   message,
+  conversationId,
   className,
   ...props
 }: ChatMessageActionsProps) {
@@ -50,32 +52,32 @@ export function ChatMessageActions({
     comment: string;
   } | null>(null);
 
-  const showFeedbackButtons = message.role === "assistant";
+  const showFeedbackButtons =
+    message.role === "assistant" && conversationId && message.id.length === 35; // Need to wait until server-side langfuse id is available
 
   const handleSubmit = () => {
     if (currentFeedback === "submitting" || !modalState) return;
 
     setCurrentFeedback("submitting");
 
-    // langfuse
-    //   .score({
-    //     traceId: `chat:${chatId}`,
-    //     traceIdType: "EXTERNAL",
-    //     name: "user-feedback",
-    //     value: modalState.feedback === "positive" ? 1 : -1,
-    //     comment: modalState.comment !== "" ? modalState.comment : undefined,
-    //     observationId: message.id,
-    //   })
-    //   .then((res) => {
-    //     setCurrentFeedback(modalState.feedback);
-    //   })
-    //   .catch((err) => {
-    //     toast.error("Something went wrong");
-    //     setCurrentFeedback(null);
-    //   });
+    langfuse
+      .score({
+        traceId: conversationId,
+        traceIdType: "EXTERNAL",
+        name: "user-feedback",
+        value: modalState.feedback === "positive" ? 1 : -1,
+        comment: modalState.comment !== "" ? modalState.comment : undefined,
+        observationId: message.id,
+      })
+      .then(() => {
+        setCurrentFeedback(modalState.feedback);
+      })
+      .catch((err) => {
+        console.error(err);
+        setCurrentFeedback(null);
+      });
 
     // close modal
-    setCurrentFeedback(modalState.feedback);
     setModalState(null);
   };
 
@@ -89,7 +91,7 @@ export function ChatMessageActions({
     >
       {showFeedbackButtons ? (
         <Button
-          variant="ghost"
+          variant={currentFeedback === "positive" ? "secondary" : "ghost"}
           size="iconXs"
           onClick={() =>
             setModalState({
@@ -114,7 +116,7 @@ export function ChatMessageActions({
 
       {showFeedbackButtons ? (
         <Button
-          variant="ghost"
+          variant={currentFeedback === "negative" ? "secondary" : "ghost"}
           size="iconXs"
           onClick={() =>
             setModalState({
