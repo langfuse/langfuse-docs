@@ -1,9 +1,9 @@
 name: "generate_embeddings"
-on: # run on main branch changes
-  push:
-    branches:
-      - qa-search
+on:
   workflow_dispatch:
+  schedule:
+    # Mondays/Thursday at 8am
+    - cron: 0 8 * * 1,4
 
 jobs:
   generate:
