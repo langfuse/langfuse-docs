@@ -18,7 +18,7 @@ export function Chat() {
 
   return (
     <div className="relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden border border-gray-700 rounded-lg">
-      <div className="flex-1 flex flex-col gap-4 overflow-y-scroll" ref={ref}>
+      <div className="flex-1 overflow-y-scroll" ref={ref}>
         <ChatList messages={messagesWithWelcome} />
       </div>
 
