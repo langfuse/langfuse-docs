@@ -37,7 +37,9 @@ export function Chat() {
 const welcomeMessage: Message = {
   role: "assistant",
   id: "announcement-1",
-  content: `Do you have any questions about Langfuse? Ask me!`,
+  content: `Do you have any questions about Langfuse? Ask me!
+
+_Warning: This is a demo. I'm not very smart._`,
 } as const;
 
 // **Uses:**

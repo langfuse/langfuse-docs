@@ -19,14 +19,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
       className={cn("group relative mb-4 flex items-start md:-ml-12")}
       {...props}
     >
-      <div
-        className={cn(
-          "flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow",
-          message.role === "user"
-            ? "bg-background"
-            : "bg-primary text-primary-foreground"
-        )}
-      >
+      <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow bg-background">
         {message.role === "user" ? (
           <User className="h-4 w-4" />
         ) : (
