@@ -25,25 +25,31 @@ const supabaseClient = createClient(
 );
 
 const langfuse = new Langfuse({
-  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
 });
 
 export default async function handler(req: Request, res: Response) {
+  const body = await req.json();
+  console.log(body);
+
   const trace = langfuse.trace({
     name: "qa",
-    metadata: {
-      version: "1.0.0",
-    },
+    externalId: body.conversationId,
   });
 
-  const body = await req.json();
   const messages = body.messages;
 
   const messageSpan = trace.span({
     name: "user-interaction",
     input: messages,
   });
+
+  // Exclude additional fields from being sent to OpenAI
+  const openAiMessages = messages.map(({ content, role }) => ({
+    content,
+    role: role,
+  }));
 
   // get last message
   const sanitizedQuery = messages[messages.length - 1].content.trim();
@@ -168,7 +174,7 @@ export default async function handler(req: Request, res: Response) {
       Only use information that is available in the context. If you are unsure and the answer is not explicitly written in the documentation, say
       "Sorry, I don't know how to help with that."`,
     },
-    ...messages,
+    ...openAiMessages,
   ];
 
   const generation = messageSpan.generation({
@@ -193,8 +199,18 @@ export default async function handler(req: Request, res: Response) {
         endTime: new Date(),
         completion,
       });
+      messageSpan.update({
+        endTime: new Date(),
+        output: {
+          text: completion,
+        },
+      });
       await langfuse.flush();
     },
   });
-  return new StreamingTextResponse(stream);
+  return new StreamingTextResponse(stream, {
+    headers: {
+      "X-Message-Id": messageSpan.id,
+    },
+  });
 }
