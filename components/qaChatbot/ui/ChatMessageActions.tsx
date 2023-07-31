@@ -53,7 +53,7 @@ export function ChatMessageActions({
   } | null>(null);
 
   const showFeedbackButtons =
-    message.role === "assistant" && conversationId && message.id.length === 35; // Need to wait until server-side langfuse id is available
+    message.role === "assistant" && conversationId && message.id.length > 34; // Need to wait until server-side langfuse id is available
 
   const handleSubmit = () => {
     if (currentFeedback === "submitting" || !modalState) return;
