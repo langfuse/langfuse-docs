@@ -14,7 +14,11 @@ export default withNextra({
   experimental: {
     scrollRestoration: true,
   },
-  transpilePackages: ['react-tweet'],
+  transpilePackages: ['react-tweet',
+    'swagger-ui-react',
+    'swagger-client',
+    'react-syntax-highlighter',
+  ],
   rewrites: async () => {
     return [
       {
