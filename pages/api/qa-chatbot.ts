@@ -6,7 +6,7 @@ import { codeBlock, oneLine } from "common-tags";
 import { Langfuse } from "langfuse";
 
 export const config = {
-  runtime: "experimental-edge",
+  runtime: "edge",
 };
 
 const openAIconfig = new Configuration({

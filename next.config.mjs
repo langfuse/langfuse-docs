@@ -8,12 +8,17 @@ const withNextra = nextra({
     remarkPlugins: [remarkGfm],
   },
   defaultShowCopyCode: true,
-  experimental: {
-    scrollRestoration: true,
-  }
 })
 
 export default withNextra({
+  experimental: {
+    scrollRestoration: true,
+  },
+  transpilePackages: ['react-tweet',
+    'swagger-ui-react',
+    'swagger-client',
+    'react-syntax-highlighter',
+  ],
   rewrites: async () => {
     return [
       {
