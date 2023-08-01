@@ -1,4 +1,3 @@
-import { remarkMermaid } from 'remark-mermaid-nextra';
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
 
@@ -6,15 +5,20 @@ const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
   mdxOptions: {
-    remarkPlugins: [remarkMermaid, remarkGfm],
+    remarkPlugins: [remarkGfm],
   },
   defaultShowCopyCode: true,
-  experimental: {
-    scrollRestoration: true,
-  }
 })
 
 export default withNextra({
+  experimental: {
+    scrollRestoration: true,
+  },
+  transpilePackages: ['react-tweet',
+    'swagger-ui-react',
+    'swagger-client',
+    'react-syntax-highlighter',
+  ],
   rewrites: async () => {
     return [
       {
@@ -39,5 +43,15 @@ export default withNextra({
       destination: "/docs/integrations",
       permanent: false,
     },
+    {
+      source: "/docs/reference",
+      destination: "/docs/api",
+      permanent: false,
+    },
+    {
+      source: "/docs/debugging-ui",
+      destination: "/docs/tracing",
+      permanent: false,
+    }
   ]
 });

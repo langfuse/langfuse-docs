@@ -1,6 +1,10 @@
+---
+description: Langfuse tracks token usage for each generation for cost and usage reporting. If tokens are not provided in the generation, Langfuse will automatically calculate the token usage.
+---
+
 # Token usage
 
-Token usage (proxy for cost) is used across Langfuse. It is available on `generations`.
+Token usage numbers are used across the Langfuse interface and reports.
 
 ```
 generation = {
@@ -16,9 +20,7 @@ generation = {
 
 ## Ingestion of usage
 
-During ingestion of LLM generations to Langfuse, the usage can be added to the generation object during create or update.
-
-LLM-APIs often return usage information in the response. It is recommended to use this information for ingestion for the most accurate token usage reporting.
+When ingesting LLM generations into Langfuse you can add token usage numbers to the generation object. If available in the LLM response, this is the preferred way to track usage with Langfuse.
 
 ## Built-in token calculation
 
@@ -26,9 +28,9 @@ For ingested generations without usage attributes, Langfuse automatically calcul
 
 This is helpful for LLM-APIs that do not return usage information in the response, e.g., when streaming OpenAI completions.
 
-| Model     | Tokenizer     | Package                   |
-| --------- | ------------- | ------------------------- |
-| `gpt*`    | `cl100k_base` | `tiktoken`                |
-| `claude*` | `claude`      | `@anthropic-ai/tokenizer` |
+| Model     | Tokenizer     | Package                                                                            |
+| --------- | ------------- | ---------------------------------------------------------------------------------- |
+| `gpt*`    | `cl100k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |
+| `claude*` | `claude`      | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
 
-Need another tokenizer? Open an issue on [GitHub](https://github.com/langfuse/langfuse).
+Need another tokenizer? Create an issue on [GitHub](https://github.com/langfuse/langfuse).

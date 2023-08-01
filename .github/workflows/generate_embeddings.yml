@@ -1,0 +1,18 @@
+name: "generate_embeddings"
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 8am
+    - cron: 0 8 * * *
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: supabase/embeddings-generator@v0.0.5 # Update this to the latest version.
+        with:
+          supabase-url: "https://rrhtvskyolhktityzfhs.supabase.co" # Update this to your project URL.
+          supabase-service-role-key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          openai-key: ${{ secrets.OPENAI_KEY }}
+          docs-root-path: "pages" # the path to the root of your md(x) files

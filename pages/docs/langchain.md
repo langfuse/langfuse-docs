@@ -1,3 +1,7 @@
+---
+description: Langchain users can integrated with Langfuse in seconds using the integration
+---
+
 # Langchain integration (Python)
 
 - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_langchain_integration_python.ipynb)
@@ -86,6 +90,7 @@ from langfuse.callback import CallbackHandler
 
 ### 1. Sequential Chain
 
+![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
 
 
 ```python
@@ -121,6 +126,8 @@ await handler.langfuse.async_flush()
 
 
 ### 2. QA Retrieval
+
+![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
 
 ```python
@@ -190,6 +197,8 @@ await handler.langfuse.async_flush()
 
 
 ### 3. Agent
+
+![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
 
 
 ```python

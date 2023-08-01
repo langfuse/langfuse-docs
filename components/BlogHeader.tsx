@@ -50,6 +50,7 @@ export const Authors = ({
           href={`https://twitter.com/${author.twitter}`}
           className="group"
           target="_blank"
+          key={author.twitter}
         >
           <div className="flex items-center gap-4" key={author.name}>
             <Image
