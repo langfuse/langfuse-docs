@@ -1,0 +1,45 @@
+---
+description: The latest updates and releases from Langfuse.
+---
+
+import { getPagesUnderRoute } from "nextra/context";
+import Link from "next/link";
+import Image from "next/image";
+
+# Guides
+
+<div className="flex flex-col gap-5 mt-8">
+  {getPagesUnderRoute("/docs/guides").map((page) => (
+    <Link key={page.route} href={page.route} className="flex flex-col group p-3 rounded-lg border border-gray-600 hover:border-gray-500 hover:bg-gray-950">
+        <div className="block font-semibold text-xl opacity-90 group-hover:opacity-100">
+          {page.meta?.title || page.frontMatter?.title || page.name}
+        </div>
+        <div className="opacity-80 mt-2 group-hover:opacity-100">
+          {page.frontMatter?.description}
+        </div>w
+        <div className="opacity-80 mt-2 group-hover:opacity-100">
+            Read more →
+        </div>
+       {page.frontMatter?.tag || page.frontMatter?.date || page.frontMatter?.author ? (
+            <div className="flex gap-2 flex-wrap mt-3 items-baseline">
+            {page.frontMatter?.tag ? (
+                <span className="opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded-sm group-hover:opacity-100">
+                {page.frontMatter.tag}
+                </span>
+            ) : null}
+            {page.frontMatter?.date ? (
+                <span className="opacity-60 text-sm group-hover:opacity-100">
+                {page.frontMatter.date}
+                </span>
+            ) : null}
+            {page.frontMatter?.author ? (
+                <span className="opacity-60 text-sm group-hover:opacity-100">
+                by {page.frontMatter.author}
+                </span>
+          ) : null}
+        </div>) : null}
+    </Link>
+
+))}
+
+</div>
