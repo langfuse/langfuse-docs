@@ -56,6 +56,8 @@ const config: DocsThemeConfig = {
           ? "Langfuse"
           : asPath.startsWith("/blog/")
           ? "%s - Langfuse Blog"
+          : asPath.startsWith("/docs/guides/")
+          ? "%s - Langfuse Guides"
           : "%s - Langfuse",
     };
   },
