@@ -28,15 +28,19 @@ Initialize the client with api keys and optionally your environment. In the exam
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-..."
-ENV_PUBLIC_KEY = "pk-lf-..."
+ENV_SECRET_KEY = "sk-lf-1234567890"
+ENV_PUBLIC_KEY = "pk-lf-1234567890"
 ```
+
+#### Async
+Some of our users use async environments in e.g. FastAPI, others want to work in a synchronous environment. We are able to cater both by providing two types of clients. All the functions available via `langfuse_async` return a Coroutine and need to be awaited. Apart from that are the APIs identical.
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import Langfuse, LangfuseAsync
 
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse_sync = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse = LangfuseAsync(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 ```
 
 ## 2. Trace execution of backend
@@ -64,9 +68,9 @@ Traces can be created and updated.
 
 
 ```python
-from langfuse.api.model import CreateTrace
+from langfuse.model import CreateTrace
 
-trace = langfuse.trace(CreateTrace(
+trace = await langfuse.trace(CreateTrace(
     name = "docs-retrieval",
     userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
@@ -94,14 +98,14 @@ Spans represent durations of units of work in a trace. We generated convenient S
 
 ```python
 import datetime
-from langfuse.api.model import CreateSpan
+from langfuse.model import CreateSpan
 
 retrievalStartTime = datetime.datetime.now()
 
 # retrieveDocs = retrieveDoc()
 # ...
 
-span = trace.span(CreateSpan(
+span = await trace.span(CreateSpan(
         name="embedding-search",
         startTime=retrievalStartTime,
         endTime=datetime.datetime.now(),
@@ -132,7 +136,8 @@ Generations are used to log generations of AI model. They contain additional met
 
 
 ```python
-from langfuse.api.model import CreateGeneration, Usage
+from langfuse.model import CreateGeneration, Usage
+
 import datetime
 
 generationStartTime = datetime.datetime.now()
@@ -140,7 +145,7 @@ generationStartTime = datetime.datetime.now()
 # chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
 # ...
 
-trace.generation(CreateGeneration(
+await trace.generation(CreateGeneration(
     name="summary-generation",
     startTime=generationStartTime,
     endTime=datetime.datetime.now(),
@@ -156,7 +161,7 @@ trace.generation(CreateGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7f5b914d52a0>
+    <langfuse.client.StatefulGenerationClientAsync at 0x7d811f537d30>
 
 
 
@@ -174,10 +179,10 @@ Events are used to track discrete events in a trace.
 
 
 ```python
-from langfuse.api.model import CreateEvent
+from langfuse.model import CreateEvent
 import datetime
 
-event = span.event(CreateEvent(
+event = await span.event(CreateEvent(
         name="chat-docs-retrieval",
         startTime=datetime.datetime.now(),
         metadata={"key": "value"},
@@ -207,10 +212,10 @@ Simple example
 
 
 ```python
-trace = langfuse.trace(CreateTrace(name = "chat-app-session"))
-span = trace.span(CreateSpan(name = "chat-interaction"))
-event = span.event(CreateEvent(name = "get-user-profile"))
-generation = span.generation(CreateGeneration(name = "chat-completion"))
+trace = await langfuse.trace(CreateTrace(name = "chat-app-session"))
+span = await trace.span(CreateSpan(name = "chat-interaction"))
+event = await span.event(CreateEvent(name = "get-user-profile"))
+generation = await span.generation(CreateGeneration(name = "chat-completion"))
 ```
 
 ## 3. Collect scores
@@ -225,10 +230,10 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 
 
 ```python
-from langfuse.api.model import CreateScore
+from langfuse.model import CreateScore
 
 
-trace.score(CreateScore(
+await trace.score(CreateScore(
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
@@ -238,33 +243,20 @@ trace.score(CreateScore(
 
 
 
-    <langfuse.client.StatefulClient at 0x7f5b914d6200>
+    <langfuse.client.StatefulClientAsync at 0x7d813b40e380>
 
-
-
-
-```python
-result = await langfuse.async_flush()
-print(result)
-```
-
-    {'status': 'success'}
 
 
 ### Flushing
 
-The Langfuse client is built asynchronous to not add latency. Only when calling the flush function, the network requests to the langfuse backend will be executed.
+The Langfuse client executes network requests in the background so that it is not blocking your API handler in any way. When you close your application, we shut down gracefully and ensure everything is sent to our backend.
 
-Langfuse offers two different fush functions. `async_flush` returns a coroutine and hence can be used in async contexts such as this Notebook. `flush` is a synchronous function and takes care of asynchronous code in the background and is blocking.
+Sometimes, for example in short-lived cloud functions, you want to ensure that the SDK sent everything to our backend. For this, you can use the `flush()` function
 
 
 ```python
-# result = await client.flush()
-# returns a result and executes a coroutine in the background
-
-result = await langfuse.async_flush() # returns a coroutine
-print(result)
+await langfuse.flush() # returns a coroutine
 ```
 
-    {'status': 'success'}
+    None
 
