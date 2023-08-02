@@ -3,6 +3,7 @@ import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { MainContentWrapper } from "./components/DocsWidgets";
 
 const footerNav = [
   { name: "Imprint", href: "/imprint" },
@@ -17,6 +18,20 @@ const config: DocsThemeConfig = {
     forcedTheme: "dark",
     storageKey: "nextra-theme-docs-color-mode",
   },
+  feedback: {
+    content: null,
+  },
+  toc: {
+    extraContent: (
+      <Link
+        href="#docs-feedback"
+        className="nx-text-xs nx-font-medium nx-text-gray-500 hover:nx-text-gray-900 dark:nx-text-gray-400 dark:hover:nx-text-gray-100 contrast-more:nx-text-gray-800 contrast-more:dark:nx-text-gray-50"
+      >
+        Have question or feedback?
+      </Link>
+    ),
+  },
+  main: MainContentWrapper,
   project: {
     link: "https://github.com/langfuse/langfuse",
     icon: (

@@ -13,3 +13,9 @@ const CrispChat = () => {
 };
 
 export default CrispChat;
+
+export const openChat = () => {
+  if (process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID) {
+    Crisp.chat.open();
+  }
+};
