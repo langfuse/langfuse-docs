@@ -103,5 +103,7 @@ const welcomeMessage: Message = {
   id: "announcement-1",
   content: `👋 Do you have any questions about Langfuse? Ask me!
 
+Interested in the architecture of this chatbot? Check out the [blog post](/blog/qa-chatbot-for-langfuse-docs).
+
 _⚠️ Warning: The bot is not very smart and answers might be misleading. If you have a question that the bot cannot answer, ask the founders via the chat widget._`,
 } as const;

@@ -1,0 +1,127 @@
+---
+description: Guide how to use Typescript SDKs to integrate Langfuse into backend and frontend of LLM applications.
+---
+
+import { SiTypescript, SiPython } from "react-icons/si";
+import { BsCode } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import FeedbackPreview from "@/components/feedbackPreview";
+import ObservabilityExamples from "@/components/observabilityExamples/index.mdx";
+
+# Example integration using Typescript SDKs
+
+Langfuse is easy to integrate into your existing LLM applications. It provides SDKs for Typescript and Python, and a REST API. The SDKs are designed to be used in the frontend and backend, and to be extendible to capture the full context of your application.
+
+## 1. Observe backend execution
+
+Monitoring LLM applications requires including the context. This can be the full user session of a chat application, retrieval results of a QA-chain, or the full execution trace of an agent. Langfuse was designed to capture the full context, be flexibly extendible while being incrementally adoptable.
+
+_Available data sources:_
+
+<div className="flex gap-3 my-2 flex-wrap mb-2">
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript">
+      <SiTypescript className="mr-2" />
+      <span>Typescript SDK</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/python">
+      <SiPython className="mr-2" />
+      <span>Python SDK</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/langchain">
+      <span>🦜🔗 Langchain</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/api">
+      <BsCode className="mr-2 h-5 w-5" />
+      <span>API (Swagger)</span>
+    </Link>
+  </Button>
+</div>
+
+_Example_
+
+<ObservabilityExamples />
+
+## 2. Collect feedback in frontend
+
+Collect user feedback to understand how well your LLM-based features are performing. Langfuse makes it easy to collect feedback from users directly in the frontend (using [`LangfuseWeb`](/docs/integrations/sdk/typescript)) and to associate it with the execution trace (via the trace id).
+
+_Available data sources:_
+
+<div className="flex gap-3 my-2 flex-wrap">
+  <Button variant="outline" asChild>
+    <Link href="/docs/sdk/typescript-web">
+      <SiTypescript className="mr-2" />
+      <span>Typescript SDK (Web)</span>
+    </Link>
+  </Button>
+  <Button variant="outline" asChild>
+    <Link href="/docs/api#restricted-access-with-public-key-client-side">
+      <BsCode className="mr-2 h-5 w-5" />
+      <span>API (Swagger)</span>
+    </Link>
+  </Button>
+</div>
+
+_Example_
+
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-400">
+
+<h3 className="text-xl font-bold">Chat application</h3>
+<span className="text-sm">User feedback on individual responses</span>
+
+<div className="mt-5 flex flex-col xl:flex-row gap-4">
+<div className="flex-1">
+
+**Integration**
+
+```typescript {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Preview**
+
+<FeedbackPreview />
+
+</div>
+</div>
+</div>

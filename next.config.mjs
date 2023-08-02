@@ -28,30 +28,40 @@ export default withNextra({
     ]
   },
   redirects: async () => [
-    {
-      source: "/analytics",
-      destination: "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY",
+    ...nonPermanentRedirects.map(([source, destination]) => ({
+      source,
+      destination,
       permanent: false,
-    },
-    {
-      source: "/observability",
-      destination: "/integrations",
+    })),
+    ...permanentRedirects.map(([source, destination]) => ({
+      source,
+      destination,
       permanent: false,
-    },
-    {
-      source: "/integrations",
-      destination: "/docs/integrations",
-      permanent: false,
-    },
-    {
-      source: "/docs/reference",
-      destination: "/docs/api",
-      permanent: false,
-    },
-    {
-      source: "/docs/debugging-ui",
-      destination: "/docs/tracing",
-      permanent: false,
-    }
+    })),
   ]
 });
+
+const nonPermanentRedirects = [
+  ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
+];
+
+const permanentRedirects = [
+  // Migration 2023-07
+  ["/observability", "/docs/tracing"],
+  ["/docs/debugging-ui", "/docs/tracing"],
+  // Migration 2023-08-01
+  // deployment
+  ["/docs/local", "/docs/deployment/local"],
+  ["/docs/self-host", "/docs/deployment/self-host"],
+  ["/docs/cloud", "/docs/deployment/cloud"],
+  // integrations
+  ["/integrations", "/docs/integrations"],
+  ["/docs/reference", "/docs/integrations/api"],
+  ["/docs/api", "/docs/integrations/api"],
+  ["/docs/sdk", "/docs/integrations/sdk"],
+  ["/docs/langchain", "/docs/integrations/langchain"],
+  // sdk
+  ["/docs/sdk/python", "/docs/integrations/sdk/python"],
+  ["/docs/sdk/typescript", "/docs/integrations/sdk/typescript"],
+  ["/docs/sdk/typescript-web", "/docs/integrations/sdk/typescript-web"],
+]
