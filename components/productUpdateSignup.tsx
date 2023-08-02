@@ -11,12 +11,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
 
-export function ProductUpdateSignup(props: { source?: string }) {
+export function ProductUpdateSignup(props: {
+  source?: string;
+  className?: string;
+}) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,7 +52,10 @@ export function ProductUpdateSignup(props: { source?: string }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex gap-y-2 w-full flex-col sm:flex-row"
+        className={cn(
+          "flex gap-y-2 w-full flex-col sm:flex-row",
+          props.className
+        )}
       >
         <FormField
           control={form.control}
@@ -69,6 +76,7 @@ export function ProductUpdateSignup(props: { source?: string }) {
         />
         <Button
           type="submit"
+          variant="secondary"
           className="sm:rounded-l-none"
           disabled={form.formState.isSubmitting}
           size="lg"
