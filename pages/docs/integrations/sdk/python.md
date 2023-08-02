@@ -268,7 +268,3 @@ print(result)
 
     {'status': 'success'}
 
-
-## Troubleshooting
-
-If you encounter any issue, we are happy to help on [Discord](https://discord.gg/7NXusRtqYU) or shoot us an email: help@langfuse.com

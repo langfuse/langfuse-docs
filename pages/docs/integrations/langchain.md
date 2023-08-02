@@ -241,7 +241,3 @@ print("output variable: ", result)
     [1m> Finished chain.[0m
     output variable:  Leo DiCaprio's girlfriend is Camila Morrone, who is 26 years old and her age raised to the 0.43 power is 4.059182145592686.
 
-
-## Troubleshooting
-
-If you encounter any issue, we are happy to help on [Discord](https://discord.gg/7NXusRtqYU) or shoot us an email: help@langfuse.com
