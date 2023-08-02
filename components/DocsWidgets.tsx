@@ -8,7 +8,7 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { FaDiscord } from "react-icons/fa";
+import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
 
@@ -41,7 +41,7 @@ export const DocsSupport = () => {
         <Button variant="outline" size="sm" asChild>
           <a href="https://discord.gg/7NXusRtqYU" target="_blank">
             <span>Discord</span>
-            <FaDiscord className="h-4 w-4 ml-3" />
+            <RxDiscordLogo className="h-4 w-4 ml-3" />
           </a>
         </Button>
         <Button variant="outline" size="sm" onClick={() => openChat()}>
