@@ -10,18 +10,16 @@ import { BlogHeader } from "@/components/BlogHeader";
 
 <BlogHeader
   title="Langfuse Update — July 2023"
-  description="Building out the core platform and preparing infrastructure for more advanced analytics: Async SDKs, automated token counts, nested Trace UI, Langchain integration, public GET API"
+  description="Building out the core platform and preparing infrastructure for advanced analytics: Async SDKs, automated token counts, nested Trace UI, langchain integration, public GET API"
   date="Aug 2, 2023"
   authors={["marcklingen"]}
 />
 
-Hi all, a lot has happened since our launch and I'm very excited to share this update!
-
-_**TLDR — Langfuse got many new features and improvements in July**_
+Hi all, a lot has happened since our launch two weeks ago and I'm excited to share our July update:
 
 - **Faster integration**
   - [Langchain integration](#Langchain): Integrate with Langfuse in minutes when using Langchain
-  - [SDKs for Python and JS/TS](#SDKs) now fully async, typed, and with improved DX for nested traces
+  - [SDKs for Python and JS/TS](#SDKs): Now fully async, typed, and with improved DX for nested traces
 - **New nested [Trace UI](#nested-trace-ui)**
 - **More metrics**
   - [Automated token counts](#token-counts) for OpenAI and Anthropic models
@@ -31,7 +29,7 @@ _**TLDR — Langfuse got many new features and improvements in July**_
   - [Analytics](#analytics) (alpha) continuously rolling out to more users
 - **Other**
   - [Public GET API](#get-api) for custom integrations
-  - [Improved docs](#docs) with a lot of new content and Q&A chatbot
+  - [Improved docs](#docs) with new content and Q&A chatbot
 
 ---
 
@@ -39,7 +37,7 @@ The details 👇
 
 ## 🦜🔗 Langchain Integration [#Langchain]
 
-For teams building their LLM app with Langchain, adopting Langfuse just got easier. We added a `CallbackHandler` to the Langfuse Python SDK that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
+For teams building their LLM app with Langchain, adopting Langfuse just got that much easier. We added a `CallbackHandler` to the Langfuse Python SDK that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
 
 ```python /callbacks=[handler]/
 # Initialize Langfuse handler
@@ -63,7 +61,7 @@ Most Langfuse users integrate using our Python or JS/TS SDKs. We made improvemen
 
 1. Fully async, avoid adding latency or blocking your app
 2. Typed (Pydantic/Typescript)
-3. Improved DX for nesting traces; no need to manually manage ids
+3. Improved DX for nesting traces; no need to manually manage IDs
 4. Support for more runtimes: JS/TS SDKs work in Node.js, Edge (Deno, Vercel, Cloudflare) or in the browser to directly report scores (e.g. user feedback) to Langfuse
 
 → [SDK docs](/docs/integrations/sdk)
@@ -82,7 +80,7 @@ _Examples from our Langchain integration:_
 
 Usage/cost reporting is a key use case of Langfuse.
 
-Until now, token counts needed to be ingested when logging new LLM calls. For OpenAI or Anthropic models, Langfuse now automatically calculates token counts based on the ingested prompts and completions. This is helpful as some APIs do not provide token counts in their responses and reduces the integration effort.
+Until now, token counts needed to be ingested when logging new LLM calls. For OpenAI and Anthropic models, Langfuse now automatically calculates token counts based on the ingested prompts and completions. This is helpful as some APIs do not provide token counts in their responses. It also reduces integration effort.
 
 | Model     | Tokenizer     | Used package                                                                       |
 | --------- | ------------- | ---------------------------------------------------------------------------------- |
@@ -93,9 +91,9 @@ Until now, token counts needed to be ingested when logging new LLM calls. For Op
 
 ## 🌟 Human-in-the-loop Evaluation [#human-in-the-loop-evaluation]
 
-Scores in Langfuse are essential to monitor the quality of your LLM app. Until now, scores were create via the Web SDK based on user feedback (e.g. thumbs up/down, implicit user feedback) or via the API (e.g. when running model-based evals).
+Scores in Langfuse are essential to monitor the quality of your LLM app. Until now, scores were created via the Web SDK based on user feedback (e.g. thumbs up/down, implicit user feedback) or via the API (e.g. when running model-based evals).
 
-Many users wanted to manually score generations in the UI as they have people on the team who browse production logs and others who consume the scored data. We've added this to the Langfuse UI:
+Many of you wanted to manually score generations in the UI as you or your team browse production logs. We've added this to the Langfuse UI:
 
 <div className="max-w-2xl overflow-hidden mt-8 rounded-xl shadow-lg ring-1 ring-slate-700">
   ![Add manual score in UI](/images/docs/score-manual.gif)
@@ -105,7 +103,7 @@ Many users wanted to manually score generations in the UI as they have people on
 
 ## 👥 User Reporting [#user-reporting]
 
-Add a `userId` when ingesting data into Langfuse use it to get usage/cost broken down by user. Explore what individual users are doing in your LLM app.
+Add a `userId` when ingesting data into Langfuse and use it to get usage/cost broken down by user. Explore what individual users are doing in your LLM app.
 
 More user-based analytics and features are coming soon, e.g. APIs to use this data in your own dashboards and usage-based billing.
 
@@ -117,13 +115,13 @@ More user-based analytics and features are coming soon, e.g. APIs to use this da
 
 ## 📈 Analytics (alpha) [#analytics]
 
-Currently we are working with a small group of users to test our analytics features. We've focused a lot on getting this right and are excited to share more soon. Reach out if you want to share your needs or want to be part of the alpha. We are onboarding new users regularly.
+Currently we are working with a small group of alpha users to test our analytics features. We've focused a lot on getting this right and are excited to share more soon. Reach out if you want to share your needs or want to be part of the alpha. We are onboarding new users every week.
 
 → [More details](/docs/analytics)
 
 ## 👩‍💻 Public GET API [#get-api]
 
-We added a public GET API to Langfuse to support users consuming Langfuse data in their own applications. Check out the API reference for more details on the available endpoints. Need other endpoints? Let us know!
+We added a public GET API to Langfuse to support users consuming Langfuse data in their own applications. Check out the API reference for more details on the available endpoints. Need other endpoints? Shoot me a message: marc@langfuse.com
 
 Example use cases:
 
@@ -141,7 +139,7 @@ GET /observations/:observationId
 
 ## 📚 Improved Docs [#docs]
 
-We've shipped a lot over the last month and the docs were lagging behind. We've now updated the docs to reflect the latest changes and added a lot of new content. This should make it way easier to get started with Langfuse and incrementally adopt more advanced features. We'd love to get your feedback on the docs, use the new widget on the bottom to 👍/👎, thank you 🙏
+We've shipped a lot over the last month and the docs were lagging behind. We've now updated the docs to reflect the latest changes and added a bunch of new content. This should make it way easier to get started with Langfuse and incrementally adopt more advanced features. We'd love to get your feedback on the docs, use the new widget on the bottom to 👍/👎, thank you 🙏
 
 We also added a [Q&A chatbot](/blog/qa-chatbot-for-langfuse-docs) as one user was surprised that we don't have one yet. It's still a bit rough around the edges but we'll improve it over time. Give feedback when using it and you can be sure that it is all tracked and analyzed in Langfuse.
 
@@ -151,7 +149,7 @@ We also added a [Q&A chatbot](/blog/qa-chatbot-for-langfuse-docs) as one user wa
 
 ## 🚢 What's Next?
 
-There is more coming in August. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd really like to see? Join us on [Discord](https://discord.gg/7NXusRtqYU) and share your thoughts.
+There is more coming in August. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd like to see? Join us on [Discord](https://discord.gg/7NXusRtqYU) and share your thoughts.
 
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
