@@ -3,7 +3,7 @@ title: Product Updates July 2023
 date: 2023/08/01
 description: Async SDKs, automated token counts, nested Trace UI, Langchain integration, public GET API
 tag: update
-ogImage: /images/blog/product-analytics-for-llm-apps/yc-team.jpeg
+ogImage: /images/blog/update-july-2023/og-july-2023.jpg
 ---
 
 import { BlogHeader } from "@/components/BlogHeader";
@@ -15,12 +15,12 @@ import { BlogHeader } from "@/components/BlogHeader";
   authors={["marcklingen"]}
 />
 
-Hi all, I'm very excited to share this update with you.
+Hi all, a lot has happened since our launch and I'm very excited to share this update!
 
 _**TLDR — Langfuse got many new features and improvements in July**_
 
 - **Faster integration**
-  - [Langchain Integration](#Langchain): Integrate your Langchain data into your LLM apps
+  - [Langchain integration](#Langchain): Integrate your Langchain data into your LLM apps
   - [SDKs for Python and JS/TS](#SDKs) now fully async, typed, and with improved DX for nested traces
 - **New nested [Trace UI](#nested-trace-ui)**
 - **More metrics**
@@ -30,8 +30,8 @@ _**TLDR — Langfuse got many new features and improvements in July**_
   - [User reporting](#user-reporting) on token usage, traces and feedback
   - [Analytics](#analytics) (alpha) continuously rolling out to more users
 - **Other**
-  - [Public GET API](#get-api)
-  - [Improved docs](#docs) with new Q&A chatbot
+  - [Public GET API](#get-api) for custom integrations
+  - [Improved docs](#docs) with a lot of new content and Q&A chatbot
 
 ---
 
@@ -78,7 +78,7 @@ _Examples from our Langchain integration:_
   ![Debug view in Langfuse](/images/blog/langchain/langfuse-debug-ui.gif)
 </div>
 
-## 🧮 Automated token counts [#token-counts]
+## 🧮 Automated Token Counts [#token-counts]
 
 Usage/cost reporting is a key use case of Langfuse.
 
@@ -91,7 +91,7 @@ Until now, token counts needed to be ingested when logging new LLM calls. For Op
 
 → [Learn more](/docs/token-usage)
 
-## 🌟 Human-in-the-loop evaluation [#human-in-the-loop-evaluation]
+## 🌟 Human-in-the-loop Evaluation [#human-in-the-loop-evaluation]
 
 Scores in Langfuse are essential to monitor the quality of your LLM app. Until now, scores were create via the Web SDK based on user feedback (e.g. thumbs up/down, implicit user feedback) or via the API (e.g. when running model-based evals).
 
@@ -103,7 +103,7 @@ Many users wanted to manually score generations in the UI as they have people on
 
 → [Learn more](/docs/scores)
 
-## 👥 User reporting [#user-reporting]
+## 👥 User Reporting [#user-reporting]
 
 Add a `userId` when ingesting data into Langfuse and get usage/cost broken down by user and explore what individual users are doing in your LLM app. More user-based analytics and features are coming soon, e.g. APIs to use this data in your own dashboards and sage-based billing.
 
@@ -137,7 +137,7 @@ GET /observations/:observationId
 
 → [API reference](/docs/integrations/api)
 
-## 📚 Big improvements to the docs [#docs]
+## 📚 Improved Docs [#docs]
 
 We've shipped a lot over the last month and the docs were lagging behind. We've now updated the docs to reflect the latest changes and added a lot of new content. This should make it way easier to get started with Langfuse and incrementally adopt more advanced features. We'd love to get your feedback on the docs, use the new widget on the bottom to 👍/👎, thank you 🙏
 
@@ -147,7 +147,7 @@ We also added a [Q&A chatbot](/blog/qa-chatbot-for-langfuse-docs) as one user wa
   ![New docs](/images/blog/update-july-2023/docs-banner.jpg)
 </div>
 
-## 🚢 What's next?
+## 🚢 What's Next?
 
 There is more coming in August. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd really like to see? Join us on [Discord](https://discord.gg/7NXusRtqYU) and share your thoughts.
 
