@@ -63,7 +63,7 @@ Traces can be created and updated.
 
 - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
-- `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the Langfuse `traceId`.
+- `id` (optional): The id of the trace can be set, otherwise a random one is generated. Useful for linking traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).
 - `userId` (optional): the id of the user who triggered the execution.
 
 
@@ -120,7 +120,7 @@ span = await trace.span(CreateSpan(
 
 Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
-`generation.log()` take the following parameters:
+`langfuse.generation()` take the following parameters:
 
 - `startTime` (optional): the time at which the generation started.
 - `endTime` (optional): the time at which the generation ended.
@@ -220,13 +220,13 @@ generation = await span.generation(CreateGeneration(name = "chat-completion"))
 
 ## 3. Collect scores
 
-Scores are used to evaluate executions/traces. They are always attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be atatched to the observation to enable evaluating it specifically.
+Scores are used to evaluate executions/traces. They are always attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
 
-- `traceId`: the id of the trace to which the score should be attached
+- `traceId`: the id of the trace to which the score should be attached, automatically set when using trace.score() instead of langfuse.score()
 - `name`: identifier of the score, string
 - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
-- `traceIdType` (optional): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
 - `comment` (optional): additional context/explanation of the score
+- `observationId` (optional): the id of the observation to which the score should be attached, automatically set when using span.score()/event.score()/generation.score() instead of langfuse.score()
 
 
 ```python

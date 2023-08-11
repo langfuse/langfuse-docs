@@ -84,7 +84,7 @@ const langfuse = new Langfuse({
 ```typescript
 const trace = langfuse.trace({
   name: "chat",
-  externalId: `chat:${chatId}`,
+  id: `chat:${chatId}`,
   metadata: {
     userEmail,
   },
@@ -92,7 +92,7 @@ const trace = langfuse.trace({
 });
 ```
 
-- We use the existing `chatId` as the `externalId` of the trace. This allows us to group all messages of a conversation into a single trace. For traces, the Langfuse SDK upserts the trace based on the provided `externalId`. This means that we can call `trace()` on every new message in a conversation.
+- We use the existing `chatId` as the `id` of the trace. This allows us to group all messages of a conversation into a single trace. For traces, the Langfuse SDK upserts the trace based on the provided `id`. This means that we can call `trace()` on every new message in a conversation.
 - We add the `userId` as it allows us to filter and aggregate data in Langfuse based on users for debugging and analytics.
 - In `metadata` we can add any additional information that we want to be available in Langfuse. In this example, we add the `userEmail`.
 
@@ -194,7 +194,6 @@ We created an event handler for the feedback form. The feedback is then logged a
 ```typescript
 await langfuse.score({
   traceId: `chat:${chatId}`,
-  traceIdType: "EXTERNAL",
   observationId: message.id,
   name: "user-feedback",
   value: modalState.feedback === "positive" ? 1 : -1,
@@ -204,7 +203,7 @@ await langfuse.score({
 
 ## Next steps
 
-If you want to integrate Langfuse into your own chat applicaion, read the [Quickstart](/docs/get-started) for an overview and the [SDK documentation](/docs/integrations/sdk) for more implementation details.
+If you want to integrate Langfuse into your own chat application, read the [Quickstart](/docs/get-started) for an overview and the [SDK documentation](/docs/integrations/sdk) for more implementation details.
 
 ## Get in touch
 

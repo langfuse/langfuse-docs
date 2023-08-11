@@ -24,9 +24,8 @@ const langfuse = new Langfuse({ publicKey, privateKey });
 export async function POST(req: Request) {
   const { messages, conversationId, userId } = await req.json();
 
-  // upsert
   const langfuseConversation = langfuse.trace({
-    externalId: `conversation_${conversationId}`,
+    id: `conversation_${conversationId}`, // finds/creates trace
     metadata: { userId },
   });
 
@@ -53,7 +52,7 @@ export async function POST(req: Request) {
         prompt: messages,
         completion,
       });
-      await languse.flush();
+      await langfuse.flush();
     },
   });
 
@@ -73,7 +72,7 @@ https://cloud.langfuse.com/...
 <div className="p-3 ring-1 ring-gray-400 rounded-xl flex flex-col gap-2 text-sm bg-zinc-900">
 <div>
 <div className="font-bold">Trace</div>
-<div className="text-gray-300">External id: conversation \<conversation_id\></div>
+<div className="text-gray-300">Id: conversation \<conversation_id\></div>
 
 </div>
 <div className="p-3 ring-1 ring-gray-400 rounded-sm">

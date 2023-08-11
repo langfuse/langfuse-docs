@@ -77,19 +77,18 @@ import { Callout } from "nextra/components";
 
 <Callout type="info" emoji="ℹ️">
   While integrating Langfuse, it is important to either include the Langfuse Ids
-  in the response to the frontend or to use an own id (as an ExternalId) which
-  is available in both backend and frontend.
+  in the response to the frontend or to use an own id as the trace id which is
+  available in both backend and frontend.
 </Callout>
 
 Attributes
 
 > - `traceId`: the id of the trace to which the score should be attached
->   - Passed from backend: `traceId = (await trace.data).id`
+>   - Passed from backend: `traceId = trace.id`
 > - `name`: identifier of the score, string
 > - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
 > - `observationId` (optional): the id of the span, event or generation to which the score should be attached
->   - Passed from backend, e.g.: `observationId = (await generation.data).id`
-> - `traceIdType` (optional): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
+>   - Passed from backend, e.g.: `observationId = generation.id`
 > - `comment` (optional): additional context/explanation of the score
 
 ```typescript filename="frontend.ts"
