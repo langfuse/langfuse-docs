@@ -153,6 +153,12 @@ export default async function handler(req: Request, res: Response) {
     },
     endTime: new Date(),
   });
+  retrievalSpan.update({
+    endTime: new Date(),
+    output: {
+      text: contextText,
+    },
+  });
 
   const assembledMessages = [
     {
