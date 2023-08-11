@@ -1,5 +1,5 @@
 ---
-description: Fully async and typed Python SDK. Uses Pydantic objects for verification.
+description: Fully async and typed Python SDK. Uses Pydantic objects for data verification.
 ---
 
 # Python SDK
@@ -9,12 +9,11 @@ description: Fully async and typed Python SDK. Uses Pydantic objects for verific
 - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_sdk_python.ipynb)
 - [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_sdk_python.ipynb)
 
-
-This section explains, how you can report LLM data to Langfuse while owning the APIs to your infrastructure such as LLM providers or databases.
+This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK does not impact your latencies and also does not impcat your customers in case of exceptions.
 
 Using langchain? Use the [langchain integration](https://langfuse.com/docs/langchain)
 
-## 1. Initializing the client
+## 1. Installation
 
 The Langfuse SDKs are hosted on the pypi index.
 
@@ -22,6 +21,45 @@ The Langfuse SDKs are hosted on the pypi index.
 ```python
 %pip install langfuse
 ```
+
+    Requirement already satisfied: langfuse in /usr/local/lib/python3.10/dist-packages (0.0.76)
+    Requirement already satisfied: attrs>=21.3.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (23.1.0)
+    Requirement already satisfied: httpx<0.25.0,>=0.15.4 in /usr/local/lib/python3.10/dist-packages (from langfuse) (0.24.1)
+    Requirement already satisfied: langchain<0.0.238,>=0.0.237 in /usr/local/lib/python3.10/dist-packages (from langfuse) (0.0.237)
+    Requirement already satisfied: pydantic==1.10.7 in /usr/local/lib/python3.10/dist-packages (from langfuse) (1.10.7)
+    Requirement already satisfied: python-dateutil<3.0.0,>=2.8.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (2.8.2)
+    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic==1.10.7->langfuse) (4.7.1)
+    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (2023.7.22)
+    Requirement already satisfied: httpcore<0.18.0,>=0.15.0 in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (0.17.3)
+    Requirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (3.4)
+    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (1.3.0)
+    Requirement already satisfied: PyYAML>=5.4.1 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (6.0.1)
+    Requirement already satisfied: SQLAlchemy<3,>=1.4 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (2.0.19)
+    Requirement already satisfied: aiohttp<4.0.0,>=3.8.3 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (3.8.5)
+    Requirement already satisfied: async-timeout<5.0.0,>=4.0.0 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (4.0.2)
+    Requirement already satisfied: dataclasses-json<0.6.0,>=0.5.7 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (0.5.14)
+    Requirement already satisfied: langsmith<0.0.11,>=0.0.10 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (0.0.10)
+    Requirement already satisfied: numexpr<3.0.0,>=2.8.4 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (2.8.5)
+    Requirement already satisfied: numpy<2,>=1 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (1.23.5)
+    Requirement already satisfied: openapi-schema-pydantic<2.0,>=1.2 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (1.2.4)
+    Requirement already satisfied: requests<3,>=2 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (2.31.0)
+    Requirement already satisfied: tenacity<9.0.0,>=8.1.0 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (8.2.2)
+    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil<3.0.0,>=2.8.0->langfuse) (1.16.0)
+    Requirement already satisfied: charset-normalizer<4.0,>=2.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (3.2.0)
+    Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (6.0.4)
+    Requirement already satisfied: yarl<2.0,>=1.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (1.9.2)
+    Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (1.4.0)
+    Requirement already satisfied: aiosignal>=1.1.2 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (1.3.1)
+    Requirement already satisfied: marshmallow<4.0.0,>=3.18.0 in /usr/local/lib/python3.10/dist-packages (from dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (3.20.1)
+    Requirement already satisfied: typing-inspect<1,>=0.4.0 in /usr/local/lib/python3.10/dist-packages (from dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (0.9.0)
+    Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (0.14.0)
+    Requirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (3.7.1)
+    Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain<0.0.238,>=0.0.237->langfuse) (2.0.4)
+    Requirement already satisfied: greenlet!=0.4.17 in /usr/local/lib/python3.10/dist-packages (from SQLAlchemy<3,>=1.4->langchain<0.0.238,>=0.0.237->langfuse) (2.0.2)
+    Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5.0,>=3.0->httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (1.1.2)
+    Requirement already satisfied: packaging>=17.0 in /usr/local/lib/python3.10/dist-packages (from marshmallow<4.0.0,>=3.18.0->dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (23.1)
+    Requirement already satisfied: mypy-extensions>=0.3.0 in /usr/local/lib/python3.10/dist-packages (from typing-inspect<1,>=0.4.0->dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (1.0.0)
+
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
 
@@ -32,26 +70,84 @@ ENV_SECRET_KEY = "sk-lf-1234567890"
 ENV_PUBLIC_KEY = "pk-lf-1234567890"
 ```
 
-#### Async
-Some of our users use async environments in e.g. FastAPI, others want to work in a synchronous environment. We are able to cater both by providing two types of clients. All the functions available via `langfuse_async` return a Coroutine and need to be awaited. Apart from that are the APIs identical.
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+```
+
+## 2. Record a simple LLM call
+Some users just want to collect the data from a single call to a LLM. To do that, you can use `generations` from the SDK and fill it with the LLM configuration and the prompt and completion.
 
 
 ```python
-from langfuse import Langfuse, LangfuseAsync
+from datetime import datetime
+from langfuse.model import InitialGeneration, Usage
 
-langfuse_sync = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
-langfuse = LangfuseAsync(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+generationStartTime = datetime.now()
+
+# call to an LLM API
+
+langfuse.generation(InitialGeneration(
+    name="summary-generation",
+    startTime=generationStartTime,
+    endTime=datetime.now(),
+    model="gpt-3.5-turbo",
+    modelParameters={"maxTokens": "1000", "temperature": "0.9"},
+    prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    completion="The Q3 OKRs contain goals for multiple teams...",
+    usage=Usage(promptTokens=50, completionTokens = 49),
+    metadata={"interface": "whatsapp"}
+))
 ```
 
-## 2. Trace execution of backend
 
-- Each backend execution is logged with a single `trace`.
-- Each trace can contain multiple `observations` to log the individual steps of the execution.
-  - Observations can be nested.
-  - Observations can be of different types
-    - `Events` are the basic building block. They are used to track discrete events in a trace.
-    - `Spans` represent durations of units of work in a trace.
-    - `Generations` are spans which are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
+
+    <langfuse.client.StatefulGenerationClient at 0x7e161d5d4a60>
+
+
+
+## 3. Record a more complex applications
+```
+TRACE
+|
+|-- SPAN: Retrieval [retrieve data from vector db]
+|   |
+|   |-- GENERATION: Vector DB Query Creation [hallucinate a query]
+|   |
+|   |-- SPAN: Data Fetching [query the db]
+|   |
+|   |-- GENERATION: Data Summary Creation [summarize the results]
+|
+|-- GENERATION: Output Generation [generate the final user output]
+```
+Some users have complex LLM features which contain vector database searches, multiple LLM calls and more as depicted above. The Langfuse SDK and UI is designed to support chaining and nesting to support these usecases. Understanding a small number of terms makes it easy to integratw with Langfuse.
+
+#### Traces
+A `trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
+#### Observations
+Each trace can contain multiple `observations` to record individual steps of an execution. There are different types of `observations`.
+  - `Events` are the basic building block. They are used to track discrete events in a trace.
+  - `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
+  - `Generations` are a specific type of `spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
+
+
+
+```python
+from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEvent
+
+trace = langfuse.trace(CreateTrace(name = "llm-feature"))
+retrieval = trace.span(CreateSpan(name = "retrieval"))
+retrieval.generation(CreateSpan(name = "query-creation"))
+retrieval.span(CreateGeneration(name = "vector-db-search"))
+retrieval.generation(CreateEvent(name = "db-summary"))
+generation = trace.generation(CreateGeneration(name = "user-output"))
+```
+
+##Object details
 
 ### Traces
 
@@ -70,7 +166,7 @@ Traces can be created and updated.
 ```python
 from langfuse.model import CreateTrace
 
-trace = await langfuse.trace(CreateTrace(
+trace = langfuse.trace(CreateTrace(
     name = "docs-retrieval",
     userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
@@ -84,7 +180,7 @@ trace = await langfuse.trace(CreateTrace(
 
 Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans as well as LLM spans.
 
-`span.create()` take the following parameters:
+Span creation takes the following parameters:
 
 - `startTime` (optional): the time at which the span started. If no startTime is provided, the current time will be used.
 - `endTime` (optional): the time at which the span ended. Can also be set using `span.update()`.
@@ -97,20 +193,31 @@ Spans represent durations of units of work in a trace. We generated convenient S
 
 
 ```python
-import datetime
-from langfuse.model import CreateSpan
+from datetime import datetime
+from langfuse.model import CreateSpan, UpdateSpan
 
-retrievalStartTime = datetime.datetime.now()
+retrievalStartTime = datetime.now()
 
 # retrieveDocs = retrieveDoc()
 # ...
 
-span = await trace.span(CreateSpan(
+span = trace.span(CreateSpan(
         name="embedding-search",
         startTime=retrievalStartTime,
-        endTime=datetime.datetime.now(),
+        endTime=datetime.now(),
         metadata={"database": "pinecone"},
         input = {'query': 'This document entails the OKR goals for ACME'},
+    )
+)
+```
+
+Spans can be updated once your function completes for example record outputs.
+
+
+
+
+```python
+span = span.update(UpdateSpan(
         output = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
     )
 )
@@ -136,32 +243,40 @@ Generations are used to log generations of AI model. They contain additional met
 
 
 ```python
-from langfuse.model import CreateGeneration, Usage
+from langfuse.model import CreateGeneration, Usage, UpdateGeneration
 
-import datetime
+from datetime import datetime
 
-generationStartTime = datetime.datetime.now()
+generationStartTime = datetime.now()
 
 # chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
 # ...
 
-await trace.generation(CreateGeneration(
+generation = trace.generation(CreateGeneration(
     name="summary-generation",
     startTime=generationStartTime,
-    endTime=datetime.datetime.now(),
+    endTime=datetime.now(),
     model="gpt-3.5-turbo",
     modelParameters={"maxTokens": "1000", "temperature": "0.9"},
     prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    metadata={"interface": "whatsapp"}
+))
+```
+
+Generations can be updated once your LLM function completes for example record outputs.
+
+
+```python
+generation.update(UpdateGeneration(
     completion="The Q3 OKRs contain goals for multiple teams...",
     usage=Usage(promptTokens=50, completionTokens = 49),
-    metadata={"interface": "whatsapp"}
 ))
 ```
 
 
 
 
-    <langfuse.client.StatefulGenerationClientAsync at 0x7d811f537d30>
+    <langfuse.client.StatefulGenerationClient at 0x7e161d5d6470>
 
 
 
@@ -180,11 +295,11 @@ Events are used to track discrete events in a trace.
 
 ```python
 from langfuse.model import CreateEvent
-import datetime
+from datetime import datetime
 
-event = await span.event(CreateEvent(
+event = span.event(CreateEvent(
         name="chat-docs-retrieval",
-        startTime=datetime.datetime.now(),
+        startTime=datetime.now(),
         metadata={"key": "value"},
         input = {"key": "value"},
         output = {"key": "value"}
@@ -198,29 +313,9 @@ event = await span.event(CreateEvent(
 - `endTime` (optional): the time at which the span ended
 - `metadata` (optional): merges with existing metadata of the span. Can be any JSON object.
 
-### Nesting of observations
+## 3. Collect (user) feedback
 
-Nesting of observations is helpful to structure the trace in a hierarchical way. This is especially helpful for complex chains and agents.
-
-```
-Simple example
-- trace: chat-app-session
-  - span: chat-interaction
-    - event: get-user-profile
-    - generation: chat-completion
-```
-
-
-```python
-trace = await langfuse.trace(CreateTrace(name = "chat-app-session"))
-span = await trace.span(CreateSpan(name = "chat-interaction"))
-event = await span.event(CreateEvent(name = "get-user-profile"))
-generation = await span.generation(CreateGeneration(name = "chat-completion"))
-```
-
-## 3. Collect scores
-
-Scores are used to evaluate executions/traces. They are always attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
+Scores are used to evaluate single executions/traces. They can be supplied internally through our UI or via the SDK. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
 
 - `traceId`: the id of the trace to which the score should be attached, automatically set when using trace.score() instead of langfuse.score()
 - `name`: identifier of the score, string
@@ -232,8 +327,7 @@ Scores are used to evaluate executions/traces. They are always attached to a sin
 ```python
 from langfuse.model import CreateScore
 
-
-await trace.score(CreateScore(
+trace.score(CreateScore(
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
@@ -243,20 +337,74 @@ await trace.score(CreateScore(
 
 
 
-    <langfuse.client.StatefulClientAsync at 0x7d813b40e380>
+    <langfuse.client.StatefulClient at 0x7e161d5d4d00>
 
 
 
-### Flushing
+##Technical considerations
 
-The Langfuse client executes network requests in the background so that it is not blocking your API handler in any way. When you close your application, we shut down gracefully and ensure everything is sent to our backend.
+## Serverless environments
 
-Sometimes, for example in short-lived cloud functions, you want to ensure that the SDK sent everything to our backend. For this, you can use the `flush()` function
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like NextJs cloud functions or AWS Lambda functions when the python process is terminated before the SDK sent the event to our backend.
+
+To avoid this, ensure that the `langfuse.flush()` function is called after each request. This method is waiting for all tasks to have completed, hence it is blocking.[link text](https://)
 
 
 ```python
-await langfuse.flush() # returns a coroutine
+langfuse.flush()
 ```
 
-    None
+## FastAPI
+Some of our users are using FastAPI, hence we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
 
+
+
+```python
+%pip install fastapi
+```
+
+    Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.101.0)
+    Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /usr/local/lib/python3.10/dist-packages (from fastapi) (1.10.7)
+    Requirement already satisfied: starlette<0.28.0,>=0.27.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (0.27.0)
+    Requirement already satisfied: typing-extensions>=4.5.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (4.7.1)
+    Requirement already satisfied: anyio<5,>=3.4.0 in /usr/local/lib/python3.10/dist-packages (from starlette<0.28.0,>=0.27.0->fastapi) (3.7.1)
+    Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (3.4)
+    Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.3.0)
+    Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.1.2)
+
+
+Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
+With this, your Python environment will only terminate, once Langfuse received all the events.
+
+
+```python
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Query, BackgroundTasks
+from langfuse.model import InitialGeneration
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Operation on startup
+
+    yield  # wait until shutdown
+
+    # Flush all events to be sent to Langfuse on shutdown. This operation is blocking.
+    langfuse.flush()
+
+
+app = FastAPI(lifespan=lifespan)
+```
+
+
+```python
+langfuse = Langfuse("pk-lf-1234567890", "sk-lf-1234567890", "http://localhost:3000")
+
+@app.get("/generate/",tags=["APIs"])
+async def campaign(prompt: str = Query(..., max_length=20)):
+  # call to a LLM
+  generation = langfuse.generation(
+      InitialGeneration(name="llm-feature", metadata="test", prompt=prompt)
+  )
+  return True
+```
