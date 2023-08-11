@@ -27,8 +27,8 @@ Initialize the client with api keys and optionally your environment. In the exam
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-1234567890"
-ENV_PUBLIC_KEY = "pk-lf-1234567890"
+ENV_SECRET_KEY = "sk-lf-..."
+ENV_PUBLIC_KEY = "pk-lf-..."
 ```
 
 
@@ -66,7 +66,7 @@ langfuse.generation(InitialGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7e161d5d4a60>
+    <langfuse.client.StatefulGenerationClient at 0x79e5bc4ee170>
 
 
 
@@ -237,7 +237,7 @@ generation.update(UpdateGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7e161d5d6470>
+    <langfuse.client.StatefulGenerationClient at 0x79e5bc4ee080>
 
 
 
@@ -298,7 +298,7 @@ trace.score(CreateScore(
 
 
 
-    <langfuse.client.StatefulClient at 0x7e161d5d4d00>
+    <langfuse.client.StatefulClient at 0x79e5bc4ef460>
 
 
 
@@ -308,12 +308,16 @@ trace.score(CreateScore(
 
 The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like NextJs cloud functions or AWS Lambda functions when the python process is terminated before the SDK sent the event to our backend.
 
-To avoid this, ensure that the `langfuse.flush()` function is called after each request. This method is waiting for all tasks to have completed, hence it is blocking.[link text](https://)
+To avoid this, ensure that the `langfuse.flush()` function is called after each request. This method is waiting for all tasks to have completed, hence it is blocking.
+To cleanly shut down the application (flush events and clean up threads), you can call `langfuse.shutdown():`
 
 
 ```python
 langfuse.flush()
+langfuse.shutdown()
 ```
+
+
 
 ## FastAPI
 Some of our users are using FastAPI, hence we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
@@ -340,8 +344,8 @@ async def lifespan(app: FastAPI):
 
     yield  # wait until shutdown
 
-    # Flush all events to be sent to Langfuse on shutdown. This operation is blocking.
-    langfuse.flush()
+    # Flush all events to be sent to Langfuse on shutdown and terminate all Threads gracefully. This operation is blocking.
+    langfuse.shutdown()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -349,7 +353,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 ```python
-langfuse = Langfuse("pk-lf-1234567890", "sk-lf-1234567890", "http://localhost:3000")
+langfuse = Langfuse("pk-lf-...", "sk-lf-...", "http://localhost:3000")
 
 @app.get("/generate/",tags=["APIs"])
 async def campaign(prompt: str = Query(..., max_length=20)):
