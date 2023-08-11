@@ -22,45 +22,6 @@ The Langfuse SDKs are hosted on the pypi index.
 %pip install langfuse
 ```
 
-    Requirement already satisfied: langfuse in /usr/local/lib/python3.10/dist-packages (0.0.76)
-    Requirement already satisfied: attrs>=21.3.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (23.1.0)
-    Requirement already satisfied: httpx<0.25.0,>=0.15.4 in /usr/local/lib/python3.10/dist-packages (from langfuse) (0.24.1)
-    Requirement already satisfied: langchain<0.0.238,>=0.0.237 in /usr/local/lib/python3.10/dist-packages (from langfuse) (0.0.237)
-    Requirement already satisfied: pydantic==1.10.7 in /usr/local/lib/python3.10/dist-packages (from langfuse) (1.10.7)
-    Requirement already satisfied: python-dateutil<3.0.0,>=2.8.0 in /usr/local/lib/python3.10/dist-packages (from langfuse) (2.8.2)
-    Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/dist-packages (from pydantic==1.10.7->langfuse) (4.7.1)
-    Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (2023.7.22)
-    Requirement already satisfied: httpcore<0.18.0,>=0.15.0 in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (0.17.3)
-    Requirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (3.4)
-    Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<0.25.0,>=0.15.4->langfuse) (1.3.0)
-    Requirement already satisfied: PyYAML>=5.4.1 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (6.0.1)
-    Requirement already satisfied: SQLAlchemy<3,>=1.4 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (2.0.19)
-    Requirement already satisfied: aiohttp<4.0.0,>=3.8.3 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (3.8.5)
-    Requirement already satisfied: async-timeout<5.0.0,>=4.0.0 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (4.0.2)
-    Requirement already satisfied: dataclasses-json<0.6.0,>=0.5.7 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (0.5.14)
-    Requirement already satisfied: langsmith<0.0.11,>=0.0.10 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (0.0.10)
-    Requirement already satisfied: numexpr<3.0.0,>=2.8.4 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (2.8.5)
-    Requirement already satisfied: numpy<2,>=1 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (1.23.5)
-    Requirement already satisfied: openapi-schema-pydantic<2.0,>=1.2 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (1.2.4)
-    Requirement already satisfied: requests<3,>=2 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (2.31.0)
-    Requirement already satisfied: tenacity<9.0.0,>=8.1.0 in /usr/local/lib/python3.10/dist-packages (from langchain<0.0.238,>=0.0.237->langfuse) (8.2.2)
-    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil<3.0.0,>=2.8.0->langfuse) (1.16.0)
-    Requirement already satisfied: charset-normalizer<4.0,>=2.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (3.2.0)
-    Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (6.0.4)
-    Requirement already satisfied: yarl<2.0,>=1.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (1.9.2)
-    Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (1.4.0)
-    Requirement already satisfied: aiosignal>=1.1.2 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain<0.0.238,>=0.0.237->langfuse) (1.3.1)
-    Requirement already satisfied: marshmallow<4.0.0,>=3.18.0 in /usr/local/lib/python3.10/dist-packages (from dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (3.20.1)
-    Requirement already satisfied: typing-inspect<1,>=0.4.0 in /usr/local/lib/python3.10/dist-packages (from dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (0.9.0)
-    Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (0.14.0)
-    Requirement already satisfied: anyio<5.0,>=3.0 in /usr/local/lib/python3.10/dist-packages (from httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (3.7.1)
-    Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain<0.0.238,>=0.0.237->langfuse) (2.0.4)
-    Requirement already satisfied: greenlet!=0.4.17 in /usr/local/lib/python3.10/dist-packages (from SQLAlchemy<3,>=1.4->langchain<0.0.238,>=0.0.237->langfuse) (2.0.2)
-    Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5.0,>=3.0->httpcore<0.18.0,>=0.15.0->httpx<0.25.0,>=0.15.4->langfuse) (1.1.2)
-    Requirement already satisfied: packaging>=17.0 in /usr/local/lib/python3.10/dist-packages (from marshmallow<4.0.0,>=3.18.0->dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (23.1)
-    Requirement already satisfied: mypy-extensions>=0.3.0 in /usr/local/lib/python3.10/dist-packages (from typing-inspect<1,>=0.4.0->dataclasses-json<0.6.0,>=0.5.7->langchain<0.0.238,>=0.0.237->langfuse) (1.0.0)
-
-
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
 
 
@@ -109,7 +70,7 @@ langfuse.generation(InitialGeneration(
 
 
 
-## 3. Record a more complex applications
+## 3. Record a more complex application
 ```
 TRACE
 |
