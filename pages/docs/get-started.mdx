@@ -65,18 +65,24 @@ To run Langfuse in production, see [self-host instructions](self-host.mdx)
 
 ### Add tracing to your backend
 
-<Tabs items={["Typescript", "Python", "Langchain", "API"]}>
+<Tabs items={["JS/TS", "Python", "Langchain", "API"]}>
 <Tab>
 
-```sh npm2yarn
+```sh
 npm i langfuse
-```
+# or
+yarn add langfuse
 
-For Deno (ESM CDN): `https://esm.sh/langfuse`
+# Node.js < 18
+npm i langfuse-node
+
+# Deno
+import { Langfuse } from "https://esm.sh/langfuse"
+```
 
 Example usage, most of the parameters are optional and depend on the use case.
 
-For more information, see the [typescript docs](/docs/integrations/sdk/typescript).
+For more information, see the [typescript SDK docs](/docs/integrations/sdk/typescript).
 
 ```typescript filename="server.ts"
 import { Langfuse } from "langfuse";
@@ -87,29 +93,24 @@ const langfuse = new Langfuse({
   // baseUrl: defaults to "https://cloud.langfuse.com"
 });
 
-const generationStartTime = new Date();
-
-// const chatCompletion = await llm.respond(prompt);
-
-langfuse.generation({
-  startTime: generationStartTime,
-  endTime: new Date(),
+// Example generation creation
+const generation = trace.generation({
   name: "chat-completion",
   model: "gpt-3.5-turbo",
   modelParameters: {
     temperature: 0.9,
     maxTokens: 2000,
-    topP: undefined,
   },
-  prompt: messagesToSend,
-  completion: chatCompletion.data.choices[0].message?.content,
-  usage: {
-    promptTokens: chatCompletion.data.usage?.prompt_tokens,
-    completionTokens: chatCompletion.data.usage?.completion_tokens,
-  },
-  metadata: {
-    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  },
+  prompt: messages,
+});
+
+// Application code
+const chatCompletion = await llm.respond(prompt);
+
+// Example update
+generation.update({
+  endTime: new Date(),
+  completion: chatCompletion,
 });
 ```
 
@@ -189,16 +190,20 @@ For more examples, see the [Langchain integration docs](/docs/integrations/langc
 </Tab>
 </Tabs>
 
-### Capture scoring (optional)
+### Capture scores (optional)
 
-<Tabs items={["Typescript", "Python", "API"]}>
+<Tabs items={["Browser", "JS/TS", "Python", "API"]}>
 <Tab>
 
-For typescript we offer a dedicated frontend package to directly report scores via the `publicKey`.
+Use LangfuseWeb to directly capture **user feedback** as scores in the browser.
+
+```sh npm2yarn
+npm i langfuse
+```
 
 Simple feedback component in React:
 
-```typescript filename="UserFeedbackComponent.tsx"
+```typescript
 import { LangfuseWeb } from "langfuse";
 
 export default function UserFeedbackComponent(props: { traceId: string }) {
@@ -227,9 +232,27 @@ export default function UserFeedbackComponent(props: { traceId: string }) {
 </Tab>
 <Tab>
 
-You can use the Python SDK to report a score via your Python server. Alternatively, you can use the Typescript SDK or REST API to directly report scores from the frontend.
+You can use the JS/TS SDK to report a score.
 
-```python filename="server.py"
+```typescript
+trace.score({
+  name: "user-explicit-feedback",
+  value: 1,
+  comment: "I like how personalized the response is",
+});
+
+// alternatively
+span.score({});
+generation.score({});
+event.score({});
+```
+
+</Tab>
+<Tab>
+
+You can use the Python SDK to report a score via your Python server.
+
+```python
 from langfuse.api.model import CreateScore
 
 score = generation.score(CreateScore(
