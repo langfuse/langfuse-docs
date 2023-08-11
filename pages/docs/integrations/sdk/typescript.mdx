@@ -8,10 +8,12 @@ import { Callout } from "nextra/components";
 # JS/TS SDK
 
 <div className="flex flex-row gap-2 mt-2">
-  <img
-    alt="Github repository langfuse/langfuse-js"
-    src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=Github&link=https%3A%2F%2Fgithub.com%2Flangfuse%2Flangfuse-js"
-  />
+  <a href="https://github.com/langfuse/langfuse-js">
+    <img
+      alt="Github repository langfuse/langfuse-js"
+      src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=Github"
+    />
+  </a>
   <a href="https://github.com/langfuse/langfuse-js/actions/workflows/ci.yml?query=branch%3Amain">
     <img
       src="https://img.shields.io/github/actions/workflow/status/langfuse/langfuse-js/ci.yml?style=flat-square&logo=Github&label=tests"
@@ -460,23 +462,25 @@ export const handler() {
 
   // So far all requests are queued
 
-  // Now we want to flush all requests before the process exits
+  // Now we want to flush and await all pending requests before the process exits
   await langfuse.shutdownAsync();
 }
 ```
 
-## Upgrading from v0.0.x to v0.1.x [#upgrade010]
+## Upgrading from v0.x to v1.x [#upgrade010]
+
+### Deprecation of `externalTraceId`
 
 We deprecated the external trace id to simplify the API. Instead, you can now (optionally) directly set the trace id when creating the trace. Traces are still upserted in case a trace with this id already exists in your project.
 
 ```typescript
-// v0.0.x
+// v0.x
 const trace = langfuse.trace({ externalId: "123" });
 // When manually linking observations and scores to the trace
 const span = langfuse.span({ traceId: "123", traceIdType: "EXTERNAL" });
 const score = langfuse.score({ traceId: "123", traceIdType: "EXTERNAL" });
 
-// v0.1.x
+// v1.x
 const trace = langfuse.trace({ id: "123" });
 // When manually linking observations and scores to the trace
 const span = langfuse.span({ traceId: "123" });
@@ -489,3 +493,21 @@ Changes
 - The `externalId` property on traces is deprecated
 
 Ingestion of externalIds via older versions of the SDK or the API is still supported. However, we will remove support for this in the future and migrate all existing traces to the new format. We monitor the usage of deprecated properties on Langfuse Cloud and will reach out to you if we detect that you are still using them before a breaking change is introduced.
+
+### Introduction of `shutdownAsync`
+
+With v1.0.0 we introduced the `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits. `flush` is still available but does not await pending requests that are already flushed.
+
+This is especially important for short-lived execution environments such as [lambdas and serverless functions](#lambda).
+
+```typescript
+export const handler() {
+  // Lambda / serverless function
+
+  // v0.x
+  await langfuse.flush();
+
+  // v1.x
+  await langfuse.shutdownAsync();
+}
+```
