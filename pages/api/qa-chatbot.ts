@@ -212,7 +212,7 @@ export default async function handler(req: Request, res: Response) {
           text: completion,
         },
       });
-      await langfuse.flush();
+      await langfuse.shutdownAsync();
     },
   });
   return new StreamingTextResponse(stream, {
