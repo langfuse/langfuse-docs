@@ -27,7 +27,9 @@ const supabaseClient = createClient(
 const langfuse = new Langfuse({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
+  host: "http://localhost:3000",
 });
+// langfuse.debug();
 
 export default async function handler(req: Request, res: Response) {
   const body = await req.json();
@@ -35,7 +37,7 @@ export default async function handler(req: Request, res: Response) {
 
   const trace = langfuse.trace({
     name: "qa",
-    externalId: body.conversationId,
+    id: "lf.docs.conversation." + body.conversationId,
   });
 
   const messages = body.messages;
