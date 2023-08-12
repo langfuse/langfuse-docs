@@ -9,7 +9,7 @@ description: Fully async and typed Python SDK. Uses Pydantic objects for data ve
 - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_sdk_python.ipynb)
 - [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_sdk_python.ipynb)
 
-This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK does not impact your latencies and also does not impcat your customers in case of exceptions.
+This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK does not impact your latencies and also does not impact your customers in case of exceptions.
 
 Using langchain? Use the [langchain integration](https://langfuse.com/docs/langchain)
 
@@ -27,8 +27,8 @@ Initialize the client with api keys and optionally your environment. In the exam
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-..."
-ENV_PUBLIC_KEY = "pk-lf-..."
+ENV_SECRET_KEY = "sk-lf-1234567890"
+ENV_PUBLIC_KEY = "pk-lf-1234567890"
 ```
 
 
@@ -39,7 +39,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 ```
 
 ## 2. Record a simple LLM call
-Some users just want to collect the data from a single call to a LLM. To do that, you can use `generations` from the SDK and fill it with the LLM configuration and the prompt and completion.
+To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration and the prompt and completion.
 
 
 ```python
@@ -63,10 +63,13 @@ langfuse.generation(InitialGeneration(
 ))
 ```
 
+    new_trace_id 750545fd-f606-4d21-8476-04415468376f
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x79e5bc4ee170>
+
+
+    <langfuse.client.StatefulGenerationClient at 0x7c68d3590b20>
 
 
 
@@ -74,25 +77,17 @@ langfuse.generation(InitialGeneration(
 ```
 TRACE
 |
-|-- SPAN: Retrieval [retrieve data from vector db]
+|-- SPAN: Retrieval
 |   |
-|   |-- GENERATION: Vector DB Query Creation [hallucinate a query]
+|   |-- GENERATION: Vector DB Query Creation
 |   |
-|   |-- SPAN: Data Fetching [query the db]
+|   |-- SPAN: Data Fetching
 |   |
-|   |-- GENERATION: Data Summary Creation [summarize the results]
+|   |-- GENERATION: Data Summary Creation
 |
-|-- GENERATION: Output Generation [generate the final user output]
+|-- GENERATION: Output Generation
 ```
-Some users have complex LLM features which contain vector database searches, multiple LLM calls and more as depicted above. The Langfuse SDK and UI is designed to support chaining and nesting to support these usecases. Understanding a small number of terms makes it easy to integratw with Langfuse.
 
-#### Traces
-A `trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
-#### Observations
-Each trace can contain multiple `observations` to record individual steps of an execution. There are different types of `observations`.
-  - `Events` are the basic building block. They are used to track discrete events in a trace.
-  - `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
-  - `Generations` are a specific type of `spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
 
 
@@ -108,15 +103,21 @@ retrieval.generation(CreateEvent(name = "db-summary"))
 generation = trace.generation(CreateGeneration(name = "user-output"))
 ```
 
+The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
+
+#### Traces
+A `Trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
+#### Observations
+Each `Trace` can contain multiple `Observations` to record individual steps of an execution. There are different types of `Observations`.
+  - `Events` are the basic building block. They are used to track discrete events in a `Trace`.
+  - `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
+  - `Generations` are a specific type of `Spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
 ##Object details
 
 ### Traces
 
 Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
-
-Traces can be created and updated.
-
-`trace.create()` takes the following parameters:
 
 - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
@@ -139,9 +140,7 @@ trace = langfuse.trace(CreateTrace(
 
 ### Span
 
-Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans as well as LLM spans.
-
-Span creation takes the following parameters:
+Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans to support your use cases such as Agent tool usages.
 
 - `startTime` (optional): the time at which the span started. If no startTime is provided, the current time will be used.
 - `endTime` (optional): the time at which the span ended. Can also be set using `span.update()`.
@@ -188,7 +187,6 @@ span = span.update(UpdateSpan(
 
 Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
-`langfuse.generation()` take the following parameters:
 
 - `startTime` (optional): the time at which the generation started.
 - `endTime` (optional): the time at which the generation ended.
@@ -237,7 +235,7 @@ generation.update(UpdateGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x79e5bc4ee080>
+    <langfuse.client.StatefulGenerationClient at 0x7c68d3591ba0>
 
 
 
@@ -298,7 +296,7 @@ trace.score(CreateScore(
 
 
 
-    <langfuse.client.StatefulClient at 0x79e5bc4ef460>
+    <langfuse.client.StatefulClient at 0x7c68d3591840>
 
 
 
@@ -306,19 +304,17 @@ trace.score(CreateScore(
 
 ## Serverless environments
 
-The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like NextJs cloud functions or AWS Lambda functions when the python process is terminated before the SDK sent the event to our backend.
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like NextJs cloud functions or AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
 
-To avoid this, ensure that the `langfuse.flush()` function is called after each request. This method is waiting for all tasks to have completed, hence it is blocking.
+To avoid this, ensure that the `langfuse.flush()` function is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
 
 
 ```python
 langfuse.flush()
 ```
 
-
-
 ## FastAPI
-Some of our users are using FastAPI, hence we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
+For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
 
 
 
@@ -327,7 +323,7 @@ Some of our users are using FastAPI, hence we have a short example, of how to us
 ```
 
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
-With this, your Python environment will only terminate, once Langfuse received all the events.
+With this, your Python environment will only terminate once Langfuse received all the events.
 
 
 ```python
@@ -351,7 +347,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 ```python
-langfuse = Langfuse("pk-lf-...", "sk-lf-...", "http://localhost:3000")
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
 @app.get("/generate/",tags=["APIs"])
 async def campaign(prompt: str = Query(..., max_length=20)):
