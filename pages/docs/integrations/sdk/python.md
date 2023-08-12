@@ -309,12 +309,10 @@ trace.score(CreateScore(
 The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like NextJs cloud functions or AWS Lambda functions when the python process is terminated before the SDK sent the event to our backend.
 
 To avoid this, ensure that the `langfuse.flush()` function is called after each request. This method is waiting for all tasks to have completed, hence it is blocking.
-To cleanly shut down the application (flush events and clean up threads), you can call `langfuse.shutdown():`
 
 
 ```python
 langfuse.flush()
-langfuse.shutdown()
 ```
 
 
@@ -345,7 +343,7 @@ async def lifespan(app: FastAPI):
     yield  # wait until shutdown
 
     # Flush all events to be sent to Langfuse on shutdown and terminate all Threads gracefully. This operation is blocking.
-    langfuse.shutdown()
+    langfuse.flush()
 
 
 app = FastAPI(lifespan=lifespan)
