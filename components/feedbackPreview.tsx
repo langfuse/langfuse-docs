@@ -102,16 +102,16 @@ export default function FeedbackPreview() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="font-bold text-xs text-gray-300 mb-2 mt-5">
+      <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
         Application
       </div>
       <div className="flex flex-col p-3 ring-1 ring-gray-400 rounded-lg">
-        <div className="font-bold text-xs text-gray-300 mb-2">User</div>
+        <div className="font-bold text-xs dark:text-primary/80 mb-2">User</div>
         <div className="p-3 ring-1 ring-gray-400 rounded-lg">
           What is the simplest way to make user feedback in my LLM application
           actionable?
         </div>
-        <div className="font-bold text-xs text-gray-300 mb-2 mt-5">
+        <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
           Assistant
         </div>
         <div className="p-3 ring-1 ring-gray-400 rounded-lg">
@@ -147,7 +147,9 @@ export default function FeedbackPreview() {
           </Button>
         </div>
       </div>
-      <div className="font-bold text-xs text-gray-300 mb-2 mt-5">Trace</div>
+      <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
+        Trace
+      </div>
       <DataTable columns={columns} data={data} />
     </div>
   );
