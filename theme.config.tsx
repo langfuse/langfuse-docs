@@ -3,7 +3,7 @@ import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { MainContentWrapper } from "./components/DocsWidgets";
+import { MainContentWrapper } from "./components/MainContentWrapper";
 
 const footerNav = [
   { name: "Imprint", href: "/imprint" },
@@ -12,24 +12,8 @@ const footerNav = [
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
-  darkMode: false,
-  nextThemes: {
-    defaultTheme: "dark",
-    forcedTheme: "dark",
-    storageKey: "nextra-theme-docs-color-mode",
-  },
   feedback: {
     content: null,
-  },
-  toc: {
-    extraContent: (
-      <Link
-        href="#docs-feedback"
-        className="nx-text-xs nx-font-medium nx-text-gray-500 hover:nx-text-gray-900 dark:nx-text-gray-400 dark:hover:nx-text-gray-100 contrast-more:nx-text-gray-800 contrast-more:dark:nx-text-gray-50"
-      >
-        Have question or feedback?
-      </Link>
-    ),
   },
   main: MainContentWrapper,
   project: {
@@ -65,22 +49,28 @@ const config: DocsThemeConfig = {
       </a>
     ),
   },
+  sidebar: {
+    defaultMenuCollapseLevel: 1,
+    toggleButton: true,
+  },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
-    text: (
-      <div className="flex flex-col items-center md:items-start">
-        <div className="mb-2">
+    component: () => (
+      <div className="flex justify-between flex-1 flex-wrap gap-2 max-w-[90rem] mx-auto text-sm py-8 px-6 border-t dark:border-t-neutral-800">
+        <span className="text-primary/80">
+          MIT {new Date().getFullYear()} © Finto Technologies GmbH
+        </span>
+        <span>
           {footerNav.map((nav) => (
             <Link
               key={nav.name}
               href={nav.href}
-              className="px-2 first-of-type:pl-0 border-l border-gray-500 first-of-type:border-l-0 rounded-none leading-6 hover:text-gray-100"
+              className="inline px-2 first-of-type:pl-0 border-l first-of-type:border-l-0 rounded-none leading-6 text-primary/80 hover:text-primary"
             >
               {nav.name}
             </Link>
           ))}
-        </div>
-        <span>MIT {new Date().getFullYear()} © Finto Technologies GmbH</span>
+        </span>
       </div>
     ),
   },

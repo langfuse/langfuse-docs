@@ -11,6 +11,9 @@ import {
 import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
+import { DotPattern } from "./magicui/dot-pattern";
+import { LinearGradient } from "./magicui/linear-gradient";
+import { cn } from "@/lib/utils";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -22,13 +25,40 @@ export const MainContentWrapper = (props) => {
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
-          className="flex flex-col gap-10 pt-14 border-t border-neutral-800 mb-20"
+          className="flex flex-col gap-10 pt-14 border-t dark:border-neutral-800 mb-20"
           id="docs-feedback"
         >
           <DocsFeedback key={router.pathname} />
           <DocsSupport />
         </div>
       ) : null}
+      <div className="absolute top-0 bottom-0 left-0 right-0 -z-50">
+        <DotPattern
+          width={15}
+          height={15}
+          cx={1}
+          cy={1}
+          cr={1}
+          className={cn(
+            "[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)]",
+            "dark:opacity-70"
+          )}
+        />
+        <LinearGradient
+          to="rgba(120,119,198,0.2)"
+          from="rgba(0,0,0,0.0)"
+          direction="top"
+          transitionPoint="50%"
+          className="hidden dark:block"
+        />
+        <LinearGradient
+          to="rgba(120,119,198,0.2)"
+          from="rgba(0,0,0,0.0)"
+          direction="top"
+          transitionPoint="50%"
+          className="dark:hidden"
+        />
+      </div>
     </>
   );
 };
