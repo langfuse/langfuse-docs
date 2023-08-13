@@ -28,7 +28,7 @@ const langfuse = new Langfuse({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
 });
-// langfuse.debug();
+langfuse.debug();
 
 export default async function handler(req: Request, res: Response) {
   const body = await req.json();
