@@ -55,8 +55,8 @@ const config: DocsThemeConfig = {
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
-    component: () => (
-      <div className="flex justify-between flex-1 flex-wrap gap-2 max-w-[90rem] mx-auto text-sm py-8 px-6 border-t dark:border-t-neutral-800">
+    text: (
+      <div className="flex justify-between flex-1 flex-wrap gap-2 text-sm">
         <span className="text-primary/80">
           MIT {new Date().getFullYear()} © Finto Technologies GmbH
         </span>
