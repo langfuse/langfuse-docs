@@ -10,7 +10,7 @@ import Image from "next/image";
 
 <div className="flex flex-col gap-5 mt-8">
   {getPagesUnderRoute("/docs/guides").map((page) => (
-    <Link key={page.route} href={page.route} className="flex flex-col group p-3 rounded-lg border border-gray-600 hover:border-gray-500 hover:bg-gray-950">
+    <Link key={page.route} href={page.route} className="flex flex-col group p-3 rounded-lg border border-border bg-background/60 hover:bg-background">
         <div className="block font-semibold text-xl opacity-90 group-hover:opacity-100">
           {page.meta?.title || page.frontMatter?.title || page.name}
         </div>

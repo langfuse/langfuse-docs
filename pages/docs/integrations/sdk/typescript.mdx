@@ -446,11 +446,18 @@ langfuse.debug();
 
 ## Short lived execution environments (lambda, serverless) [#lambda]
 
-The SDK is optimize to run in the background to queue and flush all requests. For short-lived functions and when terminating a standard Node.js app, you should use `await langfuse.shutdownAsync()` to make sure all requests are flushed and pending requests are awaited before the process exits.
+The SDK is optimize to run in the background to queue and flush all requests. In short-lived environments, set `flushAt` to `1` and `flushInterval` to `0` to send requests immediately. When the process exits use `await langfuse.shutdownAsync()` to make sure all requests are flushed and pending requests are awaited.
 
 Example:
 
 ```typescript
+const langfuse = new Langfuse({
+  secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  flushAt: 1,
+  flushInterval: 0,
+})
+
 export const handler() {
   const trace = langfuse.trace({ name: "chat-app-session" });
 

@@ -58,7 +58,7 @@ export function Chat({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden border border-gray-700 rounded-lg",
+        "relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden bg-background/40 shadow-lg rounded-lg",
         className
       )}
     >
