@@ -12,10 +12,10 @@ export const BlogHeader = ({
   date?: string;
 }) => (
   <div className="flex flex-col gap-1 items-center my-10 text-center">
-    <span className="text-gray-400">{date}</span>
+    <span className="text-primary/70">{date}</span>
 
     <h1 className="text-3xl font-bold leading-snug">{title}</h1>
-    <p className="text-gray-400 text-xl">{description}</p>
+    <p className="text-primary/70 text-xl">{description}</p>
     <Authors authors={authors} />
   </div>
 );
@@ -60,7 +60,7 @@ export const Authors = ({
               className="rounded-full"
               alt={`Picture ${author.name}`}
             />
-            <span className="text-sm text-gray-400 group-hover:text-gray-200">
+            <span className="text-primary/50 group-hover:text-primary">
               {author.name}
             </span>
           </div>
