@@ -9,7 +9,7 @@ export const Frame = ({
 }) => (
   <div
     className={cn(
-      "rounded-md sm:rounded-xl overflow-hidden max-w-2xl my-4 bg-primary/5",
+      "rounded-md sm:rounded-xl overflow-hidden max-w-2xl my-4 bg-primary/10 animate-pulse",
       className
     )}
   >
