@@ -8,6 +8,7 @@ author: Marc
 ---
 
 import { BlogHeader } from "@/components/BlogHeader";
+import { Frame } from "@/components/Frame";
 
 <BlogHeader
   title="Showcase: LLM Chatbot"
@@ -22,18 +23,18 @@ import { BlogHeader } from "@/components/BlogHeader";
 
 Chat application with conversations, user feedback, and streaming responses from the edge.
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![chat.langfuse.com screen recording](/images/blog/ai-chatbot/chat-ui.gif)
-</div>
+</Frame>
 
 ### Langfuse UI
 
 We have captured threads of users as single traces in langfuse. Threads include the user_id, overall token usage, and further metadata. User feedback which is collected in the frontend is directly related to the trace and helps to find low-quality conversations and individual messages which got negative feedback.
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![chat.langfuse.com screen
   recording](/images/blog/ai-chatbot/langfuse-dashboard.gif)
-</div>
+</Frame>
 
 ### Highlights of the integration
 
@@ -169,9 +170,7 @@ In the frontend, we want to capture user feedback (positive/negative + comment) 
 
 Feedback modal:
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
-  ![User feedback modal](/images/blog/ai-chatbot/feedback.gif)
-</div>
+<Frame>![User feedback modal](/images/blog/ai-chatbot/feedback.gif)</Frame>
 
 **Initialize client**
 
