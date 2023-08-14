@@ -214,6 +214,10 @@ const span = trace.span({
   input: {
     userInput: "How does Langfuse work?",
   },
+});
+
+// Example update
+span.update({
   metadata: {
     httpRoute: "/api/retrieve-doc",
     embeddingModel: "bert-base-uncased",
@@ -223,10 +227,11 @@ const span = trace.span({
 // Application code
 const retrievedDocs = await retrieveDoc("How does Langfuse work?");
 
-// Example update
-span.update({
-  endTime: new Date(),
-  output: retrievedDocs,
+// Example end - sets endTime, optionally pass a body
+span.end({
+  output: {
+    retrievedDocs,
+  },
 });
 
 // Properties
@@ -279,7 +284,11 @@ const chatCompletion = await llm.respond(prompt);
 
 // Example update
 generation.update({
-  endTime: new Date(),
+  completionStartTime: new Date(),
+});
+
+// Example end - sets endTime, optionally pass a body
+generation.end({
   completion: chatCompletion,
 });
 
