@@ -211,6 +211,12 @@ export default async function handler(req: Request, res: Response) {
         output: {
           text: completion,
         },
+        level: completion.includes("I don't know how to help with that")
+          ? "WARNING"
+          : "DEFAULT",
+        statusMessage: completion.includes("I don't know how to help with that")
+          ? "Refused to answer"
+          : undefined,
       });
       await langfuse.shutdownAsync();
     },
