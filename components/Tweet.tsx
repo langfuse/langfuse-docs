@@ -8,7 +8,8 @@ export const Tweet = ({
   id: string;
   className?: string;
 }) => (
-  <div className={cn("mt-2", className)}>
-    <ReactTweet id={id} apiUrl={id ? `/api/tweet/${id}` : undefined} />
-  </div>
+  <></>
+  // <div className={cn("mt-2", className)}>
+  //   <ReactTweet id={id} apiUrl={id ? `/api/tweet/${id}` : undefined} />
+  // </div>
 );
