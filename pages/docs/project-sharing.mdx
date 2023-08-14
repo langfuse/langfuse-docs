@@ -28,6 +28,7 @@ export function RolePermissionTable() {
       "apiKeys:read",
       "apiKeys:create",
       "apiKeys:delete",
+      "scores:create",
     ],
     ADMIN: [
       "members:read",
@@ -36,8 +37,10 @@ export function RolePermissionTable() {
       "apiKeys:read",
       "apiKeys:create",
       "apiKeys:delete",
+      "scores:create",
     ],
-    MEMBER: ["members:read"],
+    MEMBER: ["members:read", "scores:create"],
+    VIEWER: [],
   };
   return (
     <div className="flex gap-5 mt-4">
