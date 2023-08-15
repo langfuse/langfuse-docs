@@ -12,7 +12,7 @@ import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function Chat({ className }: { className?: string }) {
-  const ref = React.useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const conversationId = useMemo(() => nanoid(), []);
 
   // Controlled message histor. Used to update the messages state onFinish to include the latest messageId provided by the server.
@@ -50,8 +50,6 @@ export function Chat({ className }: { className?: string }) {
       setMessages(controlledMessages.current);
     },
   });
-
-  console.log(messages);
 
   const messagesWithWelcome: Message[] = [welcomeMessage, ...messages];
 

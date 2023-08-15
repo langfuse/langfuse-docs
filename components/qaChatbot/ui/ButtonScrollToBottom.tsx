@@ -24,7 +24,6 @@ export function ButtonScrollToBottom({
         className
       )}
       onClick={() => {
-        console.log("ref", outerDivRef);
         outerDivRef?.current?.scrollTo({
           top: document.body.offsetHeight,
           behavior: "smooth",

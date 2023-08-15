@@ -34,7 +34,6 @@ const langfuse = new Langfuse({
 
 export default async function handler(req: Request, res: Response) {
   const body = await req.json();
-  console.log(body);
 
   const trace = langfuse.trace({
     name: "qa",
