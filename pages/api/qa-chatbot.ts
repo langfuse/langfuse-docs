@@ -37,6 +37,9 @@ export default async function handler(req: Request, res: Response) {
   const trace = langfuse.trace({
     name: "qa",
     id: "lf.docs.conversation." + body.conversationId,
+    metadata: {
+      pathname: new URL(req.headers.get("Referer")).pathname,
+    },
   });
 
   const messages = body.messages;
