@@ -43,6 +43,7 @@ export default withNextra({
 
 const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
+  ["/discord", "https://discord.gg/7NXusRtqYU"],
 ];
 
 const permanentRedirects = [
