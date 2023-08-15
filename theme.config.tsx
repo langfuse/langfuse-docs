@@ -28,6 +28,9 @@ const config: DocsThemeConfig = {
   chat: {
     link: "https://discord.gg/7NXusRtqYU",
   },
+  search: {
+    placeholder: "Search...",
+  },
   navbar: {
     extraContent: (
       <a
