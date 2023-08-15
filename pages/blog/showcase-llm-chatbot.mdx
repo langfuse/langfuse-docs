@@ -114,7 +114,7 @@ const lfGeneration = trace.generation({
 
 **Updating the LLM call**
 
-Thanks to the Vercel AI SDK, we can use the `onStart` and `onCompletion` callbacks to update the generation object in Langfuse.
+Thanks to the Vercel AI SDK, we can use the `onStart` and `onCompletion` callbacks to update/end the generation object in Langfuse.
 
 ```typescript
 // once streaming started
@@ -126,8 +126,7 @@ async onStart() {
 
 // once streaming completed
 async onCompletion(completion) {
-  lfGeneration.update({
-    endTime: new Date(),
+  lfGeneration.end({
     completion
   })
 }

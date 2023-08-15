@@ -107,9 +107,8 @@ const generation = trace.generation({
 // Application code
 const chatCompletion = await llm.respond(prompt);
 
-// Example update
-generation.update({
-  endTime: new Date(),
+// End generation - sets endTime
+generation.end({
   completion: chatCompletion,
 });
 ```
