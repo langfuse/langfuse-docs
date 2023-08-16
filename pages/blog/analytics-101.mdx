@@ -1,0 +1,70 @@
+---
+title: Analytics 101
+date: 2023/08/16
+description: This guide provides a comprehensive overview of implementing and understanding tracing & analytics in LLM-based applications, with a focus on key metrics and an implementation of analytics.
+ogImage: /images/blog/ai-chatbot/og.png
+author: Clemens
+---
+
+import { BlogHeader } from "@/components/BlogHeader";
+import { Frame } from "@/components/Frame";
+
+<BlogHeader
+  title="Tracing & Analyzing Generative AI: LLM Analytics 101"
+  description="This guide gives builders on the LLM application layer an in-depth understanding of the why, what and how of tracing & analytics."
+  date="Aug 16, 2023"
+  authors={["clemensrawert", "marcklingen"]}
+/>
+
+
+## Software Delivery has Changed
+
+Generative AI outputs are not deterministic. They cannot be reliably forecasted. This changes how software is delivered compared to 'traditional' software engineering. If it is not clear what an output will look like and what a 'good' output is, it is hard to build robust tests and assure quality before shipping code.
+
+Learning from production data has taken the place of extensive software design and testing. But to learn from production, you have to trace your LLMs and analyze what works and what does not.
+
+
+## Tracing LLM Apps - What's different? 
+
+Building LLM-based apps means integrating multiple complex elements and interactions to your code. This can mean chains, agents, different base models tools, embedding retrieval and routing. Traditional logging and analytics tools are not well equipped to ingest, display and analyze these new ways of interacting with LLMs. The new logging stack needs to think LLM-native from the ground up. That means grouping calls and visualising them in a way that enables teams to understand and debug them. 
+
+[Include picture of Langfuse UI]
+
+## Let's Dive in: What to Measure?
+
+[Add something small about what you send in a trace usually?]
+
+Tracing production LLM traces is paramount. But what do you want to measure? We see five metrics emerging as the canonical metrics to keep track of:
+
+- **Volume:** The baseline for other metrics - track token counts for prompts and completions.
+- **Costs:** Measure costs broken down by user, feature, model and session + track GPU seconds for self-hosted models.
+- **Latency:** Measure latency at every part of a chain. Use this data to analyze which steps add latency and improve your users' experience.
+- **Quality:** Proactively monitor user feedback, conduct manual evaluations and score outputs using model-based evaluations.
+- **Errors/Exceptions:** Monitor for timeouts and HTTP errors, such as rate limits, that are indicative of systemic issues.
+
+## Implementing Effective Analytics through KPIs
+
+We've seen successful teams implement the following best practice KPIs by slicing the above five metrics (volume, cost, latency, quality, errors) by:
+- **Use case:** Cluster prompts and completions by use case to understand how your users are interacting with your LLM
+- **Model and configuration:** How do different models and model configurations affect quality, latency or errors?
+- **Chain and step:** Drill down into chains to understand what drives performance
+- **User data:** Group users by specific characteristics to gain insight into personas and specific constituencies in your product
+- **Time:** Look at your KPIs over time and detect trends
+- **Version:** Track prompts, chains and software releases by their version and understand performance changes
+- **Geography:** Especially important for latency
+- **Language:** Understand how well your app works by user language
+
+[Include tradeoff graph?]
+
+## Step-by-Step: Implementing Tracing & Analytics in LLM Applications
+
+1. **Define goals.** What do you want to achieve and how they align with user requirements. Take the above metrics and KPIs as a baseline.
+2. **Incorporate tracking.** This means backend execution and scores (e.g. capturing user feedback in the frontend).
+3. **Inspect and debug.** runtime traces through a visual UI
+4. **Analyze.** Start by measuring spend by model/user and time, spend by product feature, latency per step of a chain and scatter quality/latency/cost grouped by experiments or production versions.
+
+## Give Langfuse a spin
+
+Langfuse makes tracing and analytics of LLM applications accessible. It offers data integration with async SDKs (JS/TS, Python), API, and Langchain, and provides a UI for debugging of more complex traces. See the [quickstart guide](https://langfuse.com/docs/get-started) in our docs.
+
+Interested? Sign up to try the demo at [langfuse.com](http://langfuse.com). Self-hosting instructions can be found in [our docs](https://langfuse.com/docs/deployment/self-host).
