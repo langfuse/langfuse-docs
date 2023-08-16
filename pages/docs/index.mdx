@@ -17,25 +17,32 @@ Langfuse is an **open-source product analytics suite for LLM apps**.
 
 1. [Integrations](/docs/integrations): Data collection via SDKs
    - Tracing LLM chains by collecting specific data such as prompts, outputs, and configurations
+   - Measure quality of outputs via [Scores](/docs/scores)
    - Feedback collection from users
      - Explicit, e.g., thumbs up/down, star rating
      - Implicit, e.g., user copied the completion, user clicked on a link, user did not edit before submitting the suggested text
 1. [Nested traces](/docs/tracing)
    - Find the root cause of issues
    - Segment traces based on user feedback and other metrics
-1. [Product analytics](/docs/analytics) (in alpha)
-   - Detailed monitoring of quality, cost and latency
+1. Analytics
+   - [User-level reporting](/docs/user-explorer): costs, usage, feedback/quality
+   - [Usage/cost](/docs/token-usage)
+   - More to come soon! (get [early access](/docs/analytics))
 
 ## Why Langfuse?
 
-- Open source
-- Run Langfuse self-hosted, locally, or use Langfuse cloud
+- [Open source](/docs/open-source) (MIT license)
+- Run Langfuse [self-hosted](/docs/deployment/self-host), [locally](/docs/deployment/local), or use [Langfuse cloud](/docs/deployment/cloud)
 - Model agnostic
 - Integration
-  - Fully async, does not add latency
-  - Fully typed SDKs for typescript and python
-  - Report user feedback from front-end
+  - [Public API](/docs/integrations/api)
+  - Fully async SDKs for:
+    - [JS/TS (Node, Edge)](/docs/integrations/sdk/typescript)
+    - [Python](/docs/integrations/sdk/python)
+  - [Langchain integration](/docs/integrations/langchain) (full integration in 5 minutes)
+  - Report user feedback and other metrics from the front-end via [JS/TS Web SDK](/docs/integrations/sdk/typescript-web)
   - Incrementally adoptable, start with a single LLM call, expand to full tracing of complex chains/agents
+- Use [GET API](/docs/integrations/api) to build downstream use cases
 
 ## What's next?
 
