@@ -4,9 +4,9 @@ Repo for [langfuse.com](https://langfuse.com), based on [Nextra](https://nextra.
 
 ## Local Development
 
-First, run `pnpm i` to install the dependencies.
-
-Then, run `pnpm dev` to start the development server and visit localhost:3000.
+1. Create env based on .ev.template
+2. Run `pnpm i` to install the dependencies.
+3. Run `pnpm dev` to start the development server on localhost:3333
 
 ## SDK docs
 
