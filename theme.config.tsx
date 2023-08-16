@@ -28,6 +28,9 @@ const config: DocsThemeConfig = {
   chat: {
     link: "https://discord.gg/7NXusRtqYU",
   },
+  search: {
+    placeholder: "Search...",
+  },
   navbar: {
     extraContent: (
       <a
@@ -129,18 +132,18 @@ const config: DocsThemeConfig = {
     ),
   },
   faviconGlyph: "🪢",
-  // banner: {
-  //   key: "analytics",
-  //   dismissible: false,
-  //   text: (
-  //     <a href="/analytics" target="_blank">
-  //       <span className="sm:hidden">Soon: 📈 LLM Analytics →</span>
-  //       <span className="hidden sm:inline">
-  //         Coming soon: 📈 Langfuse LLM Analytics →
-  //       </span>
-  //     </a>
-  //   ),
-  // },
+  banner: {
+    key: "demo",
+    dismissible: true,
+    text: (
+      <Link href="/docs/demo">
+        <span className="sm:hidden">Check out live demo →</span>
+        <span className="hidden sm:inline">
+          Want to see Langfuse in action? Check out the live demo →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

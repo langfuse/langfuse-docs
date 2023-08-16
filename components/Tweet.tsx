@@ -9,6 +9,6 @@ export const Tweet = ({
   className?: string;
 }) => (
   <div className={cn("mt-2", className)}>
-    <ReactTweet id={id} apiUrl={id ? `/api/tweet/${id}` : undefined} />
+    <ReactTweet id={id} />
   </div>
 );
