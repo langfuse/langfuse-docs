@@ -1,0 +1,82 @@
+---
+description: Get (view-only) access to a Langfuse project used by the team to improve the docs Q&A chatbot.
+---
+
+# Live Demo
+
+import { Frame } from "@/components/Frame";
+import { Steps } from "nextra-theme-docs";
+import { Button } from "@/components/ui/button";
+
+## Try it yourself
+
+<Steps>
+
+### View demo project in Langfuse
+
+Get access to demo project by creating a free account (no credit card required).
+
+<Button asChild className="mt-3">
+  <a href="https://cloud.langfuse.com/auth/sign-up" target="_blank">
+    Create demo account
+  </a>
+</Button>
+
+### Produce new traces & feedback
+
+Interact with chatbot below to see new traces and user feedback in Langfuse.
+
+import { Chat } from "@/components/qaChatbot";
+
+<div className="p-2 rounded-lg mt-8 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <Chat className="h-96 my-0 bg-background/90" />
+</div>
+
+_Interested in implementation details? Checkout the [blog post](/blog/qa-chatbot-for-langfuse-docs) (code is fully open-source)._
+
+</Steps>
+
+## Prefer GIFs?
+
+### Reporting
+
+- Monitor usage (cost control)
+- Track latency, quality (based on user feedback) and OpenAI errors
+
+<Frame>
+  ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
+</Frame>
+
+### Tracing
+
+Each response is based on the following steps which can go wrong, be slow or expensive:
+
+1. Embedding of user request
+2. Embedding similarity search in Postgres
+3. Summary of docs as markdown
+4. Generation of response based on retrieved context and chat history
+
+This is how a single trace looks like in Langfuse:
+
+<Frame>![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
+
+### User feedback collection
+
+In this example, we can see how we do:
+
+1. Collection of feedback using the Langfuse Web SDK
+   > _Negative, Langchain not included in response_
+2. Browsing of feedback
+3. Identification of the root cause of the low-quality response
+   > Docs on Langchain integration are not included in embedding similarity search
+
+<Frame>
+  ![User feedback collection in
+  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
+</Frame>
+
+### Interested in more advanced analytics?
+
+We are currently running an [alpha program](/docs/analytics) with more prebuilt analytics capabilities based on the ingested production data. Interested to participate or learn more? Reach out!
+
+Why is this an alpha program? We rely on some closed source software to make this work in order to move fast and focus on what's most interesting for most of you. We'll soon bring these features to all users since we currently plan a migration to an OLAP database and flexible modeling structure to power these features.

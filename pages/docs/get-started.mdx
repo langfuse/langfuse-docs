@@ -299,12 +299,31 @@ This is a very short summary of how to get started with Langfuse, have a look at
 
 import { Card, Cards } from "nextra-theme-docs";
 import { SiTypescript, SiPython } from "react-icons/si";
+import { FiCode } from "react-icons/fi";
 
-<Cards>
+<Cards num={2}>
   <Card
     icon={<SiTypescript size="24" />}
-    title="Typescript"
-    href="/docs/sdk/typescript"
+    title="JS/TS SDK (Edge, Node, Web)"
+    href="/docs/integrations/sdk/typescript"
+    arrow
   />
-  <Card icon={<SiPython size="24" />} title="Python" href="/docs/sdk/python" />
+  <Card
+    icon={<SiPython size="24" />}
+    title="Python SDK"
+    href="/docs/integrations/sdk/python"
+    arrow
+  />
+  <Card
+    icon={<span>🦜🔗</span>}
+    title="Langchain integration"
+    href="/docs/integrations/langchain"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="API reference"
+    href="/docs/integrations/api"
+    arrow
+  />
 </Cards>
