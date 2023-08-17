@@ -98,7 +98,7 @@ const config: DocsThemeConfig = {
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
     const description =
-      frontMatter.description ?? "Open-source analytics for LLM applications";
+      frontMatter.description ?? "Open source analytics for LLM applications";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
