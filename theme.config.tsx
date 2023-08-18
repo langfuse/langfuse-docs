@@ -6,8 +6,11 @@ import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 
 const footerNav = [
-  { name: "Imprint", href: "/imprint" },
   { name: "Contact", href: "mailto:contact@langfuse.com" },
+  { name: "Imprint", href: "/imprint" },
+  { name: "Terms", href: "https://app.termly.io/document/terms-of-service/baf80a2e-dc67-46de-9ca8-2f7457179c32" },
+  { name: "Privacy", href: "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90" },
+  { name: "Cookies", href: "https://app.termly.io/document/cookie-policy/f97945a3-cb02-4db7-9370-c57023d92838" },
 ];
 
 const config: DocsThemeConfig = {
