@@ -1,15 +1,19 @@
-import { Features } from "./Features";
+import { Background } from "../Background";
+import { FeatTracing } from "./FeatTracing";
 import { Hero } from "./Hero";
-import { Meteors } from "@/components/magicui/meteors";
+import { Users } from "./Users";
 
 export function Home() {
   return (
-    <main className="relative overflow-hidden w-full">
-      <Meteors />
-      <div className="container">
-        <Hero />
-        <Features />
-      </div>
-    </main>
+    <>
+      <main className="relative overflow-hidden w-full">
+        <div className="container">
+          <Hero />
+          <Users />
+          <FeatTracing />
+        </div>
+      </main>
+      <Background />
+    </>
   );
 }

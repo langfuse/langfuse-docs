@@ -1,8 +1,8 @@
 import { MagicCard, MagicContainer } from "../magicui/magic-card";
 
-export const Features = () => (
+export const FeatOther = () => (
   <section className="flex flex-col gap-2 items-center">
-    <h2 className="text-3xl">Use cases</h2>
+    <h2 className="text-3xl">More features</h2>
     <MagicContainer className={"flex flex-col gap-4 lg:flex-row"}>
       <Card title="Magic" />
       <Card title="Card" />
