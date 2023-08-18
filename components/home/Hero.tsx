@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 export function Hero() {
   return (
     <section className="h-[calc(100vh-64px)] flex flex-col items-center text-xl justify-center text-center gap-2">
-      <div className="max-h-96">
+      <div className="h-96">
         <Spline
           scene="https://prod.spline.design/6kMV8Amtvu7CwUZJ/scene.splinecode"
           onLoad={(spline) => {
@@ -22,13 +22,15 @@ export function Hero() {
         latency
       </span>
       <div className="flex gap-4 flex-wrap items-center my-5">
-        <ShimmerButton borderRadius="8px">
-          <span className="whitespace-pre-wrap bg-gradient-to-b from-white from-30% to-gray-300/70 bg-clip-text text-center text-md font-semibold leading-none tracking-tight text-transparent">
-            Live demo
-          </span>
-        </ShimmerButton>
-        <Button variant="ghost" size="lg">
-          Create account
+        <Link href="/docs/demo">
+          <ShimmerButton borderRadius="8px">
+            <span className="whitespace-pre-wrap bg-gradient-to-b from-white from-30% to-gray-300/70 bg-clip-text text-center text-md font-semibold leading-none tracking-tight text-transparent">
+              Live demo
+            </span>
+          </ShimmerButton>
+        </Link>
+        <Button variant="ghost" size="lg" asChild>
+          <Link href="https://cloud.langfuse.com">Create account</Link>
         </Button>
       </div>
       <div className="flex gap-3 items-center">
