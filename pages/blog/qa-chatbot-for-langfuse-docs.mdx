@@ -9,6 +9,8 @@ author: Marc
 
 import { BlogHeader } from "@/components/BlogHeader";
 import { Frame } from "@/components/Frame";
+import { Chat } from "@/components/qaChatbot";
+import { Callout } from "nextra/components";
 
 <BlogHeader
   title="🤖 Q&A Chatbot for the Langfuse Docs"
@@ -19,9 +21,9 @@ import { Frame } from "@/components/Frame";
 
 We've built a new Q&A chatbot to help users find the right information in the Langfuse docs. In this post, I'll briefly summarize how we've built it and how we use Langfuse to monitor and improve it.
 
-**Try it** _(also available in the [docs](/docs/qa-chatbot))_
+**Update:** All Langfuse Cloud users now have view-only access to this project. [View live demo](/docs/demo) to explore it yourself.
 
-import { Chat } from "@/components/qaChatbot";
+**Try it** _(also available in the [docs](/docs/qa-chatbot))_
 
 <div className="p-3 rounded-lg mt-2 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
   <Chat className="h-96 my-0 bg-background/90" />
@@ -46,7 +48,7 @@ import { Chat } from "@/components/qaChatbot";
 
 ### Code
 
-All of the code is open-source and available on GitHub in the [langfuse-docs](https://github.com/langfuse/langfuse-docs) repo. Relevant files:
+All of the code is open source and available on GitHub in the [langfuse-docs](https://github.com/langfuse/langfuse-docs) repo. Relevant files:
 
 import { FileTree } from "nextra/components";
 
@@ -77,6 +79,12 @@ import { FileTree } from "nextra/components";
 </FileTree>
 
 ## Langfuse
+
+<Callout type="info" emoji="ℹ️">
+  Want to explore the project in Langfuse yourself? [Create
+  account](https://cloud.langfuse.com/auth/sign-up) to get view-only access to
+  this project in Langfuse.
+</Callout>
 
 ### Usage reporting
 

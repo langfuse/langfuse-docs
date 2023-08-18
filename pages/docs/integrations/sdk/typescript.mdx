@@ -80,13 +80,13 @@ const langfuse = new Langfuse({
 
 ### Options
 
-| Variable       | Description                                                                         | Default value                  |
-| -------------- | ----------------------------------------------------------------------------------- | ------------------------------ |
-| baseUrl        | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"` |
-| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` |
-| flushAt        | Number of queued requests                                                           | `20`                           |
-| flushInterval  | Interval in ms to flush requests                                                    | `10000`                        |
-| requestTimeout | Timeout in ms for requests                                                          | `10000`                        |
+| Variable       | Description                                                                         | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl        | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| flushAt        | Number of queued requests                                                           | `20`                                                                                                                                                    |
+| flushInterval  | Interval in ms to flush requests                                                    | `10000`                                                                                                                                                 |
+| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), set `flushAt` to `1`
@@ -214,6 +214,10 @@ const span = trace.span({
   input: {
     userInput: "How does Langfuse work?",
   },
+});
+
+// Example update
+span.update({
   metadata: {
     httpRoute: "/api/retrieve-doc",
     embeddingModel: "bert-base-uncased",
@@ -223,10 +227,11 @@ const span = trace.span({
 // Application code
 const retrievedDocs = await retrieveDoc("How does Langfuse work?");
 
-// Example update
-span.update({
-  endTime: new Date(),
-  output: retrievedDocs,
+// Example end - sets endTime, optionally pass a body
+span.end({
+  output: {
+    retrievedDocs,
+  },
 });
 
 // Properties
@@ -279,7 +284,11 @@ const chatCompletion = await llm.respond(prompt);
 
 // Example update
 generation.update({
-  endTime: new Date(),
+  completionStartTime: new Date(),
+});
+
+// Example end - sets endTime, optionally pass a body
+generation.end({
   completion: chatCompletion,
 });
 

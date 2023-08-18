@@ -27,16 +27,20 @@ const supabaseClient = createClient(
 const langfuse = new Langfuse({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
+  flushAt: 1,
+  flushInterval: 0,
 });
 // langfuse.debug();
 
 export default async function handler(req: Request, res: Response) {
   const body = await req.json();
-  console.log(body);
 
   const trace = langfuse.trace({
     name: "qa",
     id: "lf.docs.conversation." + body.conversationId,
+    metadata: {
+      pathname: new URL(req.headers.get("Referer")).pathname,
+    },
   });
 
   const messages = body.messages;
@@ -87,9 +91,8 @@ export default async function handler(req: Request, res: Response) {
   }
   const [{ embedding }] = (await embeddingResponse.json()).data;
 
-  embeddingSpan.update({
+  embeddingSpan.end({
     output: embedding,
-    endTime: new Date(),
   });
 
   const vectorStoreSpan = retrievalSpan.span({
@@ -121,9 +124,8 @@ export default async function handler(req: Request, res: Response) {
     throw new Error("Failed to match page sections");
   }
 
-  vectorStoreSpan.update({
+  vectorStoreSpan.end({
     output: pageSections,
-    endTime: new Date(),
   });
 
   const contextEncodingSpan = retrievalSpan.span({
@@ -147,14 +149,12 @@ export default async function handler(req: Request, res: Response) {
     contextText += `${content.trim()}\n---\n`;
   }
 
-  contextEncodingSpan.update({
+  contextEncodingSpan.end({
     output: {
       text: contextText,
     },
-    endTime: new Date(),
   });
-  retrievalSpan.update({
-    endTime: new Date(),
+  retrievalSpan.end({
     output: {
       text: contextText,
     },
@@ -202,15 +202,19 @@ export default async function handler(req: Request, res: Response) {
       });
     },
     onCompletion: async (completion) => {
-      generation.update({
-        endTime: new Date(),
+      generation.end({
         completion,
       });
-      messageSpan.update({
-        endTime: new Date(),
+      messageSpan.end({
         output: {
           text: completion,
         },
+        level: completion.includes("I don't know how to help with that")
+          ? "WARNING"
+          : "DEFAULT",
+        statusMessage: completion.includes("I don't know how to help with that")
+          ? "Refused to answer"
+          : undefined,
       });
       await langfuse.shutdownAsync();
     },

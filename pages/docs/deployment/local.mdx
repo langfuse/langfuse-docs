@@ -7,51 +7,67 @@ description: Self-hosting instructions for Langfuse using Docker
 ## Requirements
 
 - `docker` and `docker compose`, both included in [Docker Desktop](https://docs.docker.com/get-docker/)
+- Node.js & NPM to apply db migration using the ORM (Prisma)
 
 ## Docker compose
 
-This setup is the easiest to get started with. It will start a local database and the Langfuse server. The server is exposed on port `3030` by default.
+This setup is the easiest to get started with. It will start a local database and the Langfuse server. The server is exposed on port `3000` by default.
 
 It is not recommended to use this setup in production as the database is not persisted. Checkout [Langfuse Cloud](/docs/deployment/cloud) for a production-ready setup maintained by the Langfuse team or alternatively [self-host](/docs/deployment/self-host).
 
-```bash
-# clone Langfuse from GitHub
-git clone https://github.com/langfuse/langfuse.git
+**Start**
 
-# switch into Langfuse directory
+```bash
+# Clone repository
+git clone git@github.com:langfuse/langfuse.git
 cd langfuse
 
-# start Langfuse
-docker-compose up
+# Run server and db
+docker compose up -d
+
+# Apply db migrations
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
 ```
 
-Afterwards, use the Langfuse [API](/docs/integrations/api) or client [SDKs](/docs/integrations/sdk) to interact with the server, and view the application ui at http://localhost:3030
+-> Visit http://localhost:3000
+
+**Upgrade**
+
+```bash
+# Stop server and db
+docker compose down
+
+# Pull latest changes
+git pull
+docker-compose pull
+
+# Run server and db
+docker compose up -d
+
+# Apply db migrations
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
+```
 
 ## Local development
 
 This setup is for local development. It will start a local database via Docker and the Langfuse server via NPM. The server will be restarted on file changes.
 
 ```bash
-# clone Langfuse from GitHub
-git clone https://github.com/langfuse/langfuse.git
-
-# switch into Langfuse directory
-cd langfuse
-
 # Install dependencies
 npm install
 
 # Run the db
-docker-compose -f docker-compose.dev.yml up
+docker-compose -f docker-compose.dev.yml up -d
 
 # create an env file
 cp .env.dev.example .env
 
 # Migration
-npx prisma migrate dev
+npm run db:migrate
 
-# Seed the database
-npx prisma db seed
+# Optional: seed the database
+# npm run db:seed
+# npm run db:seed:examples
 
 # Start the server
 npm run dev

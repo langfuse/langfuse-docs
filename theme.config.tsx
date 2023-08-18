@@ -6,8 +6,11 @@ import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 
 const footerNav = [
-  { name: "Imprint", href: "/imprint" },
   { name: "Contact", href: "mailto:contact@langfuse.com" },
+  { name: "Imprint", href: "/imprint" },
+  { name: "Terms", href: "https://app.termly.io/document/terms-of-service/baf80a2e-dc67-46de-9ca8-2f7457179c32" },
+  { name: "Privacy", href: "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90" },
+  { name: "Cookies", href: "https://app.termly.io/document/cookie-policy/f97945a3-cb02-4db7-9370-c57023d92838" },
 ];
 
 const config: DocsThemeConfig = {
@@ -27,6 +30,9 @@ const config: DocsThemeConfig = {
   },
   chat: {
     link: "https://discord.gg/7NXusRtqYU",
+  },
+  search: {
+    placeholder: "Search...",
   },
   navbar: {
     extraContent: (
@@ -95,7 +101,7 @@ const config: DocsThemeConfig = {
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
     const description =
-      frontMatter.description ?? "Open-source analytics for LLM applications";
+      frontMatter.description ?? "Open source analytics for LLM applications";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
@@ -129,18 +135,18 @@ const config: DocsThemeConfig = {
     ),
   },
   faviconGlyph: "🪢",
-  // banner: {
-  //   key: "analytics",
-  //   dismissible: false,
-  //   text: (
-  //     <a href="/analytics" target="_blank">
-  //       <span className="sm:hidden">Soon: 📈 LLM Analytics →</span>
-  //       <span className="hidden sm:inline">
-  //         Coming soon: 📈 Langfuse LLM Analytics →
-  //       </span>
-  //     </a>
-  //   ),
-  // },
+  banner: {
+    key: "demo",
+    dismissible: true,
+    text: (
+      <Link href="/docs/demo">
+        <span className="sm:hidden">Check out live demo →</span>
+        <span className="hidden sm:inline">
+          Want to see Langfuse in action? Check out the live demo →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

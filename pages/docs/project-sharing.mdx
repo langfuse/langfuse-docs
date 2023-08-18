@@ -14,7 +14,8 @@ In the project settings, you can grant access to other users to view and edit yo
 
 - **Owner**: user who created the project; has all permissions
 - **Admin**: can edit the project settings and grant access to other users
-- **Member**: can view all metrics but cannot configure the project
+- **Member**: can view all metrics & create scores, but cannot configure the project
+- **Viewer**: view-only access to the project, not to the configuration
 
 ## Scopes per role
 
@@ -28,6 +29,7 @@ export function RolePermissionTable() {
       "apiKeys:read",
       "apiKeys:create",
       "apiKeys:delete",
+      "scores:create",
     ],
     ADMIN: [
       "members:read",
@@ -36,8 +38,10 @@ export function RolePermissionTable() {
       "apiKeys:read",
       "apiKeys:create",
       "apiKeys:delete",
+      "scores:create",
     ],
-    MEMBER: ["members:read"],
+    MEMBER: ["members:read", "scores:create"],
+    VIEWER: [],
   };
   return (
     <div className="flex gap-5 mt-4">
@@ -62,4 +66,4 @@ export function RolePermissionTable() {
 
 <RolePermissionTable />
 
-_Currently, roles cover project settings. In the future, they will cover more granular aspects of the project._
+_Roles cover project settings and all features that make permanent changes. The Viewer role has no privileges to make any changes_
