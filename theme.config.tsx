@@ -16,10 +16,6 @@ const footerNav = [
     name: "Privacy",
     href: "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90",
   },
-  {
-    name: "Cookies",
-    href: "https://app.termly.io/document/cookie-policy/f97945a3-cb02-4db7-9370-c57023d92838",
-  },
 ];
 
 const config: DocsThemeConfig = {
@@ -85,6 +81,14 @@ const config: DocsThemeConfig = {
               {nav.name}
             </Link>
           ))}
+          <a
+            href="#"
+            onClick={() => (window as any).displayPreferenceModal()}
+            className="inline px-2 first-of-type:pl-0 border-l first-of-type:border-l-0 rounded-none leading-6 text-primary/80 hover:text-primary"
+            id="termly-consent-preferences"
+          >
+            Cookie Preferences
+          </a>
         </span>
       </div>
     ),
