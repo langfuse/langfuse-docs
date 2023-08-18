@@ -2,6 +2,7 @@ import { Background } from "../Background";
 import { FeatTracing } from "./FeatTracing";
 import { FromTheBlog } from "./FromTheBlog";
 import { Hero } from "./Hero";
+import { Pricing } from "./Pricing";
 import { Users } from "./Users";
 
 export function Home() {
@@ -12,6 +13,7 @@ export function Home() {
           <Hero />
           <Users />
           <FeatTracing />
+          <Pricing />
           <FromTheBlog />
         </div>
       </main>

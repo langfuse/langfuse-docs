@@ -29,7 +29,7 @@ export const FeatTracing = () => (
             <p className="text-base font-semibold leading-7">
               Debug application faster
             </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">
               Nested tracing
             </h2>
             <p className="mt-6 text-lg leading-8 text-primary">
