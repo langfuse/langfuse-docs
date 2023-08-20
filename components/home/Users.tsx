@@ -8,6 +8,8 @@ import juiceboxLight from "./img/juicebox_light.png";
 import juiceboxDark from "./img/juicebox_dark.png";
 import nucleusLight from "./img/nucleus_light.png";
 import nucleusDark from "./img/nucleus_dark.png";
+import langdockLight from "./img/langdock_light.png";
+import langdockDark from "./img/langdock_dark.png";
 
 const users = [
   {
@@ -29,6 +31,12 @@ const users = [
     href: "https://fastgen.com",
   },
   {
+    name: "Langdock",
+    lightImage: langdockLight,
+    darkImage: langdockDark,
+    href: "https://www.langdock.com",
+  },
+  {
     name: "Nucleus",
     lightImage: nucleusLight,
     darkImage: nucleusDark,
@@ -42,7 +50,7 @@ export const Users = () => (
       <h2 className="text-center text-lg font-semibold leading-8">
         Teams building complex LLM apps rely on Langfuse
       </h2>
-      <div className="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+      <div className="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
         {users.map((user) => (
           <a
             href={user.href}
