@@ -45,7 +45,7 @@ export function Hero() {
           />
         </Link>
       </div>
-      {/* <div className="flex gap-3 flex-col items-center mt-5 lg:mt-10">
+      <div className="flex gap-3 flex-col items-center mt-5 lg:mt-10">
         <a
           href="https://www.producthunt.com/posts/langfuse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-langfuse"
           target="_blank"
@@ -61,7 +61,7 @@ export function Hero() {
         <span className="text-xs">
           Support our launch on Product Hunt today
         </span>
-      </div> */}
+      </div>
       <div className="flex gap-2 items-center mt-5 lg:mt-20">
         <span>Backed by</span>
         <YCLogo />
