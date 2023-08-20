@@ -41,7 +41,7 @@ export const DocsSupport = () => {
       <h3 className="text-xl font-semibold">Questions? We're here to help</h3>
       <div className="flex gap-3 flex-wrap">
         <Button variant="outline" size="sm" asChild>
-          <a href="https://discord.gg/7NXusRtqYU" target="_blank">
+          <a href="/discord" target="_blank">
             <span>Discord</span>
             <RxDiscordLogo className="h-4 w-4 ml-3" />
           </a>

@@ -34,7 +34,7 @@ const config: DocsThemeConfig = {
     ),
   },
   chat: {
-    link: "https://discord.gg/7NXusRtqYU",
+    link: "/discord",
   },
   search: {
     placeholder: "Search...",
