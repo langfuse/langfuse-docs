@@ -36,7 +36,7 @@ export function Hero() {
           <Link href="https://cloud.langfuse.com">Create account</Link>
         </Button>
       </div>
-      {/* <div className="flex gap-3 items-center">
+      <div className="flex gap-3 items-center">
         <span>Star us on GitHub</span>
         <Link href="https://github.com/langfuse/langfuse">
           <img
@@ -44,8 +44,8 @@ export function Hero() {
             src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
           />
         </Link>
-      </div> */}
-      <div className="flex gap-3 flex-col items-center mt-5 lg:mt-10">
+      </div>
+      {/* <div className="flex gap-3 flex-col items-center mt-5 lg:mt-10">
         <a
           href="https://www.producthunt.com/posts/langfuse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-langfuse"
           target="_blank"
@@ -61,7 +61,7 @@ export function Hero() {
         <span className="text-xs">
           Support our launch on Product Hunt today
         </span>
-      </div>
+      </div> */}
       <div className="flex gap-2 items-center mt-5 lg:mt-20">
         <span>Backed by</span>
         <YCLogo />
