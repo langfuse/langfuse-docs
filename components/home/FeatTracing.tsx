@@ -30,7 +30,7 @@ export const FeatTracing = () => (
           <div className="lg:max-w-lg">
             <p className="text-base font-semibold leading-7">Observability</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-              Debug application faster
+              Debug faster
             </h2>
             <p className="mt-6 text-lg leading-8 text-primary/70">
               LLM applications are increasingly complex, Langfuse helps to trace
