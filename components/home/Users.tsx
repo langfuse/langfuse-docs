@@ -55,7 +55,7 @@ export const Users = () => (
           <a
             href={user.href}
             key={user.name}
-            className="col-span-2 lg:col-span-1"
+            className="col-span-2 lg:col-span-1 last:col-start-2 lg:last:col-start-5"
             rel="noopener noreferrer"
             target="_blank"
           >
