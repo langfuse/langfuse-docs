@@ -1,40 +1,48 @@
-import { Code } from "lucide-react";
+import { Check, Code, Construction } from "lucide-react";
+import Image from "next/image";
+import dashboardImg from "./img/dashboard.png";
 
 const features = [
   {
-    name: "Push to deploy.",
+    name: "Cost.",
     description:
-      "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.",
-    icon: Code,
+      "Track token usage and cost of your LLM application. Drill-down by users, models, or application features.",
+    icon: Check,
   },
   {
-    name: "SSL certificates.",
+    name: "Quality.",
     description:
-      "Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.",
-    icon: Code,
+      "Track user feedback (via Langfuse Web SDK), internal reviews (in the Langfuse UI) and evals to track quality of your LLM application.",
+    icon: Check,
   },
   {
-    name: "Database backups.",
+    name: "Latency.",
     description:
-      "Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus. Et magna sit morbi lobortis.",
-    icon: Code,
+      "Monitor and improve latency by getting breakdowns of the added latency of each step of the LLM chain.",
+    icon: Check,
+  },
+  {
+    name: "More to come.",
+    description:
+      "We currently run a closed alpha with selected users as we build out the analytics features. Reach out if you are interested.",
+    icon: Construction,
   },
 ];
 
 export const FeatAnalytics = () => (
-  <div className="overflow-hidden  py-24 sm:py-32">
+  <div className="py-24 sm:py-32">
     <div className="mx-auto max-w-7xl px-6 lg:px-8">
       <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
         <div className="lg:pr-8 lg:pt-4">
           <div className="lg:max-w-lg">
-            <h2 className="text-base font-semibold leading-7">Deploy faster</h2>
+            <h2 className="text-base font-semibold leading-7">Analytics</h2>
             <p className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-              A better workflow
+              Metrics for LLM devs
             </p>
-            <p className="mt-6 text-lg leading-8">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores
-              impedit perferendis suscipit eaque, iste dolor cupiditate
-              blanditiis ratione.
+            <p className="mt-6 text-lg leading-8 text-primary/70">
+              Based on the ingested data, Langfuse provides prebuilt analytics
+              to help teams focus on the most important metrics when improving
+              their LLM app.
             </p>
             <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 lg:max-w-none">
               {features.map((feature) => (
@@ -46,18 +54,18 @@ export const FeatAnalytics = () => (
                     />
                     {feature.name}
                   </dt>{" "}
-                  <dd className="inline">{feature.description}</dd>
+                  <dd className="inline text-primary/70">
+                    {feature.description}
+                  </dd>
                 </div>
               ))}
             </dl>
           </div>
         </div>
-        <img
-          src="https://tailwindui.com/img/component-images/dark-project-app-screenshot.png"
-          alt="Product screenshot"
+        <Image
+          src={dashboardImg}
+          alt="Dashboard Langfuse"
           className="w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem] md:-ml-4 lg:-ml-0"
-          width={2432}
-          height={1442}
         />
       </div>
     </div>

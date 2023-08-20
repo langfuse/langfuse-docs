@@ -1,22 +1,24 @@
-import { Cloud } from "lucide-react";
+import { Check, Cloud } from "lucide-react";
 import Image from "next/image";
 import TraceScreen from "./img/trace-detail.png";
 
 const features = [
   {
     name: "Made for agents & LLM chains.",
-    description: "Lorem ipsum",
-    icon: Cloud,
+    description:
+      "Trace unlimited nested actions and get a detailed view of the entire request.",
+    icon: Check,
   },
   {
     name: "Track non-LLM actions.",
-    description: "Lorem ipsum",
-    icon: Cloud,
+    description:
+      "Database queries, API calls, and other actions that lead to the response can be tracked for optimal visibility into issues.",
+    icon: Check,
   },
   {
-    name: "Flexible.",
-    description: "Trace any model and get insights into model configuration",
-    icon: Cloud,
+    name: "Open.",
+    description: "Works with all models and configurations.",
+    icon: Check,
   },
 ];
 
@@ -26,16 +28,14 @@ export const FeatTracing = () => (
       <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
         <div className="lg:ml-auto lg:pl-4 lg:pt-4">
           <div className="lg:max-w-lg">
-            <p className="text-base font-semibold leading-7">
-              Debug application faster
-            </p>
+            <p className="text-base font-semibold leading-7">Observability</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-              Nested tracing
+              Debug application faster
             </h2>
-            <p className="mt-6 text-lg leading-8 text-primary">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores
-              impedit perferendis suscipit eaque, iste dolor cupiditate
-              blanditiis ratione.
+            <p className="mt-6 text-lg leading-8 text-primary/70">
+              LLM applications are increasingly complex, Langfuse helps to trace
+              & debug them. Understand how changes to one step impact overall
+              application performance.
             </p>
             <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-primary lg:max-w-none">
               {features.map((feature) => (
@@ -47,7 +47,9 @@ export const FeatTracing = () => (
                     />
                     {feature.name}
                   </dt>{" "}
-                  <dd className="inline">{feature.description}</dd>
+                  <dd className="inline text-primary/70">
+                    {feature.description}
+                  </dd>
                 </div>
               ))}
             </dl>
