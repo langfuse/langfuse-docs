@@ -6,8 +6,8 @@ import { Button } from "../ui/button";
 
 export function Hero() {
   return (
-    <section className="lg:h-[calc(100vh-64px)] flex flex-col items-center text-xl justify-center text-center gap-3">
-      <div className="h-64 lg:h-96">
+    <section className="lg:min-h-[calc(100vh-64px)] flex flex-col items-center text-xl justify-center text-center gap-3">
+      <div className="h-64 lg:h-96 lg:max-h-[50vh]">
         <Spline
           scene="https://prod.spline.design/6kMV8Amtvu7CwUZJ/scene.splinecode"
           onLoad={(spline) => {
