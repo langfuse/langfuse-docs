@@ -10,10 +10,10 @@ export const CloudflareVideo = ({
 }) => (
   <div
     className={cn(
-      "my-4 overflow-hidden rounded-xl shadow-lg aspect-[1.18] ring-1 ring-slate-700",
+      "my-4 overflow-hidden rounded-xl shadow-lg ring-1 ring-slate-700",
       className
     )}
   >
-    <Stream src={videoId} autoplay={true} loop={true} muted={true} />
+    <Stream src={videoId} controls={true} />
   </div>
 );
