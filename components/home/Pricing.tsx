@@ -19,7 +19,6 @@ const tiers = [
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
-      "30 days of history",
       "1 GB of storage",
       "Support via Discord and Chat",
     ],
@@ -36,7 +35,6 @@ const tiers = [
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
-      "Unlimited history",
       "10 GB of included storage",
       "1:1 support, Slack Channel, integration help",
     ],
