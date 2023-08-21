@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 
 export function Hero() {
   return (
-    <section className="lg:min-h-[calc(100vh-64px)] flex flex-col items-center text-xl justify-center text-center gap-3">
+    <section className="lg:min-h-[calc(100vh-64px)] flex flex-col items-center text-md sm:text-xl justify-center text-center gap-3">
       <div className="h-64 lg:h-96 lg:max-h-[50vh]">
         <Spline
           scene="https://prod.spline.design/6kMV8Amtvu7CwUZJ/scene.splinecode"
@@ -36,12 +36,15 @@ export function Hero() {
           <Link href="https://cloud.langfuse.com">Create account</Link>
         </Button>
       </div>
-      <div className="flex gap-2 items-center mt-5 lg:mt-20">
-        <span>Backed by</span>
+
+      <div className="flex gap-2 items-center mt-5 lg:mt-10">
+        <span className="text-primary/70">Backed by</span>
         <YCLogo />
       </div>
       <div className="flex gap-3 items-center">
-        <span>Star us on GitHub</span>
+        <span className="text-primary/70">
+          Star us on <span className="hidden sm:inline">GitHub</span>
+        </span>
         <Link href="https://github.com/langfuse/langfuse">
           <img
             alt="Langfuse Github stars"
@@ -49,6 +52,35 @@ export function Hero() {
           />
         </Link>
       </div>
+      <div className="mt-2">
+        <ProductHuntBadge />
+      </div>
     </section>
   );
 }
+
+const ProductHuntBadge = () => (
+  <>
+    <a
+      href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
+      target="_blank"
+      className="dark:hidden"
+    >
+      <img
+        src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=410250&theme=neutral&period=daily"
+        alt="Langfuse - Open&#0032;source&#0032;tracing&#0032;and&#0032;analytics&#0032;for&#0032;LLM&#0032;applications | Product Hunt"
+      />
+    </a>
+    <a
+      href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
+      target="_blank"
+      className="hidden dark:block"
+    >
+      <img
+        src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=410250&theme=dark&period=daily"
+        alt="Langfuse - Open&#0032;source&#0032;tracing&#0032;and&#0032;analytics&#0032;for&#0032;LLM&#0032;applications | Product Hunt"
+        className="border border-foreground rounded-xl"
+      />
+    </a>
+  </>
+);
