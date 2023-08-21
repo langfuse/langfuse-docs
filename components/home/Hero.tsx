@@ -36,24 +36,6 @@ export function Hero() {
           <Link href="https://cloud.langfuse.com">Create account</Link>
         </Button>
       </div>
-
-      <div className="flex gap-3 flex-col items-center mt-5 lg:mt-10">
-        <a
-          href="https://www.producthunt.com/posts/langfuse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-langfuse"
-          target="_blank"
-        >
-          <img
-            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=410250&theme=light"
-            alt="Langfuse - Open&#0032;source&#0032;tracing&#0032;and&#0032;analytics&#0032;for&#0032;LLM&#0032;applications | Product Hunt"
-            style={{ width: "250px", height: "54px" }}
-            width="250"
-            height="54"
-          />
-        </a>
-        <span className="text-xs">
-          Support our launch on Product Hunt today
-        </span>
-      </div>
       <div className="flex gap-2 items-center mt-5 lg:mt-20">
         <span>Backed by</span>
         <YCLogo />
