@@ -19,22 +19,22 @@ export default async function handler(req: NextRequest) {
 
     const body = await req.json();
 
-    const slackResponse = await fetch(process.env.SLACK_WEBHOOK_FEEDBACK_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        rawBody: JSON.stringify(
-          {
-            type: "docs-feedback",
-            ...body,
-          },
-          null,
-          2
-        ),
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    // const slackResponse = await fetch(process.env.SLACK_WEBHOOK_FEEDBACK_URL, {
+    //   method: "POST",
+    //   body: JSON.stringify({
+    //     rawBody: JSON.stringify(
+    //       {
+    //         type: "docs-feedback",
+    //         ...body,
+    //       },
+    //       null,
+    //       2
+    //     ),
+    //   }),
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
 
     if (slackResponse.status === 200) {
       return NextResponse.json({ status: "OK" });

@@ -120,7 +120,7 @@ export const DocsFeedback = () => {
           ? "What can we improve?"
           : "Thanks for your feedback!"}
       </h3>
-      {/* {selected === null ? (
+      {selected === null ? (
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
@@ -173,7 +173,7 @@ export const DocsFeedback = () => {
             Send more feedback
           </Button>
         </div>
-      )} */}
+      )}
     </div>
   );
 };
