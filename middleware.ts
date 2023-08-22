@@ -5,7 +5,7 @@ export async function middleware(req: NextRequest) {
   const ip = getIP(req);
 
   if (blockedIps.includes(ip)) {
-    console.log("Blocked request by ip: ", ip, ", request: ", req);
+    console.log("Blocked request by ip: ", ip);
     return new Response("Access denied", { status: 403 });
   }
 
