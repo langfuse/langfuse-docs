@@ -15,7 +15,7 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     price: { monthly: "Free", annually: "Free" },
     description:
-      "Get started with Langfuse, no credit card required. Great for hobby and pre-launch projects.",
+      "Get started, no credit card required. Great for hobby, pre-launch and internal projects.",
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
@@ -31,7 +31,7 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     price: { monthly: "$95", annually: "$950" },
     description:
-      "Pro plan for production usage with more included storage and support.",
+      "More storage and support for production-grade projects with significant usage.",
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
@@ -47,7 +47,7 @@ const tiers = [
     href: "mailto:enterprise@langfuse.com",
     price: "Custom",
     description:
-      "Dedicated solutions and support for enterprise-grade projects. Contact us to learn more.",
+      "Dedicated solutions and support for enterprise teams. Contact us to learn more.",
     features: [
       "Support with self-hosting in your VPS or cloud",
       "Prioritization of your feature requests",
