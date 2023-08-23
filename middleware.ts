@@ -3,6 +3,8 @@ import { NextRequest } from "next/server";
 import { get } from "@vercel/edge-config";
 
 export async function middleware(req: NextRequest) {
+  if (process.env.VERCEL_ENV !== "production") return;
+
   const ip = getIP(req);
   const config = await get("blockedIps");
   const blockedIps = Array.isArray(config) ? config : [config];

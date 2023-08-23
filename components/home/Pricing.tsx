@@ -31,7 +31,7 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     price: { monthly: "$95", annually: "$950" },
     description:
-      "Pro plan for production usage with extended history, support, and more included storage.",
+      "Pro plan for production usage with more included storage and support.",
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",

@@ -1,6 +1,6 @@
 import { Check, Cloud } from "lucide-react";
 import Image from "next/image";
-import TraceScreen from "./img/trace-detail.png";
+import TraceScreen from "./img/trace-detail.gif";
 
 const features = [
   {
