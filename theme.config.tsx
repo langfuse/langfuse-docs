@@ -34,7 +34,7 @@ const config: DocsThemeConfig = {
     ),
   },
   chat: {
-    link: "/discord",
+    link: "https://langfuse.com/discord",
   },
   search: {
     placeholder: "Search...",

@@ -1,6 +1,7 @@
 import { Check, Code, Construction } from "lucide-react";
 import Image from "next/image";
 import dashboardImg from "./img/dashboard.gif";
+// import dashboardImgPlaceholder from "./img/dashboard.png";
 
 const features = [
   {
