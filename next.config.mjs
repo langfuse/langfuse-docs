@@ -67,4 +67,6 @@ const permanentRedirects = [
   ["/docs/sdk/python", "/docs/integrations/sdk/python"],
   ["/docs/sdk/typescript", "/docs/integrations/sdk/typescript"],
   ["/docs/sdk/typescript-web", "/docs/integrations/sdk/typescript-web"],
+  // sdk integration guide
+  ["/docs/guides/sdk-integration", "/docs/integrations/sdk#Example"],
 ]
