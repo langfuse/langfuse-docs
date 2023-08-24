@@ -1,5 +1,5 @@
 ---
-description: Langfuse is open-source and can be self-hosted in your own infrastructure via Docker
+description: Langfuse is open source and can be self-hosted in your own infrastructure via Docker
 ---
 
 import { Steps } from "nextra-theme-docs";
@@ -7,7 +7,11 @@ import { Callout } from "nextra/components";
 
 # Self-Hosting Instructions
 
-If you want to run Langfuse in your infrastructure, you can easily generate a Docker container.
+[![Docker Image](https://img.shields.io/badge/docker-langfuse-blue?logo=Docker&logoColor=white&style=flat-square)](https://github.com/langfuse/langfuse/pkgs/container/langfuse)
+
+The Langfuse Server (includes API and Web UI) is open source and can be self-hosted using Docker.
+
+## Run in Docker
 
 <Steps>
 
@@ -15,52 +19,74 @@ If you want to run Langfuse in your infrastructure, you can easily generate a Do
 
 You need to have a permanent Postgres database to persist the state of Langfuse. You can use a managed service on AWS, Azure, or GCP, or you can run it yourself. After setting it up, copy the connection string.
 
-### Create docker image from repository
+### Apply migrations to the database
 
-```bash copy
-# clone the repo and cd into the directory
-git clone https://github.com/langfuse/langfuse.git && cd langfuse
+```bash
+# Clone repository
+git clone git@github.com:langfuse/langfuse.git
+cd langfuse
 
-# build the container
-docker build \
---build-arg DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
---build-arg NEXTAUTH_SECRET=mysecret \
---build-arg NEXTAUTH_URL=http:localhost:3030 \
--t langfuse .
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres
+
+npx prisma migrate deploy
 ```
 
 ### Deploy the container
 
 Deploy the container to your infrastructure. You can use a managed service like AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can run it yourself.
 
-```bash copy
-docker run \
---env DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
---env NEXTAUTH_SECRET=mysecret \
---env NEXTAUTH_URL=http:localhost:3030 \
--p 3030:3000 \
--a STDOUT langfuse
+```bash
+docker run --name langfuse \
+-e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
+-e NEXTAUTH_SECRET=mysecret \
+-e NEXTAUTH_URL=http://localhost:3000 \
+-p 3000:3000 \
+-a STDOUT \
+ghcr.io/langfuse/langfuse:latest
 ```
 
-### Update the application
+</Steps>
 
-If you want to update the application, you can simply rebuild the container and redeploy it.
+## Update
 
-```bash copy
-# pull the latest changes
-git pull
-# rebuild the container
-docker build \
---build-arg DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
---build-arg NEXTAUTH_SECRET=mysecret \
---build-arg NEXTAUTH_URL=http:localhost:3030 \
--t langfuse .
+<Steps>
+
+### Migrate database
+
+```bash
+# Clone repository
+git clone git@github.com:langfuse/langfuse.git
+cd langfuse
+
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres
+
+npx prisma migrate deploy
+```
+
+### Pull latest changes
+
+```bash
+docker pull ghcr.io/langfuse/langfuse:latest
+```
+
+### Run container
+
+```bash
+docker run --name langfuse \
+-e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
+-e NEXTAUTH_SECRET=mysecret \
+-e NEXTAUTH_URL=http://localhost:3000 \
+-p 3000:3000 \
+-a STDOUT \
+ghcr.io/langfuse/langfuse:latest
 ```
 
 </Steps>
 
 ## Troubleshooting
 
-If you encounter any issue, join us on [Discord](https://discord.gg/7NXusRtqYU).
+If you encounter any issue, join us on [Discord](/discord).
 
 Alternatively, consider [Langfuse Cloud](/docs/deployment/cloud) for a fully managed version of Langfuse.

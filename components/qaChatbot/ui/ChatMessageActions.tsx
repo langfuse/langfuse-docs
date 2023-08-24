@@ -23,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 const langfuse = new LangfuseWeb({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY ?? "",
 });
+// langfuse.debug();
+
 type Feedback = "positive" | "negative";
 
 interface ChatMessageActionsProps extends React.ComponentProps<"div"> {
@@ -62,8 +64,7 @@ export function ChatMessageActions({
 
     langfuse
       .score({
-        traceId: conversationId,
-        traceIdType: "EXTERNAL",
+        traceId: "lf.docs.conversation." + conversationId,
         name: "user-feedback",
         value: modalState.feedback === "positive" ? 1 : -1,
         comment: modalState.comment !== "" ? modalState.comment : undefined,

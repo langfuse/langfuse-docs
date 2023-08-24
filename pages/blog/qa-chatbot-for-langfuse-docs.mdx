@@ -7,7 +7,10 @@ ogImage: /images/blog/docs-qa-chatbot/og_docs-qa-chatbot.jpg
 author: Marc
 ---
 
-import { BlogHeader } from "@/components/BlogHeader";
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+import { Chat } from "@/components/qaChatbot";
+import { Callout } from "nextra/components";
 
 <BlogHeader
   title="🤖 Q&A Chatbot for the Langfuse Docs"
@@ -18,12 +21,12 @@ import { BlogHeader } from "@/components/BlogHeader";
 
 We've built a new Q&A chatbot to help users find the right information in the Langfuse docs. In this post, I'll briefly summarize how we've built it and how we use Langfuse to monitor and improve it.
 
+**Update:** All Langfuse Cloud users now have view-only access to this project. [View live demo](/docs/demo) to explore it yourself.
+
 **Try it** _(also available in the [docs](/docs/qa-chatbot))_
 
-import { Chat } from "@/components/qaChatbot";
-
 <div className="p-3 rounded-lg mt-2 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
-  <Chat className="h-96 my-0 bg-slate-950" />
+  <Chat className="h-96 my-0 bg-background/90" />
 </div>
 
 ## Implementation
@@ -45,7 +48,7 @@ import { Chat } from "@/components/qaChatbot";
 
 ### Code
 
-All of the code is open-source and available on GitHub in the [langfuse-docs](https://github.com/langfuse/langfuse-docs) repo. Relevant files:
+All of the code is open source and available on GitHub in the [langfuse-docs](https://github.com/langfuse/langfuse-docs) repo. Relevant files:
 
 import { FileTree } from "nextra/components";
 
@@ -77,6 +80,12 @@ import { FileTree } from "nextra/components";
 
 ## Langfuse
 
+<Callout type="info" emoji="ℹ️">
+  Want to explore the project in Langfuse yourself? [Create
+  account](https://cloud.langfuse.com/auth/sign-up) to get view-only access to
+  this project in Langfuse.
+</Callout>
+
 ### Usage reporting
 
 The reporting helps us to:
@@ -85,9 +94,9 @@ The reporting helps us to:
 - Understand what new users of Langfuse want to know which helps us to improve the docs
 - Track latency, quality (based on user feedback) and OpenAI errors
 
-<div className="max-w-2xl overflow-hidden mt-5 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
-</div>
+</Frame>
 
 ### Tracing
 
@@ -100,9 +109,7 @@ Each response is based on the following steps which can go wrong, be slow or exp
 
 This is how a single trace looks like in Langfuse:
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
-  ![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)
-</div>
+<Frame>![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
 
 ### User feedback collection
 
@@ -114,24 +121,24 @@ In this example, we can see how we do:
 3. Identification of the root cause of the low-quality response
    > Docs on Langchain integration are not included in embedding similarity search
 
-<div className="max-w-2xl overflow-hidden mt-10 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![User feedback collection in
   Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
-</div>
+</Frame>
 
 ## Why build this?
 
 A user was surprised when I (a human) answered his/her question. It's 2023, a bot was expected. As we added a lot to the docs over the last days, building a retrieval-based chatbot finally made sense to help users explore the project. Also, I love to have an additional production app to dogfood new Langfuse features and demonstrate how Langfuse can be used.
 
-<div className="max-w-2xl overflow-hidden mt-10 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![User requesting chatbot](/images/blog/docs-qa-chatbot/user_message.jpg)
-</div>
+</Frame>
 
 ## Get in touch
 
 We're super excited to offer users of the Langfuse docs a faster way to find the right information and dogfood Langfuse to monitor it. Check out the [repo](https://github.com/langfuse/langfuse-docs) for all backend and frontend code including the integration with Langfuse.
 
-If you have any questions, join the [Discord](https://discord.gg/7NXusRtqYU) or reach out to me on [Twitter](https://twitter.com/marcklingen).
+If you have any questions, join the [Discord](/discord) or reach out to me on [Twitter](https://twitter.com/marcklingen).
 
 import { Tweet } from "@/components/Tweet";
 

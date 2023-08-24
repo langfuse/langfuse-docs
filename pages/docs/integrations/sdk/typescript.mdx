@@ -3,22 +3,48 @@ description: Fully async and typed SDK, runs in Node.js, edge, Deno
 ---
 
 import { Tab, Tabs } from "nextra-theme-docs";
+import { Callout } from "nextra/components";
 
 # JS/TS SDK
 
-[![npm package](https://img.shields.io/npm/v/langfuse?style=flat-square)](https://www.npmjs.com/package/langfuse)
+<div className="flex flex-row flex-wrap gap-2 mt-2">
+  <a href="https://github.com/langfuse/langfuse-js">
+    <img
+      alt="Github repository langfuse/langfuse-js"
+      src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=Github"
+    />
+  </a>
+  <a href="https://github.com/langfuse/langfuse-js/actions/workflows/ci.yml?query=branch%3Amain">
+    <img
+      src="https://img.shields.io/github/actions/workflow/status/langfuse/langfuse-js/ci.yml?style=flat-square&logo=Github&label=tests"
+      alt="CI test status"
+    />
+  </a>
+  <a href="https://www.npmjs.com/package/langfuse">
+    <img
+      src="https://img.shields.io/npm/v/langfuse?style=flat-square&label=npm+langfuse"
+      alt="npm langfuse"
+    />
+  </a>
+  <a href="https://www.npmjs.com/package/langfuse-node">
+    <img
+      src="https://img.shields.io/npm/v/langfuse-node?style=flat-square&label=npm+langfuse-node"
+      alt="npm langfuse-node"
+    />
+  </a>
+</div>
 
-## Introduction
+If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your application. The library queues calls to make them non-blocking.
 
-The Langfuse Typescript SDK is a fully async and typed SDK for the Langfuse API.
-
-Runtimes
+Supported runtimes:
 
 - [x] Node.js
 - [x] Edge: Vercel, Cloudflare, ...
 - [x] Deno
 
-Want to capture data from the browser? Use [Typescript SDK (Web)](/docs/integrations/sdk/typescript-web)
+Want to capture data (e.g. user feedback) from the browser? Use [LangfuseWeb](/docs/integrations/sdk/typescript-web)
+
+## Example
 
 We integrated the Typescript SDK into the Vercel AI Chatbot project. Check out the [blog post](/blog/showcase-llm-chatbot) for screenshots and detailed explanations of the inner workings of the integration. The project includes:
 
@@ -26,256 +52,329 @@ We integrated the Typescript SDK into the Vercel AI Chatbot project. Check out t
 - Conversations
 - Collection of user feedback on individual messages using the Web SDK
 
-## 1. Initializing the client
+## Installation
 
-```sh npm2yarn
+```sh
 npm i langfuse
+# or
+yarn add langfuse
+
+# Node.js < 18
+npm i langfuse-node
+
+# Deno
+import { Langfuse } from "https://esm.sh/langfuse"
 ```
 
-_For Deno (ESM CDN): `https://esm.sh/langfuse`_
+In your application, set the **api keys** to create a client.
 
-The client can modify all entities in the Langfuse API and requires the secret key. The secret key must not be exposed to users.
-
-```typescript filename="api.ts"
-import { Langfuse } from "langfuse";
+```typescript
+import { Langfuse } from "langfuse"; // or "langfuse-node"
 
 const langfuse = new Langfuse({
   secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
   publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
-  // baseUrl: defaults to "https://cloud.langfuse.com"
+  // options
 });
 ```
 
-## 2. Trace execution of backend
+### Options
 
-- Each backend execution is logged with a single `trace`.
+| Variable       | Description                                                                         | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl        | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| flushAt        | Number of queued requests                                                           | `20`                                                                                                                                                    |
+| flushInterval  | Interval in ms to flush requests                                                    | `10000`                                                                                                                                                 |
+| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
+
+<Callout type="info" emoji="ℹ️">
+  In short-lived environments (e.g. serverless functions), set `flushAt` to `1`
+  and `flushInterval` to `0` to send requests immediately. Also, make sure to
+  always call `langfuse.shutdownAsync()` at the end to flush the queue and await
+  all pending requests. ([Learn more](#lambda))
+</Callout>
+
+## Making calls
+
+- Each backend execution is logged with a single [trace](#trace).
 - Each trace can contain multiple `observations` to log the individual steps of the execution.
-  - Observations can be of different types
+  - [Observations](#observations) can be of different types
     - [Events](#event) are the basic building block. They are used to track discrete events in a trace.
-    - [Spans](#spans) represent durations of units of work in a trace.
+    - [Spans](#span) represent durations of units of work in a trace.
     - [Generations](#generation) are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
-  - Observations can be [nested](#nesting-of-observations).
+  - Observations can be [nested](#nesting).
 
-### Trace
+### Create a trace [#trace]
 
 Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
 
-Traces can be created and updated.
-
-> `langfuse.trace()` takes the following parameters:
->
-> - `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
-> - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
-> - `externalId` (optional): the id of the execution in the external system. Useful for linking traces to external systems. Frequently used to create scores without having access to the langfuse `traceId` (see association via external Id).
-> - `userId` (optional): the id of the user that triggered the execution.
-
-```typescript filename="api.ts"
+```typescript
+// Example trace creation
 const trace = langfuse.trace({
   name: "chat-app-session",
   userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
   metadata: { env: "production", user: "user@langfuse.com" },
 });
+
+// Example update, same params as create, cannot change id
+trace.update({
+  metadata: {
+    tag: "long-running",
+  },
+});
+
+// Properties
+trace.id; // string
+
+// Create observations
+trace.event({});
+trace.span({});
+trace.generation({});
+
+// Add scores
+trace.score({});
 ```
 
-### Observations
+**`langfuse.trace()` takes the following parameters**
+
+| parameter | type   | optional | description                                                                                                                                                                             |
+| --------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string | yes      | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread). |
+| name      | string | yes      | Identifier of the trace. Useful for sorting/filtering in the UI.                                                                                                                        |
+| metadata  | object | yes      | Additional metadata of the trace. Can be any JSON object.                                                                                                                               |
+| userId    | string | yes      | The id of the user that triggered the execution. Used to provide [user-level analytics](/docs/user-explorer).                                                                           |
+| version   | string | yes      | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.                                                                    |
+
+### Observations [#observation]
 
 - `Events` are the basic building block. They are used to track discrete events in a trace.
 - `Spans` represent durations of units of work in a trace.
 - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage](/docs/token-usage) is automatically calculated.
 - Observations can be nested.
 
-#### Event
+#### Create an Event [#event]
 
 Events are used to track discrete events in a trace.
 
-> - `startTime`: the time at which the event started.
-> - `name` (optional): identifier of the event. Useful for sorting/filtering in the UI.
-> - `metadata` (optional): additional metadata of the event. JSON object.
-> - `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-> - `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
-> - `parentObservationId` (optional): the id of the span or event to which the event should be attached
-> - `input` (optional): the input to the event. Can be any JSON object.
-> - `output` (optional): the output to the event. Can be any JSON object.
-
-```typescript filename="api.ts"
-trace.event({
-  traceId: trace.id,
-  startTime: new Date(),
+```typescript
+// Example event
+const event = trace.event({
   name: "get-user-profile",
   metadata: {
     attempt: 2,
-    httpRoute: "/api/retrieve-doc",
+    httpRoute: "/api/retrieve-person",
   },
-  parentObservationId: llmCall.id,
   input: {
     userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
   },
   output: {
-    firstName: "Max",
-    lastName: "Mustermann",
-    email: "max.mustermann@gmail.com",
+    firstName: "Maxine",
+    lastName: "Simons",
+    email: "maxine.simons@langfuse.com",
   },
 });
+
+// Properties
+event.id; // string
+event.traceId; // string
+event.parentObservationId; // string | undefined
+
+// Create children
+event.event({});
+event.span({});
+event.generation({});
+
+// Add scores
+event.score({});
 ```
 
-#### Span
+**`*.event()` takes the following parameters**
+
+| parameter     | type   | optional | description                                                                                                                                                              |
+| ------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id            | string | yes      | The id of the event can be set, defaults to a random id.                                                                                                                 |
+| startTime     | Date   | yes      | The time at which the event started, defaults to the current time.                                                                                                       |
+| name          | string | yes      | Identifier of the event. Useful for sorting/filtering in the UI.                                                                                                         |
+| metadata      | object | yes      | Additional metadata of the event. Can be any JSON object.                                                                                                                |
+| level         | string | yes      | The level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI. |
+| statusMessage | string | yes      | The status message of the event. Additional field for context of the event. E.g. the error message of an error event.                                                    |
+| input         | object | yes      | The input to the event. Can be any JSON object.                                                                                                                          |
+| output        | object | yes      | The output to the event. Can be any JSON object.                                                                                                                         |
+| version       | string | yes      | The version of the event type. Used to understand how changes to the event type affect metrics. Useful in debugging.                                                     |
+
+#### Create a Span [#span]
 
 Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans as well as LLM spans.
 
-> `*.span()` take the following parameters:
->
-> - `startTime` (optional): the time at which the span started. If no startTime is provided, the current time will be used.
-> - `endTime` (optional): the time at which the span ended. Can also be set using `span.update()`.
-> - `name` (optional): identifier of the span. Useful for sorting/filtering in the UI.
-> - `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
-> - `level` (optional): the level of the span. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-> - `statusMessage` (optional): the status message of the span. Additional field for context of the event. E.g. the error message of an error event.
-> - `parentObservationId` (optional): the id of the observation to which the span should be attached
-> - `input` (optional): the input to the span. Can be any JSON object.
-> - `output` (optional): the output to the span. Can be any JSON object.
-
-```typescript filename="api.ts"
-const retrievalStartTime = new Date();
-
-// const retrievedDoc = await retrieveDoc();
-
-trace.span({
-  traceId: trace.id,
-  startTime: retrievalStartTime,
-  endTime: new Date(),
+```typescript
+// Example span creation
+const span = trace.span({
   name: "embedding-retrieval",
-  metadata: {
-    httpRoute: "/api/retrieve-doc",
-  },
   input: {
-    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  },
-  output: {
-    firstName: "Max",
-    lastName: "Mustermann",
-    email: "max.mustermann@gmail.com",
+    userInput: "How does Langfuse work?",
   },
 });
+
+// Example update
+span.update({
+  metadata: {
+    httpRoute: "/api/retrieve-doc",
+    embeddingModel: "bert-base-uncased",
+  },
+});
+
+// Application code
+const retrievedDocs = await retrieveDoc("How does Langfuse work?");
+
+// Example end - sets endTime, optionally pass a body
+span.end({
+  output: {
+    retrievedDocs,
+  },
+});
+
+// Properties
+span.id; // string
+span.traceId; // string
+span.parentObservationId; // string | undefined
+
+// Create children
+span.event({});
+span.span({});
+span.generation({});
+
+// Add scores
+span.score({});
 ```
 
-#### Generation
+**`*.span()` takes the following parameters**
+
+| parameter     | type   | optional | description                                                                                                                                                             |
+| ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | string | yes      | The id of the span can be set, otherwise a random id is generated.                                                                                                      |
+| startTime     | Date   | yes      | The time at which the span started, defaults to the current time.                                                                                                       |
+| endTime       | Date   | yes      | The time at which the span ended.                                                                                                                                       |
+| name          | string | yes      | Identifier of the span. Useful for sorting/filtering in the UI.                                                                                                         |
+| metadata      | object | yes      | Additional metadata of the span. Can be any JSON object.                                                                                                                |
+| level         | string | yes      | The level of the span. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI. |
+| statusMessage | string | yes      | The status message of the span. Additional field for context of the event. E.g. the error message of an error event.                                                    |
+| input         | object | yes      | The input to the span. Can be any JSON object.                                                                                                                          |
+| output        | object | yes      | The output to the span. Can be any JSON object.                                                                                                                         |
+| version       | string | yes      | The version of the span type. Used to understand how changes to the span type affect metrics. Useful in debugging.                                                      |
+
+#### Create a Generation [#generation]
 
 Generations are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
 
-> `generation.log()` take the following parameters:
->
-> - `startTime` (optional): the time at which the generation started.
-> - `endTime` (optional): the time at which the generation ended.
-> - `name` (optional): identifier of the generation. Useful for sorting/filtering in the UI.
-> - `model` (optional): the name of the model used for the generation
-> - `modelParameters` (optional): the parameters of the model used for the generation; can be any key-value pairs
-> - `prompt` (optional): the prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input)
-> - `completion` (optional): the completion generated by the model
-> - `usage` (optional): the usage of the model during the generation; takes three optional key-value pairs: `promptTokens`, `completionTokens`, and `totalTokens`. If `totalTokens` is not provided, we calculate it as `promptTokens + completionTokens`. Null values are ignored and hence `totalTokens` can be `null` if `promptTokens` and `completionTokens` are not provided.
-> - `metadata` (optional): additional metadata of the generation. Can be any JSON object.
-> - `level` (optional): the level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-> - `statusMessage` (optional): the status message of the generation. Additional field for context of the event. E.g. the error message of an error event.
-> - `parentObservationId` (optional): the id of the observation to which the generation should be attached as a child.
-
-```typescript filename="api.ts"
-const generationStartTime = new Date();
-
-// const chatCompletion = await llm.respond(prompt);
-
-trace.generation({
-  startTime: generationStartTime,
-  endTime: new Date(),
+```typescript
+// Example generation creation
+const generation = trace.generation({
   name: "chat-completion",
   model: "gpt-3.5-turbo",
   modelParameters: {
     temperature: 0.9,
     maxTokens: 2000,
-    topP: undefined,
   },
-  prompt: messagesToSend,
-  completion: chatCompletion.data.choices[0].message?.content,
-  usage: {
-    promptTokens: chatCompletion.data.usage?.prompt_tokens,
-    completionTokens: chatCompletion.data.usage?.completion_tokens,
-  },
-  metadata: {
-    userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  },
+  prompt: messages,
 });
+
+// Application code
+const chatCompletion = await llm.respond(prompt);
+
+// Example update
+generation.update({
+  completionStartTime: new Date(),
+});
+
+// Example end - sets endTime, optionally pass a body
+generation.end({
+  completion: chatCompletion,
+});
+
+// Properties
+generation.id; // string
+generation.traceId; // string
+generation.parentObservationId; // string | undefined
+
+// Create children
+generation.event({});
+generation.span({});
+generation.generation({});
+
+// Add scores
+generation.score({});
 ```
 
-#### Nesting of observations
+**`*.generation()` takes the following parameters**
 
-Nesting of observations is helpful to structure the trace in a hierarchical way. This is especially helpful for complex chains and agents.
+| parameter           | type   | optional | description                                                                                                                                                                                                                                |
+| ------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id                  | string | yes      | The id of the generation can be set, defaults to random id.                                                                                                                                                                                |
+| name                | string | yes      | Identifier of the generation. Useful for sorting/filtering in the UI.                                                                                                                                                                      |
+| startTime           | Date   | yes      | The time at which the generation started, defaults to the current time.                                                                                                                                                                    |
+| completionStartTime | Date   | yes      | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.                                                                              |
+| endTime             | Date   | yes      | The time at which the generation ended.                                                                                                                                                                                                    |
+| model               | string | yes      | The name of the model used for the generation.                                                                                                                                                                                             |
+| modelParameters     | object | yes      | The parameters of the model used for the generation; can be any key-value pairs.                                                                                                                                                           |
+| prompt              | object | yes      | The prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input).                                                                                              |
+| completion          | string | yes      | The completion generated by the model.                                                                                                                                                                                                     |
+| usage               | object | yes      | The usage of the model during the generation; takes three optional key-value pairs: `promptTokens`, `completionTokens`, and `totalTokens`. For some models the token counts are [automatically calculated](/docs/token-usage) by Langfuse. |
+| metadata            | object | yes      | Additional metadata of the generation. Can be any JSON object.                                                                                                                                                                             |
+| level               | string | yes      | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.                                                              |
+| statusMessage       | string | yes      | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.                                                                                                                 |
+| version             | string | yes      | The version of the generation type. Used to understand how changes to the generation type affect metrics. Reflects e.g. the version of a prompt.                                                                                           |
 
-```raw
-Simple example
+#### Nesting of observations [#nesting]
 
+Nesting of observations (spans, events, generations) is helpful to structure the trace in a hierarchical way.
+
+```yaml
+# Simple example; there are no limits to how you nest observations
 - trace: chat-app-session
   - span: chat-interaction
     - event: get-user-profile
     - generation: chat-completion
 ```
 
-There are three options to nest observations:
+There are two options to nest observations:
 
-<Tabs items={["Recommended (async)", "Trace externalId (async)", "parentObservationId (sync)"]}>
+<Tabs items={["Default", "Manual nesting via ids (distributed traces)"]}>
 <Tab>
-```typescript filename="api.ts"
+
+```typescript
 const trace = langfuse.trace({ name: "chat-app-session" });
+
 const span = trace.span({ name: "chat-interaction" });
-const event = span.event({ name: "get-user-profile" });
-const generation = span.generation({ name: "chat-completion" });
+
+span.event({ name: "get-user-profile" });
+span.generation({ name: "chat-completion" });
 ```
 
 </Tab>
 <Tab>
 
-```typescript filename="api.ts"
-// Trace creation is optional:
-// if excternalId is used in observations,
-// trace is automatically created if it does not exist
+Especially in distributed applications it is often not possible to nest observations via the SDK. In this case, you can use the `traceId` and `parentObservationId` properties to manually nest observations.
+
+```typescript
 const trace = langfuse.trace({
-  name: "chat-app-session".
-  externalId: "my-apps-session-1234"
+  name: "chat-app-session",
 });
 
 const span = langfuse.span({
-  traceId: "my-apps-session-1234",
-  traceIdType: "EXTERNAL",
   name: "chat-interaction",
+  traceId: trace.id,
 });
-```
 
-```typescript filename="frontend.ts"
-const score = await langfuseWeb.score({
-  traceId: "my-apps-session-1234",
-  traceIdType: "EXTERNAL",
-  name: "user-feedback",
-  value: 1,
-});
-```
-
-</Tab>
-
-<Tab>
-
-```typescript filename="api.ts"
-const trace = langfuse.trace({ name: "chat-app-session" });
-const traceId = (await trace.data).id;
-const span = langfuse.span({
-  traceId,
-  name: "chat-interaction",
-});
-const spanId = (await span.data).id;
 const event = langfuse.event({
-  traceId,
-  parentObservationId: spanId,
+  traceId: trace.id,
+  parentObservationId: span.id,
   name: "get-user-profile",
 });
+
 const generation = langfuse.generation({
-  traceId,
-  parentObservationId: spanId,
+  traceId: trace.id,
+  parentObservationId: span.id,
   name: "chat-completion",
 });
 ```
@@ -284,33 +383,7 @@ const generation = langfuse.generation({
 
 </Tabs>
 
-### Flushing
-
-By default, the Langfuse Typescript SDK is asynchronous to not add latency. All objects returned by the SDK have a `data` property that is a promise.
-
-In short lived execution environments (e.g. serverless functions), it is recommended to flush the Langfuse client to make sure all events are successfully sent to the Langfuse server before the execution ends. The Langfuse client keeps track of all pending requests and `langfuse.flush()` returns a promise that resolves when all requests are completed.
-
-```typescript filename="api.ts"
-await langfuse.flush();
-```
-
-LangfuseWeb also supports flushing. However, synchronous use is recommended to adjust the frontend's loading/success/error state.
-
-```typescript filename="frontend.ts"
-handleUserFeedback = async (value: number, comment: string) => {
-  setLoading(true);
-  await langfuseWeb.score({
-    traceId: message.traceId,
-    observationId: message.id,
-    name: "user-feedback",
-    value,
-    comment,
-  });
-  setLoading(false);
-};
-```
-
-## 3. Add scores
+### Create score [#score]
 
 Scores are used to evaluate executions/traces. They are attached to a single [trace](#trace). If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
 
@@ -319,24 +392,136 @@ Links
 - Learn more about [Scores in Langfuse](/docs/scores)
 - Report scores from the browser (e.g. user feedback) using the [Web SDK](/docs/integrations/sdk/typescript-web)
 
-Attributes
-
-> - `traceId`: the id of the trace to which the score should be attached
->   - Passed from backend: `traceId = (await trace.data).id`
-> - `name`: identifier of the score, string
-> - `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
-> - `observationId` (optional): the id of the span, event or generation to which the score should be attached
->   - Passed from backend, e.g.: `observationId = (await generation.data).id`
-> - `traceIdType` (optional): the type of the traceId. Can be `LANGFUSE` (default) or `EXTERNAL`. If `EXTERNAL` is used, the score will be attached to the trace with the given externalId.
-> - `comment` (optional): additional context/explanation of the score
-
-```typescript filename="api.ts"
-// with Langfuse trace id
+```typescript
 await langfuse.score({
   traceId: message.traceId,
+  observationId: message.generationId,
   name: "quality",
   value: 1,
-  observationId: generation.id,
   comment: "Factually correct",
 });
+
+// alternatively
+trace.score({});
+span.score({});
+event.score({});
+generation.score({});
+```
+
+| parameter     | type   | optional | description                                                                                                                       |
+| ------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| traceId       | string | no       | The id of the trace to which the score should be attached. Automatically set if you use `{trace,generation,span,event}.score({})` |
+| observationId | string | yes      | The id of the observation to which the score should be attached. Automatically set if you use `{generation,span,event}.score({})` |
+| name          | string | no       | Identifier of the score.                                                                                                          |
+| value         | number | no       | The value of the score. Can be any number, often standardized to 0..1                                                             |
+| comment       | string | yes      | Additional context/explanation of the score.                                                                                      |
+
+## Shutdown [#shutdown]
+
+The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
+
+```typescript
+langfuse.shutdown();
+// or
+await langfuse.shutdownAsync();
+```
+
+## Flushing [#flushing]
+
+You can also manually trigger flushes irrespective of the configured `flushAt` and `flushInterval` settings.
+
+```typescript
+await langfuse.flush();
+```
+
+## Debugging [#debugging]
+
+Issues with the SDKs can be caused by various reasons ranging from incorrectly configured API keys to network issues.
+
+The SDK does not throw errors to protect your application process. Instead, you can optionally listen to errors:
+
+```typescript
+langfuse.on("error", (error) => {
+  // Whatever you want to do with the error
+  console.error(error);
+});
+```
+
+Alternatively, you can enable debugging to get detailed logs of what's happening in the SDK.
+
+```typescript
+langfuse.debug();
+```
+
+## Short lived execution environments (lambda, serverless) [#lambda]
+
+The SDK is optimize to run in the background to queue and flush all requests. In short-lived environments, set `flushAt` to `1` and `flushInterval` to `0` to send requests immediately. When the process exits use `await langfuse.shutdownAsync()` to make sure all requests are flushed and pending requests are awaited.
+
+Example:
+
+```typescript
+const langfuse = new Langfuse({
+  secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  flushAt: 1,
+  flushInterval: 0,
+})
+
+export const handler() {
+  const trace = langfuse.trace({ name: "chat-app-session" });
+
+  trace.event({ name: "get-user-profile" });
+  const span = trace.span({ name: "chat-interaction" });
+  span.generation({ name: "chat-completion", model: "gpt-3.5-turbo", prompt, completion });
+
+  // So far all requests are queued
+
+  // Now we want to flush and await all pending requests before the process exits
+  await langfuse.shutdownAsync();
+}
+```
+
+## Upgrading from v0.x to v1.x [#upgrade0to1]
+
+### Deprecation of `externalTraceId`
+
+We deprecated the external trace id to simplify the API. Instead, you can now (optionally) directly set the trace id when creating the trace. Traces are still upserted in case a trace with this id already exists in your project.
+
+```typescript
+// v0.x
+const trace = langfuse.trace({ externalId: "123" });
+// When manually linking observations and scores to the trace
+const span = langfuse.span({ traceId: "123", traceIdType: "EXTERNAL" });
+const score = langfuse.score({ traceId: "123", traceIdType: "EXTERNAL" });
+
+// v1.x
+const trace = langfuse.trace({ id: "123" });
+// When manually linking observations and scores to the trace
+const span = langfuse.span({ traceId: "123" });
+const score = langfuse.score({ traceId: "123" });
+```
+
+Changes
+
+- The `traceIdType` property is deprecated
+- The `externalId` property on traces is deprecated
+
+Ingestion of externalIds via older versions of the SDK or the API is still supported. However, we will remove support for this in the future and migrate all existing traces to the new format. We monitor the usage of deprecated properties on Langfuse Cloud and will reach out to you if we detect that you are still using them before a breaking change is introduced.
+
+### Introduction of `shutdownAsync`
+
+With v1.0.0 we introduced the `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits. `flush` is still available but does not await pending requests that are already flushed.
+
+This is especially important for short-lived execution environments such as [lambdas and serverless functions](#lambda).
+
+```typescript
+export const handler() {
+  // Lambda / serverless function
+
+  // v0.x
+  await langfuse.flush();
+
+  // v1.x
+  await langfuse.shutdownAsync();
+}
 ```

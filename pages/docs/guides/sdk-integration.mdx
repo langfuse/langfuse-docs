@@ -16,7 +16,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import FeedbackPreview from "@/components/feedbackPreview";
-import ObservabilityExamples from "@/components/observabilityExamples/index.mdx";
 
 # Example integration using Typescript SDKs
 
@@ -56,7 +55,121 @@ _Available data sources:_
 
 _Example_
 
-<ObservabilityExamples />
+<div className="px-6 py-4 ring-1 rounded-xl ring-gray-400">
+
+<h3 className="text-xl font-bold">Chat application</h3>
+<span className="text-sm">
+  Chat conversation with repeated user interactions and LLM completions.
+</span>
+<span className="text-sm">
+  Full reference integration:
+  [`route.ts`](https://github.com/langfuse/ai-chatbot/blob/main/app/api/chat/route.ts)
+  in Vercel ai-chatbot (TypeScript, NextJs, streaming responses from edge).
+</span>
+
+<div className="mt-5 flex flex-col xl:flex-row gap-4">
+<div className="flex-1">
+
+**Integration**
+
+```typescript {4, 10, 16, 28, 33} filename="route.ts"
+import { Langfuse } from "langfuse";
+// more imports
+
+const langfuse = new Langfuse({ publicKey, privateKey });
+
+export async function POST(req: Request) {
+  const { messages, conversationId, userId } = await req.json();
+
+  const langfuseConversation = langfuse.trace({
+    id: `conversation_${conversationId}`, // finds/creates trace
+    metadata: { userId },
+  });
+
+  const execution = langfuseConversation.span({
+    name: "single-response",
+    input: messages.slice(-1),
+  });
+
+  const additionalContext = await getContext(messages);
+  langfuseConversation.event({
+    name: "context-retrieved",
+    output: additionalContext,
+  });
+
+  const res = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages,
+  });
+
+  const stream = OpenAIStream(res, {
+    async onCompletion(completion) {
+      langfuseConversation.generation({
+        name: "chat-completion",
+        prompt: messages,
+        completion,
+      });
+      await langfuse.flush();
+    },
+  });
+
+  return new StreamingTextResponse(stream);
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Trace**
+
+```
+https://cloud.langfuse.com/...
+```
+
+<div className="p-3 ring-1 ring-gray-400 rounded-xl flex flex-col gap-2 text-sm">
+<div>
+<div className="font-bold">Trace</div>
+<div>Id: conversation \<conversation_id\></div>
+
+</div>
+<div className="p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Span: single-response</div>
+  <div>Input: What do users like about Langfuse?</div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Event: context-retrieved</div>
+  <div>Output: \<output\></div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Generation: chat-completion</div>
+  <div>prompt: [ ... ]</div>
+  <div>completion: \<completion\></div>
+</div>
+<div className="p-3 ring-1 ring-gray-400 rounded-sm">
+  <div>Output: That it makes chat interactions easily observable</div>
+</div>
+
+<div className="mt-2 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Span: single-response</div>
+  <div>Input: What features of Langfuse are helpful for developers of chat aplications?</div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Event: context-retrieved</div>
+  <div>Output: \<output\></div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Generation: chat-completion</div>
+  <div>prompt: [ ... ]</div>
+  <div>completion: \<completion\></div>
+</div>
+<div className="p-3 ring-1 ring-gray-400 rounded-sm">
+  <div>Output: (1) Grouping of executions into traces (sessions), (2) nested tracking of intermediary steps that help with debugging, (3) SDKs for simple intergation with their application.</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
 
 ## 2. Collect feedback in frontend
 

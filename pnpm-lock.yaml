@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@cloudflare/stream-react':
-    specifier: ^1.8.0
-    version: 1.8.0(react@18.2.0)
   '@headlessui/react':
     specifier: ^1.7.16
     version: 1.7.16(react-dom@18.2.0)(react@18.2.0)
@@ -35,12 +32,21 @@ dependencies:
   '@radix-ui/react-toast':
     specifier: ^1.1.4
     version: 1.1.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
+  '@splinetool/react-spline':
+    specifier: ^2.2.6
+    version: 2.2.6(@splinetool/runtime@0.9.418)(react-dom@18.2.0)(react@18.2.0)
   '@supabase/supabase-js':
     specifier: ^2.31.0
     version: 2.31.0
   '@tanstack/react-table':
     specifier: ^8.9.3
     version: 8.9.3(react-dom@18.2.0)(react@18.2.0)
+  '@vercel/edge-config':
+    specifier: ^0.2.1
+    version: 0.2.1
+  '@vidstack/react':
+    specifier: ^0.6.13
+    version: 0.6.13(@types/react@18.2.18)(maverick.js@0.37.0)(react@18.2.0)(vidstack@0.6.13)
   ai:
     specifier: ^2.1.28
     version: 2.1.28(react@18.2.0)(solid-js@1.7.8)(svelte@4.1.2)(vue@3.3.4)
@@ -63,8 +69,8 @@ dependencies:
     specifier: ^1.1.5
     version: 1.1.5
   langfuse:
-    specifier: ^0.0.26
-    version: 0.0.26
+    specifier: ^1.0.8
+    version: 1.0.8
   lucide-react:
     specifier: ^0.220.0
     version: 0.220.0(react@18.2.0)
@@ -78,11 +84,11 @@ dependencies:
     specifier: ^0.4.0
     version: 0.4.0(next@13.4.12)(openapi-types@12.1.3)
   nextra:
-    specifier: latest
-    version: 2.10.0(next@13.4.12)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^2.11.0
+    version: 2.11.1(next@13.4.12)(react-dom@18.2.0)(react@18.2.0)
   nextra-theme-docs:
-    specifier: latest
-    version: 2.10.0(next@13.4.12)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^2.11.0
+    version: 2.11.1(next@13.4.12)(nextra@2.11.1)(react-dom@18.2.0)(react@18.2.0)
   openai-edge:
     specifier: ^1.2.2
     version: 1.2.2
@@ -114,8 +120,8 @@ dependencies:
     specifier: ^15.5.0
     version: 15.5.0(react@18.2.0)
   react-tweet:
-    specifier: ^3.0.3
-    version: 3.0.3(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^3.0.4
+    version: 3.0.4(react-dom@18.2.0)(react@18.2.0)
   remark-gfm:
     specifier: ^3.0.1
     version: 3.0.1
@@ -250,15 +256,6 @@ packages:
     resolution: {integrity: sha512-Tbsj02wXCbqGmzdnXNk0SOF19ChhRU70BsroIi4Pm6Ehp56in6vch94mfbdQ17DozxkL3BAVjbZ4Qc1a0HFRAg==}
     dev: false
 
-  /@cloudflare/stream-react@1.8.0(react@18.2.0):
-    resolution: {integrity: sha512-Kxt4s1xA/Nf4oSAeLvWrkeUftXNhykY+Up6dFH881vrAKCJUeSKSqSGgn5gi0BV0UvjwriOxHRa1Fu0cyuOS3w==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>=16'
-    dependencies:
-      react: 18.2.0
-    dev: false
-
   /@corex/deepmerge@4.0.43:
     resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
     dev: false
@@ -319,6 +316,10 @@ packages:
 
   /@jsdevtools/ono@7.1.3:
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
+    dev: false
+
+  /@maverick-js/signals@5.11.2:
+    resolution: {integrity: sha512-jKAyNE2O7H+xrigPoqdV0Iq2AeQ6cysfBf/b2jasJ4FfCUKjGyazgtp+pIspTW6skFvpPrvq40Qft+7HuR+Tlg==}
     dev: false
 
   /@mdx-js/mdx@2.3.0:
@@ -1063,6 +1064,27 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /@splinetool/react-spline@2.2.6(@splinetool/runtime@0.9.418)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-y9L2VEbnC6FNZZu8XMmWM9YTTTWal6kJVfP05Amf0QqDNzCSumKsJxZyGUODvuCmiAvy0PfIfEsiVKnSxvhsDw==}
+    peerDependencies:
+      '@splinetool/runtime': '*'
+      react: '>=17.0.0'
+      react-dom: '>=17.0.0'
+    dependencies:
+      '@splinetool/runtime': 0.9.418
+      lodash.debounce: 4.0.8
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-merge-refs: 2.0.2
+    dev: false
+
+  /@splinetool/runtime@0.9.418:
+    resolution: {integrity: sha512-jGkw+IKYcRSs08A9o7hdQq9BziM7pVSLKSSdNGNz0iH+io7/amCTuNg2mG+KBF5bglihqTPmC0VkrSv84iwcbw==}
+    dependencies:
+      on-change: 4.0.2
+      semver-compare: 1.0.0
+    dev: false
+
   /@supabase/functions-js@2.1.2:
     resolution: {integrity: sha512-QCR6pwJs9exCl37bmpMisUd6mf+0SUBJ6mUpiAjEkSJ/+xW8TCuO14bvkWHADd5hElJK9MxNlMQXxSA4DRz9nQ==}
     dependencies:
@@ -1183,6 +1205,7 @@ packages:
 
   /@swagger-api/apidom-ns-json-schema-draft-4@0.74.1:
     resolution: {integrity: sha512-zUQvrxoRQpvdYymHko1nxNeVWwqdGDYNYWUFW/EGZbP0sigKmuSZkh6LdseB9Pxt1WQD/6MkW3zN4JMXt/qFUA==}
+    requiresBuild: true
     dependencies:
       '@babel/runtime-corejs3': 7.22.6
       '@swagger-api/apidom-ast': 0.74.1
@@ -1597,6 +1620,32 @@ packages:
     resolution: {integrity: sha512-NbsqiNX9CnEfC1Z0Vf4mE1SgAJ07JnRYcNex7AJ9zAVzmiGHmjKFEk7O4TJIsgv2B1sLEb6owKFZrACwdYngsQ==}
     dependencies:
       '@types/node': 18.11.10
+    dev: false
+
+  /@vercel/edge-config-fs@0.1.0:
+    resolution: {integrity: sha512-NRIBwfcS0bUoUbRWlNGetqjvLSwgYH/BqKqDN7vK1g32p7dN96k0712COgaz6VFizAm9b0g6IG6hR6+hc0KCPg==}
+    dev: false
+
+  /@vercel/edge-config@0.2.1:
+    resolution: {integrity: sha512-847kYqJEbga4PGgNrctQ9XsD+2Kw/S+UjzZnIFpebQ9VbdtB0MX4anq33WetcYZYPfhZd2L0uXVnY/BcjI5dOw==}
+    engines: {node: '>=14.6'}
+    dependencies:
+      '@vercel/edge-config-fs': 0.1.0
+    dev: false
+
+  /@vidstack/react@0.6.13(@types/react@18.2.18)(maverick.js@0.37.0)(react@18.2.0)(vidstack@0.6.13):
+    resolution: {integrity: sha512-VGdHv3sCra0ZDXgbKHqHLy/X9AJtbANZoftk+/8EKbEI8bHzEX0AF0h5fncGXwpkV07jcAp3sLuP7kp041hlLA==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@types/react': ^18.0.0
+      maverick.js: 0.37.0
+      react: ^18.0.0
+      vidstack: 0.6.13
+    dependencies:
+      '@types/react': 18.2.18
+      maverick.js: 0.37.0
+      react: 18.2.0
+      vidstack: 0.6.13
     dev: false
 
   /@vue/compiler-core@3.3.4:
@@ -2074,6 +2123,11 @@ packages:
 
   /clsx@1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+    dev: false
+
+  /clsx@2.0.0:
+    resolution: {integrity: sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==}
     engines: {node: '>=6'}
     dev: false
 
@@ -3493,11 +3547,8 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /langfuse@0.0.26:
-    resolution: {integrity: sha512-eTLndaF5vBrkmM6fkWpr6wBuKxfHHNhGOnVevwt6xZ6Unq/WiQRMozv1MV8/lYOLqJvAC7V3RbawElzD59pRKQ==}
-    dependencies:
-      openapi-fetch: 0.6.2
-      uuid: 9.0.0
+  /langfuse@1.0.8:
+    resolution: {integrity: sha512-pDHasPUJn1krms2JiiLj3vY15iUpWf27iq+W438RR1LRpE+7DdVb99pBMoY+WjtTRyiQwJeO4HGqbIVB6ToWxQ==}
     dev: false
 
   /layout-base@1.0.2:
@@ -3606,6 +3657,14 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.6
       remove-accents: 0.4.2
+    dev: false
+
+  /maverick.js@0.37.0:
+    resolution: {integrity: sha512-1Dk/9rienLiihlktVvH04ADC2UJTMflC1fOMVQCCaQAaz7hgzDI5i0p/arFbDM52hFFiIcq4RdXtYz47SgsLgw==}
+    engines: {node: '>=16'}
+    dependencies:
+      '@maverick-js/signals': 5.11.2
+      type-fest: 3.13.1
     dev: false
 
   /mdast-util-definitions@5.1.2:
@@ -3804,6 +3863,11 @@ packages:
 
   /mdn-data@2.0.30:
     resolution: {integrity: sha512-GaqWWShW4kv/G9IEucWScBx9G1/vsFZZJUO+tD26M8J8z3Kw5RDQjaoZe03YAClgeS/SWPOcb4nkFBTEi5DUEA==}
+    dev: false
+
+  /media-captions@0.0.18:
+    resolution: {integrity: sha512-JW18P6FuHdyLSGwC4TQ0kF3WdNj/+wMw2cKOb8BnmY6vSJGtnwJ+vkYj+IjHOV34j3XMc70HDeB/QYKR7E7fuQ==}
+    engines: {node: '>=16'}
     dev: false
 
   /merge2@1.4.1:
@@ -4392,17 +4456,18 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /nextra-theme-docs@2.10.0(next@13.4.12)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-uXoqRoewbu0JoqQ1m67aIztWe9/nEhcSeHMimhLxZghKZxkYN0kTR5y5jmrwOHRPuJUTLL2YFwy1rvWJIZS2lw==}
+  /nextra-theme-docs@2.11.1(next@13.4.12)(nextra@2.11.1)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-tMgoD9mqLBgZqZiZTcnw5UgBtXfTWfKK0qa233sTxpZSR7CquK+BH1D4ADdJ/mXOndqCBowJ4r3tyfQovXIlzQ==}
     peerDependencies:
       next: '>=9.5.3'
-      nextra: 2.10.0
+      nextra: 2.11.1
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
       '@headlessui/react': 1.7.16(react-dom@18.2.0)(react@18.2.0)
       '@popperjs/core': 2.11.8
-      clsx: 1.2.1
+      clsx: 2.0.0
+      escape-string-regexp: 5.0.0
       flexsearch: 0.7.31
       focus-visible: 5.2.0
       git-url-parse: 13.1.0
@@ -4411,15 +4476,15 @@ packages:
       next: 13.4.12(react-dom@18.2.0)(react@18.2.0)
       next-seo: 6.1.0(next@13.4.12)(react-dom@18.2.0)(react@18.2.0)
       next-themes: 0.2.1(next@13.4.12)(react-dom@18.2.0)(react@18.2.0)
-      nextra: 2.10.0(next@13.4.12)(react-dom@18.2.0)(react@18.2.0)
+      nextra: 2.11.1(next@13.4.12)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.0.10
       zod: 3.21.4
     dev: false
 
-  /nextra@2.10.0(next@13.4.12)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-euv93UnWpdth8slMRJLqMrWvCCzR/VTVH6DPrn1JW7hZS03c2lzG2q+fsiYULGiy/kFyysmlxd4Nx5KGB1Txwg==}
+  /nextra@2.11.1(next@13.4.12)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-m+Ykev+S9Fmx7NSvVxjYFbDuFtKNV6ypnoKz+KH6WCHZor7o81LaWNyIX3RXg24GssFbVpa4sz68JAr76GZ4Sw==}
     engines: {node: '>=16'}
     peerDependencies:
       next: '>=9.5.3'
@@ -4432,7 +4497,7 @@ packages:
       '@napi-rs/simple-git': 0.1.8
       '@theguild/remark-mermaid': 0.0.4(react@18.2.0)
       '@theguild/remark-npm2yarn': 0.1.1
-      clsx: 1.2.1
+      clsx: 2.0.0
       github-slugger: 2.0.0
       graceful-fs: 4.2.11
       gray-matter: 4.0.3
@@ -4535,6 +4600,11 @@ packages:
     resolution: {integrity: sha512-geUvdk7c+eizMNUDkRpW1wJwgfOiOeHbxBR/hLXK1aT6zmVSO0jsQcs7fj6MGw89jC/cjGfLcNOrtMYtGqm81g==}
     dev: false
 
+  /on-change@4.0.2:
+    resolution: {integrity: sha512-cMtCyuJmTx/bg2HCpHo3ZLeF7FZnBOapLqZHr2AlLeJ5Ul0Zu2mUJJz051Fdwu/Et2YW04ZD+TtU+gVy0ACNCA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dev: false
+
   /once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
     dependencies:
@@ -4552,10 +4622,6 @@ packages:
   /openai-edge@1.2.2:
     resolution: {integrity: sha512-C3/Ao9Hkx5uBPv9YFBpX/x59XMPgPUU4dyGg/0J2sOJ7O9D98kD+lfdOc7v/60oYo5xzMGct80uFkYLH+X2qgw==}
     engines: {node: '>=18'}
-    dev: false
-
-  /openapi-fetch@0.6.2:
-    resolution: {integrity: sha512-Faj29Kzh7oCbt1bz6vAGNKtRJlV/GolOQTx87eYUnfCK7eVXdN9jQVojroc7tcJ5OQgyhbeOqD7LS/8UtGBnMQ==}
     dev: false
 
   /openapi-types@12.1.3:
@@ -5027,6 +5093,10 @@ packages:
       - supports-color
     dev: false
 
+  /react-merge-refs@2.0.2:
+    resolution: {integrity: sha512-V5BGTwGa2r+/t0A/BZMS6L7VPXY0CU8xtAhkT3XUoI1WJJhhtvulvoiZkJ5Jt9YAW23m4xFWmhQ+C5HwjtTFhQ==}
+    dev: false
+
   /react-redux@8.1.2(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1):
     resolution: {integrity: sha512-xJKYI189VwfsFc4CJvHqHlDrzyFTY/3vZACbE+rr/zQ34Xx1wQfB4OTOSeOSNrF6BDVe8OOdxIrAnMGXA3ggfw==}
     peerDependencies:
@@ -5125,8 +5195,8 @@ packages:
       refractor: 3.6.0
     dev: false
 
-  /react-tweet@3.0.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-dKPpCCGGo07hV8QtOthAwVbG/VfDA22kg5ny53UHnYYMR18gv7hDYiT9ZjMS4hWLzEObz++e616Sf4qLo9hhag==}
+  /react-tweet@3.0.4(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-cp2O8OnW3O5unYU4Txv2AW8g8HnqMx2kpFokTB4XnGbTt65zY2pzklWVM6pAg1lIO5n1Uikreh2cKszUKdAB/g==}
     peerDependencies:
       react: '>= 18.0.0'
       react-dom: '>= 18.0.0'
@@ -5377,6 +5447,10 @@ packages:
     dependencies:
       extend-shallow: 2.0.1
       kind-of: 6.0.3
+    dev: false
+
+  /semver-compare@1.0.0:
+    resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
     dev: false
 
   /semver@7.5.4:
@@ -6014,6 +6088,11 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
+  /type-fest@3.13.1:
+    resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
+    engines: {node: '>=14.16'}
+    dev: false
+
   /type-flag@3.0.0:
     resolution: {integrity: sha512-3YaYwMseXCAhBB14RXW5cRQfJQlEknS6i4C8fCfeUdS3ihG9EdccdR9kt3vP73ZdeTGmPb4bZtkDn5XMIn1DLA==}
     dev: false
@@ -6292,6 +6371,15 @@ packages:
       is-buffer: 2.0.5
       unist-util-stringify-position: 3.0.3
       vfile-message: 3.1.4
+    dev: false
+
+  /vidstack@0.6.13:
+    resolution: {integrity: sha512-g5wH6Hfc4EQqOI0Mm7qW4D1DWPZfQnlATLZuqpuVAKI8HOz4UGfd1v48MLK9cR+ZfPjVL4/iZLu7YOIdSX3L2g==}
+    engines: {node: '>=16'}
+    dependencies:
+      maverick.js: 0.37.0
+      media-captions: 0.0.18
+      type-fest: 3.13.1
     dev: false
 
   /vscode-oniguruma@1.7.0:

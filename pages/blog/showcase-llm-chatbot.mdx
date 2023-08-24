@@ -7,7 +7,8 @@ ogImage: /images/blog/ai-chatbot/og.png
 author: Marc
 ---
 
-import { BlogHeader } from "@/components/BlogHeader";
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
 
 <BlogHeader
   title="Showcase: LLM Chatbot"
@@ -22,18 +23,18 @@ import { BlogHeader } from "@/components/BlogHeader";
 
 Chat application with conversations, user feedback, and streaming responses from the edge.
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![chat.langfuse.com screen recording](/images/blog/ai-chatbot/chat-ui.gif)
-</div>
+</Frame>
 
 ### Langfuse UI
 
 We have captured threads of users as single traces in langfuse. Threads include the user_id, overall token usage, and further metadata. User feedback which is collected in the frontend is directly related to the trace and helps to find low-quality conversations and individual messages which got negative feedback.
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
+<Frame>
   ![chat.langfuse.com screen
   recording](/images/blog/ai-chatbot/langfuse-dashboard.gif)
-</div>
+</Frame>
 
 ### Highlights of the integration
 
@@ -45,7 +46,7 @@ We have captured threads of users as single traces in langfuse. Threads include 
 
 ## Chatbot
 
-We integrated Langfuse into the [**ai-chatbot template**](https://github.com/vercel-labs/ai-chatbot) which was open-sourced by the Vercel AI team. The template uses (from [Readme](https://github.com/vercel-labs/ai-chatbot/blob/main/README.md)):
+We integrated Langfuse into the [**ai-chatbot template**](https://github.com/vercel-labs/ai-chatbot) which was open sourced by the Vercel AI team. The template uses (from [Readme](https://github.com/vercel-labs/ai-chatbot/blob/main/README.md)):
 
 > - Next.js (App Router)
 > - [Vercel AI SDK](https://sdk.vercel.ai/docs) for streaming chat UI
@@ -84,7 +85,7 @@ const langfuse = new Langfuse({
 ```typescript
 const trace = langfuse.trace({
   name: "chat",
-  externalId: `chat:${chatId}`,
+  id: `chat:${chatId}`,
   metadata: {
     userEmail,
   },
@@ -92,7 +93,7 @@ const trace = langfuse.trace({
 });
 ```
 
-- We use the existing `chatId` as the `externalId` of the trace. This allows us to group all messages of a conversation into a single trace. For traces, the Langfuse SDK upserts the trace based on the provided `externalId`. This means that we can call `trace()` on every new message in a conversation.
+- We use the existing `chatId` as the `id` of the trace. This allows us to group all messages of a conversation into a single trace. For traces, the Langfuse SDK upserts the trace based on the provided `id`. This means that we can call `trace()` on every new message in a conversation.
 - We add the `userId` as it allows us to filter and aggregate data in Langfuse based on users for debugging and analytics.
 - In `metadata` we can add any additional information that we want to be available in Langfuse. In this example, we add the `userEmail`.
 
@@ -113,7 +114,7 @@ const lfGeneration = trace.generation({
 
 **Updating the LLM call**
 
-Thanks to the Vercel AI SDK, we can use the `onStart` and `onCompletion` callbacks to update the generation object in Langfuse.
+Thanks to the Vercel AI SDK, we can use the `onStart` and `onCompletion` callbacks to update/end the generation object in Langfuse.
 
 ```typescript
 // once streaming started
@@ -125,8 +126,7 @@ async onStart() {
 
 // once streaming completed
 async onCompletion(completion) {
-  lfGeneration.update({
-    endTime: new Date(),
+  lfGeneration.end({
     completion
   })
 }
@@ -169,9 +169,7 @@ In the frontend, we want to capture user feedback (positive/negative + comment) 
 
 Feedback modal:
 
-<div className="max-w-2xl overflow-hidden mt-2 rounded-xl shadow-lg ring-1 ring-slate-700">
-  ![User feedback modal](/images/blog/ai-chatbot/feedback.gif)
-</div>
+<Frame>![User feedback modal](/images/blog/ai-chatbot/feedback.gif)</Frame>
 
 **Initialize client**
 
@@ -194,7 +192,6 @@ We created an event handler for the feedback form. The feedback is then logged a
 ```typescript
 await langfuse.score({
   traceId: `chat:${chatId}`,
-  traceIdType: "EXTERNAL",
   observationId: message.id,
   name: "user-feedback",
   value: modalState.feedback === "positive" ? 1 : -1,
@@ -204,8 +201,8 @@ await langfuse.score({
 
 ## Next steps
 
-If you want to integrate Langfuse into your own chat applicaion, read the [Quickstart](/docs/get-started) for an overview and the [SDK documentation](/docs/integrations/sdk) for more implementation details.
+If you want to integrate Langfuse into your own chat application, read the [Quickstart](/docs/get-started) for an overview and the [SDK documentation](/docs/integrations/sdk) for more implementation details.
 
 ## Get in touch
 
-Langfuse is being actively developed in open source together with the community. Provide feedback, report bugs, or request features via GitHub issues. Join our [Discord](https://discord.gg/7NXusRtqYU) for fast support. If you want to chat about your use case, reach out to us via email: contact@langfuse.com
+Langfuse is being actively developed in open source together with the community. Provide feedback, report bugs, or request features via GitHub issues. Join our [Discord](/discord) for fast support. If you want to chat about your use case, reach out to us via email: contact@langfuse.com

@@ -12,7 +12,7 @@ import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function Chat({ className }: { className?: string }) {
-  const ref = React.useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const conversationId = useMemo(() => nanoid(), []);
 
   // Controlled message histor. Used to update the messages state onFinish to include the latest messageId provided by the server.
@@ -51,14 +51,12 @@ export function Chat({ className }: { className?: string }) {
     },
   });
 
-  console.log(messages);
-
   const messagesWithWelcome: Message[] = [welcomeMessage, ...messages];
 
   return (
     <div
       className={cn(
-        "relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden border border-gray-700 rounded-lg",
+        "relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden bg-background/40 shadow-lg rounded-lg",
         className
       )}
     >
@@ -103,7 +101,5 @@ const welcomeMessage: Message = {
   id: "announcement-1",
   content: `👋 Do you have any questions about Langfuse? Ask me!
 
-Interested in the architecture of this chatbot? Check out the [blog post](/blog/qa-chatbot-for-langfuse-docs).
-
-_⚠️ Warning: The bot is not very smart and answers might be misleading. If you have a question that the bot cannot answer, ask the founders via the chat widget._`,
+_⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the [live demo](/docs/demo). Humans (the founders) are available via the chat widget._`,
 } as const;
