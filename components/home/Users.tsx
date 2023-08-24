@@ -1,18 +1,14 @@
-import { Fragment } from "react";
 import Image from "next/image";
 import fastgenLight from "./img/fastgen_light.svg";
 import fastgenDark from "./img/fastgen_dark.svg";
 import alphawatchLight from "./img/alphawatch_light.png";
 import alphawatchDark from "./img/alphawatch_dark.png";
-import juiceboxLight from "./img/juicebox_light.png";
-import juiceboxDark from "./img/juicebox_dark.png";
 import nucleusLight from "./img/nucleus_light.png";
 import nucleusDark from "./img/nucleus_dark.png";
 import langdockLight from "./img/langdock_light.png";
 import langdockDark from "./img/langdock_dark.png";
 import berryLight from "./img/berry_light.png";
 import berryDark from "./img/berry_light.png";
-import { cn } from "@/lib/utils";
 
 const users = [
   {
