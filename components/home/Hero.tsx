@@ -1,8 +1,11 @@
 import Spline from "@splinetool/react-spline";
 import Link from "next/link";
-import { YCLogo } from "./ycLogo";
+import { YCLogo } from "./img/ycLogo";
 import ShimmerButton from "@/components/magicui/shimmer-button";
 import { Button } from "../ui/button";
+import Image from "next/image";
+import phLight from "./img/ph_product_of_the_day_light.png";
+import phDark from "./img/ph_product_of_the_day_dark.png";
 
 export function Hero() {
   return (
@@ -60,27 +63,23 @@ export function Hero() {
 }
 
 const ProductHuntBadge = () => (
-  <>
-    <a
-      href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
-      target="_blank"
-      className="dark:hidden"
-    >
-      <img
-        src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=410250&theme=neutral&period=daily"
-        alt="Langfuse - Open&#0032;source&#0032;tracing&#0032;and&#0032;analytics&#0032;for&#0032;LLM&#0032;applications | Product Hunt"
-      />
-    </a>
-    <a
-      href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
-      target="_blank"
+  <a
+    href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
+    target="_blank"
+  >
+    <Image
+      src={phLight}
+      alt="Product Hunt - Product of the Day"
+      width={250}
+      height={54}
+      className="block dark:hidden"
+    />
+    <Image
+      src={phDark}
+      alt="Product Hunt - Product of the Day"
+      width={250}
+      height={54}
       className="hidden dark:block"
-    >
-      <img
-        src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=410250&theme=dark&period=daily"
-        alt="Langfuse - Open&#0032;source&#0032;tracing&#0032;and&#0032;analytics&#0032;for&#0032;LLM&#0032;applications | Product Hunt"
-        className="border border-foreground rounded-xl"
-      />
-    </a>
-  </>
+    />
+  </a>
 );

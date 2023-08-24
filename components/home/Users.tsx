@@ -63,13 +63,13 @@ export const Users = () => (
             target="_blank"
           >
             <Image
-              className="object-contain hidden dark:block grayscale hover:grayscale-0 transition opacity-80 hover:opacity-100"
+              className="object-contain hidden dark:block grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
               src={user.lightImage}
               alt={user.name}
               fill={true}
             />
             <Image
-              className="object-contain dark:hidden grayscale hover:grayscale-0 transition opacity-80 hover:opacity-100"
+              className="object-contain dark:hidden grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
               src={user.darkImage}
               alt={user.name}
               fill={true}
