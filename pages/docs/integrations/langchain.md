@@ -161,8 +161,6 @@ handler.langfuse.flush()
 
 ```
 
-     The president said that Ketanji Brown Jackson is one of our nation's top legal minds and will continue Justice Breyer's legacy of excellence.
-
 ![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
 
 ```python
@@ -183,21 +181,6 @@ handler.langfuse.flush()
 
 print("output variable: ", result)
 ```
-
-    [1m> Entering new AgentExecutor chain...[0m
-    [32;1m[1;3m I should search for Leo DiCaprio's girlfriend and then use a calculator to solve for the 0.43 power.
-    Action: Search
-    Action Input: Leo DiCaprio's girlfriend[0m
-    Observation: [36;1m[1;3mWATCH: Meet some of Leonardo DiCaprio's famous exes Leo briefly dated Blake Lively when she was 23 and he was 36, then jumped to Erin Heatherton, who was 22, and was with Toni Garrin from 2013 to 2014, but they split when she was just 21 and he was 39.[0m
-    Thought:[32;1m[1;3m I have the current age of Leo DiCaprio's girlfriend
-    Action: Calculator
-    Action Input: 23^0.43[0m
-    Observation: [33;1m[1;3mAnswer: 3.8507291225496925[0m
-    Thought:[32;1m[1;3m I now know the final answer
-    Final Answer: Leo DiCaprio's girlfriend is currently 23 years old and her age raised to the 0.43 power is 3.8507291225496925.[0m
-
-    [1m> Finished chain.[0m
-    output variable:  Leo DiCaprio's girlfriend is currently 23 years old and her age raised to the 0.43 power is 3.8507291225496925.
 
 ## Adding scores
 
@@ -226,4 +209,44 @@ trace = langfuse.score(
         comment="I like how personalized the response is"
     )
 )
+```
+
+## Adding trace as context to a Langchain handler
+
+It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `id` or `metadata`. All the Langchain observations will be collected on that trace.
+
+To do that, we first need to initialise the [Python SDK](/docs/integrations/sdk/python), create a `trace`, and finally create the handler.
+
+```python
+%pip install uuid
+```
+
+```python
+import uuid
+import os
+
+from langfuse.client import Langfuse
+from langfuse.model import CreateTrace
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+
+trace_id = str(uuid.uuid4())
+trace = langfuse.trace(CreateTrace(id=trace_id))
+
+handler = trace.getNewHandler()
+
+llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
+    Title: {title}
+    Playwright: This is a synopsis for the above play:"""
+
+prompt_template = PromptTemplate(input_variables=["title"], template=template)
+synopsis_chain = LLMChain(llm=llm, prompt=prompt_template)
+
+synopsis_chain.run("Tragedy at sunset on the beach", callbacks=[handler])
+
+langfuse.flush()
 ```
