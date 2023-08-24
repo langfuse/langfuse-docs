@@ -33,7 +33,7 @@ const features = [
 
 export default function Integrations() {
   return (
-    <div className="py-24 sm:py-32">
+    <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
           <h2 className="text-base font-semibold leading-7 ">Integrations</h2>
@@ -71,6 +71,6 @@ export default function Integrations() {
           </dl>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

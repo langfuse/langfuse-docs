@@ -15,11 +15,10 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     price: { monthly: "Free", annually: "Free" },
     description:
-      "Get started with Langfuse, no credit card required. Great for hobby and pre-launch projects.",
+      "Get started, no credit card required. Great for hobby, pre-launch and internal projects.",
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
-      "30 days of history",
       "1 GB of storage",
       "Support via Discord and Chat",
     ],
@@ -32,11 +31,10 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     price: { monthly: "$95", annually: "$950" },
     description:
-      "Pro plan for production usage with extended history, support, and more included storage.",
+      "More storage and support for production-grade projects with significant usage.",
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
-      "Unlimited history",
       "10 GB of included storage",
       "1:1 support, Slack Channel, integration help",
     ],
@@ -49,7 +47,7 @@ const tiers = [
     href: "mailto:enterprise@langfuse.com",
     price: "Custom",
     description:
-      "Dedicated solutions and support for enterprise-grade projects. Contact us to learn more.",
+      "Dedicated solutions and support for enterprise teams. Contact us to learn more.",
     features: [
       "Support with self-hosting in your VPS or cloud",
       "Prioritization of your feature requests",
@@ -69,7 +67,7 @@ export const Pricing = () => {
   const [frequency, setFrequency] = useState(frequencies[0]);
 
   return (
-    <div className="py-24 sm:py-32">
+    <section className="py-24 sm:py-32" id="pricing">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-base font-semibold leading-7 text-primary">
@@ -188,6 +186,6 @@ export const Pricing = () => {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
