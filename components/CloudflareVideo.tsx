@@ -1,19 +1,25 @@
 import { cn } from "@/lib/utils";
-import { Stream } from "@cloudflare/stream-react";
+import { MediaPlayer, MediaOutlet } from "@vidstack/react";
 
 export const CloudflareVideo = ({
   videoId,
+  aspectRatio,
   className,
 }: {
   videoId: string;
-  className: string;
+  aspectRatio?: number;
+  className?: string;
 }) => (
-  <div
+  <MediaPlayer
+    src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
+    poster={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`}
+    controls
+    aspectRatio={aspectRatio ?? 16 / 9}
     className={cn(
-      "my-4 overflow-hidden rounded-xl shadow-lg aspect-[1.18] ring-1 ring-slate-700",
+      "my-4 overflow-hidden rounded-xl shadow-lg ring-1 ring-slate-700",
       className
     )}
   >
-    <Stream src={videoId} autoplay={true} loop={true} muted={true} />
-  </div>
+    <MediaOutlet />
+  </MediaPlayer>
 );

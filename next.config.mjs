@@ -21,10 +21,10 @@ export default withNextra({
   ],
   rewrites: async () => {
     return [
-      {
-        source: '/',
-        destination: 'https://analytics.langfuse.com',
-      },
+      // {
+      //   source: '/',
+      //   destination: 'https://analytics.langfuse.com',
+      // },
     ]
   },
   redirects: async () => [
@@ -44,6 +44,8 @@ export default withNextra({
 const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
   ["/discord", "https://discord.gg/7NXusRtqYU"],
+  ["/demo", "/docs/demo"],
+  ["/ph", "https://www.producthunt.com/posts/langfuse"],
 ];
 
 const permanentRedirects = [

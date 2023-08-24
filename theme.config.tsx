@@ -6,8 +6,16 @@ import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 
 const footerNav = [
-  { name: "Imprint", href: "/imprint" },
   { name: "Contact", href: "mailto:contact@langfuse.com" },
+  { name: "Imprint", href: "/imprint" },
+  {
+    name: "Terms",
+    href: "https://app.termly.io/document/terms-of-service/baf80a2e-dc67-46de-9ca8-2f7457179c32",
+  },
+  {
+    name: "Privacy",
+    href: "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90",
+  },
 ];
 
 const config: DocsThemeConfig = {
@@ -26,7 +34,7 @@ const config: DocsThemeConfig = {
     ),
   },
   chat: {
-    link: "https://discord.gg/7NXusRtqYU",
+    link: "https://langfuse.com/discord",
   },
   search: {
     placeholder: "Search...",
@@ -73,6 +81,14 @@ const config: DocsThemeConfig = {
               {nav.name}
             </Link>
           ))}
+          <a
+            href="#"
+            onClick={() => (window as any).displayPreferenceModal()}
+            className="inline px-2 first-of-type:pl-0 border-l first-of-type:border-l-0 rounded-none leading-6 text-primary/80 hover:text-primary"
+            id="termly-consent-preferences"
+          >
+            Cookie Preferences
+          </a>
         </span>
       </div>
     ),
@@ -98,7 +114,7 @@ const config: DocsThemeConfig = {
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
     const description =
-      frontMatter.description ?? "Open-source analytics for LLM applications";
+      frontMatter.description ?? "Open source analytics for LLM applications";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
@@ -106,6 +122,12 @@ const config: DocsThemeConfig = {
 
     return (
       <>
+        <script
+          type="text/javascript"
+          src="https://app.termly.io/embed.min.js"
+          data-auto-block="on"
+          data-website-uuid="488cc3b0-ed5a-4e9d-81f2-76014dcae784"
+        ></script>
         <meta name="theme-color" content="#000" />
         <meta property="og:url" content={url} />
         <meta httpEquiv="Content-Language" content="en" />
@@ -132,18 +154,18 @@ const config: DocsThemeConfig = {
     ),
   },
   faviconGlyph: "🪢",
-  // banner: {
-  //   key: "analytics",
-  //   dismissible: false,
-  //   text: (
-  //     <a href="/analytics" target="_blank">
-  //       <span className="sm:hidden">Soon: 📈 LLM Analytics →</span>
-  //       <span className="hidden sm:inline">
-  //         Coming soon: 📈 Langfuse LLM Analytics →
-  //       </span>
-  //     </a>
-  //   ),
-  // },
+  banner: {
+    key: "demo",
+    dismissible: true,
+    text: (
+      <Link href="/docs/demo">
+        <span className="sm:hidden">Check out live demo →</span>
+        <span className="hidden sm:inline">
+          Want to see Langfuse in action? Check out the live demo →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

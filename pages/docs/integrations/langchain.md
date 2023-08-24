@@ -34,7 +34,7 @@ The Langfuse `CallbackHandler` tracks the following actions when using Langchain
 - ChatModel: `on_chat_model_start`,
 - LLM: `on_llm_start`, `on_llm_end`, `on_llm_error`
 
-Missing some useful information/context in Langfuse? Join the [Discord](https://discord.gg/7NXusRtqYU) or share your feedback directly with us: feedback@langfuse.com
+Missing some useful information/context in Langfuse? Join the [Discord](/discord) or share your feedback directly with us: feedback@langfuse.com
 
 ## Notebook Setup
 
@@ -42,20 +42,17 @@ Missing some useful information/context in Langfuse? Join the [Discord](https://
 
 The Langfuse SDKs are hosted on the pypi index.
 
-
 ```python
 %pip install langfuse
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
 
-
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
 ENV_SECRET_KEY = "sk-lf-..."
 ENV_PUBLIC_KEY = "pk-lf-..."
 ```
-
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -65,17 +62,14 @@ handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
 ### 2. Langchain
 
-
 ```python
 import os
 os.environ["OPENAI_API_KEY"] = "sk-..."
 ```
 
-
 ```python
 %pip install langchain openai
 ```
-
 
 ```python
 # further imports
@@ -91,7 +85,6 @@ from langfuse.callback import CallbackHandler
 ### 1. Sequential Chain
 
 ![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
-
 
 ```python
 llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
@@ -121,17 +114,14 @@ handler.langfuse.flush()
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
-
 ```python
 import os
 os.environ["SERPAPI_API_KEY"] = '...'
 ```
 
-
 ```python
 %pip install unstructured chromadb tiktoken google-search-results
 ```
-
 
 ```python
 from langchain.document_loaders import UnstructuredURLLoader
@@ -173,11 +163,7 @@ handler.langfuse.flush()
 
      The president said that Ketanji Brown Jackson is one of our nation's top legal minds and will continue Justice Breyer's legacy of excellence.
 
-
-
-
 ![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
-
 
 ```python
 from langchain.agents import AgentType, initialize_agent, load_tools
@@ -198,8 +184,6 @@ handler.langfuse.flush()
 print("output variable: ", result)
 ```
 
-    
-    
     [1m> Entering new AgentExecutor chain...[0m
     [32;1m[1;3m I should search for Leo DiCaprio's girlfriend and then use a calculator to solve for the 0.43 power.
     Action: Search
@@ -211,18 +195,15 @@ print("output variable: ", result)
     Observation: [33;1m[1;3mAnswer: 3.8507291225496925[0m
     Thought:[32;1m[1;3m I now know the final answer
     Final Answer: Leo DiCaprio's girlfriend is currently 23 years old and her age raised to the 0.43 power is 3.8507291225496925.[0m
-    
+
     [1m> Finished chain.[0m
     output variable:  Leo DiCaprio's girlfriend is currently 23 years old and her age raised to the 0.43 power is 3.8507291225496925.
-
 
 ## Adding scores
 
 To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `handler.get_trace_id()`
 
-
 ### Example
-
 
 ```python
 from langfuse import Langfuse

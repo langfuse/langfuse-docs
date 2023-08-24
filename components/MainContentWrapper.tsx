@@ -11,9 +11,7 @@ import {
 import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
-import { DotPattern } from "./magicui/dot-pattern";
-import { LinearGradient } from "./magicui/linear-gradient";
-import { cn } from "@/lib/utils";
+import { Background } from "./Background";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -32,33 +30,7 @@ export const MainContentWrapper = (props) => {
           <DocsSupport />
         </div>
       ) : null}
-      <div className="absolute top-0 bottom-0 left-0 right-0 -z-50">
-        <DotPattern
-          width={15}
-          height={15}
-          cx={1}
-          cy={1}
-          cr={1}
-          className={cn(
-            "[mask-image:linear-gradient(to_bottom,white,transparent,transparent)]",
-            "dark:opacity-70"
-          )}
-        />
-        <LinearGradient
-          to="rgba(120,119,198,0.25)"
-          from="rgba(0,0,0,0.0)"
-          direction="top"
-          transitionPoint="50%"
-          className="hidden dark:block"
-        />
-        <LinearGradient
-          to="rgba(120,119,198,0.15)"
-          from="rgba(0,0,0,0.0)"
-          direction="top"
-          transitionPoint="50%"
-          className="dark:hidden"
-        />
-      </div>
+      <Background />
     </>
   );
 };
@@ -69,7 +41,7 @@ export const DocsSupport = () => {
       <h3 className="text-xl font-semibold">Questions? We're here to help</h3>
       <div className="flex gap-3 flex-wrap">
         <Button variant="outline" size="sm" asChild>
-          <a href="https://discord.gg/7NXusRtqYU" target="_blank">
+          <a href="/discord" target="_blank">
             <span>Discord</span>
             <RxDiscordLogo className="h-4 w-4 ml-3" />
           </a>
