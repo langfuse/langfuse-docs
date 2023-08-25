@@ -13,9 +13,9 @@ const tiers = [
     name: "Hobby",
     id: "tier-hobby",
     href: "https://cloud.langfuse.com",
-    price: { monthly: "Free", annually: "Free" },
+    price: "Free",
     description:
-      "Get started, no credit card required. Great for hobby, pre-launch and internal projects.",
+      "Get started, no credit card required. Great for hobby and internal projects.",
     features: [
       "Unlimited projects",
       "Unlimited events (fair use)",
@@ -47,11 +47,11 @@ const tiers = [
     href: "mailto:enterprise@langfuse.com",
     price: "Custom",
     description:
-      "Dedicated solutions and support for enterprise teams. Contact us to learn more.",
+      "Dedicated solutions and support. Contact founders to learn more.",
     features: [
-      "Support with self-hosting in your VPS or cloud",
       "Prioritization of your feature requests",
-      "Engineering support for your team",
+      "Self-hosting support (VPS or cloud)",
+      "Dedicated instance",
       "Support SLAs",
     ],
     featured: true,
@@ -133,7 +133,17 @@ export const Pricing = () => {
               >
                 {tier.description}
               </p>
-              <p className="mt-6 flex items-baseline gap-x-1">
+              <p className="mt-6 flex items-baseline gap-x-2">
+                {typeof tier.price !== "string" ? (
+                  <span
+                    className={classNames(
+                      tier.featured ? "text-gray-300" : "text-primary/80",
+                      "text-sm font-semibold leading-6"
+                    )}
+                  >
+                    Starts at
+                  </span>
+                ) : null}
                 <span
                   className={classNames(
                     tier.featured ? "text-white" : "",
