@@ -17,10 +17,24 @@ const tiers = [
     description:
       "Get started, no credit card required. Great for hobby and internal projects.",
     features: [
-      "Unlimited projects",
-      "Unlimited events (fair use)",
+      "Unlimited projects & events (fair use)",
       "1 GB of storage",
       "Support via Discord and Chat",
+    ],
+    featured: false,
+    cta: "Sign up",
+  },
+  {
+    name: "Starter",
+    id: "tier-pro",
+    href: "https://cloud.langfuse.com",
+    price: { monthly: "$95", annually: "$950" },
+    description:
+      "More storage and support for projects that move in production.",
+    features: [
+      "Unlimited projects & events (fair use)",
+      "10 GB of included storage",
+      "1:1 support, Slack Channel, integration help",
     ],
     featured: false,
     cta: "Sign up",
@@ -29,14 +43,13 @@ const tiers = [
     name: "Pro",
     id: "tier-pro",
     href: "https://cloud.langfuse.com",
-    price: { monthly: "$95", annually: "$950" },
-    description:
-      "More storage and support for production-grade projects with significant usage.",
+    price: { monthly: "$395", annually: "$3950" },
+    description: "Organizational features and security for growing teams.",
     features: [
-      "Unlimited projects",
-      "Unlimited events (fair use)",
-      "10 GB of included storage",
-      "1:1 support, Slack Channel, integration help",
+      "Unlimited projects & events (fair use)",
+      "30 GB of included storage",
+      "Dedicated support contact",
+      "SSO, custom domains, advanced RBAC, and more (soon)",
     ],
     featured: false,
     cta: "Sign up",
@@ -47,13 +60,8 @@ const tiers = [
     href: "mailto:enterprise@langfuse.com",
     price: "Custom",
     description:
-      "Dedicated solutions and support. Contact founders to learn more.",
-    features: [
-      "Prioritization of your feature requests",
-      "Self-hosting support (VPS or cloud)",
-      "Dedicated instance",
-      "Support SLAs",
-    ],
+      "Dedicated solutions and support. Contact founders to learn more. Can include prioritization of your feature requests, self-hosting support (VPS or cloud), dedicated instances, and support SLAs.",
+    features: [],
     featured: true,
     cta: "Contact founders",
   },
@@ -112,7 +120,9 @@ export const Pricing = () => {
             <div
               key={tier.id}
               className={classNames(
-                tier.featured ? "bg-gray-900 ring-gray-900" : "ring-gray-200",
+                tier.featured
+                  ? "bg-gray-900 ring-gray-900 lg:col-span-3"
+                  : "ring-gray-200",
                 "rounded-3xl p-8 ring-1 xl:p-10"
               )}
             >
@@ -133,7 +143,12 @@ export const Pricing = () => {
               >
                 {tier.description}
               </p>
-              <p className="mt-6 flex items-baseline gap-x-2">
+              <p
+                className={classNames(
+                  "mt-6 flex items-baseline gap-x-2",
+                  tier.featured && "hidden"
+                )}
+              >
                 {typeof tier.price !== "string" ? (
                   <span
                     className={classNames(
@@ -175,7 +190,7 @@ export const Pricing = () => {
               <ul
                 role="list"
                 className={classNames(
-                  tier.featured ? "text-gray-300" : "text-primary/80",
+                  tier.featured ? "text-gray-300 hidden" : "text-primary/80",
                   "mt-8 space-y-3 text-sm leading-6 xl:mt-10"
                 )}
               >
