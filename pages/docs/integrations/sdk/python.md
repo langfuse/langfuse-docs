@@ -17,17 +17,20 @@ Using langchain? Use the [langchain integration](https://langfuse.com/docs/langc
 
 The Langfuse SDKs are hosted on the pypi index.
 
+
 ```python
 %pip install langfuse
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
 
+
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
 ENV_SECRET_KEY = "sk-lf-..."
 ENV_PUBLIC_KEY = "pk-lf-..."
 ```
+
 
 ```python
 from langfuse import Langfuse
@@ -36,8 +39,8 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 ```
 
 ## 2. Record a simple LLM call
-
 To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration and the prompt and completion.
+
 
 ```python
 from datetime import datetime
@@ -60,10 +63,14 @@ langfuse.generation(InitialGeneration(
 ))
 ```
 
+
+
+
     <langfuse.client.StatefulGenerationClient at 0x788d899e3a90>
 
-## 3. Record a more complex application
 
+
+## 3. Record a more complex application
 ```
 TRACE
 |
@@ -77,6 +84,10 @@ TRACE
 |
 |-- GENERATION: Output Generation
 ```
+
+
+
+
 
 ```python
 from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEvent
@@ -92,16 +103,12 @@ generation = trace.generation(CreateGeneration(name = "user-output"))
 The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
 #### Traces
-
 A `Trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
-
 #### Observations
-
 Each `Trace` can contain multiple `Observations` to record individual steps of an execution. There are different types of `Observations`.
-
-- `Events` are the basic building block. They are used to track discrete events in a `Trace`.
-- `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
-- `Generations` are a specific type of `Spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+  - `Events` are the basic building block. They are used to track discrete events in a `Trace`.
+  - `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
+  - `Generations` are a specific type of `Spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
 ##Object details
 
@@ -113,6 +120,7 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 - `metadata` (optional): additional metadata of the trace. Can be any JSON object.
 - `id` (optional): The id of the trace can be set, otherwise a random one is generated. Useful for linking traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).
 - `userId` (optional): the id of the user who triggered the execution.
+
 
 ```python
 from langfuse.model import CreateTrace
@@ -140,6 +148,7 @@ Spans represent durations of units of work in a trace. We generated convenient S
 - `input` (optional): the input to the span. Can be any JSON object.
 - `output` (optional): the output to the span. Can be any JSON object.
 
+
 ```python
 from datetime import datetime
 from langfuse.model import CreateSpan, UpdateSpan
@@ -161,6 +170,9 @@ span = trace.span(CreateSpan(
 
 Spans can be updated once your function completes for example record outputs.
 
+
+
+
 ```python
 span = span.update(UpdateSpan(
         output = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
@@ -171,6 +183,7 @@ span = span.update(UpdateSpan(
 ### Generation
 
 Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+
 
 - `startTime` (optional): the time at which the generation started.
 - `endTime` (optional): the time at which the generation ended.
@@ -183,6 +196,7 @@ Generations are used to log generations of AI model. They contain additional met
 - `metadata` (optional): additional metadata of the generation. Can be any JSON object.
 - `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
 - `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
+
 
 ```python
 from langfuse.model import CreateGeneration, Usage, UpdateGeneration
@@ -207,6 +221,7 @@ generation = trace.generation(CreateGeneration(
 
 Generations can be updated once your LLM function completes for example record outputs.
 
+
 ```python
 generation.update(UpdateGeneration(
     completion="The Q3 OKRs contain goals for multiple teams...",
@@ -214,7 +229,12 @@ generation.update(UpdateGeneration(
 ))
 ```
 
+
+
+
     <langfuse.client.StatefulGenerationClient at 0x788d899e3370>
+
+
 
 ### Events
 
@@ -227,6 +247,7 @@ Events are used to track discrete events in a trace.
 - `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
 - `input` (optional): the input to the event. Can be any JSON object.
 - `output` (optional): the output to the event. Can be any JSON object.
+
 
 ```python
 from langfuse.model import CreateEvent
@@ -258,6 +279,7 @@ Scores are used to evaluate single executions/traces. They can be supplied inter
 - `comment` (optional): additional context/explanation of the score
 - `observationId` (optional): the id of the observation to which the score should be attached, automatically set when using span.score()/event.score()/generation.score() instead of langfuse.score()
 
+
 ```python
 from langfuse.model import CreateScore
 
@@ -268,7 +290,12 @@ trace.score(CreateScore(
 ))
 ```
 
+
+
+
     <langfuse.client.StatefulClient at 0x788d89a14250>
+
+
 
 ##Technical considerations
 
@@ -278,20 +305,33 @@ The Langfuse SDK executes network requests in the background on a separate threa
 
 To avoid this, ensure that the `langfuse.flush()` function is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
 
+
 ```python
 langfuse.flush()
 ```
 
 ## FastAPI
-
 For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
+
+
 
 ```python
 %pip install fastapi
 ```
 
+    Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.101.1)
+    Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /usr/local/lib/python3.10/dist-packages (from fastapi) (1.10.12)
+    Requirement already satisfied: starlette<0.28.0,>=0.27.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (0.27.0)
+    Requirement already satisfied: typing-extensions>=4.5.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (4.7.1)
+    Requirement already satisfied: anyio<5,>=3.4.0 in /usr/local/lib/python3.10/dist-packages (from starlette<0.28.0,>=0.27.0->fastapi) (3.7.1)
+    Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (3.4)
+    Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.3.0)
+    Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.1.3)
+
+
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
 With this, your Python environment will only terminate once Langfuse received all the events.
+
 
 ```python
 from contextlib import asynccontextmanager
@@ -312,6 +352,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 ```
 
+
 ```python
 langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
@@ -325,8 +366,8 @@ async def campaign(prompt: str = Query(..., max_length=20)):
 ```
 
 ## Debug
-
 Per default, the Langchain handler will only log exceptions. Sometimes it is valuable to debug the SDK to understand where something goes wrong. For this, you need to enable the `debug` mode of the SDK or the Langchain handler. This will enable all debug logs in your console.
+
 
 ```python
 from langfuse.callback import CallbackHandler

@@ -25,6 +25,16 @@ chain = LLMChain(llm=llm, prompt=prompt)
 chain.run(input="<user_input", callbacks=[handler])
 ```
 
+---
+ **_NOTE:_**
+When integrating callbacks, there are two main ways:
+- *Constructor Callbacks*: Set when initializing an object, like LLMChain(callbacks=[handler]). This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
+- *Request Callbacks*: Defined when issuing a request, like chain.run(input, callbacks=[handler]). This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
+
+For comprehensive data capture across objects, it's advised to use the request-based approach, as demonstrated above. Refer to the Langchain callbacks documentation for more details.
+
+---
+
 The Langfuse `CallbackHandler` tracks the following actions when using Langchain:
 
 - Chains: `on_chain_start`, `on_chain_end`. `on_chain_error`
@@ -42,17 +52,20 @@ Missing some useful information/context in Langfuse? Join the [Discord](/discord
 
 The Langfuse SDKs are hosted on the pypi index.
 
+
 ```python
 %pip install langfuse
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
 
+
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
 ENV_SECRET_KEY = "sk-lf-..."
 ENV_PUBLIC_KEY = "pk-lf-..."
 ```
+
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -62,14 +75,17 @@ handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
 ### 2. Langchain
 
+
 ```python
 import os
 os.environ["OPENAI_API_KEY"] = "sk-..."
 ```
 
+
 ```python
 %pip install langchain openai
 ```
+
 
 ```python
 # further imports
@@ -85,6 +101,7 @@ from langfuse.callback import CallbackHandler
 ### 1. Sequential Chain
 
 ![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
+
 
 ```python
 llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
@@ -114,14 +131,17 @@ handler.langfuse.flush()
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
+
 ```python
 import os
 os.environ["SERPAPI_API_KEY"] = '...'
 ```
 
+
 ```python
 %pip install unstructured chromadb tiktoken google-search-results
 ```
+
 
 ```python
 from langchain.document_loaders import UnstructuredURLLoader
@@ -161,7 +181,10 @@ handler.langfuse.flush()
 
 ```
 
+
+
 ![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
+
 
 ```python
 from langchain.agents import AgentType, initialize_agent, load_tools
@@ -186,7 +209,9 @@ print("output variable: ", result)
 
 To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `handler.get_trace_id()`
 
+
 ### Example
+
 
 ```python
 from langfuse import Langfuse
@@ -217,9 +242,11 @@ It is also possible to generate a Langchain handler based on a trace. This can h
 
 To do that, we first need to initialise the [Python SDK](/docs/integrations/sdk/python), create a `trace`, and finally create the handler.
 
+
 ```python
 %pip install uuid
 ```
+
 
 ```python
 import uuid
