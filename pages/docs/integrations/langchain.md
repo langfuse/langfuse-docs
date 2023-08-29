@@ -19,19 +19,20 @@ handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
 # Setup Langchain
 from langchain.chains import LLMChain
 ...
-chain = LLMChain(llm=llm, prompt=prompt)
+chain = LLMChain(llm=llm, prompt=prompt, callbacks=[handler])
 
 # Add Langfuse handler as callback
 chain.run(input="<user_input", callbacks=[handler])
 ```
 
 ---
- **_NOTE:_**
-When integrating callbacks, there are two main ways:
+ **_In case of missing events or tokens:_**
+
+There are two ways to integrate callbacks into Langchain:
 - *Constructor Callbacks*: Set when initializing an object, like `LLMChain(callbacks=[handler])`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
 - *Request Callbacks*: Defined when issuing a request, like `chain.run(input, callbacks=[handler])`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
 
-For comprehensive data capture across objects, it's advised to use the request-based approach, as demonstrated above. Refer to the [Langchain callbacks documentation](https://python.langchain.com/docs/modules/callbacks/#where-to-pass-in-callbacks) for more details.
+For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above. According to the [Langchain callbacks documentation](https://python.langchain.com/docs/modules/callbacks/#where-to-pass-in-callbacks), *Request Callbacks* should capture everything, but we experienced it differently.
 
 ---
 
