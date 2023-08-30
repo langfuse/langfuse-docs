@@ -1,0 +1,118 @@
+---
+description: Fully async and typed SDK, runs in Node.js, edge, Deno
+---
+
+import { Tab, Tabs } from "nextra-theme-docs";
+import { Callout } from "nextra/components";
+
+# JS/TS Langchain SDK
+
+<div className="flex flex-row flex-wrap gap-2 mt-2">
+  <a href="https://github.com/langfuse/langfuse-langchain">
+    <img
+      alt="Github repository langfuse/langfuse-js"
+      src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=Github"
+    />
+  </a>
+  <a href="https://github.com/langfuse/langfuse-js/actions/workflows/ci.yml?query=branch%3Amain">
+    <img
+      src="https://img.shields.io/github/actions/workflow/status/langfuse/langfuse-js/ci.yml?style=flat-square&logo=Github&label=tests"
+      alt="CI test status"
+    />
+  </a>
+  <a href="https://www.npmjs.com/package/langfuse-langchain">
+    <img
+      src="https://img.shields.io/npm/v/langfuse-langchain?style=flat-square&label=npm+langfuse-langchain"
+      alt="npm langfuse-langchain"
+    />
+  </a>
+</div>
+
+If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your Langchain application. The library queues calls to make them non-blocking.
+
+Supported runtimes:
+
+- [x] Node.js
+- [x] Edge: Vercel, Cloudflare, ...
+- [x] Deno
+
+Want to work without Langchain? Use [Langfuse](/docs/integrations/sdk/typescript)
+for tracing and [LangfuseWeb](/docs/integrations/sdk/typescript-web) to capture feedback from the browser.
+
+## Installation
+
+```sh
+npm i langfuse-langchain
+# or
+yarn add langfuse-langchain
+
+# Deno
+import CallbackHandler from 'langfuse-langchain'
+```
+
+In your application, set the **api keys** to create a client.
+
+```typescript
+import CallbackHandler from "langfuse-langchain";
+
+const handler = new CallbackHandler({
+  secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  // options
+});
+```
+
+### Options
+
+| Variable       | Description                                                                         | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl        | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| flushAt        | Number of queued requests                                                           | `20`                                                                                                                                                    |
+| flushInterval  | Interval in ms to flush requests                                                    | `10000`                                                                                                                                                 |
+| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
+
+<Callout type="info" emoji="ℹ️">
+  In short-lived environments (e.g. serverless functions), set `flushAt` to `1`
+  and `flushInterval` to `0` to send requests immediately. Also, make sure to
+  always call `handler.shutdownAsync()` at the end to flush the queue and await
+  all pending requests. ([Learn more](/docs/integrations/sdk/typescript#lambda))
+</Callout>
+
+#### Create a simple LLM call using Langchain
+
+````typescript /{ callbacks: [langfuseHandler] }/
+// Example generation creation
+
+// create a model
+const model = new OpenAI({
+  temperature: 0,
+  openAIApiKey: "sk-...",
+});
+// create a prompt
+const prompt = PromptTemplate.fromTemplate(
+  "What is a good name for a company that makes {product}?"
+);
+// create a chain
+const chainA = new LLMChain({ llm: model, prompt });
+
+// execute the chain
+const resA = await chainA.call(
+  { product: "colorful hockey sticks" },
+  { callbacks: [langfuseHandler] }
+);
+```                                                                          |
+
+## Shutdown [#shutdown]
+
+The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
+
+```typescript
+handler.shutdown();
+// or
+await handler.shutdownAsync();
+````
+
+# Flushing, shutdown, and debugging
+
+The Langfuse SDK uses the JS/TS (Node.js, Edge) SDK under the hood and offers the same functionality regarding flushing, shutdown and debugging. Please refer to the [JS/TS SDK documentation](/docs/integrations/sdk/typescript#shutdown) for more information.
