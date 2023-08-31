@@ -48,7 +48,6 @@ const nonPermanentRedirects = [
   ["/video", "/docs/video"],
   ["/ph", "https://www.producthunt.com/posts/langfuse"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
-  ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
 ];
 
 const permanentRedirects = [
@@ -72,4 +71,6 @@ const permanentRedirects = [
   ["/docs/sdk/typescript-web", "/docs/integrations/sdk/typescript-web"],
   // sdk integration guide
   ["/docs/guides/sdk-integration", "/docs/integrations/sdk#Example"],
+  // langchain
+  ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
 ]
