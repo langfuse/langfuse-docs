@@ -47,7 +47,8 @@ const nonPermanentRedirects = [
   ["/demo", "/docs/demo"],
   ["/video", "/docs/video"],
   ["/ph", "https://www.producthunt.com/posts/langfuse"],
-  ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"]
+  ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
+  ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
 ];
 
 const permanentRedirects = [
