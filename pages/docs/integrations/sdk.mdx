@@ -2,8 +2,13 @@
 description: Fully typed and async SDKs to integrate with Langfuse for Python and Typescript
 ---
 
-import { Card, Cards } from "nextra-theme-docs";
 import { SiTypescript, SiPython } from "react-icons/si";
+
+import { BsCode } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import FeedbackPreview from "@/components/feedbackPreview";
 
 # SDKs
 
@@ -11,7 +16,7 @@ The Langfuse SDKs are the recommended way to integrate with Langfuse.
 
 _Exception: if you use Langchain, use the [integration](/docs/integrations/langchain) for automated tracing of your Langchain chains/agents._
 
-## Benefits of the SDKs
+Properties:
 
 - Fully async requests, using Langfuse adds almost no latency
 - Accurate latency tracking using synchronous timestamps
@@ -19,7 +24,7 @@ _Exception: if you use Langchain, use the [integration](/docs/integrations/langc
 - Great DX when nesting observations
 - Cannot break your application, all errors are caught and logged
 
-### JS/TS
+## JS/TS
 
 <div className="flex flex-row flex-wrap gap-2 mt-2">
   <a href="https://github.com/langfuse/langfuse-js">
@@ -61,7 +66,7 @@ npm install langfuse-node
 
 → For more information, see [JS/TS (Node.js, Edge)](/docs/integrations/sdk/typescript) and [JS/TS (Web)](/docs/integrations/sdk/typescript-web) docs.
 
-### Python
+## Python
 
 <div className="flex flex-row flex-wrap gap-2 mt-2">
   <a href="https://github.com/langfuse/langfuse-python">
@@ -92,3 +97,178 @@ pip install langfuse
 - Langchain callback handler
 
 → For more information, see [Python docs](/docs/integrations/sdk/python).
+
+## Example
+
+This is an example implementation of the JS/TS and Web SDK to illustrate how to use the SDKs to instrument an application and add scores from the frontend (e.g., user feedback).
+
+An integration with your application might look very different depending on the backend logic and the scores you want to capture. In case of questions, join the [Discord](/discord) to discuss your use case.
+
+### 1. Backend tracing
+
+Monitoring LLM applications requires including the context. This can be the full user session of a chat application, retrieval results of a QA-chain, or the full execution trace of an agent. Langfuse was designed to capture the full context, be flexibly extendible while being incrementally adoptable.
+
+<div className="mt-5 px-3 py-2 ring-1 rounded-xl ring-gray-400">
+
+<h3 className="text-xl font-bold">Example: Chat application</h3>
+<span className="text-sm">
+  Chat conversation with repeated user interactions and LLM completions.
+</span>
+<span className="text-sm">
+  Full reference integration:
+  [`route.ts`](https://github.com/langfuse/ai-chatbot/blob/main/app/api/chat/route.ts)
+  in Vercel ai-chatbot (TypeScript, NextJs, streaming responses from edge).
+</span>
+
+<div className="mt-5 flex flex-col xl:flex-row gap-4">
+<div className="flex-1">
+
+**Integration**
+
+```typescript {4, 9, 14, 20, 32} filename="route.ts"
+import { Langfuse } from "langfuse";
+// more imports
+
+const langfuse = new Langfuse({ publicKey, privateKey });
+
+export async function POST(req: Request) {
+  const { messages, conversationId, userId } = await req.json();
+
+  const langfuseConversation = langfuse.trace({
+    id: `conversation_${conversationId}`, // creates/upserts trace
+    userId,
+  });
+
+  const execution = langfuseConversation.span({
+    name: "single-response",
+    input: messages.slice(-1),
+  });
+
+  const additionalContext = await getContext(messages);
+  execution.event({
+    name: "context-retrieved",
+    output: additionalContext,
+  });
+
+  const res = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages,
+  });
+
+  const stream = OpenAIStream(res, {
+    async onCompletion(completion) {
+      execution.generation({
+        name: "chat-completion",
+        prompt: messages,
+        completion,
+      });
+      await langfuse.flush();
+    },
+  });
+
+  return new StreamingTextResponse(stream);
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Trace**
+
+```
+https://cloud.langfuse.com/...
+```
+
+<div className="p-3 ring-1 ring-gray-400 rounded-xl flex flex-col gap-2 text-sm">
+<div>
+<div className="font-bold">Trace</div>
+<div>Id: conversation \<conversation_id\></div>
+
+</div>
+<div className="p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Span: single-response</div>
+  <div>Input: What do users like about Langfuse?</div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Event: context-retrieved</div>
+  <div>Output: \<output\></div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Generation: chat-completion</div>
+  <div>prompt: [ ... ]</div>
+  <div>completion: \<completion\></div>
+</div>
+<div className="p-3 ring-1 ring-gray-400 rounded-sm">
+  <div>Output: That it makes chat interactions easily observable</div>
+</div>
+
+<div className="mt-2 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Span: single-response</div>
+  <div>Input: What features of Langfuse are helpful for developers of chat aplications?</div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Event: context-retrieved</div>
+  <div>Output: \<output\></div>
+</div>
+<div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
+  <div className="font-bold">Generation: chat-completion</div>
+  <div>prompt: [ ... ]</div>
+  <div>completion: \<completion\></div>
+</div>
+<div className="p-3 ring-1 ring-gray-400 rounded-sm">
+  <div>Output: (1) Grouping of executions into traces (sessions), (2) nested tracking of intermediary steps that help with debugging, (3) SDKs for simple intergation with their application.</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+### 2. Add scores (via user feedback)
+
+In this example we add a score based on user feedback in the frontend. We use the [Langfuse Web SDK](/docs/integrations/sdk/typescript-web) in a React application. The score is associated to the trace using the traceId.
+
+<div className="mt-5 px-3 py-2 ring-1 rounded-xl ring-gray-400">
+
+<h3 className="text-xl font-bold">User feedback on individual responses</h3>
+<span className="text-sm">Chat application</span>
+
+<div className="mt-5 flex flex-col xl:flex-row gap-4">
+<div className="flex-1">
+
+**Integration**
+
+```typescript {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Preview**
+
+<FeedbackPreview />
+
+</div>
+</div>
+</div>

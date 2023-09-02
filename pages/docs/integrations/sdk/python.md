@@ -27,8 +27,8 @@ Initialize the client with api keys and optionally your environment. In the exam
 
 ```python
 ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-1234567890"
-ENV_PUBLIC_KEY = "pk-lf-1234567890"
+ENV_SECRET_KEY = "sk-lf-..."
+ENV_PUBLIC_KEY = "pk-lf-..."
 ```
 
 
@@ -63,13 +63,10 @@ langfuse.generation(InitialGeneration(
 ))
 ```
 
-    new_trace_id 750545fd-f606-4d21-8476-04415468376f
 
 
 
-
-
-    <langfuse.client.StatefulGenerationClient at 0x7c68d3590b20>
+    <langfuse.client.StatefulGenerationClient at 0x788d899e3a90>
 
 
 
@@ -235,7 +232,7 @@ generation.update(UpdateGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7c68d3591ba0>
+    <langfuse.client.StatefulGenerationClient at 0x788d899e3370>
 
 
 
@@ -296,7 +293,7 @@ trace.score(CreateScore(
 
 
 
-    <langfuse.client.StatefulClient at 0x7c68d3591840>
+    <langfuse.client.StatefulClient at 0x788d89a14250>
 
 
 
@@ -321,6 +318,16 @@ For engineers working with FastAPI, we have a short example, of how to use it th
 ```python
 %pip install fastapi
 ```
+
+    Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.101.1)
+    Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /usr/local/lib/python3.10/dist-packages (from fastapi) (1.10.12)
+    Requirement already satisfied: starlette<0.28.0,>=0.27.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (0.27.0)
+    Requirement already satisfied: typing-extensions>=4.5.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (4.7.1)
+    Requirement already satisfied: anyio<5,>=3.4.0 in /usr/local/lib/python3.10/dist-packages (from starlette<0.28.0,>=0.27.0->fastapi) (3.7.1)
+    Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (3.4)
+    Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.3.0)
+    Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.1.3)
+
 
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
 With this, your Python environment will only terminate once Langfuse received all the events.
@@ -356,4 +363,16 @@ async def campaign(prompt: str = Query(..., max_length=20)):
       InitialGeneration(name="llm-feature", metadata="test", prompt=prompt)
   )
   return True
+```
+
+## Debug
+Per default, the Langchain handler will only log exceptions. Sometimes it is valuable to debug the SDK to understand where something goes wrong. For this, you need to enable the `debug` mode of the SDK or the Langchain handler. This will enable all debug logs in your console.
+
+
+```python
+from langfuse.callback import CallbackHandler
+
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
+
+handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
 ```

@@ -66,7 +66,7 @@ export const FeatAnalytics = () => (
         <Image
           src={dashboardImg}
           alt="Dashboard Langfuse"
-          className="w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem] md:-ml-4 lg:-ml-0"
+          className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 lg:w-[57rem]"
         />
       </div>
     </div>

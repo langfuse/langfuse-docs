@@ -59,7 +59,7 @@ export const FeatTracing = () => (
           <Image
             src={TraceScreen}
             alt="Screenshot single trace in Langfuse"
-            className="w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem]"
+            className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 lg:w-[57rem]"
           />
         </div>
       </div>

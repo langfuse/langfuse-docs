@@ -64,8 +64,8 @@ export const YCLogo = () => (
         y2="20"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor" stop-opacity=".6"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".04"></stop>
+        <stop stopColor="currentColor" stopOpacity=".6"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".04"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_b"
@@ -75,8 +75,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_c"
@@ -86,8 +86,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_d"
@@ -97,8 +97,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_e"
@@ -108,8 +108,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_f"
@@ -119,8 +119,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_g"
@@ -130,8 +130,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_h"
@@ -141,8 +141,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_i"
@@ -152,8 +152,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_j"
@@ -163,8 +163,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
       <linearGradient
         id="svg-1913794802_8415_k"
@@ -175,7 +175,7 @@ export const YCLogo = () => (
         gradientUnits="userSpaceOnUse"
       >
         <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stop-opacity=".6"></stop>
+        <stop offset="1" stop-color="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
     </defs>
   </svg>
