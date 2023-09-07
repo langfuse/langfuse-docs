@@ -38,7 +38,17 @@ from langfuse import Langfuse
 langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 ```
 
-Below are more ways to configure the SDK to support tracking releases, enable debugging, and configure server shutdowns.
+### Options
+
+| Variable |Description   | Default value  
+| --- | --- | ---
+| baseUrl | BaseUrl of the Langfuse API | `"https://cloud.langfuse.com"`       
+| release | The release number/hash of the application to provide analytics grouped by release.	| `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
+| debug | Prints debug logs to the console | `False`
+
+
+
+At the bottom of the document are more detailed explanations for these.
 
 ## 2. Record a simple LLM call
 To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration and the prompt and completion.
