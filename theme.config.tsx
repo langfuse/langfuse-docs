@@ -3,7 +3,6 @@ import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Script from "next/script";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 
 const footerNav = [
@@ -123,13 +122,6 @@ const config: DocsThemeConfig = {
 
     return (
       <>
-        <Script
-          src="https://app.termly.io/embed.min.js"
-          strategy="beforeInteractive"
-          data-auto-block="on"
-          data-website-uuid="488cc3b0-ed5a-4e9d-81f2-76014dcae784"
-        />
-
         <meta name="theme-color" content="#000" />
         <meta property="og:url" content={url} />
         <meta httpEquiv="Content-Language" content="en" />
