@@ -1,0 +1,216 @@
+---
+title: Langfuse Update — August 2023
+date: 2023/09/06
+description: "Building out all parts of Langfuse: integration, analytics, and tracing."
+tag: update
+ogImage: /images/blog/update-august-2023/og-aug-2023.jpg
+author: Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+import releaseImg from "@/public/images/blog/update-august-2023/release.jpg";
+import versionImg from "@/public/images/blog/update-august-2023/version.jpg";
+import Image from "next/image";
+
+<BlogHeader
+  title="Langfuse Update — August 2023"
+  description="Building out all parts of Langfuse: integration, analytics, and tracing."
+  date="Sept 6, 2023"
+  authors={["maxdeichmann"]}
+/>
+
+Hi everyone 👋, we worked hard over the course of the last month and are excited to share the latest updates with you:
+
+- **Improved Tracing**
+
+  - [Langchain integration](#langchain) for JS/TS users
+  - Execute Langchain in the [context of a Trace](#langchain-trace)
+  - Track [releases and versions](#releases-and-versions) in Python and JS/TS
+  - Improved filtering on [Traces table](#traces-table)
+
+- **Improved Analytics**
+
+  - [USD cost calculation](#cost) for tokens
+  - [Token usage chart](#token-chart)
+
+- **Other**
+  - [GET API](#get-usage-metrics) to access usage metrics
+
+---
+
+The details 👇
+
+## 🦜🔗 JS/TS Langchain Integration [#langchain]
+
+Last month we released the Python Integration for Langchain and now shipped the same for teams building with JS/TS. We released a new package [langfuse-langchain](https://www.npmjs.com/package/langfuse-langchain) which exposes a `CallbackHandler` that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
+
+```typescript /{ callbacks: [handler] }/
+// Initialize Langfuse handler
+import CallbackHandler from "langfuse-langchain";
+
+const handler = new CallbackHandler({
+  secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  // options
+});
+
+// Setup Langchain
+import { OpenAI } from "langchain/llms/openai";
+
+const llm = new OpenAI();
+
+// Add Langfuse handler as callback
+const res = await llm.call("<user-input>", { callbacks: [handler] });
+```
+
+→ [Integration docs](/docs/integrations/langchain/typescript)
+
+## ⛓️ Langchain integrations with Trace context [#langchain-trace]
+
+So far, adding application and user context to Langchain apps was hard. In the Python SDK, we now support to create handlers in the context of a trace. We will catch up with the JS/TS SDK soon.
+
+```python
+import uuid
+
+from langfuse.client import Langfuse
+from langfuse.model import CreateTrace
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+# initialise langfuse client
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+
+# create trace_id for future reference
+trace_id = str(uuid.uuid4())
+# create the Trace
+trace = langfuse.trace(CreateTrace(id=trace_id))
+# get a handler bound to the Trace
+handler = trace.getNewHandler()
+
+# setup Langchain
+llm = OpenAI()
+chain = LLMChain(llm=llm, prompt=PromptTemplate(...))
+
+chain.run("<your-input>", callbacks=[handler])
+```
+
+→ [Docs](/docs/integrations/langchain/python)
+
+## 📦 Releases and versions [#releases-and-versions]
+
+We've added support for releases and versions in Python and JS/TS. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace.
+
+### Releases
+
+There are two ways of adding releases to your traces:
+
+- Add the variable via an `.env` file and it will be taken care off under the hood:
+
+```bash
+LANGFUSE_RELEASE = "ba7816b..." # <- github sha or other identifier
+```
+
+- Alternatively, add the release via the SDK constructor:
+
+```python
+# Python
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, release='ba7816b')
+```
+
+Python docs → [here](/docs/integrations/sdk/python#releases-and-versions)
+
+```typescript
+// TypeScript
+langfuse = new Langfuse({
+  publicKey: ENV_PUBLIC_KEY,
+  secretKey: ENV_SECRET_KEY,
+  host: ENV_HOST,
+  release: "ba7816b",
+});
+```
+
+Typescript docs → [here](/docs/integrations/sdk/typescript#options)
+
+Finally, releases will be visualized in the Traces view.
+
+<Image
+  src={releaseImg}
+  width={40}
+  height={40}
+  alt={`Picture release in traces table`}
+  className="w-full rounded-md my-5"
+  unoptimized
+/>
+
+### Versions
+
+Versions are available throughout the SDK. Each `span`, `generation`, and `event` can be generated with a version.
+
+<Image
+  src={versionImg}
+  width={40}
+  height={40}
+  alt={`Picture release in traces table`}
+  className="w-full rounded-md my-5"
+  unoptimized
+/>
+
+## 🔎 Improved Traces Table [#traces-table]
+
+Our users spend a lot of time on the Traces table to find the Traces they want to take a close look at. We added filtering options on `metadata` and `userId` to make navigating easier.
+
+<Frame>
+  ![User reporting](/images/blog/update-august-2023/traces-table.gif)
+</Frame>
+
+## 📈 USD Cost Calculation [#cost]
+
+We've added USD cost calculation for tokens. This is helpful to understand the cost of your LLM app per execution broken down by different LLM calls in the app. We calculate the cost based on the model and the number of tokens used.
+
+<Frame>![User reporting](/images/blog/update-august-2023/costs.gif)</Frame>
+
+## Token usage chart [#token-chart]
+
+We improved our analytics by creating a chart to the dashboard to visualize the token usage by model over time.
+
+{" "}
+
+<Frame className=" w-full bg-white">
+  ![User reporting](/images/blog/update-august-2023/token-chart.gif)
+</Frame>
+
+## 📊 GET token usage metrics [#get-usage-metrics]
+
+Some users want to use Langfuse data in their own applications. We added an endpoint to get token usage data aggregated by user, model, and date.
+
+```
+GET api/pubilc/metrics/usage
+```
+
+```JSON
+{
+   id: userId,
+   usage: [
+     {day: <2023-08-01>
+     model: claude-...,
+     promptTokens: 6783,
+     completionTokens: 5627,
+     totalTokens: 91738},]
+}
+```
+
+-> [API reference](/docs/integrations/api)
+
+## 🚢 What's Next?
+
+There is more coming in September. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd like to see? Join us on [Discord](/discord) and share your thoughts.
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Subscribe to get monthly updates via email:
+
+<ProductUpdateSignup source="Product update [July 2023]" className="mt-3" />
+
+Follow along on Twitter ([@Langfuse](https://twitter.com/langfuse), [@marcklingen](https://twitter.com/marcklingen))

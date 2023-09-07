@@ -38,6 +38,8 @@ from langfuse import Langfuse
 langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 ```
 
+Below are more ways to configure the SDK to support tracking releases, enable debugging, and configure server shutdowns.
+
 ## 2. Record a simple LLM call
 To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration and the prompt and completion.
 
@@ -66,7 +68,7 @@ langfuse.generation(InitialGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x788d899e3a90>
+    <langfuse.client.StatefulGenerationClient at 0x7fa458bf75e0>
 
 
 
@@ -80,7 +82,7 @@ TRACE
 |   |
 |   |-- SPAN: Data Fetching
 |   |
-|   |-- GENERATION: Data Summary Creation
+|   |-- EVENT: Data Summary Creation
 |
 |-- GENERATION: Output Generation
 ```
@@ -94,11 +96,18 @@ from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEven
 
 trace = langfuse.trace(CreateTrace(name = "llm-feature"))
 retrieval = trace.span(CreateSpan(name = "retrieval"))
-retrieval.generation(CreateSpan(name = "query-creation"))
-retrieval.span(CreateGeneration(name = "vector-db-search"))
-retrieval.generation(CreateEvent(name = "db-summary"))
-generation = trace.generation(CreateGeneration(name = "user-output"))
+retrieval.generation(CreateGeneration(name = "query-creation"))
+retrieval.span(CreateSpan(name = "vector-db-search"))
+retrieval.event(CreateEvent(name = "db-summary"))
+trace.generation(CreateGeneration(name = "user-output"))
 ```
+
+
+
+
+    <langfuse.client.StatefulGenerationClient at 0x7fa458c28340>
+
+
 
 The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
@@ -232,7 +241,7 @@ generation.update(UpdateGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x788d899e3370>
+    <langfuse.client.StatefulGenerationClient at 0x7fa458bf7d60>
 
 
 
@@ -293,13 +302,13 @@ trace.score(CreateScore(
 
 
 
-    <langfuse.client.StatefulClient at 0x788d89a14250>
+    <langfuse.client.StatefulClient at 0x7fa458c28b50>
 
 
 
-##Technical considerations
+## Additional configurations
 
-## Serverless environments
+### Shutdown behavior
 
 The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like NextJs cloud functions or AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
 
@@ -310,6 +319,45 @@ To avoid this, ensure that the `langfuse.flush()` function is called before term
 langfuse.flush()
 ```
 
+### Releases and versions
+
+You might want to track releases in Langfuse to understand with which Software release a given Trace was generated. This can be done by either providing the environment variable `LANGFUSE_RELEASE` or instantiating the client with the release.
+
+
+```python
+# The SDK will automatically include the env variable.
+LANGFUSE_RELEASE = "ba7816b..." # <- github sha
+
+# Alternatively, use the constructor of the SDK
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, release='ba7816b')
+```
+
+Apart from Software releases, users want to track versions of LLM apps (e.g. Prompt versions). For this, each `Generation`, `Span`, or `Event` has a version field.
+
+
+```python
+langfuse.span(CreateSpan(name = "retrieval", version="<version>"))
+```
+
+
+
+
+    <langfuse.client.StatefulSpanClient at 0x7fa458a69e40>
+
+
+
+### Debug
+Per default, the Langchain handler will only log exceptions. Sometimes it is valuable to debug the SDK to understand where something goes wrong. For this, you need to enable the `debug` mode of the SDK or the Langchain handler. This will enable all debug logs in your console.
+
+
+```python
+from langfuse.callback import CallbackHandler
+
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
+
+handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
+```
+
 ## FastAPI
 For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
 
@@ -318,16 +366,6 @@ For engineers working with FastAPI, we have a short example, of how to use it th
 ```python
 %pip install fastapi
 ```
-
-    Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.101.1)
-    Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /usr/local/lib/python3.10/dist-packages (from fastapi) (1.10.12)
-    Requirement already satisfied: starlette<0.28.0,>=0.27.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (0.27.0)
-    Requirement already satisfied: typing-extensions>=4.5.0 in /usr/local/lib/python3.10/dist-packages (from fastapi) (4.7.1)
-    Requirement already satisfied: anyio<5,>=3.4.0 in /usr/local/lib/python3.10/dist-packages (from starlette<0.28.0,>=0.27.0->fastapi) (3.7.1)
-    Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (3.4)
-    Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.3.0)
-    Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.4.0->starlette<0.28.0,>=0.27.0->fastapi) (1.1.3)
-
 
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
 With this, your Python environment will only terminate once Langfuse received all the events.
@@ -363,16 +401,4 @@ async def campaign(prompt: str = Query(..., max_length=20)):
       InitialGeneration(name="llm-feature", metadata="test", prompt=prompt)
   )
   return True
-```
-
-## Debug
-Per default, the Langchain handler will only log exceptions. Sometimes it is valuable to debug the SDK to understand where something goes wrong. For this, you need to enable the `debug` mode of the SDK or the Langchain handler. This will enable all debug logs in your console.
-
-
-```python
-from langfuse.callback import CallbackHandler
-
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
-
-handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
 ```
