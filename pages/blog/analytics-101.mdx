@@ -6,8 +6,10 @@ ogImage: /images/blog/ai-chatbot/og.png
 author: Clemens
 ---
 
-import { BlogHeader } from "@/components/BlogHeader";
+import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
+import traceImg from "@/public/images/blog/analytics-101/trace-detail.jpg";
+import Image from "next/image";
 
 <BlogHeader
   title="Tracing & Analyzing Generative AI: LLM Analytics 101"
@@ -16,23 +18,37 @@ import { Frame } from "@/components/Frame";
   authors={["clemensrawert", "marcklingen"]}
 />
 
-
 ## Software Delivery has Changed
 
 Generative AI outputs are not deterministic. They cannot be reliably forecasted. This changes how software is delivered compared to 'traditional' software engineering. If it is not clear what an output will look like and what a 'good' output is, it is hard to build robust tests and assure quality before shipping code.
 
 Learning from production data has taken the place of extensive software design and testing. But to learn from production, you have to trace your LLMs and analyze what works and what does not.
 
+## Tracing LLM Apps - What's different?
 
-## Tracing LLM Apps - What's different? 
+Building LLM-based apps means integrating multiple complex elements and interactions to your code. This can mean chains, agents, different base models tools, embedding retrieval and routing. Traditional logging and analytics tools are not well equipped to ingest, display and analyze these new ways of interacting with LLMs. The new logging stack needs to think LLM-native from the ground up. That means grouping calls and visualising them in a way that enables teams to understand and debug them.
 
-Building LLM-based apps means integrating multiple complex elements and interactions to your code. This can mean chains, agents, different base models tools, embedding retrieval and routing. Traditional logging and analytics tools are not well equipped to ingest, display and analyze these new ways of interacting with LLMs. The new logging stack needs to think LLM-native from the ground up. That means grouping calls and visualising them in a way that enables teams to understand and debug them. 
-
-[Include picture of Langfuse UI]
+<Image
+  src={traceImg}
+  alt={`Picture with a detailed traces view`}
+  className="w-full rounded-md my-5"
+  unoptimized
+/>
 
 ## Let's Dive in: What to Measure?
 
-[Add something small about what you send in a trace usually?]
+```typescript
+// Example generation creation
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+  },
+  prompt: messages,
+});
+```
 
 Tracing production LLM traces is paramount. But what do you want to measure? We see five metrics emerging as the canonical metrics to keep track of:
 
@@ -45,6 +61,7 @@ Tracing production LLM traces is paramount. But what do you want to measure? We 
 ## Implementing Effective Analytics through KPIs
 
 We've seen successful teams implement the following best practice KPIs by slicing the above five metrics (volume, cost, latency, quality, errors) by:
+
 - **Use case:** Cluster prompts and completions by use case to understand how your users are interacting with your LLM
 - **Model and configuration:** How do different models and model configurations affect quality, latency or errors?
 - **Chain and step:** Drill down into chains to understand what drives performance
@@ -53,8 +70,6 @@ We've seen successful teams implement the following best practice KPIs by slicin
 - **Version:** Track prompts, chains and software releases by their version and understand performance changes
 - **Geography:** Especially important for latency
 - **Language:** Understand how well your app works by user language
-
-[Include tradeoff graph?]
 
 ## Step-by-Step: Implementing Tracing & Analytics in LLM Applications
 
