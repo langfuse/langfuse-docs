@@ -102,17 +102,13 @@ chain.run("<your-input>", callbacks=[handler])
 
 We've added support for releases and versions in Python and JS/TS. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace. If you are using Langchain, you can add releases via the constructor of the `CallbackHandler` or the same environment variables as for the SDK.
 
-````python
-
-### Releases
-
 There are two ways of adding releases to your traces:
 
 - Add the variable via an `.env` file and it will be taken care off under the hood:
 
 ```bash
 LANGFUSE_RELEASE = "ba7816b..." # <- github sha or other identifier
-````
+```
 
 - Alternatively, add the release via the SDK constructor:
 
