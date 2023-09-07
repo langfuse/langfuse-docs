@@ -100,7 +100,9 @@ chain.run("<your-input>", callbacks=[handler])
 
 ## 📦 Releases and versions [#releases-and-versions]
 
-We've added support for releases and versions in Python and JS/TS. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace.
+We've added support for releases and versions in Python and JS/TS. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace. If you are using Langchain, you can add releases via the constructor of the `CallbackHandler` or the same environment variables as for the SDK.
+
+````python
 
 ### Releases
 
@@ -110,7 +112,7 @@ There are two ways of adding releases to your traces:
 
 ```bash
 LANGFUSE_RELEASE = "ba7816b..." # <- github sha or other identifier
-```
+````
 
 - Alternatively, add the release via the SDK constructor:
 
@@ -146,7 +148,7 @@ Finally, releases will be visualized in the Traces view.
 
 ### Versions
 
-Versions are available throughout the SDK. Each `span`, `generation`, and `event` can be generated with a version.
+Versions are available throughout the native SDKs but not for Langchain yet. Each `span`, `generation`, and `event` can be generated with a version.
 
 <Image
   src={versionImg}
@@ -171,11 +173,11 @@ We've added USD cost calculation for tokens. This is helpful to understand the c
 
 <Frame>![User reporting](/images/blog/update-august-2023/costs.gif)</Frame>
 
+Here is a [list](https://github.com/langfuse/langfuse/blob/main/prisma/migrations/20230901155336_add_pricing_data/migration.sql) of all the models we support so far. If you are missing a model, please let us know on [Discord](/discord).
+
 ## Token usage chart [#token-chart]
 
 We improved our analytics by creating a chart to the dashboard to visualize the token usage by model over time.
-
-{" "}
 
 <Frame className=" w-full bg-white">
   ![User reporting](/images/blog/update-august-2023/token-chart.gif)
