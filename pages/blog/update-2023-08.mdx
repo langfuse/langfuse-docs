@@ -20,12 +20,12 @@ import Image from "next/image";
   authors={["maxdeichmann"]}
 />
 
-Hi everyone 👋, we worked hard on Langfuse over the course of the last month and are excited to share the latest updates with you:
+Hi everyone 👋, we worked hard over the course of the last month and are excited to share the latest updates with you:
 
 - **Improved Tracing**
 
   - [Langchain integration](#langchain) for JS/TS users
-  - Execute Langchain chains in the [context of a Trace](#langchain-trace)
+  - Execute Langchain in the [context of a Trace](#langchain-trace)
   - Track [releases and versions](#releases-and-versions) in Python and JS/TS
   - Improved filtering on [Traces table](#traces-table)
 
@@ -43,7 +43,7 @@ The details 👇
 
 ## 🦜🔗 JS/TS Langchain Integration [#langchain]
 
-Last month we released the Python Integration for Langchain and built the same for teams building with JS/TS. We released a new package [langfuse-langchain](https://www.npmjs.com/package/langfuse-langchain) which exposes a `CallbackHandler` that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
+Last month we released the Python Integration for Langchain and now shipped the same for teams building with JS/TS. We released a new package [langfuse-langchain](https://www.npmjs.com/package/langfuse-langchain) which exposes a `CallbackHandler` that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
 
 ```typescript /{ callbacks: [handler] }/
 // Initialize Langfuse handler
@@ -68,7 +68,7 @@ const res = await llm.call("<user-input>", { callbacks: [handler] });
 
 ## ⛓️ Langchain integrations with Trace context [#langchain-trace]
 
-So far, adding application and user context to Langchain apps was hard. In the Python SDK, we now support to create handlers in the context of a trace.
+So far, adding application and user context to Langchain apps was hard. In the Python SDK, we now support to create handlers in the context of a trace. We will catch up with the JS/TS SDK soon.
 
 ```python
 import uuid
@@ -98,9 +98,9 @@ chain.run("<your-input>", callbacks=[handler])
 
 → [Docs](/docs/integrations/langchain/python)
 
-## 📦 Releases and versions [#releases]
+## 📦 Releases and versions [#releases-and-versions]
 
-We've added support for releases in Python and JS/TS. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace.
+We've added support for releases and versions in Python and JS/TS. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace.
 
 ### Releases
 
@@ -119,6 +119,8 @@ LANGFUSE_RELEASE = "ba7816b..." # <- github sha or other identifier
 langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, release='ba7816b')
 ```
 
+Python docs → [here](/docs/integrations/sdk/python#releases-and-versions)
+
 ```typescript
 // TypeScript
 langfuse = new Langfuse({
@@ -128,6 +130,8 @@ langfuse = new Langfuse({
   release: "ba7816b",
 });
 ```
+
+Typescript docs → [here](/docs/integrations/sdk/typescript#options)
 
 Finally, releases will be visualized in the Traces view.
 
@@ -139,9 +143,6 @@ Finally, releases will be visualized in the Traces view.
   className="w-full rounded-md my-5"
   unoptimized
 />
-
-Typescript docs → [here](/docs/integrations/sdk/typescript#options)
-Python docs → [here](/docs/integrations/sdk/python#releases-and-versions)
 
 ### Versions
 
@@ -160,7 +161,7 @@ Versions are available throughout the SDK. Each `span`, `generation`, and `event
 
 Our users spend a lot of time on the Traces table to find the Traces they want to take a close look at. We added filtering options on `metadata` and `userId` to make navigating easier.
 
-<Frame className="w-full">
+<Frame>
   ![User reporting](/images/blog/update-august-2023/traces-table.gif)
 </Frame>
 
@@ -170,9 +171,19 @@ We've added USD cost calculation for tokens. This is helpful to understand the c
 
 <Frame>![User reporting](/images/blog/update-august-2023/costs.gif)</Frame>
 
+## Token usage chart [#token-chart]
+
+We improved our analytics by creating a chart to the dashboard to visualize the token usage by model over time.
+
+{" "}
+
+<Frame className=" w-full bg-white">
+  ![User reporting](/images/blog/update-august-2023/token-chart.gif)
+</Frame>
+
 ## 📊 GET token usage metrics [#get-usage-metrics]
 
-We've added a public GET API to Langfuse to support users consuming Langfuse data in their own applications. We added an endpoint to get token usage data aggregated by user, model, and date.
+Some users want to use Langfuse data in their own applications. We added an endpoint to get token usage data aggregated by user, model, and date.
 
 ```
 GET api/pubilc/metrics/usage
@@ -191,16 +202,6 @@ GET api/pubilc/metrics/usage
 ```
 
 -> [API reference](/docs/integrations/api)
-
-## Token usage chart [#token-chart]
-
-We've added a chart to the dashboard to visualize the token usage by model over time.
-
-{" "}
-
-<Frame className=" w-full bg-white">
-  ![User reporting](/images/blog/update-august-2023/token-chart.gif)
-</Frame>
 
 ## 🚢 What's Next?
 
