@@ -81,7 +81,7 @@ const handler = new CallbackHandler({
 
 #### Create a simple LLM call using Langchain
 
-````typescript /{ callbacks: [langfuseHandler] }/
+```typescript /{ callbacks: [langfuseHandler] }/
 // Example generation creation
 
 // create a model
@@ -94,14 +94,24 @@ const prompt = PromptTemplate.fromTemplate(
   "What is a good name for a company that makes {product}?"
 );
 // create a chain
-const chainA = new LLMChain({ llm: model, prompt });
+const chainA = new LLMChain(
+  { llm: model, prompt },
+  { callbacks: [langfuseHandler] }
+);
 
 // execute the chain
 const resA = await chainA.call(
   { product: "colorful hockey sticks" },
   { callbacks: [langfuseHandler] }
 );
-```                                                                          |
+```
+
+There are two ways to integrate callbacks into Langchain:
+
+- _Constructor Callbacks_: Set when initializing an object, like `new LLMChain(..., { callbacks: [langfuseHandler] })`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
+- _Request Callbacks_: Defined when issuing a request, like `chain.run(..., { callbacks: [langfuseHandler] })`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
+
+For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://js.langchain.com/docs/modules/callbacks/#when-do-you-want-to-use-each-of-these).
 
 ## Shutdown [#shutdown]
 
@@ -111,7 +121,7 @@ The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse se
 handler.shutdown();
 // or
 await handler.shutdownAsync();
-````
+```
 
 # Flushing, shutdown, and debugging
 
