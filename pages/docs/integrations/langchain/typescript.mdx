@@ -82,7 +82,11 @@ const handler = new CallbackHandler({
 #### Create a simple LLM call using Langchain
 
 ```typescript /{ callbacks: [langfuseHandler] }/
-// Example generation creation
+import { LLMChain } from "langchain/chains";
+import { OpenAI } from "langchain/llms/openai";
+import { PromptTemplate } from "langchain/prompts";
+
+import CallbackHandler from "langfuse-langchain";
 
 // create a model
 const model = new OpenAI({
@@ -94,13 +98,13 @@ const prompt = PromptTemplate.fromTemplate(
   "What is a good name for a company that makes {product}?"
 );
 // create a chain
-const chainA = new LLMChain(
+const chain = new LLMChain(
   { llm: model, prompt },
   { callbacks: [langfuseHandler] }
 );
 
 // execute the chain
-const resA = await chainA.call(
+const resA = await chain.call(
   { product: "colorful hockey sticks" },
   { callbacks: [langfuseHandler] }
 );
@@ -118,8 +122,8 @@ For comprehensive data capture especially for complex chains or agents, it's adv
 The Langchain client can also be constructed with `Traces` or `Spans`. This allows to nest Langchain executions anywhere in the `Trace` an hence to add any metadata and ids that are important.
 
 ```typescript /{ callbacks: [langfuseHandler] }/
-// configure langchain
-const llm = new OpenAI({});
+import { OpenAI } from "langchain/llms/openai";
+import CallbackHandler, { Langfuse } from "langfuse-langchain";
 
 // configure the normal Langchain sdk
 const langfuse = new Langfuse({
@@ -133,12 +137,16 @@ const trace = langfuse.trace({ name: "joke-trace" });
 const handler = new CallbackHandler({ root: trace });
 
 // call the llm with the handler
+const llm = new OpenAI({}, { callbacks: [handler] });
 await llm.call("Tell me a joke", { callbacks: [handler] });
 
 // create a span within the trace
 const span = trace.span({ name: "joke-span" });
 const spanHandler = new CallbackHandler({ root: span });
-await llm.call("Tell me a better joke", { callbacks: [spanHandler] });
+
+// call the llm with the handler
+const llmSpan = new OpenAI({}, { callbacks: [spanHandler] });
+await llmSpan.call("Tell me a better joke", { callbacks: [spanHandler] });
 
 await handler.flushAsync();
 ```
