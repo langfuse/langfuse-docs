@@ -113,6 +113,36 @@ There are two ways to integrate callbacks into Langchain:
 
 For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://js.langchain.com/docs/modules/callbacks/#when-do-you-want-to-use-each-of-these).
 
+#### Stateful Langchain callbacks
+
+The Langchain client can also be constructed with `Traces` or `Spans`. This allows to nest Langchain executions anywhere in the `Trace` an hence to add any metadata and ids that are important.
+
+```typescript /{ callbacks: [langfuseHandler] }/
+// configure langchain
+const llm = new OpenAI({});
+
+// configure the normal Langchain sdk
+const langfuse = new Langfuse({
+  publicKey: LF_PUBLIC_KEY,
+  secretKey: LF_SECRET_KEY,
+  baseUrl: LF_HOST,
+});
+
+// create a trace and a handler nested into the trace.
+const trace = langfuse.trace({ name: "joke-trace" });
+const handler = new CallbackHandler({ root: trace });
+
+// call the llm with the handler
+await llm.call("Tell me a joke", { callbacks: [handler] });
+
+// create a span within the trace
+const span = trace.span({ name: "joke-span" });
+const spanHandler = new CallbackHandler({ root: span });
+await llm.call("Tell me a better joke", { callbacks: [spanHandler] });
+
+await handler.flushAsync();
+```
+
 ## Shutdown [#shutdown]
 
 The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
