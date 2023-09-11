@@ -57,13 +57,13 @@ const tiers = [
   {
     name: "Enterprise",
     id: "tier-enterprise",
-    href: "mailto:enterprise@langfuse.com",
+    href: "/schedule-demo",
     price: "Custom",
     description:
       "Dedicated solutions and support. Contact founders to learn more. Can include prioritization of your feature requests, self-hosting support (VPS or cloud), dedicated instances, and support SLAs.",
     features: [],
     featured: true,
-    cta: "Contact founders",
+    cta: "Talk to founders",
   },
 ];
 

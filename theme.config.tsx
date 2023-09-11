@@ -7,6 +7,10 @@ import { MainContentWrapper } from "./components/MainContentWrapper";
 
 const footerNav = [
   { name: "Contact", href: "mailto:contact@langfuse.com" },
+  {
+    name: "Schedule Demo",
+    href: "/schedule-demo",
+  },
   { name: "Imprint", href: "/imprint" },
   {
     name: "Terms",
@@ -150,7 +154,7 @@ const config: DocsThemeConfig = {
   faviconGlyph: "🪢",
   banner: {
     key: "demo",
-    dismissible: true,
+    dismissible: false,
     text: (
       <Link href="/docs/demo">
         <span className="sm:hidden">Check out live demo →</span>
