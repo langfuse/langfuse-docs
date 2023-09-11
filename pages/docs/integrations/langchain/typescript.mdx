@@ -158,6 +158,40 @@ handler.shutdown();
 await handler.shutdownAsync();
 ```
 
+## Execution identifier
+
+The SDK provides a function to return the `traceId` of the trace which is currently used. Similarly, there is another function to expose the langchain `runId`. This `runId` is the latest top-level id of a Langchain run which is also used to create `Spans` or `Generations` in Langfuse.
+
+Both of these ids can be used to create scores for the correct `Span` in Langfuse.
+
+```typescript /handler.getTraceId();/ /handler.getLangchainRunId();/
+import { OpenAI } from "langchain/llms/openai";
+import CallbackHandler, { Langfuse } from "langfuse-langchain";
+
+// configure the normal Langchain sdk
+const langfuse = new Langfuse({
+  publicKey: LF_PUBLIC_KEY,
+  secretKey: LF_SECRET_KEY,
+  baseUrl: LF_HOST,
+});
+
+// create a trace and a handler nested into the trace.
+const trace = langfuse.trace({ id: "special-id" });
+const handler = new CallbackHandler({ root: trace });
+
+handler.getTraceId(); // returns "special-id"
+
+// call the llm with the handler
+const llm = new OpenAI({}, { callbacks: [handler] });
+await llm.call("Tell me a joke", { callbacks: [handler] });
+
+handler.getLangchainRunId(); // returns the latest run id
+
+await llm.call("Tell me a better joke", { callbacks: [handler] });
+
+handler.getLangchainRunId(); // returns the latest run id, different from the first one
+```
+
 # Flushing, shutdown, and debugging
 
 The Langfuse SDK uses the JS/TS (Node.js, Edge) SDK under the hood and offers the same functionality regarding flushing, shutdown and debugging. Please refer to the [JS/TS SDK documentation](/docs/integrations/sdk/typescript#shutdown) for more information.
