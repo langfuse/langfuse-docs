@@ -68,15 +68,12 @@ const handler = new CallbackHandler({
 | -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | baseUrl        | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
 | release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| flushAt        | Number of queued requests                                                           | `20`                                                                                                                                                    |
-| flushInterval  | Interval in ms to flush requests                                                    | `10000`                                                                                                                                                 |
 | requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
 
 <Callout type="info" emoji="ℹ️">
-  In short-lived environments (e.g. serverless functions), set `flushAt` to `1`
-  and `flushInterval` to `0` to send requests immediately. Also, make sure to
-  always call `handler.shutdownAsync()` at the end to flush the queue and await
-  all pending requests. ([Learn more](/docs/integrations/sdk/typescript#lambda))
+  In short-lived environments (e.g. serverless functions), make sure to always
+  call `handler.shutdownAsync()` at the end to flush the queue and await all
+  pending requests. ([Learn more](/docs/integrations/sdk/typescript#lambda))
 </Callout>
 
 #### Create a simple LLM call using Langchain
