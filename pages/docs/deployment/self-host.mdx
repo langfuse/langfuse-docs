@@ -26,15 +26,18 @@ You need to have a permanent Postgres database to persist the state of Langfuse.
 git clone git@github.com:langfuse/langfuse.git
 cd langfuse
 
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
-DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres
-
-npx prisma migrate deploy
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
 ```
 
 ### Deploy the container
 
 Deploy the container to your infrastructure. You can use a managed service like AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can run it yourself.
+
+Environment variables:
+
+- Set `DATABASE_URL` to the connection string of your Postgres database.
+- Use a custom `NEXTAUTH_SECRET` to secure the session JWTs. You can generate one using `openssl rand -base64 32`.
+- Set `NEXTAUTH_URL` to the URL of your deployment.
 
 ```bash
 docker run --name langfuse \
