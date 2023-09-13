@@ -38,6 +38,17 @@ Scores in Langfuse are adaptable and designed to cater to the unique requirement
 
 This flexible scoring system allows for a comprehensive evaluation of various elements integral to the function and performance of the LLM application.
 
+## Ingesting scores
+
+Most users of Langfuse ingest scores programmatically. These are common sources of scores:
+
+| Source                                                 | examples                                                                                                                                                    |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Human evaluation (manual)](/docs/scores/manually)     | Review traces/generations and add scores manually in the UI                                                                                                 |
+| [User feedback](/docs/scores/user-feedback)            | Explicit (e.g., thumbs up/down, 1-5 star rating) or implicit (e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output) |
+| [Model-based evaluation frameworks](/docs/scores/eval) | OpenAI Evals, Whylabs Langkit, custom model outputs                                                                                                         |
+| [Custom via SDKs/API](/docs/scores/custom)             | Run-time quality checks (e.g. valid structured output format), custom workflow tool for human evaluation                                                    |
+
 ## Using scores across Langfuse
 
 Scores can be used in multiple ways across Langfuse:
@@ -45,20 +56,3 @@ Scores can be used in multiple ways across Langfuse:
 1. Displayed on trace to provide a quick overview
 2. Segment all execution traces by scores to e.g. find all traces with a low quality score
 3. [Analytics](/docs/analytics): Detailed score reporting with drill downs into use cases and user segments
-
-## Ingesting scores
-
-Most users of Langfuse ingest scores programmatically. These are common sources of scores:
-
-| Source                            | examples                                                                               |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| Explicit user feedback            | thumbs up/down, 1-5 star rating, free text                                             |
-| Implicit user feedback            | time spent on a page, click-through rate, accepting/rejecting a model-generated output |
-| Model-based evaluation frameworks | OpenAI Evals, Whylabs Langkit, custom model outputs                                    |
-
-_These are the most common ways to use scores, but not an exhaustive list._
-
-Read the detailed documentation on how to programmatically ingest your scores into Langfuse:
-
-- Server-side via [SDKs](/docs/integrations/sdk) or [API](/docs/integrations/api)
-- Client-side via [Web SDK](/docs/integrations/sdk/typescript-web) to e.g. record explicit or implicit user feedback
