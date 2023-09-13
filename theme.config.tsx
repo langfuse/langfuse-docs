@@ -139,6 +139,24 @@ const config: DocsThemeConfig = {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site:domain" content="langfuse.com" />
         <meta name="twitter:url" content="https://langfuse.com" />
+
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
       </>
     );
   },
@@ -151,7 +169,6 @@ const config: DocsThemeConfig = {
       <ol className="list-decimal ltr:ml-6 rtl:mr-6">{props.children}</ol>
     ),
   },
-  faviconGlyph: "🪢",
   banner: {
     key: "demo",
     dismissible: false,
