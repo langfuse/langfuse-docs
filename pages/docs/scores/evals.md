@@ -75,7 +75,7 @@ langfuse = Langfuse(os.environ.get("LF_PK"), os.environ.get("LF_SK"), os.environ
 
 ## Fetching data
 
-Below, we load all `Generations` from Langfuse filtered by name, in this case `OpenAI`. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to do that.
+Below, we load all `Generations` from Langfuse filtered by name, in this case `OpenAI`. Change it to the name you want to evaluate. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to do that.
 
 
 ```python
@@ -100,9 +100,6 @@ generations = fetch_all_pages(name="OpenAI")
 print(len(generations))
 ```
 
-    283
-
-
 ## Evaluation
 
 In this section, we define a function to set up the Langchain eval based on the entries in `EVAL_TYPES`. More on the Langchain evals can be found [here](https://python.langchain.com/docs/guides/evaluation/).
@@ -115,25 +112,7 @@ from langchain.evaluation.criteria import LabeledCriteriaEvalChain
 
 def get_evaluator_for_key(key: str):
   llm = OpenAI(temperature=0, model=os.environ.get('EVAL_MODEL'))
-  if key == 'hallucination':
-    criteria = {
-        "hallucination": (
-            "Does this submission contain information"
-            " not present in the input or reference?"
-        ),
-    }
-    return LabeledCriteriaEvalChain.from_llm(
-        llm=llm,
-        criteria=criteria,
-    )
-  elif key == "correctness":
-    evaluator = LabeledCriteriaEvalChain.from_llm(
-      llm=llm,
-      criteria='correctness',
-   )
-  else:
-      return load_evaluator("criteria", criteria=key, llm=llm)
-
+  return load_evaluator("criteria", criteria=key, llm=llm)
 ```
 
 # Scoring
@@ -154,7 +133,6 @@ def execute_eval_and_score():
     criteria = [key for key, value in EVAL_TYPES.items() if value]
 
     for criterion in criteria:
-      print(criterion)
       eval_result = get_evaluator_for_key(criterion).evaluate_strings(
           prediction=generation.completion,
           input=generation.prompt,
