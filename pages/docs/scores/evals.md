@@ -1,21 +1,27 @@
-# Model based evals with Langfuse
+# Model based evals in Langfuse
 
-- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_evals.ipynb)
-- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_evals.ipynb)
+Model-based evaluations are a powerful tool to automate the evaluation of production completions in Langfuse.
 
+Currently, model-based evals can be applied to production data in Langfuse via the Python SDK. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
 
-Evaluating the quality of LLM features is very time consuming and error prone as it is very tiering and difficult to analyse large bodies of texts. This cookbook shows, how evals can be used to automate this. For this, we use the data we captured in [Langfuse](http://langfuse.com/) already.
+**Coming soon**: support for running model-based evals directly from the Langfuse UI/Server.
 
-While this cookbook contains a Langchain example, it can easily be adjusted to use any other eval library.
+## Example
+
+> _This is a Jupyter Notebook_
+> - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_evals.ipynb)
+> - [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_evals.ipynb)
+
+This cookbook shows how model-based evaluations can be used to automate the evaluation of production completions in Langfuse. This example uses Langchain but any other eval library can be used as well. Which library is the best to use depends heavily on the use case.
 
 This cookbook follows three steps:
-1. Fetch `Generations` stored in Langfuse
-2. Evaluate these `Generations` using Langchain
-3. Submit results back to Langfuse as `Scores`
+1. Fetch production `generations` stored in Langfuse
+2. Evaluate these `generations` using Langchain
+3. Ingest results back into Langfuse as `scores`
 
 
 ----
-Not using Langfuse yet? Get started by capturing LLM events: [Python](https://langfuse.com/docs/integrations/sdk/python), [TS/JS](https://langfuse.com/docs/integrations/sdk/typescript)
+Not using Langfuse yet? [Get started](/docs/get-started) by capturing LLM events.
 
 ## Setup
 
@@ -29,11 +35,7 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 | LF_HOST | Langfuse Host, defaults to `https://cloud.langfuse.com`
 | EVAL_MODEL | OpenAI model used to evaluate each prompt/completion pair
 | OPENAI_API_KEY | OpenAI API Key found in the OpenAI UI. Beware that executing evals results in API calls and costs.
-| EVAL_TYPES | Dict of Langchain evals to be executed per `Generation` if set to `True`.
-
-
-
-Afterwards, we initialise the SDK, more information can be found [here](https://langfuse.com/docs/integrations/sdk/python#1-installation).
+| EVAL_TYPES | Dict of Langchain evals. Set to `True` to execute on each `Generation`.
 
 
 ```python
@@ -66,16 +68,23 @@ EVAL_TYPES={
 
 ```
 
+Initialize the Langfuse Python SDK, more information [here](https://langfuse.com/docs/integrations/sdk/python#1-installation).
+
 
 ```python
 from langfuse import Langfuse
 
-langfuse = Langfuse(os.environ.get("LF_PK"), os.environ.get("LF_SK"), os.environ.get("LF_HOST"))
+langfuse = Langfuse(
+    os.environ.get("LF_PK"),
+    os.environ.get("LF_SK"),
+    os.environ.get("LF_HOST"))
 ```
 
 ## Fetching data
 
-Below, we load all `Generations` from Langfuse filtered by name, in this case `OpenAI`. Change it to the name you want to evaluate. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to do that.
+Load all `generations` from Langfuse filtered by `name`, in this case `OpenAI`. Names are used in Langfuse to identify different types of generations within an application. Change it to the name you want to evaluate.
+
+CHeckout [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to set the name when ingesting an LLM Generation.
 
 
 ```python
@@ -100,7 +109,7 @@ generations = fetch_all_pages(name="OpenAI")
 print(len(generations))
 ```
 
-## Evaluation
+## Set up evaluation functions
 
 In this section, we define a function to set up the Langchain eval based on the entries in `EVAL_TYPES`. More on the Langchain evals can be found [here](https://python.langchain.com/docs/guides/evaluation/string/criteria_eval_chain).
 
@@ -115,11 +124,9 @@ def get_evaluator_for_key(key: str):
   return load_evaluator("criteria", criteria=key, llm=llm)
 ```
 
-# Scoring
+# Execute evaluation
 
-Below, we execute the evaluation for each `Generation` loaded above. Each score is provided to Langchain via the [scoring API](https://langfuse.com/docs/scores). In the Langfuse UI, you can filter Traces by `Scores` and look into the details for each.
-
-![Image of Trace](https://langfuse.com/images/docs/trace.jpg)
+Below, we execute the evaluation for each `Generation` loaded above. Each score is ingested into Langfuse via [`langfuse.score()`](https://langfuse.com/docs/scores).
 
 
 
@@ -142,10 +149,20 @@ def execute_eval_and_score():
       langfuse.score(InitialScore(name='conciseness', traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
 
 execute_eval_and_score()
+
+# SDK is async, make sure to await all requests
 langfuse.flush()
 
 ```
 
-# Get in touch
+## See Scores in Langfuse
 
-Looking for a specific way to score your executions in Langfuse? Join the [Discord](https://langfuse.com/discord) and discuss your use case!
+ In the Langfuse UI, you can filter Traces by `Scores` and look into the details for each. Check out Langfuse Analytics to understand the impact of new prompt versions or application releases on these scores.
+
+![Image of Trace](https://langfuse.com/images/docs/trace-conciseness-score.jpg)
+_Example trace with conciseness score_
+
+
+## Get in touch
+
+Looking for a specific way to score your production data in Langfuse? Join the [Discord](https://langfuse.com/discord) and discuss your use case!
