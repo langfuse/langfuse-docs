@@ -19,16 +19,18 @@ Not using Langfuse yet? Get started by capturing LLM events: [Python](https://la
 
 ## Setup
 
-First you need to install `langfuse` and `langchain` via pip and then set the environment variables. The following table explains each of these:
+First you need to install Langfuse and Langchain via pip and then set the environment variables. The following table explains each of these:
 
 
 | Variable | Description |
 | --- | --- |
 | LF_PK | Public API Key found in the Langfuse UI
 | LF_SK | Secret API Key found in the Langfuse UI
-| LF_HOST | Secret API Key found in the Langfuse UI
+| LF_HOST | Langfuse Host, defaults to `https://cloud.langfuse.com`
 | EVAL_MODEL | OpenAI model used to evaluate each prompt/completion pair
-| OPENAI_API_KEY | OpenAI API Key
+| OPENAI_API_KEY | OpenAI API Key found in the OpenAI UI. Beware that executing evals results in API calls and costs.
+| EVAL_TYPES | Dict of Langchain evals to be executed per `Generation` if set to `True`.
+
 
 
 Afterwards, we initialise the SDK, more information can be found [here](https://langfuse.com/docs/integrations/sdk/python#1-installation).
@@ -73,7 +75,7 @@ langfuse = Langfuse(os.environ.get("LF_PK"), os.environ.get("LF_SK"), os.environ
 
 ## Fetching data
 
-Below, we load all `Generations` from Langfuse by name. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation)
+Below, we load all `Generations` from Langfuse filtered by name, in this case `OpenAI`. Change it to the name you want to evaluate. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to do that.
 
 
 ```python
@@ -98,15 +100,9 @@ generations = fetch_all_pages(name="OpenAI")
 print(len(generations))
 ```
 
-## Evaluation + submission to Langfuse
+## Evaluation
 
-In this case we use the `conciseness` evaluation by Langchain to evaluate all the `Generations`. See the [docs](https://python.langchain.com/docs/guides/evaluation/) for Langfuse evaluations.
-Each score is provided to Langchain via the [scoring API](https://langfuse.com/docs/scores).
-
-After submitting all scores, they can be viewed in Langfuse.
-
-![Image of Trace](https://langfuse.com/images/docs/trace.jpg)
-
+In this section, we define a function to set up the Langchain eval based on the entries in `EVAL_TYPES`. More on the Langchain evals can be found [here](https://python.langchain.com/docs/guides/evaluation/string/criteria_eval_chain).
 
 
 ```python
@@ -116,46 +112,36 @@ from langchain.evaluation.criteria import LabeledCriteriaEvalChain
 
 def get_evaluator_for_key(key: str):
   llm = OpenAI(temperature=0, model=os.environ.get('EVAL_MODEL'))
-  if key == 'hallucination':
-    criteria = {
-        "hallucination": (
-            "Does this submission contain information"
-            " not present in the input or reference?"
-        ),
-    }
-    return LabeledCriteriaEvalChain.from_llm(
-        llm=llm,
-        criteria=criteria,
-    )
-  elif key == "correctness":
-    evaluator = LabeledCriteriaEvalChain.from_llm(
-      llm=llm,
-      criteria='correctness',
-   )
-  else:
-      return load_evaluator("criteria", criteria=key, llm=llm)
-
+  return load_evaluator("criteria", criteria=key, llm=llm)
 ```
+
+# Scoring
+
+Below, we execute the evaluation for each `Generation` loaded above. Each score is provided to Langchain via the [scoring API](https://langfuse.com/docs/scores). In the Langfuse UI, you can filter Traces by `Scores` and look into the details for each.
+
+![Image of Trace](https://langfuse.com/images/docs/trace.jpg)
+
 
 
 ```python
 from langfuse.model import InitialScore
 
 
+def execute_eval_and_score():
 
-for generation in generations:
-  criteria = [key for key, value in EVAL_TYPES.items() if value]
+  for generation in generations:
+    criteria = [key for key, value in EVAL_TYPES.items() if value]
 
-  for criterion in criteria:
-    print(criterion)
-    eval_result = get_evaluator_for_key(criterion).evaluate_strings(
-        prediction=generation.completion,
-        input=generation.prompt,
-    )
-    print(eval_result)
+    for criterion in criteria:
+      eval_result = get_evaluator_for_key(criterion).evaluate_strings(
+          prediction=generation.completion,
+          input=generation.prompt,
+      )
+      print(eval_result)
 
-    langfuse.score(InitialScore(name='conciseness', traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
+      langfuse.score(InitialScore(name='conciseness', traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
 
+execute_eval_and_score()
 langfuse.flush()
 
 ```
