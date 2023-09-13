@@ -102,7 +102,7 @@ print(len(generations))
 
 ## Evaluation
 
-In this section, we define a function to set up the Langchain eval based on the entries in `EVAL_TYPES`. More on the Langchain evals can be found [here](https://python.langchain.com/docs/guides/evaluation/).
+In this section, we define a function to set up the Langchain eval based on the entries in `EVAL_TYPES`. More on the Langchain evals can be found [here](https://python.langchain.com/docs/guides/evaluation/string/criteria_eval_chain).
 
 
 ```python
