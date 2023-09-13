@@ -1,4 +1,4 @@
-# Model based evals in Langfuse
+# Model-based Evals in Langfuse
 
 Model-based evaluations are a powerful tool to automate the evaluation of production completions in Langfuse.
 
@@ -6,7 +6,7 @@ Currently, model-based evals can be applied to production data in Langfuse via t
 
 **Coming soon**: support for running model-based evals directly from the Langfuse UI/Server.
 
-## Example
+## Example using Python SDK
 
 > _This is a Jupyter Notebook_
 > - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_evals.ipynb)
@@ -23,7 +23,7 @@ This cookbook follows three steps:
 ----
 Not using Langfuse yet? [Get started](/docs/get-started) by capturing LLM events.
 
-## Setup
+### Setup
 
 First you need to install Langfuse and Langchain via pip and then set the environment variables. The following table explains each of these:
 
@@ -80,7 +80,7 @@ langfuse = Langfuse(
     os.environ.get("LF_HOST"))
 ```
 
-## Fetching data
+### Fetching data
 
 Load all `generations` from Langfuse filtered by `name`, in this case `OpenAI`. Names are used in Langfuse to identify different types of generations within an application. Change it to the name you want to evaluate.
 
@@ -109,7 +109,7 @@ generations = fetch_all_pages(name="OpenAI")
 print(len(generations))
 ```
 
-## Set up evaluation functions
+### Set up evaluation functions
 
 In this section, we define a function to set up the Langchain eval based on the entries in `EVAL_TYPES`. More on the Langchain evals can be found [here](https://python.langchain.com/docs/guides/evaluation/string/criteria_eval_chain).
 
@@ -124,7 +124,7 @@ def get_evaluator_for_key(key: str):
   return load_evaluator("criteria", criteria=key, llm=llm)
 ```
 
-# Execute evaluation
+### Execute evaluation
 
 Below, we execute the evaluation for each `Generation` loaded above. Each score is ingested into Langfuse via [`langfuse.score()`](https://langfuse.com/docs/scores).
 
@@ -155,7 +155,7 @@ langfuse.flush()
 
 ```
 
-## See Scores in Langfuse
+### See Scores in Langfuse
 
  In the Langfuse UI, you can filter Traces by `Scores` and look into the details for each. Check out Langfuse Analytics to understand the impact of new prompt versions or application releases on these scores.
 
