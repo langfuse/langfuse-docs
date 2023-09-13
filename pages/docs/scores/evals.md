@@ -19,7 +19,7 @@ Not using Langfuse yet? Get started by capturing LLM events: [Python](https://la
 
 ## Setup
 
-First you need to install `langfuse` and `langchain` via pip and then set the environment variables. The following table explains each of these:
+First you need to install Langfuse and Langchain via pip and then set the environment variables. The following table explains each of these:
 
 
 | Variable | Description |
@@ -29,7 +29,7 @@ First you need to install `langfuse` and `langchain` via pip and then set the en
 | LF_HOST | Langfuse Host, defaults to `https://cloud.langfuse.com`
 | EVAL_MODEL | OpenAI model used to evaluate each prompt/completion pair
 | OPENAI_API_KEY | OpenAI API Key found in the OpenAI UI. Beware that executing evals results in API calls and costs.
-| EVAL_TYPES | Dict of Langchain evals to be executed per `Generation` if set to `Teue`.
+| EVAL_TYPES | Dict of Langchain evals to be executed per `Generation` if set to `True`.
 
 
 
@@ -75,7 +75,7 @@ langfuse = Langfuse(os.environ.get("LF_PK"), os.environ.get("LF_SK"), os.environ
 
 ## Fetching data
 
-Below, we load all `Generations` from Langfuse filtered by name. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to do that.
+Below, we load all `Generations` from Langfuse filtered by name, in this case `OpenAI`. The name can be submitted via our SDKs when capturing LLM calls. See [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to do that.
 
 
 ```python
@@ -99,6 +99,9 @@ def fetch_all_pages(name, limit=50):
 generations = fetch_all_pages(name="OpenAI")
 print(len(generations))
 ```
+
+    283
+
 
 ## Evaluation
 
@@ -135,7 +138,7 @@ def get_evaluator_for_key(key: str):
 
 # Scoring
 
-In this section, we execute the evaluation for each `Generation` loaded above. Each score is provided to Langchain via the [scoring API](https://langfuse.com/docs/scores). In the Langfuse UI, you can filter Traces by `Scores` and look into the details for each.
+Below, we execute the evaluation for each `Generation` loaded above. Each score is provided to Langchain via the [scoring API](https://langfuse.com/docs/scores). In the Langfuse UI, you can filter Traces by `Scores` and look into the details for each.
 
 ![Image of Trace](https://langfuse.com/images/docs/trace.jpg)
 
