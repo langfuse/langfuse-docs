@@ -1,6 +1,5 @@
 "use client";
 
-import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
@@ -25,7 +24,6 @@ import {
 type Feedback = {
   timestamp: Date;
   traceId: string;
-  userId: string;
   name: string;
   score: number;
 };
@@ -39,10 +37,6 @@ const columns: ColumnDef<Feedback>[] = [
   {
     header: "Trace ID",
     accessorKey: "traceId",
-  },
-  {
-    header: "User ID",
-    accessorKey: "userId",
   },
   {
     header: "Name",
@@ -60,7 +54,6 @@ interface DataTableProps<TData, TValue> {
 }
 
 export default function FeedbackPreview() {
-  const { toast } = useToast();
   const [state, setState] = useState<
     null | "loading-positive" | "loading-negative" | "positive" | "negative"
   >(null);
@@ -78,16 +71,10 @@ export default function FeedbackPreview() {
     if (state === feedback) return;
     setState("loading-" + feedback);
     setTimeout(() => {
-      toast({
-        title:
-          "New user feedback score: " + feedback === "positive" ? "1" : "0",
-        description: `traceId: 67329_78d, time: ${new Date().toLocaleString()}`,
-      });
       setData([
         {
           timestamp: new Date(),
           traceId: "67329_78d",
-          userId: "user-1",
           name: "user_feedback",
           score: feedback === "positive" ? 1 : 0,
         },
