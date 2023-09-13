@@ -26,7 +26,7 @@ First you need to install `langfuse` and `langchain` via pip and then set the en
 | --- | --- |
 | LF_PK | Public API Key found in the Langfuse UI
 | LF_SK | Secret API Key found in the Langfuse UI
-| LF_HOST | Secret API Key found in the Langfuse UI
+| LF_HOST | Langfuse Host, defaults to `https://cloud.langfuse.com`
 | EVAL_MODEL | OpenAI model used to evaluate each prompt/completion pair
 | OPENAI_API_KEY | OpenAI API Key found in the OpenAI UI. Beware that executing evals results in API calls and costs.
 | EVAL_TYPES | Dict of Langchain evals to be executed per `Generation` if set to `Teue`.
