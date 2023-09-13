@@ -8,6 +8,7 @@ import { MemoizedReactMarkdown } from "./Markdown";
 import { User } from "lucide-react";
 import { ChatMessageActions } from "./ChatMessageActions";
 import Link from "next/link";
+import Image from "next/image";
 
 export interface ChatMessageProps {
   message: Message;
@@ -28,7 +29,7 @@ export function ChatMessage({
         {message.role === "user" ? (
           <User className="h-4 w-4" />
         ) : (
-          <span className="text-lg">🪢</span>
+          <Image src="/icon256.png" alt="Langfuse" width={20} height={20} />
         )}
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
