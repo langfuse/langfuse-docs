@@ -84,7 +84,7 @@ langfuse = Langfuse(
 
 Load all `generations` from Langfuse filtered by `name`, in this case `OpenAI`. Names are used in Langfuse to identify different types of generations within an application. Change it to the name you want to evaluate.
 
-CHeckout [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to set the name when ingesting an LLM Generation.
+Checkout [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on how to set the name when ingesting an LLM Generation.
 
 
 ```python

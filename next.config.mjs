@@ -73,4 +73,6 @@ const permanentRedirects = [
   ["/docs/guides/sdk-integration", "/docs/integrations/sdk#Example"],
   // langchain
   ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
+  // evals
+  ["/docs/scores/evals", "/docs/scores/model-based-evals"]
 ]
