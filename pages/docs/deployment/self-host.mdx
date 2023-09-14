@@ -39,6 +39,10 @@ Environment variables:
 - Use a custom `NEXTAUTH_SECRET` to secure the session JWTs. You can generate one using `openssl rand -base64 32`.
 - Set `NEXTAUTH_URL` to the URL of your deployment.
 
+Optionally:
+
+- `NEXT_PUBLIC_SIGN_UP_DISABLED=true` blocks new sign ups
+
 ```bash
 docker run --name langfuse \
 -e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
