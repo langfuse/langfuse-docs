@@ -146,7 +146,7 @@ def execute_eval_and_score():
       )
       print(eval_result)
 
-      langfuse.score(InitialScore(name='conciseness', traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
+      langfuse.score(InitialScore(name=criterion, traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
 
 execute_eval_and_score()
 
