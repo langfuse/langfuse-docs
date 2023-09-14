@@ -159,6 +159,10 @@ langfuse.generation(InitialGeneration(
      "interface": 'whatsapp',
     }
 ))
+
+# The SDK executes network requests in the background.
+# To ensure that all requests are sent before the process exits, call flush()
+langfuse.flush()
 ```
 
 </Tab>
