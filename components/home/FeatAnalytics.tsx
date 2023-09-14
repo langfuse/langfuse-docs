@@ -25,7 +25,7 @@ const features = [
   {
     name: "More to come.",
     description:
-      "We currently run a closed alpha with selected users as we build out the analytics features. Reach out if you are interested.",
+      "We currently run a closed alpha with selected users as we build out the analytics features. All users of Langfuse Cloud have early access.",
     icon: Construction,
   },
 ];
