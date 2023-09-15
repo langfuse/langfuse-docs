@@ -4,6 +4,7 @@ import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
+import { Frame } from "./components/Frame";
 
 const footerNav = [
   { name: "Contact", href: "mailto:contact@langfuse.com" },
@@ -167,6 +168,15 @@ const config: DocsThemeConfig = {
     ),
     ol: (props: { children: React.ReactNode }) => (
       <ol className="list-decimal ltr:ml-6 rtl:mr-6">{props.children}</ol>
+    ),
+    Frame: (props: {
+      children: React.ReactNode;
+      className?: string;
+      border?: boolean;
+    }) => (
+      <Frame className={props.className} border={props.border}>
+        {props.children}
+      </Frame>
     ),
   },
   banner: {
