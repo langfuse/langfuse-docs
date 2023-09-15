@@ -37,12 +37,13 @@ Environment variables:
 
 - Set `DATABASE_URL` to the connection string of your Postgres database.
 - Use a custom `NEXTAUTH_SECRET` to secure the session JWTs. You can generate one using `openssl rand -base64 32`.
-- Set `NEXTAUTH_URL` to the URL of your deployment.
+- Set `NEXTAUTH_URL` to the URL of your deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`.
 
 Optionally:
 
 - `NEXT_PUBLIC_SIGN_UP_DISABLED=true` blocks new sign ups
 - `PORT` sets the port the server listens on (default: 3000)
+- `HOSTNAME` defaults to `localhost`. In some environments it needs to be set to `0.0.0.0` to be accessible from outside the container (e.g. Google Cloud Run).
 
 ```bash
 docker run --name langfuse \
