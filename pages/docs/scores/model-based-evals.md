@@ -39,7 +39,7 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 
 
 ```python
-%pip install langfuse langchain openai
+%pip install langfuse==1.0.23 langchain openai
 ```
 
 
@@ -89,12 +89,12 @@ Checkout [docs](https://langfuse.com/docs/integrations/sdk/python#generation) on
 
 
 ```python
-def fetch_all_pages(name, limit=50):
+def fetch_all_pages(name=None, user_id = None, limit=50):
     page = 1
     all_data = []
 
     while True:
-        response = langfuse.get_generations(name=name, limit=limit, page=page)
+        response = langfuse.get_generations(name=name, limit=limit, user_id=user_id, page=page)
         if not response.data:
             break
 
@@ -106,12 +106,9 @@ def fetch_all_pages(name, limit=50):
 
 
 ```python
-generations = fetch_all_pages(name="generation")
+generations = fetch_all_pages(user_id='user:abc')
 print(len(generations))
 ```
-
-    971
-
 
 ### Set up evaluation functions
 
