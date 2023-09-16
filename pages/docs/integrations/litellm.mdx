@@ -2,17 +2,15 @@
 description: Capture all LLM calls made via LiteLLM in Langfuse
 ---
 
-# 🚅 LiteLLM
+# 🚅 LiteLLM Integration
 
-About [LiteLLM](https://github.com/BerriAI/litellm)
-
-> Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs)
+**LiteLLM** ([GitHub](https://github.com/BerriAI/litellm)): Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs).
 
 ## Integration
 
 By adding the callback you can instantly log your responses across all providers with Langfuse.
 
-```sh
+```python filename="main.py"
 # API keys from project settings in Langfuse
 os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
 os.environ["LANGFUSE_SECRET_KEY"] = "your key"
@@ -23,7 +21,7 @@ litellm.success_callback = ["langfuse"]
 
 ## Example
 
-```python
+```python filename="main.py"
 from litellm import completion
 
 ## set env variables
