@@ -174,8 +174,8 @@ export const YCLogo = () => (
         y2="19.521"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="currentColor"></stop>
-        <stop offset="1" stop-color="currentColor" stopOpacity=".6"></stop>
+        <stop stopColor="currentColor"></stop>
+        <stop offset="1" stopColor="currentColor" stopOpacity=".6"></stop>
       </linearGradient>
     </defs>
   </svg>
