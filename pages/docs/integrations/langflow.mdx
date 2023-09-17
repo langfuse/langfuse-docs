@@ -1,0 +1,30 @@
+---
+description: Capture all LLM calls made via LiteLLM in Langfuse
+---
+
+# 🚅 Langflow
+
+About [Langflow](https://github.com/logspace-ai/langflow)
+
+> Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs)
+
+## Integration
+
+1. You'll need to export two environment variables: LANGFLOW_LANGFUSE_SECRET_KEY and LANGFLOW_LANGFUSE_PUBLIC_KEY.
+
+```sh
+# API keys from project settings in Langfuse
+export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
+export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
+
+```
+
+Alternatively, you can run the Langflow CLI command:
+
+```sh
+LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> langflow
+```
+
+If you are self-hosting Langfuse, you can also set the environment variable LANGFLOW_LANGFUSE_HOST to point to your Langfuse instance. By default, Langfuse points to the cloud instance at https://cloud.langfuse.com.
+
+
