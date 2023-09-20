@@ -4,17 +4,16 @@ description: Capture all LLM calls made via LiteLLM in Langfuse
 
 # Langflow Integration
 
-**LiteLLM** ([GitHub](https://github.com/logspace-ai/langflow)): Langflow simplifies LangChain flow prototyping with drag-and-drop, real-time chat, parameter editing, chain/agent creation, thought tracking, and flow export.
+**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)): Langflow is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
 
 ## Integration
 
-You'll need to export two environment variables: LANGFLOW_LANGFUSE_SECRET_KEY and LANGFLOW_LANGFUSE_PUBLIC_KEY.
+With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them. To trace all executions from Langflow in Langfuse, you just need to export your Langfuse api keys as environment variables:
 
 ```sh
 # API keys from project settings in Langfuse
 export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
 export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
-
 ```
 
 Alternatively, you can run the Langflow CLI command:
@@ -23,5 +22,6 @@ Alternatively, you can run the Langflow CLI command:
 LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> langflow
 ```
 
-If you are self-hosting Langfuse, you can also set the environment variable LANGFLOW_LANGFUSE_HOST to point to your Langfuse instance. By default, Langfuse points to the cloud instance at https://cloud.langfuse.com.
+## Custom host
 
+If you self-host Langfuse, you can set the additional environment variable `LANGFLOW_LANGFUSE_HOST` to point to your Langfuse instance.
