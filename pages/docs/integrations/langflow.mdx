@@ -2,26 +2,58 @@
 description: Capture all LLM calls made via LiteLLM in Langfuse
 ---
 
+import { Steps, Tab, Tabs } from "nextra-theme-docs";
+
 # Langflow Integration
 
-**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)): Langflow is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
-
-## Integration
+**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
 
 With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them. To trace all executions from Langflow in Langfuse, you just need to export your Langfuse api keys as environment variables:
 
-```sh
-# API keys from project settings in Langfuse
-export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
-export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
-```
+## Integration
 
-Alternatively, you can run the Langflow CLI command:
+<Steps>
 
-```sh
-LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> langflow
-```
+### Obtain Langfuse API keys
 
-## Custom host
+<Tabs items={["Langfuse cloud", "local or self-hosted"]}>
+<Tab>
 
-If you self-host Langfuse, you can set the additional environment variable `LANGFLOW_LANGFUSE_HOST` to point to your Langfuse instance.
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy API keys for your
+   project
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+2. Copy API keys for your
+   project
+
+</Tab>
+</Tabs>
+### Setup Langflow
+
+1.  **Export API keys as environment variables**\
+
+    ```sh
+    # API keys from project settings in Langfuse
+
+    export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
+    export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
+    ```
+
+    Alternatively, you can run the Langflow CLI command:
+
+    ```sh
+    LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> langflow
+    ```
+
+2.  **Set up the correct Langfuse host**\
+    If you self-host Langfuse, you can set the additional environment variable `LANGFLOW_LANGFUSE_HOST` to point to your Langfuse instance.
+
+3.  **Monitor langfuse**\
+    Now, whenever you use Langflow's chat or API, you will be able to see the tracing of your conversations in Langfuse.
+
+</Steps>
