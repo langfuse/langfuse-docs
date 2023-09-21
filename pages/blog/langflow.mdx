@@ -1,0 +1,59 @@
+---
+title: Langflow x Langfuse
+date: 2023/09/20
+description: "Langflow and Lanfuse collaborate to enable people to build and iterate on LLM features faster."
+tag: collaboration
+ogImage: /images/blog/langflow-langfuse/og.jpg
+author: Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+import traceDetailImg from "@/public/images/blog/langflow-langfuse/trace-detail.jpg";
+import langflowImg from "@/public/images/blog/langflow-langfuse/langflow.jpg";
+import Image from "next/image";
+
+<BlogHeader
+  title="Langflow x Langfuse"
+  description="Enable people to build and iterate on LLM features faster."
+  date="Sept 20, 2023"
+  authors={["maxdeichmann"]}
+/>
+
+Many people wonder whether LLMs could be helpful for their specific use case: for example, a professional may wants to create a chatbot on corporate knowledge in a specific language or on a very niche company domain.
+
+Langflow provides a user interface that allows you to define LLM features and get started quickly. It offers a beautiful drag-and-drop UI that enables you to define complex chains of tools and LLM calls. This eliminates the need for coding everything from scratch and allows you to experiment and prototype effortlessly. With Langflow, you have the flexibility to choose different LLM Providers and a broad range of tools to enrich prompts.
+In addition to its user-friendly interface, Langflow also offers a community-provided set of pre-built LLM features. These features have produced good results for others, making it a great source of inspiration for your own projects.
+
+<div className="mt-8 md:max-w-3xl mx-auto">
+  <Image alt="Langflow UI" src={langflowImg} />
+</div>
+
+Once you have set up your LLM feature chain using Langflow, it's time to test it in production. This is where Langfuse comes into play. Langfuse records all the steps of the LLM feature, allowing you to look into the details of how it behaved. It also provides analytics based on latency, API cost, and quality. Quality is measured by user feedback and model-based evaluations.
+
+<div className="mt-8 md:max-w-3xl mx-auto">
+  <Image alt="Trace Detail" src={traceDetailImg} />
+</div>
+
+Setting up both Langflow and Langfuse is easy. You can choose to self-host them or use the hosted version of Langfuse. The integration between the two tools is simple: just add the Langfuse environment variables when starting Langflow.
+
+```bash
+export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
+export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
+```
+
+Here is a detailed [guide](https://github.com/logspace-ai/langflow/blob/2459833b871abe77fff9a0ea556ce71d1cf72ffd/docs/docs/guides/langfuse_integration.mdx#L1) on how to get started in your environment with Langflow. Here is a [video](https://langfuse.com/docs/video) showing the tracing and analytics features of Langfuse.
+
+If you want to learn more, join our Discords ([Langfuse](https://langfuse.com/discord), [Langflow](https://discord.com/invite/EqksyE2EX9)). Also, there are plenty of open issues where we would like to collaborate with the community ([Langfuse](https://github.com/langfuse/langfuse), [Langflow](https://github.com/logspace-ai/langflow/issues)).
+
+## 🚢 What's Next?
+
+There is more coming in September. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd like to see? Join us on [Discord](/discord) and share your thoughts.
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Subscribe to get monthly updates via email:
+
+<ProductUpdateSignup source="Product update [July 2023]" className="mt-3" />
+
+Follow along on Twitter ([@Langfuse](https://twitter.com/langfuse), [@marcklingen](https://twitter.com/marcklingen))
