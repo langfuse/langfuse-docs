@@ -6,13 +6,15 @@ import { Steps, Tab, Tabs } from "nextra-theme-docs";
 
 # Langflow Integration
 
-**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)): Langflow is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
+**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
 
 With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them. To trace all executions from Langflow in Langfuse, you just need to export your Langfuse api keys as environment variables:
 
 ## Integration
 
-#### Step 1: Obtain Langfuse API keys
+<Steps>
+
+### Obtain Langfuse API keys
 
 <Tabs items={["Langfuse cloud", "local or self-hosted"]}>
 <Tab>
@@ -31,7 +33,7 @@ With the native integration, you can use Langflow to quickly create complex LLM 
 
 </Tab>
 </Tabs>
-#### Step 2: Setup Langflow
+### Setup Langflow
 
 1.  **Export API keys as environment variables**\
 
@@ -53,3 +55,5 @@ With the native integration, you can use Langflow to quickly create complex LLM 
 
 3.  **Monitor langfuse**\
     Now, whenever you use Langflow's chat or API, you will be able to see the tracing of your conversations in Langfuse.
+
+</Steps>
