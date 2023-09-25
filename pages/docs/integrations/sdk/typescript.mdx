@@ -88,8 +88,8 @@ const langfuse = new Langfuse({
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
-  call `langfuse.shutdownAsync()` at the end to flush the queue and await all
-  pending requests. ([Learn more](#lambda))
+  call `langfuse.shutdownAsync()` at the end to await all pending requests.
+  ([Learn more](#lambda))
 </Callout>
 
 ## Making calls
@@ -415,20 +415,12 @@ generation.score({});
 
 ## Shutdown [#shutdown]
 
-The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
+The Langfuse SDKs sends events asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
 
 ```typescript
 langfuse.shutdown();
 // or
 await langfuse.shutdownAsync();
-```
-
-## Flushing [#flushing]
-
-You can also manually trigger flushes irrespective of the configured `flushAt` and `flushInterval` settings.
-
-```typescript
-await langfuse.flush();
 ```
 
 ## Debugging [#debugging]
