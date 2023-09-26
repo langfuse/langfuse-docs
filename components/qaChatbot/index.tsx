@@ -10,12 +10,14 @@ import { Send } from "lucide-react";
 import { nanoid } from "ai";
 import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { usePersistedNanoId } from "./hooks/persistedNanoId";
 
 export function Chat({ className }: { className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const conversationId = useMemo(() => nanoid(), []);
+  const userId = usePersistedNanoId("qa-chatbot-user-id");
 
-  // Controlled message histor. Used to update the messages state onFinish to include the latest messageId provided by the server.
+  // Controlled message history. Used to update the messages state onFinish to include the latest messageId provided by the server.
   const [input, setInput] = useState("");
   const controlledMessages = useRef<Message[]>([]);
   const latestUserMessage = useRef<Message | null>(null);
@@ -24,6 +26,7 @@ export function Chat({ className }: { className?: string }) {
   const { messages, setMessages, append } = useChat({
     body: {
       conversationId,
+      userId: userId ? "u-" + userId : undefined,
     },
     api: "/api/qa-chatbot",
     sendExtraMessageFields: true,
