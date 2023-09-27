@@ -1,0 +1,53 @@
+---
+description: Capture all LLM calls made via Flowise in Langfuse
+---
+
+import { Steps, Tab, Tabs } from "nextra-theme-docs";
+
+# Flowise Integration
+
+**Flowise** ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder to build your customized LLM flows with a drag&drop editor.
+
+With the native integration, you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
+
+## Integration
+
+<Steps>
+
+### Obtain Langfuse API keys
+
+<Tabs items={["Langfuse cloud", "local or self-hosted"]}>
+<Tab>
+
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy API keys for your
+   project
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+2. Copy API keys for your
+   project
+
+</Tab>
+</Tabs>
+
+### Run Flowise
+
+```sh
+# install
+npm install -g flowise
+
+# start
+npx flowise start
+```
+
+### Add Langfuse
+
+<Frame>![Add Langfuse chatflow analysis](/images/docs/flowise_setup.gif)</Frame>
+
+Optionally add `release` to tag the current version of the flow. Changing the other options is commonly not needed.
+
+</Steps>
