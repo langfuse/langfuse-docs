@@ -78,12 +78,18 @@ const handler = new CallbackHandler({
 
 #### Create a simple LLM call using Langchain
 
-```typescript /{ callbacks: [langfuseHandler] }/
+```typescript /callbacks: [langfuseHandler]/
 import { LLMChain } from "langchain/chains";
 import { OpenAI } from "langchain/llms/openai";
 import { PromptTemplate } from "langchain/prompts";
 
 import CallbackHandler from "langfuse-langchain";
+
+// create a handler
+const handler = new CallbackHandler({
+  publicKey: LF_PUBLIC_KEY,
+  secretKey: LF_SECRET_KEY,
+});
 
 // create a model
 const model = new OpenAI({
@@ -95,10 +101,11 @@ const prompt = PromptTemplate.fromTemplate(
   "What is a good name for a company that makes {product}?"
 );
 // create a chain
-const chain = new LLMChain(
-  { llm: model, prompt },
-  { callbacks: [langfuseHandler] }
-);
+const chain = new LLMChain({
+  llm: model,
+  prompt,
+  callbacks: [langfuseHandler],
+});
 
 // execute the chain
 const resA = await chain.call(
@@ -109,7 +116,7 @@ const resA = await chain.call(
 
 There are two ways to integrate callbacks into Langchain:
 
-- _Constructor Callbacks_: Set when initializing an object, like `new LLMChain(..., { callbacks: [langfuseHandler] })`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
+- _Constructor Callbacks_: Set when initializing an object, like `new LLMChain({ ..., callbacks: [langfuseHandler] })`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
 - _Request Callbacks_: Defined when issuing a request, like `chain.run(..., { callbacks: [langfuseHandler] })`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
 
 For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://js.langchain.com/docs/modules/callbacks/#when-do-you-want-to-use-each-of-these).
@@ -118,7 +125,7 @@ For comprehensive data capture especially for complex chains or agents, it's adv
 
 The Langchain client can also be constructed with `Traces` or `Spans`. This allows to nest Langchain executions anywhere in the `Trace` an hence to add any metadata and ids that are important.
 
-```typescript /{ callbacks: [langfuseHandler] }/
+```typescript /callbacks: [handler]/ /callbacks: [spanHandler]/
 import { OpenAI } from "langchain/llms/openai";
 import CallbackHandler, { Langfuse } from "langfuse-langchain";
 
@@ -134,7 +141,7 @@ const trace = langfuse.trace({ name: "joke-trace" });
 const handler = new CallbackHandler({ root: trace });
 
 // call the llm with the handler
-const llm = new OpenAI({}, { callbacks: [handler] });
+const llm = new OpenAI({ callbacks: [handler] });
 await llm.call("Tell me a joke", { callbacks: [handler] });
 
 // create a span within the trace
@@ -142,7 +149,7 @@ const span = trace.span({ name: "joke-span" });
 const spanHandler = new CallbackHandler({ root: span });
 
 // call the llm with the handler
-const llmSpan = new OpenAI({}, { callbacks: [spanHandler] });
+const llmSpan = new OpenAI({ callbacks: [spanHandler] });
 await llmSpan.call("Tell me a better joke", { callbacks: [spanHandler] });
 
 await handler.flushAsync();
@@ -164,7 +171,7 @@ The SDK provides a function to return the `traceId` of the trace which is curren
 
 Both of these ids can be used to create scores for the correct `Span` in Langfuse.
 
-```typescript /handler.getTraceId();/ /handler.getLangchainRunId();/
+```typescript /handler.getTraceId();/ /handler.getLangchainRunId();/ /callbacks: [handler]/
 import { OpenAI } from "langchain/llms/openai";
 import CallbackHandler, { Langfuse } from "langfuse-langchain";
 
@@ -182,7 +189,7 @@ const handler = new CallbackHandler({ root: trace });
 handler.getTraceId(); // returns "special-id"
 
 // call the llm with the handler
-const llm = new OpenAI({}, { callbacks: [handler] });
+const llm = new OpenAI({ callbacks: [handler] });
 await llm.call("Tell me a joke", { callbacks: [handler] });
 
 handler.getLangchainRunId(); // returns the latest run id
