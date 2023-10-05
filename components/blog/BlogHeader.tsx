@@ -51,6 +51,7 @@ export const Authors = ({
           className="group"
           target="_blank"
           key={author.twitter}
+          rel="noopener noreferrer"
         >
           <div className="flex items-center gap-4" key={author.name}>
             <Image
