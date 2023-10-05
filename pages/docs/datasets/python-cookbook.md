@@ -104,7 +104,7 @@ We implement the application in two ways to demonstrate how it's done
 
 
 ```python
-# we use a ver simple eval here, you can use any eval library
+# we use a very simple eval here, you can use any eval library
 def simple_evaluation(output, expected_output):
   return output == expected_output
 ```
