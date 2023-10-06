@@ -113,7 +113,7 @@ const config: DocsThemeConfig = {
   },
   head: () => {
     const { asPath, defaultLocale, locale } = useRouter();
-    const { frontMatter } = useConfig();
+    const { frontMatter, title: pageTitle } = useConfig();
     const url =
       "https://langfuse.com" +
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
@@ -121,9 +121,17 @@ const config: DocsThemeConfig = {
     const description =
       frontMatter.description ?? "Open source analytics for LLM applications";
 
+    const title = frontMatter.title ?? pageTitle;
+
+    const section = asPath.startsWith("/docs") ? "Docs" : "";
+
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
-      : "https://langfuse.com/og.png";
+      : `https://langfuse.com/api/og?title=${encodeURIComponent(
+          title
+        )}&description=${encodeURIComponent(
+          description
+        )}&section=${encodeURIComponent(section)}`;
 
     return (
       <>
