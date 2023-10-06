@@ -21,8 +21,12 @@ export default withNextra({
   rewrites: async () => {
     return [
       {
-        source: '/docs/api-reference',
-        destination: 'https://api-reference.langfuse.com',
+        source: '/docs/api-reference/',
+        destination: 'https://langfuse-api-reference.vercel.app/docs/api-reference/',
+      },
+      {
+        source: '/docs/api-reference/:match*',
+        destination: 'https://langfuse-api-reference.vercel.app/docs/api-reference/:match*',
       },
     ]
   },
