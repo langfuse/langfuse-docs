@@ -14,17 +14,16 @@ export default withNextra({
   experimental: {
     scrollRestoration: true,
   },
-  transpilePackages: ['react-tweet',
-    'swagger-ui-react',
-    'swagger-client',
+  transpilePackages: [
+    'react-tweet',
     'react-syntax-highlighter',
   ],
   rewrites: async () => {
     return [
-      // {
-      //   source: '/',
-      //   destination: 'https://analytics.langfuse.com',
-      // },
+      {
+        source: '/docs/api-reference',
+        destination: 'https://api-reference.langfuse.com',
+      },
     ]
   },
   redirects: async () => [
