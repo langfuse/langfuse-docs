@@ -157,18 +157,22 @@ export default async function handler(req: Request, res: Response) {
     output: {
       text: contextText,
     },
+    ...(contextText === ""
+      ? { level: "WARNING", statusMessage: "No context found" }
+      : {}),
   });
 
   const assembledMessages = [
-    {
-      role: "system",
-      content: codeBlock`
+    contextText !== ""
+      ? {
+          role: "system",
+          content: codeBlock`
       ${oneLine`
       You are a very enthusiastic Langfuse representative who loves
-      to help people! Given the following sections from the Langfuse
-      documentation, answer the question using only that information,
+      to help people! Langfuse is an open-source observability tool for developers of applications that use Large Language Models (LLMs).
+      Given the following sections from the Langfuse documentation, answer the question using only that information,
       outputted in markdown format. Refer to the respective links of the documentation.`}
-      s
+      
       Context START
       """
       ${contextText}
@@ -179,7 +183,17 @@ export default async function handler(req: Request, res: Response) {
       Use emojis in your answers.
       Only use information that is available in the context. If you are unsure and the answer is not explicitly written in the documentation, say
       "Sorry, I don't know how to help with that."`,
-    },
+        }
+      : {
+          role: "system",
+          content: oneLine`
+      You are a very enthusiastic Langfuse representative who loves
+      to help people! Langfuse is an open-source observability tool for developers of applications that use Large Language Models (LLMs).
+      As there are no documentation documents that explain to the user's latest message, answer only based on the information you provided earlier in the conversation. Try to ask the user to make their question more specific.
+      Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
+      Use emojis in your answers.
+      Answer with "Sorry, I don't know how to help with that." if the question is not related to Langfuse.`,
+        },
     ...openAiMessages,
   ];
 
