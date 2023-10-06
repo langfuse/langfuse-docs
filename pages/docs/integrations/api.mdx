@@ -1,34 +1,18 @@
----
-description: Swagger API reference for the Langfuse API to integrate with your own application
----
+# HTTP API
 
-import { ApiServerReference, ApiClientReference } from "@/components/apiDoc";
+import { Card, Cards } from "nextra-theme-docs";
 
-# API Reference
+If you cannot use one of the SDKs or integrations, you can use the HTTP API directly.
 
-Using the SDKs is the recommended way to integrate with Langfuse. However, the API can also be used directly.
+<Cards num={3}>
+  <Card href="/docs/api-reference" title="API reference" image arrow>
+    ![API reference](/images/cards/code.svg)
+  </Card>
+</Cards>
 
-There are two ways to access the API:
+## Authentication
 
-1. Server-side: [Full access with secret key](#full-access-with-secret-key)
-2. Client-side: [Restricted access with public key](#restricted-access-with-public-key-client-side)
+Authenticate with the API using Basic Auth:
 
-## Full access with secret key
-
-The full API is available with a secret key. This key should not be exposed to users.
-
-**Authentication (Basic)**: pass the `public key` as username and the `secret key` as password
-
-<div className="bg-slate-200 rounded-md">
-  <ApiServerReference />
-</div>
-
-## Restricted access with public key (client-side)
-
-To allow for client-side usage of the API, a subset of the API routes are available with a public key. To integrate this API with your web application, you can also use the [Typescript frontend SDK](/docs/integrations/sdk/typescript#frontend).
-
-**Authentication (Bearer)**: `Bearer <public key>` (authorization header)
-
-<div className="bg-slate-200 rounded-md">
-  <ApiClientReference />
-</div>
+- username: Langfuse Public Key
+- password: Langfuse Secret Key
