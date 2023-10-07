@@ -15,8 +15,11 @@ export const ChangelogHeader = () => {
   const { title, description, ogImage, date, author, tag } = page.frontMatter;
 
   return (
-    <div className="flex flex-col gap-10">
-      <Link href="/changelog" className="mb-10">
+    <div className="mt-10 flex flex-col gap-10">
+      <Link
+        href={`/changelog${page.route ? "#" + page.route : ""}`}
+        className="mb-10"
+      >
         ← Back to changelog
       </Link>
 
@@ -34,7 +37,7 @@ export const ChangelogHeader = () => {
         <Author author={author} />
       </div>
 
-      <div className="flex flex-col gap-2">
+      {ogImage ? (
         <Image
           src={ogImage}
           alt={title}
@@ -42,7 +45,7 @@ export const ChangelogHeader = () => {
           height={630}
           className="rounded-lg"
         />
-      </div>
+      ) : null}
 
       <p className="text-[17px]">{description}</p>
     </div>
