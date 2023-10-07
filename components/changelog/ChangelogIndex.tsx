@@ -7,7 +7,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
   <div className="mt-12 max-w-6xl mx-auto divide-y divide-primary/10">
     {(getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>)
       .slice(0, maxItems)
-      .map((page) => (
+      .map((page, i) => (
         <div
           className="md:grid md:grid-cols-4 md:gap-5 py-16 transition-all"
           id={page.route}
@@ -30,6 +30,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                     className="object-cover"
                     alt={page.frontMatter?.title ?? "Blog post image"}
                     fill={true}
+                    priority={i < 3}
                   />
                 </div>
               ) : null}
