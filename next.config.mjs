@@ -18,6 +18,16 @@ export default withNextra({
     'react-tweet',
     'react-syntax-highlighter',
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'static.langfuse.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   rewrites: async () => {
     return [
       {
