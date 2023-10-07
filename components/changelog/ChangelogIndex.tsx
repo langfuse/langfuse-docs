@@ -18,6 +18,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                   year: "numeric",
                   month: "long",
                   day: "numeric",
+                  timeZone: "UTC",
                 })
               : null}
           </div>
@@ -42,6 +43,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                         year: "numeric",
                         month: "long",
                         day: "numeric",
+                        timeZone: "UTC",
                       }
                     )
                   : null}

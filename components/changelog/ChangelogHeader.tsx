@@ -30,6 +30,7 @@ export const ChangelogHeader = () => {
               year: "numeric",
               month: "long",
               day: "numeric",
+              timeZone: "UTC",
             })}
           </div>
           <h1 className="text-3xl md:text-4xl">{title}</h1>
