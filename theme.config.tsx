@@ -118,8 +118,7 @@ const config: DocsThemeConfig = {
       "https://langfuse.com" +
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
-    const description =
-      frontMatter.description ?? "Open source analytics for LLM applications";
+    const description = frontMatter.description ?? "";
 
     const title = frontMatter.title ?? pageTitle;
 
