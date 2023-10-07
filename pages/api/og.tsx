@@ -47,23 +47,27 @@ export default async function handler(request: NextRequest) {
           fontFamily: "sans-serif",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            gap: 20,
-            alignItems: "center",
-            padding: 40,
-            borderBottom: "3px solid white",
-          }}
-        >
-          <img width="50" height="50" src={imageData} />
-          <span style={{ fontWeight: 800 }}>
-            Langfuse
-            <span style={{ marginLeft: 10, fontWeight: 400 }}>
-              – Open source analytics for LLM Apps
+        {title !== "Langfuse" ? (
+          <div
+            style={{
+              display: "flex",
+              gap: 20,
+              alignItems: "center",
+              padding: 40,
+              paddingLeft: 80,
+              paddingRight: 80,
+              borderBottom: "3px solid white",
+            }}
+          >
+            <img width="50" height="50" src={imageData} />
+            <span style={{ fontWeight: 800 }}>
+              Langfuse
+              <span style={{ marginLeft: 10, fontWeight: 400 }}>
+                – Open source analytics for LLM Apps
+              </span>
             </span>
-          </span>
-        </div>
+          </div>
+        ) : null}
         <div
           style={{
             display: "flex",
@@ -71,7 +75,7 @@ export default async function handler(request: NextRequest) {
             alignItems: "flex-start",
             justifyContent: "center",
             flexDirection: "column",
-            padding: 40,
+            padding: 80,
             gap: 10,
           }}
         >
@@ -81,7 +85,9 @@ export default async function handler(request: NextRequest) {
             </div>
           ) : null}
           <div style={{ fontWeight: 700, fontSize: 80 }}>{title}</div>
-          {description ? <div>{description}</div> : null}
+          {description ? (
+            <div style={{ color: "#ddd" }}>{description}</div>
+          ) : null}
         </div>
       </div>
     ),
