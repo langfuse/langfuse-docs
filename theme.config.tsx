@@ -122,7 +122,11 @@ const config: DocsThemeConfig = {
 
     const title = frontMatter.title ?? pageTitle;
 
-    const section = asPath.startsWith("/docs") ? "Docs" : "";
+    const section = asPath.startsWith("/docs")
+      ? "Docs"
+      : asPath.startsWith("/changelog/")
+      ? "Changelog"
+      : "";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
