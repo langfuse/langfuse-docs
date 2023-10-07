@@ -23,7 +23,7 @@ export const ChangelogHeader = () => {
         ← Back to changelog
       </Link>
 
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-5 md:gap-2 md:flex-row justify-between md:items-end">
         <div>
           <div className="text-lg text-primary/60 mb-3">
             {new Date(date).toLocaleDateString("en-US", {
