@@ -22,12 +22,6 @@ const features = [
       "Monitor and improve latency by getting breakdowns of the added latency of each step of the LLM chain.",
     icon: Check,
   },
-  {
-    name: "More to come.",
-    description:
-      "We currently run a closed alpha with selected users as we build out the analytics features. All users of Langfuse Cloud have early access.",
-    icon: Construction,
-  },
 ];
 
 export const FeatAnalytics = () => (
