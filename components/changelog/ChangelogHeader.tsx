@@ -15,10 +15,10 @@ export const ChangelogHeader = () => {
   const { title, description, ogImage, date, author, tag } = page.frontMatter;
 
   return (
-    <div className="mt-10 flex flex-col gap-10">
+    <div className="md:mt-10 flex flex-col gap-10">
       <Link
         href={`/changelog${page.route ? "#" + page.route : ""}`}
-        className="mb-10"
+        className="md:mb-10"
       >
         ← Back to changelog
       </Link>
@@ -32,7 +32,7 @@ export const ChangelogHeader = () => {
               day: "numeric",
             })}
           </div>
-          <h1 className="text-4xl">{title}</h1>
+          <h1 className="text-3xl md:text-4xl">{title}</h1>
         </div>
         <Author author={author} />
       </div>
