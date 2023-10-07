@@ -1,5 +1,5 @@
 ---
-description: Langfuse analytics derives actionable insights from production data. Currently in alpha on Langfuse Cloud.
+description: Langfuse analytics derives actionable insights from production data.
 ---
 
 # Analytics
@@ -9,45 +9,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-<Callout type="info" emoji="ℹ️">
-  Langfuse analytics is currently in alpha on Langfuse Cloud.
-</Callout>
-
 Langfuse analytics derives actionable insights from production data.
-
-People use Langfuse analytics to answer questions such as:
-
-- _How helpful are my LLM app's outputs?_
-- _What is my LLM API spend by customer?_
-- _What do latencies look like across geographies and steps of LLM chains?_
-- _Did the quality of the application improve in newer versions? What was the impact of switching from zero-shotting GPT4 to using chained few-shotted Llama calls?_
 
 ## Metrics
 
-- **Quality** is measured through user feedback, model-based scoring and human-in-the-loop scored samples. Quality is assessed over time as well as across prompt versions, LLMs and users.
+- **Quality** is measured through user feedback, model-based scoring and human-in-the-loop scored samples (see [scores](/docs/scores)). Quality is assessed over time as well as across prompt versions, LLMs and users.
 - **Cost and Latency** are accurately measured and broken down by user, session, geography, feature, model and prompt version.
 
 ## Insights
 
 - **Monitor quality/cost/latency tradeoffs** by version to facilitate product and engineering decisions
 - Break down **LLM usage by customer** for usage-based billing and profitability analysis
-
-## Alpha program
-
-All users of Langfuse Cloud have access to the analytics alpha program.
-
-<Button asChild className="mt-3">
-  <Link href="https://cloud.langfuse.com">Create account</Link>
-</Button>
-
-### Known limitations
-
-- During the alpha we use Looker to power the dashboards. An open source version is work in progress.
-- Looker requires to be signed in with a Google Account with the same email address as your Langfuse account.
-- At times, high traffic may cause the dashboards to load slowly.
-- Not optimized for mobile screens.
-- If you run into any issues, please let us know. We are adding new dashboards on an ongoing bases. Reach out to us via to request any additional charts.
-
-### Why is this an alpha?
-
-We rely on some closed source software to make this work in order to move fast and focus on what's most interesting for most of you. We'll soon bring these features to all users since we currently plan a migration to an OLAP database and flexible modeling structure to power these features.
