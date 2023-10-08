@@ -21,11 +21,14 @@ export default function Changelog({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-3xl ring-1 ring-primary/80 p-5 max-w-lg mx-5 sm:mx-auto",
+        "rounded-3xl ring-1 ring-primary/20 p-5 max-w-lg mx-5 sm:mx-auto",
         className
       )}
     >
-      <div role="list" className="space-y-6 max-h-36 lg:max-h-96 overflow-y-scroll">
+      <div
+        role="list"
+        className="space-y-6 max-h-36 lg:max-h-96 overflow-y-scroll"
+      >
         {changelog.map((activityItem) => (
           <Link
             href={activityItem.route}
@@ -35,7 +38,7 @@ export default function Changelog({ className }: { className?: string }) {
               <div className="w-px bg-primary/40" />
             </div>
 
-            <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-[rgba(17,17,17,var(--tw-bg-opacity))]">
+            <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-background">
               <div className="h-1.5 w-1.5 rounded-full bg-primary/40 ring-1 ring-primary/80 opacity-60 group-hover:opacity-100" />
             </div>
             <p className="flex-auto py-0.5 text-sm leading-5 text-primary/60 opacity-80 group-hover:opacity-100">
@@ -60,7 +63,7 @@ export default function Changelog({ className }: { className?: string }) {
           <div className="w-px bg-primary/40" />
         </div>
 
-        <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-[rgba(17,17,17,var(--tw-bg-opacity))]">
+        <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-background">
           <div className="h-1.5 w-1.5 rounded-full bg-primary/40 ring-1 ring-primary/80 opacity-60 group-hover:opacity-100" />
         </div>
         <p className="flex-auto py-0.5 text-sm leading-5 text-primary/60 opacity-80 group-hover:opacity-100">
