@@ -33,6 +33,7 @@ export default function Changelog({ className }: { className?: string }) {
           <Link
             href={activityItem.route}
             className="relative flex gap-x-4 group"
+            key={activityItem.route}
           >
             <div className="-bottom-6 absolute left-0 top-0 flex w-6 justify-center">
               <div className="w-px bg-primary/40" />
@@ -58,7 +59,11 @@ export default function Changelog({ className }: { className?: string }) {
           </Link>
         ))}
       </div>
-      <Link href="/changelog" className="relative flex gap-x-4 group">
+      <Link
+        key="root"
+        href="/changelog"
+        className="relative flex gap-x-4 group"
+      >
         <div className="h-6 absolute left-0 top-0 flex w-6 justify-center">
           <div className="w-px bg-primary/40" />
         </div>
