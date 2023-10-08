@@ -2,6 +2,7 @@ import ShimmerButton from "../magicui/shimmer-button";
 import { BsGithub } from "react-icons/bs";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import Changelog from "./Changelog";
 
 export const OpenSource = () => {
   const [stars, setStars] = useState<number | null>(null);
@@ -14,9 +15,9 @@ export const OpenSource = () => {
   }, []);
 
   return (
-    <section className="text-center my-36 flex flex-col items-center gap-2">
-      <h2>Proudly Open Source</h2>
-      <p className="text-lg text-primary/70">
+    <section className="my-36 flex flex-col items-center gap-2">
+      <h2 className="text-center">Proudly Open Source</h2>
+      <p className="text-center text-lg text-primary/70">
         We are committed to open source and Langfuse is easy to run locally and
         self-hosted.
       </p>
@@ -29,6 +30,7 @@ export const OpenSource = () => {
           </div>
         </ShimmerButton>
       </Link>
+      <Changelog className="mt-14" />
     </section>
   );
 };

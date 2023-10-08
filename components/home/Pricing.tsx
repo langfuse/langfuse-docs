@@ -26,7 +26,7 @@ const tiers = [
   },
   {
     name: "Starter",
-    id: "tier-pro",
+    id: "tier-starter",
     href: "https://cloud.langfuse.com",
     price: { monthly: "$95", annually: "$950" },
     description:
