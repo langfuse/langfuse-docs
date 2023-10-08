@@ -10,7 +10,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
       .map((page, i) => (
         <div
           className="md:grid md:grid-cols-4 md:gap-5 py-16 transition-all"
-          id={page.route}
+          id={page.route.replace("/changelog/", "")}
         >
           <div className="hidden md:block opacity-80 text-lg group-hover:opacity-100 sticky top-24 self-start">
             {page.frontMatter?.date

@@ -17,7 +17,9 @@ export const ChangelogHeader = () => {
   return (
     <div className="md:mt-10 flex flex-col gap-10">
       <Link
-        href={`/changelog${page.route ? "#" + page.route : ""}`}
+        href={`/changelog${
+          page.route ? "#" + page.route.replace("/changelog/", "") : ""
+        }`}
         className="md:mb-10"
       >
         ← Back to changelog
