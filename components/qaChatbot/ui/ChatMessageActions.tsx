@@ -66,7 +66,7 @@ export function ChatMessageActions({
       .score({
         traceId: "lf.docs.conversation." + conversationId,
         name: "user-feedback",
-        value: modalState.feedback === "positive" ? 1 : -1,
+        value: modalState.feedback === "positive" ? 1 : 0,
         comment: modalState.comment !== "" ? modalState.comment : undefined,
         observationId: message.id,
       })
