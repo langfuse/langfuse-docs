@@ -46,7 +46,7 @@ export const Author = (props: { author: string }) => {
   return (
     <a
       href={`https://twitter.com/${author.twitter}`}
-      className="group"
+      className="group shrink-0"
       target="_blank"
       key={author.twitter}
       rel="noopener noreferrer"
@@ -59,7 +59,7 @@ export const Author = (props: { author: string }) => {
           className="rounded-full"
           alt={`Picture ${author.name}`}
         />
-        <span className="text-primary/60 group-hover:text-primary">
+        <span className="text-primary/60 group-hover:text-primary whitespace-nowrap">
           {author.name}
         </span>
       </div>

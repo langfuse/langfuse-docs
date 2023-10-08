@@ -25,19 +25,21 @@ export const ChangelogHeader = () => {
         ← Back to changelog
       </Link>
 
-      <div className="flex flex-col gap-5 md:gap-2 md:flex-row justify-between md:items-end">
-        <div>
-          <div className="text-lg text-primary/60 mb-3">
-            {new Date(date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              timeZone: "UTC",
-            })}
-          </div>
-          <h1 className="text-3xl md:text-4xl">{title}</h1>
+      <div>
+        <div className="text-lg text-primary/60 mb-3">
+          {new Date(date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: "UTC",
+          })}
         </div>
-        <Author author={author} />
+        <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
+          <div>
+            <h1 className="text-3xl md:text-4xl text-pretty">{title}</h1>
+          </div>
+          <Author author={author} />
+        </div>
       </div>
 
       {ogImage ? (
