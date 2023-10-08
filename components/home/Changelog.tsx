@@ -21,11 +21,11 @@ export default function Changelog({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-3xl ring-1 ring-primary/80 p-5 max-w-lg mx-auto",
+        "rounded-3xl ring-1 ring-primary/80 p-5 max-w-lg mx-5 sm:mx-auto",
         className
       )}
     >
-      <div role="list" className="space-y-6 max-h-96 overflow-y-scroll">
+      <div role="list" className="space-y-6 max-h-36 lg:max-h-96 overflow-y-scroll">
         {changelog.map((activityItem) => (
           <Link
             href={activityItem.route}
