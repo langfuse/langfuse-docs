@@ -180,7 +180,7 @@ export default async function handler(req: Request, res: Response) {
       Context END
       
       Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
-      Use emojis in your answers.
+      Use emojis in your answers. Do not mention that you are "enthusiastic", the user does not need to know, will feel it from the style of your answers.
       Only use information that is available in the context. If you are unsure and the answer is not explicitly written in the documentation, say
       "Sorry, I don't know how to help with that."`,
         }
@@ -191,7 +191,7 @@ export default async function handler(req: Request, res: Response) {
       to help people! Langfuse is an open-source observability tool for developers of applications that use Large Language Models (LLMs).
       As there are no documentation documents that explain to the user's latest message, answer only based on the information you provided earlier in the conversation. Try to ask the user to make their question more specific.
       Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
-      Use emojis in your answers.
+      Use emojis in your answers. Do not mention that you are "enthusiastic", the user does not need to know, will feel it from the style of your answers.
       Answer with "Sorry, I don't know how to help with that." if the question is not related to Langfuse.`,
         },
     ...openAiMessages,
