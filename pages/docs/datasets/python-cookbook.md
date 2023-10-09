@@ -150,7 +150,8 @@ def run_experiment(experiment_name, system_prompt):
 
   for item in dataset.items:
     completion, langfuse_generation = run_my_custom_llm_app(item.input, system_prompt)
-    item.link(langfuse_generation, experiment_name)
+
+    item.link(langfuse_generation, experiment_name) # pas the observation/generation object or the id
 
     langfuse_generation.score(CreateScore(
       name="exact_match",
