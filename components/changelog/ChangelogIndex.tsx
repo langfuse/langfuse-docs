@@ -27,7 +27,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
               {page.frontMatter?.ogImage ? (
                 <div className="mb-14 rounded-lg relative aspect-video overflow-hidden shadow-md group-hover:shadow-lg">
                   <Image
-                    src={page.frontMatter.ogImage}
+                    src={page.frontMatter.gif ?? page.frontMatter.ogImage}
                     className="object-cover"
                     alt={page.frontMatter?.title ?? "Blog post image"}
                     fill={true}
