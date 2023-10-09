@@ -49,6 +49,10 @@ export const ChangelogHeader = () => {
           width={1200}
           height={630}
           className="rounded-lg"
+          unoptimized={
+            page.frontMatter.gif !== undefined ||
+            page.frontMatter.ogImage?.endsWith(".gif")
+          }
         />
       ) : null}
 

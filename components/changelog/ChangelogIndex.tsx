@@ -33,6 +33,10 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                     alt={page.frontMatter?.title ?? "Blog post image"}
                     fill={true}
                     priority={i < 3}
+                    unoptimized={
+                      page.frontMatter.gif !== undefined ||
+                      page.frontMatter.ogImage?.endsWith(".gif")
+                    }
                   />
                 </div>
               ) : null}

@@ -1,6 +1,5 @@
-import { Check, Cloud } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
-import TraceScreen from "./img/trace-detail.gif";
 
 const features = [
   {
@@ -57,9 +56,12 @@ export const FeatTracing = () => (
         </div>
         <div className="flex items-start justify-end lg:order-first">
           <Image
-            src={TraceScreen}
+            src="https://static.langfuse.com/landingpage-trace.gif"
             alt="Screenshot single trace in Langfuse"
             className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 lg:w-[57rem]"
+            height={500}
+            width={500}
+            unoptimized
           />
         </div>
       </div>

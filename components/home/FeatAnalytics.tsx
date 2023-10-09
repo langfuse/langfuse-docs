@@ -1,7 +1,5 @@
-import { Check, Code, Construction } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
-import dashboardImg from "./img/dashboard.gif";
-// import dashboardImgPlaceholder from "./img/dashboard.png";
 
 const features = [
   {
@@ -58,9 +56,12 @@ export const FeatAnalytics = () => (
           </div>
         </div>
         <Image
-          src={dashboardImg}
+          src="https://static.langfuse.com/landingpage-dashboard.gif"
           alt="Dashboard Langfuse"
           className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 lg:w-[57rem]"
+          height={500}
+          width={500}
+          unoptimized
         />
       </div>
     </div>
