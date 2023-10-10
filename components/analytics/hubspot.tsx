@@ -6,7 +6,6 @@ export const Hubspot = () => {
 
 export const hsPageView = (path: string) => {
   if (window._hsq) {
-    console.log("available", window._hsq);
     window._hsq.push(["setPath", path]);
   }
 };

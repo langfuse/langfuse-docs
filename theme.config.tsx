@@ -12,6 +12,10 @@ const footerNav = [
     name: "Schedule Demo",
     href: "/schedule-demo",
   },
+  { name: "Careers", href: "/careers" },
+];
+
+const footerLegalNav = [
   { name: "Imprint", href: "/imprint" },
   {
     name: "Terms",
@@ -72,28 +76,41 @@ const config: DocsThemeConfig = {
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
     text: (
-      <div className="flex justify-between flex-1 flex-wrap gap-2 text-sm">
+      <div className="flex md:justify-between md:flex-row flex-col items-center flex-1 flex-wrap gap-2 text-sm">
+        <div className="md:order-last flex flex-col lg:flex-row gap-y-1 gap-x-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
+            {footerNav.map((nav) => (
+              <Link
+                key={nav.name}
+                href={nav.href}
+                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
+              >
+                {nav.name}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
+            {footerLegalNav.map((nav) => (
+              <Link
+                key={nav.name}
+                href={nav.href}
+                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
+              >
+                {nav.name}
+              </Link>
+            ))}
+            <a
+              href="#"
+              onClick={() => (window as any).displayPreferenceModal()}
+              className="inline rounded-none leading-6 text-primary/80 hover:text-primary"
+              id="termly-consent-preferences"
+            >
+              Cookie Preferences
+            </a>
+          </div>
+        </div>
         <span className="text-primary/80">
           MIT {new Date().getFullYear()} © Finto Technologies GmbH
-        </span>
-        <span>
-          {footerNav.map((nav) => (
-            <Link
-              key={nav.name}
-              href={nav.href}
-              className="inline px-2 first-of-type:pl-0 border-l first-of-type:border-l-0 rounded-none leading-6 text-primary/80 hover:text-primary"
-            >
-              {nav.name}
-            </Link>
-          ))}
-          <a
-            href="#"
-            onClick={() => (window as any).displayPreferenceModal()}
-            className="inline px-2 first-of-type:pl-0 border-l first-of-type:border-l-0 rounded-none leading-6 text-primary/80 hover:text-primary"
-            id="termly-consent-preferences"
-          >
-            Cookie Preferences
-          </a>
         </span>
       </div>
     ),
@@ -174,12 +191,6 @@ const config: DocsThemeConfig = {
   },
   // Fix formatting for lists; remote mt-6
   components: {
-    ul: (props: { children: React.ReactNode }) => (
-      <ul className="list-disc ltr:ml-6 rtl:mr-6">{props.children}</ul>
-    ),
-    ol: (props: { children: React.ReactNode }) => (
-      <ol className="list-decimal ltr:ml-6 rtl:mr-6">{props.children}</ol>
-    ),
     Frame: (props: {
       children: React.ReactNode;
       className?: string;
