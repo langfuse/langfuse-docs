@@ -174,12 +174,6 @@ const config: DocsThemeConfig = {
   },
   // Fix formatting for lists; remote mt-6
   components: {
-    ul: (props: { children: React.ReactNode }) => (
-      <ul className="list-disc ltr:ml-6 rtl:mr-6">{props.children}</ul>
-    ),
-    ol: (props: { children: React.ReactNode }) => (
-      <ol className="list-decimal ltr:ml-6 rtl:mr-6">{props.children}</ol>
-    ),
     Frame: (props: {
       children: React.ReactNode;
       className?: string;
