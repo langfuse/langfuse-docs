@@ -24,18 +24,9 @@ With the native integration, you can use Langflow to quickly create complex LLM 
 2. Copy API keys for your
    project
 
-</Tab>
-<Tab>
-
-1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
-2. Copy API keys for your
-   project
-
-</Tab>
-</Tabs>
 ### Setup Langflow
 
-1.  **Export API keys as environment variables**\
+1.  **Export API keys as environment variables**
 
     ```sh
     # API keys from project settings in Langfuse
@@ -49,6 +40,35 @@ With the native integration, you can use Langflow to quickly create complex LLM 
     ```sh
     LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> langflow
     ```
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+2. Copy API keys for your
+   project
+
+### Setup Langflow
+
+1.  **Export API keys as environment variables**
+
+    ```sh
+    # API keys from project settings and local langfuse host in Langfuse
+
+    export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
+    export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
+    export LANGFLOW_LANGFUSE_HOST=<your local langfuse host>
+    ```
+
+    Alternatively, you can run the Langflow CLI command:
+
+    ```sh
+    LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> LANGFLOW_LANGFUSE_HOST=<your local langfuse host> langflow
+    ```
+
+</Tab>
+</Tabs>
+### Setup Langflow
 
 2.  **Set up the correct Langfuse host**\
     If you self-host Langfuse, you can set the additional environment variable `LANGFLOW_LANGFUSE_HOST` to point to your Langfuse instance.
