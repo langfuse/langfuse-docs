@@ -76,5 +76,7 @@ const permanentRedirects = [
   // langchain
   ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
   // evals
-  ["/docs/scores/evals", "/docs/scores/model-based-evals"]
+  ["/docs/scores/evals", "/docs/scores/model-based-evals"],
+  // old experimentation to new experimentation
+  ["/experimentation", "/docs/experimentation"],
 ]
