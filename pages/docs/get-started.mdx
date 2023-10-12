@@ -14,7 +14,7 @@ This quickstart helps you to integrate your LLM application with Langfuse.
 
 The fastest way to get started is to use the Langfuse Cloud. Alternatively you can run Langfuse locally to test it out or self-host it.
 
-<Tabs items={["Langfuse cloud", "local", "self-hosted"]}>
+<Tabs items={["Langfuse cloud", "Docker"]}>
 <Tab>
 
 1. Create account and project on
@@ -30,13 +30,21 @@ The fastest way to get started is to use the Langfuse Cloud. Alternatively you c
 </Tab>
 <Tab>
 
-1.  Run Langfuse
-    ```bash copy
+1.  Run Langfuse locally with docker compose
+
+    ```bash
+    # Clone repository
     git clone https://github.com/langfuse/langfuse.git
     cd langfuse
-    docker compose up
+
+    # Run server and db
+    docker compose up -d
+
+    # Apply db migrations
+    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
     ```
-2.  Open http://localhost:3030, create a project
+
+2.  Open http://localhost:3000, create a project
 3.  Copy API keys for your project
     ```bash filename=".env"
     LANGFUSE_SECRET_KEY="sk-lf-...";
@@ -44,13 +52,26 @@ The fastest way to get started is to use the Langfuse Cloud. Alternatively you c
     ```
 
 Problems? Read more about running Langfuse [locally with
-docker](local.md)
+docker](/docs/local)
+
+This setup is **not recommended for production use** as the core database is part of the docker compose. For details on how to setup Langfuse with a dedicated database for production use, see [self-hosting instructions](/docs/self-host).
 
 </Tab>
 <Tab>
 
-1. Run postgres database
-2. Run `langfuse` docker container
+1. Run postgres database, e.g. on AWS RDS or GCP Cloud SQL
+2. Run docker container on VM or on your preferred cloud service, make sure to replace the database url with your own and add a random secret
+
+```bash
+docker run --name langfuse \
+-e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
+-e NEXTAUTH_SECRET=mysecret \
+-e NEXTAUTH_URL=http://localhost:3000 \
+-p 3000:3000 \
+-a STDOUT \
+ghcr.io/langfuse/langfuse:latest
+```
+
 3. Go to Langfuse UI on your host and create a project
 4. Copy API keys for your project
    ```bash filename=".env"
