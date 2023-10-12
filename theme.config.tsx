@@ -1,5 +1,13 @@
 import React from "react";
-import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
+import {
+  DocsThemeConfig,
+  Tabs,
+  Tab,
+  useConfig,
+  Steps,
+  Card,
+  Cards,
+} from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -189,17 +197,13 @@ const config: DocsThemeConfig = {
       </>
     );
   },
-  // Fix formatting for lists; remote mt-6
   components: {
-    Frame: (props: {
-      children: React.ReactNode;
-      className?: string;
-      border?: boolean;
-    }) => (
-      <Frame className={props.className} border={props.border}>
-        {props.children}
-      </Frame>
-    ),
+    Frame,
+    Tabs,
+    Tab,
+    Steps,
+    Card,
+    Cards,
   },
   banner: {
     key: "demo",
