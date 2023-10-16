@@ -43,5 +43,5 @@ export const ToAppButton = () => {
 
 const isSignedIn = (session: Record<string, unknown>) => {
   // check if session is object and has key "user", get typing right
-  return session && session.user;
+  return session && "user" in session && session.user !== null;
 };
