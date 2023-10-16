@@ -13,9 +13,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
-import { Button } from "./components/ui/button";
-import { BsDiscord, BsGithub } from "react-icons/bs";
+import { BsDiscord } from "react-icons/bs";
 import { GithubMenuBadge } from "./components/GitHubBadge";
+import { ToAppButton } from "./components/ToAppButton";
 
 const footerNav = [
   { name: "Contact", href: "mailto:contact@langfuse.com" },
@@ -80,9 +80,7 @@ const config: DocsThemeConfig = {
 
         <GithubMenuBadge />
 
-        <Button size="xs" asChild className="whitespace-nowrap">
-          <Link href="https://cloud.langfuse.com">Sign up</Link>
-        </Button>
+        <ToAppButton />
       </>
     ),
   },
