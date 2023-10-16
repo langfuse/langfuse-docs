@@ -78,7 +78,7 @@ langfuse.generation(InitialGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7fa458bf75e0>
+    <langfuse.client.StatefulGenerationClient at 0x7a259f5d2ec0>
 
 
 
@@ -115,7 +115,7 @@ trace.generation(CreateGeneration(name = "user-output"))
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7fa458c28340>
+    <langfuse.client.StatefulGenerationClient at 0x7a259f5d3fd0>
 
 
 
@@ -129,16 +129,18 @@ Each `Trace` can contain multiple `Observations` to record individual steps of a
   - `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
   - `Generations` are a specific type of `Spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
-##Object details
-
 ### Traces
 
 Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
 
-- `name` (optional): identifier of the trace. Useful for sorting/filtering in the UI.
-- `metadata` (optional): additional metadata of the trace. Can be any JSON object.
-- `id` (optional): The id of the trace can be set, otherwise a random one is generated. Useful for linking traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).
-- `userId` (optional): the id of the user who triggered the execution.
+| Parameter | Type   | Optional | Description
+| --- | --- | --- | ---
+| id | string | yes | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).
+| name | string | yes | Identifier of the trace. Useful for sorting/filtering in the UI.
+| metadata | object | yes | Additional metadata of the trace. Can be any JSON object.
+| userId | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/user-explorer).
+| version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
+| release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
 
 
 ```python
@@ -158,14 +160,18 @@ trace = langfuse.trace(CreateTrace(
 
 Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans to support your use cases such as Agent tool usages.
 
-- `startTime` (optional): the time at which the span started. If no startTime is provided, the current time will be used.
-- `endTime` (optional): the time at which the span ended. Can also be set using `span.update()`.
-- `name` (optional): identifier of the span. Useful for sorting/filtering in the UI.
-- `metadata` (optional): additional metadata of the span. Can be any JSON object. Can also be set or updated using `span.update()`.
-- `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-- `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
-- `input` (optional): the input to the span. Can be any JSON object.
-- `output` (optional): the output to the span. Can be any JSON object.
+| Parameter | Type   | Optional | Description
+| --- | --- | --- | ---
+| id | string | yes | The id of the span can be set, otherwise a random id is generated.
+| startTime | Date | yes | The time at which the span started, defaults to the current time.
+| endTime | Date | yes | The time at which the span ended.
+| name | string | yes | Identifier of the span. Useful for sorting/filtering in the UI.
+| metadata | object | yes | Additional metadata of the span. Can be any JSON object.
+| level | string | yes | The level of the span. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
+| statusMessage | string | yes | The status message of the span. Additional field for context of the event. E.g. the error message of an error event.
+| input | object | yes | The input to the span. Can be any JSON object.
+| output | object | yes | The output to the span. Can be any JSON object.
+| version | string | yes | The version of the span type. Used to understand how changes to the span type affect metrics. Useful in debugging.
 
 
 ```python
@@ -204,17 +210,22 @@ span = span.update(UpdateSpan(
 Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
 
-- `startTime` (optional): the time at which the generation started.
-- `endTime` (optional): the time at which the generation ended.
-- `name` (optional): identifier of the generation. Useful for sorting/filtering in the UI.
-- `model` (optional): the name of the model used for the generation
-- `modelParameters` (optional): the parameters of the model used for the generation; can be any key-value pairs
-- `prompt` (optional): the prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input)
-- `completion` (optional): the completion generated by the model
-- `usage` (optional): the usage of the model during the generation; takes two optional key-value pairs: `promptTokens` and `completionTokens`
-- `metadata` (optional): additional metadata of the generation. Can be any JSON object.
-- `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-- `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
+| Parameter | Type   | Optional | Description
+| --- | --- | --- | ---
+| id | string | yes | The id of the generation can be set, defaults to random id.
+| name | string | yes | Identifier of the generation. Useful for sorting/filtering in the UI.
+| startTime | Date | yes | The time at which the generation started, defaults to the current time.
+| completionStartTime | Date | yes | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.
+| endTime | Date | yes | The time at which the generation ended.
+| model | string | yes | The name of the model used for the generation.
+| modelParameters | object | yes | The parameters of the model used for the generation; can be any key-value pairs.
+| prompt | object | yes | The prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input).
+| completion | string | yes | The completion generated by the model.
+| usage | object | yes | The usage of the model during the generation; takes three optional key-value pairs: `promptTokens`, `completionTokens`, and `totalTokens`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse.
+| metadata | object | yes | Additional metadata of the generation. Can be any JSON object.
+| level | string | yes | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
+| statusMessage | string | yes | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.
+| version | string | yes | The version of the generation type. Used to understand how changes to the span type affect metrics. Useful in debugging.
 
 
 ```python
@@ -251,7 +262,7 @@ generation.update(UpdateGeneration(
 
 
 
-    <langfuse.client.StatefulGenerationClient at 0x7fa458bf7d60>
+    <langfuse.client.StatefulGenerationClient at 0x7a259f5d3c70>
 
 
 
@@ -259,13 +270,17 @@ generation.update(UpdateGeneration(
 
 Events are used to track discrete events in a trace.
 
-- `startTime`: the time at which the event started.
-- `name` (optional): identifier of the event. Useful for sorting/filtering in the UI.
-- `metadata` (optional): additional metadata of the event. JSON object.
-- `level` (optional): the level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-- `statusMessage` (optional): the status message of the event. Additional field for context of the event. E.g. the error message of an error event.
-- `input` (optional): the input to the event. Can be any JSON object.
-- `output` (optional): the output to the event. Can be any JSON object.
+| Parameter | Type   | Optional | Description
+| --- | --- | --- | ---
+| id | string | yes | The id of the event can be set, otherwise a random id is generated.
+| startTime | Date | yes | The time at which the event started, defaults to the current time.
+| name | string | yes | Identifier of the event. Useful for sorting/filtering in the UI.
+| metadata | object | yes | Additional metadata of the event. Can be any JSON object.
+| level | string | yes | The level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
+| statusMessage | string | yes | The status message of the event. Additional field for context of the event. E.g. the error message of an error event.
+| input | object | yes | The input to the event. Can be any JSON object.
+| output | object | yes | The output to the event. Can be any JSON object.
+| version | string | yes | The version of the event type. Used to understand how changes to the event type affect metrics. Useful in debugging.
 
 
 ```python
@@ -282,21 +297,17 @@ event = span.event(CreateEvent(
 )
 ```
 
-`span.update()` take the following parameters:
-
-- `spanId`: the id of the span to update
-- `endTime` (optional): the time at which the span ended
-- `metadata` (optional): merges with existing metadata of the span. Can be any JSON object.
-
 ## 3. Collect (user) feedback
 
 Scores are used to evaluate single executions/traces. They can be supplied internally through our UI or via the SDK. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
 
-- `traceId`: the id of the trace to which the score should be attached, automatically set when using trace.score() instead of langfuse.score()
-- `name`: identifier of the score, string
-- `value`: the value of the score; float; optional: scale it to e.g. 0..1 to make it comparable to other scores
-- `comment` (optional): additional context/explanation of the score
-- `observationId` (optional): the id of the observation to which the score should be attached, automatically set when using span.score()/event.score()/generation.score() instead of langfuse.score()
+| Parameter | Type   | Optional | Description
+| --- | --- | --- | ---
+| traceId | string | no | The id of the trace to which the score should be attached. Automatically set if you use `{trace,generation,span,event}.score({})`
+| observationId | string | yes | The id of the observation to which the score should be attached. Automatically set if you use `{generation,span,event}.score({})`
+| name | string | no | Identifier of the score.
+| value | number | no | The value of the score. Can be any number, often standardized to 0..1
+| comment | string | yes | Additional context/explanation of the score.
 
 
 ```python
@@ -308,13 +319,6 @@ trace.score(CreateScore(
     comment="I like how personalized the response is"
 ))
 ```
-
-
-
-
-    <langfuse.client.StatefulClient at 0x7fa458c28b50>
-
-
 
 ## Additional configurations
 
@@ -349,13 +353,6 @@ Apart from Software releases, users want to track versions of LLM apps (e.g. Pro
 langfuse.span(CreateSpan(name = "retrieval", version="<version>"))
 ```
 
-
-
-
-    <langfuse.client.StatefulSpanClient at 0x7fa458a69e40>
-
-
-
 ### Debug
 Per default, the Langchain handler will only log exceptions. Sometimes it is valuable to debug the SDK to understand where something goes wrong. For this, you need to enable the `debug` mode of the SDK or the Langchain handler. This will enable all debug logs in your console.
 
@@ -367,6 +364,15 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
 
 handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
 ```
+
+    DEBUG:langfuse:consumer is running...
+    DEBUG:langfuse:Debug mode is on. Logging debug level messages.
+    DEBUG:langfuse:consumer looping
+    DEBUG:langfuse:consumer is running...
+    DEBUG:langfuse:Pruning old tasks
+    DEBUG:langfuse:consumer looping
+    DEBUG:langfuse:Pruning old tasks
+
 
 ## FastAPI
 For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
