@@ -5,21 +5,21 @@ import { useState, useEffect } from "react";
 export const ToAppButton = () => {
   const [signedIn, setSignedIn] = useState<"EU" | "US" | false>(false);
   useEffect(async () => {
-    if (process.env.NODE_ENV === "development") return;
-
-    try {
-      const [eu, us] = await Promise.all([
-        fetch("https://cloud.langfuse.com/api/auth/session", {
-          credentials: "include",
-        }),
-        fetch("https://us.cloud.langfuse.com/api/auth/session", {
-          credentials: "include",
-        }),
-      ]);
-      if (isSignedIn(await us.json())) setSignedIn("US");
-      else if (isSignedIn(await eu.json())) setSignedIn("EU");
-      else setSignedIn(false);
-    } catch (e) {}
+    if (process.env.NODE_ENV === "production") {
+      try {
+        const [eu, us] = await Promise.all([
+          fetch("https://cloud.langfuse.com/api/auth/session", {
+            credentials: "include",
+          }),
+          fetch("https://us.cloud.langfuse.com/api/auth/session", {
+            credentials: "include",
+          }),
+        ]);
+        if (isSignedIn(await us.json())) setSignedIn("US");
+        else if (isSignedIn(await eu.json())) setSignedIn("EU");
+        else setSignedIn(false);
+      } catch (e) {}
+    }
   }, []);
   return (
     <Button size="xs" asChild className="whitespace-nowrap">
