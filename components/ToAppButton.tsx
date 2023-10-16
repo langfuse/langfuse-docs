@@ -9,9 +9,11 @@ export const ToAppButton = () => {
       Promise.all([
         fetch("https://cloud.langfuse.com/api/auth/session", {
           credentials: "include",
+          mode: "cors",
         }),
         fetch("https://us.cloud.langfuse.com/api/auth/session", {
           credentials: "include",
+          mode: "cors",
         }),
       ])
         .then(async ([us, eu]) => {
