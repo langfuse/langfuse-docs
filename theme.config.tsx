@@ -13,6 +13,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
+import { Button } from "./components/ui/button";
+import { BsDiscord, BsGithub } from "react-icons/bs";
+import { GithubMenuBadge } from "./components/GitHubBadge";
 
 const footerNav = [
   { name: "Contact", href: "mailto:contact@langfuse.com" },
@@ -41,40 +44,46 @@ const config: DocsThemeConfig = {
     content: null,
   },
   main: MainContentWrapper,
-  project: {
-    link: "https://github.com/langfuse/langfuse",
-    icon: (
-      <img
-        alt="Langfuse Github stars"
-        src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
-      />
-    ),
-  },
-  chat: {
-    link: "https://langfuse.com/discord",
-  },
   search: {
     placeholder: "Search...",
   },
   navbar: {
     extraContent: (
-      <a
-        className="p-2"
-        target="_blank"
-        href="https://x.com/langfuse"
-        aria-label="Langfuse X formerly known as Twitter"
-        rel="nofollow noreferrer"
-      >
-        <svg
-          aria-label="X formerly known as Twitter"
-          fill="currentColor"
-          width="24"
-          height="24"
-          viewBox="0 0 24 22"
+      <>
+        <a
+          className="p-1 hidden sm:inline-block hover:opacity-80"
+          target="_blank"
+          href="https://langfuse.com/discord"
+          aria-label="Langfuse Discord"
+          rel="nofollow noreferrer"
         >
-          <path d="M16.99 0H20.298L13.071 8.26L21.573 19.5H14.916L9.702 12.683L3.736 19.5H0.426L8.156 10.665L0 0H6.826L11.539 6.231L16.99 0ZM15.829 17.52H17.662L5.83 1.876H3.863L15.829 17.52Z"></path>
-        </svg>
-      </a>
+          <BsDiscord size={24} />
+        </a>
+
+        <a
+          className="p-1 hidden sm:inline-block hover:opacity-80"
+          target="_blank"
+          href="https://x.com/langfuse"
+          aria-label="Langfuse X formerly known as Twitter"
+          rel="nofollow noreferrer"
+        >
+          <svg
+            aria-label="X formerly known as Twitter"
+            fill="currentColor"
+            width="24"
+            height="24"
+            viewBox="0 0 24 22"
+          >
+            <path d="M16.99 0H20.298L13.071 8.26L21.573 19.5H14.916L9.702 12.683L3.736 19.5H0.426L8.156 10.665L0 0H6.826L11.539 6.231L16.99 0ZM15.829 17.52H17.662L5.83 1.876H3.863L15.829 17.52Z"></path>
+          </svg>
+        </a>
+
+        <GithubMenuBadge />
+
+        <Button size="xs" asChild className="whitespace-nowrap">
+          <Link href="https://cloud.langfuse.com">Sign up</Link>
+        </Button>
+      </>
     ),
   },
   sidebar: {
@@ -206,7 +215,7 @@ const config: DocsThemeConfig = {
     Cards,
   },
   banner: {
-    key: "demo",
+    key: "demo-banner",
     dismissible: false,
     text: (
       <Link href="/docs/demo">
