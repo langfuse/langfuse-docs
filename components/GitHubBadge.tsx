@@ -10,11 +10,13 @@ export const GithubMenuBadge = () => (
     <div className="py-1 px-2 block bg-primary/10">
       <BsGithub size={22} className="group-hover:opacity-80 opacity-100" />
     </div>
-    <StarCount className="py-1 px-2  text-sm group-hover:opacity-80 opacity-100" />
+    <div className="py-1 px-2  text-sm group-hover:opacity-80 opacity-100 w-10">
+      <StarCount />
+    </div>
   </Link>
 );
 
-export const StarCount: React.FC<{ className?: string }> = ({ className }) => {
+export const StarCount = () => {
   const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export const StarCount: React.FC<{ className?: string }> = ({ className }) => {
   }, []);
 
   return stars ? (
-    <span className={className}>
+    <span>
       {(stars as number).toLocaleString("en-US", {
         compactDisplay: "short",
         notation: "compact",

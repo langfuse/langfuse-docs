@@ -27,7 +27,7 @@ export const ToAppButton = () => {
     }
   }, []);
   return (
-    <Button size="xs" asChild className="whitespace-nowrap">
+    <Button size="xs" asChild className="whitespace-nowrap w-[70px]">
       <Link
         href={
           signedIn === "US"
