@@ -7,11 +7,11 @@ export const ToAppButton = () => {
   useEffect(() => {
     if (process.env.NODE_ENV === "production") {
       Promise.all([
-        fetch("https://cloud.langfuse.com/api/auth/session", {
+        fetch("https://us.cloud.langfuse.com/api/auth/session", {
           credentials: "include",
           mode: "cors",
         }),
-        fetch("https://us.cloud.langfuse.com/api/auth/session", {
+        fetch("https://cloud.langfuse.com/api/auth/session", {
           credentials: "include",
           mode: "cors",
         }),
