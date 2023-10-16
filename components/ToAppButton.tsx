@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 export const ToAppButton = () => {
   const [signedIn, setSignedIn] = useState<"EU" | "US" | false>(false);
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV === "production") {
       Promise.all([
         fetch("https://cloud.langfuse.com/api/auth/session", {
           credentials: "include",
