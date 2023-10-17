@@ -44,7 +44,10 @@ const nonPermanentRedirects = [
     "/analytics",
     "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY",
   ],
-  ["/careers", "https://discord.gg/7NXusRtqYU"],
+  [
+    "/careers",
+    "https://www.ycombinator.com/companies/langfuse/jobs/EubPOiS-1-founding-engineer",
+  ],
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/docs/video"],
