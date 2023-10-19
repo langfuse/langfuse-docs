@@ -55,32 +55,6 @@ docker](/docs/local)
 This setup is **not recommended for production use** as the core database is part of the docker compose. For details on how to setup Langfuse with a dedicated database for production use, see [self-hosting instructions](/docs/self-host).
 
 </Tab>
-<Tab>
-
-1. Run postgres database, e.g. on AWS RDS or GCP Cloud SQL
-2. Run docker container on VM or on your preferred cloud service, make sure to replace the database url with your own and add a random secret
-
-```bash
-docker run --name langfuse \
--e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
--e NEXTAUTH_SECRET=mysecret \
--e NEXTAUTH_URL=http://localhost:3000 \
--e SALT=mysalt \
--p 3000:3000 \
--a STDOUT \
-ghcr.io/langfuse/langfuse:latest
-```
-
-3. Go to Langfuse UI on your host and create a project
-4. Copy API keys for your project
-   ```bash filename=".env"
-   LANGFUSE_SECRET_KEY="sk-lf-...";
-   LANGFUSE_PUBLIC_KEY="pk-lf-...";
-   ```
-
-To run Langfuse in production, see [self-host instructions](self-host.mdx)
-
-</Tab>
 </Tabs>
 
 ### Add tracing to your backend
