@@ -43,3 +43,35 @@ You can share a trace with anyone via a public link. The link is read-only.
 _Example: https://cloud.langfuse.com/public/traces/lf.docs.conversation.u6Wl2hG_
 
 <Frame>![Share trace via public link](/images/docs/trace-share-link.gif)</Frame>
+
+## Get trace url in SDK
+
+Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+```python
+# trace object
+trace.get_trace_url()
+```
+
+```python
+# Langchain callback handler
+handler.get_trace_url()
+```
+
+</Tab>
+<Tab>
+```typescript
+// trace object
+trace.getTraceUrl()
+```
+
+```typescript
+// Langchain callback handler
+handler.getTraceUrl();
+```
+
+</Tab>
+
+</Tabs>
