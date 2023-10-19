@@ -24,6 +24,10 @@ const footerNav = [
     href: "/schedule-demo",
   },
   { name: "Careers", href: "/careers" },
+  {
+    name: "Status",
+    href: "https://status.langfuse.com",
+  },
 ];
 
 const footerLegalNav = [
