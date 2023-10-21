@@ -27,26 +27,46 @@ A `release` tracks the overall version of your application. Commonly it is set t
 
 #### SDK initialization
 
-<Tabs items={["Python", "JS/TS"]}>
+<Tabs items={["Python", "JS/TS", "Langchain integration"]}>
 
 <Tab>
 
 ```python /release="<release_tag>"/
+from langfuse import Langfuse
 langfuse = Langfuse(
   ENV_PUBLIC_KEY,
   ENV_SECRET_KEY,
   ENV_HOST,
-  release='<release_tag>'
+  release="<release_tag>"
 )
 ```
 
 </Tab><Tab>
 
 ```typescript /release: "<release_tag>"/
+import { Langfuse } from "langfuse";
 langfuse = new Langfuse({
   publicKey: ENV_PUBLIC_KEY,
   secretKey: ENV_SECRET_KEY,
   host: ENV_HOST,
+  release: "<release_tag>",
+});
+```
+
+</Tab><Tab>
+
+```python /release="<release_tag>"/
+# Python
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY, release="<release_tag>")
+```
+
+```typescript /release: "<release_tag>"/
+// JS/TS
+import { CallbackHandler } from "langfuse-langchain";
+const handler = new CallbackHandler({
+  secretKey: LANGFUSE_SECRET_KEY,
+  publicKey: LANGFUSE_PUBLIC_KEY,
   release: "<release_tag>",
 });
 ```
