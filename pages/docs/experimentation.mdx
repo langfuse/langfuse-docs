@@ -101,23 +101,48 @@ flowchart LR
     A1 --> A2
 ```
 
-The `version` parameter can be added to all observations (`span`, `generation`, `event`). Thereby, you can track the effect of a new `version` on the metrics of an observation with a specific `name` using [Langfuse analytics](/docs/analytics).
+The `version` parameter can be added to `traces` and all observation types (`span`, `generation`, `event`). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
-<Tabs items={["Python", "JS/TS"]}>
+<Tabs items={["Python", "JS/TS", "Langchain integration"]}>
 <Tab>
 
 ```python /version="1.0"/
+from langfuse.model import InitialGeneration
 langfuse.generation(InitialGeneration(
   name="guess-countries",
   version="1.0",
 ))
 ```
 
+`langfuse.trace()`, `langfuse.span()` and `langfuse.event()` also take an optional `version` parameter.
+
 </Tab><Tab>
 
 ```typescript /version: "1.0"/
 langfuse.generation({
   name: "guess-countries",
+  version: "1.0",
+});
+```
+
+`langfuse.trace()`, `langfuse.span()` and `langfuse.event()` also take an optional `version` parameter.
+
+</Tab><Tab>
+
+When using the Langchain integration, you can set the version for all traces/observation created by the handler at once:
+
+```python /version="1.0"/
+# Python
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY, version="1.0")
+```
+
+```typescript /version: "1.0"/
+// JS/TS
+import { CallbackHandler } from "langfuse-langchain";
+const handler = new CallbackHandler({
+  secretKey: LANGFUSE_SECRET_KEY,
+  publicKey: LANGFUSE_PUBLIC_KEY,
   version: "1.0",
 });
 ```
