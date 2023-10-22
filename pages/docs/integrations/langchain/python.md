@@ -239,14 +239,9 @@ trace = langfuse.score(
 
 ## Adding trace as context to a Langchain handler
 
-It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `id` or `metadata`. All the Langchain observations will be collected on that trace.
+It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `user_id`, `name`` or `metadata`. All the Langchain observations will be collected on that trace.
 
-To do that, we first need to initialise the [Python SDK](/docs/integrations/sdk/python), create a `trace`, and finally create the handler.
-
-
-```python
-%pip install uuid
-```
+To do that, we first need to initialize the [Python SDK](/docs/integrations/sdk/python), create a `trace`, and finally create the handler.
 
 
 ```python
@@ -261,8 +256,7 @@ from langchain.chains import LLMChain
 
 langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
-trace_id = str(uuid.uuid4())
-trace = langfuse.trace(CreateTrace(id=trace_id))
+trace = langfuse.trace(CreateTrace(name="synopsis-application", user_id="user-1234"))
 
 handler = trace.getNewHandler()
 
