@@ -34,11 +34,11 @@ const footerLegalNav = [
   { name: "Imprint", href: "/imprint" },
   {
     name: "Terms",
-    href: "https://app.termly.io/document/terms-of-service/baf80a2e-dc67-46de-9ca8-2f7457179c32",
+    href: "/tos",
   },
   {
     name: "Privacy",
-    href: "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90",
+    href: "/privacy",
   },
 ];
 
