@@ -258,7 +258,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 
 trace = langfuse.trace(CreateTrace(name="synopsis-application", user_id="user-1234"))
 
-handler = trace.getNewHandler()
+handler = trace.get_langchain_handler()
 
 llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
@@ -307,7 +307,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 trace_id = str(uuid.uuid4())
 trace = langfuse.trace(CreateTrace(id=trace_id))
 
-handler = trace.getNewHandler()
+handler = trace.get_langchain_handler()
 
 llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
