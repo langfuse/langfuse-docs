@@ -6,8 +6,8 @@ description: Fully async and typed Python SDK. Uses Pydantic objects for data ve
 
 [![PyPI](https://img.shields.io/pypi/v/langfuse?style=flat-square)](https://pypi.org/project/langfuse/)
 
-- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_sdk_python.ipynb)
-- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_sdk_python.ipynb)
+- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/python_sdk.ipynb)
+- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/python_sdk.ipynb)
 
 This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK does not impact your latencies and also does not impact your customers in case of exceptions.
 

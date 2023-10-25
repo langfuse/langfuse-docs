@@ -20,13 +20,15 @@ Use this integration if you want to get started with Langfuse super fast and mos
 
 For full flexibility, consider using the fully-featured [Python SDK](/docs/integrations/sdk/python).
 
-→ This page is a jupyter notebook, open it on [GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_openai_integration.ipynb) or [Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_openai_integration.ipynb).
+→ This page is a jupyter notebook, open it on [GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/integration_openai_sdk.ipynb) or [Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_openai_sdk.ipynb).
 
 ## 1. Setup
+
 
 ```python
 %pip install langfuse openai --upgrade
 ```
+
 
 ```python
 import os
@@ -44,6 +46,8 @@ os.environ["OPENAI_API_KEY"] = ""
 
 ## 2. Replace import
 
+
+
 ```python
 # instead of: import openai
 from langfuse.openai import openai
@@ -54,11 +58,11 @@ from langfuse.openai import openai
 _No changes required._
 
 Optionally:
-
 - Set `name` to identify a specific type of generation
 - Set `metadata` with additional information that you want to see in Langfuse
 
 ### Chat completion
+
 
 ```python
 completion = openai.ChatCompletion.create(
@@ -76,9 +80,11 @@ completion = openai.ChatCompletion.create(
 
 Simple example using Pydantic to generate the function schema.
 
+
 ```python
 %pip install pydantic==1.* --upgrade
 ```
+
 
 ```python
 from typing import List
@@ -89,6 +95,7 @@ class StepByStepAIResponse(BaseModel):
     steps: List[str]
 schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
 ```
+
 
 ```python
 import json
@@ -116,17 +123,14 @@ output = json.loads(response.choices[0]["message"]["function_call"]["arguments"]
 Go to https://cloud.langfuse.com or your own instance
 
 ### Dashboard
-
 ![Dashboard](https://langfuse.com/images/docs/openai-dashboard.png)
 
 ### List of generations
-
 ![List of generations](https://langfuse.com/images/docs/openai-generation-list.png)
 
 ### Chat completion
-
 ![Chat completion](https://langfuse.com/images/docs/openai-chat.png)
 
 ### Function
-
 ![Function](https://langfuse.com/images/docs/openai-function.png)
+

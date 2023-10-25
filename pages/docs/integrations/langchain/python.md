@@ -4,8 +4,8 @@ description: Langchain users can integrated with Langfuse in seconds using the i
 
 # Langchain integration (Python)
 
-- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_langchain_integration_python.ipynb)
-- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/src/ipynb/langfuse_docs_langchain_integration_python.ipynb)
+- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/integration_langchain.ipynb)
+- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_langchain.ipynb)
 
 Langfuse integrates with Langchain using the [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
 
