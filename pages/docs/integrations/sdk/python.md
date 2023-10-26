@@ -45,6 +45,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 | baseUrl | BaseUrl of the Langfuse API | `"https://cloud.langfuse.com"`       
 | release | The release number/hash of the application to provide analytics grouped by release.	| `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
 | debug | Prints debug logs to the console | `False`
+| number_of_consumers | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
 
 
 
