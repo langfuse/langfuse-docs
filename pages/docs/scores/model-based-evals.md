@@ -35,7 +35,7 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 
 
 ```python
-%pip install langfuse==1.0.23 langchain openai
+%pip install langfuse langchain openai --upgrade
 ```
 
 

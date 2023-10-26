@@ -54,7 +54,7 @@ The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
-%pip install langfuse
+%pip install langfuse --upgrade
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
@@ -83,7 +83,7 @@ os.environ["OPENAI_API_KEY"] = "sk-..."
 
 
 ```python
-%pip install langchain openai
+%pip install langchain openai --upgrade
 ```
 
 

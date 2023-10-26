@@ -12,37 +12,33 @@ _Simple example application_
 - **Evaluation**: exact match of completion and ground truth
 - **Experiment on**: system prompt
 
-## Install SDKs
+## Setup
 
 
 ```python
-%pip install langfuse openai langchain
+%pip install langfuse openai langchain --upgrade
 ```
 
 
 ```python
+import os
+
+# get keys for your project
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
+
+# for self-hosting
+# os.environ["ENV_HOST"] = "http://localhost:3000"
+
+# for openai
+os.environ["OPENAI_API_KEY"] = "sk-***"
+
+# import
 from langfuse import Langfuse
 import openai
-```
 
-## Environment
-
-
-```python
-# create project on cloud.langfuse.com
-# create new API keys in project settings
-LANGFUSE_PUBLIC_KEY = "pk-lf-***"
-LANGFUSE_SECRET_KEY ="sk-lf-***"
-
-langfuse = Langfuse(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
-```
-
-
-```python
-# Example uses OpenAI
-OPENAI_API_KEY="sk-***"
-
-openai.api_key = OPENAI_API_KEY
+# init
+langfuse = Langfuse()
 ```
 
 ## Create a dataset
