@@ -9,8 +9,8 @@ Currently, model-based evals can be applied to production data in Langfuse via t
 ## Example using Python SDK
 
 > _This is a Jupyter Notebook_
-> - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/model_based_evals.ipynb)
-> - [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/model_based_evals.ipynb)
+> - [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/evaluation_get_started.ipynb)
+> - [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/evaluation_get_started.ipynb)
 
 This cookbook shows how model-based evaluations can be used to automate the evaluation of production completions in Langfuse. This example uses Langchain but any other eval library can be used as well. Which library is the best to use depends heavily on the use case.
 
