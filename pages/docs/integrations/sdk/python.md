@@ -6,9 +6,6 @@ description: Fully async and typed Python SDK. Uses Pydantic objects for data ve
 
 [![PyPI](https://img.shields.io/pypi/v/langfuse?style=flat-square)](https://pypi.org/project/langfuse/)
 
-- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/python_sdk.ipynb)
-- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/python_sdk.ipynb)
-
 This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK does not impact your latencies and also does not impact your customers in case of exceptions.
 
 Using langchain? Use the [langchain integration](https://langfuse.com/docs/langchain)
@@ -19,23 +16,28 @@ The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
-%pip install langfuse
+%pip install langfuse --upgrade
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
 
 
 ```python
-ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-..."
-ENV_PUBLIC_KEY = "pk-lf-..."
+import os
+
+# get keys for your project
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-1234567890"
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-1234567890"
+
+# for self-hosting
+# os.environ["ENV_HOST"] = "http://localhost:3000"
 ```
 
 
 ```python
 from langfuse import Langfuse
 
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse = Langfuse()
 ```
 
 ### Options
@@ -63,7 +65,7 @@ generationStartTime = datetime.now()
 
 # call to an LLM API
 
-langfuse.generation(InitialGeneration(
+generation = langfuse.generation(InitialGeneration(
     name="summary-generation",
     startTime=generationStartTime,
     endTime=datetime.now(),
@@ -75,13 +77,6 @@ langfuse.generation(InitialGeneration(
     metadata={"interface": "whatsapp"}
 ))
 ```
-
-
-
-
-    <langfuse.client.StatefulGenerationClient at 0x7a259f5d2ec0>
-
-
 
 ## 3. Record a more complex application
 ```
@@ -110,15 +105,8 @@ retrieval = trace.span(CreateSpan(name = "retrieval"))
 retrieval.generation(CreateGeneration(name = "query-creation"))
 retrieval.span(CreateSpan(name = "vector-db-search"))
 retrieval.event(CreateEvent(name = "db-summary"))
-trace.generation(CreateGeneration(name = "user-output"))
+trace.generation(CreateGeneration(name = "user-output"));
 ```
-
-
-
-
-    <langfuse.client.StatefulGenerationClient at 0x7a259f5d3fd0>
-
-
 
 The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
@@ -257,15 +245,8 @@ Generations can be updated once your LLM function completes for example record o
 generation.update(UpdateGeneration(
     completion="The Q3 OKRs contain goals for multiple teams...",
     usage=Usage(promptTokens=50, completionTokens = 49),
-))
+));
 ```
-
-
-
-
-    <langfuse.client.StatefulGenerationClient at 0x7a259f5d3c70>
-
-
 
 ### Events
 
@@ -318,7 +299,7 @@ trace.score(CreateScore(
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
-))
+));
 ```
 
 ## Additional configurations
@@ -341,39 +322,26 @@ You might want to track releases in Langfuse to understand with which Software r
 
 ```python
 # The SDK will automatically include the env variable.
-LANGFUSE_RELEASE = "ba7816b..." # <- github sha
+os.environ["LANGFUSE_RELEASE"] = "ba7816b..." # <- example, github sha
 
 # Alternatively, use the constructor of the SDK
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, release='ba7816b')
+langfuse = Langfuse(release='ba7816b')
 ```
 
 Apart from Software releases, users want to track versions of LLM apps (e.g. Prompt versions). For this, each `Generation`, `Span`, or `Event` has a version field.
 
 
 ```python
-langfuse.span(CreateSpan(name = "retrieval", version="<version>"))
+langfuse.span(CreateSpan(name = "retrieval", version="<version>"));
 ```
 
 ### Debug
-Per default, the Langchain handler will only log exceptions. Sometimes it is valuable to debug the SDK to understand where something goes wrong. For this, you need to enable the `debug` mode of the SDK or the Langchain handler. This will enable all debug logs in your console.
+Enable debug mode to get verbose logs.
 
 
 ```python
-from langfuse.callback import CallbackHandler
-
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
-
-handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, debug=True)
+langfuse = Langfuse(debug=True)
 ```
-
-    DEBUG:langfuse:consumer is running...
-    DEBUG:langfuse:Debug mode is on. Logging debug level messages.
-    DEBUG:langfuse:consumer looping
-    DEBUG:langfuse:consumer is running...
-    DEBUG:langfuse:Pruning old tasks
-    DEBUG:langfuse:consumer looping
-    DEBUG:langfuse:Pruning old tasks
-
 
 ## FastAPI
 For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
@@ -381,7 +349,7 @@ For engineers working with FastAPI, we have a short example, of how to use it th
 
 
 ```python
-%pip install fastapi
+%pip install fastapi --upgrade
 ```
 
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
@@ -409,7 +377,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 ```python
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse = Langfuse()
 
 @app.get("/generate/",tags=["APIs"])
 async def campaign(prompt: str = Query(..., max_length=20)):

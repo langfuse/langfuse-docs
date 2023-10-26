@@ -2,9 +2,6 @@
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.
 
-- [View on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/datasets.ipynb)
-- [Open in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/datasets.ipynb)
-
 This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/integrations/sdk) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
 
 _Simple example application_
