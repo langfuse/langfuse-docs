@@ -2,9 +2,6 @@
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.
 
-- [View on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/datasets.ipynb)
-- [Open in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/datasets.ipynb)
-
 This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/integrations/sdk) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
 
 _Simple example application_
@@ -15,37 +12,33 @@ _Simple example application_
 - **Evaluation**: exact match of completion and ground truth
 - **Experiment on**: system prompt
 
-## Install SDKs
+## Setup
 
 
 ```python
-%pip install langfuse openai langchain
+%pip install langfuse openai langchain --upgrade
 ```
 
 
 ```python
+import os
+
+# get keys for your project
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
+
+# for self-hosting
+# os.environ["ENV_HOST"] = "http://localhost:3000"
+
+# for openai
+os.environ["OPENAI_API_KEY"] = "sk-***"
+
+# import
 from langfuse import Langfuse
 import openai
-```
 
-## Environment
-
-
-```python
-# create project on cloud.langfuse.com
-# create new API keys in project settings
-LANGFUSE_PUBLIC_KEY = "pk-lf-***"
-LANGFUSE_SECRET_KEY ="sk-lf-***"
-
-langfuse = Langfuse(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
-```
-
-
-```python
-# Example uses OpenAI
-OPENAI_API_KEY="sk-***"
-
-openai.api_key = OPENAI_API_KEY
+# init
+langfuse = Langfuse()
 ```
 
 ## Create a dataset
