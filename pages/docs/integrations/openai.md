@@ -11,15 +11,6 @@ If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement
 + from langfuse.openai import openai
 ```
 
-_**Current limitations**_
-
-- Each generation creates a new trace in Langfuse
-- It is not possible to attach a score to the generation
-
-Use this integration if you want to get started with Langfuse super fast and mostly care about tracking costs and monitoring model inputs and outputs. This integration is work in progress and features will be added over time. Suggestions and PRs welcome!
-
-For full flexibility, consider using the fully-featured [Python SDK](https://langfuse.com/docs/integrations/sdk/python).
-
 ## 1. Setup
 
 
