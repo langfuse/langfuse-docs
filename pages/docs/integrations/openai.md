@@ -177,3 +177,25 @@ poem = openai.ChatCompletion.create(
 ```
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
+
+## 6. Add scores
+
+You can also add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some other evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
+
+The score is associated to the trace using the `trace_id` (see previous step).
+
+
+```python
+from langfuse import Langfuse
+from langfuse.model import InitialScore
+
+langfuse = Langfuse()
+
+langfuse.score(InitialScore(
+    traceId=trace_id,
+    name="my-score-name",
+    value=1
+));
+```
+
+![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)
