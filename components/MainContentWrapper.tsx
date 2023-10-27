@@ -12,6 +12,8 @@ import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
 import { Background } from "./Background";
+import cookbookRoutes from "../cookbook/_routes.json";
+import { NotebookBanner } from "./NotebookBanner";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -20,6 +22,11 @@ export const MainContentWrapper = (props) => {
 
   return (
     <>
+      {cookbookRoutes.find(
+        ({ destination }) => destination === router.pathname + ".md"
+      ) ? (
+        <NotebookBanner src={router.pathname} className="mb-4" />
+      ) : null}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div

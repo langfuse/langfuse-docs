@@ -4,9 +4,6 @@ description: Langchain users can integrated with Langfuse in seconds using the i
 
 # Langchain integration (Python)
 
-- [View as notebook on GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/integration_langchain.ipynb)
-- [Open as notebook in Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_langchain.ipynb)
-
 Langfuse integrates with Langchain using the [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
 
 Add the handler as a callback when running your Langchain model/chain/agent:
@@ -49,13 +46,15 @@ Missing some useful information/context in Langfuse? Join the [Discord](/discord
 
 ## Notebook Setup
 
+<NotebookBanner src="cookbook/integration_langchain.ipynb" />
+
 ### 1. Initializing the Langfuse Callback handler
 
 The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
-%pip install langfuse
+%pip install langfuse --upgrade
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
@@ -84,7 +83,7 @@ os.environ["OPENAI_API_KEY"] = "sk-..."
 
 
 ```python
-%pip install langchain openai
+%pip install langchain openai --upgrade
 ```
 
 

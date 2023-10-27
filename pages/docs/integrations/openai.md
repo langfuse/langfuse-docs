@@ -18,9 +18,7 @@ _**Current limitations**_
 
 Use this integration if you want to get started with Langfuse super fast and mostly care about tracking costs and monitoring model inputs and outputs. This integration is work in progress and features will be added over time. Suggestions and PRs welcome!
 
-For full flexibility, consider using the fully-featured [Python SDK](/docs/integrations/sdk/python).
-
-→ This page is a jupyter notebook, open it on [GitHub](https://github.com/langfuse/langfuse-docs/blob/main/cookbook/integration_openai_sdk.ipynb) or [Google Colab](http://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_openai_sdk.ipynb).
+For full flexibility, consider using the fully-featured [Python SDK](https://langfuse.com/docs/integrations/sdk/python).
 
 ## 1. Setup
 
@@ -134,3 +132,70 @@ Go to https://cloud.langfuse.com or your own instance
 ### Function
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
+
+## 5. Group multiple generations into a single trace
+
+Many applications require more than one OpenAI call. By setting the `trace_id` you can group them into a single trace for improved debugging and reporting. The `trace_id` usually comes from your own application or you create a random one to group calls together.
+
+
+```python
+from uuid import uuid4
+trace_id = str(uuid4())
+```
+
+
+```python
+country = openai.ChatCompletion.create(
+  name="random-country",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "user", "content": "Pick a random country"}],
+  temperature=1,
+  trace_id=trace_id
+)["choices"][0]["message"]["content"]
+
+capital = openai.ChatCompletion.create(
+  name="geography-teacher",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+      {"role": "user", "content": country}],
+  temperature=0,
+  trace_id=trace_id
+)["choices"][0]["message"]["content"]
+
+poem = openai.ChatCompletion.create(
+  name="poet",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about a city."},
+      {"role": "user", "content": capital}],
+  temperature=1,
+  max_tokens=200,
+  trace_id=trace_id
+)["choices"][0]["message"]["content"]
+```
+
+![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
+
+## 6. Add scores
+
+You can also add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some other evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
+
+The score is associated to the trace using the `trace_id` (see previous step).
+
+
+```python
+from langfuse import Langfuse
+from langfuse.model import InitialScore
+
+langfuse = Langfuse()
+
+langfuse.score(InitialScore(
+    traceId=trace_id,
+    name="my-score-name",
+    value=1
+));
+```
+
+![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)
