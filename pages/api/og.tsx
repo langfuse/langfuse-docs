@@ -76,17 +76,28 @@ export default async function handler(request: NextRequest) {
             justifyContent: "center",
             flexDirection: "column",
             padding: 80,
-            gap: 10,
+            paddingTop: 40,
           }}
         >
           {section ? (
-            <div style={{ fontWeight: 700, fontSize: 40, color: "#aaa" }}>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 40,
+                color: "#aaa",
+                paddingBottom: "10px",
+              }}
+            >
               {section}
             </div>
           ) : null}
-          <div style={{ fontWeight: 700, fontSize: 80 }}>{title}</div>
+          <div style={{ fontWeight: 700, fontSize: 60, lineHeight: "3.5rem" }}>
+            {title}
+          </div>
           {description ? (
-            <div style={{ color: "#ddd" }}>{description}</div>
+            <div style={{ color: "#ddd", paddingTop: "20px" }}>
+              {description}
+            </div>
           ) : null}
         </div>
       </div>
