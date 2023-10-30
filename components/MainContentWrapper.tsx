@@ -19,13 +19,17 @@ const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
 export const MainContentWrapper = (props) => {
   const router = useRouter();
+  const notebook = cookbookRoutes.find(
+    ({ destination }) => destination === router.pathname + ".md"
+  );
 
   return (
     <>
-      {cookbookRoutes.find(
-        ({ destination }) => destination === router.pathname + ".md"
-      ) ? (
-        <NotebookBanner src={router.pathname} className="mb-4" />
+      {notebook ? (
+        <NotebookBanner
+          src={notebook.source.replace(".md", ".ipynb")}
+          className="mb-4"
+        />
       ) : null}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (

@@ -102,6 +102,29 @@ ghcr.io/langfuse/langfuse:latest
 
 ## Troubleshooting
 
-If you encounter any issue, join us on [Discord](/discord).
+If you encounter issues, please make sure that you've done the following:
 
-Alternatively, consider [Langfuse Cloud](/docs/deployment/cloud) for a fully managed version of Langfuse.
+- Apply migrations to the database
+
+  ```bash
+  # Clone repository
+  git clone https://github.com/langfuse/langfuse.git
+  cd langfuse
+
+  DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+  DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres
+
+  npx prisma migrate deploy
+  ```
+
+- `NEXTAUTH_URL` exactly matches the url you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g. 3000 if you do not expose Langfuse on port 80).
+- Set `HOSTNAME` to `0.0.0.0` in case you cannot access Langfuse.
+- SSO: Make sure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL` and the OAuth client needs to be configured with the correct callback URL.
+
+## Support
+
+If you encounter any issue, join us on [Discord](/discord) or contacts the maintainers: support@langfuse.com
+
+For support of production deployments, the Langfuse team offers dedicated enterprise support. Reach out to learn more (enterprise@langfuse.com) or [schedule a demo](https://cal.com/marc-kl/demo).
+
+Alternatively, consider [Langfuse Cloud](/docs/deployment/cloud) for a fully managed version of Langfuse. You can read more about its security and privacy [here](/docs/data-security-privacy).
