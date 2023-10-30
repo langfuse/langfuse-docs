@@ -12,7 +12,7 @@ Ragas is an open-source tool that can help you run [Model-Based Evaluation](http
 
 ```python
 import os
- 
+
 # get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
@@ -58,19 +58,20 @@ fiqa_eval
 For going to measure the following aspects of a RAG system. These metric and from the Ragas library.
 
 1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/faithfulness.html): This measures the factual consistency of the generated answer against the given context.
-2. [answer_relevency](https://docs.ragas.io/en/latest/concepts/metrics/answer_relevance.html): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
-3. [aspect_critique](https://docs.ragas.io/en/latest/concepts/metrics/critique.html): This is designed to assess submissions based on predefined aspects such as harmlessness and correctness. Additionally, users have the flexibility to define their own aspects for evaluating submissions according to their specific criteria.
+2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/answer_relevance.html): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
+3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked higher or not. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
+4. [aspect_critique](https://docs.ragas.io/en/latest/concepts/metrics/critique.html): This is designed to assess submissions based on predefined aspects such as harmlessness and correctness. Additionally, users have the flexibility to define their own aspects for evaluating submissions according to their specific criteria.
 
-Do reffer the documentation to know more about these metrics and how they work [{docs}](https://docs.ragas.io/en/latest/concepts/metrics/index.html)
+Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metrics/index.html) to know more about these metrics and how they work.
 
 
 ```python
 # import metrics
-from ragas.metrics import faithfulness, answer_relevancy
-from ragas.metrics.critique import SUPPORTED_ASPECTS
+from ragas.metrics import faithfulness, answer_relevancy, context_precision
+from ragas.metrics.critique import SUPPORTED_ASPECTS, harmfulness
 
 # metrics you chose
-metrics = [faithfulness, answer_relevancy, *SUPPORTED_ASPECTS]
+metrics = [faithfulness, answer_relevancy, context_precision, harmfulness]
 
 for m in metrics:
     print(m.name)
@@ -80,16 +81,13 @@ for m in metrics:
 
     faithfulness
     answer_relevancy
+    context_precision
     harmfulness
-    maliciousness
-    coherence
-    correctness
-    conciseness
 
 
 ## The Setup
 You can use model-based evaluation with Ragas in 2 ways
-1. Score each Trace: This means you will run the evalalutions for each trace item. This gives you much better idea since of how each call to your RAG pipelines is performing but can be expensive
+1. Score each Trace: This means you will run the evaluations for each trace item. This gives you much better idea since of how each call to your RAG pipelines is performing but can be expensive
 2. Score as Batch: In this method we will take a random sample of traces on a periodic basis and score them. This brings down cost and gives you a rough estimate the performance of your app but can miss out on important samples.
 
 In this cookbook, we'll show you how to setup both.
@@ -171,30 +169,18 @@ ragas_scores
 ```
 
     calculating faithfulness
-
-
-    Connection error caused failure to post http://localhost:1984/runs  in LangSmith API. Please confirm your LANGCHAIN_ENDPOINT. ConnectionError(MaxRetryError("HTTPConnectionPool(host='localhost', port=1984): Max retries exceeded with url: /runs (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fcf25846b60>: Failed to establish a new connection: [Errno 61] Connection refused'))"))
-    Connection error caused failure to patch http://localhost:1984/runs/c3958aab-4fc0-4285-be37-dee2f849a59b  in LangSmith API. Please confirm your LANGCHAIN_ENDPOINT. ConnectionError(MaxRetryError("HTTPConnectionPool(host='localhost', port=1984): Max retries exceeded with url: /runs/c3958aab-4fc0-4285-be37-dee2f849a59b (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fcf25846710>: Failed to establish a new connection: [Errno 61] Connection refused'))"))
-
-
     calculating answer_relevancy
+    calculating context_precision
     calculating harmfulness
-    calculating maliciousness
-    calculating coherence
-    calculating correctness
-    calculating conciseness
 
 
 
 
 
-    {'faithfulness': 1.0,
-     'answer_relevancy': 0.9774902773542787,
-     'harmfulness': 0,
-     'maliciousness': 0,
-     'coherence': 1,
-     'correctness': 1,
-     'conciseness': 1}
+    {'faithfulness': 0.6666666666666667,
+     'answer_relevancy': 0.9763805367382368,
+     'context_precision': 0.9999999999,
+     'harmfulness': 0}
 
 
 
@@ -209,13 +195,13 @@ for m in metrics:
 
 ![Trace with RAGAS scores](https://langfuse.com/images/docs/ragas-trace-score.png)
 
-Note that the scoring is blocking so make sure that you sent the generated answer before waiting for the scores to get computed. Alternatively you can run `score_with_ragas()` in a seperate thread and pass in the trace_id to log the scores.
+Note that the scoring is blocking so make sure that you sent the generated answer before waiting for the scores to get computed. Alternatively you can run `score_with_ragas()` in a separate thread and pass in the trace_id to log the scores.
 
 Or you can consider
 
 ## Scoring as batch
 
-Scoring each production trace can be time-consuming and costly depending on your application architecture and traffic. In that case, it's better to start off with a batch scoring method. Decide a timespan you want to run the batch process and the number of traces you want to _sample_ from that time slice. Create a dataset and call `ragas.evaluate` to analyse the result.
+Scoring each production trace can be time-consuming and costly depending on your application architecture and traffic. In that case, it's better to start off with a batch scoring method. Decide a timespan you want to run the batch process and the number of traces you want to _sample_ from that time slice. Create a dataset and call `ragas.evaluate` to analyze the result.
 
 You can run this periodically to keep track of how the scores are changing across timeslices and figure out if there are any discrepancies. 
 
@@ -238,7 +224,7 @@ for interaction in fiqa_eval.select(range(10, 20)):
         output={'answer': answer}
     ))
 
-# await that Langfuse SDK has processed all events before rying to retrieve it in the next step
+# await that Langfuse SDK has processed all events before trying to retrieve it in the next step
 langfuse.flush()
 ```
 
@@ -282,7 +268,7 @@ len(traces_sample)
 
 
 
-Now lets make a batch and score it. Ragas uses huggingface dataset object to build the dataset and run the evaluation. If you run this on your own production data, use the right keys to extract the question, contrexts and answer from the trace
+Now lets make a batch and score it. Ragas uses huggingface dataset object to build the dataset and run the evaluation. If you run this on your own production data, use the right keys to extract the question, contexts and answer from the trace
 
 
 ```python
@@ -435,5 +421,3 @@ for _, row in df.iterrows():
 ```
 
 ![List of traces with RAGAS scores](https://langfuse.com/images/docs/ragas-list-score-traces.png)
-
-
