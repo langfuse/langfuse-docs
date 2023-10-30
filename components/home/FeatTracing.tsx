@@ -58,7 +58,7 @@ export const FeatTracing = () => (
           <Image
             src="https://static.langfuse.com/landingpage-trace.gif"
             alt="Screenshot single trace in Langfuse"
-            className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[57rem]"
+            className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[120%]"
             height={500}
             width={500}
             unoptimized
