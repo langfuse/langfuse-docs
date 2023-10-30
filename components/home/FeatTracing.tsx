@@ -9,14 +9,21 @@ const features = [
     icon: Check,
   },
   {
+    name: "Exact cost calculation.",
+    description:
+      "Tokenizes prompts and completions of popular models to exactly measure the cost of each step of the LLM chain.",
+    icon: Check,
+  },
+  {
     name: "Track non-LLM actions.",
     description:
       "Database queries, API calls, and other actions that lead to the response can be tracked for optimal visibility into issues.",
     icon: Check,
   },
   {
-    name: "Open.",
-    description: "Works with all models and configurations.",
+    name: "Open & integrated.",
+    description:
+      "Works with all models and configurations. Native integrations with popular frameworks and libraries.",
     icon: Check,
   },
 ];
