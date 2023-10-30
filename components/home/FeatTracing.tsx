@@ -32,6 +32,16 @@ export const FeatTracing = () => (
   <section className="py-24 sm:py-32">
     <div className="mx-auto max-w-7xl px-6 lg:px-8">
       <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 2xl:mx-0 2xl:max-w-none 2xl:grid-cols-2">
+        <div className="flex items-start justify-end">
+          <Image
+            src="https://static.langfuse.com/landingpage-trace.gif"
+            alt="Screenshot single trace in Langfuse"
+            className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[120%]"
+            height={500}
+            width={500}
+            unoptimized
+          />
+        </div>
         <div className="2xl:ml-auto 2xl:pl-4 2xl:pt-4">
           <div className="2xl:max-w-lg">
             <p className="text-base font-semibold leading-7">Observability</p>
@@ -60,16 +70,6 @@ export const FeatTracing = () => (
               ))}
             </dl>
           </div>
-        </div>
-        <div className="flex items-start justify-end 2xl:order-first">
-          <Image
-            src="https://static.langfuse.com/landingpage-trace.gif"
-            alt="Screenshot single trace in Langfuse"
-            className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[120%]"
-            height={500}
-            width={500}
-            unoptimized
-          />
         </div>
       </div>
     </div>

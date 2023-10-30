@@ -38,6 +38,14 @@ export const FeatAnalytics = () => (
   <section className="py-24 sm:py-32">
     <div className="mx-auto max-w-7xl px-6 2xl:px-8">
       <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 2xl:mx-0 2xl:max-w-none 2xl:grid-cols-2">
+        <Image
+          src="https://static.langfuse.com/landingpage-dashboard.gif"
+          alt="Dashboard Langfuse"
+          className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[120%] 2xl:order-last"
+          height={500}
+          width={500}
+          unoptimized
+        />
         <div className="2xl:pr-8 2xl:pt-4">
           <div className="2xl:max-w-lg">
             <h2 className="text-base font-semibold leading-7">Analytics</h2>
@@ -67,14 +75,6 @@ export const FeatAnalytics = () => (
             </dl>
           </div>
         </div>
-        <Image
-          src="https://static.langfuse.com/landingpage-dashboard.gif"
-          alt="Dashboard Langfuse"
-          className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[120%]"
-          height={500}
-          width={500}
-          unoptimized
-        />
       </div>
     </div>
   </section>
