@@ -152,8 +152,8 @@ def execute_eval_and_score():
 
     for criterion in criteria:
       eval_result = get_evaluator_for_key(criterion).evaluate_strings(
-          prediction=generation.completion,
-          input=generation.prompt,
+          prediction=generation.output,
+          input=generation.input,
       )
       print(eval_result)
 
@@ -174,9 +174,9 @@ def eval_hallucination():
 
   for generation in generations:
     eval_result = chain.evaluate_strings(
-      prediction=generation.completion,
-      input=generation.prompt,
-      reference=generation.prompt
+      prediction=generation.output,
+      input=generation.input,
+      reference=generation.input
     )
     print(eval_result)
     if eval_result is not None and eval_result["score"] is not None and eval_result["reasoning"] is not None:
