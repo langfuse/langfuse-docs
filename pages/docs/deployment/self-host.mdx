@@ -16,27 +16,19 @@ The Langfuse Server (includes API and Web UI) is open source and can be self-hos
 
 ### Postgres database
 
-You need to have a permanent Postgres database to persist the state of Langfuse. You can use a managed service on AWS, Azure, or GCP, or you can run it yourself. After setting it up, copy the connection string.
-
-### Apply migrations to the database
-
-```bash
-# Clone repository
-git clone https://github.com/langfuse/langfuse.git
-cd langfuse
-
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
-```
+You need to have a permanent Postgres database to persist the state of Langfuse. You can use a managed service on AWS, Azure, or GCP, or you can run it yourself. After setting it up, copy the _connection string_.
 
 ### Deploy the container
 
 Deploy the container to your infrastructure. You can use a managed service like AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can run it yourself.
 
+During the startup of the container, all database migrations will be applied automatically.
+
 Environment variables:
 
 - Set `DATABASE_URL` to the connection string of your Postgres database.
 - Set `NEXTAUTH_URL` to the URL of your deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`.
-- Secrets, generate them with e.g. 512 entropy using `openssl rand -base64 32`
+- Secrets, generate them with at least 512 entropy using `openssl rand -base64 32`
   - `NEXTAUTH_SECRET` to secure the session JWTs.
   - `SALT` is used to salt the API key hashes.
 
@@ -51,7 +43,7 @@ Optionally:
 
 ```bash
 docker run --name langfuse \
--e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
+-e DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname> \
 -e NEXTAUTH_URL=http://localhost:3000 \
 -e NEXTAUTH_SECRET=mysecret \
 -e SALT=mysalt \
@@ -66,19 +58,6 @@ ghcr.io/langfuse/langfuse:latest
 
 <Steps>
 
-### Migrate database
-
-```bash
-# Clone repository
-git clone https://github.com/langfuse/langfuse.git
-cd langfuse
-
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
-DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres
-
-npx prisma migrate deploy
-```
-
 ### Pull latest changes
 
 ```bash
@@ -89,7 +68,7 @@ docker pull ghcr.io/langfuse/langfuse:latest
 
 ```bash
 docker run --name langfuse \
--e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres \
+-e DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname> \
 -e NEXTAUTH_URL=http://localhost:3000 \
 -e NEXTAUTH_SECRET=mysecret \
 -e SALT=mysalt \
@@ -103,19 +82,6 @@ ghcr.io/langfuse/langfuse:latest
 ## Troubleshooting
 
 If you encounter issues, please make sure that you've done the following:
-
-- Apply migrations to the database
-
-  ```bash
-  # Clone repository
-  git clone https://github.com/langfuse/langfuse.git
-  cd langfuse
-
-  DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
-  DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres
-
-  npx prisma migrate deploy
-  ```
 
 - `NEXTAUTH_URL` exactly matches the url you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g. 3000 if you do not expose Langfuse on port 80).
 - Set `HOSTNAME` to `0.0.0.0` in case you cannot access Langfuse.

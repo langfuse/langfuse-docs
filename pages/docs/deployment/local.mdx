@@ -4,18 +4,13 @@ description: Self-hosting instructions for Langfuse using Docker
 
 # Local Machine
 
-## Requirements
-
-- `docker` and `docker compose`, both included in [Docker Desktop](https://docs.docker.com/get-docker/)
-- Node.js & NPM to apply db migration using the ORM (Prisma)
-
-## Docker compose
-
 This setup is the easiest to get started with. It will start a local database and the Langfuse server. The server is exposed on port `3000` by default.
 
 It is not recommended to use this setup in production as the database is not persisted and environment variables are not secret. Checkout [Langfuse Cloud](/docs/deployment/cloud) for a production-ready setup maintained by the Langfuse team or alternatively [self-host](/docs/deployment/self-host).
 
-**Start**
+Requirements: `docker` and `docker compose`, both included in [Docker Desktop](https://docs.docker.com/get-docker/)
+
+## Start
 
 ```bash
 # Clone repository
@@ -24,16 +19,16 @@ cd langfuse
 
 # Run server and db
 docker compose up -d
-
-# Apply db migrations
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
 ```
 
 -> Visit http://localhost:3000
 
-**Upgrade**
+## Upgrade
 
 ```bash
+# navigate to the Langfuse directory
+cd langfuse
+
 # Stop server and db
 docker compose down
 
@@ -43,32 +38,33 @@ docker-compose pull
 
 # Run server and db
 docker compose up -d
-
-# Apply db migrations
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres npx prisma migrate deploy
 ```
 
-## Local development
+## Development setup
 
-This setup is for local development. It will start a local database via Docker and the Langfuse server via NPM. The server will be restarted on file changes.
+It will start a local database via Docker and the Langfuse server via NPM. The development server will watch for changes and restart automatically.
 
 ```bash
+# Clone repository
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+
 # Install dependencies
 npm install
 
-# Run the db
+# Run the db in the background
 docker-compose -f docker-compose.dev.yml up -d
 
 # create an env file
 cp .env.dev.example .env
 
-# Migration
+# Apply database migrations
 npm run db:migrate
 
 # Optional: seed the database
 # npm run db:seed
 # npm run db:seed:examples
 
-# Start the server
+# Start the development server
 npm run dev
 ```
