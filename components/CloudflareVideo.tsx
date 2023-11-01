@@ -9,7 +9,7 @@ export const CloudflareVideo = ({
 }: {
   videoId: string;
   aspectRatio?: number;
-  gifStyle: boolean;
+  gifStyle?: boolean;
   className?: string;
 }) => (
   <MediaPlayer
