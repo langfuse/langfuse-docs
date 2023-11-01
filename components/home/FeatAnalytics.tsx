@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import Image from "next/image";
+import { CloudflareVideo } from "../CloudflareVideo";
 
 const features = [
   {
@@ -38,13 +39,11 @@ export const FeatAnalytics = () => (
   <section className="py-24 sm:py-32">
     <div className="mx-auto max-w-7xl px-6 2xl:px-8">
       <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 2xl:mx-0 2xl:max-w-none 2xl:grid-cols-2">
-        <Image
-          src="https://static.langfuse.com/landingpage-dashboard.gif"
-          alt="Dashboard Langfuse"
-          className="w-full max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 2xl:w-[120%] 2xl:order-last"
-          height={500}
-          width={500}
-          unoptimized
+        <CloudflareVideo
+          videoId="8072f530d91328c4946f1435b52e08e5"
+          aspectRatio={16 / 9}
+          gifStyle
+          className="w-full max-w-none rounded-xl shadow-xl ring-0 2xl:w-[120%] 2xl:order-last"
         />
         <div className="2xl:pr-8 2xl:pt-4">
           <div className="2xl:max-w-lg">
