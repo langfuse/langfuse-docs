@@ -31,18 +31,18 @@ const features = [
 
 export const FeatTracing = () => (
   <section className="py-24 sm:py-32">
-    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-      <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 2xl:mx-0 2xl:max-w-none 2xl:grid-cols-2">
+    <div className="mx-auto px-6 lg:px-8">
+      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-x-8 gap-y-8 sm:gap-y-20 xl:mx-0 xl:max-w-none xl:grid-cols-2">
         <div className="flex items-start justify-end">
           <CloudflareVideo
             videoId="e12cbbad8308e31e36127a6abaebe8a9"
             aspectRatio={16 / 9}
             gifStyle
-            className="w-full max-w-none rounded-xl shadow-xl ring-0 2xl:w-[120%]"
+            className="w-full max-w-none rounded-md shadow-xl ring-0 xl:w-[120%]"
           />
         </div>
-        <div className="2xl:ml-auto 2xl:pl-4 2xl:pt-4">
-          <div className="2xl:max-w-lg">
+        <div className="xl:ml-auto xl:pl-4 xl:pt-4">
+          <div className="xl:max-w-lg">
             <p className="text-base font-semibold leading-7">Observability</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">
               Debug faster
@@ -52,7 +52,7 @@ export const FeatTracing = () => (
               & debug them. Understand how changes to one step impact overall
               application performance.
             </p>
-            <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-primary 2xl:max-w-none">
+            <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-primary xl:max-w-none">
               {features.map((feature) => (
                 <div key={feature.name} className="relative pl-9">
                   <dt className="inline font-semibold text-primary">
