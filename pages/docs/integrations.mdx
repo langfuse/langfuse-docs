@@ -11,19 +11,19 @@ Objective:
 1. Capture [traces](/docs/tracing) of your application
 2. Add [scores](/docs/scores) to these traces to measure/evaluate quality of outputs
 
-There are currently three main ways to integrate with Langfuse:
+There are currently four main ways to integrate with Langfuse:
 
-| Integration                                           | Tracing                                                               | Scores               |
-| ----------------------------------------------------- | --------------------------------------------------------------------- | -------------------- |
-| [Langchain integration](/docs/integrations/langchain) | Yes, with fully automated instrumentation                             | No, use SDKs         |
-| [SDKs for JS/TS and Python](/docs/integrations/sdk)   | Yes, incrementally adoptable and abstractions to create nested traces | Yes                  |
-| [API](/docs/integrations/api)                         | Yes, ingest manually                                                  | Yes, ingest manually |
+| Integration                               | Supports      | Description                                                                     |
+| ----------------------------------------- | ------------- | ------------------------------------------------------------------------------- |
+| [Langchain](/docs/integrations/langchain) | JS/TS, Python | Automated instrumentation by passing callback handler to Langchain application. |
+| [SDK](/docs/integrations/sdk)             | JS/TS, Python | Manual instrumentation using the SDKs for full flexibility.                     |
+| [OpenAI](/docs/integrations/openai)       | Python        | Automated instrumentation using drop-in replacement of OpenAI SDK.              |
+| [API](/docs/integrations/api)             |               | Directly call the public API. OpenAPI spec available.                           |
 
 In addition, Langfuse is natively integrated with the following projects/packages:
 
 | Name                                    | Description                                                                                                                                      |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [OpenAI](/docs/integrations/openai)     | Drop-in replacement of OpenAI SDK to get full observability of calls.                                                                            |
 | [Flowise](/docs/integrations/flowise)   | JS/TS no-code builder for customized LLM flows.                                                                                                  |
 | [Langflow](/docs/integrations/langflow) | Python-based UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.                          |
 | [LiteLLM](/docs/integrations/litellm)   | Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs). |
