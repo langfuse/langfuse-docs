@@ -19,6 +19,7 @@ export const CloudflareVideo = ({
     autoplay={gifStyle}
     muted={gifStyle}
     loop={gifStyle}
+    playsinline={gifStyle}
     aspectRatio={aspectRatio ?? 16 / 9}
     className={cn(
       "my-4 overflow-hidden rounded-xl shadow-lg ring-1 ring-slate-700",
