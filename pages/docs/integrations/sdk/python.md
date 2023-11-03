@@ -336,7 +336,7 @@ langfuse.span(CreateSpan(name = "retrieval", version="<version>"));
 ```
 
 ### Debug
-Enable debug mode to get verbose logs.
+Enable debug mode to get verbose logs. Alternatively, set the debug mode via the environment variable `LANGFUSE_DEBUG`.
 
 
 ```python

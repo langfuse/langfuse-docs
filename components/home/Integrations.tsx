@@ -1,4 +1,4 @@
-import { Chrome, Code, Link, Package } from "lucide-react";
+import { Chrome, Code, Link, Package, Unplug } from "lucide-react";
 import { SiOpenai } from "react-icons/si";
 
 const features = [
@@ -36,6 +36,12 @@ const features = [
       "Need more control? Use the Langfuse API to ingest traces and scores and build your own custom integrations.",
     icon: Code,
     href: "/docs/integrations/api",
+  },
+  {
+    name: "Other open-source projects",
+    description: "Dedicated integrations with Flowise, Langflow, and LiteLLM.",
+    icon: Unplug,
+    href: "/docs/integrations",
   },
 ];
 
