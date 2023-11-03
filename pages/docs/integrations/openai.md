@@ -190,3 +190,16 @@ langfuse.score(InitialScore(
 ```
 
 ![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)
+
+## Troubleshooting
+
+### Shutdown behavior
+
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse backend.
+
+To avoid this, ensure that the `openai.flush_langfuse()` function is called before termination. This method is blocking as it awaits all requests to be completed.
+
+
+```python
+openai.flush_langfuse()
+```
