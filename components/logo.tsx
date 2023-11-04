@@ -8,8 +8,7 @@ import {
 } from "./ui/dropdown-menu";
 
 import { useState } from "react";
-import { Download, ExternalLink, Sun } from "lucide-react";
-import Link from "next/link";
+import { Download, ExternalLink } from "lucide-react";
 
 export function Logo() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -41,7 +40,8 @@ export function Logo() {
         <DropdownMenuTrigger />
         <DropdownMenuContent>
           <DropdownMenuItem
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               window.open("/", "_blank");
             }}
           >
@@ -50,7 +50,8 @@ export function Logo() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               window.open("/langfuse_logo.png", "_blank");
             }}
           >
