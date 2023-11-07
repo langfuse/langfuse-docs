@@ -217,13 +217,13 @@ const config: DocsThemeConfig = {
     Cards,
   },
   banner: {
-    key: "demo-banner",
+    key: "seed-banner",
     dismissible: false,
     text: (
-      <Link href="/docs/demo">
-        <span className="sm:hidden">Check out live demo →</span>
+      <Link href="/blog/announcing-our-seed-round">
+        <span className="sm:hidden">Langfuse raised $4M →</span>
         <span className="hidden sm:inline">
-          Want to see Langfuse in action? Check out the live demo →
+          Langfuse raised $4M. Read the full announcement & what's next →
         </span>
       </Link>
     ),
