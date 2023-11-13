@@ -86,6 +86,7 @@ If you encounter issues, please make sure that you've done the following:
 - `NEXTAUTH_URL` exactly matches the url you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g. 3000 if you do not expose Langfuse on port 80).
 - Set `HOSTNAME` to `0.0.0.0` in case you cannot access Langfuse.
 - SSO: Make sure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL` and the OAuth client needs to be configured with the correct callback URL.
+- Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 
 ## Railway
 

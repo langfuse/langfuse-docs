@@ -25,12 +25,15 @@ Initialize the client with api keys and optionally your environment. In the exam
 ```python
 import os
 
-# get keys for your project
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
+# get keys for your project from https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# for self-hosting
-# os.environ["ENV_HOST"] = "http://localhost:3000"
+# your openai key
+os.environ["OPENAI_API_KEY"] = ""
+
+# if you do not use Langfuse Cloud
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
 
@@ -54,7 +57,7 @@ langfuse = Langfuse()
 At the bottom of the document are more detailed explanations for these.
 
 ## 2. Record a simple LLM call
-To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration and the prompt and completion.
+To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration, prompt and completion.
 
 
 ```python
@@ -336,11 +339,14 @@ langfuse.span(CreateSpan(name = "retrieval", version="<version>"));
 ```
 
 ### Debug
-Enable debug mode to get verbose logs.
+Enable debug mode to get verbose logs. Alternatively, set the debug mode via the environment variable `LANGFUSE_DEBUG`.
 
 
 ```python
 langfuse = Langfuse(debug=True)
+
+# Deactivating for the rest of the notebook
+langfuse = Langfuse()
 ```
 
 ## FastAPI

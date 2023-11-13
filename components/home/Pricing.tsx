@@ -15,26 +15,12 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     price: "Free",
     description:
-      "Get started, no credit card required. Great for hobby and internal projects.",
+      "Get started, no credit card required. Great for hobby projects and POCs.",
     features: [
-      "Unlimited projects & events (fair use)",
-      "1 GB of storage",
-      "Support via Discord and Chat",
-    ],
-    featured: false,
-    cta: "Sign up",
-  },
-  {
-    name: "Starter",
-    id: "tier-starter",
-    href: "https://cloud.langfuse.com",
-    price: { monthly: "$95", annually: "$950" },
-    description:
-      "More storage and support for projects that move in production.",
-    features: [
-      "Unlimited projects & events (fair use)",
-      "10 GB of included storage",
-      "1:1 support, Slack Channel, integration help",
+      "Unlimited projects, events, and throughput (fair use)",
+      "100k observations / month",
+      "Access last 30 days",
+      "Basic support",
     ],
     featured: false,
     cta: "Sign up",
@@ -43,16 +29,19 @@ const tiers = [
     name: "Pro",
     id: "tier-pro",
     href: "https://cloud.langfuse.com",
-    price: { monthly: "$395", annually: "$3950" },
-    description: "Organizational features and security for growing teams.",
+    price: { monthly: "$29", annually: "$290" },
+    description:
+      "For serious projects. Includes access to full history, data governance and support.",
     features: [
-      "Unlimited projects & events (fair use)",
-      "30 GB of included storage",
-      "Dedicated support contact",
-      "SSO, custom domains, advanced RBAC, and more (soon)",
+      "Unlimited projects, events, and throughput (fair use)",
+      "100k observations / month included",
+      "Unlimited history",
+      "Dedicated support channels (Slack or Discord)",
+      "Custom data retention policies",
+      "Select data region (US or EU)",
     ],
     featured: false,
-    cta: "Sign up",
+    cta: "Start free trial",
   },
   {
     name: "Enterprise",
@@ -60,8 +49,16 @@ const tiers = [
     href: "/schedule-demo",
     price: "Custom",
     description:
-      "Dedicated solutions and support. Contact founders to learn more. Can include prioritization of your feature requests, self-hosting support (VPS or cloud), dedicated instances, and support SLAs.",
-    features: [],
+      "Dedicated solutions and support for your team. Contact us to learn more.",
+    features: [
+      "All Pro features",
+      "SSO enforcement",
+      "White-glove onboarding support",
+      "Single-tenant instances",
+      "Support SLAs",
+      "Compliance and security reviews",
+      "Custom domains, advanced RBAC, and more (soon)",
+    ],
     featured: true,
     cta: "Talk to founders",
   },
@@ -86,9 +83,13 @@ export const Pricing = () => {
           </p>
         </div>
         <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-primary/80">
-          All plans include:{" "}
-          <span className="font-medium">unlimited projects</span> and{" "}
-          <span className="font-medium">unlimited events</span> (fair use)
+          All plans include (fair use)
+          <br />
+          <span className="font-medium">unlimited projects</span>
+          {", "}
+          <span className="font-medium">unlimited users</span>
+          {" and "}
+          <span className="font-medium">unlimited throughput</span>
         </p>
         <div className="mt-16 flex justify-center">
           <RadioGroup
@@ -120,9 +121,7 @@ export const Pricing = () => {
             <div
               key={tier.id}
               className={classNames(
-                tier.featured
-                  ? "bg-gray-900 ring-gray-900 lg:col-span-3"
-                  : "ring-gray-200",
+                tier.featured ? "bg-gray-900 ring-gray-900" : "ring-gray-200",
                 "rounded-3xl p-8 ring-1 xl:p-10"
               )}
             >
@@ -143,12 +142,7 @@ export const Pricing = () => {
               >
                 {tier.description}
               </p>
-              <p
-                className={classNames(
-                  "mt-6 flex items-baseline gap-x-2",
-                  tier.featured && "hidden"
-                )}
-              >
+              <p className={classNames("mt-6 flex items-baseline gap-x-2")}>
                 {typeof tier.price !== "string" ? (
                   <span
                     className={classNames(
@@ -190,7 +184,7 @@ export const Pricing = () => {
               <ul
                 role="list"
                 className={classNames(
-                  tier.featured ? "text-gray-300 hidden" : "text-primary/80",
+                  tier.featured ? "text-gray-300" : "text-primary/80",
                   "mt-8 space-y-3 text-sm leading-6 xl:mt-10"
                 )}
               >

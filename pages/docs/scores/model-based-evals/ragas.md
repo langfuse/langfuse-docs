@@ -5,7 +5,7 @@ Langfuse offers the feature to score your traces and spans. They can be used in 
 2. Segment all execution traces by scores to e.g. find all traces with a low-quality score
 3. Analytics: Detailed score reporting with drill downs into use cases and user segments
 
-Ragas is an open-source tool that can help you run [Model-Based Evaluation](https://langfuse.com/docs/scores/model-based-evals) on your traces/spans, especially for RAG pipelines. Ragas can perform reference-free evaluations of various aspects of your RAG pipeline. Because it is reference-free you don't need ground-truths when running the evaluations and can run it on production traces that you've collect with Langfuse.
+Ragas is an open-source tool that can help you run [Model-Based Evaluation](https://langfuse.com/docs/scores/model-based-evals) on your traces/spans, especially for RAG pipelines. Ragas can perform reference-free evaluations of various aspects of your RAG pipeline. Because it is reference-free you don't need ground-truths when running the evaluations and can run it on production traces that you've collected with Langfuse.
 
 ## The Environment
 
@@ -16,14 +16,17 @@ import os
 # get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
- 
+
 # your openai key
 os.environ["OPENAI_API_KEY"] = ""
+
+# if you do not use Langfuse Cloud
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
 
 ```python
-%pip install datasets ragas llama_index python-dotenv --upgrade
+%pip install langfuse datasets ragas llama_index python-dotenv "openai<1.0.0" --upgrade
 ```
 
 ## The Data
@@ -55,11 +58,11 @@ fiqa_eval
 
 
 ## The Metrics
-For going to measure the following aspects of a RAG system. These metric and from the Ragas library.
+For going to measure the following aspects of a RAG system. These metric are from the Ragas library:
 
 1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/faithfulness.html): This measures the factual consistency of the generated answer against the given context.
 2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/answer_relevance.html): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
-3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked higher or not. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
+3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
 4. [aspect_critique](https://docs.ragas.io/en/latest/concepts/metrics/critique.html): This is designed to assess submissions based on predefined aspects such as harmlessness and correctness. Additionally, users have the flexibility to define their own aspects for evaluating submissions according to their specific criteria.
 
 Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metrics/index.html) to know more about these metrics and how they work.
@@ -167,22 +170,6 @@ trace.span(CreateSpan(
 ragas_scores = score_with_ragas(question, contexts, answer)
 ragas_scores
 ```
-
-    calculating faithfulness
-    calculating answer_relevancy
-    calculating context_precision
-    calculating harmfulness
-
-
-
-
-
-    {'faithfulness': 0.6666666666666667,
-     'answer_relevancy': 0.9763805367382368,
-     'context_precision': 0.9999999999,
-     'harmfulness': 0}
-
-
 
 Once the scores are computed you can add them to the trace in Langfuse:
 
@@ -310,13 +297,13 @@ r = evaluate(ds, metrics=[faithfulness, answer_relevancy])
     evaluating with [faithfulness]
 
 
-    100%|███████████████████████████████████████████████████████████████████████████████████| 1/1 [00:23<00:00, 23.91s/it]
+    100%|██████████████████████████████████████████████████| 1/1 [00:25<00:00, 25.92s/it]
 
 
     evaluating with [answer_relevancy]
 
 
-    100%|███████████████████████████████████████████████████████████████████████████████████| 1/1 [00:05<00:00,  5.04s/it]
+    100%|██████████████████████████████████████████████████| 1/1 [00:05<00:00,  5.15s/it]
 
 
 And that is it! You can see the scores over a time period.
@@ -329,7 +316,7 @@ r
 
 
 
-    {'ragas_score': 0.9309, 'faithfulness': 0.8889, 'answer_relevancy': 0.9771}
+    {'ragas_score': 0.8659, 'faithfulness': 0.7778, 'answer_relevancy': 0.9764}
 
 
 
@@ -380,27 +367,27 @@ df.head()
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.000000</td>
-      <td>0.976908</td>
-      <td>670bc2b5-f25a-4ec4-9567-27b44b3d9fd8</td>
+      <td>0.666667</td>
+      <td>0.977490</td>
+      <td>bc895a09-b4b9-4071-8bb5-8b51025aa630</td>
     </tr>
     <tr>
       <th>1</th>
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.000000</td>
-      <td>0.977494</td>
-      <td>cb00e976-10b5-4d85-a35c-b3e8dd3dc955</td>
+      <td>0.666667</td>
+      <td>0.976919</td>
+      <td>62524351-35db-4727-9f5d-c7f2087c0cb3</td>
     </tr>
     <tr>
       <th>2</th>
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>0.666667</td>
-      <td>0.976893</td>
-      <td>2a00707d-a5e5-49ed-8bc2-67f133136330</td>
+      <td>1.000000</td>
+      <td>0.974853</td>
+      <td>aa9505a7-2847-4137-85fa-d2c2f5b95020</td>
     </tr>
   </tbody>
 </table>
