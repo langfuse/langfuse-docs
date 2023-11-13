@@ -20,9 +20,11 @@ import { LangfuseWeb } from "langfuse";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
-const langfuse = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY ?? "",
-});
+const langfuse = process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY
+  ? new LangfuseWeb({
+      publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+    })
+  : undefined;
 // langfuse.debug();
 
 type Feedback = "positive" | "negative";
@@ -58,6 +60,7 @@ export function ChatMessageActions({
     message.role === "assistant" && conversationId && message.id.length > 34; // Need to wait until server-side langfuse id is available
 
   const handleSubmit = () => {
+    if (!langfuse) return;
     if (currentFeedback === "submitting" || !modalState) return;
 
     setCurrentFeedback("submitting");
