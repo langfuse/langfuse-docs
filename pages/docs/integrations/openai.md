@@ -73,12 +73,8 @@ Simple example using Pydantic to generate the function schema.
 
 
 ```python
-%pip install pydantic==1.* --upgrade
+%pip install "pydantic<2" --upgrade
 ```
-
-    zsh:1: no matches found: pydantic==1.*
-    Note: you may need to restart the kernel to use updated packages.
-
 
 
 ```python
@@ -129,6 +125,33 @@ Go to https://cloud.langfuse.com or your own instance
 ### Function
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
+
+## 5. Track OpenAI errors
+
+Langfuse automatically monitors OpenAI errors.
+
+
+```python
+# Cause an error by attempting to use a host that does not exist.
+openai.api_base = "https://example.com"
+
+country = openai.ChatCompletion.create(
+  name="will-error",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "user", "content": "How are you?"}],
+)
+```
+
+Throws error 👆
+
+![Openai error](https://langfuse.com/images/docs/openai-error.png)
+
+
+```python
+# Reset
+openai.api_base = "https://api.openai.com/v1"
+```
 
 ## 5. Group multiple generations into a single trace
 
