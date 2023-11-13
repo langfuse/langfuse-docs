@@ -128,7 +128,7 @@ review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[handler]
 handler.langfuse.flush()
 ```
 
-## 2. Sequential Chain in Langchain Expression Language (LCEL)
+### 2. Sequential Chain in Langchain Expression Language (LCEL)
 
 ![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
 
