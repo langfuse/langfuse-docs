@@ -22,12 +22,17 @@ chain = LLMChain(llm=llm, prompt=prompt, callbacks=[handler])
 chain.run(input="<user_input", callbacks=[handler])
 ```
 
+Langchain expression language (LCEL)
+```python /config={"callbacks":[handler]}/
+chain.invoke(input, config={"callbacks":[handler]})
+```
+
 ---
  **_In case of missing events or tokens:_**
 
 There are two ways to integrate callbacks into Langchain:
-- *Constructor Callbacks*: Set when initializing an object, like `LLMChain(callbacks=[handler])`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
-- *Request Callbacks*: Defined when issuing a request, like `chain.run(input, callbacks=[handler])`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
+- *Constructor Callbacks*: Set when initializing an object, like `LLMChain(callbacks=[handler])` or `ChatOpenAI(callbacks=[handler])`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
+- *Request Callbacks*: Defined when issuing a request, like `chain.run(input, callbacks=[handler])` and `chain.invoke(input, config={"callbacks":[handler]})`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
 
 For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://python.langchain.com/docs/modules/callbacks/#where-to-pass-in-callbacks).
 
@@ -54,37 +59,34 @@ The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
-%pip install langfuse --upgrade
+%pip install langfuse langchain "openai<1.0.0" --upgrade
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
 
 
 ```python
-ENV_HOST = "https://cloud.langfuse.com"
-ENV_SECRET_KEY = "sk-lf-..."
-ENV_PUBLIC_KEY = "pk-lf-..."
+import os
+
+# get keys for your project from https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+
+# your openai key
+os.environ["OPENAI_API_KEY"] = ""
+
+# if you do not use Langfuse Cloud
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
 
 ```python
 from langfuse.callback import CallbackHandler
 
-handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+handler = CallbackHandler()
 ```
 
 ### 2. Langchain
-
-
-```python
-import os
-os.environ["OPENAI_API_KEY"] = "sk-..."
-```
-
-
-```python
-%pip install langchain openai --upgrade
-```
 
 
 ```python
@@ -93,7 +95,6 @@ from langchain.llms import OpenAI
 from langchain.chains import LLMChain, SimpleSequentialChain
 from langchain.prompts import PromptTemplate
 from langfuse.callback import CallbackHandler
-
 ```
 
 ## Examples
@@ -104,7 +105,7 @@ from langfuse.callback import CallbackHandler
 
 
 ```python
-llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+llm = OpenAI()
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
     Title: {title}
     Playwright: This is a synopsis for the above play:"""
@@ -127,19 +128,59 @@ review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[handler]
 handler.langfuse.flush()
 ```
 
-### 2. QA Retrieval
+## 2. Sequential Chain in Langchain Expression Language (LCEL)
+
+![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
+
+
+```python
+from operator import itemgetter
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema import StrOutputParser
+
+handler = CallbackHandler()
+
+prompt1 = ChatPromptTemplate.from_template("what is the city {person} is from?")
+prompt2 = ChatPromptTemplate.from_template(
+    "what country is the city {city} in? respond in {language}"
+)
+
+model = ChatOpenAI()
+
+chain1 = prompt1 | model | StrOutputParser()
+
+chain2 = (
+    {"city": chain1, "language": itemgetter("language")}
+    | prompt2
+    | model
+    | StrOutputParser()
+)
+
+chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[handler]})
+handler.get_trace_url()
+```
+
+
+
+
+    'http://localhost:3000/trace/6f40235f-a171-42e7-9bd0-a9b1754c6044'
+
+
+
+### 3. QA Retrieval
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
 
 ```python
 import os
-os.environ["SERPAPI_API_KEY"] = '...'
+os.environ["SERPAPI_API_KEY"] = ''
 ```
 
 
 ```python
-%pip install unstructured chromadb tiktoken google-search-results
+%pip install unstructured chromadb tiktoken google-search-results python-magic python-magic-bin --upgrade
 ```
 
 
@@ -150,20 +191,20 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
-handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+handler = CallbackHandler()
 urls = [
     "https://raw.githubusercontent.com/langfuse/langfuse-docs/main/public/state_of_the_union.txt",
 ]
 
 loader = UnstructuredURLLoader(urls=urls)
 
-llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+llm = OpenAI()
 
 documents = loader.load()
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
 texts = text_splitter.split_documents(documents)
 
-embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+embeddings = OpenAIEmbeddings()
 docsearch = Chroma.from_documents(texts, embeddings)
 
 query = "What did the president say about Ketanji Brown Jackson"
@@ -178,8 +219,10 @@ result = chain.run(query, callbacks=[handler])
 print(result)
 
 handler.langfuse.flush()
-
 ```
+
+     The president said that she is one of our nation's top legal minds and she will continue Justice Breyer's legacy of excellence.
+
 
 
 
@@ -190,9 +233,9 @@ handler.langfuse.flush()
 from langchain.agents import AgentType, initialize_agent, load_tools
 
 
-handler = CallbackHandler(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+handler = CallbackHandler()
 
-llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+llm = OpenAI()
 
 tools = load_tools(["serpapi", "llm-math"], llm=llm)
 
@@ -204,6 +247,24 @@ handler.langfuse.flush()
 
 print("output variable: ", result)
 ```
+
+    
+    
+    [1m> Entering new AgentExecutor chain...[0m
+    [32;1m[1;3m I should find out who Leo DiCaprio's girlfriend is and then use a calculator to calculate the 0.43 power
+    Action: Search
+    Action Input: "Leo DiCaprio's girlfriend"[0m
+    Observation: [36;1m[1;3mVittoria Ceretti: 2023 According to sources, Leo and Vittoria reportedly met during the Killers of the Flower Moon premiere at the 2023 Cannes Film Festival.[0m
+    Thought:[32;1m[1;3m I should use the calculator to find the 0.43 power of 2023
+    Action: Calculator
+    Action Input: 2023^0.43[0m
+    Observation: [33;1m[1;3mAnswer: 26.39843795372203[0m
+    Thought:[32;1m[1;3m I now know the final answer
+    Final Answer: Vittoria Ceretti is Leo DiCaprio's girlfriend and her current age raised to the 0.43 power is 26.39843795372203.[0m
+    
+    [1m> Finished chain.[0m
+    output variable:  Vittoria Ceretti is Leo DiCaprio's girlfriend and her current age raised to the 0.43 power is 26.39843795372203.
+
 
 ## Adding scores
 
@@ -225,7 +286,7 @@ from langfuse.model import CreateScoreRequest
 traceId = handler.get_trace_id()
 
 # Add score, e.g. via the Python SDK
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse = Langfuse()
 trace = langfuse.score(
     CreateScoreRequest(
         traceId=traceId,
@@ -253,13 +314,13 @@ from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse = Langfuse()
 
 trace = langfuse.trace(CreateTrace(name="synopsis-application", user_id="user-1234"))
 
 handler = trace.get_langchain_handler()
 
-llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+llm = OpenAI()
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
     Title: {title}
     Playwright: This is a synopsis for the above play:"""
@@ -301,14 +362,14 @@ from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+langfuse = Langfuse()
 
 trace_id = str(uuid.uuid4())
 trace = langfuse.trace(CreateTrace(id=trace_id))
 
 handler = trace.get_langchain_handler()
 
-llm = OpenAI(openai_api_key=os.environ.get("OPENAI_API_KEY"))
+llm = OpenAI()
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
     Title: {title}
     Playwright: This is a synopsis for the above play:"""

@@ -11,11 +11,13 @@ If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement
 + from langfuse.openai import openai
 ```
 
+The integration does not support openai 1.x yet, this is work in progress.
+
 ## 1. Setup
 
 
 ```python
-%pip install langfuse openai --upgrade
+%pip install langfuse "openai<1.0.0" --upgrade
 ```
 
 
@@ -73,6 +75,10 @@ Simple example using Pydantic to generate the function schema.
 ```python
 %pip install pydantic==1.* --upgrade
 ```
+
+    zsh:1: no matches found: pydantic==1.*
+    Note: you may need to restart the kernel to use updated packages.
+
 
 
 ```python

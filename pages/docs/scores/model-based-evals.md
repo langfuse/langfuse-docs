@@ -21,34 +21,33 @@ Not using Langfuse yet? [Get started](/docs/get-started) by capturing LLM events
 
 ### Setup
 
-First you need to install Langfuse and Langchain via pip and then set the environment variables. The following table explains each of these:
-
-
-| Variable | Description |
-| --- | --- |
-| LF_PK | Public API Key found in the Langfuse UI
-| LF_SK | Secret API Key found in the Langfuse UI
-| LF_HOST | Langfuse Host, defaults to `https://cloud.langfuse.com`
-| EVAL_MODEL | OpenAI model used to evaluate each prompt/completion pair
-| OPENAI_API_KEY | OpenAI API Key found in the OpenAI UI. Beware that executing evals results in API calls and costs.
-| EVAL_TYPES | Dict of Langchain evals. Set to `True` to execute on each `Generation`.
+First you need to install Langfuse and Langchain via pip and then set the environment variables.
 
 
 ```python
-%pip install langfuse langchain openai --upgrade
+%pip install langfuse langchain "openai<1.0.0" --upgrade
 ```
 
 
 ```python
 import os
-os.environ['LF_PK'] = "pk-lf-..."
-os.environ['LF_SK'] = "sk-lf-..."
-os.environ['LF_HOST'] = "https://cloud.langfuse.com"
 
+# get keys for your project from https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+
+# your openai key
+os.environ["OPENAI_API_KEY"] = ""
+
+# if you do not use Langfuse Cloud
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+```
+
+
+```python
 os.environ['EVAL_MODEL'] = "text-davinci-003"
 
-os.environ["OPENAI_API_KEY"]='sk-...'
-
+# Langchain Eval types
 EVAL_TYPES={
     "hallucination": True,
     "conciseness": True,
@@ -62,7 +61,6 @@ EVAL_TYPES={
     "criminality": True,
     "insensitivity": True
 }
-
 ```
 
 Initialize the Langfuse Python SDK, more information [here](https://langfuse.com/docs/integrations/sdk/python#1-installation).
@@ -71,10 +69,7 @@ Initialize the Langfuse Python SDK, more information [here](https://langfuse.com
 ```python
 from langfuse import Langfuse
 
-langfuse = Langfuse(
-    os.environ.get("LF_PK"),
-    os.environ.get("LF_SK"),
-    os.environ.get("LF_HOST"))
+langfuse = Langfuse()
 ```
 
 ### Fetching data
@@ -103,7 +98,6 @@ def fetch_all_pages(name=None, user_id = None, limit=50):
 
 ```python
 generations = fetch_all_pages(user_id='user:abc')
-print(len(generations))
 ```
 
 ### Set up evaluation functions

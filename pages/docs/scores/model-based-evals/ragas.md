@@ -16,14 +16,17 @@ import os
 # get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
- 
+
 # your openai key
 os.environ["OPENAI_API_KEY"] = ""
+
+# if you do not use Langfuse Cloud
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
 
 ```python
-%pip install datasets ragas llama_index python-dotenv --upgrade
+%pip install datasets ragas llama_index python-dotenv "openai<1.0.0" --upgrade
 ```
 
 ## The Data
@@ -168,22 +171,6 @@ ragas_scores = score_with_ragas(question, contexts, answer)
 ragas_scores
 ```
 
-    calculating faithfulness
-    calculating answer_relevancy
-    calculating context_precision
-    calculating harmfulness
-
-
-
-
-
-    {'faithfulness': 0.6666666666666667,
-     'answer_relevancy': 0.9763805367382368,
-     'context_precision': 0.9999999999,
-     'harmfulness': 0}
-
-
-
 Once the scores are computed you can add them to the trace in Langfuse:
 
 
@@ -310,13 +297,13 @@ r = evaluate(ds, metrics=[faithfulness, answer_relevancy])
     evaluating with [faithfulness]
 
 
-    100%|███████████████████████████████████████████████████████████████████████████████████| 1/1 [00:23<00:00, 23.91s/it]
+    100%|██████████████████████████████████████████████████| 1/1 [00:25<00:00, 25.92s/it]
 
 
     evaluating with [answer_relevancy]
 
 
-    100%|███████████████████████████████████████████████████████████████████████████████████| 1/1 [00:05<00:00,  5.04s/it]
+    100%|██████████████████████████████████████████████████| 1/1 [00:05<00:00,  5.15s/it]
 
 
 And that is it! You can see the scores over a time period.
@@ -329,7 +316,7 @@ r
 
 
 
-    {'ragas_score': 0.9309, 'faithfulness': 0.8889, 'answer_relevancy': 0.9771}
+    {'ragas_score': 0.8659, 'faithfulness': 0.7778, 'answer_relevancy': 0.9764}
 
 
 
@@ -380,27 +367,27 @@ df.head()
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.000000</td>
-      <td>0.976908</td>
-      <td>670bc2b5-f25a-4ec4-9567-27b44b3d9fd8</td>
+      <td>0.666667</td>
+      <td>0.977490</td>
+      <td>bc895a09-b4b9-4071-8bb5-8b51025aa630</td>
     </tr>
     <tr>
       <th>1</th>
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.000000</td>
-      <td>0.977494</td>
-      <td>cb00e976-10b5-4d85-a35c-b3e8dd3dc955</td>
+      <td>0.666667</td>
+      <td>0.976919</td>
+      <td>62524351-35db-4727-9f5d-c7f2087c0cb3</td>
     </tr>
     <tr>
       <th>2</th>
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>0.666667</td>
-      <td>0.976893</td>
-      <td>2a00707d-a5e5-49ed-8bc2-67f133136330</td>
+      <td>1.000000</td>
+      <td>0.974853</td>
+      <td>aa9505a7-2847-4137-85fa-d2c2f5b95020</td>
     </tr>
   </tbody>
 </table>
