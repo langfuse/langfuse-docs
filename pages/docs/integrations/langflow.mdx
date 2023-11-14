@@ -6,15 +6,13 @@ description: Capture all LLM calls made via Langflow in Langfuse
 
 **Langflow** ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
 
-With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them. To trace all executions from Langflow in Langfuse, you just need to export your Langfuse api keys as environment variables:
+With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
 
-## Integration
+Follow these steps to integrate Langflow with Langfuse:
 
-<Steps>
+### 1. Obtain Langfuse API keys
 
-### Obtain Langfuse API keys
-
-<Tabs items={["Langfuse cloud", "local or self-hosted"]}>
+<Tabs items={["Langfuse Cloud", "local or self-hosted"]}>
 <Tab>
 
 1. Create account and project on
@@ -31,27 +29,70 @@ With the native integration, you can use Langflow to quickly create complex LLM 
 
 </Tab>
 </Tabs>
-### Setup Langflow
+### 2. Setup Langflow
 
-1.  **Export API keys as environment variables**\
+<Tabs items={["pip install langflow", "Docker"]}>
+<Tab>
 
-    ```sh
-    # API keys from project settings in Langfuse
+```sh
+# API keys from project settings in Langfuse
+export LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
+export LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
 
-    export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
-    export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
-    ```
+# Optionally, set the host, defaults to Langfuse Cloud
+# LANGFLOW_LANGFUSE_HOST=http://localhost:3000
 
-    Alternatively, you can run the Langflow CLI command:
+# Install Langflow
+pip install langflow
 
-    ```sh
-    LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key> LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key> langflow
-    ```
+# Run Langflow
+langflow run
+```
 
-2.  **Set up the correct Langfuse host**\
-    If you self-host Langfuse, you can set the additional environment variable `LANGFLOW_LANGFUSE_HOST` to point to your Langfuse instance.
+Alternatively, you can run the Langflow CLI command with the environment variables set:
 
-3.  **Monitor langfuse**\
-    Now, whenever you use Langflow's chat or API, you will be able to see the tracing of your conversations in Langfuse.
+```
+LANGFLOW_LANGFUSE_SECRET_KEY=secret_key LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key langflow
+```
 
-</Steps>
+</Tab>
+<Tab>
+
+Clone the [Langflow repository](https://github.com/logspace-ai/langflow).
+
+```sh
+git clone https://github.com/logspace-ai/langflow.git
+cd langflow
+```
+
+Add the environment variables to `docker_example/docker-compose.yml`.
+
+```diff
+version: '3'
+
+services:
+  langflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
++     - LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
++     - LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
+    command: langflow run --host 0.0.0.0
+```
+
+Run Langflow.
+
+```sh
+cd docker_example
+docker-compose up --build
+```
+
+</Tab>
+</Tabs>
+
+### 3. Monitor in Langfuse
+
+Now, whenever you use Langflow's chat or API, you will be able to see the tracing of your conversations in Langfuse.
