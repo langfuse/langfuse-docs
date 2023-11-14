@@ -16,23 +16,27 @@ _Simple example application_
 
 
 ```python
-%pip install langfuse openai langchain --upgrade
+# compatibility issues with openai>=1.x
+%pip install langfuse openai==0.28.1 langchain --upgrade
 ```
 
 
 ```python
 import os
 
-# get keys for your project
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
+# get keys for your project from https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# for self-hosting
-# os.environ["ENV_HOST"] = "http://localhost:3000"
+# your openai key
+os.environ["OPENAI_API_KEY"] = ""
 
-# for openai
-os.environ["OPENAI_API_KEY"] = "sk-***"
+# if you do not use Langfuse Cloud
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+```
 
+
+```python
 # import
 from langfuse import Langfuse
 import openai
@@ -47,7 +51,7 @@ langfuse = Langfuse()
 ```python
 from langfuse.model import CreateDatasetRequest
 
-langfuse.create_dataset(CreateDatasetRequest(name="capital_cities"))
+langfuse.create_dataset(CreateDatasetRequest(name="capital_cities"));
 ```
 
 ### Items
@@ -98,6 +102,7 @@ We implement the application in two ways to demonstrate how it's done
 
 ```python
 # we use a very simple eval here, you can use any eval library
+# see https://langfuse.com/docs/scores/model-based-evals for details
 def simple_evaluation(output, expected_output):
   return output == expected_output
 ```
@@ -156,7 +161,7 @@ def run_experiment(experiment_name, system_prompt):
 ```python
 run_experiment(
     "famous_city",
-    "The user will input countries, respond with the mst famous city in this country"
+    "The user will input countries, respond with the most famous city in this country"
 )
 run_experiment(
     "directly_ask",
@@ -180,31 +185,36 @@ from datetime import datetime
 from langchain.chat_models import ChatOpenAI
 from langfuse.client import InitialGeneration
 from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
-def run_my_langchain_llm_app(input, prompt_template, callback_handler):
+def run_my_langchain_llm_app(input, system_message, callback_handler):
 
   # needs to include {country}
-  prompt = PromptTemplate.from_template(prompt_template)
+  messages = [
+    SystemMessage(
+      content=system_message
+    ),
+    HumanMessage(
+      content=input
+    ),
+  ]
+  chat = ChatOpenAI(callbacks=[callback_handler])
+  completion = chat(messages)
 
-  llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, callbacks=[callback_handler])
-  chain = LLMChain(llm=llm, prompt=prompt, callbacks=[callback_handler])
-  completion = chain.run(**input)
-
-  return completion
+  return completion.content
 ```
 
 
 ```python
 from langfuse.client import CreateScore
 
-def run_langchain_experiment(experiment_name, prompt_template):
+def run_langchain_experiment(experiment_name, system_message):
   dataset = langfuse.get_dataset("capital_cities")
 
   for item in dataset.items:
     handler = item.get_langchain_handler(run_name=experiment_name)
 
-    completion = run_my_langchain_llm_app(item.input, prompt_template, handler)
+    completion = run_my_langchain_llm_app(item.input["country"], system_message, handler)
 
     handler.rootSpan.score(CreateScore(
       name="exact_match",
@@ -216,7 +226,7 @@ def run_langchain_experiment(experiment_name, prompt_template):
 ```python
 run_langchain_experiment(
     "langchain_famous_city",
-    "The user will input countries, respond with the mst famous city in this country"
+    "The user will input countries, respond with the most famous city in this country"
 )
 run_langchain_experiment(
     "langchain_directly_ask",
