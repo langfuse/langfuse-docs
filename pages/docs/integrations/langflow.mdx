@@ -8,7 +8,7 @@ description: Capture all LLM calls made via Langflow in Langfuse
 
 With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
 
-Follow these steps to integrate Langflow with Langfuse:
+## Integration
 
 ### 1. Obtain Langfuse API keys
 
@@ -93,6 +93,69 @@ docker-compose up --build
 </Tab>
 </Tabs>
 
-### 3. Monitor in Langfuse
+### 3. Monitoring in Langfuse
 
-Now, whenever you use Langflow's chat or API, you will be able to see the tracing of your conversations in Langfuse.
+Now, when you use Langflow's chat or API, you can view the trace of your conversations in Langfuse.
+
+## Running Langfuse and Langflow with Docker Compose
+
+If you prefer to self-host Langfuse, you can run both services using Docker Compose. By combining the two docker-compose files, you can streamline the networking between them.
+
+```diff
+version: "3.5"
+
+services:
+  # Adapted from https://github.com/logspace-ai/langflow/blob/dev/docker_example/docker-compose.yml
+  langflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
++     # Tokens are to be created in Langfuse, then copy-pasted here. Then restart docker-compose.
++     - LANGFLOW_LANGFUSE_SECRET_KEY=sk-lf-...
++     - LANGFLOW_LANGFUSE_PUBLIC_KEY=pk-lf-...
++     - LANGFLOW_LANGFUSE_HOST=http://langfuse-server:3000
+    command: langflow run --host 0.0.0.0
+
+  # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
+  langfuse-server:
+    image: ghcr.io/langfuse/langfuse:latest
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - NEXTAUTH_SECRET=mysecret
+      - SALT=mysalt
+      - NEXTAUTH_URL=http:localhost:3000
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+volumes:
+  database_data:
+    driver: local
+```
+
+To test the connectivity between Langflow and Langfuse, run the following command:
+
+```sh
+docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFLOW_LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+
+# which should output the following:
+# http://langfuse-server:3000
+# 200
+```
