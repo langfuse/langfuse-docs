@@ -49,7 +49,9 @@ export const MainContentWrapper = (props) => {
 export const DocsSupport = () => {
   return (
     <div className="flex flex-col items-start gap-3">
-      <h3 className="text-xl font-semibold">Questions? We're here to help</h3>
+      <h3 className="text-xl font-semibold" id="contact">
+        Questions? We're here to help
+      </h3>
       <div className="flex gap-3 flex-wrap">
         <Button variant="outline" size="sm" asChild>
           <a href="/discord" target="_blank">
