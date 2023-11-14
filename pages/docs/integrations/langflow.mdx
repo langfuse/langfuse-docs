@@ -8,7 +8,7 @@ description: Capture all LLM calls made via Langflow in Langfuse
 
 With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
 
-Follow these steps to integrate Langflow with Langfuse:
+## Integration
 
 ### 1. Obtain Langfuse API keys
 
@@ -83,14 +83,30 @@ services:
     command: langflow run --host 0.0.0.0
 ```
 
-Optionnally, if you are running Langflow within Docker as well, you will need both Langflow and Langfuse to be on the same network.
-To achieve this, you may run both of them with the same docker-compose file:
+Run Langflow
+
+```sh
+cd docker_example
+docker-compose up --build
+```
+
+</Tab>
+</Tabs>
+
+### 3. Monitoring in Langfuse
+
+Now, when you use Langflow's chat or API, you can view the trace of your conversations in Langfuse.
+
+## Running Langfuse and Langflow with Docker Compose
+
+If you prefer to self-host Langfuse, you can run both services using Docker Compose. By combining the two docker-compose files, you can streamline the networking between them.
 
 ```diff
 version: "3.5"
 
-services:  
-  langflow: # Adapted from https://github.com/logspace-ai/langflow/blob/dev/docker_example/docker-compose.yml
+services:
+  # Adapted from https://github.com/logspace-ai/langflow/blob/dev/docker_example/docker-compose.yml
+  langflow:
     build:
       context: .
       dockerfile: Dockerfile
@@ -103,7 +119,7 @@ services:
 +     - LANGFLOW_LANGFUSE_HOST=http://langfuse-server:3000
     command: langflow run --host 0.0.0.0
 
-  # Below description comes from https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
+  # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
   langfuse-server:
     image: ghcr.io/langfuse/langfuse:latest
     depends_on:
@@ -116,9 +132,6 @@ services:
       - NEXTAUTH_SECRET=mysecret
       - SALT=mysalt
       - NEXTAUTH_URL=http:localhost:3000
-      - TELEMETRY_ENABLED=${TELEMETRY_ENABLED:-true}
-      - NEXT_PUBLIC_SIGN_UP_DISABLED=${NEXT_PUBLIC_SIGN_UP_DISABLED:-false}
-      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
 
   db:
     image: postgres
@@ -137,24 +150,12 @@ volumes:
     driver: local
 ```
 
-Run Langflow
+To test the connectivity between Langflow and Langfuse, run the following command:
 
-```sh
-cd docker_example
-docker-compose up --build
-```
-
-To check the connectivity from Langflow to Langfuse, you may run the following:
 ```sh
 docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFLOW_LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+
 # which should output the following:
 # http://langfuse-server:3000
 # 200
 ```
-
-</Tab>
-</Tabs>
-
-### 3. Monitor in Langfuse
-
-Now, whenever you use Langflow's chat or API, you will be able to see the tracing of your conversations in Langfuse.
