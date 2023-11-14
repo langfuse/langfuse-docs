@@ -83,11 +83,73 @@ services:
     command: langflow run --host 0.0.0.0
 ```
 
+Optionnally, if you are running Langflow within Docker as well, you will need both Langflow and Langfuse to be on the same network.
+To achieve this, you may run both of them with the same docker-compose file:
+
+```diff
+version: "3.5"
+
+services:  
+  langflow: # Adapted from https://github.com/logspace-ai/langflow/blob/dev/docker_example/docker-compose.yml
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
++     # Tokens are to be created in Langfuse, then copy-pasted here. Then restart docker-compose.
++     - LANGFLOW_LANGFUSE_SECRET_KEY=sk-lf-...
++     - LANGFLOW_LANGFUSE_PUBLIC_KEY=pk-lf-...
++     - LANGFLOW_LANGFUSE_HOST=http://langfuse-server:3000
+    command: langflow run --host 0.0.0.0
+
+  # Below description comes from https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
+  langfuse-server:
+    image: ghcr.io/langfuse/langfuse:latest
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - NEXTAUTH_SECRET=mysecret
+      - SALT=mysalt
+      - NEXTAUTH_URL=http:localhost:3000
+      - TELEMETRY_ENABLED=${TELEMETRY_ENABLED:-true}
+      - NEXT_PUBLIC_SIGN_UP_DISABLED=${NEXT_PUBLIC_SIGN_UP_DISABLED:-false}
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+volumes:
+  database_data:
+    driver: local
+```
+
 Run Langflow
 
 ```sh
 cd docker_example
 docker-compose up --build
+```
+
+To check the connectivity from Langflow to Langfuse, you may run the following:
+```sh
+docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFLOW_LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+# which should output the following:
+# http://langfuse-server:3000
+# 200
 ```
 
 </Tab>
