@@ -219,9 +219,7 @@ export default async function handler(req: Request, res: Response) {
         completion,
       });
       messageSpan.end({
-        output: {
-          text: completion,
-        },
+        output: completion,
         level: completion.includes("I don't know how to help with that")
           ? "WARNING"
           : "DEFAULT",
