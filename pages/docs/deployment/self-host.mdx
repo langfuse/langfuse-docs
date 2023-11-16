@@ -40,6 +40,7 @@ Optionally:
 - Enable signing into Langfuse using OAuth providers. For detailed instructions, see [NextAuth.js docs](https://next-auth.js.org/providers/google).
   - Google: `AUTH_GOOGLE_CLIENT_ID` and `AUTH_GOOGLE_CLIENT_SECRET`
   - GitHub: `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET`
+- `AUTH_DOMAINS_WITH_OAUTH_ENFORCEMENT` is a comma-separated list of domains that are only allowed to sign in using OAuth. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`
 
 ```bash
 docker run --name langfuse \
