@@ -26,7 +26,7 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-%pip install langfuse datasets ragas llama_index python-dotenv "openai<1.0.0" --upgrade
+%pip install langfuse datasets ragas llama_index python-dotenv openai --upgrade
 ```
 
 ## The Data
@@ -46,16 +46,6 @@ from datasets import load_dataset
 fiqa_eval = load_dataset("explodinggradients/fiqa", "ragas_eval")['baseline']
 fiqa_eval
 ```
-
-
-
-
-    Dataset({
-        features: ['question', 'ground_truths', 'answer', 'contexts'],
-        num_rows: 30
-    })
-
-
 
 ## The Metrics
 For going to measure the following aspects of a RAG system. These metric are from the Ragas library:
@@ -81,12 +71,6 @@ for m in metrics:
     # also init the metrics
     m.init_model()
 ```
-
-    faithfulness
-    answer_relevancy
-    context_precision
-    harmfulness
-
 
 ## The Setup
 You can use model-based evaluation with Ragas in 2 ways
@@ -118,7 +102,7 @@ Now lets init a Langfuse client SDK to instrument you app.
 
 ```python
 from langfuse import Langfuse
- 
+
 langfuse = Langfuse()
 ```
 
@@ -190,7 +174,7 @@ Or you can consider
 
 Scoring each production trace can be time-consuming and costly depending on your application architecture and traffic. In that case, it's better to start off with a batch scoring method. Decide a timespan you want to run the batch process and the number of traces you want to _sample_ from that time slice. Create a dataset and call `ragas.evaluate` to analyze the result.
 
-You can run this periodically to keep track of how the scores are changing across timeslices and figure out if there are any discrepancies. 
+You can run this periodically to keep track of how the scores are changing across timeslices and figure out if there are any discrepancies.
 
 To create demo data in Langfuse, lets first create ~10 traces with the fiqa dataset.
 
@@ -201,13 +185,13 @@ from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEven
 for interaction in fiqa_eval.select(range(10, 20)):
     trace = langfuse.trace(CreateTrace(name = "rag"))
     trace.span(CreateSpan(
-        name = "retrieval", 
-        input={'question': question}, 
+        name = "retrieval",
+        input={'question': question},
         output={'contexts': contexts}
     ))
     trace.span(CreateSpan(
-        name = "generation", 
-        input={'question': question, 'contexts': contexts}, 
+        name = "generation",
+        input={'question': question, 'contexts': contexts},
         output={'answer': answer}
     ))
 
@@ -221,7 +205,7 @@ Now that the dataset is uploaded to langfuse you can retrieve it as needed with 
 ```python
 def get_traces(name=None, limit=None, user_id=None):
     all_data = []
-    page = 1 
+    page = 1
 
     while True:
         response = langfuse.client.trace.list(
@@ -247,13 +231,6 @@ traces_sample = sample(traces, NUM_TRACES_TO_SAMPLE)
 
 len(traces_sample)
 ```
-
-
-
-
-    3
-
-
 
 Now lets make a batch and score it. Ragas uses huggingface dataset object to build the dataset and run the evaluation. If you run this on your own production data, use the right keys to extract the question, contexts and answer from the trace
 
@@ -294,31 +271,12 @@ ds = Dataset.from_dict(evaluation_batch)
 r = evaluate(ds, metrics=[faithfulness, answer_relevancy])
 ```
 
-    evaluating with [faithfulness]
-
-
-    100%|██████████████████████████████████████████████████| 1/1 [00:25<00:00, 25.92s/it]
-
-
-    evaluating with [answer_relevancy]
-
-
-    100%|██████████████████████████████████████████████████| 1/1 [00:05<00:00,  5.15s/it]
-
-
 And that is it! You can see the scores over a time period.
 
 
 ```python
 r
 ```
-
-
-
-
-    {'ragas_score': 0.8659, 'faithfulness': 0.7778, 'answer_relevancy': 0.9764}
-
-
 
 You can also push the scores back into Langfuse or use the exported pandas dataframe to run further analysis.
 
@@ -335,7 +293,9 @@ df.head()
 
 
 
-<div>
+
+  <div id="df-9332998e-f294-4e8b-a26a-f402c10402c7" class="colab-df-container">
+    <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
@@ -367,31 +327,240 @@ df.head()
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>0.666667</td>
-      <td>0.977490</td>
-      <td>bc895a09-b4b9-4071-8bb5-8b51025aa630</td>
+      <td>1.0</td>
+      <td>0.97749</td>
+      <td>9a1db1ee-9177-4764-a8f5-53ae09c3f009</td>
     </tr>
     <tr>
       <th>1</th>
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>0.666667</td>
-      <td>0.976919</td>
-      <td>62524351-35db-4727-9f5d-c7f2087c0cb3</td>
+      <td>1.0</td>
+      <td>0.97749</td>
+      <td>c8f005f2-21a3-4141-9a7f-125302f30bde</td>
     </tr>
     <tr>
       <th>2</th>
       <td>How to deposit a cheque issued to an associate...</td>
       <td>[Just have the associate sign the back and the...</td>
       <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.000000</td>
-      <td>0.974853</td>
-      <td>aa9505a7-2847-4137-85fa-d2c2f5b95020</td>
+      <td>1.0</td>
+      <td>0.97749</td>
+      <td>ce94ab6c-11bb-46ce-ae7b-6728519d162f</td>
     </tr>
   </tbody>
 </table>
 </div>
+    <div class="colab-df-buttons">
+
+  <div class="colab-df-container">
+    <button class="colab-df-convert" onclick="convertToInteractive('df-9332998e-f294-4e8b-a26a-f402c10402c7')"
+            title="Convert this dataframe to an interactive table."
+            style="display:none;">
+
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960">
+    <path d="M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z"/>
+  </svg>
+    </button>
+
+  <style>
+    .colab-df-container {
+      display:flex;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    .colab-df-buttons div {
+      margin-bottom: 4px;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+    <script>
+      const buttonEl =
+        document.querySelector('#df-9332998e-f294-4e8b-a26a-f402c10402c7 button.colab-df-convert');
+      buttonEl.style.display =
+        google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+      async function convertToInteractive(key) {
+        const element = document.querySelector('#df-9332998e-f294-4e8b-a26a-f402c10402c7');
+        const dataTable =
+          await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                    [key], {});
+        if (!dataTable) return;
+
+        const docLinkHtml = 'Like what you see? Visit the ' +
+          '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+          + ' to learn more about interactive tables.';
+        element.innerHTML = '';
+        dataTable['output_type'] = 'display_data';
+        await google.colab.output.renderOutput(dataTable, element);
+        const docLink = document.createElement('div');
+        docLink.innerHTML = docLinkHtml;
+        element.appendChild(docLink);
+      }
+    </script>
+  </div>
+
+
+<div id="df-34d408b3-f073-4407-938d-4eb1a3dee757">
+  <button class="colab-df-quickchart" onclick="quickchart('df-34d408b3-f073-4407-938d-4eb1a3dee757')"
+            title="Suggest charts"
+            style="display:none;">
+
+<svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
+     width="24px">
+    <g>
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+    </g>
+</svg>
+  </button>
+
+<style>
+  .colab-df-quickchart {
+      --bg-color: #E8F0FE;
+      --fill-color: #1967D2;
+      --hover-bg-color: #E2EBFA;
+      --hover-fill-color: #174EA6;
+      --disabled-fill-color: #AAA;
+      --disabled-bg-color: #DDD;
+  }
+
+  [theme=dark] .colab-df-quickchart {
+      --bg-color: #3B4455;
+      --fill-color: #D2E3FC;
+      --hover-bg-color: #434B5C;
+      --hover-fill-color: #FFFFFF;
+      --disabled-bg-color: #3B4455;
+      --disabled-fill-color: #666;
+  }
+
+  .colab-df-quickchart {
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    fill: var(--fill-color);
+    height: 32px;
+    padding: 0;
+    width: 32px;
+  }
+
+  .colab-df-quickchart:hover {
+    background-color: var(--hover-bg-color);
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    fill: var(--button-hover-fill-color);
+  }
+
+  .colab-df-quickchart-complete:disabled,
+  .colab-df-quickchart-complete:disabled:hover {
+    background-color: var(--disabled-bg-color);
+    fill: var(--disabled-fill-color);
+    box-shadow: none;
+  }
+
+  .colab-df-spinner {
+    border: 2px solid var(--fill-color);
+    border-color: transparent;
+    border-bottom-color: var(--fill-color);
+    animation:
+      spin 1s steps(1) infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      border-color: transparent;
+      border-bottom-color: var(--fill-color);
+      border-left-color: var(--fill-color);
+    }
+    20% {
+      border-color: transparent;
+      border-left-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+    }
+    30% {
+      border-color: transparent;
+      border-left-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+      border-right-color: var(--fill-color);
+    }
+    40% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+    }
+    60% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+    }
+    80% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+      border-bottom-color: var(--fill-color);
+    }
+    90% {
+      border-color: transparent;
+      border-bottom-color: var(--fill-color);
+    }
+  }
+</style>
+
+  <script>
+    async function quickchart(key) {
+      const quickchartButtonEl =
+        document.querySelector('#' + key + ' button');
+      quickchartButtonEl.disabled = true;  // To prevent multiple clicks.
+      quickchartButtonEl.classList.add('colab-df-spinner');
+      try {
+        const charts = await google.colab.kernel.invokeFunction(
+            'suggestCharts', [key], {});
+      } catch (error) {
+        console.error('Error during call to suggestCharts:', error);
+      }
+      quickchartButtonEl.classList.remove('colab-df-spinner');
+      quickchartButtonEl.classList.add('colab-df-quickchart-complete');
+    }
+    (() => {
+      let quickchartButtonEl =
+        document.querySelector('#df-34d408b3-f073-4407-938d-4eb1a3dee757 button');
+      quickchartButtonEl.style.display =
+        google.colab.kernel.accessAllowed ? 'block' : 'none';
+    })();
+  </script>
+</div>
+    </div>
+  </div>
+
 
 
 

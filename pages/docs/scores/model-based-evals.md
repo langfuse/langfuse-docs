@@ -25,7 +25,7 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 
 
 ```python
-%pip install langfuse langchain "openai<1.0.0" --upgrade
+%pip install langfuse langchain openai cohere tiktoken --upgrade
 ```
 
 

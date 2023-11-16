@@ -59,7 +59,7 @@ The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
-%pip install langfuse langchain "openai<1.0.0" --upgrade
+%pip install langfuse langchain openai --upgrade
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
@@ -161,13 +161,6 @@ chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[h
 handler.get_trace_url()
 ```
 
-
-
-
-    'http://localhost:3000/trace/6f40235f-a171-42e7-9bd0-a9b1754c6044'
-
-
-
 ### 3. QA Retrieval
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
@@ -180,7 +173,7 @@ os.environ["SERPAPI_API_KEY"] = ''
 
 
 ```python
-%pip install unstructured chromadb tiktoken google-search-results python-magic python-magic-bin --upgrade
+%pip install unstructured chromadb tiktoken google-search-results python-magic --upgrade
 ```
 
 
@@ -221,9 +214,6 @@ print(result)
 handler.langfuse.flush()
 ```
 
-     The president said that she is one of our nation's top legal minds and she will continue Justice Breyer's legacy of excellence.
-
-
 
 
 ![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
@@ -247,24 +237,6 @@ handler.langfuse.flush()
 
 print("output variable: ", result)
 ```
-
-    
-    
-    [1m> Entering new AgentExecutor chain...[0m
-    [32;1m[1;3m I should find out who Leo DiCaprio's girlfriend is and then use a calculator to calculate the 0.43 power
-    Action: Search
-    Action Input: "Leo DiCaprio's girlfriend"[0m
-    Observation: [36;1m[1;3mVittoria Ceretti: 2023 According to sources, Leo and Vittoria reportedly met during the Killers of the Flower Moon premiere at the 2023 Cannes Film Festival.[0m
-    Thought:[32;1m[1;3m I should use the calculator to find the 0.43 power of 2023
-    Action: Calculator
-    Action Input: 2023^0.43[0m
-    Observation: [33;1m[1;3mAnswer: 26.39843795372203[0m
-    Thought:[32;1m[1;3m I now know the final answer
-    Final Answer: Vittoria Ceretti is Leo DiCaprio's girlfriend and her current age raised to the 0.43 power is 26.39843795372203.[0m
-    
-    [1m> Finished chain.[0m
-    output variable:  Vittoria Ceretti is Leo DiCaprio's girlfriend and her current age raised to the 0.43 power is 26.39843795372203.
-
 
 ## Adding scores
 

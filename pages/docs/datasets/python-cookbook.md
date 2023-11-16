@@ -16,8 +16,7 @@ _Simple example application_
 
 
 ```python
-# compatibility issues with openai>=1.x
-%pip install langfuse openai==0.28.1 langchain --upgrade
+%pip install langfuse openai langchain --upgrade
 ```
 
 
@@ -122,7 +121,7 @@ def run_my_custom_llm_app(input, system_prompt):
 
   generationStartTime = datetime.now()
 
-  openai_completion = openai.ChatCompletion.create(
+  openai_completion = openai.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=messages
   ).choices[0].message.content

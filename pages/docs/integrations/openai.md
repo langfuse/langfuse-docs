@@ -17,7 +17,7 @@ The integration does not support openai 1.x yet, this is work in progress.
 
 
 ```python
-%pip install langfuse "openai<1.0.0" --upgrade
+%pip install langfuse openai --upgrade
 ```
 
 
@@ -56,7 +56,7 @@ Optionally:
 
 
 ```python
-completion = openai.ChatCompletion.create(
+completion = openai.chat.completions.create(
   name="test-chat",
   model="gpt-3.5-turbo",
   messages=[
@@ -73,7 +73,7 @@ Simple example using Pydantic to generate the function schema.
 
 
 ```python
-%pip install "pydantic<2" --upgrade
+%pip install pydantic --upgrade
 ```
 
 
@@ -90,7 +90,7 @@ schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
 
 ```python
 import json
-response = openai.ChatCompletion.create(
+response = openai.chat.completions.create(
     name="test-function",
     model="gpt-3.5-turbo-0613",
     messages=[
@@ -106,7 +106,7 @@ response = openai.ChatCompletion.create(
     function_call={"name": "get_answer_for_user_query"}
 )
 
-output = json.loads(response.choices[0]["message"]["function_call"]["arguments"])
+output = json.loads(response.choices[0].message.function_call.arguments)
 ```
 
 ## 4. Debug & measure in Langfuse
@@ -135,7 +135,7 @@ Langfuse automatically monitors OpenAI errors.
 # Cause an error by attempting to use a host that does not exist.
 openai.api_base = "https://example.com"
 
-country = openai.ChatCompletion.create(
+country = openai.chat.completions.create(
   name="will-error",
   model="gpt-3.5-turbo",
   messages=[
@@ -165,16 +165,16 @@ trace_id = str(uuid4())
 
 
 ```python
-country = openai.ChatCompletion.create(
+country = openai.chat.completions.create(
   name="random-country",
   model="gpt-3.5-turbo",
   messages=[
       {"role": "user", "content": "Pick a random country"}],
   temperature=1,
   trace_id=trace_id
-)["choices"][0]["message"]["content"]
+).choices[0].message.content
 
-capital = openai.ChatCompletion.create(
+capital = openai.chat.completions.create(
   name="geography-teacher",
   model="gpt-3.5-turbo",
   messages=[
@@ -182,9 +182,9 @@ capital = openai.ChatCompletion.create(
       {"role": "user", "content": country}],
   temperature=0,
   trace_id=trace_id
-)["choices"][0]["message"]["content"]
+).choices[0].message.content
 
-poem = openai.ChatCompletion.create(
+poem = openai.chat.completions.create(
   name="poet",
   model="gpt-3.5-turbo",
   messages=[
@@ -193,7 +193,7 @@ poem = openai.ChatCompletion.create(
   temperature=1,
   max_tokens=200,
   trace_id=trace_id
-)["choices"][0]["message"]["content"]
+).choices[0].message.content
 ```
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
