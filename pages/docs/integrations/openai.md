@@ -44,6 +44,14 @@ os.environ["OPENAI_API_KEY"] = ""
 from langfuse.openai import openai
 ```
 
+### Options
+
+| Variable |Description   | Default value  
+| --- | --- | ---
+| `openai.langfuse_host` | BaseUrl of the Langfuse API | `"https://cloud.langfuse.com"`       
+| `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
+| `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
+
 ## 3. Use SDK as usual
 
 _No changes required._
