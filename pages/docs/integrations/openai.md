@@ -45,9 +45,11 @@ from langfuse.openai import openai
 
 ### Options
 
+Instead of setting the environment variables before importing the SDK, you can also use the following options after the import:
+
 | Variable |Description   | Default value  
 | --- | --- | ---
-| `openai.langfuse_host` | BaseUrl of the Langfuse API | `"https://cloud.langfuse.com"`       
+| `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`       
 | `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
 | `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
 
