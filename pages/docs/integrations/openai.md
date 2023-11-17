@@ -11,12 +11,11 @@ If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement
 + from langfuse.openai import openai
 ```
 
-The integration does not support openai 1.x yet, this is work in progress.
-
 ## 1. Setup
 
 
 ```python
+# supports openai 1.x and 0.x
 %pip install langfuse openai --upgrade
 ```
 
