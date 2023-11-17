@@ -43,11 +43,11 @@ os.environ["OPENAI_API_KEY"] = ""
 from langfuse.openai import openai
 ```
 
-### Options
+### Attributes
 
-Instead of setting the environment variables before importing the SDK, you can also use the following options after the import:
+Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import:
 
-| Variable |Description   | Default value  
+| Attribute |Description   | Default value  
 | --- | --- | ---
 | `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`       
 | `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
