@@ -80,6 +80,23 @@ ghcr.io/langfuse/langfuse:latest
 
 </Steps>
 
+## Health Check Endpoint
+
+Langfuse includes a health check endpoint at `/api/public/health`. This endpoint checks both API functionality and database connectivity.
+
+Access the health check endpoint:
+
+```bash
+curl http://localhost:3000/api/public/health
+```
+
+The potential responses from the health check endpoint are:
+
+- `200 OK`: Both the API is functioning normally and a successful connection to the database was made.
+- `503 Service Unavailable`: Either the API is not functioning or it couldn't establish a connection to the database.
+
+Applications and monitoring services can call this endpoint periodically for health updates.
+
 ## Troubleshooting
 
 If you encounter issues, please make sure that you've done the following:
