@@ -102,8 +102,8 @@ completion = openai.chat.completions.create(
   name="test-chat",
   model="gpt-3.5-turbo",
   messages=[
-      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
-      {"role": "user", "content": "1 + 1 = "}],
+      {"role": "system", "content": "You are a professional comedian."},
+      {"role": "user", "content": "Tell me a joke."}],
   temperature=0,
   metadata={"someMetadataKey": "someValue"},
   stream=True
