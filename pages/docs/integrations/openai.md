@@ -43,7 +43,9 @@ os.environ["OPENAI_API_KEY"] = ""
 from langfuse.openai import openai
 ```
 
-The replacement works for OpenAI SDK versions `>=0.27.8`. Async functions and streaming are supported for the OpenAI SDK versions `>=1.0.0`.
+The integration is compatible with OpenAI SDK versions `>=0.27.8`.
+
+Async functions and streaming are supported for OpenAI SDK versions `>=1.0.0`.
 
 ### Attributes
 
