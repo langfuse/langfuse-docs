@@ -43,15 +43,31 @@ os.environ["OPENAI_API_KEY"] = ""
 from langfuse.openai import openai
 ```
 
+The integration is compatible with OpenAI SDK versions `>=0.27.8`.
+
+Async functions and streaming are supported for OpenAI SDK versions `>=1.0.0`.
+
 ### Attributes
 
-Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import:
+Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
 
 | Attribute |Description   | Default value  
 | --- | --- | ---
 | `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`       
 | `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
 | `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
+
+
+```python
+# Instead of environment variables, use the module variables to configure Langfuse
+
+# openai.langfuse_host = '...'
+# openai.langfuse_public_key = '...'
+# openai.langfuse_secret_key = '...'
+
+# This works for the async client as well
+# from langfuse.openai import AsyncOpenAI
+```
 
 ## 3. Use SDK as usual
 
@@ -71,6 +87,51 @@ completion = openai.chat.completions.create(
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"someMetadataKey": "someValue"},
+)
+```
+
+#### Streaming
+
+Simple example using the OpenAI streaming functionality.
+
+
+```python
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a professional comedian."},
+      {"role": "user", "content": "Tell me a joke."}],
+  temperature=0,
+  metadata={"someMetadataKey": "someValue"},
+  stream=True
+)
+
+for chunk in completion:
+  print(chunk)
+```
+
+#### Async support
+
+Simple example using the OpenAI async client. It takes the Langfuse configurations either from the environment variables or from the attributes on the `openai` module.
+
+
+```python
+from langfuse.openai import AsyncOpenAI
+
+async_client = AsyncOpenAI()
+```
+
+
+```python
+completion = await async_client.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 100 = "}],
   temperature=0,
   metadata={"someMetadataKey": "someValue"},
 )
