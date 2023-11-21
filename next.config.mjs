@@ -65,18 +65,13 @@ const permanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   // integrations
   ["/integrations", "/docs/integrations"],
-  ["/docs/reference", "/docs/integrations/api"],
-  ["/docs/api", "/docs/integrations/api"],
-  ["/docs/sdk", "/docs/integrations/sdk"],
-  ["/docs/langchain", "/docs/integrations/langchain"],
-  // sdk
-  ["/docs/sdk/python", "/docs/integrations/sdk/python"],
-  ["/docs/sdk/typescript", "/docs/integrations/sdk/typescript"],
-  ["/docs/sdk/typescript-web", "/docs/integrations/sdk/typescript-web"],
+  ["/docs/reference", "/docs/api"],
+  // Integrations back on root
+  ...["langchain", "api", "openai", "sdk", "flowise", "langflow", "litellm"].map(
+    (integration) => [`/docs/integrations/${integration}/:path*`, `/docs/${integration}/:path*`]),
   // sdk integration guide
-  ["/docs/guides/sdk-integration", "/docs/integrations/sdk#Example"],
-  // langchain
-  ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
+  ["/docs/langchain", "/docs/langchain/python"],
+  ["/docs/guides/sdk-integration", "/docs/sdk#example"],
   // evals
   ["/docs/scores/evals", "/docs/scores/model-based-evals"],
   // old experimentation to new experimentation

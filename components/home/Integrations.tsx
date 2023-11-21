@@ -7,35 +7,35 @@ const features = [
     description:
       "Typed SDKs that capture trace data and send it fully async to Langfuse. You have full control on what is sent to Langfuse.",
     icon: Package,
-    href: "/docs/integrations/sdk",
+    href: "/docs/sdk",
   },
   {
     name: "🦜🔗 Langchain integration",
     description:
       "Using Langchain? Get full execution traces in 5 minutes by adding the Langfuse Callback Handler to your app. Works for Python and JS projects.",
     icon: Link,
-    href: "/docs/integrations/langchain",
+    href: "/docs/langchain",
   },
   {
     name: "Web SDK",
     description:
       "Capture user feedback and other quality scores right from the frontend using the Langfuse Web SDK.",
     icon: Chrome,
-    href: "/docs/integrations/sdk/typescript-web",
+    href: "/docs/sdk/typescript-web",
   },
   {
     name: "OpenAI",
     description:
       "If you use the OpenAI SDK, use the Langfuse drop-in replacement to get full trace data by just changing the import.",
     icon: SiOpenai,
-    href: "/docs/integrations/openai",
+    href: "/docs/openai",
   },
   {
     name: "API",
     description:
       "Need more control? Use the Langfuse API to ingest traces and scores and build your own custom integrations.",
     icon: Code,
-    href: "/docs/integrations/api",
+    href: "/docs/api",
   },
   {
     name: "Other open-source projects",

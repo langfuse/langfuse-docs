@@ -2,7 +2,7 @@
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.
 
-This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/integrations/sdk) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
+This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
 
 _Simple example application_
 
@@ -14,11 +14,9 @@ _Simple example application_
 
 ## Setup
 
-
 ```python
 %pip install langfuse openai langchain --upgrade
 ```
-
 
 ```python
 import os
@@ -34,7 +32,6 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-
 ```python
 # import
 from langfuse import Langfuse
@@ -46,7 +43,6 @@ langfuse = Langfuse()
 
 ## Create a dataset
 
-
 ```python
 from langfuse.model import CreateDatasetRequest
 
@@ -56,7 +52,6 @@ langfuse.create_dataset(CreateDatasetRequest(name="capital_cities"));
 ### Items
 
 Load local items into the Langfuse dataset. Alternatively you can add items from production via the Langfuse UI.
-
 
 ```python
 # example items, could also be json instead of strings
@@ -73,7 +68,6 @@ local_items = [
     {"input": {"country": "Egypt"}, "expected_output": "Cairo"},
 ]
 ```
-
 
 ```python
 from langfuse.model import CreateDatasetItemRequest
@@ -98,7 +92,6 @@ We implement the application in two ways to demonstrate how it's done
 1. Custom LLM app using e.g. OpenAI SDK, traced with Langfuse Python SDK
 2. Langchain Application, traced via native Langfuse integration
 
-
 ```python
 # we use a very simple eval here, you can use any eval library
 # see https://langfuse.com/docs/scores/model-based-evals for details
@@ -107,7 +100,6 @@ def simple_evaluation(output, expected_output):
 ```
 
 ### Custom app
-
 
 ```python
 from datetime import datetime
@@ -138,7 +130,6 @@ def run_my_custom_llm_app(input, system_prompt):
   return openai_completion, langfuse_generation
 ```
 
-
 ```python
 from langfuse.client import CreateScore
 
@@ -155,7 +146,6 @@ def run_experiment(experiment_name, system_prompt):
       value=simple_evaluation(completion, item.expected_output)
     ))
 ```
-
 
 ```python
 run_experiment(
@@ -177,7 +167,6 @@ run_experiment(
 ```
 
 ### Langchain application
-
 
 ```python
 from datetime import datetime
@@ -203,7 +192,6 @@ def run_my_langchain_llm_app(input, system_message, callback_handler):
   return completion.content
 ```
 
-
 ```python
 from langfuse.client import CreateScore
 
@@ -220,7 +208,6 @@ def run_langchain_experiment(experiment_name, system_message):
       value=simple_evaluation(completion, item.expected_output)
     ))
 ```
-
 
 ```python
 run_langchain_experiment(

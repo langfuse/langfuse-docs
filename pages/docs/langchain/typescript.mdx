@@ -35,8 +35,8 @@ Supported runtimes:
 - [x] Edge: Vercel, Cloudflare, ...
 - [x] Deno
 
-Want to work without Langchain? Use [Langfuse](/docs/integrations/sdk/typescript)
-for tracing and [LangfuseWeb](/docs/integrations/sdk/typescript-web) to capture feedback from the browser.
+Want to work without Langchain? Use [Langfuse](/docs/sdk/typescript)
+for tracing and [LangfuseWeb](/docs/sdk/typescript-web) to capture feedback from the browser.
 
 ## Installation
 
@@ -72,7 +72,7 @@ const handler = new CallbackHandler({
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
   call `handler.shutdownAsync()` at the end to flush the queue and await all
-  pending requests. ([Learn more](/docs/integrations/sdk/typescript#lambda))
+  pending requests. ([Learn more](/docs/sdk/typescript#lambda))
 </Callout>
 
 #### Create a simple LLM call using Langchain
@@ -200,4 +200,4 @@ handler.getLangchainRunId(); // returns the latest run id, different from the fi
 
 # Flushing, shutdown, and debugging
 
-The Langfuse SDK uses the JS/TS (Node.js, Edge) SDK under the hood and offers the same functionality regarding flushing, shutdown and debugging. Please refer to the [JS/TS SDK documentation](/docs/integrations/sdk/typescript#shutdown) for more information.
+The Langfuse SDK uses the JS/TS (Node.js, Edge) SDK under the hood and offers the same functionality regarding flushing, shutdown and debugging. Please refer to the [JS/TS SDK documentation](/docs/sdk/typescript#shutdown) for more information.
