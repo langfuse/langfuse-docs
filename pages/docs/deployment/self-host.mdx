@@ -34,13 +34,15 @@ Environment variables:
 
 Optionally:
 
-- `NEXT_PUBLIC_SIGN_UP_DISABLED=true` blocks new sign ups.
 - `PORT` sets the port the server listens on (default: 3000).
 - `HOSTNAME` defaults to `localhost`. In some environments it needs to be set to `0.0.0.0` to be accessible from outside the container (e.g. Google Cloud Run).
-- Enable signing into Langfuse using OAuth providers. For detailed instructions, see [NextAuth.js docs](https://next-auth.js.org/providers/google).
-  - Google: `AUTH_GOOGLE_CLIENT_ID` and `AUTH_GOOGLE_CLIENT_SECRET`
-  - GitHub: `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET`
-- `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` is a comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`
+- Configure authentication:
+  - `NEXT_PUBLIC_SIGN_UP_DISABLED=true` block all new sign ups. Only existing users can sign in.
+  - Enable signing into Langfuse using OAuth/SSO providers. For detailed instructions, see [NextAuth.js docs](https://next-auth.js.org/providers/google).
+    - Google: `AUTH_GOOGLE_CLIENT_ID` and `AUTH_GOOGLE_CLIENT_SECRET`
+    - GitHub: `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET`
+  - `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` is a comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`
+  - `AUTH_DISABLE_USERNAME_PASSWORD=true` disables email/password sign for all users. Only OAuth/SSO providers can be used to sign in.
 
 ```bash
 docker run --name langfuse \
