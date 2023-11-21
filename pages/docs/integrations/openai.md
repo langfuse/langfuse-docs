@@ -291,6 +291,9 @@ langfuse = Langfuse()
 
 # create trace and add params
 trace = langfuse.trace(CreateTrace(
+    # optional, if you want to use your own id
+    # id = "my-trace-id", 
+
     name = "country-poems",
     userId = "user@example.com",
     metadata = {
