@@ -70,6 +70,7 @@ const permanentRedirects = [
   ...["langchain", "api", "openai", "sdk", "flowise", "langflow", "litellm"].map(
     (integration) => [`/docs/integrations/${integration}/:path*`, `/docs/${integration}/:path*`]),
   // sdk integration guide
+  ["/docs/langchain", "/docs/langchain/python"],
   ["/docs/guides/sdk-integration", "/docs/sdk#example"],
   // evals
   ["/docs/scores/evals", "/docs/scores/model-based-evals"],
