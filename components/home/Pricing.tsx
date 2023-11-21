@@ -34,7 +34,7 @@ const tiers = [
       "For serious projects. Includes access to full history, data governance and support.",
     features: [
       "Unlimited projects, events, and throughput (fair use)",
-      "100k observations / month included",
+      "100k observations / month included, additional: $10 / 100k observations",
       "Unlimited history",
       "Dedicated support channels (Slack or Discord)",
       "Custom data retention policies",
@@ -44,10 +44,10 @@ const tiers = [
     cta: "Start free trial",
   },
   {
-    name: "Enterprise",
-    id: "tier-enterprise",
+    name: "Team",
+    id: "tier-team",
     href: "/schedule-demo",
-    price: "Custom",
+    price: { monthly: "$199", annually: "$1990" },
     description:
       "Dedicated solutions and support for your team. Contact us to learn more.",
     features: [
