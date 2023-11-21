@@ -238,13 +238,13 @@ To get started, you can just add an identifier from your own application (e.g., 
 
 
 ```python
-# use existing id or create a random one
+# create random trace_id
+# could also use existing id from your application, e.g. conversation id
 from uuid import uuid4
 trace_id = str(uuid4())
-```
 
+# create multiple completions, pass trace_id to each
 
-```python
 country = "Bulgaria"
 
 capital = openai.chat.completions.create(
@@ -298,11 +298,12 @@ trace = langfuse.trace(CreateTrace(
     },
     release = "v0.0.21"
 ))
+
+# get traceid to pass to openai calls
 trace_id = trace.id
-```
 
+# create multiple completions, pass trace_id to each
 
-```python
 country = "Bulgaria"
 
 capital = openai.chat.completions.create(
