@@ -13,9 +13,10 @@ If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement
 
 ## 1. Setup
 
+The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
+
 
 ```python
-# supports openai 1.x and 0.x
 %pip install langfuse openai --upgrade
 ```
 
@@ -43,10 +44,6 @@ os.environ["OPENAI_API_KEY"] = ""
 from langfuse.openai import openai
 ```
 
-The integration is compatible with OpenAI SDK versions `>=0.27.8`.
-
-Async functions and streaming are supported for OpenAI SDK versions `>=1.0.0`.
-
 ### Attributes
 
 Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
@@ -59,7 +56,7 @@ Instead of setting the environment variables before importing the SDK, you can a
 
 
 ```python
-# Instead of environment variables, use the module variables to configure Langfuse
+# Instead of environment variables, you can use the module variables to configure Langfuse
 
 # openai.langfuse_host = '...'
 # openai.langfuse_public_key = '...'
@@ -110,8 +107,14 @@ completion = openai.chat.completions.create(
 )
 
 for chunk in completion:
-  print(chunk)
+  print(chunk.choices[0].delta.content, end="")
 ```
+
+    Sure, here's one for you:
+    
+    Why don't scientists trust atoms?
+    
+    Because they make up everything!None
 
 #### Async support
 
@@ -225,24 +228,24 @@ openai.api_base = "https://api.openai.com/v1"
 
 ## 5. Group multiple generations into a single trace
 
-Many applications require more than one OpenAI call. By setting the `trace_id` you can group them into a single trace for improved debugging and reporting. The `trace_id` usually comes from your own application or you create a random one to group calls together.
+Many applications require more than one OpenAI call. In Langfuse, all LLM calls of a single API invocation (or conversation thread) can be grouped into the same `trace`.
+
+There are 2 options: (1) pass a `trace_id` (own or random string) or (2) create a trace with the Langfuse SDK.
+
+### Simple: `trace_id` as string
+
+To get started, you can just add an identifier from your own application (e.g., conversation-id) to the openai calls – or create a random id.
 
 
 ```python
+# use existing id or create a random one
 from uuid import uuid4
 trace_id = str(uuid4())
 ```
 
 
 ```python
-country = openai.chat.completions.create(
-  name="random-country",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "user", "content": "Pick a random country"}],
-  temperature=1,
-  trace_id=trace_id
-).choices[0].message.content
+country = "Bulgaria"
 
 capital = openai.chat.completions.create(
   name="geography-teacher",
@@ -267,6 +270,62 @@ poem = openai.chat.completions.create(
 ```
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
+
+### Fully featured: create trace via SDK
+
+The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/integrations/sdk/python#traces-1) for full documentation on this.
+
+Some of the functionality enabled by custom traces:
+- custom name to identify a specific trace-type
+- user-level tracking
+- experiment tracking via versions and releases
+- custom metadata
+
+
+```python
+from langfuse import Langfuse
+from langfuse.model import CreateTrace
+
+# initialize SDK
+langfuse = Langfuse()
+
+# create trace and add params
+trace = langfuse.trace(CreateTrace(
+    name = "country-poems",
+    userId = "user@example.com",
+    metadata = {
+        "env": "development",
+    },
+    release = "v0.0.21"
+))
+trace_id = trace.id
+```
+
+
+```python
+country = "Bulgaria"
+
+capital = openai.chat.completions.create(
+  name="geography-teacher",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+      {"role": "user", "content": country}],
+  temperature=0,
+  trace_id=trace_id
+).choices[0].message.content
+
+poem = openai.chat.completions.create(
+  name="poet",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about a city."},
+      {"role": "user", "content": capital}],
+  temperature=1,
+  max_tokens=200,
+  trace_id=trace_id
+).choices[0].message.content
+```
 
 ## 6. Add scores
 
