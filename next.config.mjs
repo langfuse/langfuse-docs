@@ -51,7 +51,8 @@ const nonPermanentRedirects = [
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/tos", "https://app.termly.io/document/terms-of-service/baf80a2e-dc67-46de-9ca8-2f7457179c32"],
-  ["/privacy", "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90"]
+  ["/privacy", "https://app.termly.io/document/privacy-policy/47905712-56e1-4ad0-9bb7-8958f3263f90"],
+  ["/cookie-policy", "https://app.termly.io/document/cookie-policy/f97945a3-cb02-4db7-9370-c57023d92838"],
 ];
 
 const permanentRedirects = [
