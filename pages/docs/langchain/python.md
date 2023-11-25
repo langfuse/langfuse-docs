@@ -86,6 +86,12 @@ from langfuse.callback import CallbackHandler
 handler = CallbackHandler()
 ```
 
+
+```python
+# checks the SDK connection with the server.
+handler.auth_check()
+```
+
 ### 2. Langchain
 
 

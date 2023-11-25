@@ -43,6 +43,12 @@ from langfuse import Langfuse
 langfuse = Langfuse()
 ```
 
+
+```python
+# checks the SDK connection with the server.
+langfuse.auth_check()
+```
+
 ### Options
 
 | Variable |Description   | Default value  

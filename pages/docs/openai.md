@@ -44,6 +44,14 @@ os.environ["OPENAI_API_KEY"] = ""
 from langfuse.openai import openai
 ```
 
+
+```python
+# checks the SDK connection with the server.
+from langfuse.openai import auth_check
+
+auth_check()
+```
+
 ### Attributes
 
 Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
@@ -109,12 +117,6 @@ completion = openai.chat.completions.create(
 for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
-
-    Sure, here's one for you:
-    
-    Why don't scientists trust atoms?
-    
-    Because they make up everything!None
 
 #### Async support
 
@@ -292,7 +294,7 @@ langfuse = Langfuse()
 # create trace and add params
 trace = langfuse.trace(CreateTrace(
     # optional, if you want to use your own id
-    # id = "my-trace-id", 
+    # id = "my-trace-id",
 
     name = "country-poems",
     userId = "user@example.com",
