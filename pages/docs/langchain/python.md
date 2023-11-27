@@ -64,18 +64,22 @@ The Langfuse SDKs are hosted on the pypi index.
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
 
+Alternatively, you can also pass them as arguments to the `CallbackHandler` constructor.
+
 
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
-# if you do not use Langfuse Cloud
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 

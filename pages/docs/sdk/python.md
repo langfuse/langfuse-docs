@@ -53,7 +53,7 @@ langfuse.auth_check()
 
 | Variable |Description   | Default value  
 | --- | --- | ---
-| baseUrl | BaseUrl of the Langfuse API | `"https://cloud.langfuse.com"`       
+| baseUrl | BaseUrl of the Langfuse API, set to `"https://us.cloud.langfuse.com"` for US data region | `"https://cloud.langfuse.com"`       
 | release | The release number/hash of the application to provide analytics grouped by release.	| `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
 | debug | Prints debug logs to the console | `False`
 | number_of_consumers | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
@@ -288,9 +288,11 @@ event = span.event(CreateEvent(
 )
 ```
 
-## 3. Collect (user) feedback
+## 3. Scores
 
-Scores are used to evaluate single executions/traces. They can be supplied internally through our UI or via the SDK. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
+[Scores](https://langfuse.com/docs/scores) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
+
+If the score relates to a specific step of the trace, specify the `observationId`.
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
@@ -302,9 +304,19 @@ Scores are used to evaluate single executions/traces. They can be supplied inter
 
 
 ```python
-from langfuse.model import CreateScore
+from langfuse.model import CreateScore, InitialScore
 
+# via {trace, span, event, generation}.score
 trace.score(CreateScore(
+    name="user-explicit-feedback",
+    value=1,
+    comment="I like how personalized the response is"
+));
+
+# using the trace_id
+trace_id = trace.id
+langfuse.score(InitialScore(
+    traceId=trace.id,
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
