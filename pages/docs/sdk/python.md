@@ -32,7 +32,8 @@ os.environ["LANGFUSE_SECRET_KEY"] = ""
 # your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
-# if you do not use Langfuse Cloud
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
@@ -53,7 +54,7 @@ langfuse.auth_check()
 
 | Variable |Description   | Default value  
 | --- | --- | ---
-| baseUrl | BaseUrl of the Langfuse API, set to `"https://us.cloud.langfuse.com"` for US data region | `"https://cloud.langfuse.com"`       
+| host | Host of the Langfuse API, set to `"https://us.cloud.langfuse.com"` for US data region | `"https://cloud.langfuse.com"`       
 | release | The release number/hash of the application to provide analytics grouped by release.	| `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
 | debug | Prints debug logs to the console | `False`
 | number_of_consumers | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1

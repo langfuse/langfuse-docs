@@ -39,7 +39,8 @@ os.environ["LANGFUSE_SECRET_KEY"] = ""
 # your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
-# if you do not use Langfuse Cloud
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
