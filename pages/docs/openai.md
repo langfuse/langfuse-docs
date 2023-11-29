@@ -24,11 +24,12 @@ The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports a
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
 # Your host, defaults to https://cloud.langfuse.com
@@ -118,6 +119,12 @@ completion = openai.chat.completions.create(
 for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
+
+    Sure, here's one for you:
+    
+    Why don't scientists trust atoms?
+    
+    Because they make up everything!None
 
 #### Async support
 
@@ -209,7 +216,7 @@ Langfuse automatically monitors OpenAI errors.
 
 ```python
 # Cause an error by attempting to use a host that does not exist.
-openai.api_base = "https://example.com"
+openai.base_url = "https://example.com"
 
 country = openai.chat.completions.create(
   name="will-error",
