@@ -43,6 +43,9 @@ Optionally:
     - GitHub: `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET`
   - `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` is a comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`
   - `AUTH_DISABLE_USERNAME_PASSWORD=true` disables email/password sign for all users. Only OAuth/SSO providers can be used to sign in.
+- Configure default project for new users. When users create an account they will be automatically added to this project.
+  - `LANGFUSE_DEFAULT_PROJECT_ID` is the ID of the project. You need to first create it in the UI.
+  - `LANGFUSE_DEFAULT_PROJECT_ROLE` is the role of the user in the project. Possible values are `ADMIN`, `MEMBER`, `VIEWER`. Defaults to `VIEWER`. See [project roles](/docs/project-sharing) for details.
 
 ```bash
 docker run --name langfuse \
