@@ -67,11 +67,10 @@ export function ChatMessageActions({
 
     langfuse
       .score({
-        traceId: "lf.docs.conversation." + conversationId,
+        traceId: message.id,
         name: "user-feedback",
         value: modalState.feedback === "positive" ? 1 : 0,
         comment: modalState.comment !== "" ? modalState.comment : undefined,
-        observationId: message.id,
       })
       .then(() => {
         setCurrentFeedback(modalState.feedback);
