@@ -14,9 +14,11 @@ _Simple example application_
 
 ## Setup
 
+
 ```python
 %pip install langfuse openai langchain --upgrade
 ```
+
 
 ```python
 import os
@@ -28,9 +30,11 @@ os.environ["LANGFUSE_SECRET_KEY"] = ""
 # your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
-# if you do not use Langfuse Cloud
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
+
 
 ```python
 # import
@@ -43,6 +47,7 @@ langfuse = Langfuse()
 
 ## Create a dataset
 
+
 ```python
 from langfuse.model import CreateDatasetRequest
 
@@ -52,6 +57,7 @@ langfuse.create_dataset(CreateDatasetRequest(name="capital_cities"));
 ### Items
 
 Load local items into the Langfuse dataset. Alternatively you can add items from production via the Langfuse UI.
+
 
 ```python
 # example items, could also be json instead of strings
@@ -68,6 +74,7 @@ local_items = [
     {"input": {"country": "Egypt"}, "expected_output": "Cairo"},
 ]
 ```
+
 
 ```python
 from langfuse.model import CreateDatasetItemRequest
@@ -92,6 +99,7 @@ We implement the application in two ways to demonstrate how it's done
 1. Custom LLM app using e.g. OpenAI SDK, traced with Langfuse Python SDK
 2. Langchain Application, traced via native Langfuse integration
 
+
 ```python
 # we use a very simple eval here, you can use any eval library
 # see https://langfuse.com/docs/scores/model-based-evals for details
@@ -100,6 +108,7 @@ def simple_evaluation(output, expected_output):
 ```
 
 ### Custom app
+
 
 ```python
 from datetime import datetime
@@ -130,6 +139,7 @@ def run_my_custom_llm_app(input, system_prompt):
   return openai_completion, langfuse_generation
 ```
 
+
 ```python
 from langfuse.client import CreateScore
 
@@ -146,6 +156,7 @@ def run_experiment(experiment_name, system_prompt):
       value=simple_evaluation(completion, item.expected_output)
     ))
 ```
+
 
 ```python
 run_experiment(
@@ -167,6 +178,7 @@ run_experiment(
 ```
 
 ### Langchain application
+
 
 ```python
 from datetime import datetime
@@ -192,6 +204,7 @@ def run_my_langchain_llm_app(input, system_message, callback_handler):
   return completion.content
 ```
 
+
 ```python
 from langfuse.client import CreateScore
 
@@ -208,6 +221,7 @@ def run_langchain_experiment(experiment_name, system_message):
       value=simple_evaluation(completion, item.expected_output)
     ))
 ```
+
 
 ```python
 run_langchain_experiment(
