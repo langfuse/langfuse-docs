@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 const langfuse = process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY
   ? new LangfuseWeb({
       publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+      baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL ?? undefined,
     })
   : undefined;
 // langfuse.debug();
