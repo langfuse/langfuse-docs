@@ -116,7 +116,6 @@ Example usage, most of the parameters are optional and depend on the use case. F
 ```python filename="server.py"
 from datetime import datetime
 from langfuse import Langfuse
-from langfuse.model import InitialGeneration, Usage
 
 langfuse = Langfuse(
   private_key="pk-lf-...",
@@ -128,27 +127,27 @@ generationStartTime = datetime.now()
 
 # chatCompletion = callLLM(prompt)
 
-langfuse.generation(InitialGeneration(
+langfuse.generation(
     name="chat-completion",
-    startTime=generationStartTime,
-    endTime=datetime.now(),
+    start_time=generationStartTime,
+    end_time=datetime.now(),
     model="gpt-3.5-turbo",
-    modelParameters= {
+    model_parameters= {
       "temperature":0.9,
       "maxTokens":1000,
       "topP": None,
     },
     prompt=[{"role": "user", "content": message_to_send}],
     completion=chat_response.json()["choices"][0]["message"],
-    usage=Usage(
-      prompt_tokens=512,
-      completion_tokens=49
-    ),
+    usage={
+      "prompt_tokens": 512,
+      "completion_tokens": 49
+    },
     version: '1.3.9',
     metadata= {
      "interface": 'whatsapp',
     }
-))
+)
 
 # The SDK executes network requests in the background.
 # To ensure that all requests are sent before the process exits, call flush()
@@ -249,13 +248,12 @@ event.score({});
 You can use the Python SDK to report a score via your Python server.
 
 ```python
-from langfuse.model import CreateScore
 
-score = generation.score(CreateScore(
+score = generation.score(
     name='user-explicit-feedback',
     value=1,
     comment="I like how personalized the response is"
-))
+)
 ```
 
 </Tab>

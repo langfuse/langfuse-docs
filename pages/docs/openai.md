@@ -24,12 +24,11 @@ The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports a
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
+# get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# Your openai key
+# your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
 # Your host, defaults to https://cloud.langfuse.com
@@ -119,12 +118,6 @@ completion = openai.chat.completions.create(
 for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
-
-    Sure, here's one for you:
-    
-    Why don't scientists trust atoms?
-    
-    Because they make up everything!None
 
 #### Async support
 
@@ -294,23 +287,22 @@ Some of the functionality enabled by custom traces:
 
 ```python
 from langfuse import Langfuse
-from langfuse.model import CreateTrace
 
 # initialize SDK
 langfuse = Langfuse()
 
 # create trace and add params
-trace = langfuse.trace(CreateTrace(
+trace = langfuse.trace(
     # optional, if you want to use your own id
     # id = "my-trace-id",
 
     name = "country-poems",
-    userId = "user@example.com",
+    user_id = "user@example.com",
     metadata = {
         "env": "development",
     },
     release = "v0.0.21"
-))
+)
 
 # get traceid to pass to openai calls
 trace_id = trace.id
@@ -350,15 +342,14 @@ The score is associated to the trace using the `trace_id` (see previous step).
 
 ```python
 from langfuse import Langfuse
-from langfuse.model import InitialScore
 
 langfuse = Langfuse()
 
-langfuse.score(InitialScore(
-    traceId=trace_id,
+langfuse.score(
+    trace_id=trace_id,
     name="my-score-name",
     value=1
-));
+);
 ```
 
 ![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)

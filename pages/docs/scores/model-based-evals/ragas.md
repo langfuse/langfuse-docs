@@ -90,14 +90,6 @@ row = fiqa_eval[0]
 row['question'], row['answer']
 ```
 
-
-
-
-    ('How to deposit a cheque issued to an associate in my business into my business account?',
-     '\nThe best way to deposit a cheque issued to an associate in your business into your business account is to open a business account with the bank. You will need a state-issued "dba" certificate from the county clerk\'s office as well as an Employer ID Number (EIN) issued by the IRS. Once you have opened the business account, you can have the associate sign the back of the cheque and deposit it into the business account.')
-
-
-
 Now lets init a Langfuse client SDK to instrument you app.
 
 
@@ -105,6 +97,11 @@ Now lets init a Langfuse client SDK to instrument you app.
 from langfuse import Langfuse
 
 langfuse = Langfuse()
+```
+
+
+```python
+langfuse.auth_check()
 ```
 
 Here we are defining a utility function to score your trace with the metrics you chose.
@@ -130,26 +127,24 @@ All these step are logged as spans in a single trace in langfuse. You can read m
 
 
 ```python
-from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEvent, CreateScore
-
 # start a new trace when you get a question
 question = row['question']
-trace = langfuse.trace(CreateTrace(name = "rag"))
+trace = langfuse.trace(name = "rag")
 
 # retrieve the relevant chunks
 # chunks = get_similar_chunks(question)
 contexts = row['contexts']
 # pass it as span
-trace.span(CreateSpan(
+trace.span(
     name = "retrieval", input={'question': question}, output={'contexts': contexts}
-))
+)
 
 # use llm to generate a answer with the chunks
 # answer = get_response_from_llm(question, chunks)
 answer = row['answer']
-trace.span(CreateSpan(
+trace.span(
     name = "generation", input={'question': question, 'contexts': contexts}, output={'answer': answer}
-))
+)
 
 # compute scores for the question, context, answer tuple
 ragas_scores = score_with_ragas(question, contexts, answer)
@@ -162,7 +157,7 @@ Once the scores are computed you can add them to the trace in Langfuse:
 ```python
 # send the scores
 for m in metrics:
-    trace.score(CreateScore(name=m.name, value=ragas_scores[m.name]))
+    trace.score(name=m.name, value=ragas_scores[m.name])
 ```
 
 ![Trace with RAGAS scores](https://langfuse.com/images/docs/ragas-trace-score.png)
@@ -181,20 +176,19 @@ To create demo data in Langfuse, lets first create ~10 traces with the fiqa data
 
 
 ```python
-from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEvent, CreateScore
 # fiqa traces
 for interaction in fiqa_eval.select(range(10, 20)):
-    trace = langfuse.trace(CreateTrace(name = "rag"))
-    trace.span(CreateSpan(
+    trace = langfuse.trace(name = "rag")
+    trace.span(
         name = "retrieval",
         input={'question': question},
         output={'contexts': contexts}
-    ))
-    trace.span(CreateSpan(
+    )
+    trace.span(
         name = "generation",
         input={'question': question, 'contexts': contexts},
         output={'answer': answer}
-    ))
+    )
 
 # await that Langfuse SDK has processed all events before trying to retrieve it in the next step
 langfuse.flush()
@@ -292,289 +286,14 @@ df.head()
 ```
 
 
-
-
-
-  <div id="df-9332998e-f294-4e8b-a26a-f402c10402c7" class="colab-df-container">
-    <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>question</th>
-      <th>contexts</th>
-      <th>answer</th>
-      <th>faithfulness</th>
-      <th>answer_relevancy</th>
-      <th>trace_id</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>How to deposit a cheque issued to an associate...</td>
-      <td>[Just have the associate sign the back and the...</td>
-      <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.0</td>
-      <td>0.97749</td>
-      <td>9a1db1ee-9177-4764-a8f5-53ae09c3f009</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>How to deposit a cheque issued to an associate...</td>
-      <td>[Just have the associate sign the back and the...</td>
-      <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.0</td>
-      <td>0.97749</td>
-      <td>c8f005f2-21a3-4141-9a7f-125302f30bde</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>How to deposit a cheque issued to an associate...</td>
-      <td>[Just have the associate sign the back and the...</td>
-      <td>\nThe best way to deposit a cheque issued to a...</td>
-      <td>1.0</td>
-      <td>0.97749</td>
-      <td>ce94ab6c-11bb-46ce-ae7b-6728519d162f</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-    <div class="colab-df-buttons">
-
-  <div class="colab-df-container">
-    <button class="colab-df-convert" onclick="convertToInteractive('df-9332998e-f294-4e8b-a26a-f402c10402c7')"
-            title="Convert this dataframe to an interactive table."
-            style="display:none;">
-
-  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960">
-    <path d="M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z"/>
-  </svg>
-    </button>
-
-  <style>
-    .colab-df-container {
-      display:flex;
-      gap: 12px;
-    }
-
-    .colab-df-convert {
-      background-color: #E8F0FE;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: none;
-      fill: #1967D2;
-      height: 32px;
-      padding: 0 0 0 0;
-      width: 32px;
-    }
-
-    .colab-df-convert:hover {
-      background-color: #E2EBFA;
-      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
-      fill: #174EA6;
-    }
-
-    .colab-df-buttons div {
-      margin-bottom: 4px;
-    }
-
-    [theme=dark] .colab-df-convert {
-      background-color: #3B4455;
-      fill: #D2E3FC;
-    }
-
-    [theme=dark] .colab-df-convert:hover {
-      background-color: #434B5C;
-      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
-      fill: #FFFFFF;
-    }
-  </style>
-
-    <script>
-      const buttonEl =
-        document.querySelector('#df-9332998e-f294-4e8b-a26a-f402c10402c7 button.colab-df-convert');
-      buttonEl.style.display =
-        google.colab.kernel.accessAllowed ? 'block' : 'none';
-
-      async function convertToInteractive(key) {
-        const element = document.querySelector('#df-9332998e-f294-4e8b-a26a-f402c10402c7');
-        const dataTable =
-          await google.colab.kernel.invokeFunction('convertToInteractive',
-                                                    [key], {});
-        if (!dataTable) return;
-
-        const docLinkHtml = 'Like what you see? Visit the ' +
-          '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
-          + ' to learn more about interactive tables.';
-        element.innerHTML = '';
-        dataTable['output_type'] = 'display_data';
-        await google.colab.output.renderOutput(dataTable, element);
-        const docLink = document.createElement('div');
-        docLink.innerHTML = docLinkHtml;
-        element.appendChild(docLink);
-      }
-    </script>
-  </div>
-
-
-<div id="df-34d408b3-f073-4407-938d-4eb1a3dee757">
-  <button class="colab-df-quickchart" onclick="quickchart('df-34d408b3-f073-4407-938d-4eb1a3dee757')"
-            title="Suggest charts"
-            style="display:none;">
-
-<svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
-     width="24px">
-    <g>
-        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-    </g>
-</svg>
-  </button>
-
-<style>
-  .colab-df-quickchart {
-      --bg-color: #E8F0FE;
-      --fill-color: #1967D2;
-      --hover-bg-color: #E2EBFA;
-      --hover-fill-color: #174EA6;
-      --disabled-fill-color: #AAA;
-      --disabled-bg-color: #DDD;
-  }
-
-  [theme=dark] .colab-df-quickchart {
-      --bg-color: #3B4455;
-      --fill-color: #D2E3FC;
-      --hover-bg-color: #434B5C;
-      --hover-fill-color: #FFFFFF;
-      --disabled-bg-color: #3B4455;
-      --disabled-fill-color: #666;
-  }
-
-  .colab-df-quickchart {
-    background-color: var(--bg-color);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: none;
-    fill: var(--fill-color);
-    height: 32px;
-    padding: 0;
-    width: 32px;
-  }
-
-  .colab-df-quickchart:hover {
-    background-color: var(--hover-bg-color);
-    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-    fill: var(--button-hover-fill-color);
-  }
-
-  .colab-df-quickchart-complete:disabled,
-  .colab-df-quickchart-complete:disabled:hover {
-    background-color: var(--disabled-bg-color);
-    fill: var(--disabled-fill-color);
-    box-shadow: none;
-  }
-
-  .colab-df-spinner {
-    border: 2px solid var(--fill-color);
-    border-color: transparent;
-    border-bottom-color: var(--fill-color);
-    animation:
-      spin 1s steps(1) infinite;
-  }
-
-  @keyframes spin {
-    0% {
-      border-color: transparent;
-      border-bottom-color: var(--fill-color);
-      border-left-color: var(--fill-color);
-    }
-    20% {
-      border-color: transparent;
-      border-left-color: var(--fill-color);
-      border-top-color: var(--fill-color);
-    }
-    30% {
-      border-color: transparent;
-      border-left-color: var(--fill-color);
-      border-top-color: var(--fill-color);
-      border-right-color: var(--fill-color);
-    }
-    40% {
-      border-color: transparent;
-      border-right-color: var(--fill-color);
-      border-top-color: var(--fill-color);
-    }
-    60% {
-      border-color: transparent;
-      border-right-color: var(--fill-color);
-    }
-    80% {
-      border-color: transparent;
-      border-right-color: var(--fill-color);
-      border-bottom-color: var(--fill-color);
-    }
-    90% {
-      border-color: transparent;
-      border-bottom-color: var(--fill-color);
-    }
-  }
-</style>
-
-  <script>
-    async function quickchart(key) {
-      const quickchartButtonEl =
-        document.querySelector('#' + key + ' button');
-      quickchartButtonEl.disabled = true;  // To prevent multiple clicks.
-      quickchartButtonEl.classList.add('colab-df-spinner');
-      try {
-        const charts = await google.colab.kernel.invokeFunction(
-            'suggestCharts', [key], {});
-      } catch (error) {
-        console.error('Error during call to suggestCharts:', error);
-      }
-      quickchartButtonEl.classList.remove('colab-df-spinner');
-      quickchartButtonEl.classList.add('colab-df-quickchart-complete');
-    }
-    (() => {
-      let quickchartButtonEl =
-        document.querySelector('#df-34d408b3-f073-4407-938d-4eb1a3dee757 button');
-      quickchartButtonEl.style.display =
-        google.colab.kernel.accessAllowed ? 'block' : 'none';
-    })();
-  </script>
-</div>
-    </div>
-  </div>
-
-
-
-
-
 ```python
-from langfuse.model import InitialScore
-
 for _, row in df.iterrows():
     for metric_name in ["faithfulness", "answer_relevancy"]:
-        langfuse.score(InitialScore(
+        langfuse.score(
             name=metric_name,
             value=row[metric_name],
-            trace_id=row["trace_id"]))
+            trace_id=row["trace_id"]
+        )
 ```
 
 ![List of traces with RAGAS scores](https://langfuse.com/images/docs/ragas-list-score-traces.png)
