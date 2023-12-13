@@ -136,6 +136,8 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 | --- | --- | --- | ---
 | id | string | yes | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).
 | name | string | yes | Identifier of the trace. Useful for sorting/filtering in the UI.
+| input | object | yes | The input of the trace. Can be any JSON object.
+| output | object | yes | The output of the trace. Can be any JSON object.
 | metadata | object | yes | Additional metadata of the trace. Can be any JSON object.
 | userId | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/user-explorer).
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
