@@ -82,10 +82,10 @@ generationStartTime = datetime.now()
 
 generation = langfuse.generation(
     name="summary-generation",
-    startTime=generationStartTime,
-    endTime=datetime.now(),
+    start_time=generationStartTime,
+    end_time=datetime.now(),
     model="gpt-3.5-turbo",
-    modelParameters={"maxTokens": "1000", "temperature": "0.9"},
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
     prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
     completion="The Q3 OKRs contain goals for multiple teams...",
     usage={"input": 50, "output": 49},
@@ -157,7 +157,7 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 ```python
 trace = langfuse.trace(
     name = "docs-retrieval",
-    userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+    user_id = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
         "env": "production",
         "email": "user@langfuse.com",
@@ -246,8 +246,8 @@ generationStartTime = datetime.now()
 
 generation = trace.generation(
     name="summary-generation",
-    startTime=generationStartTime,
-    endTime=datetime.now(),
+    start_time=generationStartTime,
+    end_time=datetime.now(),
     model="gpt-3.5-turbo",
     model_parameters={"maxTokens": "1000", "temperature": "0.9"},
     prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
@@ -364,7 +364,7 @@ Apart from Software releases, users want to track versions of LLM apps (e.g. Pro
 
 
 ```python
-langfuse.span(name = "retrieval", version="<version>")
+langfuse.span(name="retrieval", version="<version>")
 ```
 
 
