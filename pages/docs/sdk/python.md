@@ -50,6 +50,13 @@ langfuse = Langfuse()
 langfuse.auth_check()
 ```
 
+
+
+
+    True
+
+
+
 ### Options
 
 | Variable |Description   | Default value  
@@ -69,13 +76,11 @@ To record a single call to a LLM, you can use `langfuse.generations()` method fr
 
 ```python
 from datetime import datetime
-from langfuse.model import InitialGeneration, Usage
-
 generationStartTime = datetime.now()
 
 # call to an LLM API
 
-generation = langfuse.generation(InitialGeneration(
+generation = langfuse.generation(
     name="summary-generation",
     startTime=generationStartTime,
     endTime=datetime.now(),
@@ -83,9 +88,9 @@ generation = langfuse.generation(InitialGeneration(
     modelParameters={"maxTokens": "1000", "temperature": "0.9"},
     prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
     completion="The Q3 OKRs contain goals for multiple teams...",
-    usage=Usage(promptTokens=50, completionTokens = 49),
+    usage={"input": 50, "output": 49},
     metadata={"interface": "whatsapp"}
-))
+)
 ```
 
 ## 3. Record a more complex application
@@ -108,15 +113,20 @@ TRACE
 
 
 ```python
-from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEvent
-
-trace = langfuse.trace(CreateTrace(name = "llm-feature"))
-retrieval = trace.span(CreateSpan(name = "retrieval"))
-retrieval.generation(CreateGeneration(name = "query-creation"))
-retrieval.span(CreateSpan(name = "vector-db-search"))
-retrieval.event(CreateEvent(name = "db-summary"))
-trace.generation(CreateGeneration(name = "user-output"));
+trace = langfuse.trace(name = "llm-feature")
+retrieval = trace.span(name = "retrieval")
+retrieval.generation(name = "query-creation")
+retrieval.span(name = "vector-db-search")
+retrieval.event(name = "db-summary")
+trace.generation(name = "user-output")
 ```
+
+
+
+
+    <langfuse.client.StatefulGenerationClient at 0x109813220>
+
+
 
 The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
@@ -145,16 +155,14 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 
 
 ```python
-from langfuse.model import CreateTrace
-
-trace = langfuse.trace(CreateTrace(
+trace = langfuse.trace(
     name = "docs-retrieval",
     userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
         "env": "production",
         "email": "user@langfuse.com",
     }
-))
+)
 ```
 
 ### Span
@@ -177,20 +185,18 @@ Spans represent durations of units of work in a trace. We generated convenient S
 
 ```python
 from datetime import datetime
-from langfuse.model import CreateSpan, UpdateSpan
 
 retrievalStartTime = datetime.now()
 
 # retrieveDocs = retrieveDoc()
 # ...
 
-span = trace.span(CreateSpan(
-        name="embedding-search",
-        startTime=retrievalStartTime,
-        endTime=datetime.now(),
-        metadata={"database": "pinecone"},
-        input = {'query': 'This document entails the OKR goals for ACME'},
-    )
+span = trace.span(
+    name="embedding-search",
+    start_time=retrievalStartTime,
+    end_time=datetime.now(),
+    metadata={"database": "pinecone"},
+    input = {'query': 'This document entails the OKR goals for ACME'},
 )
 ```
 
@@ -200,10 +206,10 @@ Spans can be updated once your function completes for example record outputs.
 
 
 ```python
-span = span.update(UpdateSpan(
-        output = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
-    )
+span = span.update(
+    output = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
 )
+
 ```
 
 ### Generation
@@ -230,7 +236,6 @@ Generations are used to log generations of AI model. They contain additional met
 
 
 ```python
-from langfuse.model import CreateGeneration, Usage, UpdateGeneration
 
 from datetime import datetime
 
@@ -239,25 +244,25 @@ generationStartTime = datetime.now()
 # chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
 # ...
 
-generation = trace.generation(CreateGeneration(
+generation = trace.generation(
     name="summary-generation",
     startTime=generationStartTime,
     endTime=datetime.now(),
     model="gpt-3.5-turbo",
-    modelParameters={"maxTokens": "1000", "temperature": "0.9"},
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
     prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
     metadata={"interface": "whatsapp"}
-))
+)
 ```
 
 Generations can be updated once your LLM function completes for example record outputs.
 
 
 ```python
-generation.update(UpdateGeneration(
+generation.update(
     completion="The Q3 OKRs contain goals for multiple teams...",
-    usage=Usage(promptTokens=50, completionTokens = 49),
-));
+    usage= {"input": 50, "output": 49},
+);
 ```
 
 ### Events
@@ -278,16 +283,14 @@ Events are used to track discrete events in a trace.
 
 
 ```python
-from langfuse.model import CreateEvent
 from datetime import datetime
 
-event = span.event(CreateEvent(
-        name="chat-docs-retrieval",
-        startTime=datetime.now(),
-        metadata={"key": "value"},
-        input = {"key": "value"},
-        output = {"key": "value"}
-    )
+event = span.event(
+    name="chat-docs-retrieval",
+    start_time=datetime.now(),
+    metadata={"key": "value"},
+    input = {"key": "value"},
+    output = {"key": "value"}
 )
 ```
 
@@ -307,24 +310,29 @@ If the score relates to a specific step of the trace, specify the `observationId
 
 
 ```python
-from langfuse.model import CreateScore, InitialScore
-
 # via {trace, span, event, generation}.score
-trace.score(CreateScore(
+trace.score(
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
-));
+)
 
 # using the trace_id
 trace_id = trace.id
-langfuse.score(InitialScore(
-    traceId=trace.id,
+langfuse.score(
+    trace_id=trace.id,
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
-));
+)
 ```
+
+
+
+
+    <langfuse.client.StatefulClient at 0x11ecdbe80>
+
+
 
 ## Additional configurations
 
@@ -356,8 +364,15 @@ Apart from Software releases, users want to track versions of LLM apps (e.g. Pro
 
 
 ```python
-langfuse.span(CreateSpan(name = "retrieval", version="<version>"));
+langfuse.span(name = "retrieval", version="<version>")
 ```
+
+
+
+
+    <langfuse.client.StatefulSpanClient at 0x11fa45540>
+
+
 
 ### Debug
 Enable debug mode to get verbose logs. Alternatively, set the debug mode via the environment variable `LANGFUSE_DEBUG`.
@@ -370,6 +385,81 @@ langfuse = Langfuse(debug=True)
 langfuse = Langfuse()
 ```
 
+    DEBUG:langfuse:consumer is running...
+
+
+# Upgrading from v1.x.x to v2.x.x
+
+## Removing Pydantic interfaces
+We want to make the SDK as easy to use as possible. Therefore, we removed the Pydantic interfaces and replaced them with simple function parameters. This makes it easier to integrate the SDK with your existing codebase without the need to import many objects from our SDK.
+
+### Old
+```python
+from langfuse.model import CreateTrace
+
+langfuse.trace(CreateTrace(name="My Trace"))
+```
+
+### New
+```python
+langfuse.trace(name="My Trace")
+```
+
+Removing Pydantic objects means, we also removed Pydantic enums. Instead, we use strings for enums.
+
+### Old
+```python
+from langfuse.model import InitialGeneration
+from langfuse.api.resources.commons.types.observation_level import ObservationLevel
+
+langfuse.generation(InitialGeneration(level=ObservationLevel.ERROR))
+```
+
+### New
+```python
+langfuse.generation(level="ERROR")
+```
+
+All inserted parameters are validated on function call and print errors if the validation fails. No exceptions are thrown.
+
+## Flexible usage objects on Generations
+
+We wanted to make the SDK more flexible to allow users to ingest any kinds of usage while maintaining simplicity when using OpenAI. Therefore, we removed the `LlmUsage` Pydantic model and allow users to pass two different types of usage objects.
+
+### Old
+```python
+
+from langfuse.model import InitialGeneration, Usage
+
+ langfuse.generation(
+    InitialGeneration(
+        name="my-generation",
+        usage=Usage(promptTokens=50, completionTokens=49),
+    )
+)
+```
+
+### New
+```python
+
+langfuse.generation(
+    name="my-openai-generation",
+    usage={"promptTokens": 50, "completionTokens": 49}, # defaults to "TOKENS" unit
+)
+
+langfuse.generation(
+    name="my-claude-generation",
+    usage={"input": 50, "output": 49, "unit": "CHARACTERS"}, # unit defaults to "TOKENS" unit if not set
+)
+
+```
+
+## Snake case parameters
+
+As of now, all parameters are snake case. This means, that parameters such as `startTime` are now `start_time`. This is to ensure consistency with the rest of the Python ecosystem.
+
+
+
 ## FastAPI
 For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
 
@@ -379,6 +469,17 @@ For engineers working with FastAPI, we have a short example, of how to use it th
 %pip install fastapi --upgrade
 ```
 
+    Requirement already satisfied: fastapi in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (0.105.0)
+    Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages/pydantic-1.10.7-py3.10.egg (from fastapi) (1.10.7)
+    Requirement already satisfied: anyio<4.0.0,>=3.7.1 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from fastapi) (3.7.1)
+    Requirement already satisfied: typing-extensions>=4.8.0 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from fastapi) (4.9.0)
+    Requirement already satisfied: starlette<0.28.0,>=0.27.0 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from fastapi) (0.27.0)
+    Requirement already satisfied: sniffio>=1.1 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from anyio<4.0.0,>=3.7.1->fastapi) (1.2.0)
+    Requirement already satisfied: idna>=2.8 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from anyio<4.0.0,>=3.7.1->fastapi) (3.4)
+    Requirement already satisfied: exceptiongroup in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages/exceptiongroup-1.1.2-py3.10.egg (from anyio<4.0.0,>=3.7.1->fastapi) (1.1.2)
+    Note: you may need to restart the kernel to use updated packages.
+
+
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
 With this, your Python environment will only terminate once Langfuse received all the events.
 
@@ -386,8 +487,6 @@ With this, your Python environment will only terminate once Langfuse received al
 ```python
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query, BackgroundTasks
-from langfuse.model import InitialGeneration
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -410,7 +509,9 @@ langfuse = Langfuse()
 async def campaign(prompt: str = Query(..., max_length=20)):
   # call to a LLM
   generation = langfuse.generation(
-      InitialGeneration(name="llm-feature", metadata="test", prompt=prompt)
+      name="llm-feature", 
+      metadata="test", 
+      prompt=prompt
   )
   return True
 ```
