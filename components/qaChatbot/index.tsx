@@ -21,7 +21,7 @@ export function Chat({ className }: { className?: string }) {
   const [input, setInput] = useState("");
   const controlledMessages = useRef<Message[]>([]);
   const latestUserMessage = useRef<Message | null>(null);
-  const latestMessageId = useRef<string | null>(null);
+  const latestTraceId = useRef<string | null>(null);
 
   const { messages, setMessages, append } = useChat({
     body: {
@@ -32,8 +32,8 @@ export function Chat({ className }: { className?: string }) {
     sendExtraMessageFields: true,
     onResponse(response) {
       // Get the latest message id from the server
-      const newMessageId = response.headers.get("X-Message-Id");
-      latestMessageId.current = newMessageId;
+      const newTraceId = response.headers.get("X-Trace-Id");
+      latestTraceId.current = newTraceId;
     },
     onFinish(message) {
       // Update controlledMessages
@@ -46,7 +46,7 @@ export function Chat({ className }: { className?: string }) {
       }
       controlledMessages.current.push({
         ...message,
-        id: latestMessageId.current ?? message.id,
+        id: latestTraceId.current ?? message.id,
       });
 
       // Update "ai" messages state
