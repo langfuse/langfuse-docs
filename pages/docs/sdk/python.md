@@ -393,21 +393,21 @@ langfuse = Langfuse()
 ### Removing Pydantic interfaces
 We want to make the SDK as easy to use as possible. Therefore, we removed the Pydantic interfaces and replaced them with simple function parameters. This makes it easier to integrate the SDK with your existing codebase without the need to import many objects from our SDK.
 
-#### Old
+**Old**
 ```python
 from langfuse.model import CreateTrace
 
 langfuse.trace(CreateTrace(name="My Trace"))
 ```
 
-#### New
+**New**
 ```python
 langfuse.trace(name="My Trace")
 ```
 
 Removing Pydantic objects means, we also removed Pydantic enums. Instead, we use strings for enums.
 
-#### Old
+**Old**
 ```python
 from langfuse.model import InitialGeneration
 from langfuse.api.resources.commons.types.observation_level import ObservationLevel
@@ -415,7 +415,7 @@ from langfuse.api.resources.commons.types.observation_level import ObservationLe
 langfuse.generation(InitialGeneration(level=ObservationLevel.ERROR))
 ```
 
-#### New
+**New**
 ```python
 langfuse.generation(level="ERROR")
 ```
@@ -426,7 +426,7 @@ All inserted parameters are validated on function call and print errors if the v
 
 We wanted to make the SDK more flexible to allow users to ingest any kinds of usage while maintaining simplicity when using OpenAI. Therefore, we removed the `LlmUsage` Pydantic model and allow users to pass two different types of usage objects.
 
-#### Old
+**Old**
 ```python
 
 from langfuse.model import InitialGeneration, Usage
@@ -439,7 +439,7 @@ from langfuse.model import InitialGeneration, Usage
 )
 ```
 
-#### New
+**New**
 ```python
 
 langfuse.generation(
