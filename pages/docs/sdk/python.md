@@ -388,26 +388,26 @@ langfuse = Langfuse()
     DEBUG:langfuse:consumer is running...
 
 
-# Upgrading from v1.x.x to v2.x.x
+## Upgrading from v1.x.x to v2.x.x
 
-## Removing Pydantic interfaces
+### Removing Pydantic interfaces
 We want to make the SDK as easy to use as possible. Therefore, we removed the Pydantic interfaces and replaced them with simple function parameters. This makes it easier to integrate the SDK with your existing codebase without the need to import many objects from our SDK.
 
-### Old
+#### Old
 ```python
 from langfuse.model import CreateTrace
 
 langfuse.trace(CreateTrace(name="My Trace"))
 ```
 
-### New
+#### New
 ```python
 langfuse.trace(name="My Trace")
 ```
 
 Removing Pydantic objects means, we also removed Pydantic enums. Instead, we use strings for enums.
 
-### Old
+#### Old
 ```python
 from langfuse.model import InitialGeneration
 from langfuse.api.resources.commons.types.observation_level import ObservationLevel
@@ -415,18 +415,18 @@ from langfuse.api.resources.commons.types.observation_level import ObservationLe
 langfuse.generation(InitialGeneration(level=ObservationLevel.ERROR))
 ```
 
-### New
+#### New
 ```python
 langfuse.generation(level="ERROR")
 ```
 
 All inserted parameters are validated on function call and print errors if the validation fails. No exceptions are thrown.
 
-## Flexible usage objects on Generations
+### Flexible usage objects on Generations
 
 We wanted to make the SDK more flexible to allow users to ingest any kinds of usage while maintaining simplicity when using OpenAI. Therefore, we removed the `LlmUsage` Pydantic model and allow users to pass two different types of usage objects.
 
-### Old
+#### Old
 ```python
 
 from langfuse.model import InitialGeneration, Usage
@@ -439,7 +439,7 @@ from langfuse.model import InitialGeneration, Usage
 )
 ```
 
-### New
+#### New
 ```python
 
 langfuse.generation(
@@ -454,7 +454,7 @@ langfuse.generation(
 
 ```
 
-## Snake case parameters
+### Snake case parameters
 
 As of now, all parameters are snake case. This means, that parameters such as `startTime` are now `start_time`. This is to ensure consistency with the rest of the Python ecosystem.
 
