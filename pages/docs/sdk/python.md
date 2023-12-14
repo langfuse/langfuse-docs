@@ -50,13 +50,6 @@ langfuse = Langfuse()
 langfuse.auth_check()
 ```
 
-
-
-
-    True
-
-
-
 ### Options
 
 | Variable |Description   | Default value  
@@ -120,13 +113,6 @@ retrieval.span(name = "vector-db-search")
 retrieval.event(name = "db-summary")
 trace.generation(name = "user-output")
 ```
-
-
-
-
-    <langfuse.client.StatefulGenerationClient at 0x109813220>
-
-
 
 The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
@@ -327,13 +313,6 @@ langfuse.score(
 )
 ```
 
-
-
-
-    <langfuse.client.StatefulClient at 0x11ecdbe80>
-
-
-
 ## Additional configurations
 
 ### Shutdown behavior
@@ -367,13 +346,6 @@ Apart from Software releases, users want to track versions of LLM apps (e.g. Pro
 langfuse.span(name="retrieval", version="<version>")
 ```
 
-
-
-
-    <langfuse.client.StatefulSpanClient at 0x11fa45540>
-
-
-
 ### Debug
 Enable debug mode to get verbose logs. Alternatively, set the debug mode via the environment variable `LANGFUSE_DEBUG`.
 
@@ -384,9 +356,6 @@ langfuse = Langfuse(debug=True)
 # Deactivating for the rest of the notebook
 langfuse = Langfuse()
 ```
-
-    DEBUG:langfuse:consumer is running...
-
 
 ## Upgrading from v1.x.x to v2.x.x
 
@@ -421,6 +390,9 @@ langfuse.generation(level="ERROR")
 ```
 
 All inserted parameters are validated on function call and print errors if the validation fails. No exceptions are thrown.
+
+### Renamings on Generations
+We decided to rename `prompt` and `completion` to `input` and `output` to be more consistent with the rest of the Langfuse API.
 
 ### Flexible usage objects on Generations
 
@@ -468,17 +440,6 @@ For engineers working with FastAPI, we have a short example, of how to use it th
 ```python
 %pip install fastapi --upgrade
 ```
-
-    Requirement already satisfied: fastapi in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (0.105.0)
-    Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages/pydantic-1.10.7-py3.10.egg (from fastapi) (1.10.7)
-    Requirement already satisfied: anyio<4.0.0,>=3.7.1 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from fastapi) (3.7.1)
-    Requirement already satisfied: typing-extensions>=4.8.0 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from fastapi) (4.9.0)
-    Requirement already satisfied: starlette<0.28.0,>=0.27.0 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from fastapi) (0.27.0)
-    Requirement already satisfied: sniffio>=1.1 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from anyio<4.0.0,>=3.7.1->fastapi) (1.2.0)
-    Requirement already satisfied: idna>=2.8 in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages (from anyio<4.0.0,>=3.7.1->fastapi) (3.4)
-    Requirement already satisfied: exceptiongroup in /Users/maximiliandeichmann/.pyenv/versions/anaconda3-2023.03/lib/python3.10/site-packages/exceptiongroup-1.1.2-py3.10.egg (from anyio<4.0.0,>=3.7.1->fastapi) (1.1.2)
-    Note: you may need to restart the kernel to use updated packages.
-
 
 Here is an example of how to initialise FastAPI and register the `langfuse.flush()` method to run at shutdown.
 With this, your Python environment will only terminate once Langfuse received all the events.
