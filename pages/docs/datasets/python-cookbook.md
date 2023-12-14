@@ -49,9 +49,7 @@ langfuse = Langfuse()
 
 
 ```python
-from langfuse.model import CreateDatasetRequest
-
-langfuse.create_dataset(CreateDatasetRequest(name="capital_cities"));
+langfuse.create_dataset(name="capital_cities");
 ```
 
 ### Items
@@ -77,18 +75,14 @@ local_items = [
 
 
 ```python
-from langfuse.model import CreateDatasetItemRequest
-
 # Upload to Langfuse
 for item in local_items:
   langfuse.create_dataset_item(
-    CreateDatasetItemRequest(
-        dataset_name="capital_cities",
-        # any python object or value
-        input=item["input"],
-        # any python object or value, optional
-        expected_output=item["expected_output"]
-    )
+      dataset_name="capital_cities",
+      # any python object or value
+      input=item["input"],
+      # any python object or value, optional
+      expected_output=item["expected_output"]
 )
 ```
 
@@ -112,7 +106,6 @@ def simple_evaluation(output, expected_output):
 
 ```python
 from datetime import datetime
-from langfuse.client import InitialGeneration
 
 def run_my_custom_llm_app(input, system_prompt):
   messages = [
@@ -127,22 +120,20 @@ def run_my_custom_llm_app(input, system_prompt):
       messages=messages
   ).choices[0].message.content
 
-  langfuse_generation = langfuse.generation(InitialGeneration(
-      name="guess-countries",
-      prompt=messages,
-      completion=openai_completion,
-      model="gpt-3.5-turbo",
-      startTime=generationStartTime,
-      endTime=datetime.now()
-  ))
+  langfuse_generation = langfuse.generation(
+    name="guess-countries",
+    prompt=messages,
+    completion=openai_completion,
+    model="gpt-3.5-turbo",
+    start_time=generationStartTime,
+    end_time=datetime.now()
+  )
 
   return openai_completion, langfuse_generation
 ```
 
 
 ```python
-from langfuse.client import CreateScore
-
 def run_experiment(experiment_name, system_prompt):
   dataset = langfuse.get_dataset("capital_cities")
 
@@ -151,10 +142,10 @@ def run_experiment(experiment_name, system_prompt):
 
     item.link(langfuse_generation, experiment_name) # pass the observation/generation object or the id
 
-    langfuse_generation.score(CreateScore(
+    langfuse_generation.score(
       name="exact_match",
       value=simple_evaluation(completion, item.expected_output)
-    ))
+    )
 ```
 
 
@@ -183,7 +174,6 @@ run_experiment(
 ```python
 from datetime import datetime
 from langchain.chat_models import ChatOpenAI
-from langfuse.client import InitialGeneration
 from langchain.chains import LLMChain
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
@@ -206,8 +196,6 @@ def run_my_langchain_llm_app(input, system_message, callback_handler):
 
 
 ```python
-from langfuse.client import CreateScore
-
 def run_langchain_experiment(experiment_name, system_message):
   dataset = langfuse.get_dataset("capital_cities")
 
@@ -216,10 +204,10 @@ def run_langchain_experiment(experiment_name, system_message):
 
     completion = run_my_langchain_llm_app(item.input["country"], system_message, handler)
 
-    handler.rootSpan.score(CreateScore(
+    handler.rootSpan.score(
       name="exact_match",
       value=simple_evaluation(completion, item.expected_output)
-    ))
+    )
 ```
 
 

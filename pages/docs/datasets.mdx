@@ -16,9 +16,8 @@ Datasets have a name which is unique within a project.
 <Tab>
 
 ```python
-from langfuse.model import CreateDatasetRequest
 
-langfuse.create_dataset(CreateDatasetRequest(name="<dataset_name>"))
+langfuse.create_dataset(name="<dataset_name>")
 ```
 
 </Tab>
@@ -44,20 +43,17 @@ Individual items can be added to a dataset by providing the input and optionally
 <Tab>
 
 ```python
-from langfuse.model import CreateDatasetItemRequest
 
 langfuse.create_dataset_item(
-    CreateDatasetItemRequest(
-        dataset_name="<dataset_name>",
-        # any python object or value
-        input={
-            "text": "hello world"
-        },
-        # any python object or value, optional
-        expected_output={
-            "text": "hello world"
-        }
-    )
+    dataset_name="<dataset_name>",
+    # any python object or value
+    input={
+        "text": "hello world"
+    },
+    # any python object or value, optional
+    expected_output={
+        "text": "hello world"
+    }
 )
 ```
 
@@ -104,7 +100,6 @@ Optionally, the output of the application can be evaluated to compare different 
 <Tab>
 
 ```python
-from langfuse.model import CreateScore
 
 dataset = langfuse.get_dataset("<dataset_name>")
 
@@ -118,14 +113,12 @@ for item in dataset.items:
 
     # optionally, evaluate the output to compare different runs more easily
     generation.score(
-        CreateScore(
-            name="<example_eval>",
-            # any float value
-            value=my_eval_fn(
-                item.input,
-                output,
-                item.expected_output
-            )
+        name="<example_eval>",
+        # any float value
+        value=my_eval_fn(
+            item.input,
+            output,
+            item.expected_output
         )
     )
 ```

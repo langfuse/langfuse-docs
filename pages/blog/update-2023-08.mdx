@@ -76,7 +76,6 @@ When using the Langchain Python integration, you can now add more context to the
 import uuid
 
 from langfuse.client import Langfuse
-from langfuse.model import CreateTrace
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -87,7 +86,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 # create trace_id for future reference
 trace_id = str(uuid.uuid4())
 # create the Trace
-trace = langfuse.trace(CreateTrace(id=trace_id))
+trace = langfuse.trace(id=trace_id)
 # get a handler bound to the Trace
 handler = trace.getNewHandler()
 

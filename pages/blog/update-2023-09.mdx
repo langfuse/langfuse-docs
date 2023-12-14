@@ -92,7 +92,6 @@ _Run experiment on dataset_
 <Tab>
 
 ```python
-from langfuse.model import CreateScore
 
 dataset = langfuse.get_dataset("<dataset_name>")
 
@@ -106,15 +105,13 @@ for item in dataset.items:
 
     # optionally, evaluate the output to compare different runs more easily
     generation.score(
-        CreateScore(
-            name="<example_eval>",
-            # any float value
-            value=my_eval_fn(
-                item.input,
-                output,
-                item.expected_output
-            )
-        )
+      name="<example_eval>",
+      # any float value
+      value=my_eval_fn(
+          item.input,
+          output,
+          item.expected_output
+      )
     )
 ```
 
