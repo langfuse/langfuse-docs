@@ -464,7 +464,7 @@ from langfuse.model import InitialGeneration, Usage
 
 **v2.x.x**
 
-Our new usage object supports the OpenAi structure with (`promptTokens`, `completionTokens`, `totalTokens`) and a more generalistic version (`input`, `output`, `total`, `unit`) where unit can be of value `TOKENS` (default) or `CHARACTERS`. This allows to ingest character based usage models as well. Rech out to us if you need more units.
+The usage object supports the OpenAi structure with {`promptTokens`, `completionTokens`, `totalTokens`} and a more generic version {`input`, `output`, `total`, `unit`} where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse. Create an issue to request support for other units.
 
 ```python
 
