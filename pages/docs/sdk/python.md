@@ -49,14 +49,14 @@ from langfuse import Langfuse
 langfuse = Langfuse()
 ```
 
-| Environment | Variable |Description   | Default value  
-| --- | --- | --- | ---
-| `LANGFUSE_PUBLIC_KEY` | public_key | Public key, get in project settings | 
-| `LANGFUSE_SECRET_KEY` | secret_key | Secret key, get in project settings | 
-| `LANGFUSE_HOST` | host | Host of the Langfuse API | `"https://cloud.langfuse.com"`       
-| `LANGFUSE_RELEASE` | release | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
-| `LANGFUSE_DEBUG` | debug | Optional. Prints debug logs to the console | `False`
-| | number_of_consumers | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
+| Environment, Variable | Description   | Default value  
+| --- | --- | --- 
+| `LANGFUSE_PUBLIC_KEY`, `public_key` | Public key, get in project settings | 
+| `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings | 
+| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"`       
+| `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
+| `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
+| n/a, `number_of_consumers` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
 
 ## Tracing
 
