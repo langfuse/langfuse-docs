@@ -10,14 +10,14 @@ This is a Python SDK used to send LLM data to Langfuse in a convenient way. It u
 
 Using Langchain or OpenAI SDK? Use the native [integrations](https://langfuse.com/docs/integrations).
 
-## 1. Installation
+## Installation
 
 
 ```python
 %pip install langfuse --upgrade
 ```
 
-## 2. Initialize Client
+## Initialize Client
 
 Initialize the client with your credentials. You can set them as environt variables or constructor arguments.
 
@@ -58,7 +58,7 @@ langfuse = Langfuse()
 | `LANGFUSE_DEBUG` | debug | Optional. Prints debug logs to the console | `False`
 | | number_of_consumers | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
 
-## 3. Tracing
+## Tracing
 
 The Langfuse SDK and UI are designed to support complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
@@ -304,7 +304,7 @@ event = span.event(
 
 See documentation of spans above on how to use the langfuse client and ids if you cannot use the Langfuse objects to trace your application. This also fully applies to events.
 
-## 3. Scores
+## Scores
 
 [Scores](https://langfuse.com/docs/scores) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
 
