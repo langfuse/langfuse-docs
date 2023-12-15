@@ -62,6 +62,7 @@ Instead of setting the environment variables before importing the SDK, you can a
 | `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`. Set to `"https://us.cloud.langfuse.com"` for US data region.       
 | `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
 | `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
+| `openai.langfuse_debug` | Debug mode of Langfuse SDK | `False`
 
 
 ```python
