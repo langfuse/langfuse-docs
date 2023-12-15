@@ -9,7 +9,22 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-**Minor improvement to the integration:** environment variables can also be set as attributes on the `openai` object.
+```mermaid
+graph LR
+    A(Session) -->|1:n, sessionId| B(Trace)
+```
 
+**Traces can now be grouped together to form a session:** Add a `sessionId` string when creating/updating a trace. All traces with the same `sessionId` will be grouped together.
+
+_Example session spanning multiple traces_
+<Frame border fullWidth>
+  ![Session view](/images/docs/session.png)
+</Frame>
+
+## Other features
+
+- Publish a session to share with others as a public link
+- Bookmark a session to easily find it later
+- Manually evaluate sessions by adding `scores` from the Langfuse UI
 
 See [our docs](/docs/sessions) for more information.
