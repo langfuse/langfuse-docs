@@ -26,10 +26,10 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)"]}>
 <Tab>
 ```diff
-langfuse.trace(CreateTrace(
+langfuse.trace(
     ...
-+   sessionId="your-session-id"
-))
++   session_id="your-session-id"
+)
 ```
 
 </Tab>
@@ -54,32 +54,24 @@ completion = openai.chat.completions.create(
         {"role": "system", "content": "You are a calculator."},
         {"role": "user", "content": "1 + 1 = "}],
     temperature=0,
-+   sessionId="your-session-id"
++   session_id="your-session-id"
 )
 ````
 
 </Tab>
 <Tab>
-🚧 This is a work in progress. We will soon have more native support available.
-
 ```diff
-trace = langfuse.trace(CreateTrace(
-    ...
-+   sessionId="your-session-id"
-))
-handler = trace.get_langchain_handler()
+handler = CallbackHandler(
++   session_id="your-session-id"
+)
 ```
 
 </Tab>
 <Tab>
-🚧 This is a work in progress. We will soon have more native support available.
-
 ```diff
-const trace = langfuse.trace({
-    ...
+const handler = new CallbackHandler({
 +   sessionId: "your-session-id"
 });
-const handler = new CallbackHandler({ root: trace });
 ```
 
 </Tab>
