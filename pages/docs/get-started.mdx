@@ -114,7 +114,6 @@ pip install langfuse
 Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
 
 ```python filename="server.py"
-from datetime import datetime
 from langfuse import Langfuse
 
 langfuse = Langfuse(
@@ -123,30 +122,25 @@ langfuse = Langfuse(
   host="https://cloud.langfuse.com"
 )
 
-generationStartTime = datetime.now()
-
-# chatCompletion = callLLM(prompt)
-
-langfuse.generation(
-    name="chat-completion",
-    start_time=generationStartTime,
-    end_time=datetime.now(),
+generation = langfuse.generation(
+    name="summary-generation",
     model="gpt-3.5-turbo",
-    model_parameters= {
-      "temperature":0.9,
-      "maxTokens":1000,
-      "topP": None,
-    },
-    prompt=[{"role": "user", "content": message_to_send}],
-    completion=chat_response.json()["choices"][0]["message"],
-    usage={
-      "prompt_tokens": 512,
-      "completion_tokens": 49
-    },
-    version: '1.3.9',
-    metadata= {
-     "interface": 'whatsapp',
-    }
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
+    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    metadata={"interface": "whatsapp"}
+)
+
+# execute model, mocked here
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+chat_completion = {
+    "completion":"The Q3 OKRs contain goals for multiple teams...",
+    "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
+}
+
+# update span and sets end_time
+generation.end(
+    output=chat_completion["completion"],
+    usage=chat_completion["usage"],
 )
 
 # The SDK executes network requests in the background.

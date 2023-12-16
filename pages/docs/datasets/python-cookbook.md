@@ -122,8 +122,8 @@ def run_my_custom_llm_app(input, system_prompt):
 
   langfuse_generation = langfuse.generation(
     name="guess-countries",
-    prompt=messages,
-    completion=openai_completion,
+    input=messages,
+    output=openai_completion,
     model="gpt-3.5-turbo",
     start_time=generationStartTime,
     end_time=datetime.now()
