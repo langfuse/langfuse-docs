@@ -92,7 +92,7 @@ const generation = trace.generation({
     temperature: 0.9,
     maxTokens: 2000,
   },
-  prompt: messages,
+  input: messages,
 });
 
 // Application code
@@ -100,7 +100,7 @@ const chatCompletion = await llm.respond(prompt);
 
 // End generation - sets endTime
 generation.end({
-  completion: chatCompletion,
+  output: chatCompletion,
 });
 ```
 
