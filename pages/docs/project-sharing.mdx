@@ -28,8 +28,11 @@ export function RolePermissionTable() {
       "apiKeys:create",
       "apiKeys:delete",
       "traces:publish",
+      "traces:bookmark",
+      "traces:delete",
       "scores:CUD",
       "project:delete",
+      "project:transfer",
       "datasets:CUD",
     ],
     ADMIN: [
@@ -40,11 +43,18 @@ export function RolePermissionTable() {
       "apiKeys:create",
       "apiKeys:delete",
       "traces:publish",
+      "traces:bookmark",
+      "traces:delete",
       "scores:CUD",
-      "project:delete",
       "datasets:CUD",
     ],
-    MEMBER: ["members:read", "traces:publish", "scores:CUD", "datasets:CUD"],
+    MEMBER: [
+      "members:read",
+      "traces:publish",
+      "traces:bookmark",
+      "scores:CUD",
+      "datasets:CUD",
+    ],
     VIEWER: [],
   };
   return (

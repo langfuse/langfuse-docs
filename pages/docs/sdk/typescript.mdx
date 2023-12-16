@@ -79,11 +79,11 @@ const langfuse = new Langfuse({
 
 ### Options
 
-| Variable       | Description                                                                         | Default value                                                                                                                                           |
-| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| baseUrl        | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
-| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
+| Variable       | Description                                                                               | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl        | BaseUrl of the Langfuse API; for US data region, set to `"https://us.cloud.langfuse.com"` | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release        | The release number/hash of the application to provide analytics grouped by release.       | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| requestTimeout | Timeout in ms for requests                                                                | `10000`                                                                                                                                                 |
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
@@ -138,6 +138,8 @@ trace.score({});
 | --------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | id        | string | yes      | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread). |
 | name      | string | yes      | Identifier of the trace. Useful for sorting/filtering in the UI.                                                                                                                        |
+| input     | object | yes      | The input of the trace. Can be any JSON object.                                                                                                                                         |
+| output    | object | yes      | The output of the trace. Can be any JSON object.                                                                                                                                        |
 | metadata  | object | yes      | Additional metadata of the trace. Can be any JSON object.                                                                                                                               |
 | userId    | string | yes      | The id of the user that triggered the execution. Used to provide [user-level analytics](/docs/user-explorer).                                                                           |
 | version   | string | yes      | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.                                                                    |

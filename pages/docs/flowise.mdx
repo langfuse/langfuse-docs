@@ -8,6 +8,8 @@ description: Capture all LLM calls made via Flowise in Langfuse
 
 With the native integration, you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
 
+The integration supports all use cases of Flowise, including: interactively in the UI, API, and embeds.
+
 ## Integration
 
 <Steps>
@@ -49,3 +51,11 @@ npx flowise start
 Optionally add `release` to tag the current version of the flow. Changing the other options is commonly not needed.
 
 </Steps>
+
+## Mapping of Flowise to Langfuse
+
+The integration automatically maps the following fields from Flowise to Langfuse:
+
+| Flowise | Langfuse | Notes                                                 | Required version                                                                   |
+| ------- | -------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| chatId  | userId   | The chatId represents an individual user in Langfuse. | [Flowise 1.4.3](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.3) |

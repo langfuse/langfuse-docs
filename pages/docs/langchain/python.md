@@ -23,19 +23,16 @@ chain.run(input="<user_input", callbacks=[handler])
 ```
 
 Langchain expression language (LCEL)
-
 ```python /config={"callbacks":[handler]}/
 chain.invoke(input, config={"callbacks":[handler]})
 ```
 
 ---
-
-**_In case of missing events or tokens:_**
+ **_In case of missing events or tokens:_**
 
 There are two ways to integrate callbacks into Langchain:
-
-- _Constructor Callbacks_: Set when initializing an object, like `LLMChain(callbacks=[handler])` or `ChatOpenAI(callbacks=[handler])`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
-- _Request Callbacks_: Defined when issuing a request, like `chain.run(input, callbacks=[handler])` and `chain.invoke(input, config={"callbacks":[handler]})`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
+- *Constructor Callbacks*: Set when initializing an object, like `LLMChain(callbacks=[handler])` or `ChatOpenAI(callbacks=[handler])`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
+- *Request Callbacks*: Defined when issuing a request, like `chain.run(input, callbacks=[handler])` and `chain.invoke(input, config={"callbacks":[handler]})`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
 
 For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://python.langchain.com/docs/modules/callbacks/#where-to-pass-in-callbacks).
 
@@ -60,25 +57,32 @@ Missing some useful information/context in Langfuse? Join the [Discord](/discord
 
 The Langfuse SDKs are hosted on the pypi index.
 
+
 ```python
 %pip install langfuse langchain openai --upgrade
 ```
 
 Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
 
+Alternatively, you can also pass them as arguments to the `CallbackHandler` constructor.
+
+
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
-# if you do not use Langfuse Cloud
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
+
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -86,7 +90,14 @@ from langfuse.callback import CallbackHandler
 handler = CallbackHandler()
 ```
 
+
+```python
+# checks the SDK connection with the server.
+handler.auth_check()
+```
+
 ### 2. Langchain
+
 
 ```python
 # further imports
@@ -101,6 +112,7 @@ from langfuse.callback import CallbackHandler
 ### 1. Sequential Chain
 
 ![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
+
 
 ```python
 llm = OpenAI()
@@ -129,6 +141,7 @@ handler.langfuse.flush()
 ### 2. Sequential Chain in Langchain Expression Language (LCEL)
 
 ![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
+
 
 ```python
 from operator import itemgetter
@@ -162,14 +175,17 @@ handler.get_trace_url()
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
+
 ```python
 import os
 os.environ["SERPAPI_API_KEY"] = ''
 ```
 
+
 ```python
 %pip install unstructured chromadb tiktoken google-search-results python-magic --upgrade
 ```
+
 
 ```python
 from langchain.document_loaders import UnstructuredURLLoader
@@ -208,7 +224,10 @@ print(result)
 handler.langfuse.flush()
 ```
 
+
+
 ![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
+
 
 ```python
 from langchain.agents import AgentType, initialize_agent, load_tools
@@ -233,7 +252,9 @@ print("output variable: ", result)
 
 To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `handler.get_trace_id()`
 
+
 ### Example
+
 
 ```python
 from langfuse import Langfuse
@@ -260,9 +281,10 @@ trace = langfuse.score(
 
 ## Adding trace as context to a Langchain handler
 
-It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `user_id`, ` name`` or  `metadata`. All the Langchain observations will be collected on that trace.
+It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `user_id`, `name`` or `metadata`. All the Langchain observations will be collected on that trace.
 
 To do that, we first need to initialize the [Python SDK](/docs/sdk/python), create a `trace`, and finally create the handler.
+
 
 ```python
 import uuid
@@ -310,6 +332,7 @@ TRACE (id: trace_id)
 |   |
 |   |-- GENERATION: OpenAI (id: generated by Langfuse)
 ```
+
 
 ```python
 import uuid

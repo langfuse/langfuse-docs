@@ -27,6 +27,7 @@ const supabaseClient = createClient(
 const langfuse = new Langfuse({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL ?? undefined,
 });
 // langfuse.debug();
 
@@ -35,7 +36,7 @@ export default async function handler(req: Request, res: Response) {
 
   const trace = langfuse.trace({
     name: "qa",
-    id: "lf.docs.conversation." + body.conversationId,
+    sessionId: "lf.docs.conversation." + body.conversationId,
     userId: body.userId,
     metadata: {
       pathname: new URL(req.headers.get("Referer")).pathname,
@@ -43,11 +44,6 @@ export default async function handler(req: Request, res: Response) {
   });
 
   const messages = body.messages;
-
-  const messageSpan = trace.span({
-    name: "user-interaction",
-    input: messages,
-  });
 
   // Exclude additional fields from being sent to OpenAI
   const openAiMessages = messages.map(({ content, role }) => ({
@@ -57,12 +53,12 @@ export default async function handler(req: Request, res: Response) {
 
   // get last message
   const sanitizedQuery = messages[messages.length - 1].content.trim();
-  // const sanitizedQuery = messages
-  //   .filter(({ role }) => role === "user")
-  //   .map(({ content }) => content.trim())
-  //   .join("\n");
 
-  const retrievalSpan = messageSpan.span({
+  trace.update({
+    input: sanitizedQuery,
+  });
+
+  const retrievalSpan = trace.span({
     name: "retrieval",
     input: sanitizedQuery,
   });
@@ -181,7 +177,7 @@ export default async function handler(req: Request, res: Response) {
       
       Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
       Use emojis in your answers. Do not mention that you are "enthusiastic", the user does not need to know, will feel it from the style of your answers.
-      Only use information that is available in the context. If you are unsure and the answer is not explicitly written in the documentation, say
+      Only use information that is available in the context, do not make up any code that is not in the context. If you are unsure and the answer is not explicitly written in the documentation, say
       "Sorry, I don't know how to help with that." If the user is having problems using Langfuse, tell her to reach out to the founders directly.`,
         }
       : {
@@ -197,7 +193,7 @@ export default async function handler(req: Request, res: Response) {
     ...openAiMessages,
   ];
 
-  const generation = messageSpan.generation({
+  const generation = trace.generation({
     name: "generation",
     prompt: assembledMessages as any,
     model: "gpt-3.5-turbo",
@@ -217,9 +213,6 @@ export default async function handler(req: Request, res: Response) {
     onCompletion: async (completion) => {
       generation.end({
         completion,
-      });
-      messageSpan.end({
-        output: completion,
         level: completion.includes("I don't know how to help with that")
           ? "WARNING"
           : "DEFAULT",
@@ -227,12 +220,15 @@ export default async function handler(req: Request, res: Response) {
           ? "Refused to answer"
           : undefined,
       });
+      trace.update({
+        output: completion,
+      });
       await langfuse.shutdownAsync();
     },
   });
   return new StreamingTextResponse(stream, {
     headers: {
-      "X-Message-Id": messageSpan.id,
+      "X-Trace-Id": trace.id,
     },
   });
 }
