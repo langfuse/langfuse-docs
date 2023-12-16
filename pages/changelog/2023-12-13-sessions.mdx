@@ -1,7 +1,8 @@
 ---
 date: 2023-12-13
-title: Langfuse launches 'Sessions' feature
-description: Langfuse now supports a simple way to group multiple traces into a session and replay interactions between users and LLMs.
+title: Sessions
+description: Group multiple traces into a session and replay interactions between users and your LLM based application.
+ogImage: /images/docs/session.png
 author: Marc
 ---
 
@@ -9,22 +10,9 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-```mermaid
-graph LR
-    A(Session) -->|1:n, sessionId| B(Trace)
-```
+Example use cases:
 
-**Traces can now be grouped together to form a session:** Add a `sessionId` string when creating/updating a trace. All traces with the same `sessionId` will be grouped together.
+- Conversations / threads
+- Multiple interactions within a user session
 
-_Example session spanning multiple traces_
-<Frame border fullWidth>
-  ![Session view](/images/docs/session.png)
-</Frame>
-
-## Other features
-
-- Publish a session to share with others as a public link
-- Bookmark a session to easily find it later
-- Manually evaluate sessions by adding `scores` from the Langfuse UI
-
-See [our docs](/docs/sessions) for more information.
+To get started, add a `sessionId` string when creating/updating a trace. See [docs](/docs/sessions) for full details on how to add sessions to your traces.
