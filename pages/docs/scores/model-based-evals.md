@@ -1,4 +1,4 @@
-# Model-based Evals in Langfuse
+# Model-based Evaluations in Langfuse
 
 Model-based evaluations are a powerful tool to automate the evaluation of production completions in Langfuse.
 
