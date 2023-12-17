@@ -70,12 +70,11 @@ Alternatively, you can also pass them as arguments to the `CallbackHandler` cons
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
+# get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# Your openai key
+# your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
 # Your host, defaults to https://cloud.langfuse.com
@@ -258,24 +257,20 @@ To add [scores](/docs/scores) to traces created with the Langchain integration, 
 
 ```python
 from langfuse import Langfuse
-from langfuse.model import CreateScore
-from langfuse.model import CreateScoreRequest
 
 
 # Trace langchain run via the Langfuse CallbackHandler as shown above
 
 # Get id of created trace
-traceId = handler.get_trace_id()
+trace_id = handler.get_trace_id()
 
 # Add score, e.g. via the Python SDK
 langfuse = Langfuse()
 trace = langfuse.score(
-    CreateScoreRequest(
-        traceId=traceId,
-        name="user-explicit-feedback",
-        value=1,
-        comment="I like how personalized the response is"
-    )
+    trace_id=trace_id,
+    name="user-explicit-feedback",
+    value=1,
+    comment="I like how personalized the response is"
 )
 ```
 
@@ -291,14 +286,13 @@ import uuid
 import os
 
 from langfuse.client import Langfuse
-from langfuse.model import CreateTrace
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
 langfuse = Langfuse()
 
-trace = langfuse.trace(CreateTrace(name="synopsis-application", user_id="user-1234"))
+trace = langfuse.trace(name="synopsis-application", user_id="user-1234")
 
 handler = trace.get_langchain_handler()
 
@@ -339,7 +333,6 @@ import uuid
 import os
 
 from langfuse.client import Langfuse
-from langfuse.model import CreateTrace
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -347,7 +340,7 @@ from langchain.chains import LLMChain
 langfuse = Langfuse()
 
 trace_id = str(uuid.uuid4())
-trace = langfuse.trace(CreateTrace(id=trace_id))
+trace = langfuse.trace(id=trace_id)
 
 handler = trace.get_langchain_handler()
 

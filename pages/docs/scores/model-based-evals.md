@@ -71,6 +71,8 @@ Initialize the Langfuse Python SDK, more information [here](https://langfuse.com
 from langfuse import Langfuse
 
 langfuse = Langfuse()
+
+langfuse.auth_check()
 ```
 
 ### Fetching data
@@ -137,9 +139,6 @@ Below, we execute the evaluation for each `Generation` loaded above. Each score 
 
 
 ```python
-from langfuse.model import InitialScore
-
-
 def execute_eval_and_score():
 
   for generation in generations:
@@ -152,7 +151,7 @@ def execute_eval_and_score():
       )
       print(eval_result)
 
-      langfuse.score(InitialScore(name=criterion, traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
+      langfuse.score(name=criterion, trace_id=generation.trace_id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
 
 execute_eval_and_score()
 
@@ -175,7 +174,7 @@ def eval_hallucination():
     )
     print(eval_result)
     if eval_result is not None and eval_result["score"] is not None and eval_result["reasoning"] is not None:
-      langfuse.score(InitialScore(name='hallucination', traceId=generation.trace_id, observationId=generation.id, value=eval_result["score"], comment=eval_result['reasoning']))
+      langfuse.score(name='hallucination', trace_id=generation.trace_id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
 
 ```
 

@@ -92,7 +92,7 @@ const generation = trace.generation({
     temperature: 0.9,
     maxTokens: 2000,
   },
-  prompt: messages,
+  input: messages,
 });
 
 // Application code
@@ -100,7 +100,7 @@ const chatCompletion = await llm.respond(prompt);
 
 // End generation - sets endTime
 generation.end({
-  completion: chatCompletion,
+  output: chatCompletion,
 });
 ```
 
@@ -114,9 +114,7 @@ pip install langfuse
 Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
 
 ```python filename="server.py"
-from datetime import datetime
 from langfuse import Langfuse
-from langfuse.model import InitialGeneration, Usage
 
 langfuse = Langfuse(
   private_key="pk-lf-...",
@@ -124,31 +122,26 @@ langfuse = Langfuse(
   host="https://cloud.langfuse.com"
 )
 
-generationStartTime = datetime.now()
-
-# chatCompletion = callLLM(prompt)
-
-langfuse.generation(InitialGeneration(
-    name="chat-completion",
-    startTime=generationStartTime,
-    endTime=datetime.now(),
+generation = langfuse.generation(
+    name="summary-generation",
     model="gpt-3.5-turbo",
-    modelParameters= {
-      "temperature":0.9,
-      "maxTokens":1000,
-      "topP": None,
-    },
-    prompt=[{"role": "user", "content": message_to_send}],
-    completion=chat_response.json()["choices"][0]["message"],
-    usage=Usage(
-      prompt_tokens=512,
-      completion_tokens=49
-    ),
-    version: '1.3.9',
-    metadata= {
-     "interface": 'whatsapp',
-    }
-))
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
+    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    metadata={"interface": "whatsapp"}
+)
+
+# execute model, mocked here
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+chat_completion = {
+    "completion":"The Q3 OKRs contain goals for multiple teams...",
+    "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
+}
+
+# update span and sets end_time
+generation.end(
+    output=chat_completion["completion"],
+    usage=chat_completion["usage"],
+)
 
 # The SDK executes network requests in the background.
 # To ensure that all requests are sent before the process exits, call flush()
@@ -249,13 +242,12 @@ event.score({});
 You can use the Python SDK to report a score via your Python server.
 
 ```python
-from langfuse.model import CreateScore
 
-score = generation.score(CreateScore(
+score = generation.score(
     name='user-explicit-feedback',
     value=1,
     comment="I like how personalized the response is"
-))
+)
 ```
 
 </Tab>

@@ -6,30 +6,35 @@ description: Fully async and typed Python SDK. Uses Pydantic objects for data ve
 
 [![PyPI](https://img.shields.io/pypi/v/langfuse?style=flat-square)](https://pypi.org/project/langfuse/)
 
-This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK does not impact your latencies and also does not impact your customers in case of exceptions.
+This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK adds only minimal latency to your application.
 
-Using langchain? Use the [langchain integration](https://langfuse.com/docs/langchain)
+Using Langchain or OpenAI SDK? Use the native [integrations](https://langfuse.com/docs/integrations).
 
-## 1. Installation
-
-The Langfuse SDKs are hosted on the pypi index.
+## Installation
 
 
 ```python
 %pip install langfuse --upgrade
 ```
 
-Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default. The Python client can modify all entities in the Langfuse API and therefore requires the secret key.
+## Initialize Client
+
+Initialize the client with your credentials. You can set them as environt variables or constructor arguments.
+
+If you self-host Langfuse or use the 🇺🇸 US data region, make sure to set the `LANGFUSE_HOST`.
+
+In case of initializing issues, verify your credentials using `langfuse.auth_check()`.
 
 
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = ""
 
 # Your host, defaults to https://cloud.langfuse.com
@@ -44,51 +49,33 @@ from langfuse import Langfuse
 langfuse = Langfuse()
 ```
 
+| Environment, Variable | Description   | Default value  
+| --- | --- | --- 
+| `LANGFUSE_PUBLIC_KEY`, `public_key` | Public key, get in project settings | 
+| `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings | 
+| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"`       
+| `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
+| `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
+| n/a, `number_of_consumers` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
 
-```python
-# checks the SDK connection with the server.
-langfuse.auth_check()
-```
+## Tracing
 
-### Options
+The Langfuse SDK and UI are designed to support complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
 
-| Variable |Description   | Default value  
-| --- | --- | ---
-| host | Host of the Langfuse API, set to `"https://us.cloud.langfuse.com"` for US data region | `"https://cloud.langfuse.com"`       
-| release | The release number/hash of the application to provide analytics grouped by release.	| `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
-| debug | Prints debug logs to the console | `False`
-| number_of_consumers | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. | 1
+**Traces**
 
+A `Trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
 
+**Observations**
 
-At the bottom of the document are more detailed explanations for these.
+Each `Trace` can contain multiple `Observations` to record individual steps of an execution. There are different types of `Observations`:
+  - `Events` are the basic building block. They are used to track discrete events in a `Trace`.
+  - `Spans` track time periods and include an end_time.
+  - `Generations` are a specific type of `Spans` which are used to record generations of an AI model. They contain additional metadata about the model, LLM token and cost tracking, and the prompt/completions are specifically rendered in the langfuse UI.
+  
 
-## 2. Record a simple LLM call
-To record a single call to a LLM, you can use `langfuse.generations()` method from the SDK and provide it with the LLM configuration, prompt and completion.
-
-
-```python
-from datetime import datetime
-from langfuse.model import InitialGeneration, Usage
-
-generationStartTime = datetime.now()
-
-# call to an LLM API
-
-generation = langfuse.generation(InitialGeneration(
-    name="summary-generation",
-    startTime=generationStartTime,
-    endTime=datetime.now(),
-    model="gpt-3.5-turbo",
-    modelParameters={"maxTokens": "1000", "temperature": "0.9"},
-    prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
-    completion="The Q3 OKRs contain goals for multiple teams...",
-    usage=Usage(promptTokens=50, completionTokens = 49),
-    metadata={"interface": "whatsapp"}
-))
-```
-
-## 3. Record a more complex application
+_Example_
+  
 ```
 TRACE
 |
@@ -108,25 +95,13 @@ TRACE
 
 
 ```python
-from langfuse.model import CreateTrace, CreateSpan, CreateGeneration, CreateEvent
-
-trace = langfuse.trace(CreateTrace(name = "llm-feature"))
-retrieval = trace.span(CreateSpan(name = "retrieval"))
-retrieval.generation(CreateGeneration(name = "query-creation"))
-retrieval.span(CreateSpan(name = "vector-db-search"))
-retrieval.event(CreateEvent(name = "db-summary"))
-trace.generation(CreateGeneration(name = "user-output"));
+trace = langfuse.trace(name = "llm-feature")
+retrieval = trace.span(name = "retrieval")
+retrieval.generation(name = "query-creation")
+retrieval.span(name = "vector-db-search")
+retrieval.event(name = "db-summary")
+trace.generation(name = "user-output");
 ```
-
-The Langfuse SDK and UI are designed to support very complex LLM features which contain for example vector database searches and multiple LLM calls. For that, it is very convenient to nest or chain the SDK. Understanding a small number of terms makes it easy to integrate with Langfuse.
-
-#### Traces
-A `Trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
-#### Observations
-Each `Trace` can contain multiple `Observations` to record individual steps of an execution. There are different types of `Observations`.
-  - `Events` are the basic building block. They are used to track discrete events in a `Trace`.
-  - `Spans` can be used to record steps from a chain like fetching data from a vector databse. You are able to record inputs, outputs and more.
-  - `Generations` are a specific type of `Spans` which are used to record generations of an AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
 
 ### Traces
 
@@ -134,131 +109,170 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
-| id | string | yes | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).
+| id | string | yes | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when creating a distributed trace. Traces are upserted on id.
 | name | string | yes | Identifier of the trace. Useful for sorting/filtering in the UI.
 | input | object | yes | The input of the trace. Can be any JSON object.
 | output | object | yes | The output of the trace. Can be any JSON object.
 | metadata | object | yes | Additional metadata of the trace. Can be any JSON object.
-| userId | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/user-explorer).
+| user_id | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/user-explorer).
+| session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/sessions) in Langfuse. Use your own session/thread identifier.
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
 | release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
 
 
 ```python
-from langfuse.model import CreateTrace
-
-trace = langfuse.trace(CreateTrace(
+trace = langfuse.trace(
     name = "docs-retrieval",
-    userId = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+    user_id = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
         "env": "production",
         "email": "user@langfuse.com",
     }
-))
+)
+```
+
+Traces can be updated:
+
+
+```python
+# option 1: using trace object
+trace.update(
+    input="Hi there"
+)
+
+# option 2: via trace_id, trace is upserted on id
+langfuse.trace(id=trace.id, output="Hi 👋")
+```
+
+You can get the url of a trace in the Langfuse interface. Helpful in interactive use or when adding this url to your logs.
+
+
+```python
+trace.get_trace_url()
 ```
 
 ### Span
 
-Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans to support your use cases such as Agent tool usages.
+Spans represent durations of units of work in a trace.
+
+Parameters of `langfuse.span()`:
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
-| id | string | yes | The id of the span can be set, otherwise a random id is generated.
-| startTime | datetime.datetime | yes | The time at which the span started, defaults to the current time.
-| endTime | datetime.datetime | yes | The time at which the span ended.
+| id | string | yes | The id of the span can be set, otherwise a random id is generated. Spans are upserted on id.
+| start_time | datetime.datetime | yes | The time at which the span started, defaults to the current time.
+| end_time | datetime.datetime | yes | The time at which the span ended. Automatically set by `span.end()`.
 | name | string | yes | Identifier of the span. Useful for sorting/filtering in the UI.
 | metadata | object | yes | Additional metadata of the span. Can be any JSON object.
 | level | string | yes | The level of the span. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-| statusMessage | string | yes | The status message of the span. Additional field for context of the event. E.g. the error message of an error event.
+| status_message | string | yes | The status message of the span. Additional field for context of the event. E.g. the error message of an error event.
 | input | object | yes | The input to the span. Can be any JSON object.
 | output | object | yes | The output to the span. Can be any JSON object.
 | version | string | yes | The version of the span type. Used to understand how changes to the span type affect metrics. Useful in debugging.
 
+Use trace or observation objects to create child spans:
+
 
 ```python
-from datetime import datetime
-from langfuse.model import CreateSpan, UpdateSpan
-
-retrievalStartTime = datetime.now()
-
-# retrieveDocs = retrieveDoc()
-# ...
-
-span = trace.span(CreateSpan(
-        name="embedding-search",
-        startTime=retrievalStartTime,
-        endTime=datetime.now(),
-        metadata={"database": "pinecone"},
-        input = {'query': 'This document entails the OKR goals for ACME'},
-    )
+# create span, sets start_time
+span = trace.span(
+    name="embedding-search",
+    metadata={"database": "pinecone"},
+    input = {'query': 'This document entails the OKR goals for ACME'},
 )
+
+# function, mocked
+# retrieved_documents = retrieveDoc()
+retrieved_documents = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
+
+# update span and sets end_time
+span.end(
+    output=retrieved_documents
+);
 ```
 
-Spans can be updated once your function completes for example record outputs.
+Other span methods:
+- `span.update()`, does not change end_time if not explicitly set
 
-
+Alternatively, if using the Langfuse objects is not convenient, you can use the `langfuse` client, `trace_id` and (optionally) `parent_observation_id` to create spans, and `id` to upsert a span.
 
 
 ```python
-span = span.update(UpdateSpan(
-        output = {"response": "[{'name': 'OKR Engineering', 'content': 'The engineering department defined the following OKR goals...'},{'name': 'OKR Marketing', 'content': 'The marketing department defined the following OKR goals...'}]"}
-    )
+trace_id = trace.id
+
+# create span
+span = langfuse.span(
+    trace_id=trace_id,
+    name="initial name"
+)
+
+# update span, upserts on id
+langfuse.span(
+    id=span.id,
+    name="updated name"
+)
+
+# create new nested span
+langfuse.span(
+    trace_id=trace_id,
+    parent_observation_id=span.id,
+    name="nested span"
 )
 ```
 
 ### Generation
 
-Generations are used to log generations of AI model. They contain additional metadata about the model and the prompt/completion and are specifically rendered in the langfuse UI.
+Generations are used to log generations of AI models. They contain additional metadata about the model, the prompt/completion, the cost of executing the model and are specifically rendered in the langfuse UI.
 
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
 | id | string | yes | The id of the generation can be set, defaults to random id.
 | name | string | yes | Identifier of the generation. Useful for sorting/filtering in the UI.
-| startTime | datetime.datetime | yes | The time at which the generation started, defaults to the current time.
-| completionStartTime | datetime.datetime | yes | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.
-| endTime | datetime.datetime | yes | The time at which the generation ended.
+| start_time | datetime.datetime | yes | The time at which the generation started, defaults to the current time.
+| completion_start_time | datetime.datetime | yes | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.
+| end_time | datetime.datetime | yes | The time at which the generation ended. Automatically set by `generation.end()`.
 | model | string | yes | The name of the model used for the generation.
-| modelParameters | object | yes | The parameters of the model used for the generation; can be any key-value pairs.
-| prompt | object | yes | The prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input).
-| completion | string | yes | The completion generated by the model.
-| usage | object | yes | The usage of the model during the generation; takes three optional key-value pairs: `promptTokens`, `completionTokens`, and `totalTokens`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse.
+| model_parameters | object | yes | The parameters of the model used for the generation; can be any key-value pairs.
+| input | object | yes | The prompt used for the generation; can be any string or JSON object (recommended for chat models or other models that use structured input).
+| output | string | yes | The completion generated by the model.
+| usage | object | yes | The usage object supports the OpenAi structure with {`promptTokens`, `completionTokens`, `totalTokens`} and a more generic version {`input`, `output`, `total`, `unit`} where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse.
 | metadata | object | yes | Additional metadata of the generation. Can be any JSON object.
 | level | string | yes | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-| statusMessage | string | yes | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.
+| status_message | string | yes | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.
 | version | string | yes | The version of the generation type. Used to understand how changes to the span type affect metrics. Useful in debugging.
 
+Use trace or observation objects to create child generations:
+
 
 ```python
-from langfuse.model import CreateGeneration, Usage, UpdateGeneration
-
-from datetime import datetime
-
-generationStartTime = datetime.now()
-
-# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
-# ...
-
-generation = trace.generation(CreateGeneration(
+# creates generation
+generation = trace.generation(
     name="summary-generation",
-    startTime=generationStartTime,
-    endTime=datetime.now(),
     model="gpt-3.5-turbo",
-    modelParameters={"maxTokens": "1000", "temperature": "0.9"},
-    prompt=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
+    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
     metadata={"interface": "whatsapp"}
-))
+)
+
+# execute model, mocked here
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+chat_completion = {
+    "completion":"The Q3 OKRs contain goals for multiple teams...",
+    "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
+}
+
+# update span and sets end_time
+generation.end(
+    output=chat_completion["completion"],
+    usage=chat_completion["usage"],
+);
 ```
 
-Generations can be updated once your LLM function completes for example record outputs.
+Other generation methods:
+- `generation.update()`, does not change end_time if not explicitly set
 
-
-```python
-generation.update(UpdateGeneration(
-    completion="The Q3 OKRs contain goals for multiple teams...",
-    usage=Usage(promptTokens=50, completionTokens = 49),
-));
-```
+See documentation of spans above on how to use the langfuse client and ids if you cannot use the Langfuse objects to trace your application. This also fully applies to generations.
 
 ### Events
 
@@ -267,63 +281,68 @@ Events are used to track discrete events in a trace.
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
 | id | string | yes | The id of the event can be set, otherwise a random id is generated.
-| startTime | datetime.datetime | yes | The time at which the event started, defaults to the current time.
+| start_time | datetime.datetime | yes | The time at which the event started, defaults to the current time.
 | name | string | yes | Identifier of the event. Useful for sorting/filtering in the UI.
 | metadata | object | yes | Additional metadata of the event. Can be any JSON object.
 | level | string | yes | The level of the event. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.
-| statusMessage | string | yes | The status message of the event. Additional field for context of the event. E.g. the error message of an error event.
+| status_message | string | yes | The status message of the event. Additional field for context of the event. E.g. the error message of an error event.
 | input | object | yes | The input to the event. Can be any JSON object.
 | output | object | yes | The output to the event. Can be any JSON object.
 | version | string | yes | The version of the event type. Used to understand how changes to the event type affect metrics. Useful in debugging.
 
+Use trace or observation objects to create child generations:
+
 
 ```python
-from langfuse.model import CreateEvent
-from datetime import datetime
-
-event = span.event(CreateEvent(
-        name="chat-docs-retrieval",
-        startTime=datetime.now(),
-        metadata={"key": "value"},
-        input = {"key": "value"},
-        output = {"key": "value"}
-    )
+event = span.event(
+    name="chat-docs-retrieval",
+    metadata={"key": "value"},
+    input = {"key": "value"},
+    output = {"key": "value"}
 )
 ```
 
-## 3. Scores
+See documentation of spans above on how to use the langfuse client and ids if you cannot use the Langfuse objects to trace your application. This also fully applies to events.
+
+## Scores
 
 [Scores](https://langfuse.com/docs/scores) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
 
-If the score relates to a specific step of the trace, specify the `observationId`.
+If the score relates to a specific step of the trace, specify the `observation_id`.
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
-| traceId | string | no | The id of the trace to which the score should be attached. Automatically set if you use `{trace,generation,span,event}.score({})`
-| observationId | string | yes | The id of the observation to which the score should be attached. Automatically set if you use `{generation,span,event}.score({})`
+| trace_id | string | no | The id of the trace to which the score should be attached. Automatically set if you use `{trace,generation,span,event}.score({})`
+| observation_id | string | yes | The id of the observation to which the score should be attached. Automatically set if you use `{generation,span,event}.score({})`
 | name | string | no | Identifier of the score.
 | value | number | no | The value of the score. Can be any number, often standardized to 0..1
 | comment | string | yes | Additional context/explanation of the score.
 
 
 ```python
-from langfuse.model import CreateScore, InitialScore
-
 # via {trace, span, event, generation}.score
-trace.score(CreateScore(
+trace.score(
     name="user-explicit-feedback",
     value=1,
-    comment="I like how personalized the response is"
-));
+    comment="I like how personalized the response is",
+)
 
-# using the trace_id
-trace_id = trace.id
-langfuse.score(InitialScore(
-    traceId=trace.id,
+# using the trace.id
+langfuse.score(
+    trace_id=trace.id,
     name="user-explicit-feedback",
     value=1,
     comment="I like how personalized the response is"
-));
+)
+
+# scoring a specific observation
+langfuse.score(
+    trace_id=trace.id,
+    observation_id=span.id,
+    name="user-explicit-feedback",
+    value=1,
+    comment="I like how personalized the response is"
+)
 ```
 
 ## Additional configurations
@@ -341,7 +360,9 @@ langfuse.flush()
 
 ### Releases and versions
 
-You might want to track releases in Langfuse to understand with which Software release a given Trace was generated. This can be done by either providing the environment variable `LANGFUSE_RELEASE` or instantiating the client with the release.
+Track `releases` in Langfuse to relate traces in Langfuse with the versioning of your application. This can be done by either providing the environment variable `LANGFUSE_RELEASE`, instantiating the client with the release, or setting it as a trace parameter.
+
+If no release is set, this defaults to [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3).
 
 
 ```python
@@ -349,26 +370,124 @@ You might want to track releases in Langfuse to understand with which Software r
 os.environ["LANGFUSE_RELEASE"] = "ba7816b..." # <- example, github sha
 
 # Alternatively, use the constructor of the SDK
-langfuse = Langfuse(release='ba7816b')
+langfuse = Langfuse(release="ba7816b")
+
+# Alternatively, set it when creating a trace
+langfuse.trace(release="ba7816b")
 ```
 
-Apart from Software releases, users want to track versions of LLM apps (e.g. Prompt versions). For this, each `Generation`, `Span`, or `Event` has a version field.
+To track versions of individual pieces of you application apart from releases, use the `version` parameter on all observations. This is for example useful to track the effect of changed prompts.
 
 
 ```python
-langfuse.span(CreateSpan(name = "retrieval", version="<version>"));
+# works the same for spans, generations, events
+langfuse.span(name="retrieval", version="<version>")
 ```
 
-### Debug
-Enable debug mode to get verbose logs. Alternatively, set the debug mode via the environment variable `LANGFUSE_DEBUG`.
+## Troubleshooting
 
+### Debug mode
+Enable debug mode to get verbose logs.
 
 ```python
 langfuse = Langfuse(debug=True)
-
-# Deactivating for the rest of the notebook
-langfuse = Langfuse()
 ```
+
+Alternatively, set the debug mode via the environment variable `LANGFUSE_DEBUG=True`.
+
+### Configuration/authentication problems
+
+Use auth_check() to verify that your host and api credentials are correct.
+
+
+```python
+langfuse.auth_check()
+```
+
+## Upgrading from v1.x.x to v2.x.x
+
+### Remove Pydantic interfaces
+We like Pydantic, but it cluttered the Langfuse SDK interfaces. Thus we dropped it from the function signatures – it's cleaner.
+
+**v1.x.x**
+```python
+from langfuse.model import CreateTrace
+
+langfuse.trace(CreateTrace(name="My Trace"))
+```
+
+**v2.x.x**
+```python
+langfuse.trace(name="My Trace")
+```
+
+Removing Pydantic objects means, we also removed Pydantic enums. Instead, we use strings.
+
+**v1.x.x**
+```python
+from langfuse.model import InitialGeneration
+from langfuse.api.resources.commons.types.observation_level import ObservationLevel
+
+langfuse.generation(InitialGeneration(level=ObservationLevel.ERROR))
+```
+
+**v2.x.x**
+```python
+langfuse.generation(level="ERROR")
+```
+
+All inserted parameters are validated using Pydantic under the hood and log errors if the validation fails. No exceptions are thrown.
+
+### Renamings of `prompt` and `completion` to `input` and `output`
+To increase consistency across Langfuse, the `generation` paramters `prompt` and `completion` are renamed to `input` and `output` to be more consistent with the rest of the Langfuse API.
+
+### Snake case parameters
+
+To increase consistency, all parameters are snake case in v2. For example `startTime` is now `start_time`.
+
+### Flexible usage objects on Generations
+
+We improved the flexibility of the SDK by allowing you to ingest any type of usage while still supporting the OpenAI-style usage object. As a result, we removed the `LlmUsage` Pydantic model and two different types of usage objects can be passed.
+
+**v1.x.x**
+```python
+
+from langfuse.model import InitialGeneration, Usage
+
+ langfuse.generation(
+    InitialGeneration(
+        name="my-generation",
+        usage=Usage(promptTokens=50, completionTokens=49),
+    )
+)
+```
+
+**v2.x.x**
+
+The usage object supports the OpenAi structure with {`promptTokens`, `completionTokens`, `totalTokens`} and a more generic version {`input`, `output`, `total`, `unit`} where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse. Create an issue to request support for other units.
+
+```python
+
+langfuse.generation(
+    name="my-openai-generation",
+    usage={"promptTokens": 50,
+           "completionTokens": 49,
+           "totalTokens": 99}, # defaults to "TOKENS" unit
+)
+
+langfuse.generation(
+    name="my-claude-generation",
+    usage={"input": 50,
+           "output": 49,
+           "total": 99,
+           "unit": "CHARACTERS"}, # unit defaults to "TOKENS" unit if not set
+)
+
+# set ((input and/or output) or total), total is calculated automatically if not set
+
+```
+
+
 
 ## FastAPI
 For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
@@ -386,8 +505,6 @@ With this, your Python environment will only terminate once Langfuse received al
 ```python
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query, BackgroundTasks
-from langfuse.model import InitialGeneration
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -410,7 +527,9 @@ langfuse = Langfuse()
 async def campaign(prompt: str = Query(..., max_length=20)):
   # call to a LLM
   generation = langfuse.generation(
-      InitialGeneration(name="llm-feature", metadata="test", prompt=prompt)
+      name="llm-feature", 
+      metadata="test", 
+      input=prompt
   )
   return True
 ```

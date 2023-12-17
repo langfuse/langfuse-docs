@@ -124,7 +124,7 @@ Monitoring LLM applications requires including the context. This can be the full
 
 **Integration**
 
-```typescript {4, 9, 14, 20, 32} filename="route.ts"
+```typescript {4, 9, 16, 28, 33} filename="route.ts"
 import { Langfuse } from "langfuse";
 // more imports
 
@@ -133,18 +133,14 @@ const langfuse = new Langfuse({ publicKey, privateKey });
 export async function POST(req: Request) {
   const { messages, conversationId, userId } = await req.json();
 
-  const langfuseConversation = langfuse.trace({
-    id: `conversation_${conversationId}`, // creates/upserts trace
+  const trace = langfuse.trace({
+    sessionId: `conversation_${conversationId}`, // creates/upserts trace
+    input: messages.slice(-1),
     userId,
   });
 
-  const execution = langfuseConversation.span({
-    name: "single-response",
-    input: messages.slice(-1),
-  });
-
   const additionalContext = await getContext(messages);
-  execution.event({
+  trace.event({
     name: "context-retrieved",
     output: additionalContext,
   });
@@ -156,11 +152,12 @@ export async function POST(req: Request) {
 
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
-      execution.generation({
+      trace.generation({
         name: "chat-completion",
-        prompt: messages,
-        completion,
+        input: messages,
+        output: completion,
       });
+      trace.update({ output: completion });
       await langfuse.flush();
     },
   });
@@ -180,12 +177,12 @@ https://cloud.langfuse.com/...
 
 <div className="p-3 ring-1 ring-gray-400 rounded-xl flex flex-col gap-2 text-sm">
 <div>
-<div className="font-bold">Trace</div>
+<div className="font-bold">Session</div>
 <div>Id: conversation \<conversation_id\></div>
 
 </div>
 <div className="p-3 ring-1 ring-gray-400 rounded-sm">
-  <div className="font-bold">Span: single-response</div>
+  <div className="font-bold">Trace: single-response</div>
   <div>Input: What do users like about Langfuse?</div>
 </div>
 <div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
@@ -194,15 +191,15 @@ https://cloud.langfuse.com/...
 </div>
 <div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
   <div className="font-bold">Generation: chat-completion</div>
-  <div>prompt: [ ... ]</div>
-  <div>completion: \<completion\></div>
+  <div>input: [ ... ]</div>
+  <div>output: \<completion\></div>
 </div>
 <div className="p-3 ring-1 ring-gray-400 rounded-sm">
   <div>Output: That it makes chat interactions easily observable</div>
 </div>
 
 <div className="mt-2 p-3 ring-1 ring-gray-400 rounded-sm">
-  <div className="font-bold">Span: single-response</div>
+  <div className="font-bold">Trace: single-response</div>
   <div>Input: What features of Langfuse are helpful for developers of chat aplications?</div>
 </div>
 <div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
@@ -211,8 +208,8 @@ https://cloud.langfuse.com/...
 </div>
 <div className="ml-8 p-3 ring-1 ring-gray-400 rounded-sm">
   <div className="font-bold">Generation: chat-completion</div>
-  <div>prompt: [ ... ]</div>
-  <div>completion: \<completion\></div>
+  <div>input: [ ... ]</div>
+  <div>output: \<completion\></div>
 </div>
 <div className="p-3 ring-1 ring-gray-400 rounded-sm">
   <div>Output: (1) Grouping of executions into traces (sessions), (2) nested tracking of intermediary steps that help with debugging, (3) SDKs for simple intergation with their application.</div>
