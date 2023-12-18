@@ -506,6 +506,61 @@ langfuse.generation(
 # set ((input and/or output) or total), total is calculated automatically if not set
 ```
 
+### Langchain integration
+The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
+
+```python
+
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+
+# Setup Langchain
+from langchain.chains import LLMChain
+...
+chain = LLMChain(llm=llm, prompt=prompt, callbacks=[handler])
+
+# Add Langfuse handler as callback
+chain.run(input="<first_user_input>", callbacks=[handler])
+chain.run(input="<second_user_input>", callbacks=[handler])
+
+```
+So far, invoking the chain multiple times would group the observations in one trace.
+
+```bash
+TRACE
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+```
+
+We changed this, so that each invocation will end up on its own trace. This allows us to derive the user inputs and outputs to Langchain applications. If you still want to group multiple invocations on one trace, you can use [this](https://langfuse.com/docs/langchain/python#adding-trace-as-context-to-a-langchain-handler) approach.
+
+```bash
+TRACE_1
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+
+TRACE_2
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+```
+
 
 
 ## FastAPI
