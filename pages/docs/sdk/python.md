@@ -19,11 +19,11 @@ Using Langchain or OpenAI SDK? Use the native [integrations](https://langfuse.co
 
 ## Initialize Client
 
-Initialize the client with your credentials. You can set them as environt variables or constructor arguments.
+To start, initialize the client by providing your credentials. You can set the credentials either as environment variables or constructor arguments.
 
-If you self-host Langfuse or use the 🇺🇸 US data region, make sure to set the `LANGFUSE_HOST`.
+If you are self-hosting Langfuse or using the US data region, don't forget to configure `LANGFUSE_HOST`.
 
-In case of initializing issues, verify your credentials using `langfuse.auth_check()`.
+To verify your credentials and host, use the `langfuse.auth_check()` function.
 
 
 ```python
