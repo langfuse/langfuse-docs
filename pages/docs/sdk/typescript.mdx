@@ -275,7 +275,7 @@ const generation = trace.generation({
     temperature: 0.9,
     maxTokens: 2000,
   },
-  input: messages,
+  prompt: messages,
 });
 
 // Application code
@@ -288,7 +288,7 @@ generation.update({
 
 // Example end - sets endTime, optionally pass a body
 generation.end({
-  output: chatCompletion,
+  completion: chatCompletion,
 });
 
 // Properties
@@ -461,7 +461,7 @@ export const handler() {
 
   trace.event({ name: "get-user-profile" });
   const span = trace.span({ name: "chat-interaction" });
-  span.generation({ name: "chat-completion", model: "gpt-3.5-turbo", input: prompt, output: completion });
+  span.generation({ name: "chat-completion", model: "gpt-3.5-turbo", prompt, completion });
 
   // So far all requests are queued
 
