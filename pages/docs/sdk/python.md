@@ -19,11 +19,11 @@ Using Langchain or OpenAI SDK? Use the native [integrations](https://langfuse.co
 
 ## Initialize Client
 
-Initialize the client with your credentials. You can set them as environt variables or constructor arguments.
+To start, initialize the client by providing your credentials. You can set the credentials either as environment variables or constructor arguments.
 
-If you self-host Langfuse or use the 🇺🇸 US data region, make sure to set the `LANGFUSE_HOST`.
+If you are self-hosting Langfuse or using the US data region, don't forget to configure `LANGFUSE_HOST`.
 
-In case of initializing issues, verify your credentials using `langfuse.auth_check()`.
+To verify your credentials and host, use the `langfuse.auth_check()` function.
 
 
 ```python
@@ -406,8 +406,15 @@ langfuse.auth_check()
 
 ## Upgrading from v1.x.x to v2.x.x
 
+v2 is a major release with breaking changes to simplify the SDK and make it more consistent. We recommend to upgrade to v2 as soon as possible.
+
 ### Remove Pydantic interfaces
-We like Pydantic, but it cluttered the Langfuse SDK interfaces. Thus we dropped it from the function signatures – it's cleaner.
+
+We like Pydantic, but it made the Langfuse SDK interfaces messy. Therefore, we removed the objects from the function signatures and replaced them with named parameters.
+
+All parameters are still validated using Pydantic internally. If the validation fails, errors are logged instead of throwing exceptions.
+
+#### Pydantic objects
 
 **v1.x.x**
 ```python
@@ -421,7 +428,7 @@ langfuse.trace(CreateTrace(name="My Trace"))
 langfuse.trace(name="My Trace")
 ```
 
-Removing Pydantic objects means, we also removed Pydantic enums. Instead, we use strings.
+#### Pydantic Enums
 
 **v1.x.x**
 ```python
@@ -436,18 +443,26 @@ langfuse.generation(InitialGeneration(level=ObservationLevel.ERROR))
 langfuse.generation(level="ERROR")
 ```
 
-All inserted parameters are validated using Pydantic under the hood and log errors if the validation fails. No exceptions are thrown.
-
-### Renamings of `prompt` and `completion` to `input` and `output`
-To increase consistency across Langfuse, the `generation` paramters `prompt` and `completion` are renamed to `input` and `output` to be more consistent with the rest of the Langfuse API.
+### Rename `prompt` and `completion` to `input` and `output`
+To ensure consistency throughout Langfuse, we have renamed the `prompt` and `completion` parameters in the `generation` function to `input` and `output`, respectively. This change brings them in line with the rest of the Langfuse API.
 
 ### Snake case parameters
 
-To increase consistency, all parameters are snake case in v2. For example `startTime` is now `start_time`.
+To increase consistency, all parameters are snake case in v2.
+- `trace_id` instead of `traceId`
+- `start_time` instead of `startTime`
+- `end_time` instead of `endTime`
+- `completion_start_time` instead of `completionStartTime`
+- `status_message` instead of `statusMessage`
+- `user_id` instead of `userId`
+- `session_id` instead of `sessionId`
+- `parent_observation_id` instead of `parentObservationId`
+- `model_parameters` instead of `modelParameters`
 
-### Flexible usage objects on Generations
 
-We improved the flexibility of the SDK by allowing you to ingest any type of usage while still supporting the OpenAI-style usage object. As a result, we removed the `LlmUsage` Pydantic model and two different types of usage objects can be passed.
+### More generalized usage object
+
+We improved the flexibility of the SDK by allowing you to ingest any type of usage while still supporting the OpenAI-style usage object.
 
 **v1.x.x**
 ```python
@@ -464,27 +479,31 @@ from langfuse.model import InitialGeneration, Usage
 
 **v2.x.x**
 
-The usage object supports the OpenAi structure with {`promptTokens`, `completionTokens`, `totalTokens`} and a more generic version {`input`, `output`, `total`, `unit`} where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse. Create an issue to request support for other units.
+The usage object supports the OpenAi structure with {`promptTokens`, `completionTokens`, `totalTokens`} and a more generic version {`input`, `output`, `total`, `unit`} where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/token-usage) by Langfuse. Create an issue to request support for other units and models.
 
 ```python
-
-langfuse.generation(
-    name="my-openai-generation",
-    usage={"promptTokens": 50,
-           "completionTokens": 49,
-           "totalTokens": 99}, # defaults to "TOKENS" unit
-)
-
+# Generic style
 langfuse.generation(
     name="my-claude-generation",
-    usage={"input": 50,
-           "output": 49,
-           "total": 99,
-           "unit": "CHARACTERS"}, # unit defaults to "TOKENS" unit if not set
+    usage={
+        "input": 50,
+        "output": 49,
+        "total": 99,
+        "unit": "CHARACTERS" # defaults to "TOKENS" if not set
+    }, 
+)
+
+# OpenAI style
+langfuse.generation(
+    name="my-openai-generation",
+    usage={
+        "promptTokens": 50,
+        "completionTokens": 49,
+        "totalTokens": 99
+    }, # defaults to "TOKENS" unit
 )
 
 # set ((input and/or output) or total), total is calculated automatically if not set
-
 ```
 
 
