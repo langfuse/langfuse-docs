@@ -152,7 +152,7 @@ export async function POST(req: Request) {
 
   const generation = trace.generation({
     name: "chat-generation",
-    prompt: messages,
+    input: messages,
     model: "gpt-3.5-turbo",
   });
 
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
     },
     async onCompletion(completion) {
       generation.end({
-        completion,
+        output: completion,
       });
       trace.update({
         output: completion,
