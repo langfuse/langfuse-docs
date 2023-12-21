@@ -30,7 +30,7 @@ const tiers = [
     name: "Pro",
     id: "tier-pro",
     href: "https://cloud.langfuse.com",
-    price: { monthly: "$29", annually: "$290" },
+    price: { monthly: "$29", annually: "$348" },
     description:
       "For serious projects. Includes access to full history, data governance and support.",
     features: [
@@ -47,7 +47,7 @@ const tiers = [
     name: "Team",
     id: "tier-team",
     href: "/schedule-demo",
-    price: { monthly: "$199", annually: "$1990" },
+    price: { monthly: "$199", annually: "$2388" },
     description:
       "Dedicated solutions and support for your team. Contact us to learn more.",
     features: [

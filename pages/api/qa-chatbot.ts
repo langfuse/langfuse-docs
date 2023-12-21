@@ -195,7 +195,7 @@ export default async function handler(req: Request, res: Response) {
 
   const generation = trace.generation({
     name: "generation",
-    prompt: assembledMessages as any,
+    input: assembledMessages as any,
     model: "gpt-3.5-turbo",
   });
 
@@ -212,7 +212,7 @@ export default async function handler(req: Request, res: Response) {
     },
     onCompletion: async (completion) => {
       generation.end({
-        completion,
+        output: completion,
         level: completion.includes("I don't know how to help with that")
           ? "WARNING"
           : "DEFAULT",
