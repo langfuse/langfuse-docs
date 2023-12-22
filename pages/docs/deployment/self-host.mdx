@@ -8,69 +8,22 @@ description: Langfuse is open source and can be self-hosted in your own infrastr
 
 The Langfuse Server (includes API and Web UI) is open source and can be self-hosted using Docker.
 
-## Docker
+For a full component and architecture diagram, see [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md).
 
-<Steps>
+## Requirement: Postgres Database
 
-### Postgres database
+To persist the state of Langfuse, a permanent Postgres database is required. You have the option to use a managed service on AWS, Azure, or GCP, or run it yourself. Once the database is set up, make sure to copy the connection string.
 
-You need to have a permanent Postgres database to persist the state of Langfuse. You can use a managed service on AWS, Azure, or GCP, or you can run it yourself. After setting it up, copy the _connection string_.
+## Running the Application
 
-### Deploy the container
+To run the application container, deploy it to your infrastructure. You have the option to use managed services such as AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can choose to run it on your own.
 
-Deploy the container to your infrastructure. You can use a managed service like AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can run it yourself.
-
-During the startup of the container, all database migrations will be applied automatically.
-
-Environment variables:
-
-- Set `DATABASE_URL` to the connection string of your Postgres database.
-  - Instead of `DATABASE_URL`, you can also use `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` and `DATABASE_NAME`
-- Set `NEXTAUTH_URL` to the URL of your deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`.
-- Secrets, generate them with at least 512 entropy using `openssl rand -base64 32`
-  - `NEXTAUTH_SECRET` to secure the session JWTs.
-  - `SALT` is used to salt the API key hashes.
-
-Optionally:
-
-- `PORT` sets the port the server listens on (default: 3000).
-- `HOSTNAME` defaults to `localhost`. In some environments it needs to be set to `0.0.0.0` to be accessible from outside the container (e.g. Google Cloud Run).
-- Configure authentication:
-  - `NEXT_PUBLIC_SIGN_UP_DISABLED=true` block all new sign ups. Only existing users can sign in.
-  - Enable signing into Langfuse using OAuth/SSO providers. For detailed instructions, see [NextAuth.js docs](https://next-auth.js.org/providers/google).
-    - Google: `AUTH_GOOGLE_CLIENT_ID` and `AUTH_GOOGLE_CLIENT_SECRET`
-    - GitHub: `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET`
-  - `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` is a comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`
-  - `AUTH_DISABLE_USERNAME_PASSWORD=true` disables email/password sign for all users. Only OAuth/SSO providers can be used to sign in.
-- Configure default project for new users. When users create an account they will be automatically added to this project.
-  - `LANGFUSE_DEFAULT_PROJECT_ID` is the ID of the project. You need to first create it in the UI.
-  - `LANGFUSE_DEFAULT_PROJECT_ROLE` is the role of the user in the project. Possible values are `ADMIN`, `MEMBER`, `VIEWER`. Defaults to `VIEWER`. See [project roles](/docs/project-sharing) for details.
-
-```bash
-docker run --name langfuse \
--e DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname> \
--e NEXTAUTH_URL=http://localhost:3000 \
--e NEXTAUTH_SECRET=mysecret \
--e SALT=mysalt \
--p 3000:3000 \
--a STDOUT \
-ghcr.io/langfuse/langfuse:latest
-```
-
-</Steps>
-
-## Update Docker
-
-<Steps>
-
-### Pull latest changes
+During the container startup, all database migrations will be applied automatically.
 
 ```bash
 docker pull ghcr.io/langfuse/langfuse:latest
 ```
 
-### Run container
-
 ```bash
 docker run --name langfuse \
 -e DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname> \
@@ -82,7 +35,51 @@ docker run --name langfuse \
 ghcr.io/langfuse/langfuse:latest
 ```
 
-</Steps>
+You can also one-click deploy on Railway:
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
+
+## Environment variables
+
+Langfuse is configurable using environment variables. Some are required as defined in the following table:
+
+| Variable                            | Required / Default | Description                                                                                                                                                                        |
+| ----------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                      | Required           | Connection string of your Postgres database. Instead of `DATABASE_URL`, you can also use `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` and `DATABASE_NAME`.            |
+| `DIRECT_URL`                        | `DATABASE_URL`     | Connection string of your Postgres database used for database migrations. Use this if you want to use a different user for migrations or use connection pooling on `DATABASE_URL`. |
+| `NEXTAUTH_URL`                      | Required           | URL of your deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`. Required for successful authentication via OAUTH.                                                |
+| `NEXTAUTH_SECRET`                   | Required           | Used to validate login session cookies, generate secret with at least 512 entropy using `openssl rand -base64 32`.                                                                 |
+| `SALT`                              | Required           | Used to salt hashed API keys, generate secret with at least 512 entropy using `openssl rand -base64 32`.                                                                           |
+| `PORT`                              | `3000`             | Port the server listens on.                                                                                                                                                        |
+| `HOSTNAME`                          | `localhost`        | In some environments it needs to be set to `0.0.0.0` to be accessible from outside the container (e.g. Google Cloud Run).                                                          |
+| `NEXT_PUBLIC_SIGN_UP_DISABLED`      | `false`            | Set to `true` to block all new sign ups. Only existing users can sign in.                                                                                                          |
+| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` |                    | comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                   |
+| `AUTH_DISABLE_USERNAME_PASSWORD`    | `false`            | Set to `true` to disable email/password sign for all users. Only OAuth/SSO providers can be used to sign in.                                                                       |
+| `LANGFUSE_DEFAULT_PROJECT_ID`       |                    | Configure optional default project for new users. When users create an account they will be automatically added to this project.                                                   |
+| `LANGFUSE_DEFAULT_PROJECT_ROLE`     | `VIEWER`           | Role of the user in the default project (if set). Possible values are `ADMIN`, `MEMBER`, `VIEWER`. See [project roles](/docs/project-sharing) for details.                         |
+
+Optional: Enable **OAuth/SSO** provider sign-in for Langfuse. Refer to the [NextAuth.js docs](https://next-auth.js.org/providers/google) for detailed instructions.
+
+| Provider | Variables                                                              |
+| -------- | ---------------------------------------------------------------------- |
+| Google   | `AUTH_GOOGLE_CLIENT_ID`, `AUTH_GOOGLE_CLIENT_SECRET`                   |
+| GitHub   | `AUTH_GITHUB_CLIENT_ID`, `AUTH_GITHUB_CLIENT_SECRET`                   |
+| AzureAD  | [PR](https://github.com/langfuse/langfuse/pull/396) needs to be tested |
+| Okta     | [PR](https://github.com/langfuse/langfuse/pull/506) needs to be tested |
+
+## Upgrading the Application
+
+Langfuse is released through tagged semver releases. Check out [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+
+To upgrade the application:
+
+1. Stop the container.
+2. Pull the latest container.
+3. Start the application again.
+
+During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
+
+It is recommended to enable automated upgrades to benefit from the latest features, bug fixes and security patches.
 
 ## Health Check Endpoint
 
@@ -109,10 +106,7 @@ If you encounter issues, please make sure that you've done the following:
 - Set `HOSTNAME` to `0.0.0.0` in case you cannot access Langfuse.
 - SSO: Make sure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL` and the OAuth client needs to be configured with the correct callback URL.
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
-
-## Railway
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
+- If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 
 ## Support
 
