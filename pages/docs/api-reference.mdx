@@ -2,23 +2,22 @@
 description: Langfuse HTTP API gives you full flexibility to integrate Langfuse into your existing systems.
 ---
 
-import { RedocStandalone } from "redoc";
+import { ApiReference as VueComponent } from "@scalar/api-reference";
+import { applyVueInReact } from "veaury";
 
-# API reference
+export function ApiReference() {
+  const API = applyVueInReact(VueComponent);
+  return (
+    <API
+      configuration={{
+        spec: { url: "https://cloud.langfuse.com/openapi-server.yml" },
+        theme: "alternate",
+        searchHotKey: "j",
+      }}
+    />
+  );
+}
 
-Authenticate with the API using Basic Auth:
-
-- username: Langfuse Public Key
-- password: Langfuse Secret Key
-
-<div className="mt-12 mb-20 h-[80vh] overflow-x-auto bg-white rounded-lg">
-  <RedocStandalone specUrl="https://cloud.langfuse.com/openapi-server.yml" />
-</div>
-
-## Public key only
-
-Authenticate with the API using Bearer Auth using only the public key. Meant to be used e.g. directly in the browser.
-
-<div className="mt-12 h-[80vh] overflow-x-auto bg-white rounded-lg">
-  <RedocStandalone specUrl="https://cloud.langfuse.com/openapi-client.yml" />
+<div className="h-[calc(100vh-64px)]">
+  <ApiReference />
 </div>
