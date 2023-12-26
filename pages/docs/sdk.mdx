@@ -164,7 +164,7 @@ export async function POST(req: Request) {
     },
     async onCompletion(completion) {
       generation.end({
-        completion,
+        output: completion,
       });
       trace.update({
         output: completion,

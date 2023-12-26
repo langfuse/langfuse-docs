@@ -22,9 +22,11 @@ export const StarCount = () => {
 
   useEffect(() => {
     if (!stars)
-      fetch("https://api.github.com/repos/langfuse/langfuse").then((data) =>
-        data.json().then((json) => setStars(json.stargazers_count))
-      );
+      fetch("https://api.github.com/repos/langfuse/langfuse")
+        .then((data) =>
+          data.json().then((json) => setStars(json.stargazers_count))
+        )
+        .catch((err) => console.error("Error while loading GitHub stars", err));
   }, []);
 
   return stars ? (
