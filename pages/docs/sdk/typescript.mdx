@@ -472,12 +472,15 @@ export const handler() {
 
 ## Upgrading from v1.x.x to v2.x.x [#upgrade1to2]
 
-### Dropped support for Node.js < 16
-
 You can automatically migrate your codebase using [grit](https://www.grit.io/), either [online](https://app.grit.io/migrations/new/langfuse_node_v2) or with the following CLI command:
+
 ```
 npx @getgrit/launcher apply langfuse_node_v2
 ```
+
+The grit binary executes entirely locally with AST-based transforms. Be sure to audit its changes: we suggest ensuring you have a clean working tree beforehand, and running `git add --patch` afterwards.
+
+### Dropped support for Node.js < 16
 
 As most of our users are using a modern JS/TS stack, we decided to drop support for Node < 16.
 

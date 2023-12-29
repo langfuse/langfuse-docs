@@ -413,6 +413,8 @@ You can automatically migrate your codebase using [grit](https://www.grit.io/), 
 npx -y @getgrit/launcher apply langfuse_v2
 ```
 
+The grit binary executes entirely locally with AST-based transforms. Be sure to audit its changes: we suggest ensuring you have a clean working tree beforehand, and running `git add --patch` afterwards.
+
 If your Jupyter Notebooks are not in source control, it might be harder to track changes. You may want to copy each cell individually into grit's web interface, and paste the output back in.
 
 ### Remove Pydantic interfaces
