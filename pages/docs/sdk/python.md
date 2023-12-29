@@ -408,7 +408,7 @@ langfuse.auth_check()
 
 v2 is a major release with breaking changes to simplify the SDK and make it more consistent. We recommend to upgrade to v2 as soon as possible.
 
-You can automatically migrate your codebase using [grit](https://www.grit.io/), either online or with the following CLI command:
+You can automatically migrate your codebase using [grit](https://www.grit.io/), either [online](https://app.grit.io/migrations/new/langfuse_v2) or with the following CLI command:
 ```
 npx -y @getgrit/launcher apply langfuse_v2
 ```
