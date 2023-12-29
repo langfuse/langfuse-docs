@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { RadioGroup } from "@headlessui/react";
-import { Check } from "lucide-react";
+import { Check, Plus, Minus } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { Disclosure } from "@headlessui/react";
 
 const frequencies = [
   { value: "monthly", label: "Monthly", priceSuffix: "/month" },
@@ -38,7 +39,6 @@ const tiers = [
       "100k observations / month included, additional: $10 / 100k observations",
       "Unlimited history",
       "Dedicated support channels (Slack or Discord)",
-      "Custom data retention policies",
     ],
     featured: false,
     cta: "Start free trial",
@@ -57,6 +57,7 @@ const tiers = [
       "Single-tenant instances",
       "Support SLAs",
       "Compliance and security reviews",
+      "Custom data retention policies",
       "Custom domains, advanced RBAC, and more (soon)",
     ],
     featured: true,
@@ -68,7 +69,9 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export const Pricing = () => {
+export const Pricing: React.FC<{ includeFaq?: boolean }> = ({
+  includeFaq = false,
+}) => {
   const [frequency, setFrequency] = useState(frequencies[0]);
 
   return (
@@ -205,6 +208,84 @@ export const Pricing = () => {
           ))}
         </div>
       </div>
+      {includeFaq ? (
+        <PricingFAQ />
+      ) : (
+        <div className="text-center mt-10">
+          Questions? See our{" "}
+          <a href="/pricing#faq" className="underline">
+            Pricing FAQ
+          </a>
+          .
+        </div>
+      )}
     </section>
   );
 };
+
+const faqs = [
+  {
+    question: "What is the easiest way to try Langfuse?",
+    answer:
+      "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
+  },
+  {
+    question: "What is an observation?",
+    answer:
+      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. It depends on your configuration and the comple",
+  },
+  {
+    question: "Do I need to use Langfuse Cloud?",
+    answer:
+      "No, Langfuse Cloud is the managed service offered by the Langfuse team. Langfuse is open source and you can run Langfuse <a class='underline' href='/docs/deployment/local'>locally using docker compose<a/> or for <a class='underline' href='/docs/deployment/self-host'>production use via docker<a/> and a standalone database.",
+  },
+  {
+    question: "Where is the data stored?",
+    answer:
+      "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/docs/data-security-privacy'>security and privacy documentation</a> for more details.",
+  },
+];
+
+export function PricingFAQ() {
+  return (
+    <div id="faq">
+      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
+        <div className="mx-auto max-w-4xl divide-y divide-primary/10">
+          <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
+            Frequently asked questions
+          </h2>
+          <dl className="mt-10 space-y-6 divide-y divide-primary/10">
+            {faqs.map((faq) => (
+              <Disclosure as="div" key={faq.question} className="pt-6">
+                {({ open }) => (
+                  <>
+                    <dt>
+                      <Disclosure.Button className="flex w-full items-start justify-between text-left text-primary">
+                        <span className="text-base font-semibold leading-7">
+                          {faq.question}
+                        </span>
+                        <span className="ml-6 flex h-7 items-center">
+                          {open ? (
+                            <Minus className="h-6 w-6" aria-hidden="true" />
+                          ) : (
+                            <Plus className="h-6 w-6" aria-hidden="true" />
+                          )}
+                        </span>
+                      </Disclosure.Button>
+                    </dt>
+                    <Disclosure.Panel as="dd" className="mt-2 pr-12">
+                      <p
+                        className="text-base leading-7 text-primary/70"
+                        dangerouslySetInnerHTML={{ __html: faq.answer }}
+                      />
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </div>
+  );
+}
