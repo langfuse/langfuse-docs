@@ -2,6 +2,23 @@
 description: Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs.
 ---
 
-# Prompt management
+# Prompt Management
 
-Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs. Learn more in the docs.
+Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by version.
+
+The workflow for managing prompts in Langfuse includes the following steps:
+
+```mermaid
+graph LR
+    A["1. Create new prompt version (SDK or UI)"] --> PV
+    subgraph S1["Prompt (identified by name)"]
+        PV["Prompt Version"] -->|"2. Promote"| PP["Production Prompt"]
+    end
+    PP --> D["3. Retrieve prompt using SDK"]
+    PP --> E["4. View Metrics in Langfuse for prompt version"]
+```
+
+1. Create a new prompt or update exisiting to create a new prompt version
+2. Promote a prompt version to production
+3. Retrieve the prompt in your app using the SDK (production or specific version)
+4. View metrics in Langfuse for a prompt version
