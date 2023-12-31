@@ -2,9 +2,19 @@
 description: Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs.
 ---
 
+import { Callout } from "nextra-theme-docs";
+
 # Prompt Management
 
 Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by version.
+
+## How to use Langfuse for prompt management
+
+<Callout type="info">
+
+This feature is currently in beta, the API is stable and performance/UI will be improved significantly over the next weeks. Please share your feedback on our [Discord](/discord).
+
+</Callout>
 
 The workflow for managing prompts in Langfuse includes the following steps:
 
@@ -18,7 +28,29 @@ graph LR
     PP --> E["4. View Metrics in Langfuse for prompt version"]
 ```
 
-1. Create a new prompt or update exisiting to create a new prompt version
-2. Promote a prompt version to production
-3. Retrieve the prompt in your app using the SDK (production or specific version)
-4. View metrics in Langfuse for a prompt version
+## Performance
+
+While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. Currently the prompt is retrieved from the Langfuse API every time you fetch it via the SDKs. We will introduce caching in future releases to reduce the performance impact.
+
+**Quick performance measurement**
+
+We assessed Langfuse's impact on prompt management efficiency by measuring retrieval and compilation time. The results from 1000 sequential requests are below:
+
+<div className="sm:grid sm:grid-cols-2 gap-4">
+
+<Frame className="max-w-md">
+  ![Performance Chart](/images/docs/prompt-performance-chart.png)
+</Frame>
+
+```
+count  1000.000000
+mean      0.178465 sec
+std       0.058125 sec
+min       0.137314 sec
+25%       0.161333 sec
+50%       0.165919 sec
+75%       0.171736 sec
+max       0.687994 sec
+```
+
+</div>
