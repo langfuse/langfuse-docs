@@ -34,7 +34,14 @@ While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, 
 
 **Quick performance measurement**
 
-We assessed Langfuse's impact on prompt management efficiency by measuring retrieval and compilation time. The results from 1000 sequential requests are below:
+We measured the execution time of the following snippet (retrieval and prompt compilation):
+
+```python
+prompt = langfuse.get_prompt("perf-test")
+prompt.compile(input="test")
+```
+
+Results from 1000 sequential executions:
 
 <div className="sm:grid sm:grid-cols-2 gap-4">
 
