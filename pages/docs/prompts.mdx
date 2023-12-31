@@ -31,7 +31,7 @@ graph LR
         PV["Prompt Version"] -->|"2. Promote"| PP["Production Prompt"]
     end
     PP --> D["3. Retrieve prompt using SDK"]
-    PP --> E["4. View Metrics in Langfuse for prompt version"]
+    PP --> E["4. View metrics in Langfuse for prompt version"]
 ```
 
 ### Create / Update prompts
@@ -120,6 +120,31 @@ const prompt = await langfuse.getPrompt("prompt name", { version: 3 });
 // insert variables into prompt template
 const compiledPrompt = prompt.compile({ input: "test" });
 ```
+
+</Tab>
+
+</Tabs>
+
+### Tag generations to get metrics by prompt version
+
+Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This allows you to track metrics by prompt name and version in the Langfuse UI.
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```diff
+langfuse.generation(
+    ...
++   prompt=prompt
+    ...
+)
+```
+
+</Tab>
+
+<Tab>
+
+This feature is not yet available in the JS/TS SDK. We will add it soon.
 
 </Tab>
 
