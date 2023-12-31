@@ -3,10 +3,16 @@ description: Manage and version your prompts in Langfuse. Edit and update them v
 ---
 
 import { Callout } from "nextra-theme-docs";
+import { CloudflareVideo } from "@/components/CloudflareVideo";
 
 # Prompt Management
 
 Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by version.
+
+```python
+# get current production prompt in application
+langfuse.get_prompt("prompt name")
+```
 
 ## How to use Langfuse for prompt management
 
@@ -27,6 +33,97 @@ graph LR
     PP --> D["3. Retrieve prompt using SDK"]
     PP --> E["4. View Metrics in Langfuse for prompt version"]
 ```
+
+### Create / Update prompts
+
+**Create**
+
+<Tabs items={["Langfuse UI", "Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+<CloudflareVideo
+  videoId="3c9bf36417e79dd2d68c3bba2a8f0a98"
+  aspectRatio={1.24}
+  gifStyle
+  className="max-w-lg"
+/>
+
+</Tab>
+<Tab>
+
+```python
+langfuse.create_prompt(
+  name: "prompt name",
+  prompt: "This is a prompt with a {{variable}}",
+  is_active: True # directly promote to production?
+)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+await langfuse.createPrompt({
+  name: "prompt name",
+  prompt: "This is a prompt with a {{variable}}",
+  isActive: true, // directly promote to production?
+});
+```
+
+</Tab>
+
+</Tabs>
+
+**Update**
+
+Use the edit button in the Langfuse UI or create a new prompt version via the SDKs with the same name.
+
+### Promote prompt to production
+
+Set a promot version to `active` when creating it via the SDKs. In the Langfuse UI, you can promote a prompt version to production:
+
+<CloudflareVideo
+  videoId="7b91335f4625123f2e3b9b652da7c19d"
+  aspectRatio={16 / 9}
+  gifStyle
+  className="max-w-lg"
+/>
+
+### Retrieve prompt in your application
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+# get current production version
+prompt = langfuse.get_prompt("prompt name")
+
+# get specific version
+prompt = langfuse.get_prompt("prompt name", version=3)
+
+# insert variables into prompt template
+compiled_prompt = prompt.compile(input="test")
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+// get current production version
+const prompt = await langfuse.getPrompt("prompt name");
+
+// get specific version
+const prompt = await langfuse.getPrompt("prompt name", { version: 3 });
+
+// insert variables into prompt template
+const compiledPrompt = prompt.compile({ input: "test" });
+```
+
+</Tab>
+
+</Tabs>
 
 ## Performance
 
