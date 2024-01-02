@@ -158,38 +158,28 @@ export default async function handler(req: Request, res: Response) {
       : {}),
   });
 
+  const promptName =
+    contextText !== "" ? "qa-answer-with-context" : "qa-answer-no-context";
+
+  const promptSpan = trace.span({
+    name: "fetch-prompt-from-langfuse",
+    input: {
+      promptName,
+    },
+  });
+  const prompt = await langfuse.getPrompt(promptName);
+  const compiledSystemMessage = prompt.compile({
+    context: contextText,
+  });
+  promptSpan.end({
+    output: { compiledSystemMessage, version: prompt.version },
+  });
+
   const assembledMessages = [
-    contextText !== ""
-      ? {
-          role: "system",
-          content: codeBlock`
-      ${oneLine`
-      You are a very enthusiastic Langfuse representative who loves
-      to help people! Langfuse is an open-source observability tool for developers of applications that use Large Language Models (LLMs).
-      Given the following sections from the Langfuse documentation, answer the question using only that information,
-      outputted in markdown format. Refer to the respective links of the documentation.`}
-      
-      Context START
-      """
-      ${contextText}
-      """
-      Context END
-      
-      Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
-      Use emojis in your answers. Do not mention that you are "enthusiastic", the user does not need to know, will feel it from the style of your answers.
-      Only use information that is available in the context, do not make up any code that is not in the context. If you are unsure and the answer is not explicitly written in the documentation, say
-      "Sorry, I don't know how to help with that." If the user is having problems using Langfuse, tell her to reach out to the founders directly.`,
-        }
-      : {
-          role: "system",
-          content: oneLine`
-      You are a very enthusiastic Langfuse representative who loves
-      to help people! Langfuse is an open-source observability tool for developers of applications that use Large Language Models (LLMs).
-      As there are no documentation documents that explain to the user's latest message, answer only based on the information you provided earlier in the conversation. Try to ask the user to make their question more specific.
-      Answer as markdown (including related code snippets if available), use highlights and paragraphs to structure the text.
-      Use emojis in your answers. Do not mention that you are "enthusiastic", the user does not need to know, will feel it from the style of your answers.
-      Answer with "Sorry, I don't know how to help with that." if the question is not related to Langfuse. If the user is having problems using Langfuse, tell her to reach out to the founders directly.`,
-        },
+    {
+      role: "system",
+      content: compiledSystemMessage,
+    },
     ...openAiMessages,
   ];
 
