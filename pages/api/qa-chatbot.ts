@@ -187,6 +187,7 @@ export default async function handler(req: Request, res: Response) {
     name: "generation",
     input: assembledMessages as any,
     model: "gpt-3.5-turbo",
+    prompt,
   });
 
   const response = await openai.createChatCompletion({
