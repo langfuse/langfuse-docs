@@ -186,7 +186,7 @@ const config: DocsThemeConfig = {
         <meta property="og:description" content={description} />
 
         {video && <meta property="og:video" content={video} />}
-        {video && <meta property="twitter:player" content={video} />}
+        {video && <meta property="twitter:player:stream" content={video} />}
 
         <meta property="og:image" content={image} />
         <meta property="twitter:image" content={image} />
