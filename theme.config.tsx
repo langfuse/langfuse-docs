@@ -172,6 +172,10 @@ const config: DocsThemeConfig = {
           description
         )}&section=${encodeURIComponent(section)}`;
 
+    const video = frontMatter.ogVideo
+      ? "https://langfuse.com" + frontMatter.ogVideo
+      : null;
+
     return (
       <>
         <meta name="theme-color" content="#000" />
@@ -180,6 +184,9 @@ const config: DocsThemeConfig = {
 
         <meta name="description" content={description} />
         <meta property="og:description" content={description} />
+
+        {video && <meta property="og:video" content={video} />}
+        {video && <meta property="twitter:player" content={video} />}
 
         <meta property="og:image" content={image} />
         <meta property="twitter:image" content={image} />
