@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { CloudflareVideo } from "@/components/CloudflareVideo";
+import { CloudflareVideo } from "@/components/Video";
 
 const features = [
   {
