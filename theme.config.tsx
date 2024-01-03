@@ -191,7 +191,10 @@ const config: DocsThemeConfig = {
         <meta property="og:image" content={image} />
         <meta property="twitter:image" content={image} />
 
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:card"
+          content={video ? "player" : "summary_large_image"}
+        />
         <meta name="twitter:site:domain" content="langfuse.com" />
         <meta name="twitter:url" content="https://langfuse.com" />
 
