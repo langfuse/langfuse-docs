@@ -118,6 +118,7 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 | session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/sessions) in Langfuse. Use your own session/thread identifier.
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
 | release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
+| tags | string[] | yes | Tags are used to categorize traces. They can be any string and you can assign multiple tags to a single trace. Useful for filtering and grouping traces in the UI. |
 
 
 ```python
@@ -125,9 +126,9 @@ trace = langfuse.trace(
     name = "docs-retrieval",
     user_id = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
-        "env": "production",
         "email": "user@langfuse.com",
-    }
+    },
+    tags = ["production"]
 )
 ```
 
