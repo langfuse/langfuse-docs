@@ -110,7 +110,8 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 const trace = langfuse.trace({
   name: "chat-app-session",
   userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  metadata: { env: "production", user: "user@langfuse.com" },
+  metadata: { user: "user@langfuse.com" },
+  tags: ["production"],
 });
 
 // Example update, same params as create, cannot change id
@@ -144,6 +145,7 @@ trace.score({});
 | sessionId | string | yes      | Used to group multiple traces into a [session](/docs/sessions) in Langfuse. Use your own session/thread identifier.                                                                     |
 | userId    | string | yes      | The id of the user that triggered the execution. Used to provide [user-level analytics](/docs/user-explorer).                                                                           |
 | version   | string | yes      | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.                                                                    |
+| tags       | string[] | yes      | Tags are used to categorize traces. They can be any string and you can assign multiple tags to a single trace. Useful for filtering and grouping traces in the UI.  |
 
 ### Observations [#observation]
 
