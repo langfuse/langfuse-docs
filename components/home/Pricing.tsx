@@ -232,7 +232,7 @@ const faqs = [
   {
     question: "What is an observation?",
     answer:
-      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. It depends on your configuration and the comple",
+      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
   },
   {
     question: "Do I need to use Langfuse Cloud?",
