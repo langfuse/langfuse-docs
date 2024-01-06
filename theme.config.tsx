@@ -28,6 +28,10 @@ const footerNav = [
     name: "Status",
     href: "https://status.langfuse.com",
   },
+  {
+    name: "OSS Friends",
+    href: "/oss-friends",
+  },
 ];
 
 const footerLegalNav = [
