@@ -6,13 +6,14 @@ description: Langfuse tracks token usage for each generation for cost and usage 
 
 Token usage numbers are used across the Langfuse interface and reports.
 
-```
+```typescript
 generation = {
   ...
   usage: {
-    promptTokens: number,
-    completionTokens: number,
-    totalTokens: number,
+    prompt: number,
+    completion: number,
+    total: number,
+    unit: string, // 'TOKENS' or 'CHARACTERS', defaults to 'TOKENS'
   },
   ...
 }
@@ -35,3 +36,15 @@ This is helpful for LLM-APIs that do not return usage information in the respons
 | `claude*`       | `claude`      | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
 
 Need another tokenizer? Create an issue on [GitHub](/issue).
+
+## Compatibility with OpenAI
+
+Langfuse is compatible with the usage objects returned by the OpenAI API. The Langfuse SDKs automatically convert the OpenAI usage object to the more generic Langfuse usage object.
+
+```typescript
+usage = {
+  promptTokens: 50,
+  completionTokens: 49,
+  totalTokens: 99,
+};
+```

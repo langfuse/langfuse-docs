@@ -172,6 +172,10 @@ const config: DocsThemeConfig = {
           description
         )}&section=${encodeURIComponent(section)}`;
 
+    const video = frontMatter.ogVideo
+      ? "https://langfuse.com" + frontMatter.ogVideo
+      : null;
+
     return (
       <>
         <meta name="theme-color" content="#000" />
@@ -180,6 +184,8 @@ const config: DocsThemeConfig = {
 
         <meta name="description" content={description} />
         <meta property="og:description" content={description} />
+
+        {video && <meta property="og:video" content={video} />}
 
         <meta property="og:image" content={image} />
         <meta property="twitter:image" content={image} />
@@ -216,18 +222,20 @@ const config: DocsThemeConfig = {
     Card,
     Cards,
   },
-  // banner: {
-  //   key: "seed-banner",
-  //   dismissible: false,
-  //   text: (
-  //     <Link href="/blog/announcing-our-seed-round">
-  //       <span className="sm:hidden">Langfuse raised $4M →</span>
-  //       <span className="hidden sm:inline">
-  //         Langfuse raised $4M. Read the full announcement & what's next →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "founding-eng-banner",
+    dismissible: true,
+    text: (
+      <Link href="/careers">
+        <span className="sm:hidden">
+          Join us as #1 founding engineer in Berlin →
+        </span>
+        <span className="hidden sm:inline">
+          Join us as #1 founding engineer in Berlin →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

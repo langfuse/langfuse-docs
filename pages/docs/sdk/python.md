@@ -118,6 +118,7 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 | session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/sessions) in Langfuse. Use your own session/thread identifier.
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
 | release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
+| tags | string[] | yes | Tags are used to categorize traces. They can be any string and you can assign multiple tags to a single trace. Useful for filtering and grouping traces in the UI. |
 
 
 ```python
@@ -125,9 +126,9 @@ trace = langfuse.trace(
     name = "docs-retrieval",
     user_id = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
     metadata = {
-        "env": "production",
         "email": "user@langfuse.com",
-    }
+    },
+    tags = ["production"]
 )
 ```
 
@@ -408,6 +409,15 @@ langfuse.auth_check()
 
 v2 is a major release with breaking changes to simplify the SDK and make it more consistent. We recommend to upgrade to v2 as soon as possible.
 
+You can automatically migrate your codebase using [grit](https://www.grit.io/), either [online](https://app.grit.io/migrations/new/langfuse_v2) or with the following CLI command:
+```
+npx -y @getgrit/launcher apply langfuse_v2
+```
+
+The grit binary executes entirely locally with AST-based transforms. Be sure to audit its changes: we suggest ensuring you have a clean working tree beforehand, and running `git add --patch` afterwards.
+
+If your Jupyter Notebooks are not in source control, it might be harder to track changes. You may want to copy each cell individually into grit's web interface, and paste the output back in.
+
 ### Remove Pydantic interfaces
 
 We like Pydantic, but it made the Langfuse SDK interfaces messy. Therefore, we removed the objects from the function signatures and replaced them with named parameters.
@@ -504,61 +514,6 @@ langfuse.generation(
 )
 
 # set ((input and/or output) or total), total is calculated automatically if not set
-```
-
-### Langchain integration
-The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
-
-```python
-
-from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
-
-# Setup Langchain
-from langchain.chains import LLMChain
-...
-chain = LLMChain(llm=llm, prompt=prompt, callbacks=[handler])
-
-# Add Langfuse handler as callback
-chain.run(input="<first_user_input>", callbacks=[handler])
-chain.run(input="<second_user_input>", callbacks=[handler])
-
-```
-So far, invoking the chain multiple times would group the observations in one trace.
-
-```bash
-TRACE
-|
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-```
-
-We changed this, so that each invocation will end up on its own trace. This allows us to derive the user inputs and outputs to Langchain applications. If you still want to group multiple invocations on one trace, you can use [this](https://langfuse.com/docs/langchain/python#adding-trace-as-context-to-a-langchain-handler) approach.
-
-```bash
-TRACE_1
-|
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-
-TRACE_2
-|
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
 ```
 
 

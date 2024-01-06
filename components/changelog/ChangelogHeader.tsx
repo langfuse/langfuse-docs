@@ -4,6 +4,7 @@ import { Page } from "nextra";
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { Author } from "../Authors";
+import { Video } from "../Video";
 
 export const ChangelogHeader = () => {
   const router = useRouter();
@@ -12,7 +13,8 @@ export const ChangelogHeader = () => {
     (page) => page.route === router.pathname
   ) as Page & { frontMatter: any };
 
-  const { title, description, ogImage, gif, date, author } = page.frontMatter;
+  const { title, description, ogImage, ogVideo, gif, date, author } =
+    page.frontMatter;
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">
@@ -42,7 +44,9 @@ export const ChangelogHeader = () => {
         </div>
       </div>
 
-      {ogImage ? (
+      {ogVideo ? (
+        <Video src={ogVideo} gifStyle />
+      ) : ogImage ? (
         <Image
           src={gif ?? ogImage}
           alt={title}

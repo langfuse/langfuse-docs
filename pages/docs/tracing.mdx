@@ -8,7 +8,14 @@ LLM apps use increasingly complex abstractions (chains, agents with tools, advan
 
 ## Introduction
 
-Langfuse objects:
+```mermaid
+classDiagram
+    Trace "1" *-- "n" Observation
+    Observation <|-- Event
+    Observation <|-- Span
+    Observation <|-- Generation
+    Observation o-- Observation: Nesting
+```
 
 - Each backend execution is logged with a single `trace`.
 - Each trace can contain multiple `observations` to log the individual steps of the execution.

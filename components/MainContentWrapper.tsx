@@ -14,6 +14,7 @@ import { openChat } from "./supportChat";
 import { Background } from "./Background";
 import cookbookRoutes from "../cookbook/_routes.json";
 import { NotebookBanner } from "./NotebookBanner";
+import { ProductUpdateSignup } from "./productUpdateSignup";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -39,10 +40,22 @@ export const MainContentWrapper = (props) => {
         >
           <DocsFeedback key={router.pathname} />
           <DocsSupport />
+          <DocsSubscribeToUpdates />
         </div>
       ) : null}
       <Background />
     </>
+  );
+};
+
+export const DocsSubscribeToUpdates = () => {
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <h3 className="text-xl font-semibold">Subscribe to updates</h3>
+      <div className="flex gap-3 flex-wrap">
+        <ProductUpdateSignup source="docs-footer" small />
+      </div>
+    </div>
   );
 };
 

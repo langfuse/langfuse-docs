@@ -8,12 +8,9 @@ This quickstart helps you to integrate your LLM application with Langfuse.
 
 <Steps>
 
-### Run Langfuse
+### Create project in Langfuse
 
-The fastest way to get started is to use the Langfuse Cloud. Alternatively you can run Langfuse locally to test it out or self-host it.
-
-<Tabs items={["Langfuse cloud", "Docker"]}>
-<Tab>
+The fastest way to get started is to use the Langfuse Cloud.
 
 1. Create account and project on
    [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
@@ -25,34 +22,7 @@ The fastest way to get started is to use the Langfuse Cloud. Alternatively you c
    LANGFUSE_PUBLIC_KEY="pk-lf-...";
    ```
 
-</Tab>
-<Tab>
-
-1.  Run Langfuse locally with docker compose
-
-    ```bash
-    # Clone repository
-    git clone https://github.com/langfuse/langfuse.git
-    cd langfuse
-
-    # Run server and db
-    docker compose up -d
-    ```
-
-2.  Open http://localhost:3000, create a project
-3.  Copy API keys for your project
-    ```bash filename=".env"
-    LANGFUSE_SECRET_KEY="sk-lf-...";
-    LANGFUSE_PUBLIC_KEY="pk-lf-...";
-    ```
-
-Problems? Read more about running Langfuse [locally with
-docker](/docs/local)
-
-This setup is **not recommended for production use** as the core database is part of the docker compose. For details on how to setup Langfuse with a dedicated database for production use, see [self-hosting instructions](/docs/self-host).
-
-</Tab>
-</Tabs>
+Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
 
 ### Add tracing to your backend
 
@@ -277,7 +247,7 @@ Visit Langfuse interface to explore your data.
 
 ## More information
 
-This is a very short summary of how to get started with Langfuse, have a look at the detailed SDK documentation for features such as:
+This is a brief summary of getting started with Langfuse. Have a look at the detailed SDK documentation for features such as:
 
 - Nesting of observations to capture complex chains and agents
 - Use of your own existing ids to group traces, observations and scores
