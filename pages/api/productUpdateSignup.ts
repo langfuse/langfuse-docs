@@ -44,8 +44,10 @@ export default async function handler(req: NextRequest) {
     if (slackResponse.status === 200 && loopsResponse.status === 200) {
       return NextResponse.json({ status: "OK" });
     } else {
-      console.error(slackResponse);
-      console.error(loopsResponse);
+      const slackResponseJson = await slackResponse.json();
+      const loopsResponseJson = await loopsResponse.json();
+      console.error("Slack Message", slackResponseJson.message);
+      console.error("Loops Message", loopsResponseJson.message);
       return NextResponse.json(
         {},
         {
