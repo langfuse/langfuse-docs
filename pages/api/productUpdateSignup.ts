@@ -41,13 +41,14 @@ export default async function handler(req: NextRequest) {
       }),
     ]);
 
-    if (slackResponse.status === 200 && loopsResponse.status === 200) {
+    if (
+      slackResponse.status === 200 &&
+      (loopsResponse.status === 200 || loopsResponse.status === 409)
+    ) {
       return NextResponse.json({ status: "OK" });
     } else {
-      const slackResponseJson = await slackResponse.json();
-      const loopsResponseJson = await loopsResponse.json();
-      console.error("Slack Message", slackResponseJson.message);
-      console.error("Loops Message", loopsResponseJson.message);
+      console.error("Slack", JSON.stringify(slackResponse));
+      console.error("Loops", JSON.stringify(loopsResponse));
       return NextResponse.json(
         {},
         {
