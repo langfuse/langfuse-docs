@@ -17,13 +17,25 @@ Tags are a simple yet effective way to organize your traces. They can be added d
 ### 🎯 How it works
 You add tags to your traces using the Langfuse SDK or directly from the UI. You can filter and group your traces based on these tags.
 
+**Python**
 ```python
-trace.tags = ["my-first-tag", "even-better-tag"]
+trace = langfuse.trace(
+    name = "docs-retrieval",
+    tags = ["my-first-tag", "even-better-tag"]
+)
+```
+
+**Typescript**
+```typescript
+const trace = langfuse.trace({
+  name: "docs-retrieval",
+  tags: ["my-first-tag", "even-better-tag"],
+});
 ```
 
 You can also use the GET API to retrieve traces with specific tags. 
 
-```typescript
+```bash
 GET /api/public/traces?tags=my-first-tag&tags=even-better-tag
 ```
 

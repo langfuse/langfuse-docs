@@ -89,14 +89,20 @@ Tags allow you to categorize and filter traces. You can tag traces only from the
 <Tabs items={["Python", "JS/TS"]}>
 <Tab>
 ```python
-trace.tags(["my-first-tag", "an-even-better-tag"])
+trace = langfuse.trace(
+    name = "docs-retrieval",
+    tags = ["my-first-tag", "even-better-tag"]
+)
 ```
 
 </Tab>
 
 <Tab>
 ```typescript
-trace.tags(["tag-a-licious", "tig-tag-tagging"])
+const trace = langfuse.trace({
+  name: "docs-retrieval",
+  tags: ["tag-a-licious", "tig-tag-tagging"],
+});
 ```
 
 </Tab>
