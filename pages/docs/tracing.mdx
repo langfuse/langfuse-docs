@@ -82,3 +82,40 @@ handler.getTraceUrl();
 </Tab>
 
 </Tabs>
+
+## Tagging traces
+Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the [Langfuse UI](https://cloud.langfuse.com). To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+```python
+trace = langfuse.trace(
+    name = "docs-retrieval",
+    tags = ["my-first-tag", "even-better-tag"]
+)
+```
+
+</Tab>
+
+<Tab>
+```typescript
+const trace = langfuse.trace({
+  name: "docs-retrieval",
+  tags: ["tag-a-licious", "tig-tag-tagging"],
+});
+```
+
+</Tab>
+
+</Tabs>
+
+
+### Working with traces
+Tags enable you to flexibly add metadata to your traces. 
+You can filter for tags in the Langfuse UI. You can also group traces in the UI for comparison and pattern identification. 
+Use descriptive tags and leverage the filtering and grouping capabilities of the Langfuse UI to enhance trace management and analysis workflows.
+
+### Get started
+When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
+
+<Frame>![Tagging traces](/images/docs/tagging-traces.gif)</Frame>
