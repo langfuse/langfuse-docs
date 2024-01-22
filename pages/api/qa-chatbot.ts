@@ -2,7 +2,6 @@ import { OpenAIStream, StreamingTextResponse } from "ai";
 import { Configuration, OpenAIApi } from "openai-edge";
 import { createClient } from "@supabase/supabase-js";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { codeBlock, oneLine } from "common-tags";
 import { Langfuse } from "langfuse";
 
 export const config = {
