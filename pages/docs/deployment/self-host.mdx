@@ -1,22 +1,22 @@
 ---
-description: Langfuse is open source and can be self-hosted in your own infrastructure via Docker
+description: Self-host Langfuse in your infrastructure using Docker
 ---
 
-# Self-Hosting Instructions
+# Self-Hosting Guide
 
 [![Docker Image](https://img.shields.io/badge/docker-langfuse-blue?logo=Docker&logoColor=white&style=flat-square)](https://github.com/langfuse/langfuse/pkgs/container/langfuse)
 
-The Langfuse Server (includes API and Web UI) is open source and can be self-hosted using Docker.
+Langfuse Server, which includes the API and Web UI, is open-source and can be self-hosted using Docker.
 
-For a full component and architecture diagram, see [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md).
+For a detailed component and architecture diagram, refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md).
 
-## Requirement: Postgres Database
+## Prerequisites: Postgres Database
 
-To persist the state of Langfuse, a permanent Postgres database is required. You have the option to use a managed service on AWS, Azure, or GCP, or run it yourself. Once the database is set up, make sure to copy the connection string.
+Langfuse requires a persistent Postgres database to store its state. You can use a managed service on AWS, Azure, or GCP, or host it yourself. Once the database is ready, keep the connection string handy.
 
-## Running the Application
+## Deploying the Application
 
-To run the application container, deploy it to your infrastructure. You have the option to use managed services such as AWS ECS, Azure Container Instances, or GCP Cloud Run, or you can choose to run it on your own.
+Deploy the application container to your infrastructure. You can use managed services like AWS ECS, Azure Container Instances, or GCP Cloud Run, or host it yourself.
 
 During the container startup, all database migrations will be applied automatically.
 
@@ -35,13 +35,13 @@ docker run --name langfuse \
 ghcr.io/langfuse/langfuse:latest
 ```
 
-You can also one-click deploy on Railway:
+Alternatively, you can deploy with one click on Railway:
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
 
-## Environment variables
+## Configuring Environment Variables
 
-Langfuse is configurable using environment variables. Some are required as defined in the following table:
+Langfuse can be configured using environment variables. Some are mandatory as defined in the table below:
 
 | Variable                            | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
 | ----------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,7 +59,7 @@ Langfuse is configurable using environment variables. Some are required as defin
 | `LANGFUSE_DEFAULT_PROJECT_ID`       |                    | Configure optional default project for new users. When users create an account they will be automatically added to this project.                                                                                                                                                                                                                                                                      |
 | `LANGFUSE_DEFAULT_PROJECT_ROLE`     | `VIEWER`           | Role of the user in the default project (if set). Possible values are `ADMIN`, `MEMBER`, `VIEWER`. See [project roles](/docs/project-sharing) for details.                                                                                                                                                                                                                                            |
 
-Optional: Enable **OAuth/SSO** provider sign-in for Langfuse. Refer to the [NextAuth.js docs](https://next-auth.js.org/providers/google) for detailed instructions.
+To enable OAuth/SSO provider sign-in for Langfuse, refer to the [NextAuth.js docs](https://next-auth.js.org/providers/google).
 
 | Provider | Variables                                                                           |
 | -------- | ----------------------------------------------------------------------------------- |
@@ -68,19 +68,19 @@ Optional: Enable **OAuth/SSO** provider sign-in for Langfuse. Refer to the [Next
 | AzureAD  | `AUTH_AZURE_AD_CLIENT_ID`, `AUTH_AZURE_AD_CLIENT_SECRET`, `AUTH_AZURE_AD_TENANT_ID` |
 | Okta     | [PR](https://github.com/langfuse/langfuse/pull/506) needs to be tested              |
 
-## Upgrading the Application
+## Updating the Application
 
-Langfuse is released through tagged semver releases. Check out [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
 
-To upgrade the application:
+To update the application:
 
 1. Stop the container.
 2. Pull the latest container.
-3. Start the application again.
+3. Restart the application.
 
 During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
 
-It is recommended to enable automated upgrades to benefit from the latest features, bug fixes and security patches.
+We recommend enabling automated updates to benefit from the latest features, bug fixes, and security patches.
 
 ## Health Check Endpoint
 
@@ -101,17 +101,17 @@ Applications and monitoring services can call this endpoint periodically for hea
 
 ## Troubleshooting
 
-If you encounter issues, please make sure that you've done the following:
+If you encounter issues, ensure the following:
 
-- `NEXTAUTH_URL` exactly matches the url you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g. 3000 if you do not expose Langfuse on port 80).
-- Set `HOSTNAME` to `0.0.0.0` in case you cannot access Langfuse.
-- SSO: Make sure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL` and the OAuth client needs to be configured with the correct callback URL.
+- `NEXTAUTH_URL` exactly matches the URL you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g., 3000 if you do not expose Langfuse on port 80).
+- Set `HOSTNAME` to `0.0.0.0` if you cannot access Langfuse.
+- SSO: Ensure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL`, and the OAuth client needs to be configured with the correct callback URL.
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 
 ## Support
 
-If you encounter any issue, join us on [Discord](/discord) or contacts the maintainers: support@langfuse.com
+If you encounter any issue, join us on [Discord](/discord) or contact the maintainers: support@langfuse.com
 
 For support of production deployments, the Langfuse team offers dedicated enterprise support. Reach out to learn more (enterprise@langfuse.com) or [schedule a demo](https://cal.com/marc-kl/demo).
 

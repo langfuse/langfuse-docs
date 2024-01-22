@@ -213,6 +213,7 @@ export default async function handler(req: Request, res: Response) {
       });
       trace.update({
         output: completion,
+        tags: contextText !== "" ? ["with-context"] : ["no-context"],
       });
       await langfuse.shutdownAsync();
     },
