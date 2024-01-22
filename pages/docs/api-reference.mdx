@@ -4,21 +4,12 @@ description: Langfuse HTTP API gives you full flexibility to integrate Langfuse 
 
 import { RedocStandalone } from "redoc";
 
-# API reference
+<div className="h-screen overflow-y-auto overflow-hidden bg-white">
+  <RedocStandalone
+    specUrl="https://cloud.langfuse.com/openapi-server.yml"
+    options={{
+      schemaExpansionLevel: 100,
+    }}
+/>
 
-Authenticate with the API using Basic Auth:
-
-- username: Langfuse Public Key
-- password: Langfuse Secret Key
-
-<div className="mt-12 mb-20 h-[80vh] overflow-x-auto bg-white rounded-lg">
-  <RedocStandalone specUrl="https://cloud.langfuse.com/openapi-server.yml" />
-</div>
-
-## Public key only
-
-Authenticate with the API using Bearer Auth using only the public key. Meant to be used e.g. directly in the browser.
-
-<div className="mt-12 h-[80vh] overflow-x-auto bg-white rounded-lg">
-  <RedocStandalone specUrl="https://cloud.langfuse.com/openapi-client.yml" />
 </div>
