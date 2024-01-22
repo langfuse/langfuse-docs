@@ -1,7 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-name: 'Next.js Bundle Analysis'
+name: "Next.js Bundle Analysis"
 
 on:
   pull_request:
@@ -31,29 +31,30 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        uses: bahmutov/npm-install@v1
+      # - name: Install dependencies
+      #   uses: bahmutov/npm-install@v1
 
       # If pnpm is used, you need to switch the previous step with the following one. pnpm does not create a package-lock.json
       # so the step above will fail to pull dependencies
-      # - uses: pnpm/action-setup@v2
-      #   name: Install pnpm
-      #   id: pnpm-install
-      #   with:
-      #     version: 7
-      #     run_install: true
-
-      - name: Restore next build
-        uses: actions/cache@v3
-        id: restore-build-cache
-        env:
-          cache-name: cache-next-build
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
         with:
-          # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
-          # ex: if your app builds to `dist`, replace `.next` with `dist`
-          path: .next/cache
-          # change this if you prefer a more strict cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          version: 7
+          run_install: true
+
+      # DO NOT CACHE DUE TO NEXTRA CACHING ISSUES
+      # - name: Restore next build
+      #   uses: actions/cache@v3
+      #   id: restore-build-cache
+      #   env:
+      #     cache-name: cache-next-build
+      #   with:
+      #     # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
+      #     # ex: if your app builds to `dist`, replace `.next` with `dist`
+      #     path: .next/cache
+      #     # change this if you prefer a more strict cache
+      #     key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: Build next.js app
         # change this if your site requires a custom build command
@@ -110,7 +111,7 @@ jobs:
         id: fc
         with:
           issue-number: ${{ github.event.number }}
-          body-includes: '<!-- __NEXTJS_BUNDLE -->'
+          body-includes: "<!-- __NEXTJS_BUNDLE -->"
 
       - name: Create Comment
         uses: peter-evans/create-or-update-comment@v2
