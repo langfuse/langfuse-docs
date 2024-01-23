@@ -230,13 +230,13 @@ const config: DocsThemeConfig = {
     key: "founding-eng-banner",
     dismissible: true,
     text: (
-      <Link href="https://www.producthunt.com/golden-kitty-awards/ai-infra">
-          <span className="sm:hidden">
-              Vote for us at the 2023 Product Hunt Golden Kitty Award →
-          </span>
-          <span className="hidden sm:inline">
-              Vote for us at the 2023 Product Hunt Golden Kitty Award →
-          </span>
+      <Link href="/careers">
+        <span className="sm:hidden">
+          Join us as #1 founding engineer in Berlin →
+        </span>
+        <span className="hidden sm:inline">
+          Join us as #1 founding engineer in Berlin →
+        </span>
       </Link>
     ),
   },
