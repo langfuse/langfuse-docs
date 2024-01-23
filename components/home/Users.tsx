@@ -1,27 +1,27 @@
 import Image from "next/image";
-import fastgenLight from "./img/fastgen_light.svg";
-import fastgenDark from "./img/fastgen_dark.svg";
+import pigmentLight from "./img/pigment_light.svg";
+import pigmentDark from "./img/pigment_dark.svg";
 import alphawatchLight from "./img/alphawatch_light.png";
 import alphawatchDark from "./img/alphawatch_dark.png";
-import nucleusLight from "./img/nucleus_light.png";
-import nucleusDark from "./img/nucleus_dark.png";
-import langdockLight from "./img/langdock_light.png";
-import langdockDark from "./img/langdock_dark.png";
+import mavaLight from "./img/mava_light.png";
+import mavaDark from "./img/mava_dark.png";
+import frontifyLight from "./img/frontify_light.svg";
+import frontifyDark from "./img/frontify_dark.svg";
 import berryLight from "./img/berry_light.png";
 import berryDark from "./img/berry_light.png";
 
 const users = [
   {
-    name: "Fastgen",
-    lightImage: fastgenLight,
-    darkImage: fastgenDark,
-    href: "https://fastgen.com",
+    name: "Pigment",
+    lightImage: pigmentLight,
+    darkImage: pigmentDark,
+    href: "https://pigment.com",
   },
   {
-    name: "Langdock",
-    lightImage: langdockLight,
-    darkImage: langdockDark,
-    href: "https://www.langdock.com",
+    name: "frontify",
+    lightImage: frontifyLight,
+    darkImage: frontifyDark,
+    href: "https://www.frontify.com",
   },
   {
     name: "Alphawatch",
@@ -36,10 +36,10 @@ const users = [
     href: "https://www.berryapp.io",
   },
   {
-    name: "Nucleus",
-    lightImage: nucleusLight,
-    darkImage: nucleusDark,
-    href: "https://usenucleus.io",
+    name: "Mava",
+    lightImage: mavaLight,
+    darkImage: mavaDark,
+    href: "https://mava.app",
   },
 ] as const;
 
