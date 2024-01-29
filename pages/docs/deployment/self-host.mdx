@@ -84,9 +84,36 @@ During container startup, any necessary database migrations will be applied auto
 
 We recommend enabling automated updates to benefit from the latest features, bug fixes, and security patches.
 
-### **v2.x.x** upgrade
+### Matching historical Generations to models
 
-We wanted to make usage reporting and price calculations more flexible so that users can insert costs per Generation via the API and 
+With the new implementation of the usage and cost calculation, we can match the historical Generations to the new models defined in the database.
+
+We added Langfuse maintained models to the database using migrations and will continue to do so. Hence they will be automatically available for self-hosters when running migrations. Once a migration was successful, all new Generations will be matched to the new models.
+
+For historic Generations will not be matched to the new models by running a series of commands. During the migration, the server is available for UI users and SDKs.
+
+Migration path:
+- Creating an `.env` file:
+    ```bash
+
+    # Navigate to the Langfuse directory
+    cd langfuse
+
+    # Create an .env file
+    cp .env.prod.example .env
+
+    ```
+- Setting the db URL: Open the `.env` file and set the `DIRECT_URL` with the connection string to your database. For example, `DIRECT_URL=postgresql://postgres:postgres@localhost:5432/langfuse`.
+
+- Execute the migration:
+    ```bash
+
+    # Run the migration
+    npm run model:match
+
+    ```
+
+Depending on the size of your database, this might take a while.
 
 ## Health Check Endpoint
 
