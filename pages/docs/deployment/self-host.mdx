@@ -100,10 +100,12 @@ Migration path:
     cd langfuse
 
     # Create an .env file
-    cp .env.prod.example .env
+    cp .env.dev.example .env
 
     ```
-- Setting the db URL: Open the `.env` file and set the `DIRECT_URL` with the connection string to your database. For example, `DIRECT_URL=postgresql://postgres:postgres@localhost:5432/postgres`.
+- Setting the db URL: 
+    - Set the `DATABASE_URL` with the connection string to your database. For example, `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres`.
+    - Set the `NODE_ENV` to `production`.
 
 - Execute the migration:
     ```bash
@@ -112,9 +114,10 @@ Migration path:
 
 
     # Run the migration
-    npm run model:match
+    npm run models:migrate
 
     ```
+- Clean up: remove the `.env` file to avoid connecting to the production database from your local machine.
 
 Depending on the size of your database, this might take a while.
 
