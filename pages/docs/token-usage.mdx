@@ -8,7 +8,6 @@ description: >-
 
 With Langfuse, you can store model tokens and cost on the Generation. If any of these values are not provided, Langfuse automatically calculates them based on the model name and [Langfuse maintained models](https://cloud.langfuse.com/project/clkk9oh29000umh08077y93lr/models). We regularly update the list of Langfuse maintained models.
 
-
 ```mermaid
 flowchart LR
   A[Ingested Observation]
@@ -43,7 +42,6 @@ generation = {
 
 Across the Langfuse product including all dashboards and tables, Langfuse will only attempt to calculate tokens or cost, if they were not provided by the user.
 
-
 ### Compatibility with OpenAI
 
 Langfuse is compatible with the usage objects returned by the OpenAI API. The Langfuse SDKs automatically convert the OpenAI usage object to the more generic Langfuse usage object.
@@ -55,7 +53,6 @@ usage = {
   totalTokens: 99,
 };
 ```
-
 
 ## Built-in token calculation
 
@@ -76,13 +73,10 @@ generation = {
 
 We use the following tokenizer packages to calculate token amounts:
 
-
-| Tokenizer           | Package                                                                            |
-|  ------------- | ---------------------------------------------------------------------------------- |
-| `openai`           | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |                               |
-| `claude`            | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
-
-
+| Tokenizer | Package                                                                            |
+| --------- | ---------------------------------------------------------------------------------- | --- |
+| `openai`  | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |     |
+| `claude`  | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
 
 ## Built-in cost calculation
 
@@ -90,16 +84,15 @@ For ingested generations without costs in the usage attributes, Langfuse automat
 
 You can also create your own model definition in the models table. This way, you can personalise matching patterns, prices, and more for your use case.
 
-
 <Frame>![Add model in UI](/images/docs/create-model.gif)</Frame>
-
 
 ## Model matching details
 
- Langfuse attempts to match as many models as possible to the [Langfuse maintained models](https://cloud.langfuse.com/project/clkk9oh29000umh08077y93lr/models).
+Langfuse attempts to match as many models as possible to the [Langfuse maintained models](https://cloud.langfuse.com/project/clkk9oh29000umh08077y93lr/models).
 
- The following parameters of the Generations are used to match models stored in Langfuse:
- - `model`: is used to match the `Match Pattern` of the models using regular expressions (e.g. `gpt-4-0125-preview` will match `(?i)^(gpt-4-0125-preview)$`)
- - `project_id` (set automatically by Langfuse): if the user decided to create own models, we will automatically prioritize the models with the same `project_id` over the Langfuse maintained models
- - `unit`: the unit on the usage object of the generation (e.g. `TOKENS` or `CHARACTERS`) has to match the `unit` on the Model
- - `start_time`: has to be larger than the models `Start Date` timestamp or it will defailt to the model without `Start Date`
+The following parameters of the Generations are used to match models stored in Langfuse:
+
+- `model`: is used to match the `Match Pattern` of the models using regular expressions (e.g. `gpt-4-0125-preview` will match `(?i)^(gpt-4-0125-preview)$`)
+- `project_id` (set automatically by Langfuse): if the user decided to create own models, we will automatically prioritize the models with the same `project_id` over the Langfuse maintained models
+- `unit`: the unit on the usage object of the generation (e.g. `TOKENS` or `CHARACTERS`) has to match the `unit` on the Model
+- `start_time`: has to be larger than the models `Start Date` timestamp or it will defailt to the model without `Start Date`
