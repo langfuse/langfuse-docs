@@ -3,7 +3,7 @@ description: >-
   Langfuse tracks usage and cost of LLM generations for various models (incl OpenAI, Anthropic, Google, and more). Add your own model definitions to track any model or custom pricing.
 ---
 
-# Model Usage
+# Model Usage & Cost
 
 Across Langfuse, usage and cost are tracked for LLM generations:
 
@@ -108,11 +108,11 @@ Models are matched to generations based on:
 | `unit`               | `unit`          | Unit on the usage object of the generation (e.g. `TOKENS` or `CHARACTERS`) needs to match.                                                                                                                                 |
 | `start_time`         | `start_time`    | Optional, can be used to update the price of a model without affecting past generations. If multiple models match, the model with the most recent `model.start_time` that is earlier than `generation.start_time` is used. |
 
-User defined models are prioritized over Langfuse maintained models.
+User-defined models take priority over models maintained by Langfuse.
 
 **Further details**
 
-When using the `openai` tokenizer, you need to specify the following tokenization config. (You can also copy the config from the list of predefined OpenAI models.)
+When using the `openai` tokenizer, you need to specify the following tokenization config. You can also copy the config from the list of predefined OpenAI models. See the OpenAI [documentation](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb) for further details. `tokensPerName` and `tokensPerMessage` are required for chat models.
 
 ```json
 {
@@ -124,4 +124,4 @@ When using the `openai` tokenizer, you need to specify the following tokenizatio
 
 ## Troubleshooting
 
-- Usage and cost are missing for historical generations: Except for changes in prices, Langfuse does not retroactively infer usage and cost for existing generations when model definitions are changed. You can request a batch job (Langfuse Cloud) or run a [script](/docs/deployment/self-host#migrate-models) (self-hosting) to apply new model definitions to existing generations.
+**Usage and cost are missing for historical generations**. Except for changes in prices, Langfuse does not retroactively infer usage and cost for existing generations when model definitions are changed. You can request a batch job (Langfuse Cloud) or run a [script](/docs/deployment/self-host#migrate-models) (self-hosting) to apply new model definitions to existing generations.
