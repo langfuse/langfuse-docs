@@ -1,7 +1,7 @@
 ---
 date: 2024-01-29
 title: Custom model prices (Langfuse v2.0)
-description: The new major version allows to track usage and costs across all LLM models.
+description: The new major version allows to track usage and costs for many more models and for the first time also allows to add custom models and prices.
 author: Marc
 ---
 
@@ -9,7 +9,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-[Usage and cost tracking](/docs/token-usage) of LLM completions is a core feature of Langfuse [Tracing](/docs/tracing). Since the initial release of Langfuse, tons of new models were released and many users rely on fine-tuning for their applications. Until now, only a fixed list of models was supported natively with no way to extend/override cost or token usage.
+[Usage and cost tracking](/docs/model-usage) of LLM completions is a core feature of Langfuse [Tracing](/docs/tracing). Since the initial release of Langfuse, tons of new models were released and many users rely on fine-tuning for their applications. Until now, only a fixed list of models was supported natively with no way to extend/override cost or token usage.
 
 In this major release, we have reworked the pricing and usage tracking for the entire model to achieve the following:
 
@@ -40,7 +40,7 @@ flowchart LR
 
 If the `model` of a `generation` is known, Langfuse will try to use the right tokenizer and price information to derive usage and cost for you.
 
-See docs for a detailed explanation of how model definitions work and how you can add your own.
+[See docs](/docs/model-usage) for a detailed explanation of how model definitions work and how you can add your own.
 
 ![2024-01-29-custom-model-prices.png](/images/changelog/2024-01-29-custom-model-prices.png)
 
@@ -73,4 +73,4 @@ langfuse.generation(
 
 [Langfuse Cloud](/docs/deployment/cloud): No action is required.
 
-If you are [self-hosting](/docs/deployment/self-host) Langfuse, new model/price definitions are applied to all newly ingested traces. You need to run a migration script to apply them to your existing data in Langfuse.
+If you are [self-hosting](/docs/deployment/self-host) Langfuse, new model/price definitions are applied to all newly ingested traces. You need to run a [migration script](/docs/deployment/self-host#migrate-models) to apply them to your existing data in Langfuse.

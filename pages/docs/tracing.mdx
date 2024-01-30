@@ -22,7 +22,7 @@ classDiagram
   - Observations are of different types:
     - `Events` are the basic building block. They are used to track discrete events in a trace.
     - `Spans` represent durations of units of work in a trace.
-    - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage](/docs/token-usage) is automatically calculated.
+    - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage and costs](/docs/model-usage) are automatically calculated.
   - Observations can be nested.
 
 Follow the integration docs to send traces to Langfuse. You can use:
@@ -84,6 +84,7 @@ handler.getTraceUrl();
 </Tabs>
 
 ## Tagging traces
+
 Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the [Langfuse UI](https://cloud.langfuse.com). To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
 <Tabs items={["Python", "JS/TS"]}>
@@ -109,13 +110,14 @@ const trace = langfuse.trace({
 
 </Tabs>
 
-
 ### Working with traces
-Tags enable you to flexibly add metadata to your traces. 
-You can filter for tags in the Langfuse UI. You can also group traces in the UI for comparison and pattern identification. 
+
+Tags enable you to flexibly add metadata to your traces.
+You can filter for tags in the Langfuse UI. You can also group traces in the UI for comparison and pattern identification.
 Use descriptive tags and leverage the filtering and grouping capabilities of the Langfuse UI to enhance trace management and analysis workflows.
 
 ### Get started
+
 When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
 
 <Frame>![Tagging traces](/images/docs/tagging-traces.gif)</Frame>
