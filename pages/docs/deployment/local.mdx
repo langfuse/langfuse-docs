@@ -1,14 +1,23 @@
 ---
-description: Step-by-step guide to self-host Langfuse on your local machine using Docker
+description: Step-by-step guide to run Langfuse on your local machine using docker compose.
 ---
+
+import { Callout } from "nextra/components";
 
 # Local Deployment
 
-This guide will help you set up Langfuse on your local machine. It involves starting a local database and the Langfuse server, which is exposed on port `3000` by default.
+<Callout type="warning">
+  This setup is **not suitable for production use** as the database is not
+  persistent and environment variables are not kept secret. For a
+  production-ready setup, follow the [self-hosting
+  guide](/docs/deployment/self-host) or consider using [Langfuse
+  Cloud](/docs/deployment/cloud) maintained by the Langfuse team.
+</Callout>
 
-Please note, **this setup is not suitable for production use** as the database is not persistent and environment variables are not kept secret. For a production-ready setup, consider using [Langfuse Cloud](/docs/deployment/cloud) maintained by the Langfuse team or follow our [self-hosting guide](/docs/deployment/self-host).
+You can run Langfuse on your local machine using docker compose. This method is ideal for testing Langfuse and troubleshooting integration issues.
 
-Requirements: `docker` and `docker compose`, both are included in [Docker Desktop](https://docs.docker.com/get-docker/) for Mac or Windows users.
+Requirements: `docker` and `docker compose`, both are included in [Docker Desktop](https://docs.docker.com/get-docker/)
+for Mac or Windows users.
 
 ## Getting Started
 
@@ -45,3 +54,7 @@ docker compose up
 ## Setting Up a Development Environment
 
 Refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) for detailed instructions on how to set up a development environment.
+
+## Troubleshooting
+
+The [self-hosting guide](/docs/deployment/self-host) is more extensive and includes troubleshooting steps which are also applicable to local deployments using docker compose.

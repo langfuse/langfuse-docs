@@ -39,7 +39,7 @@ Alternatively, you can deploy with one click on Railway:
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
 
-## Configuring Environment Variables
+### Configuring Environment Variables
 
 Langfuse can be configured using environment variables. Some are mandatory as defined in the table below:
 
@@ -70,21 +70,7 @@ To enable OAuth/SSO provider sign-in for Langfuse, refer to the [NextAuth.js doc
 | AzureAD  | `AUTH_AZURE_AD_CLIENT_ID`, `AUTH_AZURE_AD_CLIENT_SECRET`, `AUTH_AZURE_AD_TENANT_ID` |
 | Okta     | [PR](https://github.com/langfuse/langfuse/pull/506) needs to be tested              |
 
-## Updating the Application
-
-Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
-
-To update the application:
-
-1. Stop the container.
-2. Pull the latest container.
-3. Restart the application.
-
-During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
-
-We recommend enabling automated updates to benefit from the latest features, bug fixes, and security patches.
-
-## Health Check Endpoint
+### Health Check Endpoint
 
 Langfuse includes a health check endpoint at `/api/public/health`. This endpoint checks both API functionality and database connectivity.
 
@@ -101,7 +87,7 @@ The potential responses from the health check endpoint are:
 
 Applications and monitoring services can call this endpoint periodically for health updates.
 
-## Troubleshooting
+### Troubleshooting
 
 If you encounter issues, ensure the following:
 
@@ -111,10 +97,65 @@ If you encounter issues, ensure the following:
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 
+## Updating the Application
+
+Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+
+### How to update
+
+To update the application:
+
+1. Stop the container.
+2. Pull the latest container.
+3. Restart the application.
+
+During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
+
+We recommend enabling automated updates to benefit from the latest features, bug fixes, and security patches.
+
+### Apply newly supported models to existing data in Langfuse [#migrate-models]
+
+Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
+
+Optionally, you can apply the new model definitions to existing data using the following steps. During the migration, the database remains available (non-blocking).
+
+1. Clone the repository and create an `.env` file:
+
+   ```bash
+   # Clone the Langfuse repository
+   git clone https://github.com/langfuse/langfuse.git
+
+   # Navigate to the Langfuse directory
+   cd langfuse
+
+   # Install all dependencies
+   npm i
+
+   # Create an .env file
+   cp .env.dev.example .env
+   ```
+
+2. Edit the `.env` to connect to your database from your machine:
+
+   ```bash filename=".env"
+   NODE_ENV=production
+
+   # Replace with your database connection string
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+   ```
+
+3. Execute the migration. Depending on the size of your database, this might take a while.
+
+   ```bash
+   npm run models:migrate
+   ```
+
+4. Clean up: remove the `.env` file to avoid connecting to the production database from your local machine.
+
 ## Support
 
-If you encounter any issue, join us on [Discord](/discord) or contact the maintainers: support@langfuse.com
+If you experience any issues, please join us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
 
-For support of production deployments, the Langfuse team offers dedicated enterprise support. Reach out to learn more (enterprise@langfuse.com) or [schedule a demo](https://cal.com/marc-kl/demo).
+For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
 
-Alternatively, consider [Langfuse Cloud](/docs/deployment/cloud) for a fully managed version of Langfuse. You can read more about its security and privacy [here](/docs/data-security-privacy).
+Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
