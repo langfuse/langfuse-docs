@@ -75,5 +75,5 @@ const permanentRedirects = [
   // old experimentation to new experimentation
   ["/experimentation", "/docs/experimentation"],
   // token usage to model usage, 2024-01
-  ["/docs/token-usage", "/docs/model-usage"],
+  ["/docs/token-usage", "/docs/model-usage-and-cost"],
 ]
