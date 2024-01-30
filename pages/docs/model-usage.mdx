@@ -40,9 +40,9 @@ langfuse.generation({
   ...
   usage: {
     // usage
-    input: number,
-    output: number,
-    total: number, // if no separate input&output, otherwise derived from input + output
+    input: integer,
+    output: integer,
+    total: integer, // if no separate input&output, otherwise derived from input + output
     unit: string, // 'TOKENS' or 'CHARACTERS', defaults to 'TOKENS'
 
     // usd cost
@@ -62,9 +62,9 @@ For increased compatibility with OpenAI, you can also use the following attribut
 langfuse.generation({
   usage: {
     // usage
-    promptTokens: number,
-    completionTokens: number,
-    totalTokens: number, // optional, derived from prompt + completion
+    promptTokens: integer,
+    completionTokens: integer,
+    totalTokens: integer, // optional, derived from prompt + completion
   },
 });
 ```
