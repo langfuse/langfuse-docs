@@ -31,7 +31,7 @@ flowchart LR
   B -->|use usage| G
 ```
 
-## Ingest usage and cost [#ingest]
+## Ingest usage and/or cost [#ingest]
 
 If available in the LLM response, ingesting usage and/or cost is the most accurate and robust way to track usage in Langfuse:
 
@@ -69,7 +69,7 @@ langfuse.generation({
 });
 ```
 
-## Inferred usage and cost [#infer]
+## Infer usage and/or cost [#infer]
 
 If either usage or cost are not ingested, Langfuse will attempt to infer the missing values based on the `model` parameter of the generation. This is especially useful for some model providers or self-hosted models which do not include usage or cost in the response.
 
