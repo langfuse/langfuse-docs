@@ -62,7 +62,7 @@ const config: DocsThemeConfig = {
           className="p-1 hidden sm:inline-block hover:opacity-80"
           target="_blank"
           href="https://langfuse.com/discord"
-          aria-label="Langfuse Discord"
+          aria-label="AssistMe Discord"
           rel="nofollow noreferrer"
         >
           <BsDiscord size={24} />
@@ -72,7 +72,7 @@ const config: DocsThemeConfig = {
           className="p-1 hidden sm:inline-block hover:opacity-80"
           target="_blank"
           href="https://x.com/langfuse"
-          aria-label="Langfuse X formerly known as Twitter"
+          aria-label="AssistMe X formerly known as Twitter"
           rel="nofollow noreferrer"
         >
           <svg
@@ -143,12 +143,12 @@ const config: DocsThemeConfig = {
     return {
       titleTemplate:
         asPath === "/"
-          ? "Langfuse"
+          ? "AssistMe"
           : asPath.startsWith("/blog/")
-          ? "%s - Langfuse Blog"
+          ? "%s - AssistMe Blog"
           : asPath.startsWith("/docs/guides/")
-          ? "%s - Langfuse Guides"
-          : "%s - Langfuse",
+          ? "%s - AssistMe Guides"
+          : "%s - AssistMe",
     };
   },
   head: () => {

@@ -1,6 +1,6 @@
-# Langfuse Docs
+# AssistMe Docs
 
-Repo for [langfuse.com](https://langfuse.com), based on [Nextra](https://nextra.site/)
+Repo for [assistme.com](https://assistme.com), based on [Nextra](https://nextra.site/)
 
 ## Local Development
 
