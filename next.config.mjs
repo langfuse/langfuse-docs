@@ -1,6 +1,12 @@
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
+import NextBundleAnalyzer from '@next/bundle-analyzer'
 
+const withBundleAnalyzer = NextBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+// nextra config
 const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
@@ -10,7 +16,8 @@ const withNextra = nextra({
   defaultShowCopyCode: true,
 })
 
-export default withNextra({
+// next config
+const nextraConfig = withNextra({
   experimental: {
     scrollRestoration: true,
   },
@@ -77,3 +84,5 @@ const permanentRedirects = [
   // token usage to model usage, 2024-01
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
 ]
+
+export default withBundleAnalyzer(nextraConfig);

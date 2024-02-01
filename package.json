@@ -6,7 +6,8 @@
     "dev": "next dev -p 3333",
     "build": "next build",
     "postbuild": "next-sitemap && echo 'Removing .next/cache to resolve Nextra caching bug' && rm -rf .next/cache",
-    "start": "next start -p 3333"
+    "start": "next start -p 3333",
+    "analyze": "cross-env ANALYZE=true next build"
   },
   "homepage": "https://docs.langfuse.com",
   "dependencies": {
@@ -62,7 +63,9 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.1.0",
     "@types/node": "18.16.0",
+    "cross-env": "^7.0.3",
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {

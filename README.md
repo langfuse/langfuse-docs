@@ -34,3 +34,7 @@ API reference is automatically generated based on the OpenAPI spec of the curren
 - [Tailwind CSS](https://tailwindcss.com/)
 
 Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
+
+## Bundle analysis
+
+Run `pnpm run analyze` to analyze the bundle size of the production build using `@next/bundle-analyzer`.
