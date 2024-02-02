@@ -93,22 +93,6 @@ If you encounter issues, ensure the following:
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 
-### Provider-specific information
-
-This section is work in progress and relies on community contributions. If you have successfully deployed Langfuse on a specific platform, consider contributing a guide either via a PR or by [reaching out](#contact) to the maintainers.
-
-#### Railway
-
-You can deploy with one click on Railway:
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
-
-#### Google Cloud Platform (Cloud Run)
-
-Cloud Run is an excellent method for deploying Langfuse easily and at scale.
-
-Cloud Run does not support deploying containers directly from the GitHub Container Registry (ghcr.io) used by Langfuse. To avoid the need to pull the container and push it to the Google registry, you can refer to this [guide](https://github.com/orgs/langfuse/discussions/1013#discussioncomment-8328524) or use Cloud Build.
-
 ## Updating the Application
 
 Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
@@ -163,6 +147,32 @@ Optionally, you can apply the new model definitions to existing data using the f
    ```
 
 4. Clean up: remove the `.env` file to avoid connecting to the production database from your local machine.
+
+## Platform-specific information
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="ℹ️">
+  This section is work in progress and relies on community contributions. The
+  Langfuse team/maintainers do not have the capacity to maintain or test this
+  section. If you have successfully deployed Langfuse on a specific platform,
+  consider contributing a guide either via a GitHub
+  [PR/Issue](https://github.com/langfuse/langfuse-docs) or by [reaching
+  out](#contact) to the maintainers. Please also let us know if one of these
+  guides does not work anymore or if you have a better solution.
+</Callout>
+
+### Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
+
+### Google Cloud Platform (Cloud Run)
+
+Cloud Run is an excellent method for deploying Langfuse easily and at scale. Cloud Run does not support deploying containers directly from the GitHub Container Registry (ghcr.io) used by Langfuse. To avoid the need to pull the container and push it to the Google registry, you can refer to this [guide](https://github.com/orgs/langfuse/discussions/1013#discussioncomment-8328524) or use Cloud Build.
+
+#### AWS (Fargate)
+
+Deploy Langfuse to AWS using the AWS Fargate service for serverless container deployment. You can find the deployment guide and Cloud Development Kit (CDK) scripts here: [AI4Organization/langfuse-ecr-ecs-deployment-cdk](https://github.com/AI4Organization/langfuse-ecr-ecs-deployment-cdk).
 
 ## Support
 
