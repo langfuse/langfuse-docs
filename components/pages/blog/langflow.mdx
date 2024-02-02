@@ -1,0 +1,47 @@
+---
+title: Langflow x Langfuse
+date: 2023/09/21
+description: "Build in no-code in Langflow, observe and analyze in Langfuse"
+tag: integration
+ogImage: /images/blog/langflow-langfuse/og.png
+author: Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+import traceDetailImg from "@/public/images/blog/langflow-langfuse/trace-detail.jpg";
+import langflowImg from "@/public/images/blog/langflow-langfuse/langflow.jpg";
+import Image from "next/image";
+
+<BlogHeader
+  title="Langflow x Langfuse"
+  description="Build in no-code in Langflow, observe and analyze in Langfuse"
+  date="Sept 21, 2023"
+  authors={["maxdeichmann"]}
+/>
+
+Langflow provides a user interface that allows you to define LLM features and get started quickly. It offers a beautiful drag-and-drop UI that enables you to define complex chains of tools and LLM calls. This eliminates the need for coding everything from scratch and allows you to experiment and prototype effortlessly. With Langflow, you have the flexibility to choose different LLM Providers and a broad range of tools to enrich prompts.
+In addition to its user-friendly interface, Langflow also offers a community-provided set of pre-built LLM features. These features have produced good results for others, making it a great source of inspiration for your own projects.
+
+<Frame border>
+  <Image alt="Langflow UI" src={langflowImg} />
+</Frame>
+
+Once you have set up your LLM feature chain using Langflow, it's time to test it in production. This is where Langfuse comes into play. Langfuse records all the steps of the LLM feature, allowing you to look into the details of how it behaved. It also provides analytics based on latency, API cost, and quality. Quality is measured by user feedback and model-based evaluations.
+
+<Frame border>
+  <Image alt="Trace Detail" src={traceDetailImg} />
+</Frame>
+
+Setting up both Langflow and Langfuse is easy. You can choose to self-host them or use the hosted version of Langfuse. The integration between the two tools is simple: just add the Langfuse environment variables when starting Langflow.
+
+```bash
+export LANGFLOW_LANGFUSE_SECRET_KEY=<your secret key>
+export LANGFLOW_LANGFUSE_PUBLIC_KEY=<your public key>
+```
+
+Read the [integration docs](https://langfuse.com/docs/langflow) for more details on how to set up the integration. If you are looking for a general intro to Langfuse, we recorded a [2 min demo](https://langfuse.com/docs/video) showing the core tracing and analytics features.
+
+If you want to learn more about Langflow and Langfuse, you can join their Discords for further discussions and support ([Langfuse](https://langfuse.com/discord), [Langflow](https://discord.com/invite/EqksyE2EX9)). Additionally, as both projects are open source check out the open issues to collaborate with the community ([Langfuse](https://github.com/langfuse/langfuse), [Langflow](https://github.com/logspace-ai/langflow/issues)) or leave a ⭐️.
+
+I love how Langflow makes it easy to build complex LLM applications and am super excited about this new integration (there will be more coming over the next weeks).

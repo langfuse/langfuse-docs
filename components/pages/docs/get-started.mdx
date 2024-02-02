@@ -1,0 +1,297 @@
+---
+description: Follow the Quickstart to get started with Langfuse in minutes before diving into the details.
+---
+
+# Quickstart
+
+This quickstart helps you to integrate your LLM application with Langfuse.
+
+<Steps>
+
+### Create project in Langfuse
+
+The fastest way to get started is to use the Langfuse Cloud.
+
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy API keys for your
+   project
+
+   ```bash filename=".env"
+   LANGFUSE_SECRET_KEY="sk-lf-...";
+   LANGFUSE_PUBLIC_KEY="pk-lf-...";
+   ```
+
+Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
+
+### Add tracing to your backend
+
+<Tabs items={["JS/TS", "Python", "Langchain", "API"]}>
+<Tab>
+
+```sh
+npm i langfuse
+# or
+yarn add langfuse
+
+# Node.js < 18
+npm i langfuse-node
+
+# Deno
+import { Langfuse } from "https://esm.sh/langfuse"
+```
+
+Example usage, most of the parameters are optional and depend on the use case.
+
+For more information, see the [typescript SDK docs](/docs/sdk/typescript).
+
+```typescript filename="server.ts"
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  // baseUrl: defaults to "https://cloud.langfuse.com"
+});
+
+// Example generation creation
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+  },
+  input: messages,
+});
+
+// Application code
+const chatCompletion = await llm.respond(prompt);
+
+// End generation - sets endTime
+generation.end({
+  output: chatCompletion,
+});
+```
+
+</Tab>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
+
+```python filename="server.py"
+from langfuse import Langfuse
+
+langfuse = Langfuse(
+  public_key="pk-lf-...",
+  secret_key="sk-sk-...",
+  host="https://cloud.langfuse.com"
+)
+
+generation = langfuse.generation(
+    name="summary-generation",
+    model="gpt-3.5-turbo",
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
+    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    metadata={"interface": "whatsapp"}
+)
+
+# execute model, mocked here
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+chat_completion = {
+    "completion":"The Q3 OKRs contain goals for multiple teams...",
+    "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
+}
+
+# update span and sets end_time
+generation.end(
+    output=chat_completion["completion"],
+    usage=chat_completion["usage"],
+)
+
+# The SDK executes network requests in the background.
+# To ensure that all requests are sent before the process exits, call flush()
+langfuse.flush()
+```
+
+</Tab>
+<Tab>
+
+Install the Langfuse Python SDK
+
+```bash
+pip install langfuse
+```
+
+Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
+
+```python /callbacks=[handler]/
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
+
+# Langchain implementation
+
+# Add handler as callback when running the Langchain agent
+agent.run("<user_input>", callbacks=[handler])
+```
+
+For more examples, see the [Langchain integration docs](/docs/langchain).
+
+</Tab>
+<Tab>
+
+[API reference](/docs/api) for custom integrations
+
+</Tab>
+</Tabs>
+
+### Capture scores (optional)
+
+<Tabs items={["Browser", "JS/TS", "Python", "API"]}>
+<Tab>
+
+Use LangfuseWeb to directly capture **user feedback** as scores in the browser.
+
+```sh npm2yarn
+npm i langfuse
+```
+
+Simple feedback component in React:
+
+```typescript
+import { LangfuseWeb } from "langfuse";
+
+export default function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY, // pk-lf-...
+    // baseUrl: defaults to "https://cloud.langfuse.com"
+  });
+
+  const handleFeedback = async (value: number) => {
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback", // arbitrary name to identify the type of score
+      value, // float, optional: scale it to e.g. 0..1
+    });
+  };
+
+  return (
+    <>
+      <button onClick={() => handleFeedback(1)}>👍</button>
+      <button onClick={() => handleFeedback(0)}>👎</button>
+    </>
+  );
+}
+```
+
+</Tab>
+<Tab>
+
+You can use the JS/TS SDK to report a score.
+
+```typescript
+trace.score({
+  name: "user-explicit-feedback",
+  value: 1,
+  comment: "I like how personalized the response is",
+});
+
+// alternatively
+span.score({});
+generation.score({});
+event.score({});
+```
+
+</Tab>
+<Tab>
+
+You can use the Python SDK to report a score via your Python server.
+
+```python
+
+score = generation.score(
+    name='user-explicit-feedback',
+    value=1,
+    comment="I like how personalized the response is"
+)
+```
+
+</Tab>
+<Tab>
+
+```bash
+curl --location 'http://cloud.langfuse.com/api/public/metrics' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--header "Authorization: Bearer {langfuse_public_key}"
+--data '{
+  "traceId": "<string>",
+  "name": "<string>",
+  "value": "<integer>",
+  "observationId": "<optional_string>"
+}'
+```
+
+</Tab>
+</Tabs>
+
+### Explore
+
+Visit Langfuse interface to explore your data.
+
+</Steps>
+
+## More information
+
+This is a brief summary of getting started with Langfuse. Have a look at the detailed SDK documentation for features such as:
+
+- Nesting of observations to capture complex chains and agents
+- Use of your own existing ids to group traces, observations and scores
+- Optimizing asynchronous behavior of the SDK
+
+import { SiTypescript, SiPython } from "react-icons/si";
+import { FiCode } from "react-icons/fi";
+import { SiOpenai } from "react-icons/si";
+
+<Cards num={2}>
+  <Card
+    icon={<SiTypescript size="24" />}
+    title="JS/TS SDK (Edge, Node, Web)"
+    href="/docs/sdk/typescript"
+    arrow
+  />
+  <Card
+    icon={<SiPython size="24" />}
+    title="Python SDK"
+    href="/docs/sdk/python"
+    arrow
+  />
+  <Card
+    icon={<span>🦜🔗</span>}
+    title="Langchain integration"
+    href="/docs/langchain"
+    arrow
+  />
+  <Card
+    icon={<SiOpenai size="24" />}
+    title="OpenAI SDK (Python)"
+    href="/docs/openai"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="API reference"
+    href="/docs/api"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="Flowise, Langflow, Litellm, ..."
+    href="/docs"
+    arrow
+  />
+</Cards>

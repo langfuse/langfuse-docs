@@ -1,0 +1,99 @@
+---
+description: Score traces and LLM generations in AssistMe based on user feedback in your application.
+---
+
+import FeedbackPreview from "@/components/feedbackPreview";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+# User Feedback
+
+User feedback is a great source to evaluate the quality of an LLM app's output. In AssistMe, feedback is collected as a [`score`](/docs/scores) and attached to an execution trace or an individual LLM generation.
+
+## Types of Feedback
+
+Depending on the type of the application, there are different types of feedback that can be collected that vary in quality, detail, and quantity.
+
+- **Explicit Feedback**: Directly prompt the user to give feedback, this can be a rating, a like, a dislike, a scale or a comment. While it is simple to implement, quality and quantity of the feedback is often low.
+- **Implicit Feedback**: Measure the user's behavior, e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output. This type of feedback is more difficult to implement but is often more frequent and reliable.
+
+## Collect User Feedback in AssistMe
+
+The easiest way to collect user feedback is via the **AssistMe Web SDK**. Thereby you can ingest scores directly from the browser. See the Web SDK documentation for more details.
+
+<Accordion type="single" collapsible>
+<AccordionItem value="item-1">
+<AccordionTrigger>Example using AssistMe Web SDK</AccordionTrigger>
+<AccordionContent className="p-1">
+
+<div className="mt-5 px-3 py-2 ring-1 rounded-xl ring-gray-400">
+
+<h3 className="text-xl font-bold">User feedback on individual responses</h3>
+<span className="text-sm">Chat application</span>
+
+<div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+<div className="flex-1">
+
+**Integration**
+
+```typescript {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</div>
+<div className="flex-1">
+
+**Preview**
+
+<FeedbackPreview />
+
+</div>
+</div>
+</div>
+
+</AccordionContent>
+</AccordionItem>
+</Accordion>
+
+## Live demo
+
+We implemented collection of user feedback into the Q&A chatbot for the AssistMe docs.
+
+<Frame>
+  ![User feedback collection in
+  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
+</Frame>
+
+In this example you see the following steps:
+
+1. Collection of feedback using the AssistMe Web SDK
+   > _Negative, Langchain not included in response_
+2. Browsing of feedback
+3. Identification of the root cause of the low-quality response
+   > Docs on Langchain integration are not included in embedding similarity search
+
+→ [Try the demo yourself](/docs/demo) and browse the collected feedback in AssistMe

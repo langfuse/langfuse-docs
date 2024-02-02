@@ -1,0 +1,111 @@
+---
+description: AssistMe tracing helps to monitor and debug complex LLM apps such as chains and agents.
+---
+
+# Tracing
+
+LLM apps use increasingly complex abstractions (chains, agents with tools, advanced prompts). The nested traces in AssistMe help to understand what is going on and get to the root cause of problems.
+
+## Introduction
+
+```mermaid
+classDiagram
+    Trace "1" *-- "n" Observation
+    Observation <|-- Event
+    Observation <|-- Span
+    Observation <|-- Generation
+    Observation o-- Observation: Nesting
+```
+
+- Each backend execution is logged with a single `trace`.
+- Each trace can contain multiple `observations` to log the individual steps of the execution.
+  - Observations are of different types:
+    - `Events` are the basic building block. They are used to track discrete events in a trace.
+    - `Spans` represent durations of units of work in a trace.
+    - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage](/docs/token-usage) is automatically calculated.
+  - Observations can be nested.
+
+## Example
+
+<Frame>![Agent trace](/images/agent-trace.png)</Frame>
+
+## Detect and fix problems
+
+1. Collect user feedback from the frontend
+2. Filter down to executions that had poor quality
+3. Use the debugging UI to get to the root cause of the problem
+
+## Share via public link
+
+You can share a trace with anyone via a public link. The link is read-only.
+
+<Frame>![Share trace via public link](/images/docs/trace-share-link.gif)</Frame>
+
+## Get trace url in SDK
+
+Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+```python
+# trace object
+trace.get_trace_url()
+```
+
+```python
+# Langchain callback handler
+handler.get_trace_url()
+```
+
+</Tab>
+<Tab>
+```typescript
+// trace object
+trace.getTraceUrl()
+```
+
+```typescript
+// Langchain callback handler
+handler.getTraceUrl();
+```
+
+</Tab>
+
+</Tabs>
+
+## Tagging traces
+Tags allow you to categorize and filter traces. You can tag traces only from the AssistMe UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+```python
+trace = langfuse.trace(
+    name = "docs-retrieval",
+    tags = ["my-first-tag", "even-better-tag"]
+)
+```
+
+</Tab>
+
+<Tab>
+```typescript
+const trace = langfuse.trace({
+  name: "docs-retrieval",
+  tags: ["tag-a-licious", "tig-tag-tagging"],
+});
+```
+
+</Tab>
+
+</Tabs>
+
+
+### Working with traces
+Tags enable you to flexibly add metadata to your traces. 
+You can filter for tags in the AssistMe UI. You can also group traces in the UI for comparison and pattern identification. 
+Use descriptive tags and leverage the filtering and grouping capabilities of the AssistMe UI to enhance trace management and analysis workflows.
+
+### Get started
+When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
+
+<Frame>![Tagging traces](/images/docs/tagging-traces.gif)</Frame>

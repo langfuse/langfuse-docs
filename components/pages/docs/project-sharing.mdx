@@ -1,0 +1,85 @@
+---
+description: Grant multiple users access to your project with granular permissions and roles.
+---
+
+# Project sharing
+
+In the project settings, you can grant access to other users to view and edit your project. You can also revoke access at any time.
+
+<Frame>![Project Sharing](/images/docs/project-sharing.gif)</Frame>
+
+## Roles
+
+- **Owner**: user who created the project; has all permissions
+- **Admin**: can edit the project settings and grant access to other users
+- **Member**: can view all metrics & create scores, but cannot configure the project
+- **Viewer**: view-only access to the project, not to the configuration
+
+## Scopes per role
+
+export function RolePermissionTable() {
+  // from langfuse/langfuse
+  const RoleScopes = {
+      OWNER: [
+      "members:read",
+      "members:create",
+      "members:delete",
+      "apiKeys:read",
+      "apiKeys:create",
+      "apiKeys:delete",
+      "objects:publish",
+      "objects:bookmark",
+      "traces:delete",
+      "scores:CUD",
+      "project:delete",
+      "project:update",
+      "project:transfer",
+      "datasets:CUD",
+    ],
+    ADMIN: [
+      "project:update",
+      "members:read",
+      "members:create",
+      "members:delete",
+      "apiKeys:read",
+      "apiKeys:create",
+      "apiKeys:delete",
+      "objects:publish",
+      "objects:bookmark",
+      "traces:delete",
+      "scores:CUD",
+      "datasets:CUD",
+    ],
+    MEMBER: [
+      "members:read",
+      "objects:publish",
+      "objects:bookmark",
+      "scores:CUD",
+      "datasets:CUD",
+    ],
+    VIEWER: [],
+  };
+  return (
+    <div className="flex gap-5 mt-4">
+      {Object.entries(RoleScopes).map(([key, value]) => (
+        <div key={key}>
+          <div
+          className="border-b pb-2 mb-2 border-gray-600"
+          >{key}</div>
+          {value.sort(
+            (a, b) => a.localeCompare(b)
+          ).map((scope) => (
+            <div key={scope}
+            className="text-sm mt-1"
+            >{scope}</div>
+          ))}
+        </div>
+      ))}
+    </div>
+
+);
+}
+
+<RolePermissionTable />
+
+_Roles cover project settings and all features that make permanent changes. The Viewer role has no privileges to make any changes_

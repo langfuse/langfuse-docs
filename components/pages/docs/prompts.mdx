@@ -1,0 +1,181 @@
+---
+description: Manage and version your prompts in AssistMe. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs.
+---
+
+import { Callout } from "nextra-theme-docs";
+import { CloudflareVideo } from "@/components/Video";
+
+# Prompt Management
+
+Use AssistMe to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by version.
+
+```python
+# get current production prompt in application
+langfuse.get_prompt("prompt name")
+```
+
+## How to use AssistMe for prompt management
+
+<Callout type="info">
+
+This feature is currently in beta, the API is stable and performance/UI will be improved significantly over the next weeks. Please share your feedback on our [Discord](/discord).
+
+</Callout>
+
+The workflow for managing prompts in AssistMe includes the following steps:
+
+```mermaid
+graph LR
+    A["1. Create new prompt version (SDK or UI)"] --> PV
+    subgraph S1["Prompt (identified by name)"]
+        PV["Prompt Version"] -->|"2. Promote"| PP["Production Prompt"]
+    end
+    PP --> D["3. Retrieve prompt using SDK"]
+    PP --> E["4. View metrics in AssistMe for prompt version"]
+```
+
+### Create / Update prompts
+
+**Create**
+
+<Tabs items={["AssistMe UI", "Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+<Frame>![Agent trace](/images/prompts.gif)</Frame>
+
+</Tab>
+<Tab>
+
+```python
+langfuse.create_prompt(
+  name: "prompt name",
+  prompt: "This is a prompt with a {{variable}}",
+  is_active: True # directly promote to production?
+)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+await langfuse.createPrompt({
+  name: "prompt name",
+  prompt: "This is a prompt with a {{variable}}",
+  isActive: true, // directly promote to production?
+});
+```
+
+</Tab>
+
+</Tabs>
+
+**Update**
+
+Use the edit button in the AssistMe UI or create a new prompt version via the SDKs with the same name.
+
+### Promote prompt to production
+
+Set a prompt version to `active` when creating it via the SDKs. In the AssistMe UI, you can promote a prompt version to production:
+
+<Frame>![Agent trace](/images/prompt-list.png)</Frame>
+
+### Retrieve prompt in your application
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+# get current production version
+prompt = langfuse.get_prompt("prompt name")
+
+# get specific version
+prompt = langfuse.get_prompt("prompt name", version=3)
+
+# insert variables into prompt template
+compiled_prompt = prompt.compile(input="test")
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+// get current production version
+const prompt = await langfuse.getPrompt("prompt name");
+
+// get specific version
+const prompt = await langfuse.getPrompt("prompt name", { version: 3 });
+
+// insert variables into prompt template
+const compiledPrompt = prompt.compile({ input: "test" });
+```
+
+</Tab>
+
+</Tabs>
+
+### Tag generations to get metrics by prompt version
+
+Add the prompt object to the `generation` call in the SDKs to link the generation in [AssistMe Tracing](/docs/tracing) to the prompt version. This allows you to track metrics by prompt name and version in the AssistMe UI.
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```diff
+langfuse.generation(
+    ...
++   prompt=prompt
+    ...
+)
+```
+
+</Tab>
+
+<Tab>
+
+```diff
+langfuse.generation({
+    ...
++   prompt: prompt
+    ...
+})
+```
+
+</Tab>
+
+</Tabs>
+
+## Performance
+
+While [AssistMe Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in AssistMe adds latency to your application when retrieving the prompt. Currently the prompt is retrieved from the AssistMe API every time you fetch it via the SDKs. We will introduce caching in future releases to reduce the performance impact.
+
+**Quick performance measurement**
+
+We measured the execution time of the following snippet (retrieval and prompt compilation):
+
+```python
+prompt = langfuse.get_prompt("perf-test")
+prompt.compile(input="test")
+```
+
+Results from 1000 sequential executions in a local jupyter notebook using Langfuse Cloud (includes network latency):
+
+<div className="sm:grid sm:grid-cols-2 gap-4">
+
+<Frame className="max-w-md">
+  ![Performance Chart](/images/docs/prompt-performance-chart.png)
+</Frame>
+
+```
+count  1000.000000
+mean      0.178465 sec
+std       0.058125 sec
+min       0.137314 sec
+25%       0.161333 sec
+50%       0.165919 sec
+75%       0.171736 sec
+max       0.687994 sec
+```
+
+</div>

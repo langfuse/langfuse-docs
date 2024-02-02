@@ -1,0 +1,80 @@
+---
+description: Capture all LLM calls made via Flowise in Langfuse
+---
+
+# Flowise Integration
+
+**Flowise** ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. It lets you build customized LLM flows with a drag & drop editor.
+
+With the native integration, you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
+
+The integration supports all use cases of Flowise, including: interactively in the UI, API, and embeds.
+
+## Integration
+
+<Steps>
+
+### Obtain Langfuse API keys
+
+<Tabs items={["Langfuse cloud", "local or self-hosted"]}>
+<Tab>
+
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy API keys for your
+   project
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+2. Copy API keys for your
+   project
+
+</Tab>
+</Tabs>
+
+### Run Flowise
+
+```sh
+# install
+npm install -g flowise
+
+# start
+npx flowise start
+```
+
+### Add Langfuse
+
+<Frame>![Add Langfuse chatflow analysis](/images/docs/flowise_setup.gif)</Frame>
+
+You can optionally add `release` to tag the current version of the flow. You usually don't need to change the other options.
+
+</Steps>
+
+## Mapping of Flowise to Langfuse
+
+The integration automatically maps the following fields from Flowise to Langfuse:
+
+| Flowise                                                          | Langfuse                    | Required version                                                                     |
+| ---------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------ |
+| [chatId](https://docs.flowiseai.com/integrations/memory/threads) | [sessionId](/docs/sessions) | [Flowise 1.4.10](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.10) |
+
+## User Tracking
+
+When using the Flowise Prediction API, you have the option to include a `userId` in the `overrideConfig` parameter. This allows for [user-level tracking and analysis](/docs/user-explorer) in Langfuse.
+
+Learn more about `overrideConfig` in the [Flowise Prediction API documentation](https://docs.flowiseai.com/using-flowise/api#prediction-api).
+
+```json
+{
+  "question": "hi there",
+  "overrideConfig": {
+    "analytics": {
+      "langFuse": {
+        "userId": "user1"
+      }
+    }
+  }
+}
+```
