@@ -7,7 +7,10 @@ import { CloudflareVideo } from "@/components/Video";
 
 # Prompt Management
 
-Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by prompt version. 
+Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by prompt version.
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
 
 ```python
 from langfuse import Langfuse
@@ -17,6 +20,21 @@ langfuse = Langfuse()
 # Get current production prompt in application
 langfuse.get_prompt("prompt name")
 ```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Get current production prompt in application
+langfuse.getPrompt("prompt name");
+```
+
+</Tab>
+</Tabs>
 
 ## How to use Langfuse for prompt management
 
@@ -88,8 +106,8 @@ Use the edit button in the Langfuse UI or create a new prompt version via the SD
 Set a prompt version to `active` when creating it via the SDKs. In the Langfuse UI, you can promote a prompt version to production:
 
 <CloudflareVideo
-  videoId="7b91335f4625123f2e3b9b652da7c19d"
-  aspectRatio={16 / 9}
+  videoId="0a1cc222b766594947efd00af62e7a67"
+  aspectRatio={16.2 / 9}
   gifStyle
   className="max-w-xl"
 />
@@ -103,7 +121,7 @@ Set a prompt version to `active` when creating it via the SDKs. In the Langfuse 
 # Get current production version
 prompt = langfuse.get_prompt("prompt name")
 
-# Get specific version 
+# Get specific version
 prompt = langfuse.get_prompt("prompt name", version=3)
 
 # Get specific version and extend cache TTL from default 60 to 300 seconds
@@ -125,7 +143,9 @@ const prompt = await langfuse.getPrompt("prompt name");
 const prompt = await langfuse.getPrompt("prompt name", 3);
 
 // Get specific version and extend cache TTL from default 1 to 5 minutes
-const prompt = await langfuse.getPrompt("prompt name", 3, { cacheTtlSeconds: 300 });
+const prompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
 
 // Insert variables into prompt template
 const compiledPrompt = prompt.compile({ input: "test" });
@@ -137,7 +157,7 @@ const compiledPrompt = prompt.compile({ input: "test" });
 
 #### Caching in client SDKs
 
-While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. To minimize the impact on your application, prompts are cached for 60 seconds in the client SDKs once fetched. The cache TTL can be configured directly in the SDKs. 
+While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. To minimize the impact on your application, prompts are cached for 60 seconds in the client SDKs once fetched. The cache TTL can be configured directly in the SDKs.
 
 <Callout type="info">
 
@@ -165,20 +185,26 @@ prompt = langfuse.get_prompt("prompt name", cache_ttl_seconds=0)
 
 ```typescript
 // Get current production version and cache prompt for 5 minutes
-const prompt = await langfuse.getPrompt("prompt name", undefined, { cacheTtlSeconds: 300 });
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 300,
+});
 
 // Get prompt version 3 and cache for 5 minutes
-const prompt = await langfuse.getPrompt("prompt name", 3, { cacheTtlSeconds: 300 });
+const prompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
 
 // Disable caching for a prompt
-const prompt = await langfuse.getPrompt("prompt name", undefined, { cacheTtlSeconds: 0 });
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 0,
+});
 ```
 
 </Tab>
 
 </Tabs>
 
-**Performance on first fetch (excluding cache hits)**
+#### Performance on first fetch (excluding cache hits)
 
 We measured the execution time of the following snippet (prompt retrieval and compilation). Note that this excludes cache hits where the prompt is available immediately.
 
@@ -208,7 +234,7 @@ max       0.687994 sec
 
 </div>
 
-### Tag generations to get metrics by prompt version
+### Link generations in Langfuse Tracing to prompt versions
 
 Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This allows you to track metrics by prompt name and version in the Langfuse UI.
 
