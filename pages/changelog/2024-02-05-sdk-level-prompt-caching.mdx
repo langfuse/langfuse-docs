@@ -33,13 +33,19 @@ prompt = langfuse.get_prompt("prompt name", cache_ttl_seconds=0)
 
 ```typescript
 // Get current production version and cache prompt for 5 minutes
-const prompt = await langfuse.getPrompt("prompt name", undefined, { cacheTtlSeconds: 300 });
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 300,
+});
 
 // Get prompt version 3 and cache for 5 minutes
-const prompt = await langfuse.getPrompt("prompt name", 3, { cacheTtlSeconds: 300 });
+const prompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
 
 // Disable caching for a prompt
-const prompt = await langfuse.getPrompt("prompt name", undefined, { cacheTtlSeconds: 0 });
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 0,
+});
 ```
 
 </Tab>
@@ -49,7 +55,6 @@ const prompt = await langfuse.getPrompt("prompt name", undefined, { cacheTtlSeco
 ### Upgrade path
 
 To benefit from prompt caching, upgrade to the latest version of the Python and JS/TS SDKs. The caching feature is enabled with a 60 seconds TTL default, so you don't need to make any changes to your code to start using it.
-
 
 ### More details
 
