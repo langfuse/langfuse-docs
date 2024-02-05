@@ -7,12 +7,34 @@ import { CloudflareVideo } from "@/components/Video";
 
 # Prompt Management
 
-Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by version.
+Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by prompt version.
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
 
 ```python
-# get current production prompt in application
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Get current production prompt in application
 langfuse.get_prompt("prompt name")
 ```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Get current production prompt in application
+langfuse.getPrompt("prompt name");
+```
+
+</Tab>
+</Tabs>
 
 ## How to use Langfuse for prompt management
 
@@ -84,8 +106,8 @@ Use the edit button in the Langfuse UI or create a new prompt version via the SD
 Set a prompt version to `active` when creating it via the SDKs. In the Langfuse UI, you can promote a prompt version to production:
 
 <CloudflareVideo
-  videoId="7b91335f4625123f2e3b9b652da7c19d"
-  aspectRatio={16 / 9}
+  videoId="0a1cc222b766594947efd00af62e7a67"
+  aspectRatio={16.2 / 9}
   gifStyle
   className="max-w-xl"
 />
@@ -96,13 +118,16 @@ Set a prompt version to `active` when creating it via the SDKs. In the Langfuse 
 <Tab>
 
 ```python
-# get current production version
+# Get current production version
 prompt = langfuse.get_prompt("prompt name")
 
-# get specific version
+# Get specific version
 prompt = langfuse.get_prompt("prompt name", version=3)
 
-# insert variables into prompt template
+# Get specific version and extend cache TTL from default 60 to 300 seconds
+prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
+
+# Insert variables into prompt template
 compiled_prompt = prompt.compile(input="test")
 ```
 
@@ -111,13 +136,18 @@ compiled_prompt = prompt.compile(input="test")
 <Tab>
 
 ```typescript
-// get current production version
+// Get current production version
 const prompt = await langfuse.getPrompt("prompt name");
 
-// get specific version
-const prompt = await langfuse.getPrompt("prompt name", { version: 3 });
+// Get specific version of a prompt (here version 3). Prompt is returned even if not active.
+const prompt = await langfuse.getPrompt("prompt name", 3);
 
-// insert variables into prompt template
+// Get specific version and extend cache TTL from default 1 to 5 minutes
+const prompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
+
+// Insert variables into prompt template
 const compiledPrompt = prompt.compile({ input: "test" });
 ```
 
@@ -125,7 +155,86 @@ const compiledPrompt = prompt.compile({ input: "test" });
 
 </Tabs>
 
-### Tag generations to get metrics by prompt version
+#### Caching in client SDKs
+
+While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. To minimize the impact on your application, prompts are cached for 60 seconds in the client SDKs once fetched. The cache TTL can be configured directly in the SDKs.
+
+<Callout type="info">
+
+When refetching a prompt fails but an expired version is in the cache, the SDKs will return the expired version, preventing application blockage due to network issues.
+
+</Callout>
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+# Get current production prompt version and cache for 5 minutes
+prompt = langfuse.get_prompt("prompt name", cache_ttl_seconds=300)
+
+# Get a specific prompt version and cache for 5 minutes
+prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
+
+# Disable caching for a prompt
+prompt = langfuse.get_prompt("prompt name", cache_ttl_seconds=0)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+// Get current production version and cache prompt for 5 minutes
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 300,
+});
+
+// Get prompt version 3 and cache for 5 minutes
+const prompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
+
+// Disable caching for a prompt
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 0,
+});
+```
+
+</Tab>
+
+</Tabs>
+
+#### Performance on first fetch (excluding cache hits)
+
+We measured the execution time of the following snippet (prompt retrieval and compilation). Note that this excludes cache hits where the prompt is available immediately.
+
+```python
+prompt = langfuse.get_prompt("perf-test")
+prompt.compile(input="test")
+```
+
+Results from 1000 sequential executions in a local jupyter notebook using Langfuse Cloud (includes network latency):
+
+<div className="sm:grid sm:grid-cols-2 gap-4">
+
+<Frame className="max-w-md">
+  ![Performance Chart](/images/docs/prompt-performance-chart.png)
+</Frame>
+
+```
+count  1000.000000
+mean      0.178465 sec
+std       0.058125 sec
+min       0.137314 sec
+25%       0.161333 sec
+50%       0.165919 sec
+75%       0.171736 sec
+max       0.687994 sec
+```
+
+</div>
+
+### Link generations in Langfuse Tracing to prompt versions
 
 Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This allows you to track metrics by prompt name and version in the Langfuse UI.
 
@@ -155,40 +264,6 @@ langfuse.generation({
 </Tab>
 
 </Tabs>
-
-## Performance
-
-While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. Currently the prompt is retrieved from the Langfuse API every time you fetch it via the SDKs. We will introduce caching in future releases to reduce the performance impact.
-
-**Quick performance measurement**
-
-We measured the execution time of the following snippet (retrieval and prompt compilation):
-
-```python
-prompt = langfuse.get_prompt("perf-test")
-prompt.compile(input="test")
-```
-
-Results from 1000 sequential executions in a local jupyter notebook using Langfuse Cloud (includes network latency):
-
-<div className="sm:grid sm:grid-cols-2 gap-4">
-
-<Frame className="max-w-md">
-  ![Performance Chart](/images/docs/prompt-performance-chart.png)
-</Frame>
-
-```
-count  1000.000000
-mean      0.178465 sec
-std       0.058125 sec
-min       0.137314 sec
-25%       0.161333 sec
-50%       0.165919 sec
-75%       0.171736 sec
-max       0.687994 sec
-```
-
-</div>
 
 ## Demo
 
