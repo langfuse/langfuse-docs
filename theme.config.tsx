@@ -61,7 +61,7 @@ const config: DocsThemeConfig = {
         <a
           className="p-1 hidden sm:inline-block hover:opacity-80"
           target="_blank"
-          href="https://langfuse.com/discord"
+          href="https://assistme.com/discord"
           aria-label="AssistMe Discord"
           rel="nofollow noreferrer"
         >
@@ -71,7 +71,7 @@ const config: DocsThemeConfig = {
         <a
           className="p-1 hidden sm:inline-block hover:opacity-80"
           target="_blank"
-          href="https://x.com/langfuse"
+          href="https://x.com/assistme"
           aria-label="AssistMe X formerly known as Twitter"
           rel="nofollow noreferrer"
         >
