@@ -35,6 +35,7 @@ const footerNav = [
 ];
 
 const footerLegalNav = [
+  { name: "Security", href: "/security" },
   { name: "Imprint", href: "/imprint" },
   {
     name: "Terms",
