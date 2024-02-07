@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export const Background = () => (
   <div className="absolute top-0 bottom-0 left-0 right-0 -z-50">
-    <DotPattern
+    {/* <DotPattern
       width={15}
       height={15}
       cx={1}
@@ -14,7 +14,7 @@ export const Background = () => (
         "[mask-image:linear-gradient(to_bottom,white,transparent,transparent)]",
         "dark:opacity-70"
       )}
-    />
+    /> */}
     <LinearGradient
       to="rgba(120,119,198,0.25)"
       from="rgba(0,0,0,0.0)"
