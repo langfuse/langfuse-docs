@@ -43,7 +43,7 @@ langfuse.generation({
     input: integer,
     output: integer,
     total: integer, // if no separate input&output, otherwise derived from input + output
-    unit: string, // 'TOKENS' or 'CHARACTERS', defaults to 'TOKENS'
+    unit: ModelUsageUnit, // "TOKENS" (default) | "CHARACTERS" | "MILLISECONDS" | "SECONDS" | "IMAGES"
 
     // usd cost
     inputCost: number
