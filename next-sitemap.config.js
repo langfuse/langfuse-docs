@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-    siteUrl: 'https://langfuse.com',
+    siteUrl: 'https://assistme.chat',
     generateRobotsTxt: true,
     changefreq: 'daily',
     additionalPaths: async (config) => [{

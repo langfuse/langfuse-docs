@@ -10,7 +10,7 @@ import phDark from "./img/ph_product_of_the_day_dark.png";
 export function Hero() {
   return (
     <section className="lg:min-h-[calc(100vh-64px)] flex flex-col items-center text-md sm:text-xl justify-center text-center gap-3">
-      <div className="h-64 lg:h-96 lg:max-h-[50vh]">
+      {/* <div className="h-64 lg:h-96 lg:max-h-[50vh]">
         <Spline
           scene="https://prod.spline.design/6kMV8Amtvu7CwUZJ/scene.splinecode"
           onLoad={(spline) => {
@@ -18,9 +18,9 @@ export function Hero() {
           }}
           className="h-full w-full"
         />
-      </div>
+      </div> */}
       <h1>
-        Open Source Observability <br className="hidden sm:inline xl:hidden" />&
+         <br className="hidden sm:inline xl:hidden" />&
         Analytics for LLM Apps
       </h1>
       <span className="mt-3 text-primary/70">
@@ -35,26 +35,15 @@ export function Hero() {
             </span>
           </ShimmerButton>
         </Link>
-        <Button variant="ghost" size="lg" asChild>
+        {/* <Button variant="ghost" size="lg" asChild>
           <Link href="https://cloud.langfuse.com">Create account</Link>
-        </Button>
+        </Button> */}
       </div>
 
-      <div className="flex gap-2 items-center mt-5 lg:mt-10">
+      {/* <div className="flex gap-2 items-center mt-5 lg:mt-10">
         <span className="text-primary/70">Backed by</span>
         <YCLogo />
-      </div>
-      <div className="flex gap-3 items-center">
-        <span className="text-primary/70">
-          Star us on <span className="hidden sm:inline">GitHub</span>
-        </span>
-        <Link href="https://github.com/langfuse/langfuse">
-          <img
-            alt="Langfuse Github stars"
-            src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
-          />
-        </Link>
-      </div>
+      </div> */}
       <div className="mt-2">
         <ProductHuntBadge />
       </div>
@@ -64,7 +53,7 @@ export function Hero() {
 
 const ProductHuntBadge = () => (
   <a
-    href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
+    href="https://www.producthunt.com/posts/assistme?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-assistme"
     target="_blank"
   >
     <Image

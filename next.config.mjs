@@ -22,7 +22,7 @@ export default withNextra({
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'static.langfuse.com',
+        hostname: 'static.assistme.com',
         port: '',
         pathname: '/**',
       },
@@ -47,7 +47,7 @@ const nonPermanentRedirects = [
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/docs/video"],
-  ["/ph", "https://www.producthunt.com/posts/langfuse"],
+  ["/ph", "https://www.producthunt.com/posts/assistmeai"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
 ];
@@ -58,22 +58,22 @@ const permanentRedirects = [
   ["/docs/debugging-ui", "/docs/tracing"],
   // Migration 2023-08-01
   // deployment
-  ["/docs/local", "/docs/deployment/local"],
-  ["/docs/self-host", "/docs/deployment/self-host"],
-  ["/docs/cloud", "/docs/deployment/cloud"],
+  // ["/docs/local", "/docs/deployment/local"],
+  // ["/docs/self-host", "/docs/deployment/self-host"],
+  // ["/docs/cloud", "/docs/deployment/cloud"],
   // integrations
-  ["/integrations", "/docs/integrations"],
+  // ["/integrations", "/docs/integrations"],
   ["/docs/reference", "/docs/api"],
   // Integrations back on root
-  ...["langchain", "api", "openai", "sdk", "flowise", "langflow", "litellm"].map(
-    (integration) => [`/docs/integrations/${integration}/:path*`, `/docs/${integration}/:path*`]),
+  // ...["langchain", "api", "openai", "sdk", "flowise", "langflow", "litellm"].map(
+  //   (integration) => [`/docs/integrations/${integration}/:path*`, `/docs/${integration}/:path*`]),
   // sdk integration guide
-  ["/docs/langchain", "/docs/langchain/python"],
-  ["/docs/guides/sdk-integration", "/docs/sdk#example"],
-  // evals
-  ["/docs/scores/evals", "/docs/scores/model-based-evals"],
+  // ["/docs/langchain", "/docs/langchain/python"],
+  // ["/docs/guides/sdk-integration", "/docs/sdk#example"],
+  // // evals
+  // ["/docs/scores/evals", "/docs/scores/model-based-evals"],
   // old experimentation to new experimentation
-  ["/experimentation", "/docs/experimentation"],
+  // ["/experimentation", "/docs/experimentation"],
   // token usage to model usage, 2024-01
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
 ]

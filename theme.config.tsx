@@ -8,17 +8,16 @@ import {
   Card,
   Cards,
 } from "nextra-theme-docs";
-import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
 import { BsDiscord } from "react-icons/bs";
-import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
+import { AssistMeLogo } from "./components/AssistMeLogo";
 
 const footerNav = [
-  { name: "Contact", href: "mailto:contact@langfuse.com" },
+  { name: "Contact", href: "mailto:contact@assistme.chat" },
   {
     name: "Schedule Demo",
     href: "/schedule-demo",
@@ -26,12 +25,12 @@ const footerNav = [
   { name: "Careers", href: "/careers" },
   {
     name: "Status",
-    href: "https://status.langfuse.com",
+    href: "https://status.assistme.com",
   },
-  {
-    name: "OSS Friends",
-    href: "/oss-friends",
-  },
+  // {
+  //   name: "OSS Friends",
+  //   href: "/oss-friends",
+  // },
 ];
 
 const footerLegalNav = [
@@ -47,7 +46,7 @@ const footerLegalNav = [
 ];
 
 const config: DocsThemeConfig = {
-  logo: <Logo />,
+  logo: <AssistMeLogo />,
   feedback: {
     content: null,
   },
@@ -61,7 +60,7 @@ const config: DocsThemeConfig = {
         <a
           className="p-1 hidden sm:inline-block hover:opacity-80"
           target="_blank"
-          href="https://assistme.com/discord"
+          href="https://discord.gg/mvdPxf9e"
           aria-label="AssistMe Discord"
           rel="nofollow noreferrer"
         >
@@ -71,7 +70,7 @@ const config: DocsThemeConfig = {
         <a
           className="p-1 hidden sm:inline-block hover:opacity-80"
           target="_blank"
-          href="https://x.com/assistme"
+          href="https://x.com/assistmeai"
           aria-label="AssistMe X formerly known as Twitter"
           rel="nofollow noreferrer"
         >
@@ -86,9 +85,7 @@ const config: DocsThemeConfig = {
           </svg>
         </a>
 
-        <GithubMenuBadge />
-
-        <ToAppButton />
+        {/* <ToAppButton /> */}
       </>
     ),
   },
@@ -96,7 +93,6 @@ const config: DocsThemeConfig = {
     defaultMenuCollapseLevel: 1,
     toggleButton: true,
   },
-  docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
     text: (
       <div className="flex md:justify-between md:flex-row flex-col items-center flex-1 flex-wrap gap-2 text-sm">
@@ -133,7 +129,7 @@ const config: DocsThemeConfig = {
           </div>
         </div>
         <span className="text-primary/80">
-          MIT {new Date().getFullYear()} © Finto Technologies GmbH
+           {new Date().getFullYear()} © Cloud Flow Inc
         </span>
       </div>
     ),
@@ -155,7 +151,7 @@ const config: DocsThemeConfig = {
     const { asPath, defaultLocale, locale } = useRouter();
     const { frontMatter, title: pageTitle } = useConfig();
     const url =
-      "https://langfuse.com" +
+      "https://assistme.com" +
       (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
     const description = frontMatter.description ?? "";
@@ -169,15 +165,15 @@ const config: DocsThemeConfig = {
       : "";
 
     const image = frontMatter.ogImage
-      ? "https://langfuse.com" + frontMatter.ogImage
-      : `https://langfuse.com/api/og?title=${encodeURIComponent(
+      ? "https://assistme.com" + frontMatter.ogImage
+      : `https://assistme.com/api/og?title=${encodeURIComponent(
           title
         )}&description=${encodeURIComponent(
           description
         )}&section=${encodeURIComponent(section)}`;
 
     const video = frontMatter.ogVideo
-      ? "https://langfuse.com" + frontMatter.ogVideo
+      ? "https://assistme.com" + frontMatter.ogVideo
       : null;
 
     return (
@@ -226,20 +222,20 @@ const config: DocsThemeConfig = {
     Card,
     Cards,
   },
-  banner: {
-    key: "golden-kitty-banner",
-    dismissible: true,
-    text: (
-      <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
-        {/* mobile */}
-        <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Langfuse won a Golden Kitty Award in AI Infra →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "golden-kitty-banner",
+  //   dismissible: true,
+  //   text: (
+  //     <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         Langfuse won a Golden Kitty Award in AI Infra →
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;

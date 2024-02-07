@@ -247,7 +247,7 @@ const faqs = [
   {
     question: "What are the limitations of the fair use policy?",
     answer:
-      "The fair use policy is designed to be generous. By default, we limit API usage at 1k requests per minute to prevent abuse. Since requests are batched via the Langfuse client SDKs and the /api/public/ingestion endpoint, this limit is unlikely to be reached by most customers. If you need to increase this limit, please contact us.",
+      "The fair use policy is designed to be generous. By default, we limit API usage at 1k requests per minute to prevent abuse. Since requests are batched via the Langfuse client SDKs and the/v1/public/ingestion endpoint, this limit is unlikely to be reached by most customers. If you need to increase this limit, please contact us.",
   },
 ];
 
