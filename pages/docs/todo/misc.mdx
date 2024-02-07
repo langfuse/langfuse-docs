@@ -36,3 +36,21 @@ In this example, we can see how we do:
   ![User feedback collection in
   Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
 </Frame>
+
+## Example
+
+We integrated the Typescript SDK into the Vercel AI Chatbot project. Check out the [blog post](/blog/showcase-llm-chatbot) for screenshots and detailed explanations of the inner workings of the integration. The project includes:
+
+- Streamed responses from OpenAI
+- Conversations
+- Collection of user feedback on individual messages using the Web SDK
+
+## Making calls
+
+- Each backend execution is logged with a single [trace](#trace).
+- Each trace can contain multiple `observations` to log the individual steps of the execution.
+  - [Observations](#observations) can be of different types
+    - [Events](#event) are the basic building block. They are used to track discrete events in a trace.
+    - [Spans](#span) represent durations of units of work in a trace.
+    - [Generations](#generation) are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
+  - Observations can be [nested](#nesting).

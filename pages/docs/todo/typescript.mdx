@@ -33,30 +33,28 @@ import { Callout } from "nextra/components";
   </a>
 </div>
 
-If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your application. The library queues calls to make them non-blocking.
+If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your application.
+
+- The library queues calls to make them non-blocking.
+- The SDK does not throw errors to protect your application process. Instead, it logs errors and warnings.
+
+## Installation
 
 Supported runtimes:
 
 - [x] Node.js
-- [x] Edge: Vercel, Cloudflare, ...
+- [x] Edge (e.g. Vercel, Cloudflare Workers)
 - [x] Deno
-
-Want to capture data (e.g. user feedback) from the browser? Use [LangfuseWeb](/docs/sdk/typescript-web)
-
-## Example
-
-We integrated the Typescript SDK into the Vercel AI Chatbot project. Check out the [blog post](/blog/showcase-llm-chatbot) for screenshots and detailed explanations of the inner workings of the integration. The project includes:
-
-- Streamed responses from OpenAI
-- Conversations
-- Collection of user feedback on individual messages using the Web SDK
-
-## Installation
+- [x] Bun
 
 ```sh
 npm i langfuse
 # or
 yarn add langfuse
+# or
+pnpm add langfuse
+# or
+bun add langfuse
 
 # Node.js < 18
 npm i langfuse-node
@@ -65,7 +63,23 @@ npm i langfuse-node
 import { Langfuse } from "https://esm.sh/langfuse"
 ```
 
-In your application, set the **api keys** to create a client.
+Want to capture data (e.g. user feedback) from the browser? Use [LangfuseWeb](/docs/sdk/typescript-web)
+
+## `LangfuseClient`
+
+<Callout type="info" emoji="ℹ️">
+  In short-lived environments (e.g. serverless functions), make sure to always
+  call [`langfuse.shutdownAsync()`](#shutdownasync) at the end to await all
+  pending requests.
+</Callout>
+
+### `new Langfuse()`
+
+In your application, initialize the Langfuse client.
+
+<Tabs items={["Parameters", "Environment Variables"]}>
+
+<Tab>
 
 ```typescript
 import { Langfuse } from "langfuse"; // or "langfuse-node"
@@ -73,67 +87,71 @@ import { Langfuse } from "langfuse"; // or "langfuse-node"
 const langfuse = new Langfuse({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
-  // options
+  baseUrl: "https://cloud.langfuse.com",
+  // optional parameters
+  release: "v1.0.0",
+  requestTimeout: 10000,
 });
 ```
 
-### Options
+</Tab>
+<Tab>
 
-| Variable       | Description                                                                               | Default value                                                                                                                                           |
-| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| baseUrl        | BaseUrl of the Langfuse API; for US data region, set to `"https://us.cloud.langfuse.com"` | `"https://cloud.langfuse.com"`                                                                                                                          |
-| release        | The release number/hash of the application to provide analytics grouped by release.       | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| requestTimeout | Timeout in ms for requests                                                                | `10000`                                                                                                                                                 |
-
-<Callout type="info" emoji="ℹ️">
-  In short-lived environments (e.g. serverless functions), make sure to always
-  call `langfuse.shutdownAsync()` at the end to await all pending requests.
-  ([Learn more](#lambda))
-</Callout>
-
-## Making calls
-
-- Each backend execution is logged with a single [trace](#trace).
-- Each trace can contain multiple `observations` to log the individual steps of the execution.
-  - [Observations](#observations) can be of different types
-    - [Events](#event) are the basic building block. They are used to track discrete events in a trace.
-    - [Spans](#span) represent durations of units of work in a trace.
-    - [Generations](#generation) are spans which are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
-  - Observations can be [nested](#nesting).
-
-### Create a trace [#trace]
-
-Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
 
 ```typescript
-// Example trace creation
-const trace = langfuse.trace({
-  name: "chat-app-session",
-  userId: "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
-  metadata: { user: "user@langfuse.com" },
-  tags: ["production"],
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+// without parameters
+const langfuse = new Langfuse();
+
+const langfuse = new Langfuse({
+  // optional parameters
+  release: "v1.0.0",
+  requestTimeout: 10000,
 });
-
-// Example update, same params as create, cannot change id
-trace.update({
-  metadata: {
-    tag: "long-running",
-  },
-});
-
-// Properties
-trace.id; // string
-
-// Create observations
-trace.event({});
-trace.span({});
-trace.generation({});
-
-// Add scores
-trace.score({});
 ```
 
-**`langfuse.trace()` takes the following parameters**
+</Tab>
+</Tabs>
+
+Optional parameters
+
+| Variable       | Description                                                                         | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
+
+### `.debug()`
+
+You can enable debug mode to get detailed logs of what's happening in the SDK.
+
+```typescript
+langfuse.debug();
+```
+
+### `.shutdownAsync()`
+
+The Langfuse SDKs sends events asynchronously to the Langfuse server. When you want to exit your application, you should await `shutdownAsync` to exit cleanly before your application exits.
+
+```typescript
+await langfuse.shutdownAsync();
+```
+
+### `.trace()` [#langfuse-trace]
+
+Create a trace in [Langfuse Tracing](/docs/tracing). Returns a [`TraceClient`](#traceclient) for further use.
+
+```typescript
+const trace = langfuse.trace(params);
+```
+
+**Parameters (object)**
 
 | parameter | type     | optional | description                                                                                                                                                                             |
 | --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -146,6 +164,75 @@ trace.score({});
 | userId    | string   | yes      | The id of the user that triggered the execution. Used to provide [user-level analytics](/docs/user-explorer).                                                                           |
 | version   | string   | yes      | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.                                                                    |
 | tags      | string[] | yes      | Tags are used to categorize or label traces. Traces can be filtered by tags in the UI and GET API. Tags can also be changed in the UI. Tags are merged and never deleted via the API.   |
+
+## `TraceClient`
+
+Created by [`langfuse.trace()`](#langfuse-trace).
+
+The `TraceClient` is a convenience object to interact with traces. All methods are also available via [`LangfuseClient`](#langfuseclient) but then require the `traceId` to be passed.
+
+### Attributes
+
+| attribute | type   | description          |
+| --------- | ------ | -------------------- |
+| `id`      | string | The id of the trace. |
+
+### `.update()` [#trace-update]
+
+Update the trace with new data. Params are the same as for [`langfuse.trace()`](#langfuse-trace) except for the `id` which cannot be updated.
+
+```typescript
+trace.update(params);
+```
+
+### `.event()` [#trace-event]
+
+Create an event in the trace. Returns an [`ObservationClient`](#observationclient) for further use.
+
+```typescript
+const event = trace.event(params);
+```
+
+### `.span()` [#trace-span]
+
+Create an span in the trace. Returns an [`ObservationClient`](#observationclient) for further use.
+
+```typescript
+const span = trace.span(params);
+```
+
+### `.generation()` [#trace-generation]
+
+Create an generation in the trace. Returns an [`ObservationClient`](#observationclient) for further use.
+
+```typescript
+const generation = trace.generation(params);
+```
+
+```
+// Example update, same params as create, cannot change id
+trace.update({
+metadata: {
+tag: "long-running",
+},
+});
+
+// Properties
+trace.id; // string
+
+// Create observations
+trace.event({});
+trace.span({});
+trace.generation({});
+
+// Add scores
+trace.score({});
+
+```
+
+## `ObservationClient`
+
+## TODO
 
 ### Observations [#observation]
 
@@ -309,22 +396,22 @@ generation.score({});
 
 **`*.generation()` takes the following parameters**
 
-| parameter           | type   | optional | description                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id                  | string | yes      | The id of the generation can be set, defaults to random id.                                                                                                                                                                                                                                                                                                                                                            |
-| name                | string | yes      | Identifier of the generation. Useful for sorting/filtering in the UI.                                                                                                                                                                                                                                                                                                                                                  |
-| startTime           | Date   | yes      | The time at which the generation started, defaults to the current time.                                                                                                                                                                                                                                                                                                                                                |
-| completionStartTime | Date   | yes      | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.                                                                                                                                                                                                                                                          |
-| endTime             | Date   | yes      | The time at which the generation ended.                                                                                                                                                                                                                                                                                                                                                                                |
-| model               | string | yes      | The name of the model used for the generation.                                                                                                                                                                                                                                                                                                                                                                         |
-| modelParameters     | object | yes      | The parameters of the model used for the generation; can be any key-value pairs.                                                                                                                                                                                                                                                                                                                                       |
-| input               | object | yes      | The input to the generation - the prompt. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                            |
-| output              | object | yes      | The output to the generation - the completion. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                       |
+| parameter           | type   | optional | description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                  | string | yes      | The id of the generation can be set, defaults to random id.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| name                | string | yes      | Identifier of the generation. Useful for sorting/filtering in the UI.                                                                                                                                                                                                                                                                                                                                                                                             |
+| startTime           | Date   | yes      | The time at which the generation started, defaults to the current time.                                                                                                                                                                                                                                                                                                                                                                                           |
+| completionStartTime | Date   | yes      | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.                                                                                                                                                                                                                                                                                                     |
+| endTime             | Date   | yes      | The time at which the generation ended.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| model               | string | yes      | The name of the model used for the generation.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| modelParameters     | object | yes      | The parameters of the model used for the generation; can be any key-value pairs.                                                                                                                                                                                                                                                                                                                                                                                  |
+| input               | object | yes      | The input to the generation - the prompt. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                                                                       |
+| output              | object | yes      | The output to the generation - the completion. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                                                                  |
 | usage               | object | yes      | The usage object supports the OpenAi structure with (`promptTokens`, `completionTokens`, `totalTokens`) and a more generic version (`input`, `output`, `total`, `unit`, `inputCost`, `outputCost`, `totalCost`) where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`, `"MILLISECONDS"`, `"SECONDS"`, `"IMAGES"`. Refer to the docs on how to [automatically calculate](https://langfuse.com/docs/model-usage-and-cost) tokens and costs by Langfuse. |
-| metadata            | object | yes      | Additional metadata of the generation. Can be any JSON object. Metadata is merged when being updated via the API.                                                                                                                                                                                                                                                                                                      |
-| level               | string | yes      | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.                                                                                                                                                                                                                                          |
-| statusMessage       | string | yes      | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.                                                                                                                                                                                                                                                                                             |
-| version             | string | yes      | The version of the generation type. Used to understand how changes to the generation type affect metrics. Reflects e.g. the version of a prompt.                                                                                                                                                                                                                                                                       |
+| metadata            | object | yes      | Additional metadata of the generation. Can be any JSON object. Metadata is merged when being updated via the API.                                                                                                                                                                                                                                                                                                                                                 |
+| level               | string | yes      | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.                                                                                                                                                                                                                                                                                     |
+| statusMessage       | string | yes      | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.                                                                                                                                                                                                                                                                                                                                        |
+| version             | string | yes      | The version of the generation type. Used to understand how changes to the generation type affect metrics. Reflects e.g. the version of a prompt.                                                                                                                                                                                                                                                                                                                  |
 
 #### Nesting of observations [#nesting]
 
@@ -416,35 +503,6 @@ generation.score({});
 | name          | string | no       | Identifier of the score.                                                                                                          |
 | value         | number | no       | The value of the score. Can be any number, often standardized to 0..1                                                             |
 | comment       | string | yes      | Additional context/explanation of the score.                                                                                      |
-
-## Shutdown [#shutdown]
-
-The Langfuse SDKs sends events asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
-
-```typescript
-langfuse.shutdown();
-// or
-await langfuse.shutdownAsync();
-```
-
-## Debugging [#debugging]
-
-Issues with the SDKs can be caused by various reasons ranging from incorrectly configured API keys to network issues.
-
-The SDK does not throw errors to protect your application process. Instead, you can optionally listen to errors:
-
-```typescript
-langfuse.on("error", (error) => {
-  // Whatever you want to do with the error
-  console.error(error);
-});
-```
-
-Alternatively, you can enable debugging to get detailed logs of what's happening in the SDK.
-
-```typescript
-langfuse.debug();
-```
 
 ## Short lived execution environments (lambda, serverless) [#lambda]
 

@@ -6,25 +6,23 @@ description: Follow the Quickstart to get started with Langfuse in minutes befor
 
 This quickstart helps you to integrate your LLM application with Langfuse.
 
-<Steps>
+## Setup Langfuse Project
 
-### Create project in Langfuse
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up)
+2.  Create a new project
+3.  Create new API credentials in the project settings
+4.  Add Langfuse credentials to your environment
 
-The fastest way to get started is to use the Langfuse Cloud.
-
-1. Create account and project on
-   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
-2. Copy API keys for your
-   project
-
-   ```bash filename=".env"
-   LANGFUSE_SECRET_KEY="sk-lf-...";
-   LANGFUSE_PUBLIC_KEY="pk-lf-...";
-   ```
+    ```bash filename=".env"
+    LANGFUSE_SECRET_KEY="sk-lf-...";
+    LANGFUSE_PUBLIC_KEY="pk-lf-...";
+    LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
+    # LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+    ```
 
 Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
 
-### Add tracing to your backend
+## Add tracing to your backend
 
 <Tabs items={["JS/TS", "Python", "Langchain", "API"]}>
 <Tab>
@@ -242,8 +240,6 @@ curl --location 'http://cloud.langfuse.com/api/public/metrics' \
 ### Explore
 
 Visit Langfuse interface to explore your data.
-
-</Steps>
 
 ## More information
 
