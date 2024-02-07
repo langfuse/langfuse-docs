@@ -15,11 +15,18 @@ export const Background = () => (
         "dark:opacity-70"
       )}
     /> */}
-    <LinearGradient
+    {/* <LinearGradient
       to="rgba(120,119,198,0.25)"
       from="rgba(0,0,0,0.0)"
       direction="top"
       transitionPoint="50%"
+      className="hidden dark:block"
+    /> */}
+    <LinearGradient
+      from="rgba(2,0,36,1)"
+      to="rgba(0,212,255,1)"
+      direction="right"
+      transitionPoint="100%"
       className="hidden dark:block"
     />
     <LinearGradient

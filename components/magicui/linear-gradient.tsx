@@ -34,7 +34,7 @@ interface LinearGradientProps {
 
   /**
    * The height of the gradient
-   * @default 100%
+   * @default 100%  
    * @type string
    * */
   height?: string;
