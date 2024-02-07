@@ -1,0 +1,38 @@
+## Prefer GIFs? [#gifs]
+
+### Reporting
+
+- Monitor usage (cost control)
+- Track latency, quality (based on user feedback) and OpenAI errors
+
+<Frame>
+  ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
+</Frame>
+
+### Tracing
+
+Each response is based on the following steps which can go wrong, be slow or expensive:
+
+1. Embedding of user request
+2. Embedding similarity search in Postgres
+3. Summary of docs as markdown
+4. Generation of response based on retrieved context and chat history
+
+This is how a single trace looks like in Langfuse:
+
+<Frame>![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
+
+### User feedback collection
+
+In this example, we can see how we do:
+
+1. Collection of feedback using the Langfuse Web SDK
+   > _Negative, Langchain not included in response_
+2. Browsing of feedback
+3. Identification of the root cause of the low-quality response
+   > Docs on Langchain integration are not included in embedding similarity search
+
+<Frame>
+  ![User feedback collection in
+  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
+</Frame>
