@@ -12,7 +12,7 @@ import {
 
 # User Feedback
 
-User feedback is a great source to evaluate the quality of an LLM app's output. In Langfuse, feedback is collected as a [`score`](/docs/scores) and attached to an execution trace or an individual LLM generation.
+User feedback is a great source to evaluate the quality of an LLM app's output. In AssistMe, feedback is collected as a [`score`](/docs/scores) and attached to an execution trace or an individual LLM generation.
 
 ## Types of Feedback
 
@@ -21,13 +21,13 @@ Depending on the type of the application, there are different types of feedback 
 - **Explicit Feedback**: Directly prompt the user to give feedback, this can be a rating, a like, a dislike, a scale or a comment. While it is simple to implement, quality and quantity of the feedback is often low.
 - **Implicit Feedback**: Measure the user's behavior, e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output. This type of feedback is more difficult to implement but is often more frequent and reliable.
 
-## Collect User Feedback in Langfuse
+## Collect User Feedback in AssistMe
 
-The easiest way to collect user feedback is via the **Langfuse Web SDK**. Thereby you can ingest scores directly from the browser. See the [Web SDK documentation](/docs/sdk/typescript-web) for more details.
+The easiest way to collect user feedback is via the **AssistMe Rest API**. Thereby you can ingest scores directly from the browser. See the [Web SDK documentation](/docs/sdk/typescript-web) for more details.
 
 <Accordion type="single" collapsible>
 <AccordionItem value="item-1">
-<AccordionTrigger>Example using Langfuse Web SDK</AccordionTrigger>
+<AccordionTrigger>Example using AssistMe Rest API</AccordionTrigger>
 <AccordionContent className="p-1">
 
 <div className="mt-5 px-3 py-2 ring-1 rounded-xl ring-gray-400">
@@ -79,23 +79,5 @@ export function UserFeedbackComponent(props: { traceId: string }) {
 </AccordionItem>
 </Accordion>
 
-Alternatively, you can ingest feedback as scores server-side via the SDKs for [Python](/docs/sdk/python) and [JS/TS](/docs/sdk/typescript), or via the [HTTP API](/docs/api).
 
-## Live demo
 
-We implemented collection of user feedback into the Q&A chatbot for the Langfuse docs.
-
-<Frame>
-  ![User feedback collection in
-  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
-</Frame>
-
-In this example you see the following steps:
-
-1. Collection of feedback using the Langfuse Web SDK
-   > _Negative, Langchain not included in response_
-2. Browsing of feedback
-3. Identification of the root cause of the low-quality response
-   > Docs on Langchain integration are not included in embedding similarity search
-
-→ [Try the demo yourself](/docs/demo) and browse the collected feedback in Langfuse

@@ -6,94 +6,26 @@ import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
 # Introduction
 
-AssistMe is an **automation platform where you can create your own agents**.
 
 ## Overview
 
-<Frame
-  transparent
-  fullWidth
-  className="mt-10 rounded-lg ring-primary/20 ring-1 dark:hidden"
->
-  ![Langfuse Features along the development
-  lifecycle](/images/docs/features-light.png)
-</Frame>
-<Frame
-  transparent
-  fullWidth
-  className="mt-10 rounded-lg ring-primary/20 ring-1 hidden dark:block"
->
-  ![Langfuse Features along the development
-  lifecycle](/images/docs/features-dark.png)
-</Frame>
-<span>_Langfuse features along the development lifecycle_</span>
-
-<div className="mt-10 ring-1 ring-primary/20 rounded-lg p-5">
-
-```mermaid
-flowchart TD
-  subgraph app[Your Application]
-
-    Client[Langfuse SDK or Integration]
-    click Client "/docs/integrations"
-
-  end
-
-  subgraph Langfuse
-
-    Prompts[Prompt Management]
-    click Prompts "/docs/prompts"
-
-    Traces[Production Traces]
-    click Traces "/docs/tracing"
-
-    Evaluation
-    click Evaluation "/docs/scores"
-
-    API[GET API]
-    click API "/docs/api"
-
-    Datasets["Datasets (dev, test)"]
-    click Datasets "/docs/datasets"
-
-    Prompts <-->|linked| Traces
-    Traces --- Evaluation
-    Traces --> API
-    Traces -.-> Datasets
+Overview
+Welcome to the world of Artificial Intelligence with AssistMe AI! As the sphere of AI continues to expand and evolve, the demand for intuitive, efficient, and intelligent AI solutions grows. AssistMe AI is at the forefront of this evolution, providing an easy-to-use platform that enables the creation of customized AI agents without any coding required.
 
 
-    subgraph UI
+## Tailored Solutions for Every Business
 
-      Debug
-      click Debug "/docs/tracing"
+Whether you're at the helm of a burgeoning startup, a growing enterprise, or a multinational corporation, AI can be an invaluable asset in streamlining operations, enhancing customer service, and driving business growth.
 
-      Analytics
-      click Analytics "/docs/analytics"
 
-      Exports[Exports for finetuning]
-      click Exports "/docs/export-and-fine-tuning"
+## Simplified Creation Process
+AssistMe AI is crafted with user-friendliness at its core. Its no-code interface, pre-built templates, and step-by-step guidance are approachable even for those with little to no technical background.
 
-    end
+## Secure Data Management
 
-    Evaluation --> Analytics
-    Traces --> Debug[Explore traces for debugging]
-    Traces --> Analytics
-    Datasets --> Analytics
-    Traces --> Exports
+Beyond assistant creation, AssistMe AI also offers a secure data storage solution, providing unlimited secure storage space in a dedicated Pinecone environment. This allows for full control and transparency over your agent's learning process and improvements.
 
-  end
-
-  Client -->|"fetch production prompt (optional)"| Prompts
-  Client -->|batched, async| Traces
-  Client -->|user feedback| Evaluation
-```
-
-</div>
-<span>_How Langfuse works on a very high-level (click links for docs of modules)_</span>
-
-## Features
-
-1. [Integrations](/docs/integrations): Data collection via SDKs
+1. [Agents](/docs/integrations): intuitive 
    - Tracing LLM chains by collecting specific data such as prompts, outputs and configurations
    - Fully async SDKs for [JS/TS (Node, Edge)](/docs/sdk/typescript) and [Python](/docs/sdk/python)
    - Integrations
@@ -101,7 +33,7 @@ flowchart TD
      - [OpenAI SDK (Python)](/docs/openai), drop-in replacement
      - [HTTP API](/docs/api)
      - Other: [LiteLLM](/docs/litellm), [Flowise](/docs/flowise), [Langflow](/docs/langflow)
-1. [Nested traces](/docs/tracing)
+1. [Data Connectors](/docs/dataconnectors)
    - Find the root cause of issues
    - Segment traces based on user feedback and other metrics
    - Track multiple traces in a single [session](/docs/sessions)
@@ -117,17 +49,11 @@ flowchart TD
    - Manage, version and deploy prompts collaboratively in Langfuse
    - Fetch prompts via SDKs
 
-## Why Langfuse?
 
-- [Open source](/docs/open-source) (MIT license)
-- Run Langfuse [self-hosted](/docs/deployment/self-host) (Docker), [locally](/docs/deployment/local) (Docker compose), or use [Langfuse cloud](/docs/deployment/cloud) (generous [free plan](/pricing))
-- Model agnostic
-- Incrementally adoptable, start with a single LLM call, expand to full tracing of complex chains/agents
-- Use [GET API](/docs/api) to build downstream use cases
 
 ## What's next?
 
-<Cards num={3}>
+{/* <Cards num={3}>
   <Card href="/docs/demo" title="Live demo" image arrow>
     ![Live demo icon (Q&A Chatbot)](/images/cards/robot.svg)
   </Card>
@@ -137,7 +63,7 @@ flowchart TD
   <Card href="/docs/video" title="Langfuse in 2 minutes" image arrow>
     ![Video demo icon (camera)](/images/cards/camera.svg)
   </Card>
-</Cards>
+</Cards> */}
 
 ## Updates
 
