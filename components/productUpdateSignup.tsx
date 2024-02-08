@@ -20,6 +20,7 @@ const formSchema = z.object({
 export function ProductUpdateSignup(props: {
   source?: string;
   className?: string;
+  small?: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,7 +68,10 @@ export function ProductUpdateSignup(props: {
                   placeholder="Enter your email"
                   type="email"
                   {...field}
-                  className="sm:rounded-r-none h-11 px-4 py-2"
+                  className={cn(
+                    "sm:rounded-r-none h-11 px-4 py-2",
+                    props.small && "h-9"
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -79,7 +83,7 @@ export function ProductUpdateSignup(props: {
           variant="secondary"
           className="sm:rounded-l-none"
           disabled={form.formState.isSubmitting}
-          size="lg"
+          size={props.small ? "sm" : "lg"}
         >
           {form.formState.isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

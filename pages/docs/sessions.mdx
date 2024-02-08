@@ -23,7 +23,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
 ```diff
 langfuse.trace(
@@ -73,6 +73,11 @@ const handler = new CallbackHandler({
 +   sessionId: "your-session-id"
 });
 ```
+
+</Tab>
+
+<Tab>
+The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId to the Langfuse sessionId. Flowise 1.4.10 or higher is required.
 
 </Tab>
 

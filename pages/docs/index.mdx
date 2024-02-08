@@ -2,9 +2,13 @@
 description: Introduction to Langfuse with quickstart instructions, tutorials, and more.
 ---
 
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
 # Introduction
 
 Langfuse is an **open source observability and product analytics suite for LLM apps**.
+
+## Overview
 
 <Frame
   transparent
@@ -24,40 +28,101 @@ Langfuse is an **open source observability and product analytics suite for LLM a
 </Frame>
 <span>_Langfuse features along the development lifecycle_</span>
 
+<div className="mt-10 ring-1 ring-primary/20 rounded-lg p-5">
+
+```mermaid
+flowchart TD
+  subgraph app[Your Application]
+
+    Client[Langfuse SDK or Integration]
+    click Client "/docs/integrations"
+
+  end
+
+  subgraph Langfuse
+
+    Prompts[Prompt Management]
+    click Prompts "/docs/prompts"
+
+    Traces[Production Traces]
+    click Traces "/docs/tracing"
+
+    Evaluation
+    click Evaluation "/docs/scores"
+
+    API[GET API]
+    click API "/docs/api"
+
+    Datasets["Datasets (dev, test)"]
+    click Datasets "/docs/datasets"
+
+    Prompts <-->|linked| Traces
+    Traces --- Evaluation
+    Traces --> API
+    Traces -.-> Datasets
+
+
+    subgraph UI
+
+      Debug
+      click Debug "/docs/tracing"
+
+      Analytics
+      click Analytics "/docs/analytics"
+
+      Exports[Exports for finetuning]
+      click Exports "/docs/export-and-fine-tuning"
+
+    end
+
+    Evaluation --> Analytics
+    Traces --> Debug[Explore traces for debugging]
+    Traces --> Analytics
+    Datasets --> Analytics
+    Traces --> Exports
+
+  end
+
+  Client -->|"fetch production prompt (optional)"| Prompts
+  Client -->|batched, async| Traces
+  Client -->|user feedback| Evaluation
+```
+
+</div>
+<span>_How Langfuse works on a very high-level (click links for docs of modules)_</span>
+
 ## Features
 
 1. [Integrations](/docs/integrations): Data collection via SDKs
    - Tracing LLM chains by collecting specific data such as prompts, outputs and configurations
-   - Measure quality of outputs via [Scores](/docs/scores):
-     - [Manually in the Langfuse UI](/docs/scores/manually) (human-in-the-loop)
-     - [User feedback](/docs/scores/user-feedback), explicit or implicit, optionally directly from the browser via Web SDK
-     - [Model-based evaluations](/docs/scores/model-based-evals)
-     - [Custom via SDK/API](/docs/scores/custom)
+   - Fully async SDKs for [JS/TS (Node, Edge)](/docs/sdk/typescript) and [Python](/docs/sdk/python)
+   - Integrations
+     - Langchain ([Python](/docs/langchain/python), [JS/TS](/docs/langchain/typescript))
+     - [OpenAI SDK (Python)](/docs/openai), drop-in replacement
+     - [HTTP API](/docs/api)
+     - Other: [LiteLLM](/docs/litellm), [Flowise](/docs/flowise), [Langflow](/docs/langflow)
 1. [Nested traces](/docs/tracing)
    - Find the root cause of issues
    - Segment traces based on user feedback and other metrics
-1. Analytics
+   - Track multiple traces in a single [session](/docs/sessions)
+1. [Evaluation](/docs/scores): Measure quality of outputs via scores
+   - [Manually in the Langfuse UI](/docs/scores/manually) (human-in-the-loop)
+   - [User feedback](/docs/scores/user-feedback), explicit or implicit, optionally directly from the browser via [JS/TS Web SDK](/docs/sdk/typescript-web)
+   - [Model-based evaluations](/docs/scores/model-based-evals)
+   - [Custom via SDK/API](/docs/scores/custom)
+1. [Analytics](/docs/analytics)
    - [User-level reporting](/docs/user-explorer): costs, usage, feedback/quality
-   - [Usage/cost](/docs/token-usage)
-1. [Prompt management](/docs/prompts)
+   - [Model usage and cost](/docs/model-usage-and-cost)
+1. [Prompt management](/docs/prompts) (beta)
+   - Manage, version and deploy prompts collaboratively in Langfuse
+   - Fetch prompts via SDKs
 
 ## Why Langfuse?
 
 - [Open source](/docs/open-source) (MIT license)
-- Run Langfuse [self-hosted](/docs/deployment/self-host), [locally](/docs/deployment/local), or use [Langfuse cloud](/docs/deployment/cloud)
+- Run Langfuse [self-hosted](/docs/deployment/self-host) (Docker), [locally](/docs/deployment/local) (Docker compose), or use [Langfuse cloud](/docs/deployment/cloud) (generous [free plan](/pricing))
 - Model agnostic
-- Integration
-
-  - Fully async SDKs for:
-    - [JS/TS (Node, Edge)](/docs/sdk/typescript)
-    - [Python](/docs/sdk/python)
-  - [Langchain integration](/docs/langchain) (full integration in 5 minutes)
-  - [Public API](/docs/api)
-  - [OpenAI SDK](/docs/openai) (drop-in replacement, change only the import)
-  - [JS/TS Web SDK](/docs/sdk/typescript-web) to create scores from the client-side
-
 - Incrementally adoptable, start with a single LLM call, expand to full tracing of complex chains/agents
-
 - Use [GET API](/docs/api) to build downstream use cases
 
 ## What's next?
@@ -74,9 +139,27 @@ Langfuse is an **open source observability and product analytics suite for LLM a
   </Card>
 </Cards>
 
+## Updates
+
+### Changelog
+
+Langfuse is moving fast, check out the [changelog](/changelog) for the latest updates.
+
+Subscribe to our **mailing list** to get notified about new major features:
+
+<ProductUpdateSignup source="langfuse.com/docs" className="mt-2" />
+
+### Releases
+
+For more granular updates, see the release notes of our repositories: [langfuse](https://github.com/langfuse/langfuse/releases) (application), [langfuse-python](https://github.com/langfuse/langfuse-python/releases) (Python SDK), [langfuse-js](https://github.com/langfuse/langfuse-js/releases) (JS/TS SDK).
+
+<Frame className="max-w-md block mb-0" border>
+  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
+</Frame>
+<span>_Watch the repository on GitHub to get notified about new releases_</span>
+
 ## Get in touch
 
-Langfuse is actively developed in open source.
-Join our [Discord](/discord), provide feedback, report bugs, or request features via GitHub [issues](/issue).
+We actively develop Langfuse in [open source](/docs/open-source). Join our [Discord](/discord), provide feedback, report bugs, or request features via GitHub [issues](/issue).
 
 If you want to chat about your use case, reach out to us via email (contact@langfuse.com) or [schedule a demo](/schedule-demo).

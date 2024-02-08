@@ -43,16 +43,6 @@ return (
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
         {
-          process.env.NEXT_PUBLIC_UMAMI_SRC &&
-          process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID ? (
-            <Script
-              id="umami"
-              data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-              src={process.env.NEXT_PUBLIC_UMAMI_SRC}
-            />
-          ) : null
-        }
-        {
           process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ? (
             <CrispWidget />
           ) : null

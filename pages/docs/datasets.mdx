@@ -6,7 +6,7 @@ description: Close the loop from production to development with Langfuse dataset
 
 Datasets in Langfuse are a collection of inputs (and expected outputs) of an LLM application. They are used to benchmark new releases before deployment to production. Datasets can be incrementally created from new edge cases found in production.
 
-For an end-to-end example, checkout the [Datasets Notebook (Python)](/docs/datasets/python-cookbook).
+For an end-to-end example, check out the [Datasets Notebook (Python)](/docs/datasets/python-cookbook).
 
 ## Creating a dataset
 
@@ -16,7 +16,6 @@ Datasets have a name which is unique within a project.
 <Tab>
 
 ```python
-
 langfuse.create_dataset(name="<dataset_name>")
 ```
 
@@ -43,7 +42,6 @@ Individual items can be added to a dataset by providing the input and optionally
 <Tab>
 
 ```python
-
 langfuse.create_dataset_item(
     dataset_name="<dataset_name>",
     # any python object or value
@@ -84,7 +82,7 @@ Datasets > Items: `+ New item`
 
 **Create items from production data**
 
-In the UI, use `+ Add to dataset` on any production trace.
+In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
 
 **Edit/archive items**
 
@@ -100,7 +98,6 @@ Optionally, the output of the application can be evaluated to compare different 
 <Tab>
 
 ```python
-
 dataset = langfuse.get_dataset("<dataset_name>")
 
 for item in dataset.items:
@@ -129,7 +126,7 @@ for item in dataset.items:
 dataset = langfuse.get_dataset("<dataset_name>")
 
 for item in dataset.items:
-    # Langchain calback handler that automatically links the execution trace to the dataset item
+    # Langchain callback handler that automatically links the execution trace to the dataset item
     handler = item.get_langchain_handler(run_name="<run_name>")
 
     # Execute application and pass custom handler
@@ -170,7 +167,6 @@ After each experiment run on a dataset, you can check the aggregated score in th
 ## Conceptually
 
 ```mermaid
-
 classDiagram
 direction LR
     class Dataset {

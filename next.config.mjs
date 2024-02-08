@@ -1,6 +1,12 @@
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
+import NextBundleAnalyzer from '@next/bundle-analyzer'
 
+const withBundleAnalyzer = NextBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+// nextra config
 const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
@@ -10,7 +16,8 @@ const withNextra = nextra({
   defaultShowCopyCode: true,
 })
 
-export default withNextra({
+// next config
+const nextraConfig = withNextra({
   experimental: {
     scrollRestoration: true,
   },
@@ -50,6 +57,8 @@ const nonPermanentRedirects = [
   ["/ph", "https://www.producthunt.com/posts/langfuse"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
+  ["/security", "/docs/data-security-privacy"],
+  ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
 ];
 
 const permanentRedirects = [
@@ -74,4 +83,8 @@ const permanentRedirects = [
   ["/docs/scores/evals", "/docs/scores/model-based-evals"],
   // old experimentation to new experimentation
   ["/experimentation", "/docs/experimentation"],
+  // token usage to model usage, 2024-01
+  ["/docs/token-usage", "/docs/model-usage-and-cost"],
 ]
+
+export default withBundleAnalyzer(nextraConfig);

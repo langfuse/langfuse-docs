@@ -41,11 +41,14 @@ export default async function handler(req: NextRequest) {
       }),
     ]);
 
-    if (slackResponse.status === 200 && loopsResponse.status === 200) {
+    if (
+      slackResponse.status === 200 &&
+      (loopsResponse.status === 200 || loopsResponse.status === 409)
+    ) {
       return NextResponse.json({ status: "OK" });
     } else {
-      console.error(slackResponse);
-      console.error(loopsResponse);
+      console.error("Slack", JSON.stringify(slackResponse));
+      console.error("Loops", JSON.stringify(loopsResponse));
       return NextResponse.json(
         {},
         {

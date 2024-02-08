@@ -20,7 +20,7 @@ In the project settings, you can grant access to other users to view and edit yo
 export function RolePermissionTable() {
   // from langfuse/langfuse
   const RoleScopes = {
-      OWNER: [
+    OWNER: [
       "members:read",
       "members:create",
       "members:delete",
@@ -29,12 +29,16 @@ export function RolePermissionTable() {
       "apiKeys:delete",
       "objects:publish",
       "objects:bookmark",
+      "objects:tag",
       "traces:delete",
       "scores:CUD",
       "project:delete",
       "project:update",
       "project:transfer",
       "datasets:CUD",
+      "prompts:CUD",
+      "prompts:read",
+      "models:CUD",
     ],
     ADMIN: [
       "project:update",
@@ -46,18 +50,25 @@ export function RolePermissionTable() {
       "apiKeys:delete",
       "objects:publish",
       "objects:bookmark",
+      "objects:tag",
       "traces:delete",
       "scores:CUD",
       "datasets:CUD",
+      "prompts:CUD",
+      "prompts:read",
+      "models:CUD",
     ],
     MEMBER: [
       "members:read",
       "objects:publish",
       "objects:bookmark",
+      "objects:tag",
       "scores:CUD",
       "datasets:CUD",
+      "prompts:CUD",
+      "prompts:read",
     ],
-    VIEWER: [],
+    VIEWER: ["prompts:read"],
   };
   return (
     <div className="flex gap-5 mt-4">

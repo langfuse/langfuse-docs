@@ -28,9 +28,14 @@ const footerNav = [
     name: "Status",
     href: "https://status.langfuse.com",
   },
+  {
+    name: "OSS Friends",
+    href: "/oss-friends",
+  },
 ];
 
 const footerLegalNav = [
+  { name: "Security", href: "/security" },
   { name: "Imprint", href: "/imprint" },
   {
     name: "Terms",
@@ -223,15 +228,15 @@ const config: DocsThemeConfig = {
     Cards,
   },
   banner: {
-    key: "founding-eng-banner",
+    key: "golden-kitty-banner",
     dismissible: true,
     text: (
-      <Link href="/careers">
-        <span className="sm:hidden">
-          Join us as #1 founding engineer in Berlin →
-        </span>
+      <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
+        {/* mobile */}
+        <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
+        {/* desktop */}
         <span className="hidden sm:inline">
-          Join us as #1 founding engineer in Berlin →
+          Langfuse won a Golden Kitty Award in AI Infra →
         </span>
       </Link>
     ),

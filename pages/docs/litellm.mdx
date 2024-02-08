@@ -15,11 +15,15 @@ By adding the callback you can instantly log your responses across all providers
 os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
 os.environ["LANGFUSE_SECRET_KEY"] = "your key"
 
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+
 # Set callback
 litellm.success_callback = ["langfuse"]
 ```
 
-## Example
+## Full Example
 
 ```python filename="main.py"
 from litellm import completion
@@ -27,6 +31,10 @@ from litellm import completion
 ## set env variables
 os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
 os.environ["LANGFUSE_SECRET_KEY"] = "your key"
+
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["COHERE_API_KEY"] = ""
