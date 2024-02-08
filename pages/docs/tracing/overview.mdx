@@ -6,6 +6,12 @@ description: Langfuse tracing helps to monitor and debug complex LLM apps such a
 
 LLM apps use increasingly complex abstractions (chains, agents with tools, advanced prompts). The nested traces in Langfuse help to understand what is going on and get to the root cause of problems.
 
+Why use tracing for your LLM app?
+
+1. Collect user feedback from the frontend
+2. Filter down to executions that had poor quality
+3. Use the debugging UI to get to the root cause of the problem
+
 ## Introduction
 
 ```mermaid
@@ -17,6 +23,8 @@ classDiagram
     Observation o-- Observation: Nesting
 ```
 
+A trace in Langfuse consists of the following objects:
+
 - Each backend execution is logged with a single `trace`.
 - Each trace can contain multiple `observations` to log the individual steps of the execution.
   - Observations are of different types:
@@ -25,14 +33,55 @@ classDiagram
     - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
   - Observations can be nested.
 
-## Example
+## Get Started
 
-Automatically traced with Langchain integration:
+Follow the quickstart to add Langfuse tracing to your LLM app.
 
-<Frame>![Agent trace](/images/agent-trace.gif)</Frame>
+import { FiCode } from "react-icons/fi";
+import { Rocket } from "lucide-react";
+import { SiApplearcade } from "react-icons/si";
 
-## Detect and fix problems
+<Cards num={3}>
+  <Card
+    icon={<Rocket size="24" />}
+    title="Quickstart"
+    href="/docs/get-started"
+    arrow
+  />
+</Cards>
 
-1. Collect user feedback from the frontend
-2. Filter down to executions that had poor quality
-3. Use the debugging UI to get to the root cause of the problem
+If you use one of the following tools, follow the respective integration guide.
+
+<Cards num={3}>
+  <Card
+    icon={<FiCode size="24" />}
+    title="Flowise"
+    href="/docs/integrations/flowise"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="Langflow"
+    href="/docs/integrations/langflow"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="Litellm (Proxy)"
+    href="/docs/integrations/litellm"
+    arrow
+  />
+</Cards>
+
+## Demo
+
+Check out the interactive demo to browse production traces in Langfuse.
+
+<Cards num={3}>
+  <Card
+    icon={<SiApplearcade size="24" />}
+    title="Interactive demo"
+    href="/docs/demo"
+    arrow
+  />
+</Cards>
