@@ -27,10 +27,6 @@ const footerNav = [
     name: "Status",
     href: "https://status.assistme.com",
   },
-  // {
-  //   name: "OSS Friends",
-  //   href: "/oss-friends",
-  // },
 ];
 
 const footerLegalNav = [
