@@ -57,8 +57,13 @@ const nonPermanentRedirects = [
   ["/ph", "https://www.producthunt.com/posts/langfuse"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
+  ["/new-issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
+  ["/issues", "https://github.com/langfuse/langfuse/issues"],
+
   ["/security", "/docs/data-security-privacy"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
+  ["/new-idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
+  ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
 
   // Redirect to overview pages
   ...[
