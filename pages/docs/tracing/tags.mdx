@@ -1,0 +1,44 @@
+# Tagging traces
+
+import { CloudflareVideo } from "@/components/Video";
+
+Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+```diff
+trace = langfuse.trace(
+    ...
++   tags=["my-first-tag", "even-better-tag"]
+    ...
+)
+```
+
+</Tab>
+
+<Tab>
+```diff
+const trace = langfuse.trace({
+    ...
++   tags: ["tag-a-licious", "tig-tag-tagging"],
+    ...
+});
+```
+
+</Tab>
+
+</Tabs>
+
+### Working with tags
+
+Tags enable you to flexibly add metadata to your traces.
+You can filter for tags in the Langfuse UI and [GET API](https://api.reference.langfuse.com/).
+
+When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
+
+<CloudflareVideo
+  videoId="e4902f5c5d05ad85b5ecf9443864494d"
+  aspectRatio={3.6 / 3}
+  className="max-w-2xl mt-8"
+  gifStyle
+/>

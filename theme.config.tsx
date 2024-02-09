@@ -18,7 +18,6 @@ import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
 
 const footerNav = [
-  { name: "Contact", href: "mailto:contact@langfuse.com" },
   {
     name: "Schedule Demo",
     href: "/schedule-demo",

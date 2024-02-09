@@ -1,0 +1,161 @@
+---
+description: Capture all LLM calls made via Langflow in Langfuse
+---
+
+# ⛓️ Langflow Integration
+
+**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
+
+With the native integration, you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
+
+## Integration
+
+### 1. Obtain Langfuse API keys
+
+<Tabs items={["Langfuse Cloud", "local or self-hosted"]}>
+<Tab>
+
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy API keys for your
+   project
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+2. Copy API keys for your
+   project
+
+</Tab>
+</Tabs>
+### 2. Setup Langflow
+
+<Tabs items={["pip install langflow", "Docker"]}>
+<Tab>
+
+```sh
+# API keys from project settings in Langfuse
+export LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
+export LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
+
+# Optionally, set the host, defaults to Langfuse Cloud
+# LANGFLOW_LANGFUSE_HOST=http://localhost:3000
+
+# Install Langflow
+pip install langflow
+
+# Run Langflow
+langflow run
+```
+
+Alternatively, you can run the Langflow CLI command with the environment variables set:
+
+```
+LANGFLOW_LANGFUSE_SECRET_KEY=secret_key LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key langflow
+```
+
+</Tab>
+<Tab>
+
+Clone the [Langflow repository](https://github.com/logspace-ai/langflow)
+
+```sh
+git clone https://github.com/logspace-ai/langflow.git
+cd langflow
+```
+
+Add the environment variables to `docker_example/docker-compose.yml`
+
+```diff
+version: '3'
+
+services:
+  langflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
++     - LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
++     - LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
+    command: langflow run --host 0.0.0.0
+```
+
+Run Langflow
+
+```sh
+cd docker_example
+docker-compose up --build
+```
+
+</Tab>
+</Tabs>
+
+### 3. Monitoring in Langfuse
+
+Now, when you use Langflow's chat or API, you can view the trace of your conversations in Langfuse.
+
+## Running Langfuse and Langflow with Docker Compose
+
+If you prefer to self-host Langfuse, you can run both services using Docker Compose. By combining the two docker-compose files, you can streamline the networking between them.
+
+```diff
+version: "3.5"
+
+services:
+  # Adapted from https://github.com/logspace-ai/langflow/blob/dev/docker_example/docker-compose.yml
+  langflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
++     # Tokens are to be created in Langfuse, then copy-pasted here. Then restart docker-compose.
++     - LANGFLOW_LANGFUSE_SECRET_KEY=sk-lf-...
++     - LANGFLOW_LANGFUSE_PUBLIC_KEY=pk-lf-...
++     - LANGFLOW_LANGFUSE_HOST=http://langfuse-server:3000
+    command: langflow run --host 0.0.0.0
+
+  # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
+  langfuse-server:
+    image: ghcr.io/langfuse/langfuse:latest
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - NEXTAUTH_SECRET=mysecret
+      - SALT=mysalt
+      - NEXTAUTH_URL=http:localhost:3000
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+volumes:
+  database_data:
+    driver: local
+```
+
+To test the connectivity between Langflow and Langfuse, run the following command:
+
+```sh
+docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFLOW_LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+
+# which should output the following:
+# http://langfuse-server:3000
+# 200
+```

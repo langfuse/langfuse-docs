@@ -14,7 +14,7 @@ const features = [
     description:
       "Using Langchain? Get full execution traces in 5 minutes by adding the Langfuse Callback Handler to your app. Works for Python and JS projects.",
     icon: Link,
-    href: "/docs/langchain",
+    href: "/docs/integrations/langchain",
   },
   {
     name: "Web SDK",
@@ -28,7 +28,7 @@ const features = [
     description:
       "If you use the OpenAI SDK, use the Langfuse drop-in replacement to get full trace data by just changing the import.",
     icon: SiOpenai,
-    href: "/docs/openai",
+    href: "/docs/integrations/openai",
   },
   {
     name: "API",
