@@ -24,7 +24,7 @@ Steps after updating notebooks:
 
 ## API Reference (Swagger)
 
-API reference is automatically generated based on the OpenAPI spec of the current production deployment of Langfuse Cloud.
+API reference is automatically generated based on the OpenAPI spec of the current production deployment of AssistMe Cloud.
 
 ## Stack
 
