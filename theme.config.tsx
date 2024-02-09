@@ -18,7 +18,6 @@ import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
 
 const footerNav = [
-  { name: "Support", href: "/docs/support" },
   {
     name: "Schedule Demo",
     href: "/schedule-demo",

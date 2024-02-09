@@ -12,8 +12,6 @@ This quickstart helps you to integrate your LLM application with Langfuse. It wi
 2.  Create a new project
 3.  Create new API credentials in the project settings
 
-Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
-
 ## Log your first LLM call to Langfuse
 
 <Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","API"]}>
@@ -25,14 +23,14 @@ Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker com
 pip install langfuse
 ```
 
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
-
 ```bash filename=".env"
 LANGFUSE_SECRET_KEY="sk-lf-...";
 LANGFUSE_PUBLIC_KEY="pk-lf-...";
 LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
 # LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
 
 ```python filename="server.py"
 from langfuse import Langfuse
@@ -51,14 +49,10 @@ generation = langfuse.generation(
 
 # Execute model, mocked here
 # chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
-chat_completion = {
-    "completion":"The Q3 OKRs contain goals for multiple teams...",
-}
+chat_completion = "completion":"The Q3 OKRs contain goals for multiple teams..."
 
 # Update span and sets end_time
-generation.end(
-    output=chat_completion["completion"],
-)
+generation.end(output=chat_completion)
 
 # The SDK executes network requests in the background.
 # To ensure that all requests are sent before the process exits, call flush()
@@ -82,16 +76,14 @@ npm i langfuse-node
 import { Langfuse } from "https://esm.sh/langfuse"
 ```
 
-Example usage, most of the parameters are optional and depend on the use case.
-
-For more information, see the [typescript SDK docs](/docs/sdk/typescript).
-
 ```bash filename=".env"
 LANGFUSE_SECRET_KEY="sk-lf-...";
 LANGFUSE_PUBLIC_KEY="pk-lf-...";
 LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
 # LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript).
 
 ```typescript filename="server.ts"
 import { Langfuse } from "langfuse";
@@ -121,15 +113,50 @@ generation.end({
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}
+The integration is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously.
+
+```bash
+pip install langfuse
+```
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
+```diff filename="server.py"
+- import openai
++ from langfuse.openai import openai
+```
+
+Use the OpenAI SDK as you would normally. Example:
+
+```python
+completion = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator."},
+      {"role": "user", "content": "1 + 1 = "}],
+)
+```
 
 </Tab>
 <Tab>
 {/* Langchain (Python) */}
 
-Install the Langfuse Python SDK
+The integration uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
 
 ```bash
 pip install langfuse
+```
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
 
 Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
@@ -144,17 +171,51 @@ handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
 agent.run("<user_input>", callbacks=[handler])
 ```
 
-For more examples, see the [Langchain integration docs](/docs/langchain).
+For more examples, see the [Langchain integration docs](/docs/integrations/langchain/python).
 
 </Tab>
 <Tab>
 {/* Langchain (JS) */}
 
+The integration uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+
+```sh
+npm i langfuse-langchain
+# or
+yarn add langfuse-langchain
+
+# Deno
+import CallbackHandler from 'https://esm.sh/langfuse-langchain'
+```
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
+Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
+
+```typescript /callbacks: [handler]/
+import { CallbackHandler } from "langfuse-langchain";
+
+// Initialize Langfuse callback handler
+const handler = new CallbackHandler();
+
+// Your Langchain implementation
+const chain = new LLMChain(...);
+
+// Add handler as callback when running the Langchain agent
+await chain.call({ input: "<user_input>" }, { callbacks: [handler] });
+
+```
+
 </Tab>
 <Tab>
 {/* API */}
 
-[API reference](https://api.reference.langfuse.com) for custom integrations
+[API reference](https://api.reference.langfuse.com) for custom integrations. OpenAPI spec available.
 
 </Tab>
 
@@ -198,13 +259,13 @@ import { SiOpenai } from "react-icons/si";
   <Card
     icon={<SiOpenai size="24" />}
     title="OpenAI SDK (Python)"
-    href="/docs/openai"
+    href="/docs/integrations/openai"
     arrow
   />
   <Card
     icon={<FiCode size="24" />}
     title="API reference"
-    href="/docs/api"
+    href="https://api.reference.langfuse.com/"
     arrow
   />
   <Card

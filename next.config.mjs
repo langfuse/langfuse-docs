@@ -59,32 +59,45 @@ const nonPermanentRedirects = [
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/security", "/docs/data-security-privacy"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
-];
 
-const permanentRedirects = [
-  // Migration 2023-07
-  ["/observability", "/docs/tracing"],
-  ["/docs/debugging-ui", "/docs/tracing"],
-  // Migration 2023-08-01
-  // deployment
+  // Redirect to overview pages
+  ...[
+    "/docs/integrations",
+    "/docs/sdk",
+    "/docs/tracing",
+    "/docs/scores",
+    "/docs/scores/model-based-evals",
+    "/docs/datasets",
+  ].map((path) => [path, path + "/overview"]),
+
+  // Redirects to bridge all kinds of old links to new links
+  ["/docs/reference", "https://api.reference.langfuse.com/"],
+  ["/docs/integrations/api", "https://api.reference.langfuse.com/"],
+  ["/docs/langchain", "/docs/integrations/langchain/python"],
+  ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
+  ["/docs/langchain/python", "/docs/integrations/langchain/python"],
+  ["/docs/langchain/typescript", "/docs/integrations/langchain/typescript"],
+  ["/docs/flowise", "/docs/integrations/flowise"],
+  ["/docs/litellm", "/docs/integrations/litellm"],
+  ["/docs/langflow", "/docs/integrations/langflow"],
+  ["/integrations", "/docs/integrations"],
   ["/docs/local", "/docs/deployment/local"],
   ["/docs/self-host", "/docs/deployment/self-host"],
   ["/docs/cloud", "/docs/deployment/cloud"],
-  // integrations
-  ["/integrations", "/docs/integrations"],
-  ["/docs/reference", "/docs/api"],
-  // Integrations back on root
-  ...["langchain", "api", "openai", "sdk", "flowise", "langflow", "litellm"].map(
-    (integration) => [`/docs/integrations/${integration}/:path*`, `/docs/${integration}/:path*`]),
-  // sdk integration guide
-  ["/docs/langchain", "/docs/langchain/python"],
-  ["/docs/guides/sdk-integration", "/docs/sdk#example"],
-  // evals
-  ["/docs/scores/evals", "/docs/scores/model-based-evals"],
-  // old experimentation to new experimentation
+  ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
+  ["/docs/scores/evals", "/docs/scores/model-based-evals/overview"],
   ["/experimentation", "/docs/experimentation"],
-  // token usage to model usage, 2024-01
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
-]
+  ["/docs/debugging-ui", "/docs/tracing/overview"],
+  ["/observability", "/docs/tracing/overview"],
+  ["/docs/openai", "/docs/integrations/openai"],
+  ["/docs/api", "https://api.reference.langfuse.com/"],
+  ["/docs/qa-chatbot", "/docs/demo"],
+  ["/docs/user-explorer", "/docs/tracing/users"],
+  ["/docs/sessions", "/docs/tracing/sessions"],
+  ["/docs/deployment/cloud", "/security"],
+];
+
+const permanentRedirects = []
 
 export default withBundleAnalyzer(nextraConfig);
