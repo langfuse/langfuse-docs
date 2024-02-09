@@ -221,17 +221,44 @@ await chain.call({ input: "<user_input>" }, { callbacks: [handler] });
 
 </Tabs>
 
-### Explore
+import { Callout } from "nextra-theme-docs";
 
-Visit Langfuse interface to explore your data.
+<Callout type="info" emoji="✅">
+  Done, now visit the Langfuse interface to look at the trace you just created.
+</Callout>
 
-## More information
+## All Langfuse Platform Features
 
-This is a brief summary of getting started with Langfuse. Have a look at the detailed SDK documentation for features such as:
+This was a very brief introduction to get started with Langfuse. Explore all Langfuse platform features in detail.
 
-- Nesting of observations to capture complex chains and agents
-- Use of your own existing ids to group traces, observations and scores
-- Optimizing asynchronous behavior of the SDK
+**Develop**
+
+<Cards num={3}>
+  <Card title="Tracing" href="/docs/tracing/overview" arrow />
+  <Card title="Prompt Management" href="/docs/prompts" arrow />
+  <Card
+    title="Export & Fine-tuning"
+    href="/docs/export-and-fine-tuning"
+    arrow
+  />
+</Cards>
+
+**Monitor**
+
+<Cards num={3}>
+  <Card title="Analytics" href="/docs/analytics" arrow />
+  <Card title="Model Usage & Cost" href="/docs/model-usage-and-cost" arrow />
+  <Card title="Scores & Evaluation" href="/docs/scores/overview" arrow />
+</Cards>
+
+**Test**
+
+<Cards num={3}>
+  <Card title="Experimentation" href="/docs/experimentation" arrow />
+  <Card title="Datasets" href="/docs/datasets/overview" arrow />
+</Cards>
+
+## References
 
 import { SiTypescript, SiPython } from "react-icons/si";
 import { FiCode } from "react-icons/fi";
@@ -239,21 +266,15 @@ import { SiOpenai } from "react-icons/si";
 
 <Cards num={2}>
   <Card
-    icon={<SiTypescript size="24" />}
-    title="JS/TS SDK (Edge, Node, Web)"
-    href="/docs/sdk/typescript"
-    arrow
-  />
-  <Card
     icon={<SiPython size="24" />}
     title="Python SDK"
     href="/docs/sdk/python"
     arrow
   />
   <Card
-    icon={<span>🦜🔗</span>}
-    title="Langchain integration"
-    href="/docs/langchain"
+    icon={<SiTypescript size="24" />}
+    title="JS/TS SDK"
+    href="/docs/sdk/typescript"
     arrow
   />
   <Card
@@ -269,9 +290,33 @@ import { SiOpenai } from "react-icons/si";
     arrow
   />
   <Card
+    icon={<span>🦜🔗</span>}
+    title="Langchain integration (Python)"
+    href="/docs/integrations/langchain/python"
+    arrow
+  />
+  <Card
+    icon={<span>🦜🔗</span>}
+    title="Langchain integration (JS/TS)"
+    href="/docs/integrations/langchain/typescript"
+    arrow
+  />
+  <Card
     icon={<FiCode size="24" />}
-    title="Flowise, Langflow, Litellm, ..."
-    href="/docs"
+    title="Flowise"
+    href="/docs/integrations/flowise"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="Langflow"
+    href="/docs/integrations/langflow"
+    arrow
+  />
+  <Card
+    icon={<FiCode size="24" />}
+    title="Litellm"
+    href="/docs/integrations/litellm"
     arrow
   />
 </Cards>
