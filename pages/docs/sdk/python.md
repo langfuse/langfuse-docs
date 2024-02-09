@@ -8,8 +8,6 @@ description: Fully async and typed Python SDK. Uses Pydantic objects for data ve
 
 This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK adds only minimal latency to your application.
 
-Using Langchain or OpenAI SDK? Use the native [integrations](https://langfuse.com/docs/integrations).
-
 ## Installation
 
 
@@ -113,8 +111,8 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 | input | object | yes | The input of the trace. Can be any JSON object.
 | output | object | yes | The output of the trace. Can be any JSON object.
 | metadata | object | yes | Additional metadata of the trace. Can be any JSON object. Metadata is merged when being updated via the API.
-| user_id | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/user-explorer).
-| session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/sessions) in Langfuse. Use your own session/thread identifier.
+| user_id | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/tracing/users).
+| session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/tracing/sessions) in Langfuse. Use your own session/thread identifier.
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
 | release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
 | tags | string[] | yes | Tags are used to categorize or label traces. Traces can be filtered by tags in the UI and GET API. Tags can also be changed in the UI. Tags are merged and never deleted via the API. |
@@ -306,7 +304,7 @@ See documentation of spans above on how to use the langfuse client and ids if yo
 
 ## Scores
 
-[Scores](https://langfuse.com/docs/scores) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
 
 If the score relates to a specific step of the trace, specify the `observation_id`.
 
