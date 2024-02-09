@@ -40,6 +40,8 @@ import { LangfuseWeb } from "langfuse";
 export function UserFeedbackComponent(props: { traceId: string }) {
   const langfuseWeb = new LangfuseWeb({
     publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+    baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+    // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
   });
 
   const handleUserFeedback = async (value: number) =>
@@ -87,6 +89,8 @@ export function UserFeedbackComponent(props: { traceId: string }) {
     created() {
       this.langfuseWeb = new LangfuseWeb({
         publicKey: process.env.VUE_APP_LANGFUSE_PUBLIC_KEY,
+        baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+        // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
       });
     },
     methods: {
@@ -120,6 +124,8 @@ import { LangfuseWeb } from "langfuse";
 
 const langfuseWeb = new LangfuseWeb({
   publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
 });
 ```
 

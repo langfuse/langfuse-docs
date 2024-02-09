@@ -57,7 +57,31 @@ npm i langfuse-node
 import { Langfuse } from "https://esm.sh/langfuse"
 ```
 
-In your application, set the **api keys** to create a client.
+<Tabs items={["Environment variables", "Constructor parameters"]}>
+<Tab>
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
+```typescript
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+// without additional options
+const langfuse = new Langfuse();
+
+// with additional options
+const langfuse = new Langfuse({
+  release: "v1.0.0",
+  requestTimeout: 10000,
+});
+```
+
+</Tab>
+<Tab>
 
 ```typescript
 import { Langfuse } from "langfuse"; // or "langfuse-node"
@@ -65,17 +89,24 @@ import { Langfuse } from "langfuse"; // or "langfuse-node"
 const langfuse = new Langfuse({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
-  // options
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+
+  // optional
+  release: "v1.0.0",
+  requestTimeout: 10000,
 });
 ```
 
-### Options
+</Tab>
+</Tabs>
 
-| Variable       | Description                                                                               | Default value                                                                                                                                           |
-| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| baseUrl        | BaseUrl of the Langfuse API; for US data region, set to `"https://us.cloud.langfuse.com"` | `"https://cloud.langfuse.com"`                                                                                                                          |
-| release        | The release number/hash of the application to provide analytics grouped by release.       | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| requestTimeout | Timeout in ms for requests                                                                | `10000`                                                                                                                                                 |
+Optional constructor parameters:
+
+| Variable       | Description                                                                         | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
