@@ -48,9 +48,6 @@ const footerLegalNav = [
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
-  feedback: {
-    content: null,
-  },
   main: MainContentWrapper,
   search: {
     placeholder: "Search...",
@@ -95,6 +92,12 @@ const config: DocsThemeConfig = {
   sidebar: {
     defaultMenuCollapseLevel: 1,
     toggleButton: true,
+  },
+  editLink: {
+    text: "Edit this page on GitHub",
+  },
+  toc: {
+    backToTop: true,
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {

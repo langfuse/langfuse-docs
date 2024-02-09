@@ -10,24 +10,21 @@ export const Background = () => (
       cx={1}
       cy={1}
       cr={1}
-      className={cn(
-        "[mask-image:linear-gradient(to_bottom,white,transparent,transparent)]",
-        "dark:opacity-30"
-      )}
+      className="[mask-image:linear-gradient(to_bottom,white,transparent,transparent)] dark:opacity-30"
     />
     <LinearGradient
       to="rgba(120,119,198,0.15)"
       from="rgba(0,0,0,0.0)"
       direction="top"
-      transitionPoint="50%"
-      className="hidden dark:block"
+      transitionPoint="60%"
+      className="hidden dark:block max-h-56"
     />
     <LinearGradient
       to="rgba(120,119,198,0.3)"
       from="rgba(0,0,0,0.0)"
       direction="top"
-      transitionPoint="50%"
-      className="dark:hidden"
+      transitionPoint="60%"
+      className="dark:hidden max-h-56"
     />
   </div>
 );
