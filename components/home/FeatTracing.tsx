@@ -47,7 +47,7 @@ export const FeatTracing = () => (
               Debug faster
             </h2>
             <p className="mt-6 text-lg leading-8 text-primary/70">
-              LLM applications are increasingly complex, Langfuse helps to trace
+              LLM applications are increasingly complex, AssistMe helps to trace
               & debug them. Understand how changes to one step impact overall
               application performance.
             </p>

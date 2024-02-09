@@ -29,7 +29,7 @@ export function ChatMessage({
         {message.role === "user" ? (
           <User className="h-4 w-4" />
         ) : (
-          <Image src="/icon256.png" alt="Langfuse" width={20} height={20} />
+          <Image src="/icon256.png" alt="AssistMe" width={20} height={20} />
         )}
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">

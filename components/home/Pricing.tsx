@@ -13,7 +13,7 @@ const tiers = [
   {
     name: "Hobby",
     id: "tier-hobby",
-    href: "https://cloud.langfuse.com",
+    href: "https://cloud.AssistMe.com",
     price: "Free",
     description:
       "Get started, no credit card required. Great for hobby projects and POCs.",
@@ -30,7 +30,7 @@ const tiers = [
   {
     name: "Pro",
     id: "tier-pro",
-    href: "https://cloud.langfuse.com",
+    href: "https://cloud.AssistMe.com",
     price: { monthly: "$29", annually: "$348" },
     description:
       "For serious projects. Includes access to full history, data governance and support.",
@@ -225,29 +225,29 @@ export const Pricing: React.FC<{ includeFaq?: boolean }> = ({
 
 const faqs = [
   {
-    question: "What is the easiest way to try Langfuse?",
+    question: "What is the easiest way to try AssistMe?",
     answer:
-      "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
+      "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.AssistMe.com'>free account</a> to try AssistMe with your own data. The Hobby plan is completeley free and does not require a credit card.",
   },
   {
     question: "What is an observation?",
     answer:
-      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
+      "Traces in AssistMe include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing'>AssistMe Tracing docs<a/> for more details.",
   },
   {
-    question: "Do I need to use Langfuse Cloud?",
+    question: "Do I need to use AssistMe Cloud?",
     answer:
-      "No, Langfuse Cloud is the managed service offered by the Langfuse team. Langfuse is open source and you can run Langfuse <a class='underline' href='/docs/deployment/local'>locally using docker compose<a/> or for <a class='underline' href='/docs/deployment/self-host'>production use via docker<a/> and a standalone database.",
+      "No, AssistMe Cloud is the managed service offered by the AssistMe team. AssistMe is open source and you can run AssistMe <a class='underline' href='/docs/deployment/local'>locally using docker compose<a/> or for <a class='underline' href='/docs/deployment/self-host'>production use via docker<a/> and a standalone database.",
   },
   {
     question: "Where is the data stored?",
     answer:
-      "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/docs/data-security-privacy'>security and privacy documentation</a> for more details.",
+      "AssistMe Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/docs/data-security-privacy'>security and privacy documentation</a> for more details.",
   },
   {
     question: "What are the limitations of the fair use policy?",
     answer:
-      "The fair use policy is designed to be generous. By default, we limit API usage at 1k requests per minute to prevent abuse. Since requests are batched via the Langfuse client SDKs and the/v1/public/ingestion endpoint, this limit is unlikely to be reached by most customers. If you need to increase this limit, please contact us.",
+      "The fair use policy is designed to be generous. By default, we limit API usage at 1k requests per minute to prevent abuse. Since requests are batched via the AssistMe client SDKs and the/v1/public/ingestion endpoint, this limit is unlikely to be reached by most customers. If you need to increase this limit, please contact us.",
   },
 ];
 

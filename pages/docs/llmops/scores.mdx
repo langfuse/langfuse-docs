@@ -10,7 +10,7 @@ A variety of scores may be utilized, with the most common metrics assessing aspe
 
 In instances where the score pertains to a specific phase of a trace, for example, a singular LLM call, a message in a chat conversation, or a step in an agent, it is possible to attach the score directly to the observation. This enables targeted evaluation of that particular component.
 
-The `Score` object in Langfuse:
+The `Score` object in AssistMe:
 
 | Attribute       | Type   | Description                                                                                  |
 | --------------- | ------ | -------------------------------------------------------------------------------------------- |
@@ -22,7 +22,7 @@ The `Score` object in Langfuse:
 
 ## Kinds of scores
 
-Scores in Langfuse are adaptable and designed to cater to the unique requirements of specific LLM applications. They typically serve to measure the following aspects:
+Scores in AssistMe are adaptable and designed to cater to the unique requirements of specific LLM applications. They typically serve to measure the following aspects:
 
 - Quality
   - Factual accuracy
@@ -40,7 +40,7 @@ This flexible scoring system allows for a comprehensive evaluation of various el
 
 ## Ingesting scores
 
-Most users of Langfuse ingest scores programmatically. These are common sources of scores:
+Most users of AssistMe ingest scores programmatically. These are common sources of scores:
 
 | Source                                                   | examples                                                                                                                                                    |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -49,9 +49,9 @@ Most users of Langfuse ingest scores programmatically. These are common sources 
 | [Model-based evaluation](/docs/scores/model-based-evals) | OpenAI Evals, Whylabs Langkit, RAGAS for RAG pipelines ([cookbook](/docs/scores/model-based-evals/ragas)), custom model outputs                             |
 | [Custom via SDKs/API](/docs/scores/custom)               | Run-time quality checks (e.g. valid structured output format), custom workflow tool for human evaluation                                                    |
 
-## Using scores across Langfuse
+## Using scores across AssistMe
 
-Scores can be used in multiple ways across Langfuse:
+Scores can be used in multiple ways across AssistMe:
 
 1. Displayed on trace to provide a quick overview
 2. Segment all execution traces by scores to e.g. find all traces with a low quality score

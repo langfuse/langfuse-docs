@@ -2,7 +2,7 @@ import { OpenAIStream, StreamingTextResponse } from "ai";
 import { Configuration, OpenAIApi } from "openai-edge";
 import { createClient } from "@supabase/supabase-js";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { Langfuse } from "langfuse";
+import { AssistMe } from "AssistMe";
 
 export const config = {
   runtime: "edge",
@@ -23,17 +23,17 @@ const supabaseClient = createClient(
   }
 );
 
-const langfuse = new Langfuse({
-  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL ?? undefined,
+const AssistMe = new AssistMe({
+  publicKey: process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY,
+  secretKey: process.env.AssistMe_SECRET_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_AssistMe_BASE_URL ?? undefined,
 });
-// langfuse.debug();
+// AssistMe.debug();
 
 export default async function handler(req: Request, res: Response) {
   const body = await req.json();
 
-  const trace = langfuse.trace({
+  const trace = AssistMe.trace({
     name: "qa",
     sessionId: "lf.docs.conversation." + body.conversationId,
     userId: body.userId,
@@ -161,12 +161,12 @@ export default async function handler(req: Request, res: Response) {
     contextText !== "" ? "qa-answer-with-context" : "qa-answer-no-context";
 
   const promptSpan = trace.span({
-    name: "fetch-prompt-from-langfuse",
+    name: "fetch-prompt-from-AssistMe",
     input: {
       promptName,
     },
   });
-  const prompt = await langfuse.getPrompt(promptName);
+  const prompt = await AssistMe.getPrompt(promptName);
   const compiledSystemMessage = prompt.compile({
     context: contextText,
   });
@@ -214,7 +214,7 @@ export default async function handler(req: Request, res: Response) {
         output: completion,
         tags: contextText !== "" ? ["with-context"] : ["no-context"],
       });
-      await langfuse.shutdownAsync();
+      await AssistMe.shutdownAsync();
     },
   });
   return new StreamingTextResponse(stream, {

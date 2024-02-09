@@ -7,7 +7,7 @@ export const FromTheBlog = () => (
         <div className="mx-auto max-w-2xl text-center mb-16">
           <h2>Blog</h2>
           <p className="mt-2 text-lg leading-8 text-primary/70">
-            The latest updates and releases from Langfuse
+            The latest updates and releases from AssistMe
           </p>
         </div>
         <BlogIndex maxItems={3} />

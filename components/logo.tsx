@@ -23,14 +23,14 @@ export function Logo() {
       >
         <Image
           src="/logo_light_512.png"
-          alt="Langfuse Logo"
+          alt="AssistMe Logo"
           width={120}
           height={20}
           className="hidden dark:block"
         />
         <Image
           src="/logo_dark_512.png"
-          alt="Langfuse Logo"
+          alt="AssistMe Logo"
           width={120}
           height={20}
           className="block dark:hidden"
@@ -52,7 +52,7 @@ export function Logo() {
           <DropdownMenuItem
             onClick={(e) => {
               e.preventDefault();
-              window.open("/langfuse_logo.png", "_blank");
+              window.open("/AssistMe_logo.png", "_blank");
             }}
           >
             <Download size={14} className="mr-2" />

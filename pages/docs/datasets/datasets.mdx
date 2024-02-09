@@ -1,10 +1,10 @@
 ---
-description: Close the loop from production to development with Langfuse datasets.
+description: Close the loop from production to development with AssistMe datasets.
 ---
 
 # Datasets
 
-Datasets in Langfuse are a collection of inputs (and expected outputs) of an LLM application. They are used to benchmark new releases before deployment to production. Datasets can be incrementally created from new edge cases found in production.
+Datasets in AssistMe are a collection of inputs (and expected outputs) of an LLM application. They are used to benchmark new releases before deployment to production. Datasets can be incrementally created from new edge cases found in production.
 
 For an end-to-end example, check out the [Datasets Notebook (Python)](/docs/datasets/python-cookbook).
 
@@ -16,14 +16,14 @@ Datasets have a name which is unique within a project.
 <Tab>
 
 ```python
-langfuse.create_dataset(name="<dataset_name>")
+AssistMe.create_dataset(name="<dataset_name>")
 ```
 
 </Tab>
 <Tab>
 
 ```ts
-langfuse.createDataset("<dataset_name>");
+AssistMe.createDataset("<dataset_name>");
 ```
 
 </Tab>
@@ -42,7 +42,7 @@ Individual items can be added to a dataset by providing the input and optionally
 <Tab>
 
 ```python
-langfuse.create_dataset_item(
+AssistMe.create_dataset_item(
     dataset_name="<dataset_name>",
     # any python object or value
     input={
@@ -59,7 +59,7 @@ langfuse.create_dataset_item(
 <Tab>
 
 ```ts
-langfuse.createDatasetItem({
+AssistMe.createDatasetItem({
   datasetName: "<dataset_name>",
   // any JS object or value
   input: {
@@ -98,10 +98,10 @@ Optionally, the output of the application can be evaluated to compare different 
 <Tab>
 
 ```python
-dataset = langfuse.get_dataset("<dataset_name>")
+dataset = AssistMe.get_dataset("<dataset_name>")
 
 for item in dataset.items:
-    # execute application function and get Langfuse parent observation (span/generation/event)
+    # execute application function and get AssistMe parent observation (span/generation/event)
     # output also returned as it is used to evaluate the run
     generation, output = my_llm_application.run(item.input)
 
@@ -123,7 +123,7 @@ for item in dataset.items:
 **Using the Langchain integration**
 
 ```python
-dataset = langfuse.get_dataset("<dataset_name>")
+dataset = AssistMe.get_dataset("<dataset_name>")
 
 for item in dataset.items:
     # Langchain callback handler that automatically links the execution trace to the dataset item
@@ -137,10 +137,10 @@ for item in dataset.items:
 <Tab>
 
 ```ts
-const dataset = await langfuse.getDataset("<dataset_name>");
+const dataset = await AssistMe.getDataset("<dataset_name>");
 
 for (const item of dataset.items) {
-  // execute application function and get Langfuse parent observation (span/generation/event)
+  // execute application function and get AssistMe parent observation (span/generation/event)
   // output also returned as it is used to evaluate the run
   const [generation, output] = await myLlmApplication.run(item.input);
 

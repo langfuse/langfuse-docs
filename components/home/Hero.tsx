@@ -36,7 +36,7 @@ export function Hero() {
           </ShimmerButton>
         </Link>
         {/* <Button variant="ghost" size="lg" asChild>
-          <Link href="https://cloud.langfuse.com">Create account</Link>
+          <Link href="https://cloud.AssistMe.com">Create account</Link>
         </Button> */}
       </div>
 

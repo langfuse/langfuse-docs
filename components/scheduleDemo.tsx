@@ -8,7 +8,7 @@ export function ScheduleDemoPage() {
       <div className="text-center">
         <h1>Schedule Demo</h1>
         <p className="text-lg text-primary/80 mt-3">
-          Talk to the founders to learn more about Langfuse
+          Talk to the founders to learn more about AssistMe
         </p>
       </div>
       <ScheduleDemo />

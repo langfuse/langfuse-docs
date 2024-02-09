@@ -33,4 +33,4 @@ API reference is automatically generated based on the OpenAPI spec of the curren
 - [shadcn/ui](https://ui.shadcn.com)
 - [Tailwind CSS](https://tailwindcss.com/)
 
-Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
+Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://AssistMe.com/blog/qa-chatbot-for-AssistMe-docs) for implementation details (all open source)

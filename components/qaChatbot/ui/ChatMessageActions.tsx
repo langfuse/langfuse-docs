@@ -16,17 +16,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { LangfuseWeb } from "langfuse";
+import { AssistMeWeb } from "AssistMe";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
-const langfuse = process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY
-  ? new LangfuseWeb({
-      publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
-      baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL ?? undefined,
+const AssistMe = process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY
+  ? new AssistMeWeb({
+      publicKey: process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY,
+      baseUrl: process.env.NEXT_PUBLIC_AssistMe_BASE_URL ?? undefined,
     })
   : undefined;
-// langfuse.debug();
+// AssistMe.debug();
 
 type Feedback = "positive" | "negative";
 
@@ -58,15 +58,15 @@ export function ChatMessageActions({
   } | null>(null);
 
   const showFeedbackButtons =
-    message.role === "assistant" && conversationId && message.id.length > 34; // Need to wait until server-side langfuse id is available
+    message.role === "assistant" && conversationId && message.id.length > 34; // Need to wait until server-side AssistMe id is available
 
   const handleSubmit = () => {
-    if (!langfuse) return;
+    if (!AssistMe) return;
     if (currentFeedback === "submitting" || !modalState) return;
 
     setCurrentFeedback("submitting");
 
-    langfuse
+    AssistMe
       .score({
         traceId: message.id,
         name: "user-feedback",

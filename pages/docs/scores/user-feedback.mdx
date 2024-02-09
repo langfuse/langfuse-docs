@@ -1,5 +1,5 @@
 ---
-description: Score traces and LLM generations in Langfuse based on user feedback in your application.
+description: Score traces and LLM generations in AssistMe based on user feedback in your application.
 ---
 
 import FeedbackPreview from "@/components/feedbackPreview";
@@ -41,15 +41,15 @@ The easiest way to collect user feedback is via the **AssistMe Rest API**. There
 **Integration**
 
 ```typescript {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
-import { LangfuseWeb } from "langfuse";
+import { AssistMeWeb } from "AssistMe";
 
 export function UserFeedbackComponent(props: { traceId: string }) {
-  const langfuseWeb = new LangfuseWeb({
-    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  const AssistMeWeb = new AssistMeWeb({
+    publicKey: env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY,
   });
 
   const handleUserFeedback = async (value: number) =>
-    await langfuseWeb.score({
+    await AssistMeWeb.score({
       traceId: props.traceId,
       name: "user_feedback",
       value,

@@ -1,12 +1,12 @@
 ---
-description: Get (view-only) access to a Langfuse project used by the team to improve the docs Q&A chatbot.
+description: Get (view-only) access to a AssistMe project used by the team to improve the docs Q&A chatbot.
 ---
 
 # Interactive Demo
 
 import { Button } from "@/components/ui/button";
 
-Try Langfuse yourself with a view-only project. Alternatively:
+Try AssistMe yourself with a view-only project. Alternatively:
 
 - Watch [video walkthrough (2 min)](/docs/video)
 - Prefer GIFs? [See below ↓](#gifs)
@@ -16,19 +16,19 @@ Try Langfuse yourself with a view-only project. Alternatively:
 
 <Steps>
 
-### View demo project in Langfuse
+### View demo project in AssistMe
 
 Get access to demo project by creating a free account (no credit card required).
 
 <Button asChild className="mt-3">
-  <a href="https://cloud.langfuse.com/auth/sign-up" target="_blank">
+  <a href="https://cloud.AssistMe.com/auth/sign-up" target="_blank">
     Create demo account
   </a>
 </Button>
 
 ### Produce new traces & feedback
 
-Interact with chatbot below to see new traces and user feedback in Langfuse.
+Interact with chatbot below to see new traces and user feedback in AssistMe.
 
 import { Chat } from "@/components/qaChatbot";
 
@@ -36,7 +36,7 @@ import { Chat } from "@/components/qaChatbot";
   <Chat className="h-96 my-0 bg-background/90" />
 </div>
 
-_Interested in implementation details? Check out the [blog post](/blog/qa-chatbot-for-langfuse-docs) (code is fully open source)._
+_Interested in implementation details? Check out the [blog post](/blog/qa-chatbot-for-AssistMe-docs) (code is fully open source)._
 
 </Steps>
 
@@ -48,7 +48,7 @@ _Interested in implementation details? Check out the [blog post](/blog/qa-chatbo
 - Track latency, quality (based on user feedback) and OpenAI errors
 
 <Frame>
-  ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
+  ![Usage reporting in AssistMe](/images/blog/docs-qa-chatbot/usage.gif)
 </Frame>
 
 ### Tracing
@@ -60,15 +60,15 @@ Each response is based on the following steps which can go wrong, be slow or exp
 3. Summary of docs as markdown
 4. Generation of response based on retrieved context and chat history
 
-This is how a single trace looks like in Langfuse:
+This is how a single trace looks like in AssistMe:
 
-<Frame>![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
+<Frame>![Trace in AssistMe](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
 
 ### User feedback collection
 
 In this example, we can see how we do:
 
-1. Collection of feedback using the Langfuse Web SDK
+1. Collection of feedback using the AssistMe Web SDK
    > _Negative, Langchain not included in response_
 2. Browsing of feedback
 3. Identification of the root cause of the low-quality response
@@ -76,5 +76,5 @@ In this example, we can see how we do:
 
 <Frame>
   ![User feedback collection in
-  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
+  AssistMe](/images/blog/docs-qa-chatbot/feedback.gif)
 </Frame>

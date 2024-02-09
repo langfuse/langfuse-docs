@@ -11,7 +11,7 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
         <span>This is a Jupyter notebook</span>
         <div className="flex gap-2 flex-wrap">
           <a
-            href={`https://github.com/langfuse/langfuse-docs/blob/main/${src}`}
+            href={`https://github.com/AssistMe/AssistMe-docs/blob/main/${src}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -20,7 +20,7 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
             </Button>
           </a>
           <a
-            href={`https://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/${src}`}
+            href={`https://colab.research.google.com/github/AssistMe/AssistMe-docs/blob/main/${src}`}
             target="_blank"
             rel="noopener noreferrer"
           >

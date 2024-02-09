@@ -1,28 +1,28 @@
 ---
-description: Follow the Quickstart to get started with Langfuse in minutes before diving into the details.
+description: Follow the Quickstart to get started with AssistMe in minutes before diving into the details.
 ---
 
 # Quickstart
 
-This quickstart helps you to integrate your LLM application with Langfuse.
+This quickstart helps you to integrate your LLM application with AssistMe.
 
 <Steps>
 
-### Create project in Langfuse
+### Create project in AssistMe
 
-The fastest way to get started is to use the Langfuse Cloud.
+The fastest way to get started is to use the AssistMe Cloud.
 
 1. Create account and project on
-   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+   [cloud.AssistMe.com](https://cloud.AssistMe.com/auth/sign-up)
 2. Copy API keys for your
    project
 
    ```bash filename=".env"
-   LANGFUSE_SECRET_KEY="sk-lf-...";
-   LANGFUSE_PUBLIC_KEY="pk-lf-...";
+   AssistMe_SECRET_KEY="sk-lf-...";
+   AssistMe_PUBLIC_KEY="pk-lf-...";
    ```
 
-Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
+Alternatively you can run AssistMe [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
 
 ### Add tracing to your backend
 
@@ -30,15 +30,15 @@ Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker com
 <Tab>
 
 ```sh
-npm i langfuse
+npm i AssistMe
 # or
-yarn add langfuse
+yarn add AssistMe
 
 # Node.js < 18
-npm i langfuse-node
+npm i AssistMe-node
 
 # Deno
-import { Langfuse } from "https://esm.sh/langfuse"
+import { AssistMe } from "https://esm.sh/AssistMe"
 ```
 
 Example usage, most of the parameters are optional and depend on the use case.
@@ -46,12 +46,12 @@ Example usage, most of the parameters are optional and depend on the use case.
 For more information, see the [typescript SDK docs](/docs/sdk/typescript).
 
 ```typescript filename="server.ts"
-import { Langfuse } from "langfuse";
+import { AssistMe } from "AssistMe";
 
-const langfuse = new Langfuse({
+const AssistMe = new AssistMe({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
-  // baseUrl: defaults to "https://cloud.langfuse.com"
+  // baseUrl: defaults to "https://cloud.AssistMe.com"
 });
 
 // Example generation creation
@@ -78,21 +78,21 @@ generation.end({
 <Tab>
 
 ```bash
-pip install langfuse
+pip install AssistMe
 ```
 
 Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
 
 ```python filename="server.py"
-from langfuse import Langfuse
+from AssistMe import AssistMe
 
-langfuse = Langfuse(
+AssistMe = AssistMe(
   public_key="pk-lf-...",
   secret_key="sk-sk-...",
-  host="https://cloud.langfuse.com"
+  host="https://cloud.AssistMe.com"
 )
 
-generation = langfuse.generation(
+generation = AssistMe.generation(
     name="summary-generation",
     model="gpt-3.5-turbo",
     model_parameters={"maxTokens": "1000", "temperature": "0.9"},
@@ -115,23 +115,23 @@ generation.end(
 
 # The SDK executes network requests in the background.
 # To ensure that all requests are sent before the process exits, call flush()
-langfuse.flush()
+AssistMe.flush()
 ```
 
 </Tab>
 <Tab>
 
-Install the Langfuse Python SDK
+Install the AssistMe Python SDK
 
 ```bash
-pip install langfuse
+pip install AssistMe
 ```
 
-Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
+Add AssistMe callback handler to your Langchain agent/chain/... to automatically capture traces.
 
 ```python /callbacks=[handler]/
-from langfuse.callback import CallbackHandler
-handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
+from AssistMe.callback import CallbackHandler
+handler = CallbackHandler(AssistMe_PUBLIC_KEY, AssistMe_SECRET_KEY)
 
 # Langchain implementation
 
@@ -154,25 +154,25 @@ For more examples, see the [Langchain integration docs](/docs/langchain).
 <Tabs items={["Browser", "JS/TS", "Python", "API"]}>
 <Tab>
 
-Use LangfuseWeb to directly capture **user feedback** as scores in the browser.
+Use AssistMeWeb to directly capture **user feedback** as scores in the browser.
 
 ```sh npm2yarn
-npm i langfuse
+npm i AssistMe
 ```
 
 Simple feedback component in React:
 
 ```typescript
-import { LangfuseWeb } from "langfuse";
+import { AssistMeWeb } from "AssistMe";
 
 export default function UserFeedbackComponent(props: { traceId: string }) {
-  const langfuseWeb = new LangfuseWeb({
-    publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY, // pk-lf-...
-    // baseUrl: defaults to "https://cloud.langfuse.com"
+  const AssistMeWeb = new AssistMeWeb({
+    publicKey: process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY, // pk-lf-...
+    // baseUrl: defaults to "https://cloud.AssistMe.com"
   });
 
   const handleFeedback = async (value: number) => {
-    await langfuseWeb.score({
+    await AssistMeWeb.score({
       traceId: props.traceId,
       name: "user_feedback", // arbitrary name to identify the type of score
       value, // float, optional: scale it to e.g. 0..1
@@ -224,10 +224,10 @@ score = generation.score(
 <Tab>
 
 ```bash
-curl --location 'http://cloud.langfuse.com/api/public/metrics' \
+curl --location 'http://cloud.AssistMe.com/api/public/metrics' \
 --header 'Content-Type: application/json' \
 --header 'Accept: application/json' \
---header "Authorization: Bearer {langfuse_public_key}"
+--header "Authorization: Bearer {AssistMe_public_key}"
 --data '{
   "traceId": "<string>",
   "name": "<string>",
@@ -241,7 +241,7 @@ curl --location 'http://cloud.langfuse.com/api/public/metrics' \
 
 ### Explore
 
-Visit Langfuse interface to explore your data.
+Visit AssistMe interface to explore your data.
 
 </Steps>
 

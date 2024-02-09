@@ -187,8 +187,8 @@ const config: DocsThemeConfig = {
         <meta property="twitter:image" content={image} />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site:domain" content="langfuse.com" />
-        <meta name="twitter:url" content="https://langfuse.com" />
+        <meta name="twitter:site:domain" content="AssistMe.com" />
+        <meta name="twitter:url" content="https://AssistMe.com" />
 
         <link
           rel="apple-touch-icon"
@@ -224,10 +224,10 @@ const config: DocsThemeConfig = {
   //   text: (
   //     <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
   //       {/* mobile */}
-  //       <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
+  //       <span className="sm:hidden">AssistMe won a Golden Kitty Award →</span>
   //       {/* desktop */}
   //       <span className="hidden sm:inline">
-  //         Langfuse won a Golden Kitty Award in AI Infra →
+  //         AssistMe won a Golden Kitty Award in AI Infra →
   //       </span>
   //     </Link>
   //   ),
