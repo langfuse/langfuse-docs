@@ -6,27 +6,13 @@ description: Close the loop from production to development with AssistMe dataset
 
 Datasets in AssistMe are a collection of inputs (and expected outputs) of an LLM application. They are used to benchmark new releases before deployment to production. Datasets can be incrementally created from new edge cases found in production.
 
-For an end-to-end example, check out the [Datasets Notebook (Python)](/docs/datasets/python-cookbook).
 
 ## Creating a dataset
 
 Datasets have a name which is unique within a project.
 
-<Tabs items={["Python", "JS/TS", "UI"]} storageKey="datasets">
-<Tab>
+<Tabs items={["UI"]} storageKey="datasets">
 
-```python
-AssistMe.create_dataset(name="<dataset_name>")
-```
-
-</Tab>
-<Tab>
-
-```ts
-AssistMe.createDataset("<dataset_name>");
-```
-
-</Tab>
 <Tab>
 
 Datasets: `+ New dataset`
@@ -38,41 +24,8 @@ Datasets: `+ New dataset`
 
 Individual items can be added to a dataset by providing the input and optionally the expected output.
 
-<Tabs items={["Python", "JS/TS", "UI"]} storageKey="datasets">
-<Tab>
+<Tabs items={["UI"]} storageKey="datasets">
 
-```python
-AssistMe.create_dataset_item(
-    dataset_name="<dataset_name>",
-    # any python object or value
-    input={
-        "text": "hello world"
-    },
-    # any python object or value, optional
-    expected_output={
-        "text": "hello world"
-    }
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-AssistMe.createDatasetItem({
-  datasetName: "<dataset_name>",
-  // any JS object or value
-  input: {
-    text: "hello world",
-  },
-  // any JS object or value, optional
-  expectedOutput: {
-    text: "hello world",
-  },
-});
-```
-
-</Tab>
 <Tab>
 
 Datasets > Items: `+ New item`
@@ -94,67 +47,10 @@ When running an experiment on a dataset, the application that shall be tested is
 
 Optionally, the output of the application can be evaluated to compare different runs more easily. Use any evaluation function and add a score to the observation. More details on scores/evals [here](/docs/scores).
 
-<Tabs items={["Python", "JS/TS"]} storageKey="datasets">
+<Tabs items={["UI"]} storageKey="datasets">
 <Tab>
-
-```python
-dataset = AssistMe.get_dataset("<dataset_name>")
-
-for item in dataset.items:
-    # execute application function and get AssistMe parent observation (span/generation/event)
-    # output also returned as it is used to evaluate the run
-    generation, output = my_llm_application.run(item.input)
-
-    # link the execution trace to the dataset item and give it a run_name
-    item.link(generation, "<run_name>")
-
-    # optionally, evaluate the output to compare different runs more easily
-    generation.score(
-        name="<example_eval>",
-        # any float value
-        value=my_eval_fn(
-            item.input,
-            output,
-            item.expected_output
-        )
-    )
-```
-
-**Using the Langchain integration**
-
-```python
-dataset = AssistMe.get_dataset("<dataset_name>")
-
-for item in dataset.items:
-    # Langchain callback handler that automatically links the execution trace to the dataset item
-    handler = item.get_langchain_handler(run_name="<run_name>")
-
-    # Execute application and pass custom handler
-    my_langchain_chain.run(item.input, callbacks=[handler])
-```
-
-</Tab>
-<Tab>
-
-```ts
-const dataset = await AssistMe.getDataset("<dataset_name>");
-
-for (const item of dataset.items) {
-  // execute application function and get AssistMe parent observation (span/generation/event)
-  // output also returned as it is used to evaluate the run
-  const [generation, output] = await myLlmApplication.run(item.input);
-
-  // link the execution trace to the dataset item and give it a run_name
-  await item.link(generation, "<run_name>");
-
-  // optionally, evaluate the output to compare different runs more easily
-  generation.score({
-    name: "<score_name>",
-    value: myEvalFunction(item.input, output, item.expectedOutput),
-  });
-}
-```
-
+   Add links to our data set runs
+   Its in UI playground
 </Tab>
 </Tabs>
 
