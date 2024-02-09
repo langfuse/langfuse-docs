@@ -4,28 +4,71 @@ description: Follow the Quickstart to get started with Langfuse in minutes befor
 
 # Quickstart
 
-This quickstart helps you to integrate your LLM application with Langfuse.
+This quickstart helps you to integrate your LLM application with Langfuse. It will log a single LLM call to get started.
 
-## Setup Langfuse Project
+## Create new project in Langfuse
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up)
 2.  Create a new project
 3.  Create new API credentials in the project settings
-4.  Add Langfuse credentials to your environment
-
-    ```bash filename=".env"
-    LANGFUSE_SECRET_KEY="sk-lf-...";
-    LANGFUSE_PUBLIC_KEY="pk-lf-...";
-    LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
-    # LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-    ```
 
 Alternatively you can run Langfuse [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
 
-## Add tracing to your backend
+## Log your first LLM call to Langfuse
 
-<Tabs items={["JS/TS", "Python", "Langchain", "API"]}>
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","API"]}>
+
 <Tab>
+{/* Python */}
+
+```bash
+pip install langfuse
+```
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
+```python filename="server.py"
+from langfuse import Langfuse
+
+# Create Langfuse client
+langfuse = Langfuse()
+
+# Create generation in Langfuse
+generation = langfuse.generation(
+    name="summary-generation",
+    model="gpt-3.5-turbo",
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
+    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    metadata={"interface": "whatsapp"}
+)
+
+# Execute model, mocked here
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+chat_completion = {
+    "completion":"The Q3 OKRs contain goals for multiple teams...",
+}
+
+# Update span and sets end_time
+generation.end(
+    output=chat_completion["completion"],
+)
+
+# The SDK executes network requests in the background.
+# To ensure that all requests are sent before the process exits, call flush()
+# Not necessary in long-running production code
+langfuse.flush()
+```
+
+</Tab>
+<Tab>
+{/* JS/TS */}
 
 ```sh
 npm i langfuse
@@ -43,14 +86,17 @@ Example usage, most of the parameters are optional and depend on the use case.
 
 For more information, see the [typescript SDK docs](/docs/sdk/typescript).
 
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
 ```typescript filename="server.ts"
 import { Langfuse } from "langfuse";
 
-const langfuse = new Langfuse({
-  secretKey: "sk-lf-...",
-  publicKey: "pk-lf-...",
-  // baseUrl: defaults to "https://cloud.langfuse.com"
-});
+const langfuse = new Langfuse();
 
 // Example generation creation
 const generation = trace.generation({
@@ -74,50 +120,11 @@ generation.end({
 
 </Tab>
 <Tab>
-
-```bash
-pip install langfuse
-```
-
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
-
-```python filename="server.py"
-from langfuse import Langfuse
-
-langfuse = Langfuse(
-  public_key="pk-lf-...",
-  secret_key="sk-sk-...",
-  host="https://cloud.langfuse.com"
-)
-
-generation = langfuse.generation(
-    name="summary-generation",
-    model="gpt-3.5-turbo",
-    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
-    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
-    metadata={"interface": "whatsapp"}
-)
-
-# execute model, mocked here
-# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
-chat_completion = {
-    "completion":"The Q3 OKRs contain goals for multiple teams...",
-    "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
-}
-
-# update span and sets end_time
-generation.end(
-    output=chat_completion["completion"],
-    usage=chat_completion["usage"],
-)
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-langfuse.flush()
-```
+{/* OpenAI SDK (Python) */}
 
 </Tab>
 <Tab>
+{/* Langchain (Python) */}
 
 Install the Langfuse Python SDK
 
@@ -141,100 +148,16 @@ For more examples, see the [Langchain integration docs](/docs/langchain).
 
 </Tab>
 <Tab>
-
-[API reference](/docs/api) for custom integrations
-
-</Tab>
-</Tabs>
-
-### Capture scores (optional)
-
-<Tabs items={["Browser", "JS/TS", "Python", "API"]}>
-<Tab>
-
-Use LangfuseWeb to directly capture **user feedback** as scores in the browser.
-
-```sh npm2yarn
-npm i langfuse
-```
-
-Simple feedback component in React:
-
-```typescript
-import { LangfuseWeb } from "langfuse";
-
-export default function UserFeedbackComponent(props: { traceId: string }) {
-  const langfuseWeb = new LangfuseWeb({
-    publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY, // pk-lf-...
-    // baseUrl: defaults to "https://cloud.langfuse.com"
-  });
-
-  const handleFeedback = async (value: number) => {
-    await langfuseWeb.score({
-      traceId: props.traceId,
-      name: "user_feedback", // arbitrary name to identify the type of score
-      value, // float, optional: scale it to e.g. 0..1
-    });
-  };
-
-  return (
-    <>
-      <button onClick={() => handleFeedback(1)}>👍</button>
-      <button onClick={() => handleFeedback(0)}>👎</button>
-    </>
-  );
-}
-```
+{/* Langchain (JS) */}
 
 </Tab>
 <Tab>
+{/* API */}
 
-You can use the JS/TS SDK to report a score.
-
-```typescript
-trace.score({
-  name: "user-explicit-feedback",
-  value: 1,
-  comment: "I like how personalized the response is",
-});
-
-// alternatively
-span.score({});
-generation.score({});
-event.score({});
-```
+[API reference](https://api.reference.langfuse.com) for custom integrations
 
 </Tab>
-<Tab>
 
-You can use the Python SDK to report a score via your Python server.
-
-```python
-
-score = generation.score(
-    name='user-explicit-feedback',
-    value=1,
-    comment="I like how personalized the response is"
-)
-```
-
-</Tab>
-<Tab>
-
-```bash
-curl --location 'http://cloud.langfuse.com/api/public/metrics' \
---header 'Content-Type: application/json' \
---header 'Accept: application/json' \
---header "Authorization: Bearer {langfuse_public_key}"
---data '{
-  "traceId": "<string>",
-  "name": "<string>",
-  "value": "<integer>",
-  "observationId": "<optional_string>"
-}'
-```
-
-</Tab>
 </Tabs>
 
 ### Explore
