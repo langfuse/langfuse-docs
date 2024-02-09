@@ -116,6 +116,7 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
 | release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
 | tags | string[] | yes | Tags are used to categorize or label traces. Traces can be filtered by tags in the UI and GET API. Tags can also be changed in the UI. Tags are merged and never deleted via the API. |
+| public | boolean | yes | You can make a trace `public` to share it via a [public link](https://langfuse.com/docs/tracing/). This allows others to view the trace without needing to log in or be members of your Langfuse project. |
 
 
 ```python
