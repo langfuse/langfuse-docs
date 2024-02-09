@@ -198,6 +198,10 @@ await llm.call("Tell me a better joke", { callbacks: [handler] });
 handler.getLangchainRunId(); // returns the latest run id, different from the first one
 ```
 
+## Upgrading from v2.x.x to v3.x.x [#upgrade2to3]
+
+Requires [`langchain ^0.1.10`](https://github.com/langchain-ai/langchainjs/releases/tag/0.1.10). Langchain released a new stable version of the Callback Handler interface and this version of the Langfuse SDK implements it. Older versions are no longer supported.
+
 ## Upgrading from v1.x.x to v2.x.x [#upgrade1to2]
 
 The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
