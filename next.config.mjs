@@ -1,3 +1,10 @@
+/**
+ * @type {import('next').NextConfig}
+ */
+const nextConfig = {
+  output: "standalone",
+};
+
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
 
@@ -22,7 +29,7 @@ export default withNextra({
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'static.assistme.com',
+        hostname: 'docs.assistme.com',
         port: '',
         pathname: '/**',
       },
