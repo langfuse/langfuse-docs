@@ -7,6 +7,12 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "README.md"
+      - ".husky"
+      - ".github/**"
+      - "**/*.csv"
+      - .env*
   workflow_dispatch:
 
 jobs:
@@ -21,14 +27,23 @@ jobs:
         with:
           node-version: '20.x'
 
+      - name: create env file
+        env:
+          NEXT_PUBLIC_ASSISTME_PUBLIC_KEY: ${{ vars.NEXT_PUBLIC_ASSISTME_PUBLIC_KEY }}
+        run: |
+          touch .env
+          echo NEXT_PUBLIC_ASSISTME_PUBLIC_KEY=$NEXT_PUBLIC_ASSISTME_PUBLIC_KEY >> .env
+
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      - name: Zip all files for upload between jobs
+        # IMPORTANT: .next is a hidden folder and will NOT be included in the zip unless we specify it
+        # To fix: /home/site/wwwroot/node_modules/.bin/next: 1: ../next/dist/bin/next: not found
+        run: zip next.zip ./* .next .env -qr
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -49,9 +64,6 @@ jobs:
         with:
           name: node-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -59,4 +71,4 @@ jobs:
           app-name: 'docs-assistme-chat-wa'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_59E8C04595D24C0C960CC42B87D09BE0 }}
-          package: .
+          package: next.zip
