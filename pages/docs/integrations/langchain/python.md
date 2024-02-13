@@ -1,5 +1,5 @@
 ---
-description: Langchain users can integrated with Langfuse in seconds using the integration
+description: Native integration with Langchain (Python). Automatically captures rich traces for your Langchain runs.
 ---
 
 # Langchain integration (Python)
