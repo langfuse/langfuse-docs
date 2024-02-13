@@ -63,11 +63,13 @@ const handler = new CallbackHandler({
 
 ### Options
 
-| Variable | Description                                                                         | Default value                                                                                                                                           |
-| -------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| baseUrl  | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
-| release  | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| userId   | For user-level analytics ([docs](/docs/tracing/users))                              | `undefined`                                                                                                                                             |
+| Variable  | Description                                                                                    | Default value                                                                                                                                           |
+| --------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl   | BaseUrl of the Langfuse API                                                                    | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release   | The release number/hash of the application to provide analytics grouped by release.            | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| version   | The version of the application, see [experimentation docs](/docs/experimentation) for details. | `undefined`                                                                                                                                             |
+| userId    | For user-level analytics ([docs](/docs/tracing/users))                                         | `undefined`                                                                                                                                             |
+| sessionId | For session-level tracing ([docs](/docs/tracing/sessions))                                     | `undefined`                                                                                                                                             |
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
@@ -172,12 +174,8 @@ Both of these ids can be used to create scores for the correct `Span` in Langfus
 import { OpenAI } from "langchain/llms/openai";
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 
-// configure the normal Langchain sdk
-const langfuse = new Langfuse({
-  publicKey: LF_PUBLIC_KEY,
-  secretKey: LF_SECRET_KEY,
-  baseUrl: LF_HOST,
-});
+// Create a Langfuse JS client
+const langfuse = new Langfuse();
 
 // create a trace and a handler nested into the trace.
 const trace = langfuse.trace({ id: "special-id" });
