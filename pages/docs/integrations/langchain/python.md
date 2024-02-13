@@ -285,7 +285,7 @@ To do that, we first need to initialize the [Python SDK](/docs/sdk/python), crea
 import uuid
 import os
 
-from langfuse.client import Langfuse
+from langfuse import Langfuse
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -332,7 +332,7 @@ TRACE (id: trace_id)
 import uuid
 import os
 
-from langfuse.client import Langfuse
+from langfuse import Langfuse
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
