@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import {
   Calendar,
@@ -13,14 +13,32 @@ import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
 import { Background } from "./Background";
 import { ProductUpdateSignup } from "./productUpdateSignup";
+import { useSearchParams } from "next/navigation";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
+export const SidebarChecker = () => {
+  useEffect(() => {
+    let element = document.querySelector('.nextra-sidebar-container');
+    element.className = 'hidden';
+  }, [])
+  return (<></>);
+}
+
 export const MainContentWrapper = (props) => {
+  const [visible, setVisible] = useState('');
   const router = useRouter();
+  const params = useSearchParams();
+  const sidebarVisible = params.get('sidebarVisible');
+
+  // useEffect(() => {
+  //   let element = document.querySelector('.nextra-sidebar-container');
+  //   element.className = 'hidden';
+  // }, [])
 
   return (
     <>
+      {sidebarVisible === 'false' ? <SidebarChecker /> : ''}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
@@ -130,10 +148,10 @@ export const DocsFeedback = () => {
         {selected === null
           ? "Was this page useful?"
           : selected === "positive"
-          ? "What was most useful?"
-          : selected === "negative"
-          ? "What can we improve?"
-          : "Thanks for your feedback!"}
+            ? "What was most useful?"
+            : selected === "negative"
+              ? "What can we improve?"
+              : "Thanks for your feedback!"}
       </h3>
       {selected === null ? (
         <div className="flex flex-wrap gap-3">

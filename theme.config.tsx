@@ -1,6 +1,6 @@
 'use client'
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   DocsThemeConfig,
   Tabs,
@@ -47,12 +47,12 @@ const footerLegalNav = [
 ];
 
 const Docs: PageItem = {
-    title: "Docs",
-    type: "page",
-    href: "docs",
-    kind: 'MdxPage',
-    name: 'Docs',
-    route: '/docs'
+  title: "Docs",
+  type: "page",
+  href: "docs",
+  kind: 'MdxPage',
+  name: 'Docs',
+  route: '/docs'
 }
 
 const CheckHeaderParamsComponent = () => {
@@ -66,7 +66,7 @@ const CheckHeaderParamsComponent = () => {
   } else {
     return (
       <Navbar flatDirectories={[]} items={[Docs,
-    ]} />
+      ]} />
     )
   }
 }
