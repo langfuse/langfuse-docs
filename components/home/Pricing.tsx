@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { RadioGroup } from "@headlessui/react";
 import { Check, Plus, Minus } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
@@ -7,7 +6,6 @@ import { Disclosure } from "@headlessui/react";
 
 const frequencies = [
   { value: "monthly", label: "Monthly", priceSuffix: "/month" },
-  { value: "annually", label: "Annually", priceSuffix: "/year" },
 ];
 const tiers = [
   {
@@ -18,10 +16,11 @@ const tiers = [
     description:
       "Get started, no credit card required. Great for hobby projects and POCs.",
     features: [
-      "Unlimited projects, events, and throughput (fair use)",
-      "100k observations / month",
+      "50k observations / month",
       "Access last 30 days",
-      "Basic support",
+      "Max 3 users",
+      "Max 1k requests / minute",
+      "Community support (Discord & GitHub)",
       "Select data region (US or EU)",
     ],
     featured: false,
@@ -31,36 +30,38 @@ const tiers = [
     name: "Pro",
     id: "tier-pro",
     href: "https://cloud.langfuse.com",
-    price: { monthly: "$29", annually: "$348" },
+    price: { monthly: "$59" },
     description:
-      "For serious projects. Includes access to full history, data governance and support.",
+      "For serious projects. Includes access to full history and higher usage.",
     features: [
-      "Unlimited projects, events, and throughput (fair use)",
       "100k observations / month included, additional: $10 / 100k observations",
-      "Unlimited history",
-      "Dedicated support channels (Slack or Discord)",
+      "Unlimited data access",
+      "Unlimited users",
+      "Max 1k requests / minute",
+      "Dedicated support via email, Slack or Discord",
+      "Select data region (US or EU)",
+      "DPA for GDPR compliance",
     ],
-    featured: false,
-    cta: "Start free trial",
+    featured: true,
+    cta: "Sign up",
   },
   {
     name: "Team",
     id: "tier-team",
     href: "/schedule-demo",
-    price: { monthly: "$199", annually: "$2388" },
+    price: { monthly: "$499" },
     description:
-      "Dedicated solutions and support for your team. Contact us to learn more.",
+      "Dedicated solutions and support for your team. Contact us for pricing.",
     features: [
       "All Pro features",
       "SSO enforcement",
       "White-glove onboarding support",
-      "Single-tenant instances",
+      "Single-tenant instance on your domain",
       "Support SLAs",
-      "Compliance and security reviews",
       "Custom data retention policies",
-      "Custom domains, advanced RBAC, and more (soon)",
+      "Compliance information and security reviews",
     ],
-    featured: true,
+    featured: false,
     cta: "Talk to founders",
   },
 ];
@@ -72,7 +73,7 @@ function classNames(...classes) {
 export const Pricing: React.FC<{ includeFaq?: boolean }> = ({
   includeFaq = false,
 }) => {
-  const [frequency, setFrequency] = useState(frequencies[0]);
+  const frequency = frequencies[0];
 
   return (
     <section className="py-24 sm:py-32" id="pricing">
@@ -85,41 +86,7 @@ export const Pricing: React.FC<{ includeFaq?: boolean }> = ({
             Simple pricing for projects of all sizes
           </p>
         </div>
-        <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-primary/80">
-          All plans include (fair use)
-          <br />
-          <span className="font-medium">unlimited projects</span>
-          {", "}
-          <span className="font-medium">unlimited users</span>
-          {" and "}
-          <span className="font-medium">unlimited throughput</span>
-        </p>
-        <div className="mt-16 flex justify-center">
-          <RadioGroup
-            value={frequency}
-            onChange={setFrequency}
-            className="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs font-semibold leading-5 ring-1 ring-inset ring-primary/80"
-          >
-            <RadioGroup.Label className="sr-only">
-              Payment frequency
-            </RadioGroup.Label>
-            {frequencies.map((option) => (
-              <RadioGroup.Option
-                key={option.value}
-                value={option}
-                className={({ checked }) =>
-                  classNames(
-                    checked ? "bg-primary text-background" : "text-primary/70",
-                    "cursor-pointer rounded-full px-2.5 py-1"
-                  )
-                }
-              >
-                <span>{option.label}</span>
-              </RadioGroup.Option>
-            ))}
-          </RadioGroup>
-        </div>
-        <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <div className="isolate mx-auto mt-20 grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
           {tiers.map((tier) => (
             <div
               key={tier.id}
@@ -146,7 +113,7 @@ export const Pricing: React.FC<{ includeFaq?: boolean }> = ({
                 {tier.description}
               </p>
               <p className={classNames("mt-6 flex items-baseline gap-x-2")}>
-                {typeof tier.price !== "string" ? (
+                {tier.name === "Team" ? (
                   <span
                     className={classNames(
                       tier.featured ? "text-gray-300" : "text-primary/80",
@@ -248,6 +215,11 @@ const faqs = [
     question: "What are the limitations of the fair use policy?",
     answer:
       "The fair use policy is designed to be generous. By default, we limit API usage at 1k requests per minute to prevent abuse. Since requests are batched via the Langfuse client SDKs and the /api/public/ingestion endpoint, this limit is unlikely to be reached by most customers. If you need to increase this limit, please contact us.",
+  },
+  {
+    question: "Do you offer discounts?",
+    answer:
+      "Yes, we offer discounts for students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at sales@langfuse.com with details about your project.",
   },
 ];
 
