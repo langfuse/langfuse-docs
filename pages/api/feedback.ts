@@ -54,7 +54,7 @@ export default async function handler(req: NextRequest) {
       {},
       {
         status: 500,
-        statusText: "Internal Server Error"
+        statusText: "Internal Server Error",
       }
     );
   }
