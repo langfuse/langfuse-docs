@@ -1,18 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
 
 // Define the breakpoint
 const MOBILE_BREAKPOINT = 650;
 
-export default function MobileSwitch(props: {
-  mobile: React.ElementType;
-  desktop: React.ElementType;
-}) {
+interface MobileSwitchProps {
+  mobile: ReactNode;
+  desktop: ReactNode;
+}
+
+export default function MobileSwitch(props: MobileSwitchProps) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const objectRef = useRef(null);
+  const objectRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(objectRef.current.offsetWidth <= MOBILE_BREAKPOINT);
+      setIsMobile(objectRef.current!.offsetWidth <= MOBILE_BREAKPOINT);
     };
     handleResize();
 

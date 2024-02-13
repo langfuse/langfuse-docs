@@ -2,7 +2,7 @@ import { OpenAIStream, StreamingTextResponse } from "ai";
 import { Configuration, OpenAIApi } from "openai-edge";
 import { createClient } from "@supabase/supabase-js";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { AssistMe } from "AssistMe";
+import { Langfuse } from "langfuse";
 
 export const config = {
   runtime: "edge",
@@ -23,7 +23,7 @@ const supabaseClient = createClient(
   }
 );
 
-const AssistMe = new AssistMe({
+const AssistMe = new Langfuse({
   publicKey: process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY,
   secretKey: process.env.AssistMe_SECRET_KEY,
   baseUrl: process.env.NEXT_PUBLIC_AssistMe_BASE_URL ?? undefined,

@@ -24,7 +24,7 @@ export function DotPattern({
   ...props
 }: DotPatternProps) {
   const id = useId();
-e
+
   return (
     <svg
       aria-hidden="true"

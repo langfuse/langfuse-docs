@@ -16,12 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { AssistMeWeb } from "AssistMe";
+import { LangfuseWeb } from "langfuse";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 const AssistMe = process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY
-  ? new AssistMeWeb({
+  ? new LangfuseWeb({
       publicKey: process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY,
       baseUrl: process.env.NEXT_PUBLIC_AssistMe_BASE_URL ?? undefined,
     })

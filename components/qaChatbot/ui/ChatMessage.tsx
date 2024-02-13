@@ -9,11 +9,18 @@ import { User } from "lucide-react";
 import { ChatMessageActions } from "./ChatMessageActions";
 import Link from "next/link";
 import Image from "next/image";
+import { ClassAttributes } from "react";
+import { boolean } from "zod";
 
 export interface ChatMessageProps {
   message: Message;
   conversationId: string;
 }
+
+interface CustomReactMarkdownProps extends ClassAttributes<HTMLElement>{
+  inline?: boolean;
+}
+
 
 export function ChatMessage({
   message,
@@ -56,7 +63,7 @@ export function ChatMessage({
             li({ children }) {
               return <li className="mb-1">{children}</li>;
             },
-            code({ node, inline, className, children, ...props }) {
+            code<CustomReactMarkdownProps>({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "");
 
               if (inline) {

@@ -1,3 +1,5 @@
+'use client'
+
 import React from "react";
 import {
   DocsThemeConfig,
@@ -7,6 +9,7 @@ import {
   Steps,
   Card,
   Cards,
+  Navbar,
 } from "nextra-theme-docs";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -15,6 +18,8 @@ import { Frame } from "./components/Frame";
 import { BsDiscord } from "react-icons/bs";
 import { ToAppButton } from "./components/ToAppButton";
 import { AssistMeLogo } from "./components/AssistMeLogo";
+import { useSearchParams } from "next/navigation";
+import { PageItem } from "nextra/normalize-pages";
 
 const footerNav = [
   { name: "Contact", href: "mailto:contact@assistme.chat" },
@@ -41,6 +46,31 @@ const footerLegalNav = [
   },
 ];
 
+const Docs: PageItem = {
+    title: "Docs",
+    type: "page",
+    href: "docs",
+    kind: 'MdxPage',
+    name: 'Docs',
+    route: '/docs'
+}
+
+const CheckHeaderParamsComponent = () => {
+  const params = useSearchParams();
+  const navbarVisible = params.get('navbarVisible');
+
+  if (navbarVisible === 'false') {
+    return (
+      <></>
+    )
+  } else {
+    return (
+      <Navbar flatDirectories={[]} items={[Docs,
+    ]} />
+    )
+  }
+}
+
 const config: DocsThemeConfig = {
   logo: <AssistMeLogo />,
   feedback: {
@@ -51,6 +81,7 @@ const config: DocsThemeConfig = {
     placeholder: "Search...",
   },
   navbar: {
+    component: <CheckHeaderParamsComponent />,
     extraContent: (
       <>
         <a
@@ -125,7 +156,7 @@ const config: DocsThemeConfig = {
           </div>
         </div>
         <span className="text-primary/80">
-           {new Date().getFullYear()} © Cloud Flow Inc
+          {new Date().getFullYear()} © Cloud Flow Inc
         </span>
       </div>
     ),
@@ -137,10 +168,10 @@ const config: DocsThemeConfig = {
         asPath === "/"
           ? "AssistMe"
           : asPath.startsWith("/blog/")
-          ? "%s - AssistMe Blog"
-          : asPath.startsWith("/docs/guides/")
-          ? "%s - AssistMe Guides"
-          : "%s - AssistMe",
+            ? "%s - AssistMe Blog"
+            : asPath.startsWith("/docs/guides/")
+              ? "%s - AssistMe Guides"
+              : "%s - AssistMe",
     };
   },
   head: () => {
@@ -157,16 +188,16 @@ const config: DocsThemeConfig = {
     const section = asPath.startsWith("/docs")
       ? "Docs"
       : asPath.startsWith("/changelog/")
-      ? "Changelog"
-      : "";
+        ? "Changelog"
+        : "";
 
     const image = frontMatter.ogImage
       ? "https://assistme.com" + frontMatter.ogImage
       : `https://assistme.com/api/og?title=${encodeURIComponent(
-          title
-        )}&description=${encodeURIComponent(
-          description
-        )}&section=${encodeURIComponent(section)}`;
+        title
+      )}&description=${encodeURIComponent(
+        description
+      )}&section=${encodeURIComponent(section)}`;
 
     const video = frontMatter.ogVideo
       ? "https://assistme.com" + frontMatter.ogVideo

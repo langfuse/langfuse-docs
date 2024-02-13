@@ -11,7 +11,7 @@ export function ButtonScrollToBottom({
   className,
   outerDivRef,
   ...props
-}: ButtonProps & { outerDivRef: React.Ref<HTMLButtonElement> }) {
+}: ButtonProps & { outerDivRef: any }) {
   const isAtBottom = useAtBottom(outerDivRef);
 
   return (

@@ -55,7 +55,7 @@ interface DataTableProps<TData, TValue> {
 
 export default function FeedbackPreview() {
   const [state, setState] = useState<
-    null | "loading-positive" | "loading-negative" | "positive" | "negative"
+    string | null
   >(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [data, setData] = useState<Feedback[]>([]);
