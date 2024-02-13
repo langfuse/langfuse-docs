@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { Check, Plus, Minus, X } from "lucide-react";
-import { Disclosure, RadioGroup } from "@headlessui/react";
+import { Disclosure } from "@headlessui/react";
 import { BorderBeam } from "../magicui/border-beam";
 import Link from "next/link";
 
