@@ -119,3 +119,26 @@ Use descriptive tags and leverage the filtering and grouping capabilities of the
 When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
 
 <Frame>![Tagging traces](/images/docs/tagging-traces.gif)</Frame>
+
+
+### Use API to create traces
+
+<Tabs items={["API"]}>
+  <Tab>
+ 
+  ```bash
+  curl --location 'http://staging.assistme.chat/api/v1/traces' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header "Authorization: Bearer {AssistMe_public_key}"
+  --data '{
+    "traceId": "<string>",
+    "name": "<string>",
+    "value": "<integer>",
+    "observationId": "<optional_string>"
+  }'
+  ```
+ 
+  </Tab>
+
+</Tabs>
