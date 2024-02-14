@@ -259,18 +259,18 @@ export function Pricing({ extended = false }: { extended?: boolean }) {
                         </div>
                       )}
                     </div>
-                    <a
+                    <Link
                       href={tier.href}
                       aria-describedby={tier.id}
                       className={classNames(
                         tier.featured
                           ? "bg-indigo-600 shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
                           : "bg-white/10 hover:bg-white/20 focus-visible:outline-white",
-                        "rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                        "rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 z-10"
                       )}
                     >
                       {tier.cta}
-                    </a>
+                    </Link>
                   </div>
                   <div className="mt-8 flow-root sm:mt-10">
                     <ul
