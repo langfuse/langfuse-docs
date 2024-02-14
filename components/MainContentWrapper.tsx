@@ -31,11 +31,6 @@ export const MainContentWrapper = (props) => {
   const params = useSearchParams();
   const sidebarVisible = params.get('sidebarVisible');
 
-  // useEffect(() => {
-  //   let element = document.querySelector('.nextra-sidebar-container');
-  //   element.className = 'hidden';
-  // }, [])
-
   return (
     <>
       {sidebarVisible === 'false' ? <SidebarChecker /> : ''}
