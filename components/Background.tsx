@@ -22,7 +22,7 @@ export const Background = () => (
       transitionPoint="50%"
       className="hidden dark:block"
     /> */}
-    <LinearGradient
+    {/* <LinearGradient
       from="rgba(2,0,36,1)"
       to="rgba(0,212,255,1)"
       direction="right"
@@ -35,6 +35,6 @@ export const Background = () => (
       direction="top"
       transitionPoint="50%"
       className="dark:hidden"
-    />
+    /> */}
   </div>
 );
