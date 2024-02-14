@@ -1,248 +1,63 @@
 ---
-description: Follow the Quickstart to get started with AssistMe in minutes before diving into the details.
+description: Welcome to the AssistMe platform! Start creating AI Copilots for your business to enhance productivity and efficiency with our quick guide.
 ---
 
-# Quickstart
+# Quickstart with AssistMe
 
-This quickstart helps you to integrate your LLM application with AssistMe.
+## Creating Your First AI Copilot (Agent)
 
+Familiarize yourself with the steps necessary to create your agent.
 <Steps>
 
-### Create project in AssistMe
+### Creation Steps
 
-The fastest way to get started is to use the AssistMe Cloud.
+1. **Naming the Agent:** Choose a unique name that is easy to identify.
+2. **Setting the System Prompt:** Describe your expectations of the agent and its main tasks.
+3. **Setting up Data Connectors:** Integrate your Google Drive and SharePoint to give the agent access to necessary data.
+4. **Custom Functions Setup:** Add plugins or custom functions to extend your agent's capabilities.
+5. **Data Indexing:** Wait until the data is indexed, and the agent is ready for testing.
 
-1. Create account and project on
-   [cloud.AssistMe.com](https://cloud.AssistMe.com/auth/sign-up)
-2. Copy API keys for your
-   project
+### Data Integration
 
-   ```bash filename=".env"
-   AssistMe_SECRET_KEY="sk-lf-...";
-   AssistMe_PUBLIC_KEY="pk-lf-...";
-   ```
+Learn about integrating data from external sources like Google Drive and SharePoint to improve your agent's efficiency.
 
-Alternatively you can run AssistMe [locally](/docs/deployment/local) (docker compose) to test it out or [self-host](/docs/deployment/self-host) (Docker) it.
+### Custom API Functions
 
-### Add tracing to your backend
+Discover how to connect various APIs, such as Zapier or ServiceNow, to enhance your AI Copilot's functionality.
 
-<Tabs items={["JS/TS", "Python", "Langchain", "API"]}>
-<Tab>
+### Testing and Debugging
 
-```sh
-npm i AssistMe
-# or
-yarn add AssistMe
+Understand the importance of testing your agent to ensure its correct operation and get acquainted with best practices for testing and debugging.
 
-# Node.js < 18
-npm i AssistMe-node
 
-# Deno
-import { AssistMe } from "https://esm.sh/AssistMe"
-```
-
-Example usage, most of the parameters are optional and depend on the use case.
-
-For more information, see the [typescript SDK docs](/docs/sdk/typescript).
-
-```typescript filename="server.ts"
-import { AssistMe } from "AssistMe";
-
-const AssistMe = new AssistMe({
-  secretKey: "sk-lf-...",
-  publicKey: "pk-lf-...",
-  // baseUrl: defaults to "https://cloud.AssistMe.com"
-});
-
-// Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-3.5-turbo",
-  modelParameters: {
-    temperature: 0.9,
-    maxTokens: 2000,
-  },
-  input: messages,
-});
-
-// Application code
-const chatCompletion = await llm.respond(prompt);
-
-// End generation - sets endTime
-generation.end({
-  output: chatCompletion,
-});
-```
-
-</Tab>
-<Tab>
-
-```bash
-pip install AssistMe
-```
-
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
-
-```python filename="server.py"
-from AssistMe import AssistMe
-
-AssistMe = AssistMe(
-  public_key="pk-lf-...",
-  secret_key="sk-sk-...",
-  host="https://cloud.AssistMe.com"
-)
-
-generation = AssistMe.generation(
-    name="summary-generation",
-    model="gpt-3.5-turbo",
-    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
-    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
-    metadata={"interface": "whatsapp"}
-)
-
-# execute model, mocked here
-# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
-chat_completion = {
-    "completion":"The Q3 OKRs contain goals for multiple teams...",
-    "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
-}
-
-# update span and sets end_time
-generation.end(
-    output=chat_completion["completion"],
-    usage=chat_completion["usage"],
-)
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-AssistMe.flush()
-```
-
-</Tab>
-<Tab>
-
-Install the AssistMe Python SDK
-
-```bash
-pip install AssistMe
-```
-
-Add AssistMe callback handler to your Langchain agent/chain/... to automatically capture traces.
-
-```python /callbacks=[handler]/
-from AssistMe.callback import CallbackHandler
-handler = CallbackHandler(AssistMe_PUBLIC_KEY, AssistMe_SECRET_KEY)
-
-# Langchain implementation
-
-# Add handler as callback when running the Langchain agent
-agent.run("<user_input>", callbacks=[handler])
-```
-
-For more examples, see the [Langchain integration docs](/docs/langchain).
-
-</Tab>
-<Tab>
-
-[API reference](/docs/api) for custom integrations
-
-</Tab>
-</Tabs>
-
-### Capture scores (optional)
-
-<Tabs items={["Browser", "JS/TS", "Python", "API"]}>
-<Tab>
-
-Use AssistMeWeb to directly capture **user feedback** as scores in the browser.
-
-```sh npm2yarn
-npm i AssistMe
-```
-
-Simple feedback component in React:
-
-```typescript
-import { AssistMeWeb } from "AssistMe";
-
-export default function UserFeedbackComponent(props: { traceId: string }) {
-  const AssistMeWeb = new AssistMeWeb({
-    publicKey: process.env.NEXT_PUBLIC_AssistMe_PUBLIC_KEY, // pk-lf-...
-    // baseUrl: defaults to "https://cloud.AssistMe.com"
-  });
-
-  const handleFeedback = async (value: number) => {
-    await AssistMeWeb.score({
-      traceId: props.traceId,
-      name: "user_feedback", // arbitrary name to identify the type of score
-      value, // float, optional: scale it to e.g. 0..1
-    });
-  };
-
-  return (
-    <>
-      <button onClick={() => handleFeedback(1)}>👍</button>
-      <button onClick={() => handleFeedback(0)}>👎</button>
-    </>
-  );
-}
-```
-
-</Tab>
-<Tab>
-
-You can use the JS/TS SDK to report a score.
-
-```typescript
-trace.score({
-  name: "user-explicit-feedback",
-  value: 1,
-  comment: "I like how personalized the response is",
-});
-
-// alternatively
-span.score({});
-generation.score({});
-event.score({});
-```
-
-</Tab>
-<Tab>
-
-You can use the Python SDK to report a score via your Python server.
-
-```python
-
-score = generation.score(
-    name='user-explicit-feedback',
-    value=1,
-    comment="I like how personalized the response is"
-)
-```
-
-</Tab>
-<Tab>
-
-```bash
-curl --location 'http://cloud.AssistMe.com/api/public/metrics' \
---header 'Content-Type: application/json' \
---header 'Accept: application/json' \
---header "Authorization: Bearer {AssistMe_public_key}"
---data '{
-  "traceId": "<string>",
-  "name": "<string>",
-  "value": "<integer>",
-  "observationId": "<optional_string>"
-}'
-```
-
-</Tab>
-</Tabs>
-
-### Explore
-
-Visit AssistMe interface to explore your data.
 
 </Steps>
+
+### Getting Started
+
+Now that you're equipped with the basics, you're ready to start creating your AI Copilot. Visit our platform and begin the transformation of your business today!
+
+This structured guide is designed to help users swiftly navigate through the process of creating and utilizing an AI Copilot on the AssistMe platform, ensuring clear instructions and guidance for a successful beginning.
+
+<Tabs items={["API"]}>
+
+  <Tab>
+
+  ```bash
+  curl --location 'http://staging.assistme.chat/api/v1/metrics' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header "Authorization: Bearer {AssistMe_public_key}"
+  --data '{
+    "traceId": "<string>",
+    "name": "<string>",
+    "value": "<integer>",
+    "observationId": "<optional_string>"
+  }'
+  ```
+
+  </Tab>
+</Tabs>
+
 
 

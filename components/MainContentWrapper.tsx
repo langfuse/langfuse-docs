@@ -26,7 +26,7 @@ export const SidebarChecker = () => {
 }
 
 export const MainContentWrapper = (props) => {
-  const [visible, setVisible] = useState('');
+  const [visible, setVisible] = useState(true);
   const router = useRouter();
   const params = useSearchParams();
   const sidebarVisible = params.get('sidebarVisible');
