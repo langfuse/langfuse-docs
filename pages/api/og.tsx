@@ -7,7 +7,7 @@ export const config = {
 
 export default async function handler(request: NextRequest) {
   const imageData = (await fetch(
-    new URL("../../public/icon256.png", import.meta.url)
+    new URL("../../public/assistme.svg", import.meta.url)
   ).then((res) => res.arrayBuffer())) as string;
 
   const { searchParams } = new URL(request.url);
