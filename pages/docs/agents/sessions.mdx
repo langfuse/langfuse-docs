@@ -23,7 +23,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tabs items={["Python", "API"]}>
 <Tab>
 ```diff
 AssistMe.trace(
@@ -33,57 +33,26 @@ AssistMe.trace(
 ```
 
 </Tab>
-<Tab>
-```diff
-AssistMe.trace({
-    ...
-+   sessionId: "your-session-id"
-})
-```
+  <Tab>
+ 
+  ```bash
+  curl --location 'http://staging.assistme.chat/api/v1/traces' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header "Authorization: Bearer {AssistMe_public_key}"
+  --data '{
+    "traceId": "<string>",
+    "name": "<string>",
+    "value": "<integer>",
+    "observationId": "<optional_string>"
+  }'
+  ```
+ 
+  </Tab>
 
-</Tab>
-<Tab>
-```
-from AssistMe.openai import openai
-```
-```diff
-completion = openai.chat.completions.create(
-    name="test-chat",
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a calculator."},
-        {"role": "user", "content": "1 + 1 = "}],
-    temperature=0,
-+   session_id="your-session-id"
-)
-````
-
-</Tab>
-<Tab>
-```diff
-handler = CallbackHandler(
-+   session_id="your-session-id"
-)
-```
-
-</Tab>
-<Tab>
-```diff
-const handler = new CallbackHandler({
-+   sessionId: "your-session-id"
-});
-```
-
-</Tab>
-
-<Tab>
-The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId to the AssistMe sessionId. Flowise 1.4.10 or higher is required.
-
-</Tab>
 
 </Tabs>
 
-Session tracking for all [integrations](/docs/integrations) will be available soon. If you want to be notified when this feature is ready, please open an [issue](/issue).
 
 ## Other features
 
