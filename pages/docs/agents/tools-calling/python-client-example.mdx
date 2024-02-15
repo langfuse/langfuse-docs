@@ -1,0 +1,40 @@
+## Python Client Example for Enabling API Calling
+To enable API calling in your Agent using the AssistMe Python client, you can use the `client.agent.enable_api_calling` method. This method allows you to activate the API calling feature for a specific agent and define functions for various tasks such as getting a customer's balance, age, or last failed transactions.
+Below is an updated example demonstrating how to use this method with the necessary parameters:
+```python
+pythonCopy codefrom assistme import AssistMe
+client = AssistMe()
+# Specify the unique agent identifier
+agent_id = "your_agent_id_here"
+# Define the function for getting a customer's balance
+get_customer_balance_function = {
+   "type": "function",
+   "function": {
+       "name": "get_customer_balance",
+       "description": "Retrieves the current balance for a specified customer",
+       "endpoint": {
+           "url": "https://api.example.com/customer/balance",
+           "method": "GET",
+           "headers": {
+               "Authorization": "Bearer YOUR_API_KEY"
+           }
+       },
+       "parameters": {
+           "type": "object",
+           "properties": {
+               "customerId": {
+                   "type": "string",
+                   "description": "The unique identifier for the customer"
+               }
+           },
+           "required": ["customerId"]
+       }
+   }
+}
+# Enable API calling for the agent with the defined function
+response = client.agent.enable_api_calling(agent_id=agent_id, function=get_customer_balance_function)
+# Print the response to verify the configuration has been applied
+print(response)
+```
+In this example, replace `your_agent_id_here` with the actual ID of your agent and `"Bearer YOUR_API_KEY"` with the real bearer token required for authorization against the API you are calling. Adjust the function definition (`get_customer_balance_function`) as needed for other API calls, such as getting a customer's age or information on the last failed transactions.
+This method configures your agent to make external API calls, extending its functionality beyond basic conversational capabilities to interact with external data sources and services dynamically.
