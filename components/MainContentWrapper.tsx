@@ -84,7 +84,7 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="https://cal.com/ihor-ks" target="_blank">
+          <a href="https://cal.com/ihor-k" target="_blank">
             <span>Talk to founder</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>
