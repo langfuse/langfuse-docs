@@ -12,10 +12,34 @@ It's easy to map data in AssistMe to individual users. Just pass a unique identi
 
 The user list provides an overview of all users that have been tracked by AssistMe. It makes it simple to segment by overall token usage, number of traces, and user feedback.
 
-<Frame>![User List](/images/docs/users-list.png)</Frame>
+
+<Frame>![User List](/images/docs/users.png)</Frame>
 
 ## Individual user view
 
 The individual user view provides an in-depth look into a single user. Explore aggregated metrics or view all traces and feedback for a user.
 
-<Frame>![Individual user view](/images/docs/users-single-user.gif)</Frame>
+<Frame>![Individual user view](/images/docs/user_detail.gif)</Frame>
+
+### Use API to create users
+
+
+<Tabs items={["API"]}>
+  <Tab>
+ 
+  ```bash
+  curl --location 'http://staging.assistme.chat/api/v1/traces' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header "Authorization: Bearer {AssistMe_public_key}"
+  --data '{
+    "traceId": "<string>",
+    "name": "<string>",
+    "value": "<integer>",
+    "observationId": "<optional_string>"
+  }'
+  ```
+ 
+  </Tab>
+
+  </Tabs>
