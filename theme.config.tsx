@@ -23,15 +23,15 @@ import { PageItem } from "nextra/normalize-pages";
 
 const footerNav = [
   { name: "Contact", href: "mailto:contact@assistme.chat" },
-  {
-    name: "Schedule Demo",
-    href: "/schedule-demo",
-  },
-  { name: "Careers", href: "/careers" },
-  {
-    name: "Status",
-    href: "https://status.assistme.com",
-  },
+  // {
+  //   name: "Schedule Demo",
+  //   href: "/schedule-demo",
+  // },
+  // { name: "Careers", href: "/careers" },
+  // {
+  //   name: "Status",
+  //   href: "https://status.assistme.com",
+  // },
 ];
 
 const footerLegalNav = [

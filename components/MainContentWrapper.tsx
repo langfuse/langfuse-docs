@@ -74,9 +74,9 @@ export const DocsSupport = () => {
             <RxDiscordLogo className="h-4 w-4 ml-3" />
           </a>
         </Button>
-        <Button variant="outline" size="sm" onClick={() => openChat()}>
+        {/* <Button variant="outline" size="sm" onClick={() => openChat()}>
           <span>Chat</span> <MessageSquare className="h-4 w-4 ml-3" />
-        </Button>
+        </Button> */}
         <Button variant="outline" size="sm" asChild>
           <a href="mailto:support@assistme.chat" target="_blank">
             <span>Email</span>
@@ -84,7 +84,7 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="https://cal.com/marc-kl" target="_blank">
+          <a href="https://cal.com/ihor-k" target="_blank">
             <span>Talk to founder</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>
