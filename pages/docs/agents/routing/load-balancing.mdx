@@ -1,0 +1,58 @@
+## Load Balancing Configuration Guide
+
+This guide demonstrates how to configure load balancing for the AssistMe router using the AssistMe Python client. This configuration ensures efficient distribution of requests across multiple instances of a specific model to optimize throughput and reliability.
+
+### Configuration Details
+
+To configure load balancing, specify each model instance's details, including the model name, deployment identifier, API base URL, API key, and the rate limit measured in requests per minute (RPM).
+
+#### Example Configuration
+
+```python
+from assistme import AssistMe
+
+client = AssistMe()
+
+# Define the load balancing configuration with detailed explanations for each parameter
+router_config = {
+    "model_list": [
+        {
+            "model_name": "gpt-3.5-turbo",  # The name of the model for load balancing
+            "model": "azure/gpt-turbo-small-eu",  # Model instance identifier
+            "api_base": "https://my-endpoint-europe-berri-992.openai.azure.com/",  # API base URL
+            "api_key": "[Your_API_Key_Here]",  # API key for authentication
+            "rpm": 6  # RPM (Requests Per Minute): Rate limit for this deployment
+        },
+        {
+            "model_name": "gpt-3.5-turbo",
+            "model": "azure/gpt-turbo-small-ca",
+            "api_base": "https://my-endpoint-canada-berri992.openai.azure.com/",
+            "api_key": "[Your_API_Key_Here]",
+            "rpm": 6  # RPM (Requests Per Minute): Rate limit for this deployment
+        },
+        {
+            "model_name": "gpt-3.5-turbo",
+            "model": "azure/gpt-turbo-large",
+            "api_base": "https://openai-france-1234.openai.azure.com/",
+            "api_key": "[Your_API_Key_Here]",
+            "rpm": 1440  # RPM (Requests Per Minute): Rate limit for this deployment
+        }
+    ]
+}
+
+# Apply the configuration using the router.configure method
+response = client.router.configure(router_config=router_config)
+
+# Print the response to verify the configuration has been applied
+print(response)
+```
+
+#### Key Parameters Explained:
+
+- **`model_name`**: Identifies the model version for which load balancing is configured.
+- **`model`**: Specifies the model instance, facilitating request routing to the appropriate deployment.
+- **`api_base`**: The base URL for the API endpoint of the model instance, necessary for directing requests.
+- **`api_key`**: A unique key required for authenticating requests to the model's API endpoint.
+- **`rpm`**: Stands for "Requests Per Minute," indicating the rate limit for requests to the specified model instance. This parameter helps manage throughput and ensures balanced distribution across deployments.
+
+Replace `[Your_API_Key_Here]` with your actual API keys for each deployment. The `router.configure` method is a placeholder for the actual method used to configure the router in the AssistMe client; refer to the AssistMe client library documentation for exact usage.

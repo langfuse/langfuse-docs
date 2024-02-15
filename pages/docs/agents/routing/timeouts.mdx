@@ -1,0 +1,60 @@
+## Configuration Guide: Fallbacks, Cooldowns, Retries, and Timeouts
+
+This documentation provides a detailed guide on configuring your AssistMe platform router to effectively manage fallbacks, cooldowns, retries, and timeouts. By implementing these settings, your service will automatically handle errors and optimize request distribution, enhancing reliability and user experience.
+
+### Configuration Setup
+
+The configuration requires defining the models involved and setting global parameters for error handling, including the number of retries, request timeout limits, fallback mechanisms, and cooldown conditions.
+
+#### Simplified Example Configuration
+
+```
+markdownCopy codefrom assistme import AssistMe
+
+client = AssistMe()
+
+# Configuration for handling errors and optimizing request distribution
+router_config = {
+    "model_list": [
+        {
+            "model_name": "gpt-3.5-turbo",
+            "model": "gpt-3.5-turbo",
+            "api_key": "<my-openai-key>"
+        },
+        {
+            "model_name": "gpt-3.5-turbo-16k",
+            "model": "gpt-3.5-turbo-16k",
+            "api_key": "<my-openai-key>"
+        }
+    ],
+    "litellm_settings": {
+        "num_retries": 3,  # Retry call 3 times on each model before failing
+        "request_timeout": 10,  # Timeout if call exceeds 10 seconds
+        "fallbacks": [{"gpt-3.5-turbo": ["gpt-3.5-turbo-16k"]}],  # Fallback to gpt-3.5-turbo-16k if gpt-3.5-turbo fails after retries
+        "allowed_fails": 3  # Cooldown model if it fails more than 3 times in a minute
+    }
+}
+
+# Apply the router configuration
+response = client.router.configure(router_config=router_config)
+
+# Verify the configuration has been applied
+print(response)
+```
+
+#### Configuration Parameters Explained:
+
+- **`model_list`**: Specifies the models to be used, including their names, identifiers, and API keys for authenticated access.
+
+- `litellm_settings`
+
+  : Defines the global settings for error handling:
+
+  - **`num_retries`**: The number of attempts to make on each model before deeming the request as failed.
+  - **`request_timeout`**: The maximum time (in seconds) a request should take before being considered as timed out.
+  - **`fallbacks`**: Designates alternative models to use if the primary model fails after the specified number of retries.
+  - **`allowed_fails`**: Sets the threshold for the number of failures within a minute that triggers a cooldown period for the model.
+
+Replace `<my-openai-key>` with the actual API keys for your models. This setup ensures that your application can dynamically respond to request failures, efficiently distributing loads and maintaining high availability.
+
+The `router.configure` method illustrated is a generic representation. For actual implementation, consult the AssistMe client library documentation for the correct usage and method names.

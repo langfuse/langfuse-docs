@@ -46,7 +46,7 @@ const tiers = [
   {
     name: "Team",
     id: "tier-team",
-    // href: "/schedule-demo",
+    href: "/schedule-demo",
     price: { monthly: "$199", annually: "$2388" },
     description:
       "Dedicated solutions and support for your team. Contact us to learn more.",
