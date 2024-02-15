@@ -49,65 +49,6 @@ _Example: https://cloud.AssistMe.com/public/traces/lf.docs.conversation.u6Wl2hG_
 
 <Frame>![Share trace via public link](/images/docs/trace-share-link.gif)</Frame>
 
-## Get trace url in SDK
-
-Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
-
-<Tabs items={["Python", "JS/TS"]}>
-<Tab>
-```python
-# trace object
-trace.get_trace_url()
-```
-
-```python
-# Langchain callback handler
-handler.get_trace_url()
-```
-
-</Tab>
-<Tab>
-```typescript
-// trace object
-trace.getTraceUrl()
-```
-
-```typescript
-// Langchain callback handler
-handler.getTraceUrl();
-```
-
-</Tab>
-
-</Tabs>
-
-## Tagging traces
-
-Tags allow you to categorize and filter traces. You can tag traces only from the [AssistMe SDKs](/docs/sdk) or from the [AssistMe UI](https://cloud.AssistMe.com). To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
-
-<Tabs items={["Python", "JS/TS"]}>
-<Tab>
-```python
-trace = AssistMe.trace(
-    name = "docs-retrieval",
-    tags = ["my-first-tag", "even-better-tag"]
-)
-```
-
-</Tab>
-
-<Tab>
-```typescript
-const trace = AssistMe.trace({
-  name: "docs-retrieval",
-  tags: ["tag-a-licious", "tig-tag-tagging"],
-});
-```
-
-</Tab>
-
-</Tabs>
-
 ### Working with traces
 
 Tags enable you to flexibly add metadata to your traces.
