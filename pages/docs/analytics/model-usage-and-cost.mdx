@@ -69,13 +69,6 @@ AssistMe.generation({
 });
 ```
 
-## Infer usage and/or cost [#infer]
-
-If either usage or cost are not ingested, AssistMe will attempt to infer the missing values based on the `model` parameter of the generation. This is especially useful for some model providers or self-hosted models which do not include usage or cost in the response.
-
-AssistMe comes with a **list of predefined popular models and their tokenizers** including **OpenAI, Anthropic, Google**.
-
-You can also add your own **custom model definitions** (see [below](#custom-model-definitions)) or request official support for new models via [GitHub](/issue).
 
 ### Usage
 
@@ -96,4 +89,4 @@ AssistMe automatically calculates cost for ingested generations if (1) usage is 
 
 ## Troubleshooting
 
-**Usage and cost are missing for historical generations**. Except for changes in prices, AssistMe does not retroactively infer usage and cost for existing generations when model definitions are changed. You can request a batch job (AssistMe Cloud) or run a [script](/docs/deployment/self-host#migrate-models) (self-hosting) to apply new model definitions to existing generations.
+**Usage and cost are missing for historical generations**. Except for changes in prices, AssistMe does not retroactively infer usage and cost for existing generations when model definitions are changed. You can request a batch job or run a [script](/docs/deployment/self-host#migrate-models) (self-hosting) to apply new model definitions to existing generations.

@@ -27,7 +27,7 @@ const footerNav = [
     name: "Schedule Demo",
     href: "/schedule-demo",
   },
-  { name: "Careers", href: "/careers" },
+  // { name: "Careers", href: "/careers" },
   {
     name: "Status",
     href: "https://status.assistme.com",
