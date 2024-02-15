@@ -35,40 +35,30 @@ flowchart LR
 
 If available in the LLM response, ingesting usage and/or cost is the most accurate and robust way to track usage in AssistMe:
 
-```typescript
-AssistMe.generation({
-  ...
-  usage: {
-    // usage
-    input: integer,
-    output: integer,
-    total: integer, // if no separate input&output, otherwise derived from input + output
-    unit: string, // 'TOKENS' or 'CHARACTERS', defaults to 'TOKENS'
+<Tabs items={["API"]}>
+  <Tab>
+ 
+  ```bash
+  curl --location 'http://staging.assistme.chat/api/v1/observations' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json' \
+  --header "Authorization: Bearer {AssistMe_public_key}"
+  --data '{
+    "page": "<optional_string>",
+    "limit": "<optional_string>",
+    "name": "<optional_string>",
+    "userId": "<optional_string>",
+    "type": "<optional_string>",
+    "traceId": "<optional_string>",
+    "parentObservationId": "<optional_string>",
+    "agentId": "<string>"
+  }'
+  ```
+ 
+  </Tab>
 
-    // usd cost
-    inputCost: number
-    outputCost: number
-    totalCost: number
-  },
-  ...
-})
-```
 
-### Compatibility with OpenAI
-
-For increased compatibility with OpenAI, you can also use the following attributes to ingest usage:
-
-```typescript
-AssistMe.generation({
-  usage: {
-    // usage
-    promptTokens: integer,
-    completionTokens: integer,
-    totalTokens: integer, // optional, derived from prompt + completion
-  },
-});
-```
-
+</Tabs>
 
 ### Usage
 
