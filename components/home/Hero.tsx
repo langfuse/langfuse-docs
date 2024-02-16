@@ -27,7 +27,11 @@ export function Hero() {
         </span>
 
         <div className="flex gap-4 flex-wrap items-center justify-center my-4">
-          <Button size="lg" asChild>
+          <Button
+            size="lg"
+            className="text-white bg-gradient-to-br from-pink-500 to-orange-400 opacity-90 hover:opacity-100 transition-opacity"
+            asChild
+          >
             <Link href="/docs/demo">Try demo</Link>
           </Button>
           <Button variant="secondary" size="lg" asChild>

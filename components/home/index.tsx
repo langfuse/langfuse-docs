@@ -7,6 +7,8 @@ import { Pricing } from "./Pricing";
 import { Users } from "./Users";
 import { OpenSource } from "./OpenSource";
 import Integrations from "./Integrations";
+import { FeatureBento } from "./FeatureBento";
+import IntegrationsNew from "./IntegrationsNew";
 
 export const Home = () => (
   <>
@@ -14,9 +16,8 @@ export const Home = () => (
       <div className="px-2 md:container">
         <Hero />
         <Users />
-        <FeatTracing />
-        <FeatAnalytics />
-        <Integrations />
+        <FeatureBento />
+        <IntegrationsNew />
         <OpenSource />
         <Pricing />
         <FromTheBlog />
