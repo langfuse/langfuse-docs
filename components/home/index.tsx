@@ -8,10 +8,10 @@ export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
       <div className="px-2 md:container">
-        <FeatTracing />
+        {/* <FeatTracing />
         <FeatAnalytics />
         <Pricing />
-        <FromTheBlog />
+        <FromTheBlog /> */}
         {/* <CTA /> */}
       </div>
     </main>
