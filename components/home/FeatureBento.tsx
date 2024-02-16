@@ -2,14 +2,12 @@ import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import {
   Award,
   Box,
-  Boxes,
   GanttChart,
   GitPullRequestArrow,
   LineChart,
 } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import HomeSubHeader from "./components/HomeSubHeader";
-import { DotPattern } from "../magicui/dot-pattern";
 
 const features = [
   {
@@ -26,7 +24,7 @@ const features = [
     name: "Prompt Management",
     description:
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
-    href: "/",
+    href: "/docs/prompts",
     cta: "See docs",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
@@ -36,7 +34,7 @@ const features = [
     name: "Evaluation",
     description:
       "Understand what works with manual/user feedback & model-based evaluation.",
-    href: "/",
+    href: "/docs/scores/overview",
     cta: "See docs",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
@@ -45,7 +43,7 @@ const features = [
     Icon: LineChart,
     name: "Metrics",
     description: "Track cost, latency, and quality.",
-    href: "/",
+    href: "/docs/analytics",
     cta: "See docs",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
@@ -55,7 +53,7 @@ const features = [
     name: "Interoperable integrations",
     description:
       "Interoperable integrations for Python, JS, OpenAI SDK, Langchain and more.",
-    href: "/",
+    href: "/docs/integrations/overview",
     cta: "See docs",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",

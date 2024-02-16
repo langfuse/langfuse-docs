@@ -2,6 +2,8 @@ import { Check, Plus, Minus, X } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import { BorderBeam } from "../magicui/border-beam";
 import Link from "next/link";
+import HomeSubHeader from "./components/HomeSubHeader";
+import { Button } from "../ui/button";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -198,14 +200,12 @@ export function Pricing({ extended = false }: { extended?: boolean }) {
     <div className="isolate overflow-hidden">
       <div className="flow-root pb-16 pt-24 sm:pt-32 lg:pb-0">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="relative z-10">
-            <h2 className="mx-auto max-w-4xl text-center text-5xl font-bold tracking-tight">
-              Simple pricing for projects of all sizes
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-lg leading-8 text-primary/60">
-              Get started on the Hobby plan for free. No credit card required.
-            </p>
-          </div>
+          <HomeSubHeader
+            subtitle="Simple pricing for projects of all sizes"
+            title="Pricing"
+            description="Get started on the Hobby plan for free. No credit card required."
+          />
+
           <div className="relative mx-auto mt-10 grid max-w-md grid-cols-1 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
             <div
               className="hidden lg:absolute lg:inset-x-px lg:bottom-4 lg:top-4 lg:block lg:rounded-2xl lg:bg-gray-800/80 lg:ring-1 lg:ring-white/10"
@@ -259,18 +259,13 @@ export function Pricing({ extended = false }: { extended?: boolean }) {
                         </div>
                       )}
                     </div>
-                    <Link
-                      href={tier.href}
-                      aria-describedby={tier.id}
-                      className={classNames(
-                        tier.featured
-                          ? "bg-indigo-600 shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600"
-                          : "bg-white/10 hover:bg-white/20 focus-visible:outline-white",
-                        "rounded-md py-2 px-3 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 z-10"
-                      )}
+                    <Button
+                      asChild
+                      className="z-10"
+                      variant={tier.featured ? "cta" : "secondary"}
                     >
-                      {tier.cta}
-                    </Link>
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
                   </div>
                   <div className="mt-8 flow-root sm:mt-10">
                     <ul

@@ -65,6 +65,7 @@ module.exports = {
         meteor: "meteor 5s linear infinite",
         spin: "spin calc(var(--speed) * 2) infinite linear",
         slide: "slide var(--speed) ease-in-out infinite alternate",
+        "gradient": 'gradient 6s linear infinite',
       },
       keyframes: {
         "accordion-down": {
@@ -87,6 +88,9 @@ module.exports = {
             transform: "rotate(215deg) translateX(-500px)",
             opacity: 0,
           },
+        },
+        "gradient": {
+          to: { 'background-position': '200% center' },
         },
         spin: {
           "0%": {
