@@ -68,7 +68,7 @@ export function Hero() {
             className="hidden dark:block"
           />
         </a>
-        <div className="max-w-full w-52">
+        <div className="max-w-full w-52 px-1">
           <ProductHuntBadge />
         </div>
       </div>
