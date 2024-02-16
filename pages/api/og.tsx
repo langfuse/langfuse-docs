@@ -63,7 +63,7 @@ export default async function handler(request: NextRequest) {
             <span style={{ fontWeight: 800 }}>
               Langfuse
               <span style={{ marginLeft: 10, fontWeight: 400 }}>
-                – Open source analytics for LLM Apps
+                – Open Source LLM Engineering Platform
               </span>
             </span>
           </div>

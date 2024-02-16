@@ -1,5 +1,5 @@
 ---
-description: Capture all LLM calls made via LiteLLM in Langfuse
+description: Open source observability for LiteLLM via the native integration. Automatically capture detailed traces and metrics for every request.
 ---
 
 # 🚅 LiteLLM Integration
@@ -15,9 +15,9 @@ By adding the callback you can instantly log your responses across all providers
 os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
 os.environ["LANGFUSE_SECRET_KEY"] = "your key"
 
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+# Langfuse host
+os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"]="https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Set callback
 litellm.success_callback = ["langfuse"]
@@ -32,9 +32,9 @@ from litellm import completion
 os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
 os.environ["LANGFUSE_SECRET_KEY"] = "your key"
 
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+# Langfuse host
+os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"]="https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["COHERE_API_KEY"] = ""
