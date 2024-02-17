@@ -32,6 +32,7 @@ const BentoBgImage = ({
       src={imgLight}
       fill
       alt={alt}
+      sizes="(min-width: 1024px) 33vw, 100vw"
     />
     <Image
       className="opacity-30 top-0 right-0 hidden dark:block"
@@ -43,6 +44,7 @@ const BentoBgImage = ({
       src={imgDark}
       fill
       alt={alt}
+      sizes="(min-width: 1024px) 33vw, 100vw"
     />
   </>
 );
@@ -112,7 +114,7 @@ export function FeatureBento() {
         description="All Langfuse features are tightly integrated with Langfuse tracing."
         button={{ href: "/docs", text: "Explore docs" }}
       />
-      <BentoGrid className="lg:grid-rows-3">
+      <BentoGrid className="lg:grid-rows-3 gap-3">
         {features.map((feature) => (
           <BentoCard key={feature.name} {...feature} />
         ))}

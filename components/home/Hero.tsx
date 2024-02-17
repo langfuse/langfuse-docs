@@ -13,7 +13,7 @@ export function Hero() {
   return (
     <HomeSection>
       {/* HERO */}
-      <div className="flex flex-col items-start justify-center pt-5 gap-3 md:min-h-[calc(60vh-100px)]">
+      <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(60vh-100px)]">
         <h1 className="text-5xl sm:text-7xl lg:text-8xl">
           Open Source
           <br />

@@ -66,12 +66,14 @@ const UserLogo = ({ user }: { user: User }) => {
         src={user.lightImage}
         alt={user.name}
         className="object-contain hidden dark:block grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
+        sizes="(min-width: 768px) 20vw, 40vw"
         fill={true}
       />
       <Image
         src={user.darkImage}
         alt={user.name}
         className="object-contain dark:hidden grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
+        sizes="(min-width: 768px) 20vw, 40vw"
         fill={true}
       />
     </a>
