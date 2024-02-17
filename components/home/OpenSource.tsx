@@ -17,7 +17,7 @@ export const OpenSource = () => {
       />
 
       <Link href="https://github.com/langfuse/langfuse">
-        <ShimmerButton borderRadius="8px" className="mt-11">
+        <ShimmerButton borderRadius="0.25rem" className="mt-11">
           <div className="flex gap-4 items-center whitespace-pre-wrap bg-gradient-to-b from-white from-30% to-gray-300/70 bg-clip-text text-center text-md font-semibold leading-none tracking-tight text-transparent">
             <BsGithub size={28} className="text-white" />
             <span>langfuse/langfuse:</span>
