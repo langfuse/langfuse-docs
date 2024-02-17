@@ -1,4 +1,7 @@
-import Image from "next/image";
+import { cn } from "@/lib/utils";
+import Marquee from "@/components/magicui/marquee";
+
+import Image, { type StaticImageData } from "next/image";
 import pigmentLight from "./img/pigment_light.svg";
 import pigmentDark from "./img/pigment_dark.svg";
 import alphawatchLight from "./img/alphawatch_light.png";
@@ -9,8 +12,16 @@ import frontifyLight from "./img/frontify_light.svg";
 import frontifyDark from "./img/frontify_dark.svg";
 import berryLight from "./img/berry_light.png";
 import berryDark from "./img/berry_light.png";
+import { HomeSection } from "./components/HomeSection";
 
-const users = [
+type User = {
+  name: string;
+  lightImage: StaticImageData;
+  darkImage: StaticImageData;
+  href: string;
+};
+
+const users: User[] = [
   {
     name: "Pigment",
     lightImage: pigmentLight,
@@ -41,38 +52,47 @@ const users = [
     darkImage: mavaDark,
     href: "https://mava.app",
   },
-] as const;
+];
 
-export const Users = () => (
-  <section className="py-24 sm:py-32">
-    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-      <h2 className="text-center text-lg font-semibold leading-8">
+const UserLogo = ({ user }: { user: User }) => {
+  return (
+    <a
+      href={user.href}
+      className={cn("relative h-12 sm:h-16 w-20 sm:w-40 cursor-pointer")}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Image
+        src={user.lightImage}
+        alt={user.name}
+        className="object-contain hidden dark:block grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
+        fill={true}
+      />
+      <Image
+        src={user.darkImage}
+        alt={user.name}
+        className="object-contain dark:hidden grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
+        fill={true}
+      />
+    </a>
+  );
+};
+
+export const Users = () => {
+  return (
+    <HomeSection className="pt-6 md:pt-6 max-w-screen-xl">
+      <h2 className="text-center text-lg font-semibold leading-8 mb-6">
         Teams building complex LLM apps rely on Langfuse
       </h2>
-      <div className="mx-auto mt-10 grid max-w-lg items-center gap-x-8 gap-y-8 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none grid-cols-2 lg:grid-cols-5">
-        {users.map((user) => (
-          <a
-            href={user.href}
-            key={user.name}
-            className="relative overflow-hidden h-12 sm:h-16 w-20 sm:w-40 mx-auto last:col-span-2 last:lg:col-span-1"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <Image
-              className="object-contain hidden dark:block grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
-              src={user.lightImage}
-              alt={user.name}
-              fill={true}
-            />
-            <Image
-              className="object-contain dark:hidden grayscale hover:grayscale-0 transition dark:opacity-90 opacity-80 hover:opacity-100"
-              src={user.darkImage}
-              alt={user.name}
-              fill={true}
-            />
-          </a>
-        ))}
+      <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden">
+        <Marquee className="[--gap:4rem]">
+          {users.map((user) => (
+            <UserLogo key={user.name} user={user} />
+          ))}
+        </Marquee>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white dark:from-background"></div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-white dark:from-background"></div>
       </div>
-    </div>
-  </section>
-);
+    </HomeSection>
+  );
+};

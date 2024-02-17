@@ -66,6 +66,8 @@ module.exports = {
         spin: "spin calc(var(--speed) * 2) infinite linear",
         slide: "slide var(--speed) ease-in-out infinite alternate",
         "gradient": 'gradient 6s linear infinite',
+        marquee: "marquee var(--duration) linear infinite",
+        "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
       keyframes: {
         "accordion-down": {
@@ -88,6 +90,14 @@ module.exports = {
             transform: "rotate(215deg) translateX(-500px)",
             opacity: 0,
           },
+        },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
+        },
+        "marquee-vertical": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(calc(-100% - var(--gap)))" },
         },
         "gradient": {
           to: { 'background-position': '200% center' },
