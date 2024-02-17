@@ -7,12 +7,13 @@ import phDark from "./img/ph_product_of_the_day_dark.png";
 import { CloudflareVideo } from "../Video";
 import GoldenKittyAwardSVG from "./img/ph_gke_ai_infra.svg";
 import GoldenKittyAwardSVGWhite from "./img/ph_gke_ai_infra_white.svg";
+import { HomeSection } from "./components/HomeSection";
 
 export function Hero() {
   return (
-    <section>
+    <HomeSection>
       {/* HERO */}
-      <div className="flex flex-col items-start justify-center pt-5 px-5 gap-3 md:min-h-[calc(60vh-100px)]">
+      <div className="flex flex-col items-start justify-center pt-5 gap-3 md:min-h-[calc(60vh-100px)]">
         <h1 className="text-4xl sm:text-7xl lg:text-8xl">
           Open Source
           <br />
@@ -77,7 +78,7 @@ export function Hero() {
         videoId="ff57153dd945da86f7549c1f30daaea2"
         aspectRatio={1.71}
       />
-    </section>
+    </HomeSection>
   );
 }
 
