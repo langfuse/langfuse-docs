@@ -1,25 +1,37 @@
 import { cn } from "@/lib/utils";
-import { MediaPlayer, MediaOutlet } from "@vidstack/react";
+import {
+  MediaPlayer,
+  MediaOutlet,
+  useMediaRemote,
+  useMediaStore,
+} from "@vidstack/react";
+import { useState, useRef, useEffect } from "react";
+import { FaPlay } from "react-icons/fa";
 
 export const CloudflareVideo = ({
   videoId,
   aspectRatio,
   className,
   gifStyle = false,
+  title,
 }: {
   videoId: string;
   aspectRatio?: number;
   gifStyle?: boolean;
   className?: string;
-}) => (
-  <Video
-    src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
-    poster={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`}
-    aspectRatio={aspectRatio}
-    gifStyle={gifStyle}
-    className={className}
-  />
-);
+  title?: string;
+}) => {
+  return (
+    <Video
+      src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
+      poster={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`}
+      aspectRatio={aspectRatio}
+      gifStyle={gifStyle}
+      className={className}
+      title={title}
+    />
+  );
+};
 
 export const Video = ({
   src,
@@ -27,27 +39,65 @@ export const Video = ({
   aspectRatio,
   className,
   gifStyle = false,
+  title,
 }: {
   src: string;
   poster?: string;
   aspectRatio?: number;
   gifStyle?: boolean;
   className?: string;
-}) => (
-  <MediaPlayer
-    src={src}
-    poster={poster}
-    controls={!gifStyle}
-    autoplay={gifStyle}
-    muted={gifStyle}
-    loop={gifStyle}
-    playsinline={gifStyle}
-    aspectRatio={aspectRatio}
-    className={cn(
-      "my-4 overflow-hidden rounded shadow-lg ring-1 ring-slate-700 bg-cover object-cover",
-      className
-    )}
-  >
-    <MediaOutlet />
-  </MediaPlayer>
-);
+  title?: string;
+}) => {
+  const [panelDismissed, setPanelDismissed] = useState(false);
+  const mediaPlayerRef = useRef(null);
+  const remote = useMediaRemote(mediaPlayerRef);
+  const { duration } = useMediaStore(mediaPlayerRef);
+  const durationString = duration
+    ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60)} min`
+    : null;
+
+  return (
+    <MediaPlayer
+      ref={mediaPlayerRef}
+      src={src}
+      poster={poster}
+      controls={!gifStyle && panelDismissed}
+      autoplay={gifStyle}
+      muted={gifStyle}
+      loop={gifStyle}
+      load="eager"
+      playsinline={gifStyle}
+      aspectRatio={aspectRatio}
+      className={cn(
+        "my-4 overflow-hidden rounded shadow-lg ring-1 ring-slate-700 bg-cover object-cover",
+        className
+      )}
+    >
+      {gifStyle ? (
+        // Capture mouse events, they broke scrolling on iOS
+        <div className="absolute inset-0 z-10" />
+      ) : !panelDismissed ? (
+        <div
+          className="group cursor-pointer absolute inset-0 z-10 flex flex-col justify-center items-center"
+          onClick={() => {
+            remote.play();
+            setPanelDismissed(true);
+          }}
+        >
+          <div className="p-3 md:p-6 rounded-full bg-background group-hover:ring-8 ring-background/20 bg-opacity-75 hover:bg-opacity-90 transition flex">
+            <FaPlay className="h-3 w-3 md:h-6 md:w-6 text-white" />
+          </div>
+          <div className="mt-3 md:mt-6 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="flex gap-2 text-xs md:text-sm font-semibold bg-background/90 py-1 px-3 rounded-full">
+              {title && <span>{title}</span>}
+              {durationString && (
+                <span className="text-primary/70">{durationString}</span>
+              )}
+            </span>
+          </div>
+        </div>
+      ) : null}
+      <MediaOutlet />
+    </MediaPlayer>
+  );
+};
