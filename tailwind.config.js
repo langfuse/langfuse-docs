@@ -71,7 +71,7 @@ module.exports = {
         slide: "slide var(--speed) ease-in-out infinite alternate",
         "gradient": 'gradient 6s linear infinite',
         marquee: "marquee var(--duration) linear infinite",
-        grid: "grid 15s linear infinite",
+        grid: "grid 20s linear infinite",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
       keyframes: {
