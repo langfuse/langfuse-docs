@@ -80,7 +80,7 @@ const UserLogo = ({ user }: { user: User }) => {
 
 export const Users = () => {
   return (
-    <HomeSection className="pt-6 md:pt-6 max-w-screen-xl">
+    <HomeSection className="pt-6 md:pt-6">
       <h2 className="text-center text-lg font-semibold leading-8 mb-6">
         Teams building complex LLM apps rely on Langfuse
       </h2>
