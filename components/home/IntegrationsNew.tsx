@@ -52,6 +52,10 @@ export default function IntegrationsNew() {
         title="Integrations"
         subtitle="Works with any LLM app"
         description="Typed SDKs for Python & JS/TS. Native integrations for popular frameworks and libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
+        button={{
+          href: "/docs/integrations/overview",
+          text: "Integration docs",
+        }}
       />
       <div
         className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded-lg border bg-background p-8 md:p-12 md:shadow-2xl"
