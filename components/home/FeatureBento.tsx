@@ -27,7 +27,7 @@ const BentoBgImage = ({
       style={{
         objectFit: "contain",
         objectPosition: "top right",
-        maskImage: "linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,1))",
+        maskImage: "linear-gradient(to top, rgba(0,0,0,0) 15%, rgba(0,0,0,1))",
       }}
       src={imgLight}
       fill
@@ -38,7 +38,7 @@ const BentoBgImage = ({
       style={{
         objectFit: "contain",
         objectPosition: "top right",
-        maskImage: "linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,1))",
+        maskImage: "linear-gradient(to top, rgba(0,0,0,0) 15%, rgba(0,0,0,1))",
       }}
       src={imgDark}
       fill
