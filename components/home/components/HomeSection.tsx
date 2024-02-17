@@ -9,7 +9,7 @@ export const HomeSection = forwardRef<
     <section
       ref={ref}
       className={cn(
-        "py-24 sm:py-32 mx-auto max-w-7xl px-2 sm:px-6 xl:px-8 first:pt-0",
+        "py-24 sm:py-32 mx-auto max-w-7xl px-5 sm:px-7 xl:px-10 first:pt-0",
         props.className
       )}
     >
