@@ -4,15 +4,14 @@ import Link from "next/link";
 import Changelog from "./Changelog";
 import { StarCount } from "../GitHubBadge";
 import { HomeSection } from "./components/HomeSection";
-import HomeSubHeader from "./components/HomeSubHeader";
+import { Header } from "../Header";
 
 export const OpenSource = () => {
   return (
     <HomeSection className="flex flex-col items-center">
-      <HomeSubHeader
+      <Header
         title="Proudly Open Source"
-        description="We are committed to open source and Langfuse is easy to run locally and
-        self-hosted."
+        description="Langfuse is committed to open source and easy to run locally and self-hosted."
         className="mb-0"
       />
 

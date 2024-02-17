@@ -5,7 +5,7 @@ import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { forwardRef, useRef, type ReactNode } from "react";
 import { Code } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
-import HomeSubHeader from "./components/HomeSubHeader";
+import { Header } from "../Header";
 import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
 
 const Circle = forwardRef<
@@ -48,7 +48,7 @@ export function Integrations() {
 
   return (
     <HomeSection>
-      <HomeSubHeader
+      <Header
         title="Works with any LLM app"
         description="Typed SDKs for Python & JS/TS. Native integrations for popular frameworks and libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
         button={{

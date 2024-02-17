@@ -1,6 +1,6 @@
 import Marquee from "@/components/magicui/marquee";
 import { HomeSection } from "./components/HomeSection";
-import HomeSubHeader from "./components/HomeSubHeader";
+import { Header } from "../Header";
 import { SiPython, SiTypescript } from "react-icons/si";
 
 export type GithubRelease = {
@@ -41,7 +41,7 @@ export const Releases = ({
 }) => {
   return (
     <HomeSection>
-      <HomeSubHeader
+      <Header
         title="We Ship Fast"
         description="We are all figuring out the best workflow for LLM engineering together. These are the releases of the last 14 days."
         button={{

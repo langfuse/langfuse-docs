@@ -2,7 +2,7 @@ import { Check, Plus, Minus, X } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import { BorderBeam } from "../magicui/border-beam";
 import Link from "next/link";
-import HomeSubHeader from "./components/HomeSubHeader";
+import { Header } from "../Header";
 import { Button } from "../ui/button";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
@@ -203,13 +203,14 @@ export function Pricing({
   isPricingPage?: boolean;
 }) {
   return (
-    <HomeSection id="pricing" className={cn(isPricingPage && "sm:my-12")}>
+    <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
       <div className="isolate overflow-hidden">
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
-            <HomeSubHeader
+            <Header
               title="Simple pricing for projects of all sizes"
               description="Get started on the Hobby plan for free. No credit card required."
+              h="h1"
             />
 
             <div className="relative mx-auto mt-10 grid max-w-md grid-cols-1 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">

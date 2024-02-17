@@ -2,29 +2,33 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import React, { forwardRef } from "react";
+import React from "react";
 
-const HomeSubHeader = forwardRef<
-  HTMLDivElement,
-  {
-    title?: string;
-    description?: string;
-    button?: { href: string; text: string };
-    className?: string;
-  }
->(({ title, description, className, button }, ref) => {
+export const Header = ({
+  title,
+  description,
+  className,
+  button,
+  h = "h2",
+}: {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  button?: { href: string; text: string };
+  h?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  className?: string;
+}) => {
+  const TitleTag: React.ElementType = h;
   return (
     <div
-      ref={ref}
       className={cn(
         "mx-auto max-w-4xl text-center mb-20 text-balance",
         className
       )}
     >
       {title && (
-        <h2 className="mt-2 text-5xl font-bold tracking-tight sm:text-7xl text-balance">
+        <TitleTag className="mt-2 text-4xl font-bold tracking-tight sm:text-7xl text-balance font-mono">
           {title}
-        </h2>
+        </TitleTag>
       )}
       {description && (
         <p className="mt-6 text-2xl leading-8 font-medium tracking-wide text-primary/70">
@@ -40,8 +44,4 @@ const HomeSubHeader = forwardRef<
       )}
     </div>
   );
-});
-
-HomeSubHeader.displayName = "HomeSubHeader";
-
-export default HomeSubHeader;
+};

@@ -7,7 +7,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
-import HomeSubHeader from "./components/HomeSubHeader";
+import { Header } from "../Header";
 import bentoTracePng from "./img/bento_trace.png";
 import bentoTraceDarkPng from "./img/bento_trace_dark.png";
 import Image, { type StaticImageData } from "next/image";
@@ -109,7 +109,7 @@ const features = [
 export function FeatureBento() {
   return (
     <HomeSection id="features">
-      <HomeSubHeader
+      <Header
         title="Tools for the full development workflow"
         description="All Langfuse features are tightly integrated with Langfuse tracing."
         button={{ href: "/docs", text: "Explore docs" }}

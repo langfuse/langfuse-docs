@@ -45,57 +45,68 @@ export const getStaticProps = async () => {
   return {
     props: {
       ssg: {
-        releases:{
-            langfuse: releasesLangfuse
-                .filter((release) => !release.draft && !release.pre_release &&
-                    new Date(release.created_at).getTime() > new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // 14 days
-                )
-                .map((release) => ({
-                    name: release.name,
-                    html_url: release.html_url,
-                    created_at: release.created_at,
-                    repo: "langfuse/langfuse",
-                }))
-                .sort(
-                    (a, b) =>
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime()
-                ),
-            "jsSdk": releasesLangfuseJs
-                .filter((release) => !release.draft && !release.pre_release &&
-                    new Date(release.created_at).getTime() > new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // 14 days
-                )
-                .map((release) => ({
-                    name: release.name,
-                    html_url: release.html_url,
-                    created_at: release.created_at,
-                    repo: "langfuse/langfuse-js",
-                }))
-                .sort(
-                    (a, b) =>
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime()
-                ),
-            "pythonSdk": releasesLangfusePython
-                .filter((release) => !release.draft && !release.pre_release &&
-                    new Date(release.created_at).getTime() > new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // 14 days
-                )
-                .map((release) => ({
-                    name: release.name,
-                    html_url: release.html_url,
-                    created_at: release.created_at,
-                    repo: "langfuse/langfuse-python",
-                }))
-                .sort(
-                    (a, b) =>
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime()
-                ),
-        }
+        releases: {
+          langfuse: releasesLangfuse
+            .filter(
+              (release) =>
+                !release.draft &&
+                !release.pre_release &&
+                new Date(release.created_at).getTime() >
+                  new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // 14 days
+            )
+            .map((release) => ({
+              name: release.name,
+              html_url: release.html_url,
+              created_at: release.created_at,
+              repo: "langfuse/langfuse",
+            }))
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            ),
+          jsSdk: releasesLangfuseJs
+            .filter(
+              (release) =>
+                !release.draft &&
+                !release.pre_release &&
+                new Date(release.created_at).getTime() >
+                  new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // 14 days
+            )
+            .map((release) => ({
+              name: release.name,
+              html_url: release.html_url,
+              created_at: release.created_at,
+              repo: "langfuse/langfuse-js",
+            }))
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            ),
+          pythonSdk: releasesLangfusePython
+            .filter(
+              (release) =>
+                !release.draft &&
+                !release.pre_release &&
+                new Date(release.created_at).getTime() >
+                  new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // 14 days
+            )
+            .map((release) => ({
+              name: release.name,
+              html_url: release.html_url,
+              created_at: release.created_at,
+              repo: "langfuse/langfuse-python",
+            }))
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            ),
+        },
       },
     },
-
-};
+  };
 };
 
 <HomePage />

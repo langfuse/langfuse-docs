@@ -39,6 +39,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                     className="object-cover"
                     alt={page.frontMatter?.title ?? "Blog post image"}
                     fill={true}
+                    sizes="(min-width: 1024px) 1000px, 100vw"
                     priority={i < 3}
                     unoptimized={
                       page.frontMatter.gif !== undefined ||
@@ -60,7 +61,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                     )
                   : null}
               </div>
-              <h2 className="block font-semibold text-3xl opacity-90 group-hover:opacity-100">
+              <h2 className="block font-mono text-3xl opacity-90 group-hover:opacity-100">
                 {page.meta?.title || page.frontMatter?.title || page.name}
               </h2>
               <div className="opacity-80 mt-4 text-lg group-hover:opacity-100">

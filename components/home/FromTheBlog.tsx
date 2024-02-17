@@ -1,10 +1,10 @@
 import { BlogIndex } from "../blog/BlogIndex";
 import { HomeSection } from "./components/HomeSection";
-import HomeSubHeader from "./components/HomeSubHeader";
+import { Header } from "../Header";
 
 export const FromTheBlog = () => (
   <HomeSection>
-    <HomeSubHeader
+    <Header
       title="Blog"
       description="The latest updates and releases from Langfuse"
     />
