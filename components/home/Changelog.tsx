@@ -20,10 +20,7 @@ export default function Changelog({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn(
-        "rounded-3xl ring-1 ring-primary/20 p-5 max-w-lg mx-5 sm:mx-auto",
-        className
-      )}
+      className={cn("rounded border p-5 max-w-lg mx-5 sm:mx-auto", className)}
     >
       <div
         role="list"

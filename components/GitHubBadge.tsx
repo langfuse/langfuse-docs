@@ -4,7 +4,7 @@ import { BsGithub } from "react-icons/bs";
 export const GithubMenuBadge = () => (
   <a
     href="https://github.com/langfuse/langfuse"
-    className="group h-8 flex shrink-0 flex-row items-center rounded-md border border-primary/10 overflow-hidden transition-opacity"
+    className="group h-8 flex shrink-0 flex-row items-center rounded border border-primary/10 overflow-hidden transition-opacity"
     target="_blank"
     rel="nofollow noreferrer"
   >

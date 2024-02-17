@@ -214,7 +214,7 @@ export function Pricing({
 
             <div className="relative mx-auto mt-10 grid max-w-md grid-cols-1 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               <div
-                className="hidden lg:absolute lg:inset-x-px lg:bottom-4 lg:top-4 lg:block lg:rounded-2xl lg:bg-gray-800/80 lg:ring-1 lg:ring-white/10"
+                className="hidden lg:absolute lg:inset-x-px lg:bottom-4 lg:top-4 lg:block lg:rounded lg:bg-gray-800/80 lg:ring-1 lg:ring-white/10"
                 aria-hidden="true"
               />
               {tiers.map((tier) => (
@@ -224,7 +224,7 @@ export function Pricing({
                     tier.featured
                       ? "z-10 bg-slate-100 shadow-xl ring-1 ring-gray-900/10"
                       : "bg-gray-800/80 ring-1 ring-white/10 lg:bg-transparent lg:pb-14 lg:ring-0",
-                    "relative rounded-2xl"
+                    "relative rounded"
                   )}
                 >
                   {tier.featured && <BorderBeam borderWidth={2} />}
@@ -359,7 +359,7 @@ export function Pricing({
                                 {/* Fake card background */}
                                 <div
                                   aria-hidden="true"
-                                  className="absolute inset-y-0 right-0 hidden w-1/2 rounded-lg bg-white dark:bg-gray-800/80 shadow-sm sm:block"
+                                  className="absolute inset-y-0 right-0 hidden w-1/2 rounded bg-white dark:bg-gray-800/80 shadow-sm sm:block"
                                 />
 
                                 <div
@@ -367,7 +367,7 @@ export function Pricing({
                                     tier.featured
                                       ? "ring-2 ring-indigo-600"
                                       : "ring-1 ring-gray-900/10",
-                                    "relative rounded-lg bg-white dark:bg-gray-800/80 shadow-sm sm:rounded-none dark:sm:bg-transparent sm:shadow-none sm:ring-0"
+                                    "relative rounded bg-white dark:bg-gray-800/80 shadow-sm sm:rounded-none dark:sm:bg-transparent sm:shadow-none sm:ring-0"
                                   )}
                                 >
                                   <dl className="divide-y divide-gray-200 text-sm leading-6">
@@ -427,7 +427,7 @@ export function Pricing({
                                     tier.featured
                                       ? "ring-2 ring-indigo-600"
                                       : "ring-1 ring-gray-900/10",
-                                    "pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 rounded-lg sm:block"
+                                    "pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 rounded sm:block"
                                   )}
                                 />
                               </div>
@@ -489,9 +489,9 @@ export function Pricing({
                             className="absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
                             aria-hidden="true"
                           >
-                            <div className="h-full w-full rounded-lg bg-white dark:bg-gray-800/80 shadow-sm" />
-                            <div className="h-full w-full rounded-lg bg-white dark:bg-gray-800/80 shadow-sm" />
-                            <div className="h-full w-full rounded-lg bg-white dark:bg-gray-800/80 shadow-sm" />
+                            <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
+                            <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
+                            <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
                           </div>
 
                           <table className="relative w-full border-separate border-spacing-x-8">
@@ -582,7 +582,7 @@ export function Pricing({
                                   tier.featured
                                     ? "ring-2 ring-indigo-600"
                                     : "ring-1 ring-gray-900/10",
-                                  "rounded-lg"
+                                  "rounded"
                                 )}
                               />
                             ))}

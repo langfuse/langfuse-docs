@@ -57,7 +57,7 @@ export function Integrations() {
         }}
       />
       <div
-        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded-lg border bg-background p-8 md:p-12 md:shadow-2xl"
+        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background p-8 md:p-12"
         ref={containerRef}
       >
         <div className="flex h-full w-full flex-col items-stretch justify-between gap-10">
