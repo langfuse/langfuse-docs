@@ -18,7 +18,7 @@ const ReleaseCard = ({
   icon: React.ReactNode;
 }) => {
   return (
-    <div className="relative cursor-default w-60 overflow-hidden rounded border p-4 flex gap-4 items-center bg-background">
+    <div className="relative cursor-default w-60 overflow-hidden rounded border px-3 py-2 flex gap-4 items-center bg-background">
       {icon}
       <div className="flex flex-col">
         <h3 className="text-sm font-medium dark:text-white">{release.name}</h3>
@@ -43,7 +43,7 @@ export const Releases = ({
     <HomeSection>
       <Header
         title="We Ship Fast"
-        description="We are all figuring out the best workflow for LLM engineering together. These are the releases of the last 14 days."
+        description="We are all figuring out the best workflow for LLM engineering together. Here's what we've released in the past 14 days."
         button={{
           href: "https://github.com/langfuse",
           text: "GitHub",
