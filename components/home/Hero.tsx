@@ -14,7 +14,7 @@ export function Hero() {
     <HomeSection>
       {/* HERO */}
       <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(60vh-100px)]">
-        <h1 className="text-4xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold font-mono">
+        <h1 className="text-4xl sm:text-7xl lg:text-8xl font-bold font-mono">
           Open Source
           <br />
           LLM Engineering Platform
@@ -77,6 +77,7 @@ export function Hero() {
       <CloudflareVideo
         videoId="ff57153dd945da86f7549c1f30daaea2"
         aspectRatio={1.71}
+        title="What is Langfuse?"
       />
     </HomeSection>
   );
