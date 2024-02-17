@@ -203,13 +203,12 @@ export function Pricing({
   isPricingPage?: boolean;
 }) {
   return (
-    <HomeSection id="pricing" className={cn(isPricingPage && "sm:py-12")}>
+    <HomeSection id="pricing" className={cn(isPricingPage && "sm:my-12")}>
       <div className="isolate overflow-hidden">
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
             <HomeSubHeader
-              subtitle="Simple pricing for projects of all sizes"
-              title={!isPricingPage && "Pricing"}
+              title="Simple pricing for projects of all sizes"
               description="Get started on the Hobby plan for free. No credit card required."
             />
 

@@ -108,8 +108,7 @@ export function FeatureBento() {
   return (
     <HomeSection id="features">
       <HomeSubHeader
-        title="Platform Overview"
-        subtitle="Tools for the full development workflow"
+        title="Tools for the full development workflow"
         description="All Langfuse features are tightly integrated with Langfuse tracing."
         button={{ href: "/docs", text: "Explore docs" }}
       />

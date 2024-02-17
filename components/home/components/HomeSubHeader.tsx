@@ -8,12 +8,11 @@ const HomeSubHeader = forwardRef<
   HTMLDivElement,
   {
     title?: string;
-    subtitle?: string;
     description?: string;
     button?: { href: string; text: string };
     className?: string;
   }
->(({ title, subtitle, description, className, button }, ref) => {
+>(({ title, description, className, button }, ref) => {
   return (
     <div
       ref={ref}
@@ -22,14 +21,15 @@ const HomeSubHeader = forwardRef<
         className
       )}
     >
-      {title && <h2 className="text-base font-semibold leading-7">{title}</h2>}
-      {subtitle && (
-        <p className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl text-balance">
-          {subtitle}
-        </p>
+      {title && (
+        <h2 className="mt-2 text-5xl font-bold tracking-tight sm:text-7xl text-balance">
+          {title}
+        </h2>
       )}
       {description && (
-        <p className="mt-6 text-lg leading-8 text-primary/70">{description}</p>
+        <p className="mt-6 text-2xl leading-8 font-medium tracking-wide text-primary/70">
+          {description}
+        </p>
       )}
       {button && (
         <Button variant="ghost" className="mt-6" asChild>

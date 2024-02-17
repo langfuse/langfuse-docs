@@ -49,8 +49,7 @@ export default function IntegrationsNew() {
   return (
     <HomeSection>
       <HomeSubHeader
-        title="Integrations"
-        subtitle="Works with any LLM app"
+        title="Works with any LLM app"
         description="Typed SDKs for Python & JS/TS. Native integrations for popular frameworks and libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
         button={{
           href: "/docs/integrations/overview",

@@ -5,7 +5,7 @@ import HomeSubHeader from "./components/HomeSubHeader";
 export const FromTheBlog = () => (
   <HomeSection>
     <HomeSubHeader
-      subtitle="Blog"
+      title="Blog"
       description="The latest updates and releases from Langfuse"
     />
     <BlogIndex maxItems={3} />
