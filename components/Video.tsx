@@ -5,7 +5,7 @@ import {
   useMediaRemote,
   useMediaStore,
 } from "@vidstack/react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { FaPlay } from "react-icons/fa";
 
 export const CloudflareVideo = ({
@@ -13,18 +13,23 @@ export const CloudflareVideo = ({
   aspectRatio,
   className,
   gifStyle = false,
+  poster,
   title,
 }: {
   videoId: string;
   aspectRatio?: number;
   gifStyle?: boolean;
   className?: string;
+  poster?: string;
   title?: string;
 }) => {
   return (
     <Video
       src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
-      poster={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`}
+      poster={
+        poster ??
+        `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`
+      }
       aspectRatio={aspectRatio}
       gifStyle={gifStyle}
       className={className}
@@ -60,7 +65,6 @@ export const Video = ({
     <MediaPlayer
       ref={mediaPlayerRef}
       src={src}
-      poster={poster}
       controls={!gifStyle && panelDismissed}
       autoplay={gifStyle}
       muted={gifStyle}
@@ -77,15 +81,19 @@ export const Video = ({
         // Capture mouse events, they broke scrolling on iOS
         <div className="absolute inset-0 z-10" />
       ) : !panelDismissed ? (
+        // Overlay with play button and poster image
         <div
-          className="group cursor-pointer absolute inset-0 z-10 flex flex-col justify-center items-center"
+          className="group cursor-pointer absolute inset-0 z-10 flex flex-col justify-center items-center bg-cover"
+          style={{
+            backgroundImage: poster ? `url(${poster})` : undefined,
+          }}
           onClick={() => {
             remote.play();
             setPanelDismissed(true);
           }}
         >
           <div className="p-3 md:p-6 rounded-full bg-background group-hover:ring-8 ring-background/20 bg-opacity-75 hover:bg-opacity-90 transition flex">
-            <FaPlay className="h-3 w-3 md:h-6 md:w-6 text-white" />
+            <FaPlay className="h-6 w-6 text-white" />
           </div>
           <div className="mt-3 md:mt-6 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className="flex gap-2 text-xs md:text-sm font-semibold bg-background/90 py-1 px-3 rounded-full">
