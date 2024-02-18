@@ -69,7 +69,7 @@ export const Video = ({
       autoplay={gifStyle}
       muted={gifStyle}
       loop={gifStyle}
-      load="eager"
+      load={!gifStyle ? "custom" : undefined}
       playsinline={gifStyle}
       aspectRatio={aspectRatio}
       className={cn(
@@ -86,6 +86,9 @@ export const Video = ({
           className="group cursor-pointer absolute inset-0 z-10 flex flex-col justify-center items-center bg-cover"
           style={{
             backgroundImage: poster ? `url(${poster})` : undefined,
+          }}
+          onMouseEnter={() => {
+            remote.startLoading();
           }}
           onClick={() => {
             remote.play();
