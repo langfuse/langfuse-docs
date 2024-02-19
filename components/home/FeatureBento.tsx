@@ -10,6 +10,10 @@ import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import bentoTracePng from "./img/bento_trace.png";
 import bentoTraceDarkPng from "./img/bento_trace_dark.png";
+import bentoMetricsPng from "./img/bento_metrics.png";
+import bentoMetricsDarkPng from "./img/bento_metrics_dark.png";
+import bentoPromptPng from "./img/bento_prompt_management.png";
+import bentoPromptDarkPng from "./img/bento_prompt_management_dark.png";
 import Image, { type StaticImageData } from "next/image";
 
 const BentoBgImage = ({
@@ -72,7 +76,13 @@ const features = [
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
     href: "/docs/prompts",
     cta: "See docs",
-    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    background: (
+      <BentoBgImage
+        imgLight={bentoPromptPng}
+        imgDark={bentoPromptDarkPng}
+        alt="Prompt Management"
+      />
+    ),
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
   },
   {
@@ -90,7 +100,7 @@ const features = [
     name: "Datasets",
     description:
       "Derive datasets from production data to fine-tune models and test your LLM application.",
-    href: "/docs/integrations/overview",
+    href: "/docs/datasets/overview",
     cta: "See docs",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
@@ -101,7 +111,13 @@ const features = [
     description: "Track cost, latency, and quality.",
     href: "/docs/analytics",
     cta: "See docs",
-    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    background: (
+      <BentoBgImage
+        imgLight={bentoMetricsPng}
+        imgDark={bentoMetricsDarkPng}
+        alt="Metrics"
+      />
+    ),
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
   },
 ];
