@@ -38,7 +38,9 @@ export const ChangelogHeader = () => {
         </div>
         <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
           <div>
-            <h1 className="text-3xl md:text-4xl text-pretty">{title}</h1>
+            <h1 className="text-3xl md:text-4xl text-pretty font-mono">
+              {title}
+            </h1>
           </div>
           <Author author={author} />
         </div>
@@ -52,7 +54,7 @@ export const ChangelogHeader = () => {
           alt={title}
           width={1200}
           height={630}
-          className="rounded-lg"
+          className="rounded"
           unoptimized={
             page.frontMatter.gif !== undefined ||
             page.frontMatter.ogImage?.endsWith(".gif")
