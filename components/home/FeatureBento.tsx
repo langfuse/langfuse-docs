@@ -130,7 +130,7 @@ export function FeatureBento() {
         description="All Langfuse features are tightly integrated with Langfuse tracing."
         button={{ href: "/docs", text: "Explore docs" }}
       />
-      <BentoGrid className="lg:grid-rows-3 gap-3">
+      <BentoGrid>
         {features.map((feature) => (
           <BentoCard key={feature.name} {...feature} />
         ))}

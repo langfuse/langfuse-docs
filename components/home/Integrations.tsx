@@ -26,7 +26,7 @@ const Circle = forwardRef<
       )}
       <div
         ref={ref}
-        className="flex h-16 w-16 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] text-black"
+        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 p-3 text-black"
       >
         {children}
       </div>
@@ -50,7 +50,7 @@ export function Integrations() {
     <HomeSection>
       <Header
         title="Works with any LLM app"
-        description="Typed SDKs for Python & JS/TS. Native integrations for popular frameworks and libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
+        description="SDKs for Python & JS/TS. Native integrations for popular libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
         button={{
           href: "/docs/integrations/overview",
           text: "Integration docs",
@@ -60,14 +60,14 @@ export function Integrations() {
         className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background p-8 md:p-12"
         ref={containerRef}
       >
-        <div className="flex h-full w-full flex-col items-stretch justify-between gap-10">
+        <div className="flex h-full w-full flex-col items-stretch justify-between gap-6">
           <div className="flex flex-row items-center justify-between">
             <Circle ref={inPythonRef} titleLeft="Python SDK">
               <SiPython className="h-6 w-6" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inTypescriptRef} titleLeft="Typescript SDK">
+            <Circle ref={inTypescriptRef} titleLeft="JS/TS SDK">
               <SiTypescript className="h-6 w-6" />
             </Circle>
             <Circle ref={out1ref} className="hidden">

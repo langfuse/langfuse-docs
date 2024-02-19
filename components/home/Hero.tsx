@@ -74,11 +74,11 @@ export function Hero() {
         </div>
       </div>
       {/* <div className="aspect-video bg-blue-200"></div> */}
-      <CloudflareVideo
+      {/* <CloudflareVideo
         videoId="ff57153dd945da86f7549c1f30daaea2"
         aspectRatio={1.71}
         title="What is Langfuse?"
-      />
+      /> */}
     </HomeSection>
   );
 }

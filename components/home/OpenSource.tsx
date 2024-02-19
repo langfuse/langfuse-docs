@@ -11,7 +11,7 @@ export const OpenSource = () => {
     <HomeSection className="flex flex-col items-center">
       <Header
         title="Proudly Open Source"
-        description="Langfuse is committed to open source and easy to run locally and self-hosted."
+        description="Langfuse is committed to open source. You can run it locally or self-hosted."
         className="mb-0"
       />
 

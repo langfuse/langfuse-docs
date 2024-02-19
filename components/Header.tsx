@@ -21,7 +21,7 @@ export const Header = ({
   return (
     <div
       className={cn(
-        "mx-auto max-w-4xl text-center mb-20 text-balance",
+        "mx-auto max-w-4xl text-center mb-12 text-balance",
         className
       )}
     >

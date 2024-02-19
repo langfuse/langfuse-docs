@@ -16,11 +16,11 @@ export const Home = ({ releases }) => (
       <FeatureBento />
       <Integrations />
       <OpenSource />
-      <Releases releases={releases as any} />
+      {/* <Releases releases={releases as any} /> */}
       <Pricing />
       {/* <FromTheBlog /> */}
       {/* <CTA /> */}
-      <Footer />
+      {/* <Footer /> */}
     </main>
     <Background />
   </>

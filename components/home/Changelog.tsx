@@ -22,6 +22,9 @@ export default function Changelog({ className }: { className?: string }) {
     <div
       className={cn("rounded border p-5 max-w-lg mx-5 sm:mx-auto", className)}
     >
+      <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
+        <h3>Changelog</h3>
+      </div>
       <div
         role="list"
         className="space-y-6 max-h-40 lg:max-h-96 overflow-y-scroll"
