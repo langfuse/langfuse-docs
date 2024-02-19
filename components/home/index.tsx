@@ -5,10 +5,8 @@ import { Users } from "./Users";
 import { OpenSource } from "./OpenSource";
 import { FeatureBento } from "./FeatureBento";
 import { Integrations } from "./Integrations";
-import { Releases } from "./Releases";
-import { Footer } from "./Footer";
 
-export const Home = ({ releases }) => (
+export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
       <Hero />
@@ -16,7 +14,6 @@ export const Home = ({ releases }) => (
       <FeatureBento />
       <Integrations />
       <OpenSource />
-      {/* <Releases releases={releases as any} /> */}
       <Pricing />
       {/* <FromTheBlog /> */}
       {/* <CTA /> */}
