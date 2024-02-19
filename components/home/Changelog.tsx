@@ -27,7 +27,7 @@ export default function Changelog({ className }: { className?: string }) {
       </div>
       <div
         role="list"
-        className="space-y-6 max-h-40 lg:max-h-96 overflow-y-scroll"
+        className="space-y-6 max-h-52 lg:max-h-96 overflow-y-scroll"
       >
         {changelog.map((activityItem) => (
           <Link
