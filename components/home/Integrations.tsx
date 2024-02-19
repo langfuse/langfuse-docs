@@ -12,16 +12,15 @@ const Circle = forwardRef<
   HTMLDivElement,
   {
     className?: string;
-    titleLeft?: string;
-    titleRight?: string;
+    title?: string;
     children?: ReactNode;
   }
->(({ className, children, titleLeft }, ref) => {
+>(({ className, children, title }, ref) => {
   return (
     <div className={cn("z-10 flex flex-row items-center gap-4", className)}>
-      {titleLeft && (
+      {title && (
         <span className="w-[4.4rem] md:w-20 text-right text-sm md:text-base">
-          {titleLeft}
+          {title}
         </span>
       )}
       <div
@@ -62,12 +61,12 @@ export function Integrations() {
       >
         <div className="flex h-full w-full flex-col items-stretch justify-between gap-6">
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inPythonRef} titleLeft="Python SDK">
+            <Circle ref={inPythonRef} title="Python SDK">
               <SiPython className="h-6 w-6" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inTypescriptRef} titleLeft="JS/TS SDK">
+            <Circle ref={inTypescriptRef} title="JS/TS SDK">
               <SiTypescript className="h-6 w-6" />
             </Circle>
             <Circle ref={out1ref} className="hidden">
@@ -75,7 +74,7 @@ export function Integrations() {
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inOpenAiRef} titleLeft="OpenAI SDK">
+            <Circle ref={inOpenAiRef} title="OpenAI SDK">
               <SiOpenai className="h-6 w-6" />
             </Circle>
             <Circle ref={langfuseNodeRef} className="h-16 w-16">
@@ -86,7 +85,7 @@ export function Integrations() {
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inLangchainRef} titleLeft="Langchain">
+            <Circle ref={inLangchainRef} title="Langchain">
               <span>🦜&nbsp;🔗</span>
             </Circle>
             <Circle ref={out3ref} className="hidden">
@@ -94,7 +93,7 @@ export function Integrations() {
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inApiRef} titleLeft="API">
+            <Circle ref={inApiRef} title="API">
               <Code className="h-6 w-6" />
             </Circle>
           </div>
