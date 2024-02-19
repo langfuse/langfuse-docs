@@ -27,7 +27,7 @@ const BentoBgImage = ({
 }) => (
   <>
     <Image
-      className="opacity-30 top-0 right-0 dark:hidden hidden lg:block"
+      className="opacity-30 top-0 right-0 dark:hidden hidden md:block"
       style={{
         objectFit: "contain",
         objectPosition: "top right",
@@ -39,7 +39,7 @@ const BentoBgImage = ({
       sizes="(min-width: 1024px) 33vw, 100vw"
     />
     <Image
-      className="opacity-30 top-0 right-0 hidden dark:lg:block"
+      className="opacity-30 top-0 right-0 hidden dark:md:block"
       style={{
         objectFit: "contain",
         objectPosition: "top right",
@@ -67,7 +67,7 @@ const features = [
         alt="Tracing"
       />
     ),
-    className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-2",
+    className: "md:row-start-1 md:row-end-4 md:col-start-2 md:col-end-2",
   },
   {
     Icon: GitPullRequestArrow,
@@ -83,7 +83,7 @@ const features = [
         alt="Prompt Management"
       />
     ),
-    className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
+    className: "md:col-start-1 md:col-end-2 md:row-start-1 md:row-end-3",
   },
   {
     Icon: ThumbsUp,
@@ -93,7 +93,7 @@ const features = [
     href: "/docs/scores/overview",
     cta: "Learn more",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
-    className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
+    className: "md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4",
   },
   {
     Icon: Box,
@@ -103,7 +103,7 @@ const features = [
     href: "/docs/datasets/overview",
     cta: "Learn more",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
-    className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
+    className: "md:col-start-3 md:col-end-3 md:row-start-1 md:row-end-2",
   },
   {
     Icon: LineChart,
@@ -118,7 +118,7 @@ const features = [
         alt="Metrics"
       />
     ),
-    className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
+    className: "md:col-start-3 md:col-end-3 md:row-start-2 md:row-end-4",
   },
 ];
 
