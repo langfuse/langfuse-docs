@@ -27,7 +27,7 @@ const BentoBgImage = ({
 }) => (
   <>
     <Image
-      className="opacity-30 top-0 right-0 dark:hidden"
+      className="opacity-30 top-0 right-0 dark:hidden hidden lg:block"
       style={{
         objectFit: "contain",
         objectPosition: "top right",
@@ -39,7 +39,7 @@ const BentoBgImage = ({
       sizes="(min-width: 1024px) 33vw, 100vw"
     />
     <Image
-      className="opacity-30 top-0 right-0 hidden dark:block"
+      className="opacity-30 top-0 right-0 hidden dark:lg:block"
       style={{
         objectFit: "contain",
         objectPosition: "top right",
@@ -59,7 +59,7 @@ const features = [
     name: "Tracing",
     description: "Detailed production traces to debug LLM applications faster.",
     href: "/docs/tracing/overview",
-    cta: "See docs",
+    cta: "Learn more",
     background: (
       <BentoBgImage
         imgLight={bentoTracePng}
@@ -75,7 +75,7 @@ const features = [
     description:
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
     href: "/docs/prompts",
-    cta: "See docs",
+    cta: "Learn more",
     background: (
       <BentoBgImage
         imgLight={bentoPromptPng}
@@ -91,7 +91,7 @@ const features = [
     description:
       "Collect user feedback and use manual and model-based evaluations.",
     href: "/docs/scores/overview",
-    cta: "See docs",
+    cta: "Learn more",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
   },
@@ -101,7 +101,7 @@ const features = [
     description:
       "Derive datasets from production data to fine-tune models and test your LLM application.",
     href: "/docs/datasets/overview",
-    cta: "See docs",
+    cta: "Learn more",
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
   },
@@ -110,7 +110,7 @@ const features = [
     name: "Metrics",
     description: "Track cost, latency, and quality.",
     href: "/docs/analytics",
-    cta: "See docs",
+    cta: "Learn more",
     background: (
       <BentoBgImage
         imgLight={bentoMetricsPng}
