@@ -95,14 +95,14 @@ export const Video = ({
             setPanelDismissed(true);
           }}
         >
-          <div className="p-3 md:p-6 rounded-full bg-background group-hover:ring-8 ring-background/20 bg-opacity-75 hover:bg-opacity-90 transition flex">
+          <div className="p-3 md:p-6 rounded-full bg-black group-hover:ring-8 ring-black/20 bg-opacity-75 hover:bg-opacity-90 transition flex">
             <FaPlay className="h-6 w-6 text-white" />
           </div>
           <div className="mt-3 md:mt-6 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="flex gap-2 text-xs md:text-sm font-semibold bg-background/90 py-1 px-3 rounded-full">
+            <span className="flex gap-2 text-xs md:text-sm font-semibold bg-black/90 text-white py-1 px-3 rounded-full">
               {title && <span>{title}</span>}
               {durationString && (
-                <span className="text-primary/70">{durationString}</span>
+                <span className="text-white/70">{durationString}</span>
               )}
             </span>
           </div>
