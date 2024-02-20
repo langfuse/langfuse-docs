@@ -53,8 +53,8 @@ export default function Integrations() {
   return (
     <HomeSection>
       <Header
-        title="Works with any LLM app"
-        description="SDKs for Python & JS/TS. Native integrations for popular libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
+        title="Works with any LLM app and model"
+        description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
         button={{
           href: "/docs/integrations/overview",
           text: "Integration docs",
@@ -98,7 +98,7 @@ export default function Integrations() {
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inLlamaindexRef} title="Llama-index">
+            <Circle ref={inLlamaindexRef} title="Llama-Index">
               <Image
                 src={LlamaindexIcon}
                 alt="Llama-index"

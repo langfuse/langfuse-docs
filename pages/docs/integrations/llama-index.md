@@ -2,11 +2,13 @@
 description: Open source observability for LlamaIndex via the native integration. Automatically capture detailed traces and metrics for every request of your RAG application.
 ---
 
-# LlamaIndex Integration
+# 🦙 LlamaIndex Integration
 
 **LlamaIndex** ([GitHub](https://github.com/run-llama/llama_index)) is an advanced "data framework" tailored for augmenting Large Language Models (LLMs) with private data. It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs. Designed for both beginners and experts, LlamaIndex provides a user-friendly high-level API for easy data ingestion and querying, alongside customizable lower-level APIs for detailed module adaptation. 
 
 Langfuse offers a simple integration for automatic capture of traces and metrics generated in LlamaIndex applications.
+
+**Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
 
 ## Quickstart
 
@@ -14,9 +16,7 @@ Make sure you have both `llama-index` and `langfuse` installed.
 
 
 ```python
-# Install llama-index and langfuse
-pip install llama-index
-pip install langfuse 
+%pip install llama-index langfuse --upgrade
 ```
 
 At the root of your LlamaIndex application, register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager`. When instantiating `LlamaIndexCallbackHandler`, make sure that your environment variables for 
@@ -34,7 +34,19 @@ langfuse_callback_handler = LlamaIndexCallbackHandler()
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```
 
-Done! ✨ Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI. Below an example expanding on (LlamaIndex's quick start guide)[https://docs.llamaindex.ai/en/stable/getting_started/starter_example.html].
+Done! ✨ Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
+
+**Important:** Langfuse processes events in the background to avoid blocking the main thread or adding latency. If you want to inspect events interactively or shut down your application, make sure to flush events to Langfuse to avoid dropping any of them.
+
+
+```python
+# Flush events to Langfuse before application exits
+langfuse_callback_handler.flush()
+```
+
+## Example
+
+Below an example expanding on [LlamaIndex's quick start guide](https://docs.llamaindex.ai/en/stable/getting_started/starter_example.html). Run this notebook to see traces and metrics in Langfuse.
 
 
 ```python
@@ -59,11 +71,3 @@ langfuse_callback_handler.flush()
 ```
 
 Now head over to the Langfuse UI and inspect the traces generated from these executions.
-
-**Important** Before shutting down your application and whenever else you see fit in you application flow, flush collected events from your application to Langfuse to not drop any events queued for reporting.
-
-
-```python
-# Flush events to Langfuse before application exits
-langfuse_callback_handler.flush()
-```
