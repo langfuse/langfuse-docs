@@ -7,6 +7,9 @@ import { Code } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
+import LangfuseIcon from "@/public/icon256.png";
+import LangchainIcon from "./img/langchain_icon.png";
+import Image from "next/image";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -25,7 +28,7 @@ const Circle = forwardRef<
       )}
       <div
         ref={ref}
-        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 p-3 text-black"
+        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black"
       >
         {children}
       </div>
@@ -78,7 +81,12 @@ export default function Integrations() {
               <SiOpenai className="h-6 w-6" />
             </Circle>
             <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <span className="text-3xl">🪢</span>
+              <Image
+                src={LangfuseIcon}
+                alt="Langfuse Icon"
+                width={30}
+                height={30}
+              />
             </Circle>
             <Circle ref={out2ref} className="hidden">
               <Code className="h-6 w-6" />
@@ -86,7 +94,12 @@ export default function Integrations() {
           </div>
           <div className="flex flex-row items-center justify-between">
             <Circle ref={inLangchainRef} title="Langchain">
-              <span>🦜&nbsp;🔗</span>
+              <Image
+                src={LangchainIcon}
+                alt="Langchain Icon"
+                width={40}
+                height={40}
+              />
             </Circle>
             <Circle ref={out3ref} className="hidden">
               <Code className="h-6 w-6" />
