@@ -73,7 +73,7 @@ langfuse.create_prompt(
   config: {
     "temperature": 0.5,
     "top_p": 0.9
-  }
+  } # optionally, add configs (e.g. model parameters or model tools)
 )
 ```
 
@@ -89,7 +89,7 @@ await langfuse.createPrompt({
   config: {
     temperature: 0.5,
     topP: 0.9
-  }
+  } // optionally, add configs (e.g. model parameters or model tools)
 });
 ```
 
@@ -155,7 +155,7 @@ const prompt = await langfuse.getPrompt("prompt name", 3, {
 const compiledPrompt = prompt.compile({ input: "test" });
 
 // Access the config of the prompt
-const config = prompt["config"];
+const config = prompt.config;
 ```
 
 </Tab>
