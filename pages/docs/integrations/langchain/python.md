@@ -1,5 +1,5 @@
 ---
-description: Native integration with Langchain (Python). Automatically captures rich traces for your Langchain runs.
+description: Open source observability for your Langchain (Python) application. Automatically captures rich traces and metrics.
 ---
 
 # Langchain integration (Python)
@@ -276,7 +276,7 @@ trace = langfuse.score(
 
 ## Adding trace as context to a Langchain handler
 
-It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `user_id`, `name`` or `metadata`. All the Langchain observations will be collected on that trace.
+It is also possible to generate a Langchain handler based on a trace. This can help to add context such as a specific `user_id`, `name` or `metadata`. All the Langchain observations will be collected on that trace.
 
 To do that, we first need to initialize the [Python SDK](/docs/sdk/python), create a `trace`, and finally create the handler.
 
