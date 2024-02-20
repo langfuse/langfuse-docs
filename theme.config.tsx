@@ -64,8 +64,59 @@ const CheckHeaderParamsComponent = () => {
     )
   } else {
     return (
-      <Navbar flatDirectories={[]} items={[Docs,
-      ]} />
+      <><Navbar flatDirectories={[]} items={[Docs,
+      ]} /></>
+    )
+  }
+}
+
+const CheckFooterParamsComponent = () => {
+  const params = useSearchParams();
+  const footerVisible = params.get('footerVisible');
+
+  if (footerVisible === 'false') {
+    return (
+      <></>
+    )
+  } else {
+    return (
+      <div className="flex md:justify-between md:flex-row flex-col px-14 py-10 border-2 border-[#F2F3F5] items-center flex-1 flex-wrap gap-2 text-sm">
+        <div className="md:order-last flex flex-col lg:flex-row gap-y-1 gap-x-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
+            {footerNav.map((nav) => (
+              <Link
+                key={nav.name}
+                href={nav.href}
+                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
+              >
+                {nav.name}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
+            {footerLegalNav.map((nav) => (
+              <Link
+                key={nav.name}
+                href={nav.href}
+                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
+              >
+                {nav.name}
+              </Link>
+            ))}
+            <a
+              href="#"
+              onClick={() => (window as any).displayPreferenceModal()}
+              className="inline rounded-none leading-6 text-primary/80 hover:text-primary"
+              id="termly-consent-preferences"
+            >
+              Cookie Preferences
+            </a>
+          </div>
+        </div>
+        <span className="text-primary/80">
+          {new Date().getFullYear()} © Cloud Flow Inc
+        </span>
+      </div>
     )
   }
 }
@@ -120,45 +171,7 @@ const config: DocsThemeConfig = {
     toggleButton: true,
   },
   footer: {
-    text: (
-      <div className="flex md:justify-between md:flex-row flex-col items-center flex-1 flex-wrap gap-2 text-sm">
-        <div className="md:order-last flex flex-col lg:flex-row gap-y-1 gap-x-4">
-          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
-            {footerNav.map((nav) => (
-              <Link
-                key={nav.name}
-                href={nav.href}
-                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
-              >
-                {nav.name}
-              </Link>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
-            {footerLegalNav.map((nav) => (
-              <Link
-                key={nav.name}
-                href={nav.href}
-                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
-              >
-                {nav.name}
-              </Link>
-            ))}
-            <a
-              href="#"
-              onClick={() => (window as any).displayPreferenceModal()}
-              className="inline rounded-none leading-6 text-primary/80 hover:text-primary"
-              id="termly-consent-preferences"
-            >
-              Cookie Preferences
-            </a>
-          </div>
-        </div>
-        <span className="text-primary/80">
-          {new Date().getFullYear()} © Cloud Flow Inc
-        </span>
-      </div>
-    ),
+    component: <CheckFooterParamsComponent />
   },
   useNextSeoProps() {
     const { asPath } = useRouter();
