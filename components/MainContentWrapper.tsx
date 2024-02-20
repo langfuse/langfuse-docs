@@ -21,6 +21,8 @@ export const SidebarChecker = () => {
   useEffect(() => {
     let element = document.querySelector('.nextra-sidebar-container');
     element.className = 'hidden';
+    let carousel = document.querySelectorAll('.nx-mb-8.nx-flex.nx-items-center.nx-border-t');
+    carousel[0].className = 'hidden';
   }, [])
   return (<></>);
 }
@@ -30,6 +32,7 @@ export const MainContentWrapper = (props) => {
   const router = useRouter();
   const params = useSearchParams();
   const sidebarVisible = params.get('sidebarVisible');
+  const feedbackVisible = params.get('feedbackVisible');
 
   return (
     <>
@@ -40,9 +43,11 @@ export const MainContentWrapper = (props) => {
           className="flex flex-col gap-10 pt-14 border-t dark:border-neutral-800 mb-20"
           id="docs-feedback"
         >
-          <DocsFeedback key={router.pathname} />
-          <DocsSupport />
-          <DocsSubscribeToUpdates />
+          {feedbackVisible === "false" ?
+            <></> : <>
+              <DocsFeedback key={router.pathname} />
+              <DocsSupport />
+              <DocsSubscribeToUpdates /></>}
         </div>
       ) : null}
       <Background />
