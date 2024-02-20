@@ -33,7 +33,7 @@ const Circle = forwardRef<
   );
 });
 
-export function Integrations() {
+export default function Integrations() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inPythonRef = useRef<HTMLDivElement>(null);
   const inTypescriptRef = useRef<HTMLDivElement>(null);

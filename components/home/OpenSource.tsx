@@ -6,7 +6,7 @@ import { StarCount } from "../GitHubBadge";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 
-export const OpenSource = () => {
+export default function OpenSource() {
   return (
     <HomeSection className="flex flex-col items-center">
       <Header
@@ -28,4 +28,4 @@ export const OpenSource = () => {
       <Changelog className="mt-14" />
     </HomeSection>
   );
-};
+}

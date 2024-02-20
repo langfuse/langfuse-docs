@@ -1,10 +1,20 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import { Pricing } from "./Pricing";
 import { Users } from "./Users";
-import { OpenSource } from "./OpenSource";
-import { FeatureBento } from "./FeatureBento";
-import { Integrations } from "./Integrations";
+import dynamic from "next/dynamic";
+
+const FeatureBento = dynamic(() => import("./FeatureBento"), {
+  ssr: false,
+});
+const Integrations = dynamic(() => import("./Integrations"), {
+  ssr: false,
+});
+const OpenSource = dynamic(() => import("./OpenSource"), {
+  ssr: false,
+});
+const Pricing = dynamic(() => import("./Pricing"), {
+  ssr: false,
+});
 
 export const Home = () => (
   <>

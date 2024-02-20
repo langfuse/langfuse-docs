@@ -197,7 +197,7 @@ const sections = [
   },
 ];
 
-export function Pricing({
+export default function Pricing({
   isPricingPage = false,
 }: {
   isPricingPage?: boolean;

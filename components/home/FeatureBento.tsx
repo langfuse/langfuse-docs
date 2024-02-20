@@ -122,7 +122,7 @@ const features = [
   },
 ];
 
-export function FeatureBento() {
+export default function FeatureBento() {
   return (
     <HomeSection id="features">
       <Header
