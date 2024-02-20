@@ -3,10 +3,12 @@
 import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { forwardRef, useRef, type ReactNode } from "react";
-import { Code } from "lucide-react";
+import { Code, MoreHorizontal } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
+import LlamaindexIcon from "./img/llamaindex_icon.png";
+import Image from "next/image";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -25,7 +27,7 @@ const Circle = forwardRef<
       )}
       <div
         ref={ref}
-        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 p-3 text-black"
+        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black"
       >
         {children}
       </div>
@@ -40,6 +42,9 @@ export default function Integrations() {
   const inOpenAiRef = useRef<HTMLDivElement>(null);
   const inLangchainRef = useRef<HTMLDivElement>(null);
   const inApiRef = useRef<HTMLDivElement>(null);
+  const inLlamaindexRef = useRef<HTMLDivElement>(null);
+  const inMoreRef = useRef<HTMLDivElement>(null);
+
   const langfuseNodeRef = useRef<HTMLDivElement>(null);
   const out1ref = useRef<HTMLDivElement>(null);
   const out2ref = useRef<HTMLDivElement>(null);
@@ -77,9 +82,6 @@ export default function Integrations() {
             <Circle ref={inOpenAiRef} title="OpenAI SDK">
               <SiOpenai className="h-6 w-6" />
             </Circle>
-            <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <span className="text-3xl">🪢</span>
-            </Circle>
             <Circle ref={out2ref} className="hidden">
               <Code className="h-6 w-6" />
             </Circle>
@@ -88,13 +90,31 @@ export default function Integrations() {
             <Circle ref={inLangchainRef} title="Langchain">
               <span>🦜&nbsp;🔗</span>
             </Circle>
+            <Circle ref={langfuseNodeRef} className="h-16 w-16">
+              <span className="text-3xl">🪢</span>
+            </Circle>
             <Circle ref={out3ref} className="hidden">
               <Code className="h-6 w-6" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
+            <Circle ref={inLlamaindexRef} title="Llama-index">
+              <Image
+                src={LlamaindexIcon}
+                alt="Llama-index"
+                width={40}
+                height={40}
+              />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
             <Circle ref={inApiRef} title="API">
               <Code className="h-6 w-6" />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle ref={inMoreRef} title="Litellm, Flowise, Langflow">
+              <MoreHorizontal className="h-5 w-5" />
             </Circle>
           </div>
         </div>
@@ -126,6 +146,18 @@ export default function Integrations() {
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={inApiRef}
+          toRef={langfuseNodeRef}
+          duration={3}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={inLlamaindexRef}
+          toRef={langfuseNodeRef}
+          duration={3}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={inMoreRef}
           toRef={langfuseNodeRef}
           duration={3}
         />
