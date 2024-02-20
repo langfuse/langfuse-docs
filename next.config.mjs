@@ -26,6 +26,14 @@ const nextraConfig = withNextra({
     'react-syntax-highlighter',
     'geist'
   ],
+  modularizeImports: {
+    // tree-shake react-icons to reduce bundle size
+    // https://github.com/react-icons/react-icons/issues/786#issuecomment-1674964835
+    "react-icons/?(((\\w*)?/?)*)": {
+      transform: "@react-icons/all-files/{{ matches.[1] }}/{{ member }}",
+      skipDefaultConversion: true
+    }
+  },
   images: {
     remotePatterns: [
       {
