@@ -33,7 +33,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                   className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
                 />
               ) : page.frontMatter?.ogImage ? (
-                <div className="mb-14 rounded relative aspect-video overflow-hidden shadow-md group-hover:shadow-lg">
+                <div className="mb-14 rounded relative aspect-video overflow-hidden shadow-md group-hover:shadow-lg border">
                   <Image
                     src={page.frontMatter.gif ?? page.frontMatter.ogImage}
                     className="object-cover"
