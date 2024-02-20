@@ -8,6 +8,8 @@ import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
+import LangfuseIcon from "@/public/icon256.png";
+import LangchainIcon from "./img/langchain_icon.png";
 import Image from "next/image";
 
 const Circle = forwardRef<
@@ -64,7 +66,7 @@ export default function Integrations() {
         className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background py-4 px-2 md:p-12"
         ref={containerRef}
       >
-        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-6">
+        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-4">
           <div className="flex flex-row items-center justify-between">
             <Circle ref={inPythonRef} title="Python SDK">
               <SiPython className="h-6 w-6" />
@@ -88,10 +90,20 @@ export default function Integrations() {
           </div>
           <div className="flex flex-row items-center justify-between">
             <Circle ref={inLangchainRef} title="Langchain">
-              <span>🦜&nbsp;🔗</span>
+              <Image
+                src={LangchainIcon}
+                alt="Langchain Icon"
+                width={40}
+                height={40}
+              />
             </Circle>
             <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <span className="text-3xl">🪢</span>
+              <Image
+                src={LangfuseIcon}
+                alt="Langfuse Icon"
+                width={35}
+                height={35}
+              />
             </Circle>
             <Circle ref={out3ref} className="hidden">
               <Code className="h-6 w-6" />
