@@ -1,0 +1,69 @@
+---
+description: Open source observability for LlamaIndex via the native integration. Automatically capture detailed traces and metrics for every request of your RAG application.
+---
+
+# 🦙 LlamaIndex Integration
+
+**LlamaIndex** ([GitHub](https://github.com/run-llama/llama_index)) is an advanced "data framework" tailored for augmenting Large Language Models (LLMs) with private data.
+
+> It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs. Designed for both beginners and experts, LlamaIndex provides a user-friendly high-level API for easy data ingestion and querying, alongside customizable lower-level APIs for detailed module adaptation.
+
+Langfuse offers a simple integration for automatic capture of traces and metrics generated in LlamaIndex applications. **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
+
+## Quickstart
+
+Make sure you have both `llama-index` and `langfuse` installed.
+
+```bash
+pip install llama-index --upgrade
+pip install langfuse --upgrade
+```
+
+At the root of your LlamaIndex application, register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager`. When instantiating `LlamaIndexCallbackHandler`, make sure to configure it correctly with your Langfuse API keys and the Host URL.
+
+<Tabs items={["Environment variables", "Constructor parameters"]}>
+<Tab>
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.callback import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+</Tab>
+<Tab>
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.callback import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler(
+    public_key="pk-lf-...",
+    secret_key="sk-lf-...",
+    host="https://cloud.langfuse.com"
+)
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+</Tab>
+</Tabs>
+
+Done! ✨ Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
+
+**Important:** Langfuse processes events in the background to avoid blocking the main thread or adding latency. If you want to inspect events interactively or shut down your application, make sure to flush events to Langfuse to avoid dropping any of them.
+
+```python
+# Flush events to Langfuse before application exits
+langfuse_callback_handler.flush()
+```

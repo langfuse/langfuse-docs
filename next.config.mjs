@@ -74,6 +74,7 @@ const nonPermanentRedirects = [
     "/docs/scores",
     "/docs/scores/model-based-evals",
     "/docs/datasets",
+    "/docs/integrations/llama-index",
   ].map((path) => [path, path + "/overview"]),
 
   // Redirects to bridge all kinds of old links to new links
