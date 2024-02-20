@@ -34,7 +34,7 @@ LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-from langfuse.callback import LlamaIndexCallbackHandler
+from langfuse.llama_index import LlamaIndexCallbackHandler
 
 langfuse_callback_handler = LlamaIndexCallbackHandler()
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
@@ -46,7 +46,7 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-from langfuse.callback import LlamaIndexCallbackHandler
+from langfuse.llama_index import LlamaIndexCallbackHandler
 
 langfuse_callback_handler = LlamaIndexCallbackHandler(
     public_key="pk-lf-...",

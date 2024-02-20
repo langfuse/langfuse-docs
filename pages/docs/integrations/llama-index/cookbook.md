@@ -12,19 +12,17 @@ This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse 
 
 Make sure you have both `llama-index` and `langfuse` installed.
 
-
 ```python
 %pip install llama-index langfuse --upgrade
 ```
 
 Initializie the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com).
 
-
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-from langfuse.callback import LlamaIndexCallbackHandler
- 
+from langfuse.llama_index import LlamaIndexCallbackHandler
+
 langfuse_callback_handler = LlamaIndexCallbackHandler(
     public_key="pk-lf-...",
     secret_key="sk-lf-...",
@@ -34,7 +32,6 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```
 
 ## Index
-
 
 ```python
 # Example context, thx ChatGPT
@@ -48,7 +45,6 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 """)
 ```
 
-
 ```python
 # Example index construction + LLM query
 from llama_index.core import VectorStoreIndex
@@ -57,14 +53,12 @@ index = VectorStoreIndex.from_documents([doc1,doc2])
 
 ## Query
 
-
 ```python
 response = index.as_query_engine().query("What did he do growing up?")
 print(response)
 ```
 
 ## Explore traces in Langfuse
-
 
 ```python
 # As we want to immediately see result in Langfuse, we need to flush the callback handler
