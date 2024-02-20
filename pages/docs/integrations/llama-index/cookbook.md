@@ -80,4 +80,9 @@ print(response)
 langfuse_callback_handler.flush()
 ```
 
-Done! ✨ You see traces of your index ([example](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/e85c648e-c24f-4233-8217-0218c073a720)) and query ([example](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/892d9e4a-bba3-41a7-b338-501a0d8a873b)) in your Langfuse project.
+Done! ✨ You see traces of your index and query in your Langfuse project.
+
+Example traces (public links):
+1. [Index](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/5268a183-b47b-4797-8ba7-fcaff0e26438)
+2. [Query](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/d84d38b5-1dbc-47ce-bcad-893e1a39aefa)
+3. [Query (chat)](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/7101af0c-5716-448e-8a80-a02a04f70ccb)
