@@ -1,0 +1,31 @@
+---
+date: 2024-02-20
+title: "LlamaIndex Python integration"
+description: Automatically capture detailed traces and metrics for every request of your LlamaIndex application.
+author: Max
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're is excited to announce our newest Python integration with [LlamaIndex](https://www.llamaindex.ai/), bringing advanced observability to a popular library in the LLM ecosystem for building RAG (retrieval-augmented generation) applications. RAG allows you to inject additional context derived from private data sources (PDFs, SQL databases, slide decks) into your LLM prompts. Our integration with LlamaIndex empowers you now to seamlessly track and monitor the performance, traces, and metrics of your LlamaIndex applications. Detailed traces of the LlamaIndex context augmentation and the LLM querying processes are captured and can be inspected directly in the Langfuse UI. By integrating Langfuse's observability with LlamaIndex, we aim to provide you with the transparency needed to optimize your private-data enhanced LLM applications.
+
+### How it works
+
+```python
+# main.py
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+
+from langfuse.callback import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+Done! ✨ Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse.
+
+### More details
+
+Check out the full [documentation](/docs/integrations/llama-index) for more details on how to use this integration.
