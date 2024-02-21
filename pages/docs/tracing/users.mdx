@@ -8,56 +8,64 @@ The Users view provides an overview of all users. It also offers an in-depth loo
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
-## How it works
-
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
-```diff
-langfuse.trace(
-    ...
-+   user_id="your-user-id"
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    user_id="your-user-id"
 )
 ```
 
 </Tab>
 <Tab>
-```diff
-langfuse.trace({
-    ...
-+   userId: "your-user-id"
-})
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  userId: "your-user-id",
+});
 ```
 
 </Tab>
 <Tab>
 
-```diff
+```python
 from langfuse.openai import openai
 
 completion = openai.chat.completions.create(
-    name="test-chat",
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a calculator."},
-        {"role": "user", "content": "1 + 1 = "}],
-    temperature=0,
-+   user_id="your-user-id"
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add user_id as additional argument
+  user_id="your-user-id"
 )
 ```
 
 </Tab>
 <Tab>
-```diff
+
+```python
 handler = CallbackHandler(
-+   user_id="your-user-id"
+  user_id="your-user-id"
 )
 ```
 
 </Tab>
 <Tab>
-```diff
+
+```typescript
 const handler = new CallbackHandler({
-+   userId: "your-user-id"
+  userId: "your-user-id",
 });
 ```
 
