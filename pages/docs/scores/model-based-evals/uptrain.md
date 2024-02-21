@@ -1,19 +1,22 @@
-# Evaluation of RAG pipelines with UpTrain
+# LLM Evaluations with UpTrain
 
-Langfuse offers the feature to score your traces and spans. They can be used in multiple ways across Langfuse:
+[Langfuse](https://langfuse.com/) offers the feature to score your traces and spans. They can be used in multiple ways across Langfuse:
 1. Displayed on trace to provide a quick overview
 2. Segment all execution traces by scores to e.g. find all traces with a low-quality score
 3. Analytics: Detailed score reporting with drill downs into use cases and user segments
 
-This notebook demonstrates how to use Langfuse to create traces and evaluate using [UpTrain](https://langfuse.com)
+This notebook demonstrates how to use Langfuse to create traces and evaluate using UpTrain
 
-## How to integrate?
-### Enter your Langfuse API keys and OpenAI API key
+## Enter your Langfuse API keys and OpenAI API key
+
 You can get your Langfuse API keys [here](https://cloud.langfuse.com/) and OpenAI API key [here](https://platform.openai.com/api-keys)
+
 
 ```python
 %pip install langfuse datasets uptrain litellm openai --upgrade
 ```
+
+
 ```python
 import os
 
@@ -29,7 +32,9 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-### Let's create a sample data
+## Let's create a sample data
+
+
 ```python
 data = [
     {
@@ -54,7 +59,8 @@ data = [
     }
 ]
 ```
-### Run Evaluations using UpTrain Open-Source Software (OSS)
+
+## Run Evaluations using UpTrain Open-Source Software (OSS)
 
 We have used the following 3 metrics from UpTrain's library:
 
@@ -65,6 +71,7 @@ We have used the following 3 metrics from UpTrain's library:
 3. [Response Completeness](https://docs.uptrain.ai/predefined-evaluations/response-quality/response-completeness): Evaluates whether the response has answered all the aspects of the question specified
 
 You can look at the complete list of UpTrain's supported metrics [here](https://docs.uptrain.ai/predefined-evaluations/overview)
+
 
 ```python
 from uptrain import EvalLLM, Evals
@@ -79,15 +86,16 @@ res = eval_llm.evaluate(
 )
 ```
 
-### Using Langfuse
-
+## Using Langfuse
 You can use Langfuse in 2 ways:
 1. Score each Trace: This means you will run the evaluations for each trace item. This gives you much better idea since of how each call to your UpTrain pipelines is performing but can be expensive
+
 2. Score as Batch: In this method we will take a random sample of traces on a periodic basis and score them. This brings down cost and gives you a rough estimate the performance of your app but can miss out on important samples.
 
-### Method 1: Score with Trace
+## Method 1: Score with Trace
 
-**Now lets initialize a Langfuse client SDK to instrument you app**
+Now lets initialize a Langfuse client SDK to instrument you app.
+
 
 ```python
 from langfuse import Langfuse
@@ -96,7 +104,10 @@ langfuse = Langfuse()
 
 langfuse.auth_check()
 ```
-**Let's create a trace for the dataset**
+
+Let's create a trace for the dataset
+
+
 ```python
 # start a new trace when you get a question
 question = data[0]['question']
@@ -117,17 +128,23 @@ trace.span(
     name = "generation", input={'question': question, 'context': context}, output={'response': response}
 )
 ```
-**Let's add the scores to the trace in Langfuse**
+
+Let's add the scores to the trace in Langfuse
+
+
 ```python
 trace.score(name='context_relevance', value=res[0]['score_context_relevance'])
 trace.score(name='factual_accuracy', value=res[0]['score_factual_accuracy'])
 trace.score(name='response_completeness', value=res[0]['score_response_completeness'])
 ```
-![List of traces with UpTrain scores](/public/images/uptrain_trace.png)
 
-### Method 2: Scoring as batch
+![Trace with UpTrain scores](/cookbook/llm_evaluations_with_uptrain_files/image-2.png)
 
-**Let's create trace with our original dataset**
+## Method 2: Scoring as batch
+
+Let's create trace with our original dataset
+
+
 ```python
 for interaction in data:
     trace = langfuse.trace(name = "uptrain batch")
@@ -145,7 +162,10 @@ for interaction in data:
 # await that Langfuse SDK has processed all events before trying to retrieve it in the next step
 langfuse.flush()
 ```
-**Retrieve the uploaded dataset**
+
+Retrieve the uploaded dataset
+
+
 ```python
 def get_traces(name=None, limit=10000, user_id=None):
     all_data = []
@@ -164,7 +184,10 @@ def get_traces(name=None, limit=10000, user_id=None):
  
     return all_data[:limit]
 ```
-**Now lets make a batch and score it using UpTrain.**
+
+Now lets make a batch
+
+
 ```python
 from random import sample
  
@@ -172,6 +195,9 @@ NUM_TRACES_TO_SAMPLE = 4
 traces = get_traces(name="uptrain batch")
 traces_sample = sample(traces, NUM_TRACES_TO_SAMPLE)
 ```
+
+Create an evaluation batch using the created batch
+
 
 ```python
 # score on a sample
@@ -198,18 +224,40 @@ for t in traces_sample:
     evaluation_batch['trace_id'].append(t.id)
 ```
 
+Convert the evaluation batch to a list of dictionaries
+
+
 ```python
 data = [dict(zip(evaluation_batch,t)) for t in zip(*evaluation_batch.values())]
+```
+
+Evaluate the batch data using UpTrain
+
+
+```python
+
 res = eval_llm.evaluate(
     data = data,
     checks = [Evals.CONTEXT_RELEVANCE, Evals.FACTUAL_ACCURACY, Evals.RESPONSE_COMPLETENESS]
 )
 ```
+
+Add Trace ID to the generated evaluations
+
+
 ```python
 df = pd.DataFrame(res)
 
 # add the langfuse trace_id to the result dataframe
 df["trace_id"] = [d['trace_id'] for d in data]
+
+df.head()
+```
+
+Let's add the evaluation results to the batch
+
+
+```python
 for _, row in df.iterrows():
     for metric_name in ["context_relevance", "factual_accuracy","response_completeness"]:
         langfuse.score(
@@ -217,6 +265,6 @@ for _, row in df.iterrows():
             value=row["score_"+metric_name],
             trace_id=row["trace_id"]
         )
-df.head()
 ```
-![List of traces with UpTrain scores](/public/images/uptrain_batch.png)
+
+![List of Traces with UpTrain Scores](/cookbook/llm_evaluations_with_uptrain_files/image.png)
