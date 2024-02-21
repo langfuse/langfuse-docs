@@ -15,7 +15,7 @@ It's easy to map data in Langfuse to individual users. Just pass a unique identi
 ```diff
 langfuse.trace(
     ...
-+   user_id="your-session-id"
++   user_id="your-user-id"
 )
 ```
 
@@ -24,7 +24,7 @@ langfuse.trace(
 ```diff
 langfuse.trace({
     ...
-+   userId: "your-session-id"
++   userId: "your-user-id"
 })
 ```
 
@@ -41,7 +41,7 @@ completion = openai.chat.completions.create(
         {"role": "system", "content": "You are a calculator."},
         {"role": "user", "content": "1 + 1 = "}],
     temperature=0,
-+   user_id="your-session-id"
++   user_id="your-user-id"
 )
 ````
 
@@ -49,7 +49,7 @@ completion = openai.chat.completions.create(
 <Tab>
 ```diff
 handler = CallbackHandler(
-+   user_id="your-session-id"
++   user_id="your-user-id"
 )
 ```
 
@@ -57,7 +57,7 @@ handler = CallbackHandler(
 <Tab>
 ```diff
 const handler = new CallbackHandler({
-+   userId: "your-session-id"
++   userId: "your-user-id"
 });
 ```
 
