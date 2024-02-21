@@ -53,10 +53,7 @@ export function ProductUpdateSignup(props: {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn(
-          "flex gap-y-2 w-full flex-col sm:flex-row",
-          props.className
-        )}
+        className={cn("flex gap-y-2 w-full flex-row", props.className)}
       >
         <FormField
           control={form.control}
@@ -88,7 +85,7 @@ export function ProductUpdateSignup(props: {
           {form.formState.isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            "Get updates"
+            <>Get&nbsp;updates</>
           )}
         </Button>
       </form>

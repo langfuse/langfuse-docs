@@ -1,20 +1,10 @@
 ---
-description: Track conversations or threads across multiple traces in a single session.
+description: Track LLM chat conversations or threads across multiple traces in a single session. Replay the entire interaction to debug or analyze the conversation.
 ---
 
 # Sessions
 
 Many interactions with LLM applications span multiple traces. `Sessions` in Langfuse are a way to group these traces together and see a simple **session replay** of the entire interaction. Get started by adding a `sessionId` when creating a trace.
-
-Try this feature using the public [example project](/docs/demo).
-
-_Example session spanning multiple traces_
-
-<Frame border fullWidth>
-  ![Session view](/images/docs/session.png)
-</Frame>
-
-## How it works
 
 ```mermaid
 graph LR
@@ -25,52 +15,62 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
-```diff
-langfuse.trace(
-    ...
-+   session_id="your-session-id"
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    session_id="your-session-id"
 )
 ```
 
 </Tab>
 <Tab>
-```diff
-langfuse.trace({
-    ...
-+   sessionId: "your-session-id"
-})
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  sessionId: "your-session-id",
+});
 ```
 
 </Tab>
 <Tab>
-```
+
+```python
 from langfuse.openai import openai
-```
-```diff
+
 completion = openai.chat.completions.create(
-    name="test-chat",
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a calculator."},
-        {"role": "user", "content": "1 + 1 = "}],
-    temperature=0,
-+   session_id="your-session-id"
-)
-````
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
 
-</Tab>
-<Tab>
-```diff
-handler = CallbackHandler(
-+   session_id="your-session-id"
+  # add session_id as additional argument
+  session_id="your-session-id"
 )
 ```
 
 </Tab>
 <Tab>
-```diff
+
+```python
+handler = CallbackHandler(
+  session_id="your-session-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
 const handler = new CallbackHandler({
-+   sessionId: "your-session-id"
+  sessionId: "your-session-id",
 });
 ```
 
@@ -82,6 +82,16 @@ The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId t
 </Tab>
 
 </Tabs>
+
+## Example
+
+Try this feature using the public [example project](/docs/demo).
+
+_Example session spanning multiple traces_
+
+<Frame border fullWidth>
+  ![Session view](/images/docs/session.png)
+</Frame>
 
 ## Other features
 

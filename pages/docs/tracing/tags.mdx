@@ -1,28 +1,89 @@
+---
+description: Tags help to filter and organize traces in Langfuse based on use case, functions/apis used, environment and other criteria.
+---
+
 # Tagging traces
 
 import { CloudflareVideo } from "@/components/Video";
 
 Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
-<Tabs items={["Python", "JS/TS"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
-```diff
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
 trace = langfuse.trace(
-    ...
-+   tags=["my-first-tag", "even-better-tag"]
-    ...
+    tags=["my-first-tag", "even-better-tag"]
 )
 ```
 
 </Tab>
 
 <Tab>
-```diff
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
 const trace = langfuse.trace({
-    ...
-+   tags: ["tag-a-licious", "tig-tag-tagging"],
-    ...
+  tags: ["tag-a-licious", "tig-tag-tagging"],
 });
+```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add tags as additional argument
+  tags=["my-first-tag", "even-better-tag"]
+)
+```
+
+</Tab>
+
+<Tab>
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Create trace with tags
+trace = langfuse.trace(
+    tags=["my-first-tag", "even-better-tag"]
+)
+
+# Get Langchain callback handler for this trace
+handler = trace.get_langchain_handler()
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+// Create trace with tags
+const trace = langfuse.trace({
+  tags: ["tag-a-licious", "tig-tag-tagging"],
+});
+
+// Get Langchain callback handler for this trace
+const handler = new CallbackHandler({ root: trace });
 ```
 
 </Tab>

@@ -1,64 +1,85 @@
-import Spline from "@splinetool/react-spline";
 import Link from "next/link";
 import { YCLogo } from "./img/ycLogo";
-import ShimmerButton from "@/components/magicui/shimmer-button";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import phLight from "./img/ph_product_of_the_day_light.png";
 import phDark from "./img/ph_product_of_the_day_dark.png";
+import { CloudflareVideo } from "../Video";
+import GoldenKittyAwardSVG from "./img/ph_gke_ai_infra.svg";
+import GoldenKittyAwardSVGWhite from "./img/ph_gke_ai_infra_white.svg";
+import { HomeSection } from "./components/HomeSection";
 
 export function Hero() {
   return (
-    <section className="lg:min-h-[calc(100vh-64px)] flex flex-col items-center text-md sm:text-xl justify-center text-center gap-3">
-      <div className="h-64 lg:h-96 lg:max-h-[50vh]">
-        <Spline
-          scene="https://prod.spline.design/6kMV8Amtvu7CwUZJ/scene.splinecode"
-          onLoad={(spline) => {
-            spline.setZoom(3);
-          }}
-          className="h-full w-full"
-        />
-      </div>
-      <h1>
-        Open Source Observability <br className="hidden sm:inline xl:hidden" />&
-        Analytics for LLM Apps
-      </h1>
-      <span className="mt-3 text-primary/70">
-        Detailed production traces and a granular view on quality, cost and
-        latency
-      </span>
-      <div className="flex gap-4 flex-wrap items-center justify-center my-2 lg:my-5">
-        <Link href="/docs/demo">
-          <ShimmerButton borderRadius="8px">
-            <span className="whitespace-pre-wrap bg-gradient-to-b from-white from-30% to-gray-300/70 bg-clip-text text-center text-md font-semibold leading-none tracking-tight text-transparent">
-              Live demo
-            </span>
-          </ShimmerButton>
-        </Link>
-        <Button variant="ghost" size="lg" asChild>
-          <Link href="https://cloud.langfuse.com">Create account</Link>
-        </Button>
-      </div>
-
-      <div className="flex gap-2 items-center mt-5 lg:mt-10">
-        <span className="text-primary/70">Backed by</span>
-        <YCLogo />
-      </div>
-      <div className="flex gap-3 items-center">
-        <span className="text-primary/70">
-          Star us on <span className="hidden sm:inline">GitHub</span>
+    <HomeSection>
+      {/* HERO */}
+      <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(60vh-100px)] pb-12 lg:py-20">
+        <h1 className="text-4xl sm:text-7xl lg:text-8xl font-bold font-mono">
+          Open Source
+          <br />
+          LLM Engineering Platform
+        </h1>
+        <span className="mt-2 text-primary/70 text-2xl sm:text-3xl lg:text-4xl md:text-balance font-semibold tracking-wide">
+          <span className="underline">Traces</span>,{" "}
+          <span className="underline">evals</span>,{" "}
+          <span className="underline">prompt management</span> and{" "}
+          <span className="underline">metrics</span> to debug and improve your
+          LLM application.
         </span>
+
+        <div className="flex gap-4 flex-wrap items-center justify-center my-4">
+          <Button size="lg" variant="cta" asChild>
+            <Link href="/docs/demo">Try demo</Link>
+          </Button>
+          <Button variant="secondary" size="lg" asChild>
+            <Link href="/docs">View docs</Link>
+          </Button>
+        </div>
+      </div>
+      {/* Badges */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4 items-center justify-items-center my-10 flex-wrap">
         <Link href="https://github.com/langfuse/langfuse">
           <img
             alt="Langfuse Github stars"
             src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
           />
         </Link>
+        <a
+          href="https://www.ycombinator.com/companies/langfuse"
+          className="flex flex-col sm:flex-row items-center gap-x-2 gap-y-1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <div className="text-primary/70 text-sm">Backed by</div>
+          <YCLogo />
+        </a>
+        <a
+          href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            src={GoldenKittyAwardSVG}
+            alt="Langfuse won #1 Golden Kitty in AI Infra Category"
+            className="block dark:hidden"
+          />
+          <Image
+            src={GoldenKittyAwardSVGWhite}
+            alt="Langfuse won #1 Golden Kitty in AI Infra Category"
+            className="hidden dark:block"
+          />
+        </a>
+        <div className="max-w-full w-52 px-1">
+          <ProductHuntBadge />
+        </div>
       </div>
-      <div className="mt-2">
-        <ProductHuntBadge />
-      </div>
-    </section>
+      {/* <div className="aspect-video bg-blue-200"></div> */}
+      {/* <CloudflareVideo
+        videoId="ff57153dd945da86f7549c1f30daaea2"
+        aspectRatio={1.71}
+        title="What is Langfuse?"
+      /> */}
+    </HomeSection>
   );
 }
 

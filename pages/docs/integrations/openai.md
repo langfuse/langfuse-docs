@@ -232,7 +232,7 @@ openai.api_base = "https://api.openai.com/v1"
 
 ## 5. Group multiple generations into a single trace
 
-Many applications require more than one OpenAI call. In Langfuse, all LLM calls of a single API invocation (or conversation thread) can be grouped into the same `trace`.
+Many applications require more than one OpenAI call. In Langfuse, all LLM calls of a single API invocation can be grouped into the same `trace`.
 
 There are 2 options: (1) pass a `trace_id` (own or random string) or (2) create a trace with the Langfuse SDK.
 
@@ -333,6 +333,8 @@ poem = openai.chat.completions.create(
   trace_id=trace_id
 ).choices[0].message.content
 ```
+
+You can also use the nesting capabilities of Langfuse Tracing by providing a `parent_observation_id`. For example, this can be the id of a span that you created via the Langfuse Python SDK.
 
 ## 6. Add scores
 

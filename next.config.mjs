@@ -24,6 +24,7 @@ const nextraConfig = withNextra({
   transpilePackages: [
     'react-tweet',
     'react-syntax-highlighter',
+    'geist'
   ],
   images: {
     remotePatterns: [

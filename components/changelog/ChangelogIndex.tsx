@@ -30,15 +30,16 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                 <Video
                   src={page.frontMatter.ogVideo}
                   gifStyle
-                  className="mb-14 rounded-xl relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
+                  className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
                 />
               ) : page.frontMatter?.ogImage ? (
-                <div className="mb-14 rounded-xl relative aspect-video overflow-hidden shadow-md group-hover:shadow-lg">
+                <div className="mb-14 rounded relative aspect-video overflow-hidden shadow-md group-hover:shadow-lg">
                   <Image
                     src={page.frontMatter.gif ?? page.frontMatter.ogImage}
                     className="object-cover"
                     alt={page.frontMatter?.title ?? "Blog post image"}
                     fill={true}
+                    sizes="(min-width: 1024px) 1000px, 100vw"
                     priority={i < 3}
                     unoptimized={
                       page.frontMatter.gif !== undefined ||
@@ -60,7 +61,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                     )
                   : null}
               </div>
-              <h2 className="block font-semibold text-3xl opacity-90 group-hover:opacity-100">
+              <h2 className="block font-mono text-3xl opacity-90 group-hover:opacity-100">
                 {page.meta?.title || page.frontMatter?.title || page.name}
               </h2>
               <div className="opacity-80 mt-4 text-lg group-hover:opacity-100">

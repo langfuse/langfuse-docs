@@ -1,5 +1,5 @@
 ---
-description: Fully async and typed SDK, runs in Node.js, edge, Deno
+description: Open source observability for your Langchain (JS) application. Automatically captures rich traces and metrics.
 ---
 
 import { Callout } from "nextra/components";
@@ -27,7 +27,7 @@ import { Callout } from "nextra/components";
   </a>
 </div>
 
-If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your Langchain application. The library queues calls to make them non-blocking. 
+If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your Langchain application. The library queues calls to make them non-blocking.
 
 **Supported runtimes**
 
@@ -65,16 +65,18 @@ const langfuseHandler = new CallbackHandler({
 
 ### Options
 
-| Variable | Description                                                                         | Default value                                                                                                                                           |
-| -------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| baseUrl  | BaseUrl of the Langfuse API                                                         | `"https://cloud.langfuse.com"`                                                                                                                          |
-| release  | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| userId   | For user-level analytics ([docs](/docs/tracing/users))                              | `undefined`                                                                                                                                             |
+| Variable  | Description                                                                                    | Default value                                                                                                                                           |
+| --------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl   | BaseUrl of the Langfuse API                                                                    | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release   | The release number/hash of the application to provide analytics grouped by release.            | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| version   | The version of the application, see [experimentation docs](/docs/experimentation) for details. | `undefined`                                                                                                                                             |
+| userId    | For user-level analytics ([docs](/docs/tracing/users))                                         | `undefined`                                                                                                                                             |
+| sessionId | For session-level tracing ([docs](/docs/tracing/sessions))                                     | `undefined`                                                                                                                                             |
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
-  call `langfuseHandler.shutdownAsync()` at the end to flush the queue and await all
-  pending requests. ([Learn more](/docs/sdk/typescript#lambda))
+  call `langfuseHandler.shutdownAsync()` at the end to flush the queue and await
+  all pending requests. ([Learn more](/docs/sdk/typescript#lambda))
 </Callout>
 
 #### Create a simple LLM call using Langchain
@@ -153,12 +155,11 @@ const langfuseSpanHandler = new CallbackHandler({ root: span });
 
 // Invoke the nested call to the LLm with the corresponding handler
 const llmSpan = new OpenAI({ callbacks: [langfuseSpanHandler] });
-await llmSpan.call("Tell me a better joke", { callbacks: [langfuseSpanHandler] });
+await llmSpan.call("Tell me a better joke", {
+  callbacks: [langfuseSpanHandler],
+});
 
-await Promise.all([
-    langfuseHandler.flushAsync(),
-    langfuseSpanHandler.flushAsync(),
-  ]);
+await langfuse.flushAsync();
 ```
 
 ## Shutdown [#shutdown]
@@ -166,8 +167,6 @@ await Promise.all([
 The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
 
 ```typescript
-langfuseHandler.shutdown();
-// or
 await langfuseHandler.shutdownAsync();
 ```
 
@@ -182,12 +181,8 @@ import { OpenAI } from "@langchain/openai";
 
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 
-// Instantiate the standard Langfuse SDK
-const langfuse = new Langfuse({
-  publicKey: LANGFUSE_PUBLIC_KEY,
-  secretKey: LANGFUSE_SECRET_KEY,
-  baseUrl: LANGFUSE_BASEURL,
-});
+// Create a Langfuse JS client
+const langfuse = new Langfuse();
 
 // Create a trace and a handler nested into the trace.
 const trace = langfuse.trace({ id: "special-id" });

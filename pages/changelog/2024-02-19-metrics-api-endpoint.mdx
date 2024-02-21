@@ -1,0 +1,77 @@
+---
+date: 2024-02-19
+title: "New API: GET /metrics/daily"
+description: Retrieve aggregated daily usage metrics via a unified endpoint. Filters for application type, user, or tags are available for tailored data retrieval.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Returned data includes:
+
+- Daily trace count
+- Daily total cost
+- Daily usage per model (broken down by input and output)
+
+Optional filters
+
+- `traceName` to commonly filter by the application type, depending on how you use `name` in your traces
+- `userId` to filter by [user](/docs/tracing/users)
+- `tags` to filter by [tags](/docs/tracing/tags)
+
+See [API reference](https://api.reference.langfuse.com/#get-/api/public/metrics/daily) for more details.
+
+Do you miss any other GET API routes or metrics on this one? Add them to our [idea board](/ideas)!
+
+## Example
+
+```
+GET /api/public/metrics/daily?traceName=my-copilot&userId=john
+```
+
+```json
+{
+  "data": [
+    {
+      "date": "2024-02-18",
+      "countTraces": 1500,
+      "totalCost": 102.19,
+      "usage": [
+        {
+          "model": "llama2",
+          "inputUsage": 1200,
+          "outputUsage": 1300,
+          "totalUsage": 2500
+        },
+        {
+          "model": "gpt-4",
+          "inputUsage": 500,
+          "outputUsage": 550,
+          "totalUsage": 1050
+        }
+      ]
+    },
+    {
+      "date": "2024-02-17",
+      "countTraces": 1250,
+      "totalCost": 250.0,
+      "usage": [
+        {
+          "model": "llama2",
+          "inputUsage": 1000,
+          "outputUsage": 1100,
+          "totalUsage": 2100
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 2,
+    "totalItems": 60,
+    "totalPages": 30
+  }
+}
+```
