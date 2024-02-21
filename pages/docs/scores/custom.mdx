@@ -11,23 +11,23 @@ Exemplary use cases:
 - **Deterministic rules at runtime**: e.g. check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse.
 
-## SDKs
-
-### Python
+<Tabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
 
 ```python
-langfuse.score(InitialScore(
+langfuse.score(
     trace_id=message.trace_id,
     observation_id=message.generation_id,
     name="quality",
     value=1,
     comment="Factually correct",
-))
+)
 ```
 
 → More details in [Python SDK docs](/docs/sdk/python)
 
-### JS/TS
+</Tab>
+<Tab>
 
 ```typescript
 await langfuse.score({
@@ -41,6 +41,10 @@ await langfuse.score({
 
 → More details in [JS/TS SDK docs](/docs/sdk/typescript#score)
 
-## API
+</Tab>
+<Tab>
 
-Check out [API reference](/docs/api) for more details.
+Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
+
+</Tab>
+</Tabs>

@@ -8,6 +8,76 @@ The Users view provides an overview of all users. It also offers an in-depth loo
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    user_id="your-user-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  userId: "your-user-id",
+});
+```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add user_id as additional argument
+  user_id="your-user-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```python
+handler = CallbackHandler(
+  user_id="your-user-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+const handler = new CallbackHandler({
+  userId: "your-user-id",
+});
+```
+
+</Tab>
+
+<Tab>
+You can set the `userId` via the override configs, see the [Flowise Integration docs](/docs/flowise) for more details.
+
+</Tab>
+
+</Tabs>
+
 ## View all users
 
 The user list provides an overview of all users that have been tracked by Langfuse. It makes it simple to segment by overall token usage, number of traces, and user feedback.

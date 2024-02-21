@@ -70,6 +70,10 @@ langfuse.create_prompt(
   name: "prompt name",
   prompt: "This is a prompt with a {{variable}}",
   is_active: True # directly promote to production?
+  config: {
+    "temperature": 0.5,
+    "top_p": 0.9
+  } # optionally, add configs (e.g. model parameters or model tools)
 )
 ```
 
@@ -82,6 +86,10 @@ await langfuse.createPrompt({
   name: "prompt name",
   prompt: "This is a prompt with a {{variable}}",
   isActive: true, // directly promote to production?
+  config: {
+    temperature: 0.5,
+    topP: 0.9
+  } // optionally, add configs (e.g. model parameters or model tools)
 });
 ```
 
@@ -121,6 +129,10 @@ prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
 
 # Insert variables into prompt template
 compiled_prompt = prompt.compile(input="test")
+
+# Access the config of the prompt
+config = prompt.config
+
 ```
 
 </Tab>
@@ -141,6 +153,9 @@ const prompt = await langfuse.getPrompt("prompt name", 3, {
 
 // Insert variables into prompt template
 const compiledPrompt = prompt.compile({ input: "test" });
+
+// Access the config of the prompt
+const config = prompt.config;
 ```
 
 </Tab>
