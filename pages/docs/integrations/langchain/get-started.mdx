@@ -3,6 +3,11 @@ description: Open source observability for your Langchain application. Works in 
 ogImage: /images/docs/langchain_og.png
 ---
 
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
+
 # Langchain Integration (Python & JS/TS)
 
 Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/modules/callbacks/), [JS](https://js.langchain.com/docs/modules/callbacks/)). Thereby, the Langfuse SDK automatically creates a nested trace for every run of your Langchain applications.
@@ -11,114 +16,26 @@ Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://p
 
 You can configure the integration via (1) constructor arguments or (2) environment variables. Get your Langfuse credentials from the Langfuse dashboard.
 
-<Tabs items={["Python (constructor args)", "Python (env)", "JS (constructor args)", "JS (env)"]}>
-<Tab>
-{/* Python (args) */}
-
-```bash
-pip install langfuse
-```
-
-```python
-# Initialize Langfuse handler
-from langfuse.callback import CallbackHandler
-langfuse_handler = CallbackHandler(
-    secret_key="sk-lf-...",
-    public_key="pk-lf-...",
-    host="https://cloud.langfuse.com", # 🇪🇺 EU region
-  # host="https://us.cloud.langfuse.com", # 🇺🇸 US region
-)
-
-# Your Langchain code
-
-# Add Langfuse handler as callback to `run` or `invoke`
-# Works for traditional Langchain code and LCEL
-chain.run(input="<user_input>", callbacks=[langfuse_handler])
-chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
-```
-
-</Tab>
-<Tab>
-{/* Python (env) */}
-
-```bash
-pip install langfuse
-```
-
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
-
-```python
-# Initialize Langfuse handler
-from langfuse.callback import CallbackHandler
-langfuse_handler = CallbackHandler()
-
-# Your Langchain code
-
-# Add Langfuse handler as callback to `run` or `invoke`
-# Works for traditional Langchain code and LCEL
-chain.run(input="<user_input>", callbacks=[langfuse_handler])
-chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
-```
-
-</Tab>
-<Tab>
-{/* JS (args) */}
-
-```bash
-npm i langfuse-langchain
-```
-
-```typescript
-import { CallbackHandler } from "langfuse-langchain";
-// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
-
-const langfuseHandler = new CallbackHandler({
-  secretKey: "sk-lf-...",
-  publicKey: "pk-lf-...",
-  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
-  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
-});
-
-// Your Langchain code
-
-// Add Langfuse handler as callback to `run` or `invoke`
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
-```
-
-</Tab>
-<Tab>
-{/* JS (env) */}
-
-```bash
-npm i langfuse-langchain
-```
-
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
-
-```typescript
-import { CallbackHandler } from "langfuse-langchain";
-// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
-
-const langfuseHandler = new CallbackHandler();
-
-// Your Langchain code
-
-// Add Langfuse handler as callback to `run` or `invoke`
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
-```
-
-</Tab>
-
+<Tabs
+  items={[
+    "Python (constructor args)",
+    "Python (env)",
+    "JS (constructor args)",
+    "JS (env)",
+  ]}
+>
+  <Tab>
+    <GetStartedLangchainPythonArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsEnv />
+  </Tab>
 </Tabs>
 
 import { Callout } from "nextra-theme-docs";

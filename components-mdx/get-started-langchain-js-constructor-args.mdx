@@ -1,0 +1,20 @@
+```bash
+npm i langfuse-langchain
+```
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+});
+
+// Your Langchain code
+
+// Add Langfuse handler as callback to `run` or `invoke`
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```

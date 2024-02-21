@@ -1,0 +1,20 @@
+import Env from "./env-python.mdx";
+
+```bash
+pip install langfuse
+```
+
+<Env />
+
+```python
+# Initialize Langfuse handler
+from langfuse.callback import CallbackHandler
+langfuse_handler = CallbackHandler()
+
+# Your Langchain code
+
+# Add Langfuse handler as callback to `run` or `invoke`
+# Works for traditional Langchain code and LCEL
+chain.run(input="<user_input>", callbacks=[langfuse_handler])
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
+```
