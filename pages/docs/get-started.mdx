@@ -126,7 +126,7 @@ LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
 # LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
 
-```diff filename="server.py"
+```diff filename=".py"
 - import openai
 + from langfuse.openai import openai
 ```
@@ -163,12 +163,12 @@ Add Langfuse callback handler to your Langchain agent/chain/... to automatically
 
 ```python /callbacks=[handler]/
 from langfuse.callback import CallbackHandler
-handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
+langfuse_handler = CallbackHandler()
 
 # Langchain implementation
 
 # Add handler as callback when running the Langchain agent
-agent.run("<user_input>", callbacks=[handler])
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
 ```
 
 For more examples, see the [Langchain integration docs](/docs/integrations/langchain/python).
@@ -201,14 +201,15 @@ Add Langfuse callback handler to your Langchain agent/chain/... to automatically
 import { CallbackHandler } from "langfuse-langchain";
 
 // Initialize Langfuse callback handler
-const handler = new CallbackHandler();
+const langfuseHandler = new CallbackHandler();
 
-// Your Langchain implementation
-const chain = new LLMChain(...);
+// Langchain implementation
 
 // Add handler as callback when running the Langchain agent
-await chain.call({ input: "<user_input>" }, { callbacks: [handler] });
-
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandler] } // Register your Langfuse callback as run config
+);
 ```
 
 </Tab>
