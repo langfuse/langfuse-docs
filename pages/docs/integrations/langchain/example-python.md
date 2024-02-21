@@ -1,58 +1,14 @@
 ---
-description: Open source observability for your Langchain (Python) application. Automatically captures rich traces and metrics.
+description: Cookbook with examples of the Langfuse Integration for Langchain (Python).
 ---
 
-# Langchain Integration (Python)
+# Cookbook: Langchain Integration
 
-Langfuse integrates with Langchain using [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
+This is a cookbook with examples of the Langfuse Integration for Langchain (Python).
 
-## Integration
+Follow the [integration guide](https://langfuse.com/docs/integrations/langchain) to add this integration to your Langchain project. The integration also supports Langchain JS.
 
-Simply add the Langfuse handler as a callback when running your Langchain model/chain/agent to start capturing traces from your executions:
-
-```python
-# Initialize Langfuse handler
-from langfuse.callback import CallbackHandler
-
-langfuse_handler = CallbackHandler(
-    public_key=LANGFUSE_PUBLIC_KEY, secret_key=LANGFUSE_SECRET_KEY
-)
-
-# Setup Langchain
-from langchain.chains import LLMChain
-...
-chain = LLMChain(llm=llm, prompt=prompt)
-
-# Add Langfuse handler as callback to `run` or `invoke`
-chain.run(input="<user_input>", callbacks=[langfuse_handler])
-chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
-```
-
-[Langchain expression language](https://python.langchain.com/docs/expression_language/) (LCEL)
-
-```python
-chain = prompt | llm
-chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
-```
-
----
-
-The Langfuse `CallbackHandler` tracks the following actions when using Langchain:
-
-- Chains: `on_chain_start`, `on_chain_end`. `on_chain_error`
-- Agents: `on_agent_start`, `on_agent_action`, `on_agent_finish`, `on_agent_end`
-- Tools: `on_tool_start`, `on_tool_end`, `on_tool_error`
-- Retriever: `on_retriever_start`, `on_retriever_end`
-- ChatModel: `on_chat_model_start`,
-- LLM: `on_llm_start`, `on_llm_end`, `on_llm_error`
-
-Missing some useful information/context in Langfuse? Join the [Discord](/discord) or share your feedback directly with us: feedback@langfuse.com
-
-## Example Cookbook
-
-<NotebookBanner src="cookbook/integration_langchain.ipynb" />
-
-### Setup
+## Setup
 
 
 ```python
@@ -60,8 +16,6 @@ Missing some useful information/context in Langfuse? Join the [Discord](/discord
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
-
-Alternatively, you may also pass them as arguments to the `CallbackHandler` constructor, but make sure not to commit any keys to your repository.
 
 
 ```python
@@ -90,9 +44,7 @@ langfuse_handler = CallbackHandler()
 langfuse_handler.auth_check()
 ```
 
-### Examples
-
-#### 1. Sequential Chain
+## Example: Sequential Chain
 
 ![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
 
@@ -125,7 +77,7 @@ review = overall_chain.invoke("Tragedy at sunset on the beach", {"callbacks":[la
 review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler]) # add the handler to the run method
 ```
 
-#### 2. Sequential Chain in Langchain Expression Language (LCEL)
+## Example: Sequential Chain in Langchain Expression Language (LCEL)
 
 ![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
 
@@ -154,7 +106,7 @@ chain2 = (
 chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[langfuse_handler]})
 ```
 
-#### 3. RetrievalQA
+## Example: RetrievalQA
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
@@ -219,7 +171,7 @@ agent_executor = AgentExecutor(agent=agent, tools=tools)
 agent_executor.invoke({"input": "What is Langfuse?"}, config={"callbacks":[langfuse_handler]})
 ```
 
-### Adding scores
+## Adding scores to traces
 
 To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `langfuse_handler.get_trace_id()`
 
@@ -242,19 +194,12 @@ trace = langfuse.score(
 )
 ```
 
-### Interoperability with Langfuse Python SDK
+## Interoperability with Langfuse Python SDK
 
-To use all functionalities of Langfuse, use `get_langchain_handler()` on Langfuse tracing nodes (`trace` or `span`). Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing).
+To use all functionalities of Langfuse, use `get_langchain_handler()` on Langfuse tracing nodes (`trace` or `span`). Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/integrations/langchain).
 
-**Advantages**
-- Set custom attributes on trace/span.
-- Add additional custom observations to the trace that are not created by the Langchain integration.
-- Trace a Langchain application in any point in the application/trace hierarchy.
 
-**Disadvantages**
-- Input/output of a run is not added to trace/span but to a child span.
-
-#### How it works
+### How it works
 
 
 ```python
@@ -275,7 +220,7 @@ span = trace.span()
 langfuse_handler = span.get_langchain_handler()
 ```
 
-#### Example
+### Example
 
 We'll run the same chain multiple times at different places within the hierarchy of a trace.
 
@@ -337,59 +282,3 @@ span_physics.end()
 View it in Langfuse
 
 ![Trace of Nested Langchain Runs in Langfuse](https://langfuse.com/images/docs/langchain_python_trace_interoperability.png)
-
-## Upgrading from v1.x.x to v2.x.x
-
-The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
-
-```python
-from langfuse.callback import CallbackHandler
-langfuse_handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
-
-# Setup Langchain
-from langchain.chains import LLMChain
-...
-chain = LLMChain(llm=llm, prompt=prompt, callbacks=[langfuse_handler])
-
-# Add Langfuse handler as callback
-chain.run(input="<first_user_input>", callbacks=[langfuse_handler])
-chain.run(input="<second_user_input>", callbacks=[langfuse_handler])
-
-```
-
-So far, invoking the chain multiple times would group the observations in one trace.
-
-```bash
-TRACE
-|
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-```
-
-We changed this, so that each invocation will end up on its own trace. This allows us to derive the user inputs and outputs to Langchain applications. If you still want to group multiple invocations on one trace, you can use [this](https://langfuse.com/docs/langchain/python#adding-trace-as-context-to-a-langchain-handler) approach.
-
-```bash
-TRACE_1
-|
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-
-TRACE_2
-|
-|-- SPAN: Retrieval
-|   |
-|   |-- SPAN: LLM Chain
-|   |   |
-|   |   |-- GENERATION: ChatOpenAi
-```
