@@ -4,37 +4,33 @@ description: Open source observability for your Langchain (Python) application. 
 
 # Langchain integration (Python)
 
-Langfuse integrates with Langchain using the [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
+Langfuse integrates with Langchain using [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
 
-Add the handler as a callback when running your Langchain model/chain/agent:
+Simply add the Langfuse handler as a callback when running your Langchain model/chain/agent to start capturing traces from your executions:
 
-```python /callbacks=[handler]/
+```python
 # Initialize Langfuse handler
 from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+
+langfuse_handler = CallbackHandler(
+    public_key=LANGFUSE_PUBLIC_KEY, secret_key=LANGFUSE_SECRET_KEY
+)
 
 # Setup Langchain
 from langchain.chains import LLMChain
 ...
-chain = LLMChain(llm=llm, prompt=prompt, callbacks=[handler])
+chain = LLMChain(llm=llm, prompt=prompt, callbacks=[langfuse_handler])
 
 # Add Langfuse handler as callback
-chain.run(input="<user_input", callbacks=[handler])
+chain.run(input="<user_input>", callbacks=[langfuse_handler])
 ```
 
-Langchain expression language (LCEL)
-```python /config={"callbacks":[handler]}/
-chain.invoke(input, config={"callbacks":[handler]})
+[Langchain expression language](https://python.langchain.com/docs/expression_language/) (LCEL)
+
+```python
+chain = prompt | llm
+chain.invoke(input, config={"callbacks": [langfuse_handler]})
 ```
-
----
- **_In case of missing events or tokens:_**
-
-There are two ways to integrate callbacks into Langchain:
-- *Constructor Callbacks*: Set when initializing an object, like `LLMChain(callbacks=[handler])` or `ChatOpenAI(callbacks=[handler])`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
-- *Request Callbacks*: Defined when issuing a request, like `chain.run(input, callbacks=[handler])` and `chain.invoke(input, config={"callbacks":[handler]})`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
-
-For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://python.langchain.com/docs/modules/callbacks/#where-to-pass-in-callbacks).
 
 ---
 
@@ -49,22 +45,20 @@ The Langfuse `CallbackHandler` tracks the following actions when using Langchain
 
 Missing some useful information/context in Langfuse? Join the [Discord](/discord) or share your feedback directly with us: feedback@langfuse.com
 
-## Notebook Setup
+## Example Cookbook
 
 <NotebookBanner src="cookbook/integration_langchain.ipynb" />
 
 ### 1. Initializing the Langfuse Callback handler
-
-The Langfuse SDKs are hosted on the pypi index.
 
 
 ```python
 %pip install langfuse langchain openai --upgrade
 ```
 
-Initialize the client with api keys and optionally your environment. In the example we are using the cloud environment which is also the default.
+Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
 
-Alternatively, you can also pass them as arguments to the `CallbackHandler` constructor.
+Alternatively, you may also pass them as arguments to the `CallbackHandler` constructor, but make sure not to commit any keys to your repository.
 
 
 ```python
@@ -73,26 +67,24 @@ import os
 # get keys for your project from https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
 
 # your openai key
 os.environ["OPENAI_API_KEY"] = ""
-
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
 
 ```python
 from langfuse.callback import CallbackHandler
 
-handler = CallbackHandler()
+langfuse_handler = CallbackHandler()
 ```
 
 
 ```python
-# checks the SDK connection with the server.
-handler.auth_check()
+# Tests the SDK connection with the server
+langfuse_handler.auth_check()
 ```
 
 ### 2. Langchain
@@ -133,8 +125,8 @@ review_chain = LLMChain(llm=llm, prompt=prompt_template)
 overall_chain = SimpleSequentialChain(
     chains=[synopsis_chain, review_chain],
 )
-review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[handler]) # add the handler to the run method
-handler.langfuse.flush()
+review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler]) # add the handler to the run method
+langfuse_handler.flush()
 ```
 
 ### 2. Sequential Chain in Langchain Expression Language (LCEL)
@@ -148,7 +140,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 
-handler = CallbackHandler()
+langfuse_handler = CallbackHandler()
 
 prompt1 = ChatPromptTemplate.from_template("what is the city {person} is from?")
 prompt2 = ChatPromptTemplate.from_template(
@@ -166,8 +158,8 @@ chain2 = (
     | StrOutputParser()
 )
 
-chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[handler]})
-handler.get_trace_url()
+chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[langfuse_handler]})
+langfuse_handler.get_trace_url()
 ```
 
 ### 3. QA Retrieval
@@ -193,7 +185,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
-handler = CallbackHandler()
+langfuse_handler = CallbackHandler()
 urls = [
     "https://raw.githubusercontent.com/langfuse/langfuse-docs/main/public/state_of_the_union.txt",
 ]
@@ -216,11 +208,11 @@ chain = RetrievalQA.from_chain_type(
     retriever=docsearch.as_retriever(search_kwargs={"k": 1}),
 )
 
-result = chain.run(query, callbacks=[handler])
+result = chain.run(query, callbacks=[langfuse_handler])
 
 print(result)
 
-handler.langfuse.flush()
+langfuse_handler.flush()
 ```
 
 
@@ -232,7 +224,7 @@ handler.langfuse.flush()
 from langchain.agents import AgentType, initialize_agent, load_tools
 
 
-handler = CallbackHandler()
+langfuse_handler = CallbackHandler()
 
 llm = OpenAI()
 
@@ -240,17 +232,16 @@ tools = load_tools(["serpapi", "llm-math"], llm=llm)
 
 agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
 
-result = agent.run("Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?", callbacks=[handler])
+result = agent.run("Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?", callbacks=[langfuse_handler])
 
-handler.langfuse.flush()
+langfuse_handler.flush()
 
 print("output variable: ", result)
 ```
 
 ## Adding scores
 
-To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `handler.get_trace_id()`
-
+To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `langfuse_handler.get_trace_id()`
 
 ### Example
 
@@ -258,11 +249,10 @@ To add [scores](/docs/scores) to traces created with the Langchain integration, 
 ```python
 from langfuse import Langfuse
 
-
 # Trace langchain run via the Langfuse CallbackHandler as shown above
 
 # Get id of created trace
-trace_id = handler.get_trace_id()
+trace_id = langfuse_handler.get_trace_id()
 
 # Add score, e.g. via the Python SDK
 langfuse = Langfuse()
@@ -294,7 +284,7 @@ langfuse = Langfuse()
 
 trace = langfuse.trace(name="synopsis-application", user_id="user-1234")
 
-handler = trace.get_langchain_handler()
+langfuse_handler = trace.get_langchain_handler()
 
 llm = OpenAI()
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
@@ -304,9 +294,9 @@ template = """You are a playwright. Given the title of play, it is your job to w
 prompt_template = PromptTemplate(input_variables=["title"], template=template)
 synopsis_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-synopsis_chain.run("Tragedy at sunset on the beach", callbacks=[handler])
+synopsis_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler])
 
-langfuse.flush()
+langfuse.flush() # This will also flush events added by 'langfuse_handler'
 ```
 
 ## Configuring multiple runs per trace
@@ -342,7 +332,7 @@ langfuse = Langfuse()
 trace_id = str(uuid.uuid4())
 trace = langfuse.trace(id=trace_id)
 
-handler = trace.get_langchain_handler()
+langfuse_handler = trace.get_langchain_handler()
 
 llm = OpenAI()
 template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
@@ -352,15 +342,15 @@ template = """You are a playwright. Given the title of play, it is your job to w
 prompt_template = PromptTemplate(input_variables=["title"], template=template)
 synopsis_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-synopsis_chain.run("Tragedy at sunset on the beach", callbacks=[handler])
+synopsis_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler])
 
 # configure the next span id
 next_span_id = str(uuid.uuid4())
-handler.setNextSpan(next_span_id)
+langfuse_handler.setNextSpan(next_span_id)
 
-synopsis_chain.run("Comedy at sunset on the beach", callbacks=[handler])
+synopsis_chain.run("Comedy at sunset on the beach", callbacks=[langfuse_handler])
 
-langfuse.flush()
+langfuse.flush() # This will also flush events added by 'langfuse_handler'
 ```
 
 ## Upgrading from v1.x.x to v2.x.x
@@ -368,20 +358,20 @@ langfuse.flush()
 The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
 
 ```python
-
 from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+langfuse_handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
 
 # Setup Langchain
 from langchain.chains import LLMChain
 ...
-chain = LLMChain(llm=llm, prompt=prompt, callbacks=[handler])
+chain = LLMChain(llm=llm, prompt=prompt, callbacks=[langfuse_handler])
 
 # Add Langfuse handler as callback
-chain.run(input="<first_user_input>", callbacks=[handler])
-chain.run(input="<second_user_input>", callbacks=[handler])
+chain.run(input="<first_user_input>", callbacks=[langfuse_handler])
+chain.run(input="<second_user_input>", callbacks=[langfuse_handler])
 
 ```
+
 So far, invoking the chain multiple times would group the observations in one trace.
 
 ```bash

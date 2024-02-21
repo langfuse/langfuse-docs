@@ -29,7 +29,7 @@ import { Callout } from "nextra/components";
 
 If you are working with Node.js, Deno, or Edge functions, the `langfuse` library is the simplest way to integrate Langfuse into your Langchain application. The library queues calls to make them non-blocking.
 
-Supported runtimes:
+**Supported runtimes**
 
 - [x] Node.js
 - [x] Edge: Vercel, Cloudflare, ...
@@ -41,20 +41,22 @@ for tracing and [LangfuseWeb](/docs/sdk/typescript-web) to capture feedback from
 ## Installation
 
 ```sh
+# npm
 npm i langfuse-langchain
-# or
+
+# or yarn
 yarn add langfuse-langchain
 
-# Deno
+# or deno
 import CallbackHandler from 'https://esm.sh/langfuse-langchain'
 ```
 
-In your application, set the **api keys** to create a client.
+In your application, set your **API keys** from the project settings in the Langfuse UI to create a client.
 
 ```typescript
 import { CallbackHandler } from "langfuse-langchain";
 
-const handler = new CallbackHandler({
+const langfuseHandler = new CallbackHandler({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
   // options
@@ -73,87 +75,91 @@ const handler = new CallbackHandler({
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
-  call `handler.shutdownAsync()` at the end to flush the queue and await all
-  pending requests. ([Learn more](/docs/sdk/typescript#lambda))
+  call `langfuseHandler.shutdownAsync()` at the end to flush the queue and await
+  all pending requests. ([Learn more](/docs/sdk/typescript#lambda))
 </Callout>
 
 #### Create a simple LLM call using Langchain
 
 ```typescript /callbacks: [langfuseHandler]/
-import { LLMChain } from "langchain/chains";
-import { OpenAI } from "langchain/llms/openai";
-import { PromptTemplate } from "langchain/prompts";
+import { PromptTemplate } from "@langchain/core/prompts";
+import { OpenAI } from "@langchain/openai";
 
 import { CallbackHandler } from "langfuse-langchain";
 
-// create a handler
-const handler = new CallbackHandler({
-  publicKey: LF_PUBLIC_KEY,
-  secretKey: LF_SECRET_KEY,
+// Create a callback handler
+const langfuseHandler = new CallbackHandler({
+  publicKey: LANGFUSE_PUBLIC_KEY,
+  secretKey: LANGFUSE_SECRET_KEY,
 });
 
-// create a model
+// Choose a model
 const model = new OpenAI({
   temperature: 0,
-  openAIApiKey: "sk-...",
+  openAIApiKey: "YOUR-API-KEY",
+  callbacks: [langfuseHandler] // Register your Langfuse callback in the constructor
 });
-// create a prompt
+
+// Create a prompt
 const prompt = PromptTemplate.fromTemplate(
   "What is a good name for a company that makes {product}?"
 );
-// create a chain
-const chain = new LLMChain({
-  llm: model,
-  prompt,
-  callbacks: [langfuseHandler],
-});
 
-// execute the chain
-const resA = await chain.call(
+// Create a chain and add the Langfuse callback handler
+const chain = prompt.pipe(model).withConfig({ callbacks: [langfuseHandler] }); // Register your Langfuse callback on chain creation
+
+// Invoke the chain
+const result = await chain.invoke(
   { product: "colorful hockey sticks" },
-  { callbacks: [langfuseHandler] }
+  { callbacks: [langfuseHandler] } // Register your Langfuse callback as run config
 );
+
+...
+
+await langfuseHandler.flushAsync(); // Flush queued events to Langfuse
 ```
 
 There are two ways to integrate callbacks into Langchain:
 
-- _Constructor Callbacks_: Set when initializing an object, like `new LLMChain({ ..., callbacks: [langfuseHandler] })`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
-- _Request Callbacks_: Defined when issuing a request, like `chain.run(..., { callbacks: [langfuseHandler] })`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
+- **Constructor Callbacks**: Set when initializing an object, like `new LLMChain({ ..., callbacks: [langfuseHandler] })`. This approach will use the callback for every call made on that specific object. However, it won't apply to its child objects, making it limited in scope.
+- **Request Callbacks**: Defined when issuing a request, like `chain.invoke(..., { callbacks: [langfuseHandler] })`. This not only uses the callback for that specific request but also for any subsequent sub-requests it triggers.
 
-For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above [docs](https://js.langchain.com/docs/modules/callbacks/#when-do-you-want-to-use-each-of-these).
+For comprehensive data capture especially for complex chains or agents, it's advised to use the both approaches, as demonstrated above. [Langchain docs.](https://js.langchain.com/docs/modules/callbacks/#when-do-you-want-to-use-each-of-these).
 
 #### Stateful Langchain callbacks
 
 The Langchain client can also be constructed with `Traces` or `Spans`. This allows to nest Langchain executions anywhere in the `Trace` an hence to add any metadata and ids that are important.
 
-```typescript /callbacks: [handler]/ /callbacks: [spanHandler]/
-import { OpenAI } from "langchain/llms/openai";
+```typescript /callbacks: [langfuseHandler]/ /callbacks: [langfuseSpanHandler]/
+import { OpenAI } from "@langchain/openai";
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 
-// configure the normal Langchain sdk
+// Instantiate the standard Langfuse SDK
 const langfuse = new Langfuse({
-  publicKey: LF_PUBLIC_KEY,
-  secretKey: LF_SECRET_KEY,
-  baseUrl: LF_HOST,
+  publicKey: LANGFUSE_PUBLIC_KEY,
+  secretKey: LANGFUSE_SECRET_KEY,
+  baseUrl: LANGFUSE_BASEURL,
 });
 
-// create a trace and a handler nested into the trace.
-const trace = langfuse.trace({ name: "joke-trace" });
-const handler = new CallbackHandler({ root: trace });
+// Create a trace and a handler nested into the trace.
+const parentTrace = langfuse.trace({ name: "parent-trace" });
+const langfuseHandler = new CallbackHandler({ root: parentTrace });
 
-// call the llm with the handler
-const llm = new OpenAI({ callbacks: [handler] });
-await llm.call("Tell me a joke", { callbacks: [handler] });
+// Call the LLM with the handler
+const llm = new OpenAI({ callbacks: [langfuseHandler] });
+await llm.call("Tell me a joke", { callbacks: [langfuseHandler] });
 
-// create a span within the trace
-const span = trace.span({ name: "joke-span" });
-const spanHandler = new CallbackHandler({ root: span });
+// Create a span within the trace
+const childSpan = parentTrace.span({ name: "child-span" });
+const langfuseSpanHandler = new CallbackHandler({ root: span });
 
-// call the llm with the handler
-const llmSpan = new OpenAI({ callbacks: [spanHandler] });
-await llmSpan.call("Tell me a better joke", { callbacks: [spanHandler] });
+// Invoke the nested call to the LLm with the corresponding handler
+const llmSpan = new OpenAI({ callbacks: [langfuseSpanHandler] });
+await llmSpan.call("Tell me a better joke", {
+  callbacks: [langfuseSpanHandler],
+});
 
-await handler.flushAsync();
+await langfuse.flushAsync();
 ```
 
 ## Shutdown [#shutdown]
@@ -161,7 +167,7 @@ await handler.flushAsync();
 The Langfuse SDKs buffer events and flush them asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
 
 ```typescript
-await handler.shutdownAsync();
+await langfuseHandler.shutdownAsync();
 ```
 
 ## Execution identifier
@@ -170,28 +176,29 @@ The SDK provides a function to return the `traceId` of the trace which is curren
 
 Both of these ids can be used to create scores for the correct `Span` in Langfuse.
 
-```typescript /handler.getTraceId();/ /handler.getLangchainRunId();/ /callbacks: [handler]/
-import { OpenAI } from "langchain/llms/openai";
+```typescript /handler.getTraceId();/ /handler.getLangchainRunId();/ /callbacks: [langfuseHandler]/
+import { OpenAI } from "@langchain/openai";
+
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 
 // Create a Langfuse JS client
 const langfuse = new Langfuse();
 
-// create a trace and a handler nested into the trace.
+// Create a trace and a handler nested into the trace.
 const trace = langfuse.trace({ id: "special-id" });
-const handler = new CallbackHandler({ root: trace });
+const langfuseHandler = new CallbackHandler({ root: trace });
 
-handler.getTraceId(); // returns "special-id"
+langfuseHandler.getTraceId(); // returns "special-id"
 
-// call the llm with the handler
-const llm = new OpenAI({ callbacks: [handler] });
-await llm.call("Tell me a joke", { callbacks: [handler] });
+// Call the LLM with the handler
+const llm = new OpenAI({ callbacks: [langfuseHandler] });
+await llm.call("Tell me a joke", { callbacks: [langfuseHandler] });
 
-handler.getLangchainRunId(); // returns the latest run id
+langfuseHandler.getLangchainRunId(); // returns the latest run id
 
-await llm.call("Tell me a better joke", { callbacks: [handler] });
+await llm.call("Tell me a better joke", { callbacks: [langfuseHandler] });
 
-handler.getLangchainRunId(); // returns the latest run id, different from the first one
+langfuseHandler.getLangchainRunId(); // returns the latest run id, different from the first one
 ```
 
 ## Upgrading from v2.x.x to v3.x.x [#upgrade2to3]
@@ -206,9 +213,9 @@ The `CallbackHandler` can be used in multiple invocations of a Langchain chain a
 import { CallbackHandler } from "langfuse-langchain";
 
 // create a handler
-const handler = new CallbackHandler({
-  publicKey: LF_PUBLIC_KEY,
-  secretKey: LF_SECRET_KEY,
+const langfuseHandler = new CallbackHandler({
+  publicKey: LANGFUSE_PUBLIC_KEY,
+  secretKey: LANGFUSE_SECRET_KEY,
 });
 
 import { LLMChain } from "langchain/chains";
@@ -272,5 +279,5 @@ If you still want to group multiple invocations on one trace, you can scope the 
 
 ```typescript
 const trace = langfuse.trace({ id: "special-id" });
-const handler = new CallbackHandler({ root: trace });
+const langfuseHandler = new CallbackHandler({ root: trace });
 ```
