@@ -69,7 +69,6 @@ const nonPermanentRedirects = [
   // Redirect to overview pages
   ...[
     "/docs/integrations",
-    "/docs/sdk",
     "/docs/tracing",
     "/docs/scores",
     "/docs/scores/model-based-evals",
@@ -91,7 +90,8 @@ const nonPermanentRedirects = [
   ["/docs/local", "/docs/deployment/local"],
   ["/docs/self-host", "/docs/deployment/self-host"],
   ["/docs/cloud", "/docs/deployment/cloud"],
-  ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
+  ["/docs/guides/sdk-integration", "/docs/sdk"],
+  ["/docs/sdk/overview", "/docs/sdk"],
   ["/docs/scores/evals", "/docs/scores/model-based-evals/overview"],
   ["/experimentation", "/docs/experimentation"],
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
