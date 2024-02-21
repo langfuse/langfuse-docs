@@ -2,7 +2,7 @@
 description: Open source observability for your Langchain (Python) application. Automatically captures rich traces and metrics.
 ---
 
-# Langchain integration (Python)
+# Langchain Integration (Python)
 
 Langfuse integrates with Langchain using [Langchain Callbacks](https://python.langchain.com/docs/modules/callbacks/). Thereby, the Langfuse SDK automatically creates a nested trace for the abstractions offered by Langchain.
 
