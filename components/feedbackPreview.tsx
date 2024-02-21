@@ -92,16 +92,16 @@ export default function FeedbackPreview() {
       <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
         Application
       </div>
-      <div className="flex flex-col p-3 ring-1 ring-gray-400 rounded-lg">
+      <div className="flex flex-col p-3 ring-1 ring-gray-400 rounded">
         <div className="font-bold text-xs dark:text-primary/80 mb-2">User</div>
-        <div className="p-3 ring-1 ring-gray-400 rounded-lg">
+        <div className="p-3 ring-1 ring-gray-400 rounded">
           What is the simplest way to make user feedback in my LLM application
           actionable?
         </div>
         <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
           Assistant
         </div>
-        <div className="p-3 ring-1 ring-gray-400 rounded-lg">
+        <div className="p-3 ring-1 ring-gray-400 rounded">
           As a helpful assistant I cannot help you with this question
         </div>
         <div className="flex gap-3 mt-3">
@@ -153,7 +153,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="ring-1 ring-gray-400 rounded-lg">
+    <div className="ring-1 ring-gray-400 rounded">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

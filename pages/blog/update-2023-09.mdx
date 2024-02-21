@@ -61,13 +61,11 @@ for generation in generations:
     )
 
     langfuse.score(
-      InitialScore(
-        name="hallucination",
-        traceId=generation.trace_id,
-        observationId=generation.id,
-        value=eval["score"],
-        comment=eval['reasoning']
-      )
+      name="hallucination",
+      traceId=generation.trace_id,
+      observationId=generation.id,
+      value=eval["score"],
+      comment=eval['reasoning']
     )
 ```
 
