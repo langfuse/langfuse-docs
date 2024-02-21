@@ -19,7 +19,7 @@ langfuse_handler = CallbackHandler(
 # Setup Langchain
 from langchain.chains import LLMChain
 ...
-chain = LLMChain(llm=llm, prompt=prompt, callbacks=[langfuse_handler])
+chain = LLMChain(llm=llm, prompt=prompt)
 
 # Add Langfuse handler as callback
 chain.run(input="<user_input>", callbacks=[langfuse_handler])
