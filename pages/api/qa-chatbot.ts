@@ -82,9 +82,7 @@ export default async function handler(req: Request, res: Response) {
     throw new Error("Failed to create embedding for question");
   }
   const [{ embedding }] = (await embeddingResponse.json()).data;
-  embeddingSpan.end({
-    output: embedding,
-  });
+  embeddingSpan.end();
 
   const vectorStoreSpan = retrievalSpan.span({
     name: "vector-store",
