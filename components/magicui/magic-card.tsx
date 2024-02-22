@@ -194,7 +194,7 @@ const MagicCard = ({
   return (
     <div
       {...props}
-      className={cn("relative h-full w-full rounded-2xl", className)}
+      className={cn("relative h-full w-full rounded", className)}
       style={
         {
           "--mask-size": `${size}px`,
@@ -203,10 +203,10 @@ const MagicCard = ({
       }
     >
       {/* Border */}
-      <div className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl bg-gray-300 bg-[radial-gradient(var(--mask-size)_circle_at_var(--mouse-x)_var(--mouse-y),#ffaa40_0,#9c40ff_50%,transparent_100%)] transition-opacity duration-500 dark:bg-gray-700 " />
+      <div className="pointer-events-none absolute inset-0 h-full w-full rounded bg-gray-300 bg-[radial-gradient(var(--mask-size)_circle_at_var(--mouse-x)_var(--mouse-y),#ffaa40_0,#9c40ff_50%,transparent_100%)] transition-opacity duration-500 dark:bg-gray-700 " />
 
       {/* Background */}
-      <div className={"absolute inset-[1px] rounded-2xl bg-background"} />
+      <div className={"absolute inset-[1px] rounded bg-background"} />
 
       {children}
 
@@ -214,7 +214,7 @@ const MagicCard = ({
       {spotlight && (
         <div
           className={
-            "blur-xs pointer-events-none absolute left-0 top-0 h-full w-full rounded-2xl bg-[radial-gradient(var(--mask-size)_circle_at_var(--mouse-x)_var(--mouse-y),var(--spotlight-color),transparent_40%)] transition-opacity duration-500"
+            "blur-xs pointer-events-none absolute left-0 top-0 h-full w-full rounded bg-[radial-gradient(var(--mask-size)_circle_at_var(--mouse-x)_var(--mouse-y),var(--spotlight-color),transparent_40%)] transition-opacity duration-500"
           }
         />
       )}

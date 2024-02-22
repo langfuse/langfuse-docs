@@ -1,0 +1,19 @@
+import Env from "./env-js.mdx";
+
+```bash
+npm i langfuse-langchain
+```
+
+<Env />
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+// Your Langchain code
+
+// Add Langfuse handler as callback to `run` or `invoke`
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```

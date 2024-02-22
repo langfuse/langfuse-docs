@@ -15,7 +15,7 @@ export function Logo() {
   return (
     <>
       <div
-        className="flex gap-2 items-center"
+        className="flex gap-2 items-center cursor-pointer"
         onContextMenu={(e) => {
           e.preventDefault();
           setMenuOpen(true);
