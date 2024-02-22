@@ -32,41 +32,97 @@ flowchart LR
 
 ## Ingest usage and/or cost [#ingest]
 
-If available in the LLM response, ingesting usage and/or cost is the most accurate and robust way to track usage in Langfuse:
+If available in the LLM response, ingesting usage and/or cost is the most accurate and robust way to track usage in Langfuse.
+
+<Tabs items={["Python", "JS"]}>
+<Tab>
+
+```python
+generation = langfuse.generation(
+  # ...
+  usage={
+    # usage
+    "input": int,
+    "output": int,
+    "total": int,  # if not set, it is derived from input + output
+    "unit": "TOKENS",  # any of: "TOKENS", "CHARACTERS", "MILLISECONDS", "SECONDS", "IMAGES"
+
+    # usd cost
+    "input_cost": float,
+    "output_cost": float,
+    "total_cost": float, # if not set, it is derived from input_cost + output_cost
+  },
+  # ...
+)
+```
+
+</Tab>
+<Tab>
 
 ```typescript
-langfuse.generation({
-  ...
+const generation = langfuse.generation({
+  // ...
   usage: {
     // usage
-    input: integer,
-    output: integer,
-    total: integer, // if no separate input&output, otherwise derived from input + output
-    unit: ModelUsageUnit, // "TOKENS" | "CHARACTERS" | "MILLISECONDS" | "SECONDS" | "IMAGES"
+    input: int,
+    output: int,
+    total: int, // optional, it is derived from input + output
+    unit: "TOKENS", // "TOKENS" | "CHARACTERS" | "MILLISECONDS" | "SECONDS" | "IMAGES"
 
     // usd cost
-    inputCost: number
-    outputCost: number
-    totalCost: number
+    inputCost: float,
+    outputCost: float,
+    totalCost: float, // optional, it is derived from input + output
   },
-  ...
-})
+  // ...
+});
 ```
+
+</Tab>
+</Tabs>
+
+You can also update the usage and cost via `generation.udpdate()` and `generation.end()`.
 
 ### Compatibility with OpenAI
 
 For increased compatibility with OpenAI, you can also use the following attributes to ingest usage:
 
+<Tabs items={["Python", "JS"]}>
+<Tab>
+
+```python
+generation = langfuse.generation(
+  # ...
+  usage={
+    # usage
+    "prompt_tokens": int,
+    "completion_tokens": int,
+    "total_tokens": int,  # optional, it is derived from prompt + completion
+  },
+  # ...
+)
+```
+
+</Tab>
+<Tab>
+
 ```typescript
-langfuse.generation({
+const generation = langfuse.generation({
+  // ...
   usage: {
     // usage
     promptTokens: integer,
     completionTokens: integer,
     totalTokens: integer, // optional, derived from prompt + completion
   },
+  // ...
 });
 ```
+
+</Tab>
+</Tabs>
+
+You can also ingest OpenAI-style usage via `generation.udpdate()` and `generation.end()`.
 
 ## Infer usage and/or cost [#infer]
 
