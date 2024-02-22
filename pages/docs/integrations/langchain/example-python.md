@@ -22,13 +22,13 @@ Initialize the Langfuse client with your API keys from the project settings in t
 import os
 
 # get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-*****"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-*****"
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
 
 # your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "***"
 ```
 
 
@@ -44,7 +44,9 @@ langfuse_handler = CallbackHandler()
 langfuse_handler.auth_check()
 ```
 
-## Example: Sequential Chain
+## Examples
+
+### Sequential Chain
 
 ![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
 
@@ -77,7 +79,7 @@ review = overall_chain.invoke("Tragedy at sunset on the beach", {"callbacks":[la
 review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler]) # add the handler to the run method
 ```
 
-## Example: Sequential Chain in Langchain Expression Language (LCEL)
+### Sequential Chain in Langchain Expression Language (LCEL)
 
 ![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
 
@@ -106,7 +108,49 @@ chain2 = (
 chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[langfuse_handler]})
 ```
 
-## Example: RetrievalQA
+### ConversationChain
+
+We'll use a [session](https://langfuse.com/docs/tracing/sessions) in Langfuse to track this conversation with each invocation being a single trace.
+
+In addition to the traces of each run, you also get a conversation view of the entire session:
+
+![Session view of ConversationChain in Langfuse](https://langfuse.com/images/docs/langchain_session.png)
+
+
+```python
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
+from langchain_openai import OpenAI
+
+llm = OpenAI(temperature=0)
+
+conversation = ConversationChain(
+    llm=llm, memory=ConversationBufferMemory()
+)
+```
+
+
+```python
+# Create a callback handler with a session
+langfuse_handler = CallbackHandler(session_id="conversation_chain")
+```
+
+
+```python
+conversation.predict(input="Hi there!", callbacks=[langfuse_handler])
+```
+
+
+```python
+conversation.predict(input="How to build great developer tools?", callbacks=[langfuse_handler])
+```
+
+
+```python
+conversation.predict(input="Summarize your last response", callbacks=[langfuse_handler])
+```
+
+### RetrievalQA
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
@@ -150,9 +194,7 @@ chain = RetrievalQA.from_chain_type(
 chain.invoke(query, config={"callbacks":[langfuse_handler]})
 ```
 
-
-
-![Trace of Langchain Agent in Langfuse](https://langfuse.com/images/docs/langchain_agent.jpg)
+### Agent
 
 
 ```python
