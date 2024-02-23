@@ -1,4 +1,4 @@
-# Evaluate Langfuse LLM Traces with with UpTrain
+# Evaluate Langfuse LLM Traces with UpTrain
 
 UpTrain's open-source library offers a series of evaluation metrics to assess LLM applications.
 
