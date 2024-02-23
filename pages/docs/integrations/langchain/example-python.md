@@ -213,6 +213,33 @@ agent_executor = AgentExecutor(agent=agent, tools=tools)
 agent_executor.invoke({"input": "What is Langfuse?"}, config={"callbacks":[langfuse_handler]})
 ```
 
+### AzureOpenAI
+
+
+```python
+os.environ["AZURE_OPENAI_ENDPOINT"] = "<Azure OpenAI endpoint>"
+os.environ["AZURE_OPENAI_API_KEY"] = "<Azure OpenAI API key>"
+os.environ["OPENAI_API_TYPE"] = "azure"
+os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
+```
+
+
+```python
+from langchain_openai import AzureChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+
+langfuse_handler = CallbackHandler()
+
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
+model = AzureChatOpenAI(
+    deployment_name="gpt-35-turbo",
+    model_name="gpt-3.5-turbo",
+)
+chain = prompt | model
+
+chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]})
+```
+
 ## Adding scores to traces
 
 To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `langfuse_handler.get_trace_id()`
