@@ -152,6 +152,10 @@ const config: DocsThemeConfig = {
           : asPath.startsWith("/docs/guides/")
           ? "%s - Langfuse Guides"
           : "%s - Langfuse",
+
+      // exclude /cookbook from search engines
+      nofollow: asPath.startsWith("/cookbook"),
+      noindex: asPath.startsWith("/cookbook"),
     };
   },
   head: () => {
