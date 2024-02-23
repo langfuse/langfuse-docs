@@ -261,3 +261,4 @@ In Langfuse, you can now see the scores for each trace and monitor them over tim
 
 ![UpTrain Evals on a list of traces in Langfuse](https://langfuse.com/images/cookbook/uptrain-batch.png)
 
+
