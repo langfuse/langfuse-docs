@@ -18,19 +18,28 @@ import { ProductUpdateSignup } from "./productUpdateSignup";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
+const cleanedCookbookRoutes = cookbookRoutes.flatMap(
+  ({ notebook, destinations }) => {
+    return [
+      ...destinations,
+      "cookbook/" + notebook.replace(".ipynb", ".md"), // add cookbook path that all notebooks are published to
+    ].map((d) => ({
+      notebook,
+      destination: "/" + d,
+    }));
+  }
+);
+
 export const MainContentWrapper = (props) => {
   const router = useRouter();
-  const notebook = cookbookRoutes.find(
+  const notebook = cleanedCookbookRoutes.find(
     ({ destination }) => destination === router.pathname + ".md"
   );
 
   return (
     <>
       {notebook ? (
-        <NotebookBanner
-          src={notebook.source.replace(".md", ".ipynb")}
-          className="mb-4"
-        />
+        <NotebookBanner src={notebook.notebook} className="mb-4" />
       ) : null}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
