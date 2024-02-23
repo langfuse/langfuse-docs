@@ -241,7 +241,6 @@ openai_stats_no_langfuse = time_func(lambda: openai.chat.completions.create(
   max_tokens=10,
 ))
 openai_stats_no_langfuse
-
 ```
 
 
