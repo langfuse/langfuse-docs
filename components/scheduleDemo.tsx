@@ -2,6 +2,8 @@ import { Background } from "./Background";
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
 import { Header } from "./Header";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 export function ScheduleDemoPage() {
   return (
@@ -10,6 +12,10 @@ export function ScheduleDemoPage() {
         title="Talk to us"
         description="Get a demo by one of the founders to learn more about Langfuse"
         h="h1"
+        button={{
+          href: "/enterprise",
+          text: "Enterprise FAQ",
+        }}
       />
       <ScheduleDemo />
       <Background />
