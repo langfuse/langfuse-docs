@@ -2,8 +2,6 @@ import { Background } from "./Background";
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
 import { Header } from "./Header";
-import { Button } from "./ui/button";
-import Link from "next/link";
 
 export function ScheduleDemoPage() {
   return (
