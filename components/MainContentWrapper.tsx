@@ -12,34 +12,22 @@ import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
 import { Background } from "./Background";
-import cookbookRoutes from "../cookbook/_routes.json";
 import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
+import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
-const cleanedCookbookRoutes = cookbookRoutes.flatMap(
-  ({ notebook, destinations }) => {
-    return [
-      ...destinations,
-      "cookbook/" + notebook.replace(".ipynb", ".md"), // add cookbook path that all notebooks are published to
-    ].map((d) => ({
-      notebook,
-      destination: "/" + d,
-    }));
-  }
-);
-
 export const MainContentWrapper = (props) => {
   const router = useRouter();
-  const notebook = cleanedCookbookRoutes.find(
-    ({ destination }) => destination === router.pathname + ".md"
+  const cookbook = COOKBOOK_ROUTE_MAPPING.find(
+    (cookbook) => cookbook.path === router.pathname
   );
 
   return (
     <>
-      {notebook ? (
-        <NotebookBanner src={notebook.notebook} className="mb-4" />
+      {cookbook ? (
+        <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
       ) : null}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
