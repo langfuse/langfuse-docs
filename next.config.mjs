@@ -69,7 +69,6 @@ const nonPermanentRedirects = [
   // Redirect to overview pages
   ...[
     "/docs/integrations",
-    "/docs/sdk",
     "/docs/tracing",
     "/docs/scores",
     "/docs/scores/model-based-evals",
@@ -79,10 +78,11 @@ const nonPermanentRedirects = [
   // Redirects to bridge all kinds of old links to new links
   ["/docs/reference", "https://api.reference.langfuse.com/"],
   ["/docs/integrations/api", "https://api.reference.langfuse.com/"],
-  ["/docs/langchain", "/docs/integrations/langchain/python"],
-  ["/docs/integrations/langchain", "/docs/integrations/langchain/python"],
-  ["/docs/langchain/python", "/docs/integrations/langchain/python"],
-  ["/docs/langchain/typescript", "/docs/integrations/langchain/typescript"],
+  ["/docs/langchain", "/docs/integrations/langchain"],
+  ["/docs/langchain/python", "/docs/integrations/langchain/get-started"],
+  ["/docs/langchain/typescript", "/docs/integrations/langchain/get-started"],
+  ["/docs/integrations/langchain/python", "/docs/integrations/langchain/get-started"],
+  ["/docs/integrations/langchain/typescript", "/docs/integrations/langchain/get-started"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm"],
   ["/docs/langflow", "/docs/integrations/langflow"],
@@ -90,7 +90,8 @@ const nonPermanentRedirects = [
   ["/docs/local", "/docs/deployment/local"],
   ["/docs/self-host", "/docs/deployment/self-host"],
   ["/docs/cloud", "/docs/deployment/cloud"],
-  ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
+  ["/docs/guides/sdk-integration", "/docs/sdk"],
+  ["/docs/sdk/overview", "/docs/sdk"],
   ["/docs/scores/evals", "/docs/scores/model-based-evals/overview"],
   ["/experimentation", "/docs/experimentation"],
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
