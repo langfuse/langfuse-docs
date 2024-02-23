@@ -1,0 +1,102 @@
+---
+description: Langfuse offers extensive RBAC capabilities to manage project sharing and permissions across different teams and projects.
+---
+
+# Project sharing (RBAC)
+
+You can share a project with other users and grant them different roles and permissions. Langfuse uses a role-based access control (RBAC) system to manage project sharing.
+
+## Add users to a project
+
+In the project settings, you can add users to the project via their email address. They will receive an email notification and will be able to access the project once they log in. Users who do not have a Langfuse account yet, will be listed as pending invites until they sign up.
+
+<Frame>![Project Sharing](/images/docs/project-sharing.gif)</Frame>
+
+## Roles
+
+### Available roles
+
+- **Owner**: user who created the project; has all permissions
+- **Admin**: can edit the project settings and grant access to other users
+- **Member**: can view all metrics & create scores, but cannot configure the project
+- **Viewer**: view-only access to the project, not to the configuration
+
+### Scopes per role
+
+All roles in Langfuse have the ability to read all data, unless there is a specific scope that limits access to certain data. For instance, the `members:read` scope restricts read access to project members, which is not available to the `Viewer` role.
+
+export function RolePermissionTable() {
+  // from langfuse/langfuse
+  const RoleScopes = {
+    OWNER: [
+      "members:read",
+      "members:create",
+      "members:delete",
+      "apiKeys:read",
+      "apiKeys:create",
+      "apiKeys:delete",
+      "objects:publish",
+      "objects:bookmark",
+      "objects:tag",
+      "traces:delete",
+      "scores:CUD",
+      "project:delete",
+      "project:update",
+      "project:transfer",
+      "datasets:CUD",
+      "prompts:CUD",
+      "prompts:read",
+      "models:CUD",
+    ],
+    ADMIN: [
+      "project:update",
+      "members:read",
+      "members:create",
+      "members:delete",
+      "apiKeys:read",
+      "apiKeys:create",
+      "apiKeys:delete",
+      "objects:publish",
+      "objects:bookmark",
+      "objects:tag",
+      "traces:delete",
+      "scores:CUD",
+      "datasets:CUD",
+      "prompts:CUD",
+      "prompts:read",
+      "models:CUD",
+    ],
+    MEMBER: [
+      "members:read",
+      "objects:publish",
+      "objects:bookmark",
+      "objects:tag",
+      "scores:CUD",
+      "datasets:CUD",
+      "prompts:CUD",
+      "prompts:read",
+    ],
+    VIEWER: ["prompts:read"],
+  };
+  return (
+    <div className="flex gap-5 mt-4">
+      {Object.entries(RoleScopes).map(([key, value]) => (
+        <div key={key}>
+          <div
+          className="border-b pb-2 mb-2 border-gray-600"
+          >{key}</div>
+          {value.sort(
+            (a, b) => a.localeCompare(b)
+          ).map((scope) => (
+            <div key={scope}
+            className="text-sm mt-1"
+            >{scope}</div>
+          ))}
+        </div>
+      ))}
+    </div>
+
+);
+}
+
+<RolePermissionTable />

@@ -1,5 +1,5 @@
 ---
-description: Track the effect of changes to your LLM app on metrics in Langfuse using versions and releases.
+description: Langfuse helps to rapidly iterate on your LLM application by providing insights into the effect of experiments on costs, latencies and quality.
 ---
 
 # Experimentation (releases & versions)
@@ -25,18 +25,21 @@ flowchart LR
 
 A `release` tracks the overall version of your application. Commonly it is set to the _semantic version_ or _git commit hash_ of your application.
 
+The SDKs look for a `release` in the following order:
+
+1. SDK initialization
+2. Environment variable
+3. Automatically on popular platforms
+
 #### SDK initialization
 
-<Tabs items={["Python", "JS/TS", "Langchain integration"]}>
+<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 
 <Tab>
 
 ```python /release="<release_tag>"/
 from langfuse import Langfuse
 langfuse = Langfuse(
-  ENV_PUBLIC_KEY,
-  ENV_SECRET_KEY,
-  ENV_HOST,
   release="<release_tag>"
 )
 ```
@@ -46,9 +49,6 @@ langfuse = Langfuse(
 ```typescript /release: "<release_tag>"/
 import { Langfuse } from "langfuse";
 langfuse = new Langfuse({
-  publicKey: ENV_PUBLIC_KEY,
-  secretKey: ENV_SECRET_KEY,
-  host: ENV_HOST,
   release: "<release_tag>",
 });
 ```
@@ -56,17 +56,15 @@ langfuse = new Langfuse({
 </Tab><Tab>
 
 ```python /release="<release_tag>"/
-# Python
 from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY, release="<release_tag>")
+handler = CallbackHandler(release="<release_tag>")
 ```
 
+</Tab><Tab>
+
 ```typescript /release: "<release_tag>"/
-// JS/TS
 import { CallbackHandler } from "langfuse-langchain";
 const handler = new CallbackHandler({
-  secretKey: LANGFUSE_SECRET_KEY,
-  publicKey: LANGFUSE_PUBLIC_KEY,
   release: "<release_tag>",
 });
 ```
@@ -103,7 +101,7 @@ flowchart LR
 
 The `version` parameter can be added to `traces` and all observation types (`span`, `generation`, `event`). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
-<Tabs items={["Python", "JS/TS", "Langchain integration"]}>
+<Tabs items={["Python", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
 
 ```python /version="1.0"/
@@ -128,20 +126,16 @@ langfuse.generation({
 
 </Tab><Tab>
 
-When using the Langchain integration, you can set the version for all traces/observation created by the handler at once:
-
 ```python /version="1.0"/
-# Python
 from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY, version="1.0")
+handler = CallbackHandler(version="1.0")
 ```
 
+</Tab><Tab>
+
 ```typescript /version: "1.0"/
-// JS/TS
 import { CallbackHandler } from "langfuse-langchain";
 const handler = new CallbackHandler({
-  secretKey: LANGFUSE_SECRET_KEY,
-  publicKey: LANGFUSE_PUBLIC_KEY,
   version: "1.0",
 });
 ```

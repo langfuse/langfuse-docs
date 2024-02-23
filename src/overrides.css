@@ -7,22 +7,17 @@
     background: transparent !important;
 }
 
-/* do not show edit/contact menu below the toc */
 .nextra-toc>div> :last-child {
-    display: none;
-}
-
-:is(html[class~=dark] .nextra-steps h3):before {
-    border-color: transparent;
-}
-
-.nextra-steps h3:before {
-    border-color: transparent;
+    fill-opacity: 50;
 }
 
 /* smaller search bar */
 .nextra-search {
     width: 10rem;
+}
+
+.nextra-search input {
+    border-radius: 0.25rem;
 }
 
 /* Fix logo overflowing */
@@ -43,5 +38,10 @@ media-outlet {
 
 /* More gap between h2 in articles */
 article.nextra-body-typesetting-article h2 {
-    margin-top: 8rem;
+    margin-top: 6rem;
+}
+
+svg .nodeLabel,
+svg .edgeLabel {
+    font-family: monospace;
 }

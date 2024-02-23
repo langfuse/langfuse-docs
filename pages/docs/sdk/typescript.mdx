@@ -43,14 +43,6 @@ Supported runtimes:
 
 Want to capture data (e.g. user feedback) from the browser? Use [LangfuseWeb](/docs/sdk/typescript-web)
 
-## Example
-
-We integrated the Typescript SDK into the Vercel AI Chatbot project. Check out the [blog post](/blog/showcase-llm-chatbot) for screenshots and detailed explanations of the inner workings of the integration. The project includes:
-
-- Streamed responses from OpenAI
-- Conversations
-- Collection of user feedback on individual messages using the Web SDK
-
 ## Installation
 
 ```sh
@@ -65,7 +57,31 @@ npm i langfuse-node
 import { Langfuse } from "https://esm.sh/langfuse"
 ```
 
-In your application, set the **api keys** to create a client.
+<Tabs items={["Environment variables", "Constructor parameters"]}>
+<Tab>
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-...";
+LANGFUSE_PUBLIC_KEY="pk-lf-...";
+LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
+# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+```
+
+```typescript
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+// without additional options
+const langfuse = new Langfuse();
+
+// with additional options
+const langfuse = new Langfuse({
+  release: "v1.0.0",
+  requestTimeout: 10000,
+});
+```
+
+</Tab>
+<Tab>
 
 ```typescript
 import { Langfuse } from "langfuse"; // or "langfuse-node"
@@ -73,17 +89,24 @@ import { Langfuse } from "langfuse"; // or "langfuse-node"
 const langfuse = new Langfuse({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
-  // options
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+
+  // optional
+  release: "v1.0.0",
+  requestTimeout: 10000,
 });
 ```
 
-### Options
+</Tab>
+</Tabs>
 
-| Variable       | Description                                                                               | Default value                                                                                                                                           |
-| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| baseUrl        | BaseUrl of the Langfuse API; for US data region, set to `"https://us.cloud.langfuse.com"` | `"https://cloud.langfuse.com"`                                                                                                                          |
-| release        | The release number/hash of the application to provide analytics grouped by release.       | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
-| requestTimeout | Timeout in ms for requests                                                                | `10000`                                                                                                                                                 |
+Optional constructor parameters:
+
+| Variable       | Description                                                                         | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| release        | The release number/hash of the application to provide analytics grouped by release. | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| requestTimeout | Timeout in ms for requests                                                          | `10000`                                                                                                                                                 |
 
 <Callout type="info" emoji="ℹ️">
   In short-lived environments (e.g. serverless functions), make sure to always
@@ -135,17 +158,18 @@ trace.score({});
 
 **`langfuse.trace()` takes the following parameters**
 
-| parameter | type     | optional | description                                                                                                                                                                             |
-| --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string   | yes      | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread). |
-| name      | string   | yes      | Identifier of the trace. Useful for sorting/filtering in the UI.                                                                                                                        |
-| input     | object   | yes      | The input of the trace. Can be any JSON object.                                                                                                                                         |
-| output    | object   | yes      | The output of the trace. Can be any JSON object.                                                                                                                                        |
-| metadata  | object   | yes      | Additional metadata of the trace. Can be any JSON object. Metadata is merged when being updated via the API.object.                                                                     |
-| sessionId | string   | yes      | Used to group multiple traces into a [session](/docs/sessions) in Langfuse. Use your own session/thread identifier.                                                                     |
-| userId    | string   | yes      | The id of the user that triggered the execution. Used to provide [user-level analytics](/docs/user-explorer).                                                                           |
-| version   | string   | yes      | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.                                                                    |
-| tags      | string[] | yes      | Tags are used to categorize or label traces. Traces can be filtered by tags in the UI and GET API. Tags can also be changed in the UI. Tags are merged and never deleted via the API.   |
+| parameter | type     | optional | description                                                                                                                                                                                               |
+| --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string   | yes      | The id of the trace can be set, defaults to a random id. Set it to link traces to external systems or when grouping multiple runs into a single trace (e.g. messages in a chat thread).                   |
+| name      | string   | yes      | Identifier of the trace. Useful for sorting/filtering in the UI.                                                                                                                                          |
+| input     | object   | yes      | The input of the trace. Can be any JSON object.                                                                                                                                                           |
+| output    | object   | yes      | The output of the trace. Can be any JSON object.                                                                                                                                                          |
+| metadata  | object   | yes      | Additional metadata of the trace. Can be any JSON object. Metadata is merged when being updated via the API.object.                                                                                       |
+| sessionId | string   | yes      | Used to group multiple traces into a [session](/docs/tracing/sessions) in Langfuse. Use your own session/thread identifier.                                                                               |
+| userId    | string   | yes      | The id of the user that triggered the execution. Used to provide [user-level analytics](/docs/tracing/users).                                                                                             |
+| version   | string   | yes      | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.                                                                                      |
+| tags      | string[] | yes      | Tags are used to categorize or label traces. Traces can be filtered by tags in the UI and GET API. Tags can also be changed in the UI. Tags are merged and never deleted via the API.                     |
+| public    | boolean  | yes      | You can make a trace `public` to share it via a [public link](https://langfuse.com/docs/tracing/). This allows others to view the trace without needing to log in or be members of your Langfuse project. |
 
 ### Observations [#observation]
 
@@ -309,22 +333,22 @@ generation.score({});
 
 **`*.generation()` takes the following parameters**
 
-| parameter           | type   | optional | description                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id                  | string | yes      | The id of the generation can be set, defaults to random id.                                                                                                                                                                                                                                                                                                                                                            |
-| name                | string | yes      | Identifier of the generation. Useful for sorting/filtering in the UI.                                                                                                                                                                                                                                                                                                                                                  |
-| startTime           | Date   | yes      | The time at which the generation started, defaults to the current time.                                                                                                                                                                                                                                                                                                                                                |
-| completionStartTime | Date   | yes      | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.                                                                                                                                                                                                                                                          |
-| endTime             | Date   | yes      | The time at which the generation ended.                                                                                                                                                                                                                                                                                                                                                                                |
-| model               | string | yes      | The name of the model used for the generation.                                                                                                                                                                                                                                                                                                                                                                         |
-| modelParameters     | object | yes      | The parameters of the model used for the generation; can be any key-value pairs.                                                                                                                                                                                                                                                                                                                                       |
-| input               | object | yes      | The input to the generation - the prompt. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                            |
-| output              | object | yes      | The output to the generation - the completion. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                       |
-| usage               | object | yes      | The usage object supports the OpenAi structure with (`promptTokens`, `completionTokens`, `totalTokens`) and a more generic version (`input`, `output`, `total`, `unit`, `inputCost`, `outputCost`, `totalCost`) where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`, `"MILLISECONDS"`, `"SECONDS"`, `"IMAGES"`. Refer to the docs on how to [automatically calculate](https://langfuse.com/docs/model-usage-and-cost) tokens and costs by Langfuse. |
-| metadata            | object | yes      | Additional metadata of the generation. Can be any JSON object. Metadata is merged when being updated via the API.                                                                                                                                                                                                                                                                                                      |
-| level               | string | yes      | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.                                                                                                                                                                                                                                          |
-| statusMessage       | string | yes      | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.                                                                                                                                                                                                                                                                                             |
-| version             | string | yes      | The version of the generation type. Used to understand how changes to the generation type affect metrics. Reflects e.g. the version of a prompt.                                                                                                                                                                                                                                                                       |
+| parameter           | type   | optional | description                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                  | string | yes      | The id of the generation can be set, defaults to random id.                                                                                                                                                                                                                                                                                                                                                                                           |
+| name                | string | yes      | Identifier of the generation. Useful for sorting/filtering in the UI.                                                                                                                                                                                                                                                                                                                                                                                 |
+| startTime           | Date   | yes      | The time at which the generation started, defaults to the current time.                                                                                                                                                                                                                                                                                                                                                                               |
+| completionStartTime | Date   | yes      | The time at which the completion started (streaming). Set it to get latency analytics broken down into time until completion started and completion duration.                                                                                                                                                                                                                                                                                         |
+| endTime             | Date   | yes      | The time at which the generation ended.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| model               | string | yes      | The name of the model used for the generation.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| modelParameters     | object | yes      | The parameters of the model used for the generation; can be any key-value pairs.                                                                                                                                                                                                                                                                                                                                                                      |
+| input               | object | yes      | The input to the generation - the prompt. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                                                           |
+| output              | object | yes      | The output to the generation - the completion. Can be any JSON object or string.                                                                                                                                                                                                                                                                                                                                                                      |
+| usage               | object | yes      | The usage object supports the OpenAi structure with (`promptTokens`, `completionTokens`, `totalTokens`) and a more generic version (`input`, `output`, `total`, `unit`, `inputCost`, `outputCost`, `totalCost`) where unit can be of value `"TOKENS"`, `"CHARACTERS"`, `"MILLISECONDS"`, `"SECONDS"`, `"IMAGES"`. Refer to the docs on how to [automatically calculate](https://langfuse.com/docs/model-usage-and-cost) tokens and costs by Langfuse. |
+| metadata            | object | yes      | Additional metadata of the generation. Can be any JSON object. Metadata is merged when being updated via the API.                                                                                                                                                                                                                                                                                                                                     |
+| level               | string | yes      | The level of the generation. Can be `DEBUG`, `DEFAULT`, `WARNING` or `ERROR`. Used for sorting/filtering of traces with elevated error levels and for highlighting in the UI.                                                                                                                                                                                                                                                                         |
+| statusMessage       | string | yes      | The status message of the generation. Additional field for context of the event. E.g. the error message of an error event.                                                                                                                                                                                                                                                                                                                            |
+| version             | string | yes      | The version of the generation type. Used to understand how changes to the generation type affect metrics. Reflects e.g. the version of a prompt.                                                                                                                                                                                                                                                                                                      |
 
 #### Nesting of observations [#nesting]
 
@@ -472,6 +496,10 @@ export const handler() {
 }
 ```
 
+## Upgrading from v2.x.x to v3.x.x [#upgrade2to3]
+
+This release includes breaking changes only for users of the [Langchain JS integration](/docs/integrations/langchain/typescript). The upgrade is non-breaking for all other parts of the SDK.
+
 ## Upgrading from v1.x.x to v2.x.x [#upgrade1to2]
 
 You can automatically migrate your codebase using [grit](https://www.grit.io/), either [online](https://app.grit.io/migrations/new/langfuse_node_v2) or with the following CLI command:
@@ -509,7 +537,7 @@ langfuse.generation({
 
 **v2.x.x**
 
-The usage object supports the OpenAi structure with `{'promptTokens', 'completionTokens', 'totalTokens'}` and a more generic version `{'input', 'output', 'total', 'unit'}` where unit can be of value `"TOKENS"` (default) or `"CHARACTERS"`, `"MILLISECONDS"`, `"SECONDS"`, `"IMAGES"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/model-usage-and-cost) by Langfuse. Create an issue to request support for other units and models.
+The usage object supports the OpenAi structure with `{'promptTokens', 'completionTokens', 'totalTokens'}` and a more generic version `{'input', 'output', 'total', 'unit'}` where unit can be of value `"TOKENS"`, `"CHARACTERS"`, `"MILLISECONDS"`, `"SECONDS"`, `"IMAGES"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/model-usage-and-cost) by Langfuse. Create an issue to request support for other units and models.
 
 ```typescript
 // Generic style
@@ -519,7 +547,7 @@ langfuse.generation({
     input: 50,
     output: 49,
     total: 99,
-    unit: "CHARACTERS", // defaults to "TOKENS" if not set
+    unit: "TOKENS",
   },
 });
 
@@ -580,3 +608,11 @@ export const handler() {
   await langfuse.shutdownAsync();
 }
 ```
+
+## Example
+
+We integrated the Typescript SDK into the Vercel AI Chatbot project. Check out the [blog post](/blog/showcase-llm-chatbot) for screenshots and detailed explanations of the inner workings of the integration. The project includes:
+
+- Streamed responses from OpenAI
+- Conversations
+- Collection of user feedback on individual messages using the Web SDK

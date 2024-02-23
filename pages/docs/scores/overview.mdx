@@ -1,0 +1,58 @@
+---
+description: Langfuse (open source) helps evaluate LLM applications. Commonly used to measure quality, tonality, factual accuracy, completeness, and relevance.
+---
+
+# Scores & Evaluation
+
+Scores serve as a metric for evaluating individual executions or traces.
+
+A variety of scores may be utilized, with the most common metrics assessing aspects such as quality, tonality, factual accuracy, completeness, and relevance, among others.
+
+In instances where the score pertains to a specific phase of a trace, for example, a singular LLM call, a message in a chat conversation, or a step in an agent, it is possible to attach the score directly to the observation. This enables targeted evaluation of that particular component.
+
+The `Score` object in Langfuse:
+
+| Attribute       | Type   | Description                                                                                  |
+| --------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `name`          | string | Name of the score, e.g. user_feedback, hallucination_eval                                    |
+| `value`         | number | Value of the score                                                                           |
+| `traceId`       | string | Id of the trace the score relates to                                                         |
+| `observationId` | string | Optional: Observation (e.g. LLM call) the score relates to                                   |
+| `comment`       | string | Optional: Evaluation comment, commonly used for user feedback, eval output or internal notes |
+
+## Kinds of scores
+
+Scores in Langfuse are adaptable and designed to cater to the unique requirements of specific LLM applications. They typically serve to measure the following aspects:
+
+- Quality
+  - Factual accuracy
+  - Completeness of the information provided
+  - Verification against hallucinations
+- Style
+  - Sentiment portrayed
+  - Tonality of the content
+  - Potential toxicity
+- Security
+  - Similarity to prevalent prompt injections
+  - Instances of model refusals (e.g., as a language model, ...)
+
+This flexible scoring system allows for a comprehensive evaluation of various elements integral to the function and performance of the LLM application.
+
+## Ingesting scores
+
+Most users of Langfuse ingest scores programmatically. These are common sources of scores:
+
+| Source                                                   | examples                                                                                                                                                                                                     |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Manual evaluation (UI)](/docs/scores/manually)          | Review traces/generations and add scores manually in the UI                                                                                                                                                  |
+| [User feedback](/docs/scores/user-feedback)              | Explicit (e.g., thumbs up/down, 1-5 star rating) or implicit (e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output)                                                  |
+| [Model-based evaluation](/docs/scores/model-based-evals) | OpenAI Evals, Whylabs Langkit, Langchain Evaluators ([cookbook](/docs/scores/model-based-evals/langchain)), RAGAS for RAG pipelines ([cookbook](/docs/scores/model-based-evals/ragas)), custom model outputs |
+| [Custom via SDKs/API](/docs/scores/custom)               | Run-time quality checks (e.g. valid structured output format), custom workflow tool for human evaluation                                                                                                     |
+
+## Using scores across Langfuse
+
+Scores can be used in multiple ways across Langfuse:
+
+1. Displayed on trace to provide a quick overview
+2. Segment all execution traces by scores to e.g. find all traces with a low quality score
+3. Analytics: Detailed score reporting with drill downs into use cases and user segments

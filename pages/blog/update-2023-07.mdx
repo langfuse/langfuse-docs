@@ -8,6 +8,10 @@ author: Marc
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
 
 <BlogHeader
   title="Langfuse Update — July 2023"
@@ -40,21 +44,29 @@ The details 👇
 
 For teams building their LLM app with Langchain, adopting Langfuse just got that much easier. We added a `CallbackHandler` to the Langfuse Python SDK that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
 
-```python /callbacks=[handler]/
-# Initialize Langfuse handler
-from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+<Tabs
+  items={[
+    "Python (constructor args)",
+    "Python (env)",
+    "JS (constructor args)",
+    "JS (env)",
+  ]}
+>
+  <Tab>
+    <GetStartedLangchainPythonArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsEnv />
+  </Tab>
+</Tabs>
 
-# Setup Langchain
-from langchain.chains import LLMChain
-...
-chain = LLMChain(llm=llm, prompt=prompt)
-
-# Add Langfuse handler as callback
-chain.run(input="<user_input", callbacks=[handler])
-```
-
-→ [Integration docs](/docs/langchain)
+→ [Integration docs](/docs/integrations/langchain/get-started)
 
 ## ⚡️ Improved SDKs for Python and JS/TS [#SDKs]
 
@@ -108,7 +120,7 @@ More user-based analytics and features are coming soon, e.g. APIs to use this da
 
 <Frame>![User reporting](/images/blog/update-july-2023/users.gif)</Frame>
 
-→ [Learn more](/docs/user-explorer)
+→ [Learn more](/docs/tracing/users)
 
 ## 📈 Analytics (alpha) [#analytics]
 

@@ -1,0 +1,60 @@
+---
+description: Open source observability for LiteLLM via the native integration. Automatically capture detailed traces and metrics for every request.
+---
+
+# 🚅 LiteLLM Integration
+
+**LiteLLM** ([GitHub](https://github.com/BerriAI/litellm)): Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs).
+
+## Integration
+
+By adding the callback you can instantly log your responses across all providers with Langfuse.
+
+```python filename="main.py"
+# API keys from project settings in Langfuse
+os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
+os.environ["LANGFUSE_SECRET_KEY"] = "your key"
+
+# Langfuse host
+os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"]="https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Set callback
+litellm.success_callback = ["langfuse"]
+```
+
+## Full Example
+
+```python filename="main.py"
+from litellm import completion
+
+## set env variables
+os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
+os.environ["LANGFUSE_SECRET_KEY"] = "your key"
+
+# Langfuse host
+os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"]="https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["COHERE_API_KEY"] = ""
+
+# set callbacks
+litellm.success_callback = ["langfuse"]
+
+# openai call
+response = completion(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm openai"}
+  ]
+)
+
+# cohere call
+response = completion(
+  model="command-nightly",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm cohere"}
+  ]
+)
+```

@@ -1,18 +1,12 @@
 ---
-description: Get (view-only) access to a Langfuse project used by the team to improve the docs Q&A chatbot.
+description: Try Langfuse in action with a live demo project. Interact with the chatbot to see new traces and user feedback (👍/👎) in Langfuse.
 ---
 
 # Interactive Demo
 
 import { Button } from "@/components/ui/button";
 
-Try Langfuse yourself with a view-only project. Alternatively:
-
-- Watch [video walkthrough (2 min)](/docs/video)
-- Prefer GIFs? [See below ↓](#gifs)
-- [Schedule personal demo](/schedule-demo)
-
-## Try it yourself
+Try Langfuse yourself with a view-only project.
 
 <Steps>
 
@@ -21,60 +15,25 @@ Try Langfuse yourself with a view-only project. Alternatively:
 Get access to demo project by creating a free account (no credit card required).
 
 <Button asChild className="mt-3">
-  <a href="https://cloud.langfuse.com/auth/sign-up" target="_blank">
+  <a
+    href="https://cloud.langfuse.com/auth/sign-up"
+    target="_blank"
+    rel="noopener"
+  >
     Create demo account
   </a>
 </Button>
 
 ### Produce new traces & feedback
 
-Interact with chatbot below to see new traces and user feedback in Langfuse.
+Interact with chatbot below to see new traces and user feedback (👍/👎) in Langfuse.
 
 import { Chat } from "@/components/qaChatbot";
 
-<div className="p-2 rounded-lg mt-8 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
-  <Chat className="h-96 my-0 bg-background/90" />
+<div className="p-2 rounded mt-8 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <Chat className="h-[40rem] my-0 bg-background/90" />
 </div>
 
-_Interested in implementation details? Check out the [blog post](/blog/qa-chatbot-for-langfuse-docs) (code is fully open source)._
+_Interested in implementation details of this RAG chat? Check out the [blog post](/blog/qa-chatbot-for-langfuse-docs) (code is fully open source)._
 
 </Steps>
-
-## Prefer GIFs? [#gifs]
-
-### Reporting
-
-- Monitor usage (cost control)
-- Track latency, quality (based on user feedback) and OpenAI errors
-
-<Frame>
-  ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
-</Frame>
-
-### Tracing
-
-Each response is based on the following steps which can go wrong, be slow or expensive:
-
-1. Embedding of user request
-2. Embedding similarity search in Postgres
-3. Summary of docs as markdown
-4. Generation of response based on retrieved context and chat history
-
-This is how a single trace looks like in Langfuse:
-
-<Frame>![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
-
-### User feedback collection
-
-In this example, we can see how we do:
-
-1. Collection of feedback using the Langfuse Web SDK
-   > _Negative, Langchain not included in response_
-2. Browsing of feedback
-3. Identification of the root cause of the low-quality response
-   > Docs on Langchain integration are not included in embedding similarity search
-
-<Frame>
-  ![User feedback collection in
-  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
-</Frame>

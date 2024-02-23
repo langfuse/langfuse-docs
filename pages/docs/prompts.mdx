@@ -1,5 +1,5 @@
 ---
-description: Manage and version your prompts in Langfuse. Edit and update them via the UI and SDK. Retrieve the production version via the SDKs.
+description: Manage and version your prompts in Langfuse (open source). When retrieved, they are cached by the Langfuse SDKs for low latency.
 ---
 
 import { Callout } from "nextra-theme-docs";
@@ -36,14 +36,6 @@ langfuse.getPrompt("prompt name");
 </Tab>
 </Tabs>
 
-## How to use Langfuse for prompt management
-
-<Callout type="info">
-
-This feature is currently in beta, the API is stable and performance/UI will be improved significantly over the next weeks. Please share your feedback on our [Discord](/discord).
-
-</Callout>
-
 The workflow for managing prompts in Langfuse includes the following steps:
 
 ```mermaid
@@ -56,7 +48,7 @@ graph LR
     PP --> E["4. View metrics in Langfuse for prompt version"]
 ```
 
-### Create / Update prompts
+## Create / Update prompts
 
 **Create**
 
@@ -78,6 +70,10 @@ langfuse.create_prompt(
   name: "prompt name",
   prompt: "This is a prompt with a {{variable}}",
   is_active: True # directly promote to production?
+  config: {
+    "temperature": 0.5,
+    "top_p": 0.9
+  } # optionally, add configs (e.g. model parameters or model tools)
 )
 ```
 
@@ -90,6 +86,10 @@ await langfuse.createPrompt({
   name: "prompt name",
   prompt: "This is a prompt with a {{variable}}",
   isActive: true, // directly promote to production?
+  config: {
+    temperature: 0.5,
+    topP: 0.9
+  } // optionally, add configs (e.g. model parameters or model tools)
 });
 ```
 
@@ -101,7 +101,7 @@ await langfuse.createPrompt({
 
 Use the edit button in the Langfuse UI or create a new prompt version via the SDKs with the same name.
 
-### Promote prompt to production
+## Promote prompt to production
 
 Set a prompt version to `active` when creating it via the SDKs. In the Langfuse UI, you can promote a prompt version to production:
 
@@ -112,7 +112,7 @@ Set a prompt version to `active` when creating it via the SDKs. In the Langfuse 
   className="max-w-xl"
 />
 
-### Retrieve prompt in your application
+## Retrieve prompt in your application
 
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -129,6 +129,10 @@ prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
 
 # Insert variables into prompt template
 compiled_prompt = prompt.compile(input="test")
+
+# Access the config of the prompt
+config = prompt.config
+
 ```
 
 </Tab>
@@ -149,15 +153,18 @@ const prompt = await langfuse.getPrompt("prompt name", 3, {
 
 // Insert variables into prompt template
 const compiledPrompt = prompt.compile({ input: "test" });
+
+// Access the config of the prompt
+const config = prompt.config;
 ```
 
 </Tab>
 
 </Tabs>
 
-#### Caching in client SDKs
+### Caching in client SDKs
 
-While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. To minimize the impact on your application, prompts are cached for 60 seconds in the client SDKs once fetched. The cache TTL can be configured directly in the SDKs.
+While [Langfuse Tracing](/docs/tracing/overview) is fully asynchronous and non-blocking, managing prompts in Langfuse adds latency to your application when retrieving the prompt. To minimize the impact on your application, prompts are cached for 60 seconds in the client SDKs once fetched. The cache TTL can be configured directly in the SDKs.
 
 <Callout type="info">
 
@@ -204,7 +211,7 @@ const prompt = await langfuse.getPrompt("prompt name", undefined, {
 
 </Tabs>
 
-#### Performance on first fetch (excluding cache hits)
+### Performance on first fetch (excluding cache hits)
 
 We measured the execution time of the following snippet (prompt retrieval and compilation). Note that this excludes cache hits where the prompt is available immediately.
 
@@ -234,9 +241,9 @@ max       0.687994 sec
 
 </div>
 
-### Link generations in Langfuse Tracing to prompt versions
+## Link generations in Langfuse Tracing to prompt versions
 
-Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This allows you to track metrics by prompt name and version in the Langfuse UI.
+Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing/overview) to the prompt version. This allows you to track metrics by prompt name and version in the Langfuse UI.
 
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -267,4 +274,4 @@ langfuse.generation({
 
 ## Demo
 
-We used this feature for our [Docs Q&A Chatbot](/docs/qa-chatbot) and traced it with Langfuse. You can get view-only access to the project by signing up to the [public demo](/demo).
+We used this feature for our Docs Q&A Chatbot and traced it with Langfuse. You can get view-only access to the project by signing up to the [public demo](/docs/demo).

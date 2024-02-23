@@ -1,0 +1,85 @@
+---
+description: Each trace has a unique URL that you can use to share it with others or to access it directly.
+---
+
+# Trace URLs
+
+import { CloudflareVideo } from "@/components/Video";
+
+Each trace has a unique URL that you can use to share it with others or to access it directly.
+
+## Get trace url
+
+Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
+
+<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
+<Tab>
+```python
+trace = langfuse.trace(...)
+trace.get_trace_url()
+```
+
+</Tab>
+<Tab>
+```typescript
+const trace = langfuse.trace(...)
+trace.getTraceUrl()
+```
+
+</Tab>
+<Tab>
+
+```python
+handler.get_trace_url()
+```
+
+</Tab>
+<Tab>
+
+```typescript
+handler.getTraceUrl();
+```
+
+</Tab>
+</Tabs>
+
+## Share trace via url
+
+By default, only members of your Langfuse project can view a trace.
+
+You can make a trace `public` to share it via a public link. This allows others to view the trace without needing to log in or be members of your Langfuse project.
+
+_Example: https://cloud.langfuse.com/public/traces/lf.docs.conversation.u6Wl2hG_
+
+<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
+<Tab>
+
+<CloudflareVideo
+  videoId="2b49a3463199ecfc4dfc17380f016e6f"
+  aspectRatio={15.55 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+```diff
+trace = langfuse.trace(
+    ...
++   public=True
+    ...
+)
+```
+
+</Tab>
+
+<Tab>
+```diff
+const trace = langfuse.trace({
+    ...
++   public: true,
+    ...
+});
+```
+
+</Tab>
+</Tabs>

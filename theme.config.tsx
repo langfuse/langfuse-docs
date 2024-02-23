@@ -18,7 +18,6 @@ import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
 
 const footerNav = [
-  { name: "Contact", href: "mailto:contact@langfuse.com" },
   {
     name: "Schedule Demo",
     href: "/schedule-demo",
@@ -49,9 +48,6 @@ const footerLegalNav = [
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
-  feedback: {
-    content: null,
-  },
   main: MainContentWrapper,
   search: {
     placeholder: "Search...",
@@ -96,6 +92,12 @@ const config: DocsThemeConfig = {
   sidebar: {
     defaultMenuCollapseLevel: 1,
     toggleButton: true,
+  },
+  editLink: {
+    text: "Edit this page on GitHub",
+  },
+  toc: {
+    backToTop: true,
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
@@ -227,20 +229,20 @@ const config: DocsThemeConfig = {
     Card,
     Cards,
   },
-  banner: {
-    key: "golden-kitty-banner",
-    dismissible: true,
-    text: (
-      <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
-        {/* mobile */}
-        <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Langfuse won a Golden Kitty Award in AI Infra →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "golden-kitty-banner",
+  //   dismissible: true,
+  //   text: (
+  //     <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         Langfuse won a Golden Kitty Award in AI Infra →
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;

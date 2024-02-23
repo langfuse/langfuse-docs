@@ -12,12 +12,14 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 <ChangelogHeader />
 
 Tagging allows you to flexibly add metadata to your traces, making it easier to categorize, filter, and manage them.
-Tags are a simple yet effective way to organize your traces. They can be added directly to the trace object from the SDK and can be used to filter and group traces in Langfuse. 
+Tags are a simple yet effective way to organize your traces. They can be added directly to the trace object from the SDK and can be used to filter and group traces in Langfuse.
 
 ### 🎯 How it works
+
 You add tags to your traces using the Langfuse SDK or directly from the UI. You can filter and group your traces based on these tags.
 
 **Python**
+
 ```python
 trace = langfuse.trace(
     name = "docs-retrieval",
@@ -26,6 +28,7 @@ trace = langfuse.trace(
 ```
 
 **Typescript**
+
 ```typescript
 const trace = langfuse.trace({
   name: "docs-retrieval",
@@ -33,7 +36,7 @@ const trace = langfuse.trace({
 });
 ```
 
-You can also use the GET API to retrieve traces with specific tags. 
+You can also use the GET API to retrieve traces with specific tags.
 
 ```bash
 GET /api/public/traces?tags=my-first-tag&tags=even-better-tag
@@ -42,4 +45,5 @@ GET /api/public/traces?tags=my-first-tag&tags=even-better-tag
 Note: The GET API will return only the traces that have all the specified tags. If a trace does not have every tag specified in the API call, it will not be included in the returned results.
 
 ### 🕹️ Try it out
-Head over to the [docs](/docs/tracing#tagging-traces) to learn more and get started. You can also see traces in action by [logging into](https://cloud.langfuse.com) your account and selecting the ‘langfuse-docs‘ project. Don't hesitate to reach out to us with feedback.
+
+Head over to the [docs](/docs/tracing/tags) to learn more and get started.

@@ -61,13 +61,11 @@ for generation in generations:
     )
 
     langfuse.score(
-      InitialScore(
-        name="hallucination",
-        traceId=generation.trace_id,
-        observationId=generation.id,
-        value=eval["score"],
-        comment=eval['reasoning']
-      )
+      name="hallucination",
+      traceId=generation.trace_id,
+      observationId=generation.id,
+      value=eval["score"],
+      comment=eval['reasoning']
     )
 ```
 
@@ -155,7 +153,7 @@ for item in dataset.items:
 
 Datasets are currently in beta on Langfuse Cloud as the API might still slightly change. If you'd like to try it, let us know via the in-app chat.
 
-→ [Dataset docs](/docs/datasets)
+→ [Dataset docs](/docs/datasets/overview)
 → [Python Cookbook](/docs/datasets/python-cookbook)
 
 ## 📊 In-app dashboards [#analytics]
