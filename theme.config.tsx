@@ -178,6 +178,8 @@ const config: DocsThemeConfig = {
       ? "Docs"
       : asPath.startsWith("/changelog/")
       ? "Changelog"
+      : asPath.startsWith("/cookbook/")
+      ? "Cookbook"
       : "";
 
     const image = frontMatter.ogImage
