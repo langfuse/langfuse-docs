@@ -16,6 +16,7 @@ import { Frame } from "./components/Frame";
 import { BsDiscord } from "react-icons/bs";
 import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
+import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 
 const footerNav = [
   {
@@ -143,6 +144,13 @@ const config: DocsThemeConfig = {
   },
   useNextSeoProps() {
     const { asPath } = useRouter();
+    const cookbook = COOKBOOK_ROUTE_MAPPING.find(
+      (cookbook) => cookbook.path === asPath
+    );
+    const canonical: string | undefined = cookbook?.canonicalPath
+      ? "https://langfuse.com" + cookbook.canonicalPath
+      : undefined;
+
     return {
       titleTemplate:
         asPath === "/"
@@ -152,10 +160,7 @@ const config: DocsThemeConfig = {
           : asPath.startsWith("/docs/guides/")
           ? "%s - Langfuse Guides"
           : "%s - Langfuse",
-
-      // exclude /cookbook from search engines
-      nofollow: asPath.startsWith("/cookbook"),
-      noindex: asPath.startsWith("/cookbook"),
+      canonical,
     };
   },
   head: () => {
