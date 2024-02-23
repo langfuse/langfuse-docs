@@ -16,6 +16,8 @@ Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://p
 
 You can configure the integration via (1) constructor arguments or (2) environment variables. Get your Langfuse credentials from the Langfuse dashboard.
 
+Prefer end-to-end examples? Check out the [cookbook](/docs/integrations/langchain/example-python) (Python).
+
 <Tabs
   items={[
     "Python (constructor args)",
@@ -64,8 +66,10 @@ When initializing the Langfuse handler, you can pass the following **optional** 
 | Feature/interface | Python | JS/TS |
 | ----------------- | ------ | ----- |
 | LCEL              | ✅     | ✅    |
-| `run()`           | ✅     | ✅    |
 | `invoke()`        | ✅     | ✅    |
+| `run()`           | ✅     | ✅    |
+| `call()`          | ✅     | ✅    |
+| `predict()`       | ✅     | ✅    |
 | `batch()`         |        |       |
 | async             |        |       |
 | streaming         |        |       |
@@ -127,7 +131,7 @@ Limitation: The input/output of the Langchain code will not be added to the trac
 
 ### Queuing and flushing
 
-The Langfuse SDKs queue and batches events in the background to reduce the number of network requests and improve overall performance. In a long-running application, this works without any additional configuration.
+The Langfuse SDKs queue and batch events in the background to reduce the number of network requests and improve overall performance. In a long-running application, this works without any additional configuration.
 
 If you are running a short-lived application, you need to shutdown Langfuse to ensure that all events are flushed before the application exits.
 
