@@ -94,9 +94,9 @@ You can add the following properties to the openai method, e.g. `openai.chat.com
 | ----------------------- | ---------------------------------------------------------------------------- |
 | `name`                  | Set `name` to identify a specific type of generation.                        |
 | `metadata`              | Set `metadata` with additional information that you want to see in Langfuse. |
-| `session_id`            | TODO                                                                         |
-| `user_id`               | TODO                                                                         |
-| `tags`                  | TODO                                                                         |
+| `session_id`            | The current [session](/docs/tracing/sessions).                                                         |
+| `user_id`               | The current [user_id](/docs/tracing/users).                                                                         |
+| `tags`                  | Set [tags](/docs/tracing/tags) to categorize and filter traces.                                                                         |
 | `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 | `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 
@@ -116,7 +116,49 @@ openai.chat.completions.create(
 
 ### Group multiple LLM calls into a single trace
 
-**TODO TODO TODO TODO TODO: trace_id as string, generate a uuid or similar**
+To get started, you can just add an identifier from your own application (e.g., conversation-id) to the openai calls – or create a random id.
+
+```python
+# create random trace_id
+# could also use existing id from your application, e.g. conversation id
+from uuid import uuid4
+trace_id = str(uuid4())
+
+# create multiple completions, pass trace_id to each
+
+country = "Bulgaria"
+
+capital = openai.chat.completions.create(
+  name="geography-teacher",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+      {"role": "user", "content": country}],
+  temperature=0,
+  trace_id=trace_id
+).choices[0].message.content
+
+poem = openai.chat.completions.create(
+  name="poet",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about a city."},
+      {"role": "user", "content": capital}],
+  temperature=1,
+  max_tokens=200,
+  trace_id=trace_id
+).choices[0].message.content
+```
+
+Now both generations are regrouped in a trace without any name and a random `trace_id`.
+
+```
+TRACE: (no name)
+|
+|-- GENERATION: geography-teacher
+|
+|-- GENERATION: poet
+```
 
 ### Interoperability with Langfuse Python SDK
 
@@ -128,32 +170,128 @@ Use the OpenAI integration in combination with the regular Langfuse SDKs if you 
 
 Learn more about the structure of a trace [here](/docs/tracing/overview).
 
-**TODO TODO TODO TODO TODO**
-
-<Tabs items={["Trace", "Trace + nested span"]}>
+<Tabs items={["Trace", "Trace and nested spans"]}>
 <Tab>
+We can easily create a trace with custom parameters in Langfuse and use this trace's `trace_id` to group OpenAI generations.
+
+```python
+from langfuse import Langfuse
+
+# initialize SDK
+langfuse = Langfuse()
+
+# create trace and add params
+trace = langfuse.trace(
+    # optional, if you want to use your own id
+    # id = "my-trace-id"
+    name = "capital-poem-generator"
+)
+
+# get traceid to pass to openai calls
+trace_id = trace.id
+
+# create multiple completions, pass trace_id to each
+
+country = "Bulgaria"
+
+capital = openai.chat.completions.create(
+  name="geography-teacher",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+      {"role": "user", "content": country}],
+  temperature=0,
+  trace_id=trace_id
+).choices[0].message.content
+
+poem = openai.chat.completions.create(
+  name="poet",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about a city."},
+      {"role": "user", "content": capital}],
+  temperature=1,
+  max_tokens=200,
+  trace_id=trace_id
+).choices[0].message.content
+```
+
+Now both generations are regrouped in the trace "capital-poem-generator" with the `trace_id` assigned by Langfuse.
 
 ```
-TRACE: person-locator
+TRACE: capital-poem-generator
 |
-|-- SPAN: Chain (Albert Einstein)
+|-- GENERATION: geography-teacher
 |
-|-- SPAN: Chain (Isaac Newton)
+|-- GENERATION: poet
 ```
 
 </Tab>
 <Tab>
+We can also use the nesting capabilities of Langfuse Tracing by providing a `parent_observation_id`. For example, this can be the id of a span that you created via the Langfuse Python SDK.
+
+```python
+from langfuse import Langfuse
+
+# initialize SDK
+langfuse = Langfuse()
+
+# create trace and add params
+trace = langfuse.trace(
+    # optional, if you want to use your own id
+    # id = "my-trace-id"
+    name = "capital-poem-generator"
+)
+
+for country in ["Bulgaria", "France"]:
+  # create span
+  span = trace.span(name=country)
+
+  # get span_id to provide for OpenAI calls
+  span_id = span.id
+
+  capital = openai.chat.completions.create(
+    name="geography-teacher",
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+        {"role": "user", "content": country}],
+    temperature=0,
+    parent_observation_id=span_id
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    name="poet",
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about a city."},
+        {"role": "user", "content": capital}],
+    temperature=1,
+    max_tokens=200,
+    parent_observation_id=span_id
+  ).choices[0].message.content
+  
+  # End span to get span-level latencies
+  span.end()
+```
+
+Now we have two sets of two nested generations which regrouped under a span each using their respective `span_id` as the generation's `parent_observation_id`.
   
 ```
-TRACE: person-locator
+TRACE: capital-poem-generator
 |
-|-- SPAN: Chain (Alan Turing)
+|-- SPAN: Bulgaria
+|   |
+|   |-- GENERATION: geography-teacher
+|   |
+|   |-- GENERATION: poet
 |
-|-- SPAN: Physics
+|-- SPAN: France
 |   |
-|   |-- SPAN: Chain (Albert Einstein)
+|   |-- GENERATION: geography-teacher
 |   |
-|   |-- SPAN: Chain (Isaac Newton)
+|   |-- GENERATION: poet
+
 ```
   
 </Tab>
