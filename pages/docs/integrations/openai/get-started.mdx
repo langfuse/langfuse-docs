@@ -114,6 +114,10 @@ openai.chat.completions.create(
 )
 ```
 
+### Group multiple LLM calls into a single trace
+
+**TODO TODO TODO TODO TODO: trace_id as string, generate a uuid or similar**
+
 ### Interoperability with Langfuse Python SDK
 
 Use the OpenAI integration in combination with the regular Langfuse SDKs if you want to:
@@ -125,6 +129,35 @@ Use the OpenAI integration in combination with the regular Langfuse SDKs if you 
 Learn more about the structure of a trace [here](/docs/tracing/overview).
 
 **TODO TODO TODO TODO TODO**
+
+<Tabs items={["Trace", "Trace + nested span"]}>
+<Tab>
+
+```
+TRACE: person-locator
+|
+|-- SPAN: Chain (Albert Einstein)
+|
+|-- SPAN: Chain (Isaac Newton)
+```
+
+</Tab>
+<Tab>
+  
+```
+TRACE: person-locator
+|
+|-- SPAN: Chain (Alan Turing)
+|
+|-- SPAN: Physics
+|   |
+|   |-- SPAN: Chain (Albert Einstein)
+|   |
+|   |-- SPAN: Chain (Isaac Newton)
+```
+  
+</Tab>
+</Tabs>
 
 ## Troubleshooting
 
