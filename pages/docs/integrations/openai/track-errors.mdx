@@ -1,11 +1,17 @@
 ---
-description: Drop-in replacement of OpenAI SDK to get full observability in Langfuse by changing only the import
+description: Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration.
 ---
 
-# Track OpenAI errors
+# Tracking of OpenAI API errors
 
-Langfuse automatically monitors OpenAI errors.
+Langfuse Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration.
 
+Learn more about how to get started [here](/docs/integrations/openai/get-started).
+
+```diff
+- import openai
++ from langfuse.openai import openai
+```
 
 ```python
 # Cause an error by attempting to use a host that does not exist.
@@ -21,10 +27,4 @@ country = openai.chat.completions.create(
 
 Throws error 👆
 
-![Openai error](https://langfuse.com/images/docs/openai-error.png)
-
-
-```python
-# Reset
-openai.api_base = "https://api.openai.com/v1"
-```
+![Openai error](/images/docs/openai-error.png)

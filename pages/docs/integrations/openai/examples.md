@@ -6,7 +6,7 @@ description: Drop-in replacement of OpenAI SDK to get full observability in Lang
 
 This is a cookbook with examples of the Langfuse Integration for OpenAI (Python).
 
-Follow the [integration guide](https://langfuse.com/docs/integrations/openai) to add this integration to your OpenAI project.
+Follow the [integration guide](https://langfuse.com/docs/integrations/openai/get-started) to add this integration to your OpenAI project.
 
 ## Setup
 
@@ -33,9 +33,6 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-## Import
-
-
 
 ```python
 # instead of: import openai
@@ -44,13 +41,15 @@ from langfuse.openai import openai
 
 
 ```python
-# checks the SDK connection with the server.
+# For debugging, checks the SDK connection with the server. Do not use in production as it adds latency.
 from langfuse.openai import auth_check
 
 auth_check()
 ```
 
-## 1. Example: Chat completion
+## Examples
+
+### Chat completion
 
 
 ```python
@@ -65,7 +64,7 @@ completion = openai.chat.completions.create(
 )
 ```
 
-### 1.1 Streaming
+### Chat completion (streaming)
 
 Simple example using the OpenAI streaming functionality.
 
@@ -86,7 +85,7 @@ for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
 
-### 1.2 Async support
+### Chat completion (async)
 
 Simple example using the OpenAI async client. It takes the Langfuse configurations either from the environment variables or from the attributes on the `openai` module.
 
@@ -114,7 +113,7 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Chat completion](https://langfuse.com/images/docs/openai-chat.png)
 
-## 2. Example: Functions
+### Functions
 
 Simple example using Pydantic to generate the function schema.
 
@@ -161,13 +160,13 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
 
-## 3. Example: Group multiple generations into a single trace
+### Group multiple generations into a single trace
 
 Many applications require more than one OpenAI call. In Langfuse, all LLM calls of a single API invocation can be grouped into the same `trace`.
 
 There are 2 options: (1) pass a `trace_id` (own or random string) or (2) create a trace with the Langfuse SDK.
 
-### 3.1 Simple: `trace_id` as string
+#### Simple: `trace_id` as string
 
 To get started, you can just add an identifier from your own application (e.g., conversation-id) to the openai calls – or create a random id.
 
@@ -208,7 +207,7 @@ Go to https://cloud.langfuse.com or your own instance to see your trace.
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
 
-### 3.2 Fully featured: create trace via SDK
+#### Fully featured: interoperability with Langfuse SDK
 
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
@@ -269,7 +268,7 @@ poem = openai.chat.completions.create(
 
 You can also use the nesting capabilities of Langfuse Tracing by providing a `parent_observation_id`. For example, this can be the id of a span that you created via the Langfuse Python SDK.
 
-## 4. Example: Add scores
+### Add scores to generation
 
 You can also add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some other evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 

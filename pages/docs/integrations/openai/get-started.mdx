@@ -11,15 +11,22 @@ If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement
 + from langfuse.openai import openai
 ```
 
-## 1. Setup
+Langfuse automatically tracks:
+
+- All prompts/completions with support for streaming, async and functions
+- Latencies
+- Errors ([example](/docs/integrations/openai/track-errors))
+- Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
+
+## Get started
+
+### 1. Setup
 
 The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
-
 
 ```python
 %pip install langfuse openai --upgrade
 ```
-
 
 ```python
 import os
@@ -36,55 +43,90 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-## 2. Replace import
+### 2. Replace import
 
-
-
-```python
-from langfuse.openai import openai
-# instead of: import openai
+```diff
+- import openai
++ from langfuse.openai import openai
 ```
 
-
 ```python
-# checks the SDK connection with the server.
+# Optional, checks the SDK connection with the server. Not recommended for production usage.
 from langfuse.openai import auth_check
 
 auth_check()
 ```
 
-### Attributes
+#### Optional attributes
 
 Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
 
-| Attribute |Description   | Default value  
-| --- | --- | ---
-| `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`. Set to `"https://us.cloud.langfuse.com"` for US data region.       
-| `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
-| `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
-| `openai.langfuse_debug` | Debug mode of Langfuse SDK | `False`
+| Attribute                    | Description                     | Default value                                                                                                                                  |
+| ---------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openai.langfuse_host`       | Host of the Langfuse API        | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`. Set to `"https://us.cloud.langfuse.com"` for US data region. |
+| `openai.langfuse_public_key` | Public key of the Langfuse API  | `LANGFUSE_PUBLIC_KEY` environment variable                                                                                                     |
+| `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable                                                                                                     |
+| `openai.langfuse_debug`      | Debug mode of Langfuse SDK      | `False`                                                                                                                                        |
 
-
-```python
-# Instead of environment variables, you can use the module variables to configure Langfuse
-
-# openai.langfuse_host = '...'
-# openai.langfuse_public_key = '...'
-# openai.langfuse_secret_key = '...'
-
-# This works for the async client as well
-# from langfuse.openai import AsyncOpenAI
-```
-
-## 3. Use SDK as usual
+### 3. Use SDK as usual
 
 _No changes required._
 
-Optionally:
-- Set `name` to identify a specific type of generation
-- Set `metadata` with additional information that you want to see in Langfuse
+For end-to-end examples, check out the [example notebook](/docs/integrations/openai/examples).
 
-## 4. Troubleshooting
+import { FileCode } from "lucide-react";
+
+<Cards>
+  <Card
+    title="Examples"
+    href="/docs/integrations/openai/examples"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## Advanced usage
+
+### Custom trace properties
+
+You can add the following properties to the openai method, e.g. `openai.chat.completions.create()`, to use additional Langfuse features:
+
+| Property                | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `name`                  | Set `name` to identify a specific type of generation.                        |
+| `metadata`              | Set `metadata` with additional information that you want to see in Langfuse. |
+| `session_id`            | TODO                                                                         |
+| `user_id`               | TODO                                                                         |
+| `tags`                  | TODO                                                                         |
+| `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
+| `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
+
+Example:
+
+```python
+openai.chat.completions.create(
+    name="test-chat",
+    model="gpt-3.5-turbo",
+    messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 1 = "}],
+    temperature=0,
+    metadata={"someMetadataKey": "someValue"},
+)
+```
+
+### Interoperability with Langfuse Python SDK
+
+Use the OpenAI integration in combination with the regular Langfuse SDKs if you want to:
+
+- Add non-OpenAI related observations to the trace.
+- Group multiple OpenAI calls into a single trace.
+- Have more control over the trace structure.
+
+Learn more about the structure of a trace [here](/docs/tracing/overview).
+
+**TODO TODO TODO TODO TODO**
+
+## Troubleshooting
 
 ### Shutdown behavior
 
@@ -92,8 +134,6 @@ The Langfuse SDK executes network requests in the background on a separate threa
 
 To avoid this, ensure that the `openai.flush_langfuse()` function is called before termination. This method is blocking as it awaits all requests to be completed.
 
-
 ```python
 openai.flush_langfuse()
 ```
-
