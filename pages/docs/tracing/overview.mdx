@@ -62,3 +62,85 @@ Check out the interactive demo to browse production traces in Langfuse.
     arrow
   />
 </Cards>
+
+## Event queuing/batching
+
+Langfuse's client SDKs and integrations are all designed to queue and batch requests in the background to optimize API calls and network time. Batches are determined by a combination of time and size (number of events and size of batch).
+
+### Configuration
+
+All integrations have a sensible default configuration, but you can customise the batching behaviour to suit your needs.
+
+| Option (Python)      | Option (JS)          | Description                                              |
+| -------------------- | -------------------- | -------------------------------------------------------- |
+| `flush_at`           | `flushAt`            | The maximum number of events to batch up before sending. |
+| `flush_interval` (s) | `flushInterval` (ms) | The maximum time to wait before sending a batch.         |
+
+You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=1000` to send every second.
+
+### Manual flushing
+
+import { Callout } from "nextra-theme-docs";
+
+<Callout type="info" emoji="ℹ️">
+  This is especially relevant for short-lived applications like serverless
+  functions. If you do not flush the client, you may lose events.
+</Callout>
+
+If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
+
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)"]}>
+
+<Tab>
+{/* Python */}
+
+```python
+langfuse.flush()
+```
+
+</Tab>
+<Tab>
+{/* JS/TS */}
+
+```javascript
+await langfuse.flushAsync();
+```
+
+If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
+
+```javascript
+await langfuse.shutdownAsync();
+```
+
+</Tab>
+<Tab>
+{/* OpenAI SDK (Python) */}
+
+```python
+openai.flush()
+```
+
+</Tab>
+<Tab>
+{/* Langchain (Python) */}
+
+```python
+langfuse_handler.flush()
+```
+
+</Tab>
+<Tab>
+{/* Langchain (JS) */}
+
+```javascript
+await langfuseHandler.flushAsync();
+```
+
+If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
+
+```javascript
+await langfuseHandler.shutdownAsync();
+```
+
+</Tab>
+</Tabs>
