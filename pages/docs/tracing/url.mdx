@@ -29,12 +29,50 @@ trace.getTraceUrl()
 </Tab>
 <Tab>
 
+Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/get-started#interoperability)).
+
 ```python
+# Intialize Langfuse Client
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Create a Langfuse trace for an execution of your application
+trace = langfuse.trace()
+
+# Get Langchain handler for this trace
+langfuse_handler = trace.get_langchain_handler()
+
+# Get the trace URL
+langfuse_handler.get_trace_url()
+```
+
+**Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.
+
+```
 handler.get_trace_url()
 ```
 
 </Tab>
 <Tab>
+
+Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/get-started#interoperability)).
+
+```typescript
+// Intialize Langfuse Client
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+// Create a Langfuse trace for an execution of your application
+const trace = langfuse.trace();
+
+// Get Langchain handler for this trace
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Get the trace URL
+langfuseHandler.getTraceUrl();
+```
+
+**Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.
 
 ```typescript
 handler.getTraceUrl();
