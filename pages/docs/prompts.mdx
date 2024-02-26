@@ -48,6 +48,15 @@ graph LR
     PP --> E["4. View metrics in Langfuse for prompt version"]
 ```
 
+## Prompt object
+
+Attributes of a prompt in Langfuse:
+
+- `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`)
+- `config`: Optional JSON object to store any parameters (e.g. model parameters or model tools).
+- `version`: Integer to indicate the version of the prompt. The version is automatically incremented when creating a new prompt version.
+- `is_active`: Boolean to indicate if the prompt version is in production. This is the default version that is returned when fetching the prompt by name.
+
 ## Create / Update prompts
 
 **Create**
@@ -88,8 +97,8 @@ await langfuse.createPrompt({
   isActive: true, // directly promote to production?
   config: {
     temperature: 0.5,
-    topP: 0.9
-  } // optionally, add configs (e.g. model parameters or model tools)
+    topP: 0.9,
+  }, // optionally, add configs (e.g. model parameters or model tools)
 });
 ```
 
@@ -129,10 +138,16 @@ prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
 
 # Insert variables into prompt template
 compiled_prompt = prompt.compile(input="test")
+```
 
-# Access the config of the prompt
-config = prompt.config
+Attributes
 
+```python
+# Raw prompt including {{variables}}
+prompt.prompt
+
+# Config object
+prompt.config
 ```
 
 </Tab>
@@ -153,9 +168,16 @@ const prompt = await langfuse.getPrompt("prompt name", 3, {
 
 // Insert variables into prompt template
 const compiledPrompt = prompt.compile({ input: "test" });
+```
 
-// Access the config of the prompt
-const config = prompt.config;
+Attributes
+
+```typescript
+// Raw prompt including {{variables}}
+prompt.prompt;
+
+// Config object
+prompt.config;
 ```
 
 </Tab>

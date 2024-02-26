@@ -12,7 +12,9 @@ for mapping in mappings:
     md_filename = filename.replace('.ipynb', '.md')
     source = 'cookbook/' + md_filename
 
-    destinations = mapping['destinations']
+    destinations = []
+    if mapping['docsPath'] is not None:
+        destinations.append(mapping['docsPath'] + ".md")
     # also publish all md files to pages/cookbook/
     destinations.append('cookbook/' + md_filename)
 
