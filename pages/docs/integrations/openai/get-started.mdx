@@ -1,0 +1,99 @@
+---
+description: Drop-in replacement of OpenAI SDK to get full observability in Langfuse by changing only the import
+---
+
+# OpenAI Integration (Python)
+
+If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import.
+
+```diff
+- import openai
++ from langfuse.openai import openai
+```
+
+## 1. Setup
+
+The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
+
+
+```python
+%pip install langfuse openai --upgrade
+```
+
+
+```python
+import os
+
+# get keys for your project from https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+
+# your openai key
+os.environ["OPENAI_API_KEY"] = ""
+
+# Your host, defaults to https://cloud.langfuse.com
+# For US data region, set to "https://us.cloud.langfuse.com"
+# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+```
+
+## 2. Replace import
+
+
+
+```python
+from langfuse.openai import openai
+# instead of: import openai
+```
+
+
+```python
+# checks the SDK connection with the server.
+from langfuse.openai import auth_check
+
+auth_check()
+```
+
+### Attributes
+
+Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
+
+| Attribute |Description   | Default value  
+| --- | --- | ---
+| `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`. Set to `"https://us.cloud.langfuse.com"` for US data region.       
+| `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
+| `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
+| `openai.langfuse_debug` | Debug mode of Langfuse SDK | `False`
+
+
+```python
+# Instead of environment variables, you can use the module variables to configure Langfuse
+
+# openai.langfuse_host = '...'
+# openai.langfuse_public_key = '...'
+# openai.langfuse_secret_key = '...'
+
+# This works for the async client as well
+# from langfuse.openai import AsyncOpenAI
+```
+
+## 3. Use SDK as usual
+
+_No changes required._
+
+Optionally:
+- Set `name` to identify a specific type of generation
+- Set `metadata` with additional information that you want to see in Langfuse
+
+## 4. Troubleshooting
+
+### Shutdown behavior
+
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse backend.
+
+To avoid this, ensure that the `openai.flush_langfuse()` function is called before termination. This method is blocking as it awaits all requests to be completed.
+
+
+```python
+openai.flush_langfuse()
+```
+

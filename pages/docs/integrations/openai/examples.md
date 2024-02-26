@@ -2,16 +2,13 @@
 description: Drop-in replacement of OpenAI SDK to get full observability in Langfuse by changing only the import
 ---
 
-# OpenAI Integration (Python)
+# Cookbook: OpenAI Integration (Python)
 
-If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import.
+This is a cookbook with examples of the Langfuse Integration for OpenAI (Python).
 
-```diff
-- import openai
-+ from langfuse.openai import openai
-```
+Follow the [integration guide](https://langfuse.com/docs/integrations/openai) to add this integration to your OpenAI project.
 
-## 1. Setup
+## Setup
 
 The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
 
@@ -36,7 +33,7 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-## 2. Replace import
+## Import
 
 
 
@@ -53,38 +50,7 @@ from langfuse.openai import auth_check
 auth_check()
 ```
 
-### Attributes
-
-Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
-
-| Attribute |Description   | Default value  
-| --- | --- | ---
-| `openai.langfuse_host` | BaseUrl of the Langfuse API | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`. Set to `"https://us.cloud.langfuse.com"` for US data region.       
-| `openai.langfuse_public_key` | Public key of the Langfuse API | `LANGFUSE_PUBLIC_KEY` environment variable       
-| `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable       
-| `openai.langfuse_debug` | Debug mode of Langfuse SDK | `False`
-
-
-```python
-# Instead of environment variables, you can use the module variables to configure Langfuse
-
-# openai.langfuse_host = '...'
-# openai.langfuse_public_key = '...'
-# openai.langfuse_secret_key = '...'
-
-# This works for the async client as well
-# from langfuse.openai import AsyncOpenAI
-```
-
-## 3. Use SDK as usual
-
-_No changes required._
-
-Optionally:
-- Set `name` to identify a specific type of generation
-- Set `metadata` with additional information that you want to see in Langfuse
-
-### Chat completion
+## 1. Example: Chat completion
 
 
 ```python
@@ -99,7 +65,7 @@ completion = openai.chat.completions.create(
 )
 ```
 
-#### Streaming
+### 1.1 Streaming
 
 Simple example using the OpenAI streaming functionality.
 
@@ -120,7 +86,7 @@ for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
 
-#### Async support
+### 1.2 Async support
 
 Simple example using the OpenAI async client. It takes the Langfuse configurations either from the environment variables or from the attributes on the `openai` module.
 
@@ -144,7 +110,11 @@ completion = await async_client.chat.completions.create(
 )
 ```
 
-### Functions
+Go to https://cloud.langfuse.com or your own instance to see your generation.
+
+![Chat completion](https://langfuse.com/images/docs/openai-chat.png)
+
+## 2. Example: Functions
 
 Simple example using Pydantic to generate the function schema.
 
@@ -186,57 +156,18 @@ response = openai.chat.completions.create(
 output = json.loads(response.choices[0].message.function_call.arguments)
 ```
 
-## 4. Debug & measure in Langfuse
+Go to https://cloud.langfuse.com or your own instance to see your generation.
 
-Go to https://cloud.langfuse.com or your own instance
-
-### Dashboard
-![Dashboard](https://langfuse.com/images/docs/openai-dashboard.png)
-
-### List of generations
-![List of generations](https://langfuse.com/images/docs/openai-generation-list.png)
-
-### Chat completion
-![Chat completion](https://langfuse.com/images/docs/openai-chat.png)
-
-### Function
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
 
-## 5. Track OpenAI errors
-
-Langfuse automatically monitors OpenAI errors.
-
-
-```python
-# Cause an error by attempting to use a host that does not exist.
-openai.base_url = "https://example.com"
-
-country = openai.chat.completions.create(
-  name="will-error",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "user", "content": "How are you?"}],
-)
-```
-
-Throws error 👆
-
-![Openai error](https://langfuse.com/images/docs/openai-error.png)
-
-
-```python
-# Reset
-openai.api_base = "https://api.openai.com/v1"
-```
-
-## 5. Group multiple generations into a single trace
+## 3. Example: Group multiple generations into a single trace
 
 Many applications require more than one OpenAI call. In Langfuse, all LLM calls of a single API invocation can be grouped into the same `trace`.
 
 There are 2 options: (1) pass a `trace_id` (own or random string) or (2) create a trace with the Langfuse SDK.
 
-### Simple: `trace_id` as string
+### 3.1 Simple: `trace_id` as string
 
 To get started, you can just add an identifier from your own application (e.g., conversation-id) to the openai calls – or create a random id.
 
@@ -273,9 +204,11 @@ poem = openai.chat.completions.create(
 ).choices[0].message.content
 ```
 
+Go to https://cloud.langfuse.com or your own instance to see your trace.
+
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
 
-### Fully featured: create trace via SDK
+### 3.2 Fully featured: create trace via SDK
 
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
@@ -336,7 +269,7 @@ poem = openai.chat.completions.create(
 
 You can also use the nesting capabilities of Langfuse Tracing by providing a `parent_observation_id`. For example, this can be the id of a span that you created via the Langfuse Python SDK.
 
-## 6. Add scores
+## 4. Example: Add scores
 
 You can also add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some other evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 
@@ -355,17 +288,6 @@ langfuse.score(
 );
 ```
 
+Go to https://cloud.langfuse.com or your own instance to see your trace with score.
+
 ![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)
-
-## Troubleshooting
-
-### Shutdown behavior
-
-The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse backend.
-
-To avoid this, ensure that the `openai.flush_langfuse()` function is called before termination. This method is blocking as it awaits all requests to be completed.
-
-
-```python
-openai.flush_langfuse()
-```
