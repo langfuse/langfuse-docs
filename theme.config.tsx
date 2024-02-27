@@ -17,6 +17,7 @@ import { BsDiscord } from "react-icons/bs";
 import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
 import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
+import { GeistSans } from "geist/font/sans";
 
 const footerNav = [
   {
@@ -211,6 +212,12 @@ const config: DocsThemeConfig = {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site:domain" content="langfuse.com" />
         <meta name="twitter:url" content="https://langfuse.com" />
+
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html { --font-geist-sans: ${GeistSans.style.fontFamily}; }`,
+          }}
+        />
 
         <link
           rel="apple-touch-icon"
