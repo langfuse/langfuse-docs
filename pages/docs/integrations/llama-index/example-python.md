@@ -96,6 +96,10 @@ Example traces (public links):
 2. [Query](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/d84d38b5-1dbc-47ce-bcad-893e1a39aefa)
 3. [Query (chat)](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/7101af0c-5716-448e-8a80-a02a04f70ccb)
 
+Trace in Langfuse:
+
+![Langfuse Traces](https://static.langfuse.com/llamaindex-langfuse-docs.gif)
+
 
 ## Interested in more advanced features?
 
