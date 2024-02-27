@@ -15,48 +15,21 @@ Langfuse offers a simple integration for automatic capture of traces and metrics
 Make sure you have both `llama-index` and `langfuse` installed.
 
 ```bash
-pip install llama-index --upgrade
-pip install langfuse --upgrade
+pip install llama-index langfuse
 ```
 
 At the root of your LlamaIndex application, register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager`. When instantiating `LlamaIndexCallbackHandler`, make sure to configure it correctly with your Langfuse API keys and the Host URL.
 
-<Tabs items={["Environment variables", "Constructor parameters"]}>
-<Tab>
+import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
+import GetStartedLlamaindexPythonEnv from "@/components-mdx/get-started-llamaindex-python-env.mdx";
 
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
-
-```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-langfuse_callback_handler = LlamaIndexCallbackHandler()
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-```
-
-</Tab>
-<Tab>
-
-```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-langfuse_callback_handler = LlamaIndexCallbackHandler(
-    public_key="pk-lf-...",
-    secret_key="sk-lf-...",
-    host="https://cloud.langfuse.com"
-)
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-```
-
-</Tab>
+<Tabs items={["Environment variables", "Constructor arguments"]}>
+  <Tab>
+    <GetStartedLlamaindexPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLlamaindexPythonArgs />
+  </Tab>
 </Tabs>
 
 import { Callout } from "nextra-theme-docs";
@@ -68,9 +41,17 @@ import { Callout } from "nextra-theme-docs";
   visible in the Langfuse UI.
 </Callout>
 
-## Cookbook
+Check out the notebook for end-to-end examples of the integration:
 
-If you prefer an end-to-end example to try the integration, check out the [cookbook](/docs/integrations/llama-index/example-python).
+import { FileCode } from "lucide-react";
+
+<Cards>
+  <Card
+    title="Example Notebook"
+    href="/docs/integrations/llama-index/example-python"
+    icon={<FileCode />}
+  />
+</Cards>
 
 ## Additional configuration
 
@@ -84,42 +65,68 @@ If you are running a short-lived application, you need to flush Langfuse to ensu
 langfuse_handler.flush()
 ```
 
-### Setting a root trace or span
-If you have an existing Langfuse trace or span object, you can set it as the root observation for your `LlamaIndexCallbackHandler`. Subsequent traces and spans will be nested under this root. This is useful when your LlamaIndex executions are part of a larger application and you want to link all traces and spans together. This can also be useful when you'd like to group multiple LlamaIndex executions to be part of the same trace or span.
+Learn more about queuing and batching of events [here](/docs/tracing/overview).
 
-Note that the input and output of your provided root trace or span must be set manually and is not managed by the LlamaIndexCallbackHandler to avoid overwrite issues.
+### Custom trace parameters
+
+You can update trace parameters at any time to add additional context to a trace, such as a user ID, session ID, or tags. See the [Python SDK Trace documentation](/docs/sdk/python#traces) for more information. All _subsequent_ traces will include these set parameters.
+
+| Property     | Description                                                               |
+| ------------ | ------------------------------------------------------------------------- |
+| `name`       | Identify a specific type of trace, e.g. a use case or functionality.      |
+| `metadata`   | Additional information that you want to see in Langfuse. Can be any JSON. |
+| `session_id` | The current [session](/docs/tracing/sessions).                            |
+| `user_id`    | The current [user_id](/docs/tracing/users).                               |
+| `tags`       | [Tags](/docs/tracing/tags) to categorize and filter traces.               |
+| `version`    | The specified version to trace [experiments](/docs/experimentation).      |
+| `release`    | The specified release to trace [experiments](/docs/experimentation).      |
 
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse import langfuse
 
-# Create a new trace on your main execution path
-root_trace = langfuse.trace(...)
+# Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+def my_func():
+  # Set trace parameters before executing your LlamaIndex code
+  langfuse_handler.set_trace_params(
+    user_id="user-123",
+    session_id="session-abc",
+    tags=["production"]
+  )
+
+  # Your LlamaIndex code, trace will include the set parameters
+```
+
+Note that when setting a root trace or span, this setting will have no effect as the root trace or span will be used. See next section for more information.
+
+### Interoperability with Langfuse SDKs
+
+If you have an existing Langfuse trace or span object, you can set it as the root observation for your `LlamaIndexCallbackHandler`. Subsequent traces and spans will be nested under this root. This is useful when your **LlamaIndex executions are part of a larger application** and you want to link all traces and spans together. This can also be useful when you'd like to **group multiple LlamaIndex executions** to be part of the same trace or span.
+
+Note that the Llamaindex intergation will not make any changes to your provided root trace or span. If you want to add additional context or input/output to your root trace or span, you can do so via the Python SDK.
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse import langfuse
 
 # Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
 langfuse_callback_handler = LlamaIndexCallbackHandler()
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
-# Set the root trace, subsequent LlamaIndex observations will be nested under root
-langfuse_callback_handler.set_root(root_trace)
+def my_func():
+  # Create a new trace on your main execution path
+  root_trace = langfuse.trace(name="trace-name")
 
-# Reset root, subsequent LlamaIndex observations will now use the default grouping and trace creation
-langfuse_callback_handler.set_root(None)
+  # Set the root trace, subsequent LlamaIndex observations will be nested under root
+  langfuse_callback_handler.set_root(root_trace)
 
+  # Your LlamaIndex code here
 
-```
-
-### Updating trace parameters
-
-You can update trace parameters at any time to add additional context to a trace, such as a user ID, session ID, or tags. See the [Python SDK Trace documentation](/docs/sdk/python#traces) for more information. All subsequent traces will include these set parameters. 
-
-Note that when setting a root trace or span, this setting will have no effect as the root trace or span will be used.
-
-```python
-langfuse_handler.set_trace_params(
-    user_id="user-123",
-    session_id="session-abc",
-    tags=["production"]
-)
+  # Reset root, subsequent LlamaIndex observations will now use the default grouping and trace creation
+  langfuse_callback_handler.set_root(None)
 ```

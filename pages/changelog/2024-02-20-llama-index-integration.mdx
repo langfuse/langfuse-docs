@@ -2,7 +2,7 @@
 date: 2024-02-20
 title: "LlamaIndex integration (Python)"
 description: Automatically capture detailed traces and metrics for every request of your LlamaIndex application with the new Langfuse Integration.
-author: Max
+author: Hassieb
 ogImage: /images/changelog/2024-02-20-llama-index-integration.jpg
 ---
 
@@ -18,15 +18,9 @@ We're incredibly excited about this, let us know if you have any questions or fe
 
 ### 🕹️ How it works
 
-```python filename="main.py"
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
+import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
 
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-langfuse_callback_handler = LlamaIndexCallbackHandler()
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-```
+<GetStartedLlamaindexPythonArgs />
 
 Done! ✨ Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse.
 

@@ -16,6 +16,7 @@ This quickstart helps you to integrate your LLM application with Langfuse. It wi
 
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
 
 <Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","API"]}>
 
@@ -172,26 +173,12 @@ For more details, see the [Langchain integration docs](/docs/integrations/langch
 The integration uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
 
 ```bash
-pip install llama-index --upgrade
-pip install langfuse --upgrade
+pip install llama-index langfuse
 ```
 
-At the root of your LlamaIndex application, register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager`. When instantiating `LlamaIndexCallbackHandler`, make sure to configure it correctly with your Langfuse API keys and the Host URL.
+<GetStartedLlamaindexPythonArgs />
 
-```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-langfuse_callback_handler = LlamaIndexCallbackHandler(
-    public_key="pk-lf-...",
-    secret_key="sk-lf-...",
-    host="https://cloud.langfuse.com"
-)
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-```
-
-The `LlamaIndexCallbackHandler` will automatically capture detailed traces of your LlamaIndex executions and send them to Langfuse asynchronously.
+Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
 
 </Tab>
 <Tab>

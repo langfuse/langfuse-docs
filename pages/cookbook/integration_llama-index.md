@@ -86,3 +86,11 @@ Example traces (public links):
 1. [Index](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/5268a183-b47b-4797-8ba7-fcaff0e26438)
 2. [Query](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/d84d38b5-1dbc-47ce-bcad-893e1a39aefa)
 3. [Query (chat)](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/7101af0c-5716-448e-8a80-a02a04f70ccb)
+
+
+## Interested in more advanced features?
+
+See the full [integration docs](https://langfuse.com/docs/integrations/llama-index/get-started) to learn more about advanced features and how to use them:
+
+- Interoperability with Langfuse Python SDK and other integrations
+- Add custom metadata and attributes to the traces

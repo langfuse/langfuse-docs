@@ -72,13 +72,13 @@ Instead of setting the environment variables before importing the SDK, you can a
 
 _No changes required._
 
-For end-to-end examples, check out the [example notebook](/docs/integrations/openai/examples).
+Check out the notebook for end-to-end examples of the integration:
 
 import { FileCode } from "lucide-react";
 
 <Cards>
   <Card
-    title="Examples"
+    title="Example Notebook"
     href="/docs/integrations/openai/examples"
     icon={<FileCode />}
   />
@@ -88,9 +88,9 @@ import { FileCode } from "lucide-react";
 
 ### Queuing and batching of events
 
-The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse backend.
+The Langfuse SDKs queue and batches events in the background to reduce the number of network requests and improve overall performance. In a long-running application, this works without any additional configuration.
 
-To avoid this, ensure that the `openai.flush_langfuse()` function is called before the process is terminated. This method is blocking as it awaits all requests to be completed.
+If you are running a short-lived application, you need to flush Langfuse to ensure that all events are flushed before the application exits.
 
 ```python
 openai.flush_langfuse()
