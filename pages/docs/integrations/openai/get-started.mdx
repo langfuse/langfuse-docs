@@ -116,14 +116,13 @@ You can add the following properties to the openai method, e.g. `openai.chat.com
 
 Example:
 
-```python
+```python {6-7}
 openai.chat.completions.create(
-    name="test-chat",
     model="gpt-3.5-turbo",
     messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
-    temperature=0,
+    name="test-chat",
     metadata={"someMetadataKey": "someValue"},
 )
 ```
@@ -132,7 +131,7 @@ openai.chat.completions.create(
 
 Usually, this integration creates a single trace in Langfuse for each openai call. If you want to group multiple openai calls into a single trace, you can use the `trace_id` property. This can be either a random id or an existing id from your application that will be unique to this execution.
 
-```python /trace_id=trace_id/ /trace_id = str(uuid4())/
+```python {3,14,23}
 from langfuse.openai import openai
 from uuid import uuid4
 trace_id = str(uuid4())
@@ -201,7 +200,7 @@ TRACE: capital-poem-generator
 
 Implementation:
 
-```python /langfuse.trace/ /trace_id=trace_id/
+```python {5,8,20,29}
 from langfuse import Langfuse
 from langfuse.openai import openai
 
@@ -256,7 +255,7 @@ TRACE: capital-poem-generator
 
 Implementation
 
-```python /langfuse.trace/ /trace_id=trace.id/ /trace.span/ /parent_observation_id=span.id/ /span.end()/
+```python showLineNumbers {5,8,12,20-21,30-31,35}
 from langfuse import Langfuse
 from langfuse.openai import openai
 
