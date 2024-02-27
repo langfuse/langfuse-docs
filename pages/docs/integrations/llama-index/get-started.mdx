@@ -97,12 +97,12 @@ from llama_index.core.callbacks import CallbackManager
 from langfuse import langfuse
 
 # Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
-langfuse_callback_handler = LlamaIndexCallbackHandler()
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+langfuse_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_handler])
 
 def my_func():
   # Set trace parameters before executing your LlamaIndex code
-  langfuse_handler.set_trace_params(
+  langfuse_callback_handler.set_trace_params(
     user_id="user-123",
     session_id="session-abc",
     tags=["production"]
