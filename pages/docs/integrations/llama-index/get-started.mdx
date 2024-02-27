@@ -101,18 +101,25 @@ def my_func():
   # Your LlamaIndex code, trace will include the set parameters
 ```
 
-Note that when setting a root trace or span, this setting will have no effect as the root trace or span will be used. See next section for more information.
+> Notes
+>
+> - The params will be applied to all traces and spans created after the `set_trace_params` call. You can unset them by calling e.g. `set_trace_params(user_id=None)`.
+> - If you run this in a Jupyter Notebook, you need to run `set_trace_params` in the same cell as your LlamaIndex code.
+> - When setting a root trace or span, this setting will have no effect as the root trace or span will be used. See next section for more information.
 
 ### Interoperability with Langfuse SDKs
 
-If you have an existing Langfuse trace or span object, you can set it as the root observation for your `LlamaIndexCallbackHandler`. Subsequent traces and spans will be nested under this root. This is useful when your **LlamaIndex executions are part of a larger application** and you want to link all traces and spans together. This can also be useful when you'd like to **group multiple LlamaIndex executions** to be part of the same trace or span.
+If you have an existing Langfuse trace or span object, you can set it as the root observation for your `LlamaIndexCallbackHandler`. All _subsequent_ traces and spans will be nested under this root.
 
-Note that the Llamaindex intergation will not make any changes to your provided root trace or span. If you want to add additional context or input/output to your root trace or span, you can do so via the Python SDK.
+This is useful when your **LlamaIndex executions are part of a larger application** and you want to link all traces and spans together. This can also be useful when you'd like to **group multiple LlamaIndex executions** to be part of the same trace or span.
 
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-from langfuse import langfuse
+from langfuse import Langfuse
+
+# Instantiate a Langfuse Client
+langfuse = Langfuse()
 
 # Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
 langfuse_callback_handler = LlamaIndexCallbackHandler()
@@ -130,3 +137,8 @@ def my_func():
   # Reset root, subsequent LlamaIndex observations will now use the default grouping and trace creation
   langfuse_callback_handler.set_root(None)
 ```
+
+> Notes
+>
+> - The Llamaindex intergation will not make any changes to your provided root trace or span. If you want to add additional context or input/output to your root trace or span, you can do so via the Python SDK.
+> - If you run this in a Jupyter Notebook, you need to run `set_root` in the same cell as your LlamaIndex code.

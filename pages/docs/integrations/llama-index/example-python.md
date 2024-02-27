@@ -33,6 +33,15 @@ langfuse_callback_handler = LlamaIndexCallbackHandler(
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```
 
+This example uses OpenAI for embeddings and chat completions.
+
+
+```python
+import os
+
+os.environ["OPENAI_API_KEY"] = ""
+```
+
 ## Index
 
 
