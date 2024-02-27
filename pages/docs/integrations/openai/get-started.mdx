@@ -84,6 +84,20 @@ import { FileCode } from "lucide-react";
   />
 </Cards>
 
+## Troubleshooting
+
+### Queuing and batching of events
+
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse backend.
+
+To avoid this, ensure that the `openai.flush_langfuse()` function is called before the process is terminated. This method is blocking as it awaits all requests to be completed.
+
+```python
+openai.flush_langfuse()
+```
+
+Learn more about queuing and batching of events [here](/docs/tracing/overview).
+
 ## Advanced usage
 
 ### Custom trace properties
@@ -94,9 +108,9 @@ You can add the following properties to the openai method, e.g. `openai.chat.com
 | ----------------------- | ---------------------------------------------------------------------------- |
 | `name`                  | Set `name` to identify a specific type of generation.                        |
 | `metadata`              | Set `metadata` with additional information that you want to see in Langfuse. |
-| `session_id`            | The current [session](/docs/tracing/sessions).                                                         |
-| `user_id`               | The current [user_id](/docs/tracing/users).                                                                         |
-| `tags`                  | Set [tags](/docs/tracing/tags) to categorize and filter traces.                                                                         |
+| `session_id`            | The current [session](/docs/tracing/sessions).                               |
+| `user_id`               | The current [user_id](/docs/tracing/users).                                  |
+| `tags`                  | Set [tags](/docs/tracing/tags) to categorize and filter traces.              |
 | `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 | `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 
@@ -116,195 +130,171 @@ openai.chat.completions.create(
 
 ### Group multiple LLM calls into a single trace
 
-To get started, you can just add an identifier from your own application (e.g., conversation-id) to the openai calls – or create a random id.
+Usually, this integration creates a single trace in Langfuse for each openai call. If you want to group multiple openai calls into a single trace, you can use the `trace_id` property. This can be either a random id or an existing id from your application that will be unique to this execution.
 
-```python
-# create random trace_id
-# could also use existing id from your application, e.g. conversation id
+```python /trace_id=trace_id/ /trace_id = str(uuid4())/
+from langfuse.openai import openai
 from uuid import uuid4
 trace_id = str(uuid4())
 
-# create multiple completions, pass trace_id to each
-
 country = "Bulgaria"
 
 capital = openai.chat.completions.create(
-  name="geography-teacher",
   model="gpt-3.5-turbo",
   messages=[
-      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+      {"role": "system", "content": "What is the capital of the country?"},
       {"role": "user", "content": country}],
   temperature=0,
+  name="get-capital",
   trace_id=trace_id
 ).choices[0].message.content
 
 poem = openai.chat.completions.create(
-  name="poet",
   model="gpt-3.5-turbo",
   messages=[
-      {"role": "system", "content": "You are a poet. Create a poem about a city."},
+      {"role": "system", "content": "You are a poet. Create a poem about this city."},
       {"role": "user", "content": capital}],
-  temperature=1,
-  max_tokens=200,
+  name="generate-poem",
   trace_id=trace_id
 ).choices[0].message.content
 ```
 
-Now both generations are regrouped in a trace without any name and a random `trace_id`.
+Now both generations are grouped in the same trace with the `trace_id` assigned by you.
 
 ```
-TRACE: (no name)
+TRACE (id: trace_id)
 |
-|-- GENERATION: geography-teacher
+|-- GENERATION: get-capital
 |
-|-- GENERATION: poet
+|-- GENERATION: generate-poem
 ```
+
+If you want to add further properties or observations to the trace, read the next section.
 
 ### Interoperability with Langfuse Python SDK
 
-Use the OpenAI integration in combination with the regular Langfuse SDKs if you want to:
+Use the OpenAI integration in combination with the regular Langfuse SDKs ([full reference](/docs/sdk/python)) if you want to:
 
 - Add non-OpenAI related observations to the trace.
-- Group multiple OpenAI calls into a single trace.
+- Group multiple OpenAI calls into a single trace while customizing the trace.
 - Have more control over the trace structure.
 
-Learn more about the structure of a trace [here](/docs/tracing/overview).
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="ℹ️">
+  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing/overview)
+  to the basic concepts.
+</Callout>
 
 <Tabs items={["Trace", "Trace and nested spans"]}>
 <Tab>
-We can easily create a trace with custom parameters in Langfuse and use this trace's `trace_id` to group OpenAI generations.
 
-```python
-from langfuse import Langfuse
-
-# initialize SDK
-langfuse = Langfuse()
-
-# create trace and add params
-trace = langfuse.trace(
-    # optional, if you want to use your own id
-    # id = "my-trace-id"
-    name = "capital-poem-generator"
-)
-
-# get traceid to pass to openai calls
-trace_id = trace.id
-
-# create multiple completions, pass trace_id to each
-
-country = "Bulgaria"
-
-capital = openai.chat.completions.create(
-  name="geography-teacher",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
-      {"role": "user", "content": country}],
-  temperature=0,
-  trace_id=trace_id
-).choices[0].message.content
-
-poem = openai.chat.completions.create(
-  name="poet",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a poet. Create a poem about a city."},
-      {"role": "user", "content": capital}],
-  temperature=1,
-  max_tokens=200,
-  trace_id=trace_id
-).choices[0].message.content
-```
-
-Now both generations are regrouped in the trace "capital-poem-generator" with the `trace_id` assigned by Langfuse.
+Desired trace structure:
 
 ```
 TRACE: capital-poem-generator
 |
-|-- GENERATION: geography-teacher
+|-- GENERATION: get-capital
 |
-|-- GENERATION: poet
+|-- GENERATION: generate-poem
 ```
 
-</Tab>
-<Tab>
-We can also use the nesting capabilities of Langfuse Tracing by providing a `parent_observation_id`. For example, this can be the id of a span that you created via the Langfuse Python SDK.
+Implementation:
 
-```python
+```python /langfuse.trace/ /trace_id=trace_id/
 from langfuse import Langfuse
+from langfuse.openai import openai
 
 # initialize SDK
 langfuse = Langfuse()
 
 # create trace and add params
-trace = langfuse.trace(
-    # optional, if you want to use your own id
-    # id = "my-trace-id"
-    name = "capital-poem-generator"
-)
+trace = langfuse.trace(name="capital-poem-generator")
 
-for country in ["Bulgaria", "France"]:
-  # create span
-  span = trace.span(name=country)
+# create multiple completions, pass trace_id to each
 
-  # get span_id to provide for OpenAI calls
-  span_id = span.id
+country = "Bulgaria"
 
-  capital = openai.chat.completions.create(
-    name="geography-teacher",
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
-        {"role": "user", "content": country}],
-    temperature=0,
-    parent_observation_id=span_id
-  ).choices[0].message.content
+capital = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "What is the capital of the country?"},
+      {"role": "user", "content": country}],
+  name="get-capital",
+  trace_id=trace_id
+).choices[0].message.content
 
-  poem = openai.chat.completions.create(
-    name="poet",
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a poet. Create a poem about a city."},
-        {"role": "user", "content": capital}],
-    temperature=1,
-    max_tokens=200,
-    parent_observation_id=span_id
-  ).choices[0].message.content
-  
-  # End span to get span-level latencies
-  span.end()
+poem = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about this city."},
+      {"role": "user", "content": capital}],
+  name="generate-poem",
+  trace_id=trace_id
+).choices[0].message.content
 ```
 
-Now we have two sets of two nested generations which are regrouped under a span each using their respective `span_id` as the generation's `parent_observation_id`.
-  
+</Tab>
+<Tab>
+Desired trace structure:
+
 ```
 TRACE: capital-poem-generator
 |
 |-- SPAN: Bulgaria
 |   |
-|   |-- GENERATION: geography-teacher
+|   |-- GENERATION: get-capital
 |   |
-|   |-- GENERATION: poet
+|   |-- GENERATION: generate-poem
 |
 |-- SPAN: France
 |   |
-|   |-- GENERATION: geography-teacher
+|   |-- GENERATION: get-capital
 |   |
-|   |-- GENERATION: poet
-
+|   |-- GENERATION: generate-poem
 ```
-  
+
+Implementation
+
+```python /langfuse.trace/ /trace_id=trace.id/ /trace.span/ /parent_observation_id=span.id/ /span.end()/
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# initialize SDK
+langfuse = Langfuse()
+
+# create trace and add params
+trace = langfuse.trace(name="capital-poem-generator")
+
+for country in ["Bulgaria", "France"]:
+  # create span
+  span = trace.span(name=country)
+
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+    trace_id=trace.id,
+    parent_observation_id=span.id,
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+    trace_id=trace.id,
+    parent_observation_id=span.id,
+  ).choices[0].message.content
+
+  # End span to get span-level latencies
+  span.end()
+```
+
+_Note that you need to provide `trace_id` and `parent_observation_id` to each generation._
+
 </Tab>
 </Tabs>
-
-## Troubleshooting
-
-### Shutdown behavior
-
-The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments like AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse backend.
-
-To avoid this, ensure that the `openai.flush_langfuse()` function is called before termination. This method is blocking as it awaits all requests to be completed.
-
-```python
-openai.flush_langfuse()
-```
