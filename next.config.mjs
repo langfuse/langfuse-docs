@@ -83,6 +83,8 @@ const nonPermanentRedirects = [
   ["/docs/langchain/typescript", "/docs/integrations/langchain/get-started"],
   ["/docs/integrations/langchain/python", "/docs/integrations/langchain/get-started"],
   ["/docs/integrations/langchain/typescript", "/docs/integrations/langchain/get-started"],
+  ["/docs/integrations/llama-index/overview", "/docs/integrations/llama-index/get-started"],
+  ["/docs/integrations/llama-index/cookbook", "/docs/integrations/llama-index/example-python"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm"],
   ["/docs/langflow", "/docs/integrations/langflow"],

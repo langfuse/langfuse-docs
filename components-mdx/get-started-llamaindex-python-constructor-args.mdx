@@ -1,0 +1,12 @@
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.llama_index import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler(
+    public_key="pk-lf-...",
+    secret_key="sk-lf-...",
+    host="https://cloud.langfuse.com"
+)
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
