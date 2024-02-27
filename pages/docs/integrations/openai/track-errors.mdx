@@ -1,0 +1,30 @@
+---
+description: Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration.
+---
+
+# Tracking of OpenAI API errors
+
+Langfuse Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration.
+
+Learn more about how to get started [here](/docs/integrations/openai/get-started).
+
+```diff
+- import openai
++ from langfuse.openai import openai
+```
+
+```python
+# Cause an error by attempting to use a host that does not exist.
+openai.base_url = "https://example.com"
+
+country = openai.chat.completions.create(
+  name="will-error",
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "user", "content": "How are you?"}],
+)
+```
+
+Throws error 👆
+
+![Openai error](/images/docs/openai-error.png)
