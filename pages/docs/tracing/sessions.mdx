@@ -13,7 +13,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
 ```python
@@ -73,6 +73,26 @@ const handler = new CallbackHandler({
   sessionId: "your-session-id",
 });
 ```
+
+</Tab>
+
+<Tab>
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse import langfuse
+
+# Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+langfuse_callback_handler.set_trace_params(
+  session_id="session-abc",
+)
+```
+
+All LlamaIndex traces created after `set_trace_params` will include the `session_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
 
 </Tab>
 

@@ -99,7 +99,7 @@ import { Callout } from "nextra-theme-docs";
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
 
-<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)"]}>
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
 
 <Tab>
 {/* Python */}
@@ -150,6 +150,14 @@ If you exit the application, use `shutdownAsync` method to make sure all request
 
 ```javascript
 await langfuseHandler.shutdownAsync();
+```
+
+</Tab>
+<Tab>
+{/* LlamaIndex */}
+
+```python
+langfuse_handler.flush()
 ```
 
 </Tab>
