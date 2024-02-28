@@ -74,7 +74,7 @@ const features = [
     name: "Prompt Management",
     description:
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
-    href: "/docs/prompts",
+    href: "/docs/prompts/get-started",
     cta: "Learn more",
     background: (
       <BentoBgImage
