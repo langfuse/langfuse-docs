@@ -1,5 +1,5 @@
 ---
-description: Examplel on how to use Langfuse Prompt Management in Langchain applications in Python
+description: Exampel on how to use Langfuse Prompt Management in Langchain applications in Python
 ---
 
 # Example: Langfuse Prompt Management with Langchain in Python
