@@ -123,7 +123,7 @@ Set a prompt version to `active` when creating it via the SDKs. In the Langfuse 
 
 ## Retrieve prompt in your application
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tabs items={["Python SDK", "Langchain (Python SDK)", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -148,6 +148,26 @@ prompt.prompt
 
 # Config object
 prompt.config
+```
+
+</Tab>
+
+<Tab>
+
+As Langfuse and Langchain process input variables of prompt templates differently, we provide the `PromptClient.get_langchain_prompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate.
+
+```python
+from langfuse import Langfuse
+from langchain_core.prompts import ChatPromptTemplate
+
+# Initialize Langfuse client 
+langfuse = Langfuse()
+
+# Get current production version of a Langfuse prompt
+langfuse_prompt = langfuse.get_prompt("prompt_name")
+
+# Create Langchain PromptTemplate
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
 ```
 
 </Tab>
