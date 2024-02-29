@@ -16,8 +16,6 @@ Langfuse integrates with Langchain using Langchain Callbacks ([Python](https://p
 
 You can configure the integration via (1) constructor arguments or (2) environment variables. Get your Langfuse credentials from the Langfuse dashboard.
 
-Prefer end-to-end examples? Check out the [cookbook](/docs/integrations/langchain/example-python) (Python).
-
 <Tabs
   items={[
     "Python (constructor args)",
@@ -47,6 +45,23 @@ import { Callout } from "nextra-theme-docs";
   dashboard.
 </Callout>
 
+Prefer end-to-end examples?
+
+import { FileCode, GitPullRequestArrow } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Example (Python)"
+    href="/docs/integrations/langchain/example-python"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example (JS/TS)"
+    href="/docs/integrations/langchain/example-javascript"
+    icon={<FileCode />}
+  />
+</Cards>
+
 ## Additional Configuration
 
 ### Optional constructor arguments
@@ -71,8 +86,8 @@ When initializing the Langfuse handler, you can pass the following **optional** 
 | `call()`          | ✅     | ✅    |
 | `predict()`       | ✅     | ✅    |
 | async             |        | ✅    |
-| `batch()`         |        |       |
-| streaming         |        |       |
+| `batch()`         |        | (✅)  |
+| streaming         |        | ✅    |
 
 We are interested in your feedback! Raise an issue on [GitHub](/ideas) to request support for additional interfaces.
 
