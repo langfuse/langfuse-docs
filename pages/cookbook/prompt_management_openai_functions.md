@@ -1,4 +1,4 @@
-# Example: Langfuse Prompt Management for OpenAI functions
+# Example: Langfuse Prompt Management for OpenAI functions (Python)
 
 Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version control and manage prompts collaboratively in one place. This example demostrates how to use the flexible `config` object on Langfuse prompts to store function calling options and model parameters.
 
