@@ -1,6 +1,8 @@
-# Example: Langfuse Prompt Management for Langchain (JS)
+# Example: Langfuse Prompt Management with Langchain (JS)
 
 Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version control and manage prompts collaboratively in one place.
+
+This example demonstrates how to use Langfuse Prompt Management together with Langchain JS.
 
 
 ```typescript
@@ -85,7 +87,7 @@ prompt.config
 
 
 
-### Transform prompt into Langchain PromptTemplate
+#### Transform prompt into Langchain PromptTemplate
 
 Langfuse uses the mustache-notation for `{{variables}}`, Langchain uses single braces (`{variable}`). We need to transform the prompt to create the Langchain PromptTemplate.
 
@@ -109,7 +111,7 @@ import { PromptTemplate } from "npm:@langchain/core/prompts"
 const promptTemplate = PromptTemplate.fromTemplate(langchainFormatPrompt);
 ```
 
-### Setup Langfuse Tracing for Langchain JS
+#### Setup Langfuse Tracing for Langchain JS
 
 We'll use the native [Langfuse Tracing for Langchain JS](https://langfuse.com/docs/integrations/langchain) when executing this chain. This is fully optional and can be used independently from Prompt Management.
 
@@ -119,7 +121,7 @@ import { CallbackHandler } from "npm:langfuse-langchain"
 const langfuseLangchainHandler = new CallbackHandler(langfuseParams)
 ```
 
-### Create chain
+#### Create chain
 
 We use the `modelName` and `temperature` stored in `prompt.config`.
 
@@ -135,7 +137,7 @@ const model = new ChatOpenAI({
 const chain = RunnableSequence.from([promptTemplate, model]);
 ```
 
-### Invoke chain
+#### Invoke chain
 
 
 ```typescript
@@ -235,7 +237,7 @@ const runnable = model
   .pipe(parser);
 ```
 
-## Invoke
+### Invoke chain
 
 
 ```typescript
@@ -246,6 +248,6 @@ const result = await runnable.invoke(
 );
 ```
 
-### Trace in Langfuse
+### View trace in Langfuse
 
 ![Trace in Langfuse](https://langfuse.com/images/cookbook/js_prompt_management_langchain_json_extraction_trace.png)
