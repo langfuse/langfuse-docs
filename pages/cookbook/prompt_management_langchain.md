@@ -88,21 +88,18 @@ print(langfuse_prompt.prompt)
     Plan an event titled {{Event Name}}. The event will be about: {{Event Description}}. The event will be held in {{Location}} on {{Date}}. Consider the following factors: audience, budget, venue, catering options, and entertainment. Provide a detailed plan including potential vendors and logistics.
 
 
-### Transform prompt into Langchain format
+### Transform into Langchain PromptTemplate
 
-Langfuse declares input variables in prompt templates using double brackets (`{{input variable}}`). Langchain uses single brackets for declaring input variables in PromptTemplates (`{input variable}`). Hence, we need to transform the prompt to be able to use it within a Langchain application.
+Use the utility method `.get_langchain_prompt()` to transform the Langfuse prompt into a string that can be used in Langchain.
+
+Context: Langfuse declares input variables in prompt templates using double brackets (`{{input variable}}`). Langchain uses single brackets for declaring input variables in PromptTemplates (`{input variable}`). The utility method `.get_langchain_prompt()` replaces the double brackets with single brackets.
 
 
 ```python
-import re
+from langchain_core.prompts import ChatPromptTemplate
 
-# Replace double brackets with single brackets
-single_bracket_prompt = re.sub(r'\{\{(.*?)\}\}', r'{\1}', langfuse_prompt.prompt)
-print(single_bracket_prompt)
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
 ```
-
-    Plan an event titled {Event Name}. The event will be about: {Event Description}. The event will be held in {Location} on {Date}. Consider the following factors: audience, budget, venue, catering options, and entertainment. Provide a detailed plan including potential vendors and logistics.
-
 
 Extract the configuration options from `prompt.config`
 
@@ -118,14 +115,12 @@ print(f"Prompt model configurations\nModel: {model}\nTemperature: {temperature}"
     Temperature: 0
 
 
-### Create Langchain application
+### Create Langchain chain based on prompt
 
 
 ```python
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-langchain_prompt = ChatPromptTemplate.from_template(single_bracket_prompt)
 model = ChatOpenAI(model=model, temperature=temperature)
 
 chain = langchain_prompt | model
