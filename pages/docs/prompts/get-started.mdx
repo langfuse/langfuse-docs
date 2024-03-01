@@ -9,7 +9,7 @@ import { CloudflareVideo } from "@/components/Video";
 
 Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by prompt version.
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)"]}>
+<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
 
 ```python
@@ -47,6 +47,24 @@ prompt = langfuse.get_prompt("prompt name")
 
 # Example using ChatPromptTemplate
 langchain_prompt = ChatPromptTemplate.from_template(prompt.get_langchain_prompt())
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new Langfuse();
+
+// Get current production prompt in application
+const langfusePrompt = await langfuse.getPrompt("prompt name");
+
+// Example using ChatPromptTemplate
+const promptTemplate = PromptTemplate.fromTemplate(
+  langfusePrompt.getLangchainPrompt()
+);
 ```
 
 </Tab>
@@ -139,7 +157,7 @@ Set a prompt version to `active` when creating it via the SDKs. In the Langfuse 
 
 ## Retrieve prompt in your application
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)",]}>
+<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
 
 ```python
@@ -219,11 +237,44 @@ from langchain_core.prompts import ChatPromptTemplate
 # Initialize Langfuse client
 langfuse = Langfuse()
 
-# Get current production version of a Langfuse prompt
-langfuse_prompt = langfuse.get_prompt("prompt_name")
+# Get current production version
+langfuse_prompt = langfuse.get_prompt("prompt name")
+
+# Get specific version
+langfuse_prompt = langfuse.get_prompt("prompt name", version=3)
+
+# Get specific version and extend cache TTL from default 60 to 300 seconds
+langfuse_prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
 
 # Example using ChatPromptTemplate
 langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new Langfuse();
+
+// Get current production version
+const langfusePrompt = await langfuse.getPrompt("prompt name");
+
+// Get specific version of a prompt (here version 3). Prompt is returned even if not active.
+const langfusePrompt = await langfuse.getPrompt("prompt name", 3);
+
+// Get specific version and extend cache TTL from default 1 to 5 minutes
+const langfusePrompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
+
+// Example using ChatPromptTemplate
+const promptTemplate = PromptTemplate.fromTemplate(
+  langfusePrompt.getLangchainPrompt()
+);
 ```
 
 </Tab>
@@ -240,7 +291,7 @@ When refetching a prompt fails but an expired version is in the cache, the SDKs 
 
 </Callout>
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tabs items={["Python", "JS/TS"]}>
 <Tab>
 
 ```python
