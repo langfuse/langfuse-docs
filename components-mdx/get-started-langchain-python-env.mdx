@@ -13,9 +13,13 @@ langfuse_handler = CallbackHandler()
 
 # Your Langchain code
 
-# Add Langfuse handler as callback to `run`, `predict`, `invoke`
-# Works for traditional Langchain code and LCEL
+# Add Langfuse handler as callback (classic and LCEL)
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
+```
+
+Also works for `run` and `predict` methods.
+
+```python
 chain.run(input="<user_input>", callbacks=[langfuse_handler])
 conversation.predict(input="<user_input>", callbacks=[langfuse_handler])
-chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
 ```
