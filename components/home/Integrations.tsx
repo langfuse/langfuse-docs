@@ -8,7 +8,7 @@ import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
-import LangfuseIcon from "@/public/icon256.png";
+import LangfuseIcon from "@/public/icon.svg";
 import LangchainIcon from "./img/langchain_icon.png";
 import Image from "next/image";
 
