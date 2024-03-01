@@ -101,8 +101,8 @@ export default function Integrations() {
               <Image
                 src={LangfuseIcon}
                 alt="Langfuse Icon"
-                width={35}
-                height={35}
+                width={28}
+                height={28}
               />
             </Circle>
             <Circle ref={out3ref} className="hidden">
@@ -114,8 +114,8 @@ export default function Integrations() {
               <Image
                 src={LlamaindexIcon}
                 alt="Llama-index"
-                width={40}
-                height={40}
+                width={35}
+                height={35}
               />
             </Circle>
           </div>
