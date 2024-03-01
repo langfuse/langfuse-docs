@@ -5,7 +5,7 @@ description: Manage and version your prompts in Langfuse (open source). When ret
 import { Callout } from "nextra-theme-docs";
 import { CloudflareVideo } from "@/components/Video";
 
-# Prompt Management
+# Get Started with Prompt Management
 
 Use Langfuse to effectively manage and version your prompts. This allows you to iterate quickly, publish new prompt versions without redeploying your app, and track metrics by prompt version.
 
@@ -73,13 +73,13 @@ const promptTemplate = PromptTemplate.fromTemplate(
 The workflow for managing prompts in Langfuse includes the following steps:
 
 ```mermaid
-graph LR
+graph TB
     A["1. Create new prompt version (SDK or UI)"] --> PV
     subgraph S1["Prompt (identified by name)"]
         PV["Prompt Version"] -->|"2. Promote"| PP["Production Prompt"]
     end
     PP --> D["3. Retrieve prompt using SDK"]
-    PP --> E["4. View metrics in Langfuse for prompt version"]
+    PP --> E["4. View metrics in Langfuse UI"]
 ```
 
 ## Prompt object
