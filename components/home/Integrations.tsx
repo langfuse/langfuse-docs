@@ -3,11 +3,12 @@
 import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { forwardRef, useRef, type ReactNode } from "react";
-import { Code } from "lucide-react";
+import { Code, MoreHorizontal } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
-import LangfuseIcon from "@/public/icon256.png";
+import LlamaindexIcon from "./img/llamaindex_icon.png";
+import LangfuseIcon from "@/public/icon.svg";
 import LangchainIcon from "./img/langchain_icon.png";
 import Image from "next/image";
 
@@ -43,6 +44,9 @@ export default function Integrations() {
   const inOpenAiRef = useRef<HTMLDivElement>(null);
   const inLangchainRef = useRef<HTMLDivElement>(null);
   const inApiRef = useRef<HTMLDivElement>(null);
+  const inLlamaindexRef = useRef<HTMLDivElement>(null);
+  const inMoreRef = useRef<HTMLDivElement>(null);
+
   const langfuseNodeRef = useRef<HTMLDivElement>(null);
   const out1ref = useRef<HTMLDivElement>(null);
   const out2ref = useRef<HTMLDivElement>(null);
@@ -51,8 +55,8 @@ export default function Integrations() {
   return (
     <HomeSection>
       <Header
-        title="Works with any LLM app"
-        description="SDKs for Python & JS/TS. Native integrations for popular libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
+        title="Works with any LLM app and model"
+        description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
         button={{
           href: "/docs/integrations/overview",
           text: "Integration docs",
@@ -62,7 +66,7 @@ export default function Integrations() {
         className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background py-4 px-2 md:p-12"
         ref={containerRef}
       >
-        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-6">
+        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-4">
           <div className="flex flex-row items-center justify-between">
             <Circle ref={inPythonRef} title="Python SDK">
               <SiPython className="h-6 w-6" />
@@ -80,14 +84,6 @@ export default function Integrations() {
             <Circle ref={inOpenAiRef} title="OpenAI SDK">
               <SiOpenai className="h-6 w-6" />
             </Circle>
-            <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <Image
-                src={LangfuseIcon}
-                alt="Langfuse Icon"
-                width={30}
-                height={30}
-              />
-            </Circle>
             <Circle ref={out2ref} className="hidden">
               <Code className="h-6 w-6" />
             </Circle>
@@ -101,13 +97,36 @@ export default function Integrations() {
                 height={40}
               />
             </Circle>
+            <Circle ref={langfuseNodeRef} className="h-16 w-16">
+              <Image
+                src={LangfuseIcon}
+                alt="Langfuse Icon"
+                width={28}
+                height={28}
+              />
+            </Circle>
             <Circle ref={out3ref} className="hidden">
               <Code className="h-6 w-6" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
+            <Circle ref={inLlamaindexRef} title="Llama-Index">
+              <Image
+                src={LlamaindexIcon}
+                alt="Llama-index"
+                width={35}
+                height={35}
+              />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
             <Circle ref={inApiRef} title="API">
               <Code className="h-6 w-6" />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle ref={inMoreRef} title="Litellm, Flowise, Langflow">
+              <MoreHorizontal className="h-5 w-5" />
             </Circle>
           </div>
         </div>
@@ -139,6 +158,18 @@ export default function Integrations() {
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={inApiRef}
+          toRef={langfuseNodeRef}
+          duration={3}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={inLlamaindexRef}
+          toRef={langfuseNodeRef}
+          duration={3}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={inMoreRef}
           toRef={langfuseNodeRef}
           duration={3}
         />

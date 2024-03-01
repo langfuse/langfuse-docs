@@ -22,14 +22,14 @@ export function Logo() {
         }}
       >
         <Image
-          src="/logo_light_512.png"
+          src="/langfuse_logo_white.svg"
           alt="Langfuse Logo"
           width={120}
           height={20}
           className="hidden dark:block"
         />
         <Image
-          src="/logo_dark_512.png"
+          src="/langfuse_logo.svg"
           alt="Langfuse Logo"
           width={120}
           height={20}
@@ -57,6 +57,15 @@ export function Logo() {
           >
             <Download size={14} className="mr-2" />
             Logo (png)
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.preventDefault();
+              window.open("/langfuse_logo.svg", "_blank");
+            }}
+          >
+            <Download size={14} className="mr-2" />
+            Logo (svg)
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

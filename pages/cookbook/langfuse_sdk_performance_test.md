@@ -4,8 +4,9 @@ Langfuse shall have a minimal impact on latency. This is achieved by running alm
 
 Coverage of this performance test:
 - Langfuse SDK: trace(), generation(), span()
-- Langchain Integration (with control)
-- OpenAI Integration (with control)
+- Langchain Integration
+- OpenAI Integration
+- LlamaIndex Integration
 
 Limitation: We test integrations using OpenAI's hosted models, making the experiment less controlled but actual latency of the integrations impact more realistic.
 
@@ -149,6 +150,8 @@ time_func(lambda: trace.event(name="perf-generation"))
 
 ## Langchain Integration
 
+Docs: https://langfuse.com/docs/integrations/langchain
+
 
 ```python
 %pip install langchain langchain-openai --upgrade
@@ -171,7 +174,7 @@ from langfuse.callback import CallbackHandler
 langfuse_handler = CallbackHandler()
 ```
 
-Control: Invoking Langchain chain without Langfuse tracing
+### Bechmark without Langfuse
 
 
 ```python
@@ -194,7 +197,7 @@ langchain_stats_no_langfuse
 
 
 
-Invoking Langchain chain with Langfuse tracing
+### With Langfuse Tracing
 
 
 ```python
@@ -219,6 +222,8 @@ langchain_stats_with_langfuse
 
 ## OpenAI Integration
 
+Docs: https://langfuse.com/docs/integrations/openai
+
 
 ```python
 %pip install langfuse openai --upgrade --quiet
@@ -229,18 +234,17 @@ langchain_stats_with_langfuse
 import openai
 ```
 
-Control: OpenAI SDK without Langfuse Tracing
+### Benchmark without Langfuse
 
 
 ```python
-openai_stats_no_langfuse = time_func(lambda: openai.chat.completions.create(
+time_func(lambda: openai.chat.completions.create(
   model="gpt-3.5-turbo",
   messages=[
       {"role": "user", "content": "what is the city Paul Graham is from?"}],
   temperature=0,
   max_tokens=10,
 ))
-openai_stats_no_langfuse
 ```
 
 
@@ -258,7 +262,7 @@ openai_stats_no_langfuse
 
 
 
-OpenAI SDK with Langfuse Tracing
+### With Langfuse Tracing
 
 
 ```python
@@ -267,14 +271,13 @@ from langfuse.openai import openai
 
 
 ```python
-openai_stats_with_langfuse = time_func(lambda: openai.chat.completions.create(
+time_func(lambda: openai.chat.completions.create(
   model="gpt-3.5-turbo",
   messages=[
       {"role": "user", "content": "what is the city Paul Graham is from?"}],
   temperature=0,
   max_tokens=10,
 ))
-openai_stats_with_langfuse
 ```
 
 
@@ -288,6 +291,136 @@ openai_stats_with_langfuse
     50% (sec)       0.435775
     75% (sec)       0.558746
     max (sec)       2.613779
+    dtype: float64
+
+
+
+## LlamaIndex Integration
+
+Docs: https://langfuse.com/docs/integrations/llama-index
+
+
+```python
+%pip install llama-index --upgrade --quiet
+```
+
+Sample documents
+
+
+```python
+from llama_index.core import Document
+
+doc1 = Document(text="""
+Maxwell "Max" Silverstein, a lauded movie director, screenwriter, and producer, was born on October 25, 1978, in Boston, Massachusetts. A film enthusiast from a young age, his journey began with home movies shot on a Super 8 camera. His passion led him to the University of Southern California (USC), majoring in Film Production. Eventually, he started his career as an assistant director at Paramount Pictures. Silverstein's directorial debut, “Doors Unseen,” a psychological thriller, earned him recognition at the Sundance Film Festival and marked the beginning of a successful directing career.
+""")
+doc2 = Document(text="""
+Throughout his career, Silverstein has been celebrated for his diverse range of filmography and unique narrative technique. He masterfully blends suspense, human emotion, and subtle humor in his storylines. Among his notable works are "Fleeting Echoes," "Halcyon Dusk," and the Academy Award-winning sci-fi epic, "Event Horizon's Brink." His contribution to cinema revolves around examining human nature, the complexity of relationships, and probing reality and perception. Off-camera, he is a dedicated philanthropist living in Los Angeles with his wife and two children.
+""")
+```
+
+### Bechmark without Langfuse
+
+Index
+
+
+```python
+# Example index construction + LLM query
+from llama_index.core import VectorStoreIndex
+
+time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
+```
+
+
+
+
+    count         100.000000
+    mean (sec)      0.171673
+    std (sec)       0.058332
+    min (sec)       0.112696
+    25% (sec)       0.136361
+    50% (sec)       0.157330
+    75% (sec)       0.178455
+    max (sec)       0.459417
+    dtype: float64
+
+
+
+Query
+
+
+```python
+index = VectorStoreIndex.from_documents([doc1,doc2])
+time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
+```
+
+
+
+
+    count         100.000000
+    mean (sec)      0.795817
+    std (sec)       0.338263
+    min (sec)       0.445060
+    25% (sec)       0.614282
+    50% (sec)       0.756573
+    75% (sec)       0.908411
+    max (sec)       3.495263
+    dtype: float64
+
+
+
+### With Langfuse Tracing
+
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.llama_index import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+Index
+
+
+```python
+time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
+```
+
+
+
+
+    count         100.000000
+    mean (sec)      0.178796
+    std (sec)       0.101976
+    min (sec)       0.112530
+    25% (sec)       0.138217
+    50% (sec)       0.163698
+    75% (sec)       0.179563
+    max (sec)       0.992403
+    dtype: float64
+
+
+
+Query
+
+
+```python
+index = VectorStoreIndex.from_documents([doc1,doc2])
+time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
+```
+
+
+
+
+    count         100.000000
+    mean (sec)      0.802315
+    std (sec)       0.230386
+    min (sec)       0.423413
+    25% (sec)       0.639373
+    50% (sec)       0.784945
+    75% (sec)       0.945300
+    max (sec)       2.164593
     dtype: float64
 
 

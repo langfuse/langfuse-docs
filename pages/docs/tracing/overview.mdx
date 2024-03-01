@@ -48,19 +48,29 @@ import { SiApplearcade } from "react-icons/si";
     href="/docs/get-started"
     arrow
   />
-</Cards>
-
-## Demo
-
-Check out the interactive demo to browse production traces in Langfuse.
-
-<Cards num={3}>
   <Card
     icon={<SiApplearcade size="24" />}
     title="Interactive demo"
     href="/docs/demo"
     arrow
   />
+</Cards>
+
+## Advanced usage
+
+You can extend the tracing capabilities of Langfuse by using the following features:
+
+import { Users, Tag, MessagesSquare } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Sessions"
+    href="/docs/tracing/sessions"
+    icon={<MessagesSquare />}
+    arrow
+  />
+  <Card title="Users" href="/docs/tracing/users" icon={<Users />} arrow />
+  <Card title="Tags" href="/docs/tracing/tags" icon={<Tag />} arrow />
 </Cards>
 
 ## Event queuing/batching [#queuing-batching]
@@ -89,7 +99,7 @@ import { Callout } from "nextra-theme-docs";
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
 
-<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)"]}>
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
 
 <Tab>
 {/* Python */}
@@ -140,6 +150,14 @@ If you exit the application, use `shutdownAsync` method to make sure all request
 
 ```javascript
 await langfuseHandler.shutdownAsync();
+```
+
+</Tab>
+<Tab>
+{/* LlamaIndex */}
+
+```python
+langfuse_handler.flush()
 ```
 
 </Tab>

@@ -16,8 +16,9 @@ This quickstart helps you to integrate your LLM application with Langfuse. It wi
 
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
 
-<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","API"]}>
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","API"]}>
 
 <Tab>
 {/* Python */}
@@ -167,6 +168,20 @@ For more details, see the [Langchain integration docs](/docs/integrations/langch
 
 </Tab>
 <Tab>
+{/* LlamaIndex */}
+
+The integration uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
+
+```bash
+pip install llama-index langfuse
+```
+
+<GetStartedLlamaindexPythonArgs />
+
+Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
+
+</Tab>
+<Tab>
 {/* API */}
 
 [API reference](https://api.reference.langfuse.com) for custom integrations. OpenAPI spec available.
@@ -189,7 +204,7 @@ This was a very brief introduction to get started with Langfuse. Explore all Lan
 
 <Cards num={3}>
   <Card title="Tracing" href="/docs/tracing/overview" arrow />
-  <Card title="Prompt Management" href="/docs/prompts" arrow />
+  <Card title="Prompt Management" href="/docs/prompts/get-started" arrow />
   <Card
     title="Export & Fine-tuning"
     href="/docs/export-and-fine-tuning"
@@ -241,6 +256,12 @@ import { SiOpenai } from "react-icons/si";
     icon={<span>🦜🔗</span>}
     title="Langchain (Python & JS)"
     href="/docs/integrations/langchain/get-started"
+    arrow
+  />
+  <Card
+    icon={<span>🦙</span>}
+    title="LlamaIndex"
+    href="/docs/integrations/llama-index/get-started"
     arrow
   />
   <Card

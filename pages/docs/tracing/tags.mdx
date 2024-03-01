@@ -8,7 +8,7 @@ import { CloudflareVideo } from "@/components/Video";
 
 Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS)"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS)", "LlamaIndex"]}>
 <Tab>
 
 ```python
@@ -85,6 +85,26 @@ const trace = langfuse.trace({
 // Get Langchain callback handler for this trace
 const handler = new CallbackHandler({ root: trace });
 ```
+
+</Tab>
+
+<Tab>
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse import langfuse
+
+# Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+langfuse_callback_handler.set_trace_params(
+  tags=["tag-a-licious", "tig-tag-tagging"],
+)
+```
+
+All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
 
 </Tab>
 
