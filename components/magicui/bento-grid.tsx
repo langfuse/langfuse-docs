@@ -43,7 +43,7 @@ const BentoCard = ({
   <Link
     key={name}
     className={cn(
-      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded border lg:cursor-default",
+      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded border",
       // light styles
       "bg-white",
       // dark styles
