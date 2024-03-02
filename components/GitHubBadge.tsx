@@ -11,7 +11,7 @@ export const GithubMenuBadge = () => (
     <div className="py-1 px-2 block bg-primary/10">
       <BsGithub size={22} className="group-hover:opacity-80 opacity-100" />
     </div>
-    <div className="py-1 px-2  text-sm group-hover:opacity-80 opacity-100 w-10">
+    <div className="py-1 text-center text-sm group-hover:opacity-80 opacity-100 w-10">
       <StarCount />
     </div>
   </a>
@@ -22,7 +22,7 @@ export const StarCount = () => {
 
   useEffect(() => {
     if (!stars)
-      fetch("https://api.github.com/repos/langfuse/langfuse")
+      fetch("/api/stargazer-count")
         .then((data) =>
           data.json().then((json) => setStars(json.stargazers_count))
         )
