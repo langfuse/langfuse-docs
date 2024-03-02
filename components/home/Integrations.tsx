@@ -42,7 +42,10 @@ const Circle = forwardRef<
       )}
       <div
         ref={ref}
-        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black group-hover:bg-slate-200"
+        className={cn(
+          "flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black",
+          href && "group-hover:bg-slate-200"
+        )}
       >
         {href && (
           <ArrowUpRightFromSquare
