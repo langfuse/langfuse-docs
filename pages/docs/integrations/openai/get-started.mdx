@@ -2,7 +2,7 @@
 description: Drop-in replacement of OpenAI SDK to get full observability in Langfuse by changing only the import.
 ---
 
-# OpenAI Integration (Python)
+# Observability for OpenAI SDK (Python)
 
 If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import.
 
@@ -18,57 +18,86 @@ Langfuse automatically tracks:
 - API Errors ([example](/docs/integrations/openai/track-errors))
 - Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
 
-## Get started
+_In the Langfuse Console_
 
-### 1. Setup
+import { CloudflareVideo } from "@/components/Video";
+
+<CloudflareVideo
+  videoId="53740b20a378b166552ff1941ed38e4c"
+  aspectRatio={16 / 9.8}
+  gifStyle
+/>
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="ℹ️">
+  Currently only Python is supported by this integration. If you are interested
+  in an integration with the **Node.js/Typescript OpenAI SDK**, add your
+  upvote/comments to [this
+  issue](https://github.com/orgs/langfuse/discussions/844).
+</Callout>
+
+## How it works
+
+<Steps>
+
+### Install Langfuse SDK
 
 The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
 
-```python
-%pip install langfuse openai --upgrade
+```sh
+pip install langfuse openai
 ```
 
-```python
-import os
+### Switch to Langfuse Wrapped OpenAI SDK
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+<Tabs items={["Environment variables", "Attributes"]}>
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
+<Tab>
 
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
-```
+Add Langfuse credentials to your environment variables
 
-### 2. Replace import
+import EnvPython from "@/components-mdx/env-python.mdx";
+
+<EnvPython />
+
+Change import
 
 ```diff
 - import openai
 + from langfuse.openai import openai
 ```
 
-```python
-# Optional, checks the SDK connection with the server. Not recommended for production usage.
-from langfuse.openai import auth_check
+</Tab>
+<Tab>
 
-auth_check()
+Change import
+
+```diff
+- import openai
++ from langfuse.openai import openai
 ```
 
-#### Optional attributes
+Add Langfuse credentials to your code
 
-Instead of setting the environment variables before importing the SDK, you can also use the following attributes after the import. This works for the async OpenAI client as well:
+```python
+openai.langfuse_public_key"pk-lf-..."
+openai.langfuse_secret_key="sk-lf-..."
+openai.langfuse_host="https://cloud.langfuse.com" # 🇪🇺 EU region
+# openai.langfuse_host="https://us.cloud.langfuse.com" # 🇺🇸 US region
+```
 
-| Attribute                    | Description                     | Default value                                                                                                                                  |
-| ---------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openai.langfuse_host`       | Host of the Langfuse API        | `LANGFUSE_HOST` environment variable, defaults to `"https://cloud.langfuse.com"`. Set to `"https://us.cloud.langfuse.com"` for US data region. |
-| `openai.langfuse_public_key` | Public key of the Langfuse API  | `LANGFUSE_PUBLIC_KEY` environment variable                                                                                                     |
-| `openai.langfuse_secret_key` | Private key of the Langfuse API | `LANGFUSE_SECRET_KEY` environment variable                                                                                                     |
-| `openai.langfuse_debug`      | Debug mode of Langfuse SDK      | `False`                                                                                                                                        |
+</Tab>
 
-### 3. Use SDK as usual
+</Tabs>
+
+Optional, checks the SDK connection with the server. Not recommended for production usage.
+
+```python
+openai.auth_check()
+```
+
+### Use OpenAI SDK as usual
 
 _No changes required._
 
@@ -78,11 +107,18 @@ import { FileCode } from "lucide-react";
 
 <Cards>
   <Card
-    title="Example Notebook"
+    title="Example notebook"
     href="/docs/integrations/openai/examples"
     icon={<FileCode />}
   />
+  <Card
+    title="Error tracking example"
+    href="/docs/integrations/openai/track-errors"
+    icon={<FileCode />}
+  />
 </Cards>
+
+</Steps>
 
 ## Troubleshooting
 
@@ -97,6 +133,14 @@ openai.flush_langfuse()
 ```
 
 Learn more about queuing and batching of events [here](/docs/tracing/overview).
+
+### Debug mode
+
+If you are having issues with the integration, you can enable debug mode to get more information about the requests and responses.
+
+```python
+openai.langfuse_debug=True
+```
 
 ## Advanced usage
 
@@ -177,8 +221,6 @@ Use the OpenAI integration in combination with the regular Langfuse SDKs ([full 
 - Add non-OpenAI related observations to the trace.
 - Group multiple OpenAI calls into a single trace while customizing the trace.
 - Have more control over the trace structure.
-
-import { Callout } from "nextra/components";
 
 <Callout type="info" emoji="ℹ️">
   New to Langfuse Tracing? Checkout this [introduction](/docs/tracing/overview)

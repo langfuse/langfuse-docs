@@ -4,7 +4,7 @@ description: Example cookbook for the LlamaIndex Langfuse integration.
 
 # Cookbook LlamaIndex Integration
 
-This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/docs/integrations/llama-index). It uses a very simple Index and Query.
+This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/docs/integrations/llama-index/get-started). It uses a very simple Index and Query.
 
 **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
 
@@ -12,19 +12,17 @@ This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse 
 
 Make sure you have both `llama-index` and `langfuse` installed.
 
-
 ```python
 %pip install llama-index langfuse --upgrade
 ```
 
 Initialize the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com).
 
-
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse.llama_index import LlamaIndexCallbackHandler
- 
+
 langfuse_callback_handler = LlamaIndexCallbackHandler(
     public_key="pk-lf-...",
     secret_key="sk-lf-...",
@@ -35,7 +33,6 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
 This example uses OpenAI for embeddings and chat completions.
 
-
 ```python
 import os
 
@@ -43,7 +40,6 @@ os.environ["OPENAI_API_KEY"] = ""
 ```
 
 ## Index
-
 
 ```python
 # Example context, thx ChatGPT
@@ -57,7 +53,6 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 """)
 ```
 
-
 ```python
 # Example index construction + LLM query
 from llama_index.core import VectorStoreIndex
@@ -67,13 +62,11 @@ index = VectorStoreIndex.from_documents([doc1,doc2])
 
 ## Query
 
-
 ```python
 # Query
 response = index.as_query_engine().query("What did he do growing up?")
 print(response)
 ```
-
 
 ```python
 # Chat
@@ -83,7 +76,6 @@ print(response)
 
 ## Explore traces in Langfuse
 
-
 ```python
 # As we want to immediately see result in Langfuse, we need to flush the callback handler
 langfuse_callback_handler.flush()
@@ -92,6 +84,7 @@ langfuse_callback_handler.flush()
 Done! ✨ You see traces of your index and query in your Langfuse project.
 
 Example traces (public links):
+
 1. [Index](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/5268a183-b47b-4797-8ba7-fcaff0e26438)
 2. [Query](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/d84d38b5-1dbc-47ce-bcad-893e1a39aefa)
 3. [Query (chat)](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/7101af0c-5716-448e-8a80-a02a04f70ccb)
@@ -99,7 +92,6 @@ Example traces (public links):
 Trace in Langfuse:
 
 ![Langfuse Traces](https://static.langfuse.com/llamaindex-langfuse-docs.gif)
-
 
 ## Interested in more advanced features?
 

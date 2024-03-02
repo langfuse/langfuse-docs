@@ -89,26 +89,17 @@ prompt.config
 
 #### Transform prompt into Langchain PromptTemplate
 
-Langfuse uses the mustache-notation for `{{variables}}`, Langchain uses single braces (`{variable}`). We need to transform the prompt to create the Langchain PromptTemplate.
+Use the utility method `.getLangchainPrompt()` to transform the Langfuse prompt into a string that can be used in Langchain.
 
-
-```typescript
-const langchainFormatPrompt = prompt.prompt.replace(/\{\{(.*?)\}\}/g, "{$1}")
-langchainFormatPrompt
-```
-
-
-
-
-    [32m"Tell me a joke about {topic}"[39m
-
-
+Context: Langfuse declares input variables in prompt templates using double brackets (`{{input variable}}`). Langchain uses single brackets for declaring input variables in PromptTemplates (`{input variable}`). The utility method `.getLangchainPrompt()` replaces the double brackets with single brackets.
 
 
 ```typescript
 import { PromptTemplate } from "npm:@langchain/core/prompts"
 
-const promptTemplate = PromptTemplate.fromTemplate(langchainFormatPrompt);
+const promptTemplate = PromptTemplate.fromTemplate(
+    prompt.getLangchainPrompt()
+  );
 ```
 
 #### Setup Langfuse Tracing for Langchain JS
@@ -217,7 +208,6 @@ const extractionFunctionSchema = {
 ```typescript
 import { ChatOpenAI } from "npm:@langchain/openai";
 import { JsonOutputFunctionsParser } from "npm:langchain/output_parsers";
-import { HumanMessage } from "npm:@langchain/core/messages";
 
 // Instantiate the parser
 const parser = new JsonOutputFunctionsParser();
@@ -241,6 +231,8 @@ const runnable = model
 
 
 ```typescript
+import { HumanMessage } from "npm:@langchain/core/messages";
+
 // Invoke the runnable with an input
 const result = await runnable.invoke(
     [new HumanMessage("What a beautiful day!")],
