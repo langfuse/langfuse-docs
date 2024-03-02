@@ -1,6 +1,8 @@
 ---
-description: Open source observability for LlamaIndex via the native integration. Automatically capture detailed traces and metrics for every request of your RAG application.
+description: Open source observability for LlamaIndex. Automatically capture detailed traces and metrics for every request of your RAG application.
 ---
+
+import { Callout } from "nextra-theme-docs";
 
 # 🦙 LlamaIndex Integration
 
@@ -10,7 +12,20 @@ description: Open source observability for LlamaIndex via the native integration
 
 Langfuse offers a simple integration for automatic capture of [traces](/docs/tracing/overview) and metrics generated in LlamaIndex applications. **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
 
-Currently only Python is supported by this integration. If you are interested in an integration with LlamaIndex.TS, add your upvote/comments [here](https://github.com/orgs/langfuse/discussions/1291).
+<Callout type="info" emoji="ℹ️">
+  Currently only Python is supported by this integration. If you are interested
+  in an integration with **LlamaIndex.TS**, add your upvote/comments to [this
+  issue](https://github.com/orgs/langfuse/discussions/1291).
+</Callout>
+
+import { CloudflareVideo } from "@/components/Video";
+
+<CloudflareVideo
+  videoId="590b7c143b13a0f4e40bd181175f1a00"
+  aspectRatio={16 / 9.86}
+  gifStyle
+/>
+<span>_Example LlamaIndex trace in Langfuse_</span>
 
 ## Add Langfuse to your LlamaIndex application
 
@@ -34,8 +49,6 @@ import GetStartedLlamaindexPythonEnv from "@/components-mdx/get-started-llamaind
   </Tab>
 </Tabs>
 
-import { Callout } from "nextra-theme-docs";
-
 <Callout type="info" emoji="✨">
   Done! Traces and metrics from your LlamaIndex application are now
   automatically tracked in Langfuse. If you construct a new index or query an
@@ -54,16 +67,6 @@ import { FileCode } from "lucide-react";
     icon={<FileCode />}
   />
 </Cards>
-
-Example LlamaIndex trace in Langfuse:
-
-import { CloudflareVideo } from "@/components/Video";
-
-<CloudflareVideo
-  videoId="590b7c143b13a0f4e40bd181175f1a00"
-  aspectRatio={16 / 9.86}
-  gifStyle
-/>
 
 ## Additional configuration
 
@@ -93,7 +96,7 @@ You can update trace parameters at any time to add additional context to a trace
 | `version`    | The specified version to trace [experiments](/docs/experimentation).      |
 | `release`    | The specified release to trace [experiments](/docs/experimentation).      |
 
-```python
+```python {11-15}
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse import langfuse
@@ -125,7 +128,7 @@ If you have an existing Langfuse trace or span object, you can set it as the roo
 
 This is useful when your **LlamaIndex executions are part of a larger application** and you want to link all traces and spans together. This can also be useful when you'd like to **group multiple LlamaIndex executions** to be part of the same trace or span.
 
-```python
+```python {14,17,22}
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse import Langfuse
