@@ -77,7 +77,7 @@ export default function Changelog({ className }: { className?: string }) {
         key="root"
         href="/changelog"
         className="relative flex gap-x-4 group"
-        role="listitem" // Added role for the link acting as a button
+        role="button" // Added role for the link acting as a button
         aria-label="Read the full changelog" // Added aria-label for the link
       >
         <div className="h-6 absolute left-0 top-0 flex w-6 justify-center">
