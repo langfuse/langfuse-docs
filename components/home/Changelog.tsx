@@ -42,7 +42,7 @@ export default function Changelog({ className }: { className?: string }) {
             <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-background">
               <div className="h-1.5 w-1.5 rounded-full bg-secondary ring-1 ring-primary/80 opacity-60 group-hover:opacity-100" />
             </div>
-            <p className="flex-auto py-0.5 text-sm leading-5 text-primary/60 opacity-80 group-hover:opacity-100">
+            <p className="flex-auto py-0.5 text-sm leading-5 text-primary/70 opacity-80 group-hover:opacity-100">
               <span className="font-medium text-primary">
                 {activityItem.title}
               </span>{" "}
@@ -51,7 +51,7 @@ export default function Changelog({ className }: { className?: string }) {
             {activityItem.date ? (
               <time
                 dateTime={activityItem.date.toISOString()}
-                className="flex-none py-0.5 text-sm leading-5 text-primary/60 opacity-80 group-hover:opacity-100"
+                className="flex-none py-0.5 text-sm leading-5 text-primary/70 opacity-80 group-hover:opacity-100"
               >
                 {formatDate(activityItem.date)}
               </time>
