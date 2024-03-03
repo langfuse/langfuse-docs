@@ -1,8 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import {
@@ -20,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Loader2, ThumbsDown, ThumbsUp } from "lucide-react";
 
 type Feedback = {
   timestamp: Date;
@@ -115,9 +114,9 @@ export default function FeedbackPreview() {
             onClick={() => handleFeedback("positive")}
           >
             {state === "loading-positive" ? (
-              <AiOutlineLoading3Quarters className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <FaThumbsUp />
+              <ThumbsUp size={16} />
             )}
           </Button>
           <Button
@@ -127,9 +126,9 @@ export default function FeedbackPreview() {
             onClick={() => handleFeedback("negative")}
           >
             {state === "loading-negative" ? (
-              <AiOutlineLoading3Quarters className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <FaThumbsDown />
+              <ThumbsDown size={16} />
             )}
           </Button>
         </div>
