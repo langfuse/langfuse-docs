@@ -13,11 +13,11 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
-import { BsDiscord } from "react-icons/bs";
 import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
 import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
+import IconDiscord from "./components/icons/discord";
 
 const footerNav = [
   {
@@ -64,7 +64,7 @@ const config: DocsThemeConfig = {
           aria-label="Langfuse Discord"
           rel="nofollow noreferrer"
         >
-          <BsDiscord size={24} />
+          <IconDiscord className="h-7 w-7" />
         </a>
 
         <a
