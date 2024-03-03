@@ -35,6 +35,23 @@ export function Logo() {
           height={20}
           className="block dark:hidden"
         />
+        <style jsx>{`
+          div {
+            padding: 0.5rem 0.5rem 0.5rem 0;
+            mask-image: linear-gradient(
+              60deg,
+              #bba0ff 25%,
+              rgba(187, 160, 255, 0.2) 50%,
+              #bba0ff 75%
+            );
+            mask-size: 400%;
+            mask-position: 0%;
+          }
+          div:hover {
+            mask-position: 100%;
+            transition: mask-position 1s ease, -webkit-mask-position 1s ease;
+          }
+        `}</style>
       </div>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
         <DropdownMenuTrigger />
