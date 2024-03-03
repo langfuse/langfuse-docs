@@ -28,19 +28,25 @@ export default function Changelog({ className }: { className?: string }) {
   return (
     <div
       className={cn("rounded border p-5 max-w-lg mx-5 sm:mx-auto", className)}
+      role="region" // Added role for the container
+      aria-labelledby="changelog-heading" // Added aria-labelledby to reference the heading
     >
       <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
-        <h3>Changelog</h3>
+        <h3 id="changelog-heading">Changelog</h3>{" "}
+        {/* Added id to the heading */}
       </div>
       <div
         role="list"
         className="space-y-6 max-h-52 lg:max-h-96 overflow-y-scroll"
+        aria-label="Recent changelog entries" // Added aria-label for the list
       >
         {changelog.map((activityItem) => (
           <Link
             href={activityItem.route}
             className="relative flex gap-x-4 group"
             key={activityItem.route}
+            role="listitem" // Added role for each list item
+            aria-label={`Changelog entry for ${activityItem.title}`} // Added aria-label for each list item
           >
             <div className="-bottom-6 absolute left-0 top-0 flex w-6 justify-center">
               <div className="w-px bg-secondary" />
@@ -59,6 +65,7 @@ export default function Changelog({ className }: { className?: string }) {
               <time
                 dateTime={activityItem.date.toISOString()}
                 className="flex-none py-0.5 text-sm leading-5 text-primary/70 opacity-80 group-hover:opacity-100"
+                aria-label={`Date: ${formatDate(activityItem.date)}`} // Added aria-label for the date
               >
                 {formatDate(activityItem.date)}
               </time>
@@ -70,6 +77,8 @@ export default function Changelog({ className }: { className?: string }) {
         key="root"
         href="/changelog"
         className="relative flex gap-x-4 group"
+        role="listitem" // Added role for the link acting as a button
+        aria-label="Read the full changelog" // Added aria-label for the link
       >
         <div className="h-6 absolute left-0 top-0 flex w-6 justify-center">
           <div className="w-px bg-secondary" />
