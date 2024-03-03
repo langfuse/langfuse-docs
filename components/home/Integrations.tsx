@@ -145,7 +145,7 @@ export default function Integrations() {
             >
               <Image
                 src={LlamaindexIcon}
-                alt="Llama-index"
+                alt="Llama-index Icon"
                 width={35}
                 height={35}
               />

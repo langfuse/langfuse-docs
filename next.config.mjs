@@ -36,6 +36,10 @@ const nextraConfig = withNextra({
       },
     ],
   },
+  i18n: {
+    locales: ["en"],
+    defaultLocale: "en",
+  },
   redirects: async () => [
     ...nonPermanentRedirects.map(([source, destination]) => ({
       source,
