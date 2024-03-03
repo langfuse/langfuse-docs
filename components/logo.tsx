@@ -1,14 +1,10 @@
 import Image from "next/image";
-import {
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "./ui/dropdown-menu";
-
 import { useState } from "react";
-import { Download, ExternalLink } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
+  ssr: false,
+});
 
 export function Logo() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,39 +32,7 @@ export function Logo() {
           className="block dark:hidden"
         />
       </div>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
-        <DropdownMenuTrigger />
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              window.open("/", "_blank");
-            }}
-          >
-            <ExternalLink size={14} className="mr-2" />
-            Open in new tab
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              window.open("/langfuse_logo.png", "_blank");
-            }}
-          >
-            <Download size={14} className="mr-2" />
-            Logo (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.preventDefault();
-              window.open("/langfuse_logo.svg", "_blank");
-            }}
-          >
-            <Download size={14} className="mr-2" />
-            Logo (svg)
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>
   );
 }
