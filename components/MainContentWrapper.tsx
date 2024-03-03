@@ -8,13 +8,13 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
 import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
+import IconDiscord from "./icons/discord";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -66,7 +66,7 @@ export const DocsSupport = () => {
         <Button variant="outline" size="sm" asChild>
           <a href="/discord" target="_blank">
             <span>Discord</span>
-            <RxDiscordLogo className="h-4 w-4 ml-3" />
+            <IconDiscord className="h-4 w-4 ml-3" />
           </a>
         </Button>
         <Button variant="outline" size="sm" onClick={() => openChat()}>

@@ -1,39 +1,24 @@
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-});
+import { useState } from "react";
 
 export function ProductUpdateSignup(props: {
   source?: string;
   className?: string;
   small?: boolean;
 }) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+
     const res = await fetch("/api/productUpdateSignup", {
       method: "POST",
       body: JSON.stringify({
-        ...values,
+        email,
         source: props.source ?? "Website signup",
       }),
       headers: {
@@ -41,54 +26,37 @@ export function ProductUpdateSignup(props: {
       },
     });
 
+    setIsSubmitting(false);
+
     if (!res.ok) {
       alert("Something went wrong. Please try again later.");
     } else {
       alert("Thanks for signing up!");
-      form.reset();
+      setEmail("");
     }
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className={cn("flex gap-y-2 w-full flex-row", props.className)}
+    <form
+      onSubmit={onSubmit}
+      className={cn("flex gap-y-2 w-full flex-row", props.className)}
+    >
+      <Input
+        placeholder="Enter your email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className={cn("rounded-r-none h-11 px-4 py-2", props.small && "h-9")}
+      />
+      <Button
+        type="submit"
+        variant="secondary"
+        className="rounded-l-none"
+        disabled={isSubmitting}
+        size={props.small ? "sm" : "lg"}
       >
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  placeholder="Enter your email"
-                  type="email"
-                  {...field}
-                  className={cn(
-                    "sm:rounded-r-none h-11 px-4 py-2",
-                    props.small && "h-9"
-                  )}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          variant="secondary"
-          className="sm:rounded-l-none"
-          disabled={form.formState.isSubmitting}
-          size={props.small ? "sm" : "lg"}
-        >
-          {form.formState.isSubmitting ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <>Get&nbsp;updates</>
-          )}
-        </Button>
-      </form>
-    </Form>
+        {isSubmitting ? <>Submitting&nbsp;...</> : <>Get&nbsp;updates</>}
+      </Button>
+    </form>
   );
 }
