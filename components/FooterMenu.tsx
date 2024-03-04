@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-const menuItems = [
+const menuItems: {
+  heading: string;
+  items: { name: string; href: string }[];
+}[] = [
   {
     heading: "Platform",
     items: [
@@ -102,6 +105,10 @@ const menuItems = [
     items: [
       { name: "Blog", href: "/blog" },
       { name: "Careers", href: "/careers" },
+      {
+        name: "About us",
+        href: "/about",
+      },
       { name: "Contact", href: "mailto:support@langfuse.com" },
       {
         name: "Schedule Demo",

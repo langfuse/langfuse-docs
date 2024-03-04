@@ -70,6 +70,7 @@ const nonPermanentRedirects = [
   ["/new-idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
   ["/gh-support", "https://github.com/orgs/langfuse/discussions/categories/support"],
+  ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
 
   // Redirect to overview pages
   ...[
