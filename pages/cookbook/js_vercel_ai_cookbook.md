@@ -1,5 +1,5 @@
 ---
-description: End-to-end example of the usage of Langfuse with the Vercel AI fromework in JS/TS.
+description: End-to-end example of the usage of Langfuse with the Vercel AI framework in JS/TS.
 ---
 
 # Cookbook: Vercel AI (JS/TS)
