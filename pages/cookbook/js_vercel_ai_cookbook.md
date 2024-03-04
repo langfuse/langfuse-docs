@@ -4,7 +4,7 @@ This is a cookbook with an end-to-end example on how to use Langfuse within the 
 
 ## Setup
 
-Initialize the Langfuse with your API keys from the project settings in the Langfuse UI and add them to your environment. As we will use OpenAI LLMs for this example, we also want to configure an OpenAI client.
+Initialize Langfuse with your API keys from the project settings in the Langfuse UI and add them to your environment. As we will use OpenAI LLMs for this example, we also want to configure an OpenAI client.
 
 
 ```typescript
@@ -12,13 +12,13 @@ import { Langfuse } from "npm:langfuse"
 import { Configuration, OpenAIApi } from "npm:openai-edge";
 
 const langfuse = new Langfuse({
-  publicKey: "pk-lf-9c2e6261-e9f6-4b82-ae8e-c1571b5853b0",
-  secretKey: "sk-lf-81268a9f-21df-477d-8604-d423bab5fc00",
+  publicKey: "",
+  secretKey: "",
   baseUrl: "https://cloud.langfuse.com",
 });
 
 const openAIconfig = new Configuration({
-  apiKey: "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",
+  apiKey: "",
 });
 const openai = new OpenAIApi(openAIconfig);
 ```
@@ -123,7 +123,6 @@ export default async function handler(req: Request, res: Response) {
             });
         },
         onCompletion: async (completion) => {
-            console.log("Test")
             generation.end({
                 output: completion,
                 level: completion.includes("I don't know how to help with that")
@@ -178,19 +177,30 @@ const data = await response.text();
 console.log(data);
 ```
 
-    Test
-    Love is a deep and profound feeling of affection and care for someone or something. It can manifest in many different forms, such as romantic love, familial love, or unconditional love. It is a powerful emotion that can bring joy, happiness, and connection to our lives.
 
+    Stack trace:
 
+    Error: Response error: {
 
-```typescript
-// invoke handler function
-const response = await handler(mockRequest);
-console.log(response.json())
-```
+        "error": {
 
-    Test
-    Promise { [36m<pending>[39m }
+            "message": "Incorrect API key provided: sk-LL0Cz***************************************gKDj. You can find your API key at https://platform.openai.com/account/api-keys.",
+
+            "type": "invalid_request_error",
+
+            "param": null,
+
+            "code": "invalid_api_key"
+
+        }
+
+    }
+
+    
+
+        at Object.start (file:///Users/Christophe/Library/Caches/deno/npm/registry.npmjs.org/ai/3.0.4/dist/index.mjs:291:30)
+
+        at eventLoopTick (ext:core/01_core.js:166:7)
 
 
 ## Explore the trace in the UI
