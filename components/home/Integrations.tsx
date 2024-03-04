@@ -6,12 +6,14 @@ import { forwardRef, useRef, type ReactNode } from "react";
 import { ArrowUpRightFromSquare, Code, MoreHorizontal } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
 import LangfuseIcon from "@/public/icon.svg";
 import LangchainIcon from "./img/langchain_icon.png";
 import Image from "next/image";
 import Link from "next/link";
+import IconPython from "../icons/python";
+import IconTypescript from "../icons/typescript";
+import IconOpenai from "../icons/openai";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -92,7 +94,7 @@ export default function Integrations() {
               title="Python SDK"
               href="/docs/sdk/python"
             >
-              <SiPython className="h-6 w-6" />
+              <IconPython className="h-9 w-9" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
@@ -101,7 +103,7 @@ export default function Integrations() {
               title="JS/TS SDK"
               href="/docs/sdk/typescript"
             >
-              <SiTypescript className="h-6 w-6" />
+              <IconTypescript className="h-7 w-7" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
@@ -110,7 +112,7 @@ export default function Integrations() {
               title="OpenAI SDK"
               href="/docs/integrations/openai/get-started"
             >
-              <SiOpenai className="h-6 w-6" />
+              <IconOpenai className="h-7 w-7" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
@@ -143,7 +145,7 @@ export default function Integrations() {
             >
               <Image
                 src={LlamaindexIcon}
-                alt="Llama-index"
+                alt="Llama-index Icon"
                 width={35}
                 height={35}
               />

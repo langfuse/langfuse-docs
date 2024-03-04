@@ -1,8 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
+import { z } from "zod";
 
 export const config = {
   runtime: "edge",
 };
+
+const emailSchema = z.string().email();
 
 export default async function handler(req: NextRequest) {
   if (req.method !== "POST") {
@@ -17,6 +20,17 @@ export default async function handler(req: NextRequest) {
 
   const body = await req.json();
   const { email, source } = body;
+
+  // Validate email using zod
+  if (!emailSchema.safeParse(email).success) {
+    return NextResponse.json(
+      { error: "Invalid email address" },
+      {
+        status: 400,
+        statusText: "Bad Request",
+      }
+    );
+  }
 
   try {
     const [slackResponse, loopsResponse] = await Promise.all([

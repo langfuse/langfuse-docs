@@ -8,6 +8,11 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
   <div className="mt-12 max-w-6xl mx-auto divide-y divide-primary/10">
     {(getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>)
       .slice(0, maxItems)
+      .sort(
+        (a, b) =>
+          new Date(b.frontMatter.date).getTime() -
+          new Date(a.frontMatter.date).getTime()
+      )
       .map((page, i) => (
         <div
           className="md:grid md:grid-cols-4 md:gap-5 py-16 transition-all"

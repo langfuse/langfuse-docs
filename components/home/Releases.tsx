@@ -1,7 +1,8 @@
 import Marquee from "@/components/magicui/marquee";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { SiPython, SiTypescript } from "react-icons/si";
+import IconTypescript from "../icons/typescript";
+import IconPython from "../icons/python";
 
 export type GithubRelease = {
   repo: string;
@@ -68,7 +69,7 @@ export const Releases = ({
             <ReleaseCard
               key={release.name}
               release={release}
-              icon={<SiTypescript className="h-5 w-5" />}
+              icon={<IconTypescript className="h-5 w-5" />}
             />
           ))}
         </Marquee>
@@ -77,7 +78,7 @@ export const Releases = ({
             <ReleaseCard
               key={release.name}
               release={release}
-              icon={<SiPython className="h-5 w-5" />}
+              icon={<IconPython className="h-5 w-5" />}
             />
           ))}
         </Marquee>
