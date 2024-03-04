@@ -36,10 +36,6 @@ const nextraConfig = withNextra({
       },
     ],
   },
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
   redirects: async () => [
     ...nonPermanentRedirects.map(([source, destination]) => ({
       source,
@@ -70,6 +66,7 @@ const nonPermanentRedirects = [
   ["/new-idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
   ["/gh-support", "https://github.com/orgs/langfuse/discussions/categories/support"],
+  ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
 
   // Redirect to overview pages
   ...[
