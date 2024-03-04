@@ -46,11 +46,11 @@ On a daily schedule Langfuse batches aggregated events and metrics to your PostH
 
 Matching of metadata helps to join the data from Langfuse with the data from PostHog:
 
-| Langfuse                                   | PostHog        | Notes                                                                     |
-| ------------------------------------------ | -------------- | ------------------------------------------------------------------------- |
-| `user_id`                                  | `$distinct_id` |                                                                           |
-| `trace.timestamp`, `generation.started_at` | `timestamp`    |                                                                           |
-| `trace.metadata.$posthog_session_id`       | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
+| Langfuse                                                      | PostHog        | Notes                                                                     |
+| ------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------- |
+| `user_id`                                                     | `$distinct_id` |                                                                           |
+| `trace.timestamp`, `generation.started_at`, `score.timestamp` | `timestamp`    |                                                                           |
+| `trace.metadata.$posthog_session_id`                          | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
 
 ### Events
 
