@@ -27,16 +27,28 @@ export const SidebarChecker = () => {
   return (<></>);
 }
 
+
+export const ThemeChecker = () => {
+  useEffect(() => {
+    let html = document.querySelector('html');
+    html.className = 'dark';
+  }, [])
+  return (<></>);
+}
+
 export const MainContentWrapper = (props) => {
   const [visible, setVisible] = useState(true);
   const router = useRouter();
   const params = useSearchParams();
   const sidebarVisible = params.get('sidebarVisible');
   const feedbackVisible = params.get('feedbackVisible');
+  const theme = params.get('theme');
+
 
   return (
     <>
       {sidebarVisible === 'false' ? <SidebarChecker /> : ''}
+      {theme === 'dark' ? <ThemeChecker /> : ''}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
