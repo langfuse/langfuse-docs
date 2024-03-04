@@ -28,10 +28,20 @@ export const SidebarChecker = () => {
 }
 
 
-export const ThemeChecker = () => {
+export const ThemeDark = () => {
   useEffect(() => {
     let html = document.querySelector('html');
     html.className = 'dark';
+  }, [])
+  return (<></>);
+}
+
+export const ThemeLight= () => {
+  useEffect(() => {
+    let elements = document.querySelectorAll('.dark');
+    elements.forEach(function(elem) {
+      elem.classList.remove('dark');
+    })
   }, [])
   return (<></>);
 }
@@ -48,7 +58,8 @@ export const MainContentWrapper = (props) => {
   return (
     <>
       {sidebarVisible === 'false' ? <SidebarChecker /> : ''}
-      {theme === 'dark' ? <ThemeChecker /> : ''}
+      {theme === 'dark' ? <ThemeDark /> : ''}
+      {theme === 'light' ? <ThemeLight /> : ''}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
