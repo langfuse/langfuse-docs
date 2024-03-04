@@ -177,32 +177,9 @@ const data = await response.text();
 console.log(data);
 ```
 
-
-    Stack trace:
-
-    Error: Response error: {
-
-        "error": {
-
-            "message": "Incorrect API key provided: sk-LL0Cz***************************************gKDj. You can find your API key at https://platform.openai.com/account/api-keys.",
-
-            "type": "invalid_request_error",
-
-            "param": null,
-
-            "code": "invalid_api_key"
-
-        }
-
-    }
-
-    
-
-        at Object.start (file:///Users/Christophe/Library/Caches/deno/npm/registry.npmjs.org/ai/3.0.4/dist/index.mjs:291:30)
-
-        at eventLoopTick (ext:core/01_core.js:166:7)
+    Love is a deep feeling of affection and care towards someone or something. It can manifest in many different forms such as romantic love, familial love, or love for friends. Love often involves feelings of warmth, compassion, and a desire to see the other person happy. It's a beautiful and complex emotion that can bring joy and fulfillment to our lives.
 
 
 ## Explore the trace in the UI
 
-https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/e5602889-1a77-462e-a5f5-7f7678177207
+https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/5cabfef1-54a0-4f52-a0ea-cba0c877a4e4
