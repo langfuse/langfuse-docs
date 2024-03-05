@@ -11,10 +11,40 @@ import { CloudflareVideo } from "@/components/Video";
 
 <ChangelogHeader />
 
-## Use >20 evaluators through Langfuse &lt;-> Uptrain integration
+## How-to
 
-You can easily evaluate existing traces in Langfuse by loading them into a notebook, running UpTrain evaluators on them and writing the scores back to your data in Langfuse. You can find the complete list of UpTrain evals [here](https://github.com/uptrain-ai/uptrain?tab=readme-ov-file#pre-built-evaluations-we-offer-).
+<Steps>
 
-**Get Started:** We have set up [a cookbook](https://langfuse.com/cookbook/evaluation_with_uptrain) which makes evaluating your first traces happen in a jiffy.
+### Trace your application with Langfuse
 
-**Sneak peak**: We are currently working on an evaluation service to automatically score all incoming observations by running custom evaluation templates. Ping us if you want to be among the first to try it: early-access@langfuse.com
+Use any Langfuse [integration](/docs/integrations).
+
+### Pull (a sample) via our Python SDK
+
+Define which traces/LLM-calls you want to evaluate and pull them via our Python SDK.
+
+### Run Uptrain OSS evals
+
+You can find the complete list of UpTrain evals [here](https://github.com/uptrain-ai/uptrain?tab=readme-ov-file#pre-built-evaluations-we-offer-).
+
+### Log scores to Langfuse
+
+Use Langfuse [Scores](/docs/scores) to track the eval results in Langfuse.
+
+</Steps>
+
+We have set up an end-to-end cookbook which makes evaluating your traces with UpTrain happen in a jiffy:
+
+import { FileCode } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Uptrain + Langfuse Coookbook"
+    href="/cookbook/evaluation_with_uptrain"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## Sneak peak
+
+We are currently working on an evaluation service to automatically score all incoming observations by running custom evaluation templates. Ping us if you want to be among the first to try it: early-access@langfuse.com
