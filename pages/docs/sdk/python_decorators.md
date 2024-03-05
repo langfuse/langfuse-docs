@@ -10,7 +10,7 @@ The Langfuse Python SDK uses decorators for you to effortlessly integrate observ
 
 If you use [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index) or other popular frameworks to build your LLM app, check out our [integrations](/docs/integrations) for tailored solutions.
 
-For a detailed API reference, see our [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator).
+For a detailed API reference, see our [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators).
 
 Here's a simple example of our decorators-based Python SDK:
 
@@ -117,7 +117,7 @@ This will be the resulting hierarchy from the above executions:
 
 Enhancing the detail and relevance of your observability data in Langfuse is straightforward. By leveraging the `langfuse_context.update_current_observation` and `langfuse_context.update_current_trace` methods, you can enrich the context of your observability data directly within the scope of the function being observed.
 
-When adding parameters, consider the specific observation type that is in context. The [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse#LangfuseDecorator.update_current_observation) provides a comprehensive list of the parameters you can set per observation type. Trace parameters can be updated from any point within the nested function hierarchy.
+When adding parameters, consider the specific observation type that is in context. The [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators#LangfuseDecorator.update_current_observation) provides a comprehensive list of the parameters you can set per observation type. Trace parameters can be updated from any point within the nested function hierarchy.
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
@@ -303,4 +303,4 @@ If no release is set, this defaults to [common system environment names](https:/
 
 ## API reference
 
-See the [Python SDK API reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator) for more details.
+See the [Python SDK API reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators) for more details.
