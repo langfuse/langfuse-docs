@@ -29,6 +29,7 @@ def function_to_trace():
     print("Hello, from the parent trace!")
     span_inside_trace()
 
+function_to_trace()
 
 langfuse_context.flush()
 ```
