@@ -42,9 +42,9 @@ const openai = new OpenAIApi(openAIconfig);
 
 ### Cookbook-only: Add prompt to Langfuse
 
-We'll also use [Langfuse Prompt Management](https://langfuse.com/docs/prompts) in this example. To be able to pull a production prompt from Langfuse, we'll quickly push once to Langfuse.
+We'll also use [Langfuse Prompt Management](https://langfuse.com/docs/prompts) in this example. To be able to subsequently pull a production prompt from Langfuse, we'll quickly push one to Langfuse.
 
-If you copy/paste this example, you'd probably want to create the prompt one-off or via the Langfuse UI. You can also just hardcode your prompts and not use Langfuse Prompt Management.
+If you copy and paste this example, consider creating the prompt one-off or via the Langfuse UI before moving to prod. Alternatively, you can hardcode your prompts and avoid using Langfuse Prompt Management.
 
 
 ```typescript
@@ -55,33 +55,9 @@ await langfuse.createPrompt({
 })
 ```
 
-
-
-
-    LangfusePromptClient {
-      promptResponse: {
-        id: [32m"cltdlm5nm007uu4sihsviflsf"[39m,
-        createdAt: [32m"2024-03-04T23:54:59.746Z"[39m,
-        updatedAt: [32m"2024-03-04T23:54:59.746Z"[39m,
-        projectId: [32m"cloramnkj0002jz088vzn1ja4"[39m,
-        createdBy: [32m"API"[39m,
-        prompt: [32m"You are an extremely helpful assistant. Please assume that the person asking you questions needs you"[39m... 41 more characters,
-        name: [32m"qa-prompt"[39m,
-        version: [33m5[39m,
-        isActive: [33mtrue[39m,
-        config: {}
-      },
-      name: [32m"qa-prompt"[39m,
-      version: [33m5[39m,
-      prompt: [32m"You are an extremely helpful assistant. Please assume that the person asking you questions needs you"[39m... 41 more characters,
-      config: {}
-    }
-
-
-
 ### API handler
 
-The `ai` package provide a number of wrappers.
+The `ai` package provides a number of interfaces and abstractions.
 
 In our example, we will use `OpenAIStream` to efficiently process and stream responses from OpenAI's models, and `StreamingTextResponse` to seamlessly deliver these AI-generated responses as HTTP streams to users.
 
@@ -97,10 +73,7 @@ Include the following if you deploy via Vercel:
 export const runtime = 'edge';
 ```
 
-In the following, we use a multitude of Langfuse features and went a bit wild to highlight how Langfuse can help debug and track various pieces of such an API handler:
-- Create a trace ([Tracing introduction](https://langfuse.com/docs/tracing), [Langfuse TS SDK](https://langfuse.com/docs/sdk/typescript)
-- Fetch prompt from [Langfuse Prompt Management](https://langfuse.com/docs/prompts)
-- 
+Main API handler.
 
 
 ```typescript
@@ -232,7 +205,7 @@ export default async function handler(req: Request, res: Response) {
 
 ## Our Frontend
 
-If you use React, you'll probably want to use the `ai` package React components for state management and to consume the streamed response. Learn more here: https://sdk.vercel.ai/docs/getting-started#wire-up-a-ui
+If you use React, you'll probably want to use the `ai` package's React hooks for state management and to consume the streamed response. Learn more here: https://sdk.vercel.ai/docs/getting-started#wire-up-a-ui
 
 
 To fit this into a notebook, we'll just call the API route directly.
@@ -277,8 +250,8 @@ console.log(response.headers.get("X-Langfuse-Trace-Url"))
 
 ![Trace in Langfuse UI](https://langfuse.com/images/cookbok/js_tracing_example_vercel_ai_sdk_trace.png)
 
-PS: As I run this notebook a couple of times while putting together this notebook, you can find a session replay of me asking the same question `What is love?` in this [session replay view](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/sessions/testSession) (I made it public).
+PS: As I ran this notebook a couple of times while putting together this notebook, you can find a session replay of me asking the same question `What is love?` in this [session replay view](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/sessions/testSession) (I made it public).
 
 ## Production Demo
 
-If you are curious, we use the Vercel AI SDK to power the public demo ([Docs Q&A Chatbot](https://langfuse.com/demo)). It's open source, see the full backend route here: [`qa-chatbot.ts`](https://github.com/langfuse/langfuse-docs/blob/main/pages/api/qa-chatbot.ts).
+We also use the Vercel AI SDK to power the public demo ([Docs Q&A Chatbot](https://langfuse.com/demo)). It's open source, see the full backend route here: [`qa-chatbot.ts`](https://github.com/langfuse/langfuse-docs/blob/main/pages/api/qa-chatbot.ts).
