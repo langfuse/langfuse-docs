@@ -16,21 +16,21 @@ Here's a simple example of our decorators-based Python SDK:
 
 
 ```python
-from langfuse.decorators import langfuse
+from langfuse.decorators import langfuse_context, observe
 
 
-@langfuse.trace()
+@observe()
 def span_inside_trace():
     print("Hello, from a span inside a trace!")
 
 
-@langfuse.trace()
+@observe()
 def function_to_trace():
     print("Hello, from the parent trace!")
     span_inside_trace()
 
 
-langfuse.flush()
+langfuse_context.flush()
 ```
 
 Voilà! ✨ Langfuse will generate a trace with a nested span for you.
@@ -69,34 +69,34 @@ os.environ["LANGFUSE_HOST"] = (
 
 Langfuse simplifies observability in LLM-powered applications by organizing activities into traces. Each trace contains observations: spans for nested activities, events for distinct actions, or generations for LLM interactions. This setup mirrors your app's execution flow, offering insights into performance and behavior. See our [Tracing documentation](/docs/tracing/overview) for more details on Langfuse's telemetry model.
 
-Langfuse simplifies application tracing with the `@langfuse.trace()` decorator, automating the tracking of execution times and the nesting hierarchy of calls. This approach allows you to seamlessly integrate observability by simply decorating the functions you'd like to trace, and focusing on feature development while Langfuse handles the intricacies of contexts and nested calls.
+Langfuse simplifies application tracing with the `@observe()` decorator, automating the tracking of execution times and the nesting hierarchy of calls. This approach allows you to seamlessly integrate observability by simply decorating the functions you'd like to trace, and focusing on feature development while Langfuse handles the intricacies of contexts and nested calls.
 
 ### Capture traces
 
 In Langfuse, traces serve as the foundational element, acting as containers for various observations within your application. Traces are capable of representing comprehensive execution flows, such as those found in chained LLM applications, backend endpoint processes, or any complex sequence involving multiple observations. This hierarchical structure allows for a detailed and organized view of application performance and behavior.
 
-Utilizing the `@langfuse.trace()` decorator provided by the Langfuse Python SDK, you can designate the top-level function in a sequence as a trace. Subsequent nested function calls decorated with `@langfuse.trace()` are automatically recognized as either spans, which are subdivisions of a trace capturing specific operations, or generations, which are specialized observations for LLM interactions.
+Utilizing the `@observe()` decorator provided by the Langfuse Python SDK, you can designate the top-level function in a sequence as a trace. Subsequent nested function calls decorated with `@observe()` are automatically recognized as either spans, which are subdivisions of a trace capturing specific operations, or generations, which are specialized observations for LLM interactions.
 
 Here's a concise example demonstrating how to employ the Langfuse decorator to capture traces, spans, and generations, and how to finalize the trace by flushing it to the Langfuse platform for analysis:
 
 
 ```python
-from langfuse.decorators import langfuse
+from langfuse.decorators import langfuse_context, observe
 
 
-@langfuse.trace(as_type="generation")
+@observe(as_type="generation")
 def deeply_nested_llm_call():
     # Logic for a deeply nested LLM call
     pass
 
 
-@langfuse.trace()
+@observe()
 def nested_span():
     # This creates a new span within the trace
     deeply_nested_llm_call()
 
 
-@langfuse.trace()
+@observe()
 def main():
     # The entry point creating a new trace
     nested_span()
@@ -106,7 +106,7 @@ def main():
 main()
 
 # Flush the collected data to the Langfuse platform
-langfuse.flush()
+langfuse_context.flush()
 ```
 
 This will be the resulting hierarchy from the above executions:
@@ -115,7 +115,7 @@ This will be the resulting hierarchy from the above executions:
 
 ### Enrich elements
 
-Enhancing the detail and relevance of your observability data in Langfuse is straightforward. By leveraging the `langfuse.update_current_observation` and `langfuse.update_current_trace` methods, you can enrich the context of your observability data directly within the scope of the function being observed.
+Enhancing the detail and relevance of your observability data in Langfuse is straightforward. By leveraging the `langfuse_context.update_current_observation` and `langfuse_context.update_current_trace` methods, you can enrich the context of your observability data directly within the scope of the function being observed.
 
 When adding parameters, consider the specific observation type that is in context. The [Python SDK API Reference](https://f5cb2b86.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator.update_current_observation) provides a comprehensive list of the parameters you can set per observation type. Trace parameters can be updated from any point within the nested function hierarchy.
 
@@ -123,17 +123,17 @@ Below is an example demonstrating how to enrich traces and observations with cus
 
 
 ```python
-from langfuse.decorators import langfuse
+from langfuse.decorators import langfuse_context, observe
 
 
-@langfuse.trace(as_type="generation")
+@observe(as_type="generation")
 def deeply_nested_llm_call():
     # Enrich the current observation with a custom name, input, and output
-    langfuse.update_current_observation(
+    langfuse_context.update_current_observation(
         name="Deeply nested LLM call", input="Ping?", output="Pong!"
     )
     # Set the parent trace's name from within a nested observation
-    langfuse.update_current_trace(
+    langfuse_context.update_current_trace(
         name="Trace name set from deeply_nested_llm_call",
         session_id="1234",
         user_id="5678",
@@ -141,14 +141,14 @@ def deeply_nested_llm_call():
     )
 
 
-@langfuse.trace()
+@observe()
 def nested_span():
     # Update the current span with a custom name and level
-    langfuse.update_current_observation(name="Nested Span", level="WARNING")
+    langfuse_context.update_current_observation(name="Nested Span", level="WARNING")
     deeply_nested_llm_call()
 
 
-@langfuse.trace()
+@observe()
 def main():
     nested_span()
 
@@ -157,7 +157,7 @@ def main():
 main()
 
 # Flush the enriched data to the Langfuse platform for analysis
-langfuse.flush()
+langfuse_context.flush()
 ```
 
 On the Langfuse platform the trace now shows with the updated name from the `deeply_nested_llm_call`, and the observations will be enriched with the appropriate data points.
@@ -168,7 +168,7 @@ On the Langfuse platform the trace now shows with the updated name from the `dee
 
 The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments such as AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
 
-To avoid this, ensure that the `langfuse.flush()` method is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
+To avoid this, ensure that the `langfuse_context.flush()` method is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
 
 ## Additional features
 
@@ -188,19 +188,19 @@ If the score relates to a specific step of the trace, specify the `observation_i
 
 
 ```python
-from langfuse.decorators import langfuse
+from langfuse.decorators import langfuse_context, observe
 
 
 # This will create a new span under the trace
-@langfuse.trace()
+@observe()
 def nested_span():
-    langfuse.score_current_observation(
+    langfuse_context.score_current_observation(
         name="feedback-on-span",
         value=1,
         comment="I like how personalized the response is",
     )
 
-    langfuse.score_current_trace(
+    langfuse_context.score_current_trace(
         name="feedback-on-trace",
         value=1,
         comment="I like how personalized the response is",
@@ -208,7 +208,7 @@ def nested_span():
 
 
 # This will create a new trace
-@langfuse.trace()
+@observe()
 def main():
     nested_span()
 
@@ -216,7 +216,7 @@ def main():
 main()
 
 # Flush the trace to send it to the Langfuse platform
-langfuse.flush()
+langfuse_context.flush()
 ```
 
 ### Custom IDs
@@ -225,10 +225,10 @@ If you have your own unique ID representing an execution (messageId, traceId, co
 
 
 ```python
-from langfuse.decorators import langfuse
+from langfuse.decorators import langfuse_context, observe
 
 
-@langfuse.trace()
+@observe()
 def process_user_request(user_id, request_data, **kwargs):
     # Function logic here
     pass
@@ -243,6 +243,7 @@ def main():
     process_user_request(
         user_id=user_id,
         request_data=request_data,
+        # Pass the custom observation ID to the function
         langfuse_observation_id=custom_observation_id,
     )
 
@@ -250,7 +251,7 @@ def main():
 main()
 
 # Flush the trace to send it to the Langfuse platform
-langfuse.flush()
+langfuse_context.flush()
 ```
 
 ### Debug mode
@@ -258,7 +259,7 @@ Enable debug mode to get verbose logs. Set the debug mode via the environment va
 
 ### Authentication check
 
-Use `langfuse.auth_check()` to verify that your host and API credentials are valid.
+Use `langfuse_context.auth_check()` to verify that your host and API credentials are valid.
 
 ### Releases and versions
 
