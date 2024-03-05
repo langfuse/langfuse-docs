@@ -10,7 +10,7 @@ The Langfuse Python SDK uses decorators for you to effortlessly integrate observ
 
 If you use [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index) or other popular frameworks to build your LLM app, check out our [integrations](/docs/integrations) for tailored solutions.
 
-For a detailed API reference, see our [Python SDK API Reference](https://f5cb2b86.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator).
+For a detailed API reference, see our [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator).
 
 Here's a simple example of our decorators-based Python SDK:
 
@@ -111,13 +111,13 @@ langfuse_context.flush()
 
 This will be the resulting hierarchy from the above executions:
 
-![python_decorators_nesting](/public/images/cookbook/python_decorators_nesting.png)
+![python_decorators_nesting](/images/cookbook/python_decorators_nesting.png)
 
 ### Enrich elements
 
 Enhancing the detail and relevance of your observability data in Langfuse is straightforward. By leveraging the `langfuse_context.update_current_observation` and `langfuse_context.update_current_trace` methods, you can enrich the context of your observability data directly within the scope of the function being observed.
 
-When adding parameters, consider the specific observation type that is in context. The [Python SDK API Reference](https://f5cb2b86.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator.update_current_observation) provides a comprehensive list of the parameters you can set per observation type. Trace parameters can be updated from any point within the nested function hierarchy.
+When adding parameters, consider the specific observation type that is in context. The [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse#LangfuseDecorator.update_current_observation) provides a comprehensive list of the parameters you can set per observation type. Trace parameters can be updated from any point within the nested function hierarchy.
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
@@ -138,6 +138,7 @@ def deeply_nested_llm_call():
         session_id="1234",
         user_id="5678",
         tags=["tag1", "tag2"],
+        public=True
     )
 
 
@@ -162,7 +163,7 @@ langfuse_context.flush()
 
 On the Langfuse platform the trace now shows with the updated name from the `deeply_nested_llm_call`, and the observations will be enriched with the appropriate data points.
 
-![python_decorators_enriched-nesting](/public/images/cookbook/python_decorators_enriched-nesting.png)
+![python_decorators_enriched-nesting](/images/cookbook/python_decorators_enriched-nesting.png)
 
 ### Flush observations
 
@@ -172,19 +173,18 @@ To avoid this, ensure that the `langfuse_context.flush()` method is called befor
 
 ## Additional features
 
-### [WIP - not ready for review]Scoring
+### Scoring
 
 [Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. They can created manually via the Langfuse UI or via the SDKs.
 
-If the score relates to a specific step of the trace, specify the `observation_id`.
-
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
-| trace_id | string | no | The id of the trace to which the score should be attached. Automatically set if you use `{trace,generation,span,event}.score({})`
-| observation_id | string | yes | The id of the observation to which the score should be attached. Automatically set if you use `{generation,span,event}.score({})`
 | name | string | no | Identifier of the score.
 | value | number | no | The value of the score. Can be any number, often standardized to 0..1
 | comment | string | yes | Additional context/explanation of the score.
+
+
+You can attach a score to the current observation context by calling `langfuse_context.score_current_observation`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse_context.score_current_trace`:
 
 
 ```python
@@ -254,6 +254,40 @@ main()
 langfuse_context.flush()
 ```
 
+Alternatively you may also score a trace or observation from outside its context, since the `trace_id` or the `trace_id` in combination with the `observation_id` are sufficient to attach a score even from outside the function context. See the [Python SDK docs](https://python.reference.langfuse.com/langfuse/client#Langfuse.score) on the score method on the Langfuse client object.
+
+
+```python
+from langfuse import Langfuse
+from langfuse.decorators import langfuse_context, observe
+
+# Initialize the Langfuse client
+langfuse_client = Langfuse()
+
+
+# Create a new trace
+@observe()
+def main():
+    trace_id = langfuse_context.get_current_trace_id()
+
+    return "function_result", trace_id
+
+
+# Flush the trace to send it to the Langfuse platform
+langfuse_context.flush()
+
+# Execute the main function to generate a trace
+_, trace_id = main()
+
+# Score the trace from outside the trace context
+langfuse_client.score(
+    trace_id=trace_id,
+    name="user-explicit-feedback",
+    value=1,
+    comment="I like how personalized the response is"
+)
+```
+
 ### Debug mode
 Enable debug mode to get verbose logs. Set the debug mode via the environment variable `LANGFUSE_DEBUG=True`.
 
@@ -269,4 +303,4 @@ If no release is set, this defaults to [common system environment names](https:/
 
 ## API reference
 
-See the [Python SDK API reference](https://f5cb2b86.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator) for more details.
+See the [Python SDK API reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators/langfuse#LangfuseDecorator) for more details.
