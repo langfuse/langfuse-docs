@@ -97,6 +97,8 @@ const nonPermanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
   ["/docs/sdk", "/docs/sdk/overview"],
+  ["/docs/sdk/typescript/guide", "/docs/sdk/typescript/guide"],
+  ["/docs/sdk/typescript/guide-web", "/docs/sdk/typescript/guide-web"],
   ["/docs/scores/evals", "/docs/scores/model-based-evals"],
   ["/docs/scores/model-based-evals/overview", "/docs/scores/model-based-evals"],
   ["/docs/scores/model-based-evals/ragas", "/cookbook/evaluation_of_rag_with_ragas"],

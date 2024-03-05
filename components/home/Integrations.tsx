@@ -101,7 +101,7 @@ export default function Integrations() {
             <Circle
               ref={inTypescriptRef}
               title="JS/TS SDK"
-              href="/docs/sdk/typescript"
+              href="/docs/sdk/typescript/guide"
             >
               <IconTypescript className="h-7 w-7" />
             </Circle>
