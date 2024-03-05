@@ -13,7 +13,7 @@ Vercel AI SDK capabilities (from the docs)
 > - Node.js, Serverless, and Edge Runtime support
 > - Callbacks for saving completed streaming responses to a database (in the same request)
 
-In this end-to-end example, we use the callbacks to log all LLM calls to Langfuse via the [Langfuse TS SDK](https://langfuse.com/docs/sdk/typescript). It also supports Node.js, Serverless, and Edge Runtimes and intgrates well with Langchain JS ([integration docs](https://langfuse.com/docs/integrations/langchain)).
+In this end-to-end example, we use the [stream-lifecycle callbacks](https://sdk.vercel.ai/docs/guides/providers/openai#guide-save-to-database-after-completion) to log all LLM calls to Langfuse via the [Langfuse TS SDK](https://langfuse.com/docs/sdk/typescript). It also supports Node.js, Serverless, and Edge Runtimes and intgrates well with Langchain JS ([integration docs](https://langfuse.com/docs/integrations/langchain)).
 
 Hint: this is a deno-notebook and uses deno imports.
 
