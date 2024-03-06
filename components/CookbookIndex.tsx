@@ -5,7 +5,11 @@ import { FileCode } from "lucide-react";
 
 export const CookbookIndex = () => (
   <Cards num={2}>
-    {(getPagesUnderRoute("/cookbook") as Array<Page & { frontMatter: any }>)
+    {(
+      getPagesUnderRoute("/guides/cookbook") as Array<
+        Page & { frontMatter: any }
+      >
+    )
       .filter((page) => page.route !== "/cookbook")
       .map((page, i) => (
         <Card
