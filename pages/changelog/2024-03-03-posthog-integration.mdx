@@ -52,6 +52,12 @@ Matching of metadata helps to join the data from Langfuse with the data from Pos
 | `trace.timestamp`, `generation.started_at`, `score.timestamp` | `timestamp`    |                                                                           |
 | `trace.metadata.$posthog_session_id`                          | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
 
+### User properties
+
+We send the following user properties via `'$set'`:
+
+- `langfuse_user_url`: Deeplink to the [user profile](/docs/tracing/users) in Langfuse.
+
 ### Events
 
 You can decide which events you want to send to PostHog. By default, we send all of the following events:
