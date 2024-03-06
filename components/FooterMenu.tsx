@@ -38,7 +38,7 @@ const menuItems: {
       },
       {
         name: "JS/TS SDK",
-        href: "/docs/sdk/typescript",
+        href: "/docs/sdk/typescript/guide",
       },
       {
         name: "OpenAI SDK",

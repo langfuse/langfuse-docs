@@ -16,7 +16,7 @@ for mapping in mappings:
     if mapping['docsPath'] is not None:
         destinations.append(mapping['docsPath'] + ".md")
     # also publish all md files to pages/cookbook/
-    destinations.append('cookbook/' + md_filename)
+    destinations.append('guides/cookbook/' + md_filename)
 
     for destination in destinations:
         full_destination = "pages/" + destination

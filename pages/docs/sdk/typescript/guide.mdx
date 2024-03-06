@@ -41,7 +41,7 @@ Supported runtimes:
 - [x] Edge: Vercel, Cloudflare, ...
 - [x] Deno
 
-Want to capture data (e.g. user feedback) from the browser? Use [LangfuseWeb](/docs/sdk/typescript-web)
+Want to capture data (e.g. user feedback) from the browser? Use [LangfuseWeb](/docs/sdk/typescript/guide-web)
 
 ## Installation
 
@@ -113,6 +113,18 @@ Optional constructor parameters:
   call `langfuse.shutdownAsync()` at the end to await all pending requests.
   ([Learn more](#lambda))
 </Callout>
+
+## End-to-end example
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="JS SDK & Vercel AI SDK"
+    href="/docs/sdk/typescript/example-vercel-ai"
+    icon={<FileCode />}
+  />
+</Cards>
 
 ## Making calls
 
@@ -415,7 +427,7 @@ Scores are used to evaluate executions/traces. They are attached to a single [tr
 Links
 
 - Learn more about [Scores in Langfuse](/docs/scores)
-- Report scores from the browser (e.g. user feedback) using the [Web SDK](/docs/sdk/typescript-web)
+- Report scores from the browser (e.g. user feedback) using the [Web SDK](/docs/sdk/typescript/guide-web)
 
 ```typescript
 await langfuse.score({
