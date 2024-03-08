@@ -168,14 +168,6 @@ const sections = [
           Team: "Custom regions available",
         },
       },
-      {
-        name: "Dedicated managed instance",
-        tiers: {
-          Hobby: false,
-          Pro: false,
-          Team: "Talk to us",
-        },
-      },
     ],
   },
   {
