@@ -1,0 +1,90 @@
+---
+title: "Langfuse integrates with leading LLM framework 🦙Llama Index"
+date: 2024/03/06
+description: Context retrieval is a mainstay in LLM engineering. This latest integration brings Langfuse's observability to Llama Index users. It allows them to easily trace, monitor and analyze their RAG applications. 
+tag: announcement
+ogImage: /images/changelog/2024-02-27-llama-index-integration.png
+author: Clemens
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse integrates with leading LLM framework 🦙Llama Index"
+  description="Context retrieval is a mainstay in LLM engineering. This latest integration brings Langfuse’s observability to Llama Index users. It allows them to easily trace, monitor and analyze their RAG applications."
+  authors={["clemensrawert", "hassiebpakzad"]}
+/>
+
+
+
+We’re launching our latest major **integration with the Llama Index framework**. Llama Index is a darling of our community. This integration has been our users’ [most requested feature](https://github.com/orgs/langfuse/discussions/828) for a while. We're thrilled to publicly release the integration after beta testing it with select Langfuse users over the past weeks. 
+
+<Frame fullWidth className="mb-12">
+  ![Langfuse and Llama Index](/images/changelog/2024-02-27-llama-index-integration.png)
+</Frame>
+
+
+## 🦙 Llama Index, RAG and 🪢 Langfuse
+
+[Llama Index](https://www.llamaindex.ai/) is a framework for augmenting LLMs with private data. The framework is extremely popular with developers (it is approaching [30k stars on GitHub](https://github.com/run-llama/llama_index)) and is used across the space, from hobbyists to enterprises. 
+
+LLMs are trained on huge datasets. Popular models such as OpenAI's GPT, Anthropic's Claude or Mistral are general purpose in nature. That is, they are not trained for a specific use case or context but to provide answers to _any_ input that is provided to them. Retrieval-augmented-generation (RAG) tries to steer Large Language Models towards a _specific_ context again. By allowing the addition of private data sources and domain specific context to LLM apps, they can [significantly enhance the quality of an LLM’s response](https://www.pinecone.io/blog/rag-study/).
+
+**RAG has proven to be a pragmatic and efficient way of working with LLMs**. It is specifically suited to builders on the application layer, trying to tackle problems in a specific domain or context. It is already a much used technique in Langfuse user’s projects and we’re thrilled to more natively support its most popular framework.
+
+Llama Index completes our roster of major integrations next to existing integrations with [OpenAI](https://langfuse.com/docs/integrations/openai/get-started) and LLM framework [LangChain](https://langfuse.com/docs/integrations/langchain/tracing) (see [full list of integrations](https://langfuse.com/docs/integrations/overview)). 
+
+We remain committed to supporting the most popular ways developers build on top of Large Language Models and specifically to frameworks that are built in open source. 
+
+We want to thank the team at Llama Index for their guidance which helped make this integration feature rich and stable in record time.
+
+## Integrating Langfuse with Llama Index
+
+<Frame>
+  ![Usage reporting in Langfuse](https://static.langfuse.com/llamaindex-langfuse-docs.gif)
+</Frame>
+_Integrating llama index with Langfuse observability - more info in [cookbook](https://langfuse.com/docs/integrations/llama-index/example-python)_
+
+Langfuse integrates with Llama Index via its **callback handler**. This makes getting set up as easy as: 
+
+* Signing up for Langfuse and retrieving API keys from the project settings
+* Initializing both Llama Index and Langfuse
+* Adding your Langfuse keys to the app
+* That’s it. Now all LLM calls are automatically logged to Langfuse
+
+``` python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.llama_index import LlamaIndexCallbackHandler
+ 
+langfuse_callback_handler = LlamaIndexCallbackHandler(
+    public_key="pk-lf-...",
+    secret_key="sk-lf-...",
+    host="https://cloud.langfuse.com"
+)
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+While easy to set up, the integration makes extensive use of Langfuse’s wider feature set. This includes flushing for short-lived applications and custom trace parameters (such as sessions, users, tags, versions and metadata). The integration is [interoperable with our Python SDK](https://langfuse.com/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdks).
+
+Users can naturally continue layering other Langfuse features such as [evaluations](https://langfuse.com/docs/scores/model-based-evals), [datasets](https://langfuse.com/docs/datasets/overview) or [prompt management](https://langfuse.com/docs/prompts/get-started) to their Llama Index app.
+
+
+## Dive In
+
+Head to the [Langfuse Docs](https://langfuse.com/docs/integrations/llama-index/get-started) or see an example integration in this [end-to-end cookbook](https://langfuse.com/docs/integrations/llama-index/example-python) to dive straight in. 
+
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Coookbook: Llama Index"
+    href="/guides/cookbook/integration_llama-index/"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Docs: Llama Index"
+    href="docs/integrations/llama-index/get-started"
+    icon={<BookOpen />}
+  />
+</Cards>
