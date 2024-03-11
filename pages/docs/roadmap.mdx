@@ -1,0 +1,53 @@
+---
+docs: Langfuse is open source and we want to be outmost transparent about what we are working on and what is coming next. Please share your feedback and ideas with us on GitHub.
+---
+
+# Roadmap
+
+We want to be transparent about what we are working on and what is coming next. This roadmap is a living document and will be updated as we make progress and as we receive feedback from our community.
+
+Feel like something is missing? Add new ideas to [on GitHub](/ideas) or vote on existing ones. Both are a great way to contribute to Langfuse and help us understand what is important to you.
+
+## 🏁 Pre-release
+
+- Integration to push Langfuse metrics to [PostHog](https://github.com/PostHog/posthog) ([draft changelog](https://langfuse-docs-git-posthog-integration-langfuse.vercel.app/changelog/2024-03-03-posthog-integration))
+- Decorator-based Python integration ([GitHub post](https://github.com/orgs/langfuse/discussions/1009) with installation instructions)
+
+  ```python
+  from langfuse.decorators import observe
+
+  @observe()
+  def span_inside_trace():
+      print("Hello, from a span inside a trace!")
+
+
+  @observe()
+  def function_to_trace():
+      print("Hello, from the parent trace!")
+      span_inside_trace()
+
+  function_to_trace()
+  ```
+
+_Please reach out if you are interested in testing these features before they are released to provide feedback and help shape the future of Langfuse: early-access@langfuse.com._
+
+## 🚧 In progress
+
+- Manual evaluations in Langfuse UI along multiple dimensions, currently only a single dimension is supported
+- Improved datasets UI/UX
+- Evaluation service to run custom model-based evals on historical and newly ingested traces
+- Infrastructure: queued ingestion to handle large and spiky loads on small instances
+- Improved tables across the Langfuse UI to display all relevant information and be more user-friendly
+- Move to SDK references generated from docstrings to improve the developer experience (Intellisense) and reduce the risk of errors
+
+## 🔮 Planned
+
+- Datasets: make them usable in CI (e.g GitHub Actions)
+- Langchain integration: support batch (Python) and async (Python) methods
+- Prompt playground connected to datasets and prompt management
+- Prompt management: multiple environments, comments on versions
+- Infrastructure: add OLAP database for faster analytical queries
+
+## 🚨 Upcoming breaking changes
+
+- OpenAI integration, dropping support of `openai < 1.0.0` to greatly simplify the integration and improve the developer experience of everyone on `openai >= 1`
