@@ -120,6 +120,7 @@ const nonPermanentRedirects = [
   ["/docs/schedule-demo", "/schedule-demo"],
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
+  ["/roadmap", "/docs/roadmap"],
 ];
 
 const permanentRedirects = []
