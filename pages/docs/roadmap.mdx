@@ -6,9 +6,66 @@ description: Langfuse is open source and we want to be outmost transparent about
 
 We want to be transparent about what we are working on and what is coming next. This roadmap is a living document and will be updated as we make progress and as we receive feedback from our community.
 
-Feel like something is missing? Add new ideas to [on GitHub](/ideas) or vote on existing ones. Both are a great way to contribute to Langfuse and help us understand what is important to you.
+import { Callout } from "nextra/components";
 
-## 🏁 Pre-release
+<Callout type="info" emoji="ℹ️">
+  **Feel like something is missing?** Add new ideas [on GitHub](/ideas) or vote
+  on existing ones. Both are a great way to contribute to Langfuse and help us
+  understand what is important to you.
+</Callout>
+
+## 🚀 Released
+
+import { getPagesUnderRoute } from "nextra/context";
+import Link from "next/link";
+
+export const ChangelogList = () => (
+  <ul className="list-disc list pl-6">
+    {getPagesUnderRoute("/changelog")
+      .sort(
+        (a, b) =>
+          new Date(b.frontMatter.date).getTime() -
+          new Date(a.frontMatter.date).getTime()
+      )
+      .slice(0, 10)
+      .map((page, i) => (
+        <li
+          className="my-2"
+          id={page.route.replace("/changelog/", "")}
+          key={page.route.replace("/changelog/", "")}
+        >
+          <Link
+            key={page.route}
+            href={page.route}
+            className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:from-font]"
+          >
+            <span className="">
+              {page.meta?.title || page.frontMatter?.title || page.name}
+            </span>
+          </Link>
+          <span className="text-primary/60 ml-2 hidden sm:inline">
+            {page.frontMatter?.date
+              ? `(${new Date(page.frontMatter.date).toLocaleDateString(
+                  "en-US",
+                  {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "UTC",
+                  }
+                )})`
+              : null}
+          </span>
+        </li>
+      ))}
+  </ul>
+);
+
+10 most recent [changelog](/changelog) items:
+
+<ChangelogList />
+
+## 🧪 Pre-release
 
 - Integration to push Langfuse metrics to [PostHog](https://github.com/PostHog/posthog) ([draft changelog](https://langfuse-docs-git-posthog-integration-langfuse.vercel.app/changelog/2024-03-03-posthog-integration))
 - Decorator-based Python integration ([GitHub post](https://github.com/orgs/langfuse/discussions/1009) with installation instructions)
@@ -48,7 +105,28 @@ _Please reach out if you are interested in testing these features before they ar
 - Prompt management: multiple environments, comments on versions
 - Infrastructure: add OLAP database for faster analytical queries
 
-## 🚨 Upcoming breaking changes
+## ⚠️ Upcoming breaking changes
 
 - OpenAI integration, dropping support of `openai < 1.0.0` to greatly simplify the integration and improve the developer experience of everyone on `openai >= 1`
 - Self-hosting: langfuse will move from a single container to a multi-container setup (queues, async worker, OLAP database) to improve scalability and reliability. We will publish an extensive guide once the changes are in pre-release to help everyone migrate.
+
+## 🙏 Feature requests and bug reports
+
+The best way to support Langfuse is to share your feedback and ideas with us. Please add your ideas and thoughts to GitHub discussions and report bugs on GitHub issues.
+
+import IconGithub from "@/components/icons/github";
+
+<Cards num={2}>
+  <Card
+    href="/ideas"
+    title="Ideas (GitHub Discussions)"
+    arrow
+    icon={<IconGithub />}
+  />
+  <Card
+    href="/issues"
+    title="Bugs (GitHub Issues)"
+    arrow
+    icon={<IconGithub />}
+  />
+</Cards>
