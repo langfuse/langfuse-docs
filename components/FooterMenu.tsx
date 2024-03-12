@@ -75,12 +75,16 @@ const menuItems: {
     items: [
       { name: "Documentation", href: "/docs" },
       {
+        name: "Interactive Demo",
+        href: "/demo",
+      },
+      {
         name: "Changelog",
         href: "/changelog",
       },
       {
-        name: "Interactive Demo",
-        href: "/demo",
+        name: "Roadmap",
+        href: "/docs/roadmap",
       },
       {
         name: "Pricing",
