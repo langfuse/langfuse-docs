@@ -45,13 +45,13 @@ const footerLegalNav = [
   },
 ];
 
-const Docs: PageItem = {
-  title: "Docs",
+const Posts: PageItem = {
+  title: "Posts",
   type: "page",
-  href: "docs",
+  href: "posts",
   kind: 'MdxPage',
-  name: 'Docs',
-  route: '/docs'
+  name: 'Posts',
+  route: '/posts'
 }
 
 const CheckHeaderParamsComponent = () => {
@@ -64,7 +64,7 @@ const CheckHeaderParamsComponent = () => {
     )
   } else {
     return (
-      <><Navbar flatDirectories={[]} items={[Docs,
+      <><Navbar flatDirectories={[]} items={[Posts,
       ]} /></>
     )
   }

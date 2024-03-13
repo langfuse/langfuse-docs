@@ -40,14 +40,9 @@ export const MainContentWrapper = (props) => {
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
-          className="flex flex-col gap-10 pt-14 border-t dark:border-neutral-800 mb-20"
+          className="flex flex-col justify-center gap-10 pt-14 mb-20"
           id="docs-feedback"
         >
-          {feedbackVisible === "false" ?
-            <></> : <>
-              <DocsFeedback key={router.pathname} />
-              <DocsSupport />
-              <DocsSubscribeToUpdates /></>}
         </div>
       ) : null}
       <Background />

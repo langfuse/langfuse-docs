@@ -1,0 +1,57 @@
+import Image from 'next/image';
+
+
+import { Button } from "@/components/ui/button"
+
+
+export default function Posts() {
+
+  const posts = [
+  {
+    postTitle: "Greetings",
+    postContent: "When you come into the land (of Israel) and have planted all manner of trees for food, then you shall count the fruit thereof as forbidden; three years shall it be forbidden to you; it shall not be eaten. And in the fourth year, all the fruit shall be holy, for giving praise to God. But in the fifth year, you may eat the fruit, that it may yield to you more richly the increase thereof.",
+    postDate: "24.12.2023"
+  }
+]
+
+return (
+    <div className=" pt-[40px] flex flex-col lg:flex-row gap-6">
+        {posts.map((post) => {
+          return (
+          <div className="post" className="w-[280px] h-[420px] shadow-lg	">
+            <Image
+              src={"/post-1.jpg"}
+              width={280}
+              height={216}
+              style={{ objectFit: 'cover' }}
+              alt="post"
+              className="rounded-t-2xl w-[280px] h-[216px]"
+            />
+            <div className="px-4">
+              <h4 className="post__title text-left text-xl font-medium mb-1">
+                Greetings
+              </h4>
+
+              <p className="post__text text-base mb-5">When you come into the land (of Israel) and have planted all manner of trees for food</p>
+
+              <div className="flex items-center justify-between">
+                <span className="post__date text-sm">24.12.2023</span>
+
+                <button className="post__read-more flex gap-2 items-center px-5 py-2">
+                  <span className="text-sm font-medium">Read more</span>
+                  <Image
+                    width={24}
+                    height={24}
+                    src="/arrow-right-purple.svg"
+                    alt="purple arrow"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+          )
+        })}
+    </div>
+
+);
+}

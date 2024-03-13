@@ -1,0 +1,119 @@
+import Image from 'next/image';
+
+
+export default function PostPage() {
+    const posts = [
+        {
+            postTitle: "Greetings",
+            postContent: "When you come into the land (of Israel) and have planted all manner of trees for food, then you shall count the fruit thereof as forbidden; three years shall it be forbidden to you; it shall not be eaten. And in the fourth year, all the fruit shall be holy, for giving praise to God. But in the fifth year, you may eat the fruit, that it may yield to you more richly the increase thereof.",
+            postDate: "24.12.2023"
+        }
+    ];
+  
+    const text = [
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+        {
+        p: 'Lorem ipsum dolor sit amet consectetur. Faucibus tincidunt varius cursus donec nulla in et mattis tellus. Volutpat ut eget viverra volutpat elementum pulvinar posuere diam etiam. Maecenas sit curabitur massa massa consectetur ut nec. Ac morbi in feugiat egestas tempus commodo molestie convallis et. Cursus justo libero mattis dictum ultricies nisi mauris. Auctor quis aliquet laoreet velit amet massa aenean. Volutpat feugiat condimentum pulvinar habitant at et. Montes mi in ac orci id faucibus tempor dui. Ut vulputate libero mattis dapibus at diam. Scelerisque urna massa velit vitae sit faucibus. Ornare lobortis vestibulum mattis turpis iaculis mattis. Facilisis ac sed elit platea scelerisque est pellentesque quam mattis.',
+        },
+    ];
+  return (
+    <>
+    <div className="flex flex-col items-center w-[100%]">
+      <section className="full-post flex flex-col lg:px-[144px] pt-5  px-5">
+        <Image
+          src={"/post-1.jpg"}
+          width={320}
+          style={{ objectFit: 'cover' }}
+          height={380}
+          className="h-[380px] w-[400px] lg:w-[1800px] lg:h-[380px] rounded-2xl"
+          alt="post image"
+        />
+
+        <div className="mx-auto flex just-between w-[100%]">
+          <div className="full-post__description-container lg:mb-9 flex flex-col justify-between">
+            <h3 className="full-post__title mb-4">Greetings</h3>
+
+            <div className="flex flex-col lg:text-2xl w-[800px] lg:flex-row lg:justify-between">
+              <span className="full-post__author">
+                Written by Roman
+              </span>
+
+              <span className="full-post__date mb-7">24.12.2023</span>
+            </div>
+          </div>
+
+          <div className="full-post__text max-w-[956px] flex flex-col gap-5">
+
+          </div>
+        </div>
+      </section>
+        <div className="full-post__text max-w-[800px] flex flex-col gap-5">
+            {
+                text.map((paragraph) => (
+              <p className="full-post__paragraph" key={paragraph.p}>
+                {paragraph.p}
+              </p>
+            ))}
+        </div>
+      <section className="more-articles items-center flex flex-col">
+        <h2 className="more-articles__title mb-12">More articles</h2>
+                 <div className=" pt-[40px] flex flex-col lg:flex-row gap-6">
+        {posts.map((post) => {
+          return (
+          <div className="post" className="w-[280px] h-[420px] shadow-lg	">
+            <Image
+              src={"/post-1.jpg"}
+              width={280}
+              height={216}
+              style={{ objectFit: 'cover' }}
+              alt="post"
+              className="rounded-t-2xl w-[280px] h-[216px]"
+            />
+            <div className="px-4">
+              <h4 className="post__title text-left text-xl font-medium mb-1">
+                Greetings
+              </h4>
+
+              <p className="post__text text-base mb-5">When you come into the land (of Israel) and have planted all manner of trees for food</p>
+
+              <div className="flex items-center justify-between">
+                <span className="post__date text-sm">24.12.2023</span>
+
+                <button className="post__read-more flex gap-2 items-center px-5 py-2">
+                  <span className="text-sm font-medium">Read more</span>
+                  <Image
+                    width={24}
+                    height={24}
+                    src="/arrow-right-purple.svg"
+                    alt="purple arrow"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+          )
+        })}
+    </div>
+    </section>
+
+    </div>
+    </>
+  )
+}
