@@ -11,7 +11,19 @@ export default function OpenSource() {
     <HomeSection className="flex flex-col items-center">
       <Header
         title="Proudly Open Source"
-        description="Langfuse is committed to open source. You can run it locally or self-hosted."
+        description={
+          <span>
+            Langfuse is committed to open source. You can also run it{" "}
+            <Link href="/docs/deployment/local" className="underline">
+              locally
+            </Link>{" "}
+            or{" "}
+            <Link href="/docs/deployment/self-host" className="underline">
+              self-hosted
+            </Link>
+            .
+          </span>
+        }
         className="mb-0"
       />
 
