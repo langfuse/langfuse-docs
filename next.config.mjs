@@ -67,6 +67,7 @@ const nonPermanentRedirects = [
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
   ["/gh-support", "https://github.com/orgs/langfuse/discussions/categories/support"],
   ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
+  ["/docs/analytics", "/docs/analytics/overview"],
 
   // Redirect to overview pages
   ...[
@@ -120,6 +121,7 @@ const nonPermanentRedirects = [
   ["/docs/schedule-demo", "/schedule-demo"],
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
+  ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
 ];
 
 const permanentRedirects = []
