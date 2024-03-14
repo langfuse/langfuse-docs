@@ -1,3 +1,8 @@
+---
+description: Cookbook that demonstrates how to run Langchain evaluations on data in Langfuse.
+category: Evaluation
+---
+
 # Run Langchain Evaluations on data in Langfuse
 
 This cookbook shows how model-based evaluations can be used to automate the evaluation of production completions in Langfuse. This example uses Langchain and is adaptable to other libraries. Which library is the best to use depends heavily on the use case.
