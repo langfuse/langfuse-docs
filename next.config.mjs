@@ -54,7 +54,9 @@ const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
-  ["/video", "/docs/video"],
+  ["/video", "/guides/videos/2-min"],
+  ["/docs/video", "/guides/videos/2-min"],
+  ["/roadmap", "/docs/roadmap"],
   ["/ph", "https://www.producthunt.com/posts/langfuse"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
@@ -120,7 +122,6 @@ const nonPermanentRedirects = [
   ["/docs/schedule-demo", "/schedule-demo"],
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
-  ["/roadmap", "/docs/roadmap"],
 ];
 
 const permanentRedirects = []
