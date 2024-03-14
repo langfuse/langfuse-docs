@@ -517,7 +517,7 @@ langfuse.generation(
 
 
 ## FastAPI
-For engineers working with FastAPI, we have a short example, of how to use it there. [Here](https://github.com/langfuse/fastapi_demo) is a Git Repo with all the details.
+For engineers working with FastAPI, we have a short example, of how to use it there.
 
 
 

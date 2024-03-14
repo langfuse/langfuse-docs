@@ -168,14 +168,6 @@ const sections = [
           Team: "Custom regions available",
         },
       },
-      {
-        name: "Dedicated managed instance",
-        tiers: {
-          Hobby: false,
-          Pro: false,
-          Team: "Talk to us",
-        },
-      },
     ],
   },
   {
@@ -310,6 +302,7 @@ export default function Pricing({
         </div>
         {isPricingPage ? (
           <>
+            <SelfHost className="mt-10" />
             <div className="relative">
               <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                 {/* Feature comparison (up to lg) */}
@@ -598,18 +591,34 @@ export default function Pricing({
             <PricingFAQ />
           </>
         ) : (
-          <div className="text-center mt-10">
-            For a detailed comparison and FAQ, see our{" "}
-            <Link href="/pricing" className="underline">
-              pricing page
-            </Link>
-            .
-          </div>
+          <>
+            <div className="text-center mt-10">
+              For a detailed comparison and FAQ, see our{" "}
+              <Link href="/pricing" className="underline">
+                pricing page
+              </Link>
+              .
+            </div>
+            <SelfHost className="mt-3" />
+          </>
         )}
       </div>
     </HomeSection>
   );
 }
+const SelfHost = ({ className }: { className?: string }) => (
+  <div className={cn("text-center", className)}>
+    Langfuse is also easy to{" "}
+    <Link href="/docs/deployment/local" className="underline">
+      run locally
+    </Link>{" "}
+    and{" "}
+    <Link href="/docs/deployment/self-host" className="underline">
+      self-host
+    </Link>
+    .
+  </div>
+);
 
 const faqs = [
   {

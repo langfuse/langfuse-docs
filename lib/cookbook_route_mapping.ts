@@ -8,7 +8,7 @@ export const COOKBOOK_ROUTE_MAPPING: {
   .flatMap(({ docsPath, notebook }) => [
     {
       // default export to cookbook folder
-      path: `/cookbook/${notebook.replace(".ipynb", "")}`,
+      path: `/guides/cookbook/${notebook.replace(".ipynb", "")}`,
       ipynbPath: `/cookbook/${notebook}`,
       // if also in docs, set cookbook as canonical path
       canonicalPath: docsPath ? `/${docsPath}` : undefined,

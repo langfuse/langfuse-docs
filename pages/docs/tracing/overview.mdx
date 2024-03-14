@@ -38,7 +38,7 @@ A trace in Langfuse consists of the following objects:
     - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
   - Observations can be nested.
 
-<div className="grid grid-cols-2 mt-4 gap-4">
+<div className="grid grid-cols-2 mt-4 gap-2 md:gap-4">
 
 <div className="border rounded py-4 text-center">
 
@@ -140,6 +140,12 @@ If you want to send a batch immediately, you can call the `flush` method on the 
 
 ```python
 langfuse.flush()
+```
+
+If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
+
+```python
+langfuse.shutdown()
 ```
 
 </Tab>
