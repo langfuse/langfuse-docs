@@ -6,16 +6,6 @@ description: Track LLM chat conversations or threads across multiple traces in a
 
 Many interactions with LLM applications span multiple traces. `Sessions` in Langfuse are a way to group these traces together and see a simple **session replay** of the entire interaction. Get started by adding a `sessionId` when creating a trace.
 
-Try this feature using the public [example project](/docs/demo).
-
-_Example session spanning multiple traces_
-
-<Frame border fullWidth>
-  ![Session view](/images/docs/session.png)
-</Frame>
-
-## How it works
-
 ```mermaid
 graph LR
     A(Session) -->|1:n, sessionId| B(Trace)
@@ -23,56 +13,86 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
-```diff
-langfuse.trace(
-    ...
-+   session_id="your-session-id"
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    session_id="your-session-id"
 )
 ```
 
 </Tab>
 <Tab>
-```diff
-langfuse.trace({
-    ...
-+   sessionId: "your-session-id"
-})
-```
 
-</Tab>
-<Tab>
-```
-from langfuse.openai import openai
-```
-```diff
-completion = openai.chat.completions.create(
-    name="test-chat",
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a calculator."},
-        {"role": "user", "content": "1 + 1 = "}],
-    temperature=0,
-+   session_id="your-session-id"
-)
-````
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
 
-</Tab>
-<Tab>
-```diff
-handler = CallbackHandler(
-+   session_id="your-session-id"
-)
-```
-
-</Tab>
-<Tab>
-```diff
-const handler = new CallbackHandler({
-+   sessionId: "your-session-id"
+const trace = langfuse.trace({
+  sessionId: "your-session-id",
 });
 ```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add session_id as additional argument
+  session_id="your-session-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```python
+handler = CallbackHandler(
+  session_id="your-session-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+const handler = new CallbackHandler({
+  sessionId: "your-session-id",
+});
+```
+
+</Tab>
+
+<Tab>
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse import langfuse
+
+# Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+langfuse_callback_handler.set_trace_params(
+  session_id="session-abc",
+)
+```
+
+All LlamaIndex traces created after `set_trace_params` will include the `session_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
 
 </Tab>
 
@@ -83,8 +103,18 @@ The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId t
 
 </Tabs>
 
+## Example
+
+Try this feature using the public [example project](/docs/demo).
+
+_Example session spanning multiple traces_
+
+<Frame border fullWidth>
+  ![Session view](/images/docs/session.png)
+</Frame>
+
 ## Other features
 
-- Publish a session to share with others as a public link
+- Publish a session to share with others as a public link ([example](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/sessions/lf.docs.conversation.TL4KDlo))
 - Bookmark a session to easily find it later
 - Manually evaluate sessions by adding `scores` from the Langfuse UI

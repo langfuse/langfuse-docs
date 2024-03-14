@@ -74,7 +74,7 @@ const features = [
     name: "Prompt Management",
     description:
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
-    href: "/docs/prompts",
+    href: "/docs/prompts/get-started",
     cta: "Learn more",
     background: (
       <BentoBgImage
@@ -92,7 +92,7 @@ const features = [
       "Collect user feedback and use manual and model-based evaluations.",
     href: "/docs/scores/overview",
     cta: "Learn more",
-    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    background: null,
     className: "md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4",
   },
   {
@@ -102,7 +102,7 @@ const features = [
       "Derive datasets from production data to fine-tune models and test your LLM application.",
     href: "/docs/datasets/overview",
     cta: "Learn more",
-    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    background: null,
     className: "md:col-start-3 md:col-end-3 md:row-start-1 md:row-end-2",
   },
   {

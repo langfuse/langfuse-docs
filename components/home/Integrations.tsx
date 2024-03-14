@@ -3,21 +3,40 @@
 import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { forwardRef, useRef, type ReactNode } from "react";
-import { Code } from "lucide-react";
+import { ArrowUpRightFromSquare, Code, MoreHorizontal } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { SiOpenai, SiPython, SiTypescript } from "react-icons/si";
+import LlamaindexIcon from "./img/llamaindex_icon.png";
+import LangfuseIcon from "@/public/icon.svg";
+import LangchainIcon from "./img/langchain_icon.png";
+import Image from "next/image";
+import Link from "next/link";
+import IconPython from "../icons/python";
+import IconTypescript from "../icons/typescript";
+import IconOpenai from "../icons/openai";
 
 const Circle = forwardRef<
   HTMLDivElement,
   {
     className?: string;
     title?: string;
+    href?: string;
     children?: ReactNode;
   }
->(({ className, children, title }, ref) => {
+>(({ className, children, title, href }, ref) => {
+  // Conditionally render as next/Link if href is provided
+  const Component = href ? Link : "div";
+
   return (
-    <div className={cn("z-10 flex flex-row items-center gap-4", className)}>
+    <Component
+      className={cn(
+        "z-10 flex flex-row items-center gap-4 group",
+        href ? "cursor-pointer" : "cursor-default",
+        className
+      )}
+      title={"Langfuse " + title + " documentation"}
+      href={href}
+    >
       {title && (
         <span className="w-[4.4rem] md:w-20 text-right text-sm md:text-base">
           {title}
@@ -25,11 +44,20 @@ const Circle = forwardRef<
       )}
       <div
         ref={ref}
-        className="flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 p-3 text-black"
+        className={cn(
+          "flex h-14 w-14 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-200 text-black",
+          href && "group-hover:bg-slate-200"
+        )}
       >
-        {children}
+        {href && (
+          <ArrowUpRightFromSquare
+            className="hidden group-hover:block"
+            size={18}
+          />
+        )}
+        <span className={cn(href && "group-hover:hidden")}>{children}</span>
       </div>
-    </div>
+    </Component>
   );
 });
 
@@ -40,16 +68,16 @@ export default function Integrations() {
   const inOpenAiRef = useRef<HTMLDivElement>(null);
   const inLangchainRef = useRef<HTMLDivElement>(null);
   const inApiRef = useRef<HTMLDivElement>(null);
+  const inLlamaindexRef = useRef<HTMLDivElement>(null);
+  const inMoreRef = useRef<HTMLDivElement>(null);
+
   const langfuseNodeRef = useRef<HTMLDivElement>(null);
-  const out1ref = useRef<HTMLDivElement>(null);
-  const out2ref = useRef<HTMLDivElement>(null);
-  const out3ref = useRef<HTMLDivElement>(null);
 
   return (
     <HomeSection>
       <Header
-        title="Works with any LLM app"
-        description="SDKs for Python & JS/TS. Native integrations for popular libraries such as OpenAI and Langchain. Missing an integration? Let us know!"
+        title="Works with any LLM app and model"
+        description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
         button={{
           href: "/docs/integrations/overview",
           text: "Integration docs",
@@ -59,42 +87,86 @@ export default function Integrations() {
         className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background py-4 px-2 md:p-12"
         ref={containerRef}
       >
-        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-6">
+        <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-4">
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inPythonRef} title="Python SDK">
-              <SiPython className="h-6 w-6" />
+            <Circle
+              ref={inPythonRef}
+              title="Python SDK"
+              href="/docs/sdk/python"
+            >
+              <IconPython className="h-9 w-9" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inTypescriptRef} title="JS/TS SDK">
-              <SiTypescript className="h-6 w-6" />
-            </Circle>
-            <Circle ref={out1ref} className="hidden">
-              <Code className="h-6 w-6" />
+            <Circle
+              ref={inTypescriptRef}
+              title="JS/TS SDK"
+              href="/docs/sdk/typescript/guide"
+            >
+              <IconTypescript className="h-7 w-7" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inOpenAiRef} title="OpenAI SDK">
-              <SiOpenai className="h-6 w-6" />
+            <Circle
+              ref={inOpenAiRef}
+              title="OpenAI SDK"
+              href="/docs/integrations/openai/get-started"
+            >
+              <IconOpenai className="h-7 w-7" />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle
+              ref={inLangchainRef}
+              title="Langchain"
+              href="/docs/integrations/langchain/tracing"
+            >
+              <Image
+                src={LangchainIcon}
+                alt="Langchain Icon"
+                width={40}
+                height={40}
+              />
             </Circle>
             <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <span className="text-3xl">🪢</span>
+              <Image
+                src={LangfuseIcon}
+                alt="Langfuse Icon"
+                width={28}
+                height={28}
+              />
             </Circle>
-            <Circle ref={out2ref} className="hidden">
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle
+              ref={inLlamaindexRef}
+              title="Llama-Index"
+              href="/docs/integrations/llama-index/get-started"
+            >
+              <Image
+                src={LlamaindexIcon}
+                alt="Llama-index Icon"
+                width={35}
+                height={35}
+              />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle
+              ref={inApiRef}
+              title="API"
+              href="https://api.reference.langfuse.com/"
+            >
               <Code className="h-6 w-6" />
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle ref={inLangchainRef} title="Langchain">
-              <span>🦜&nbsp;🔗</span>
-            </Circle>
-            <Circle ref={out3ref} className="hidden">
-              <Code className="h-6 w-6" />
-            </Circle>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <Circle ref={inApiRef} title="API">
-              <Code className="h-6 w-6" />
+            <Circle
+              ref={inMoreRef}
+              title="Litellm, Flowise, Langflow"
+              href="/docs/integrations/overview"
+            >
+              <MoreHorizontal className="h-5 w-5" />
             </Circle>
           </div>
         </div>
@@ -131,23 +203,14 @@ export default function Integrations() {
         />
         <AnimatedBeam
           containerRef={containerRef}
-          fromRef={out1ref}
+          fromRef={inLlamaindexRef}
           toRef={langfuseNodeRef}
-          className="hidden"
           duration={3}
         />
         <AnimatedBeam
           containerRef={containerRef}
-          fromRef={out2ref}
+          fromRef={inMoreRef}
           toRef={langfuseNodeRef}
-          className="hidden"
-          duration={3}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={out3ref}
-          toRef={langfuseNodeRef}
-          className="hidden"
           duration={3}
         />
       </div>

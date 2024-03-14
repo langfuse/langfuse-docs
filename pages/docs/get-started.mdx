@@ -8,13 +8,17 @@ This quickstart helps you to integrate your LLM application with Langfuse. It wi
 
 ## Create new project in Langfuse
 
-1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up)
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host](/docs/deployment/self-host)
 2.  Create a new project
 3.  Create new API credentials in the project settings
 
 ## Log your first LLM call to Langfuse
 
-<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","API"]}>
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
+
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","API"]}>
 
 <Tab>
 {/* Python */}
@@ -83,7 +87,7 @@ LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
 # LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
 
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript).
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript/guide).
 
 ```typescript filename="server.ts"
 import { Langfuse } from "langfuse";
@@ -126,7 +130,7 @@ LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
 # LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
 
-```diff filename="server.py"
+```diff filename=".py"
 - import openai
 + from langfuse.openai import openai
 ```
@@ -148,30 +152,9 @@ completion = openai.chat.completions.create(
 
 The integration uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
 
-```bash
-pip install langfuse
-```
+<GetStartedLangchainPythonArgs />
 
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
-
-Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
-
-```python /callbacks=[handler]/
-from langfuse.callback import CallbackHandler
-handler = CallbackHandler(LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
-
-# Langchain implementation
-
-# Add handler as callback when running the Langchain agent
-agent.run("<user_input>", callbacks=[handler])
-```
-
-For more examples, see the [Langchain integration docs](/docs/integrations/langchain/python).
+For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
 
 </Tab>
 <Tab>
@@ -179,37 +162,23 @@ For more examples, see the [Langchain integration docs](/docs/integrations/langc
 
 The integration uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
 
-```sh
-npm i langfuse-langchain
-# or
-yarn add langfuse-langchain
+<GetStartedLangchainJsArgs />
 
-# Deno
-import CallbackHandler from 'https://esm.sh/langfuse-langchain'
+For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+
+</Tab>
+<Tab>
+{/* LlamaIndex */}
+
+The integration uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
+
+```bash
+pip install llama-index langfuse
 ```
 
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
+<GetStartedLlamaindexPythonArgs />
 
-Add Langfuse callback handler to your Langchain agent/chain/... to automatically capture traces.
-
-```typescript /callbacks: [handler]/
-import { CallbackHandler } from "langfuse-langchain";
-
-// Initialize Langfuse callback handler
-const handler = new CallbackHandler();
-
-// Your Langchain implementation
-const chain = new LLMChain(...);
-
-// Add handler as callback when running the Langchain agent
-await chain.call({ input: "<user_input>" }, { callbacks: [handler] });
-
-```
+Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
 
 </Tab>
 <Tab>
@@ -235,7 +204,7 @@ This was a very brief introduction to get started with Langfuse. Explore all Lan
 
 <Cards num={3}>
   <Card title="Tracing" href="/docs/tracing/overview" arrow />
-  <Card title="Prompt Management" href="/docs/prompts" arrow />
+  <Card title="Prompt Management" href="/docs/prompts/get-started" arrow />
   <Card
     title="Export & Fine-tuning"
     href="/docs/export-and-fine-tuning"
@@ -260,63 +229,70 @@ This was a very brief introduction to get started with Langfuse. Explore all Lan
 
 ## References
 
-import { SiTypescript, SiPython } from "react-icons/si";
-import { FiCode } from "react-icons/fi";
-import { SiOpenai } from "react-icons/si";
+import { Code } from "lucide-react";
+import IconPython from "@/components/icons/python";
+import IconTypescript from "@/components/icons/typescript";
+import IconOpenai from "@/components/icons/openai";
 
 <Cards num={2}>
   <Card
-    icon={<SiPython size="24" />}
+    icon={<IconPython />}
     title="Python SDK"
     href="/docs/sdk/python"
     arrow
   />
   <Card
-    icon={<SiTypescript size="24" />}
+    icon={<IconTypescript />}
     title="JS/TS SDK"
-    href="/docs/sdk/typescript"
+    href="/docs/sdk/typescript/guide"
     arrow
   />
   <Card
-    icon={<SiOpenai size="24" />}
-    title="OpenAI SDK (Python)"
+    icon={<IconOpenai />}
+    title="OpenAI SDK"
     href="/docs/integrations/openai"
     arrow
   />
   <Card
-    icon={<FiCode size="24" />}
+    icon={<span>🦜🔗</span>}
+    title="Langchain"
+    href="/docs/integrations/langchain/tracing"
+    arrow
+  />
+  <Card
+    icon={<span>🦙</span>}
+    title="LlamaIndex"
+    href="/docs/integrations/llama-index/get-started"
+    arrow
+  />
+  <Card
+    icon={<Code size="24" />}
     title="API reference"
     href="https://api.reference.langfuse.com/"
     arrow
   />
   <Card
-    icon={<span>🦜🔗</span>}
-    title="Langchain integration (Python)"
-    href="/docs/integrations/langchain/python"
-    arrow
-  />
-  <Card
-    icon={<span>🦜🔗</span>}
-    title="Langchain integration (JS/TS)"
-    href="/docs/integrations/langchain/typescript"
-    arrow
-  />
-  <Card
-    icon={<FiCode size="24" />}
+    icon={<Code size="24" />}
     title="Flowise"
     href="/docs/integrations/flowise"
     arrow
   />
   <Card
-    icon={<FiCode size="24" />}
+    icon={<Code size="24" />}
     title="Langflow"
     href="/docs/integrations/langflow"
     arrow
   />
   <Card
-    icon={<FiCode size="24" />}
+    icon={<Code size="24" />}
     title="Litellm"
     href="/docs/integrations/litellm"
+    arrow
+  />
+  <Card
+    icon={<Code size="24" />}
+    title="Superagent"
+    href="/docs/integrations/superagent"
     arrow
   />
 </Cards>

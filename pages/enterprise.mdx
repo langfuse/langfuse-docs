@@ -1,0 +1,76 @@
+---
+description: FAQ and deployment options for Langfuse in an enterprise environment.
+---
+
+# Langfuse in the Enterprise
+
+Langfuse addresses key challenges when deploying LLM-based applications within an enterprise. Being [open source](/docs/open-source), Langfuse is ideal for enterprises to address data security and privacy concerns by self-hosting. This document outlines common queries related to using Langfuse in an enterprise setting.
+
+## Introduction to Langfuse
+
+See our [technical documentation](/docs) for a detailed introduction to Langfuse and all of its platform features.
+
+<Frame
+  transparent
+  fullWidth
+  className="mt-10 rounded-lg ring-primary/20 ring-1 dark:hidden"
+>
+  ![Langfuse Features along the development
+  lifecycle](/images/docs/features-light.png)
+</Frame>
+<Frame
+  transparent
+  fullWidth
+  className="mt-10 rounded-lg ring-primary/20 ring-1 hidden dark:block"
+>
+  ![Langfuse Features along the development
+  lifecycle](/images/docs/features-dark.png)
+</Frame>
+<span>_Langfuse features along the development lifecycle_</span>
+
+## Resources
+
+- [Security and Compliance](/docs/data-security-privacy) - includes information on SOC2 and ISO27001 compliance
+- Component Diagram see [Contributing.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
+- Langfuse Cloud [Pricing](/pricing)
+- [Interactive demo](/demo) of the Langfuse platform
+- Open Source [Licensing](/docs/open-source)
+- [Changelog](/changelog) and [roadmap](/docs/roadmap)
+
+## Talk to us
+
+Schedule an [introduction call](/schedule-demo) to discuss your specific needs and requirements.
+
+## FAQ
+
+#### What is the difference between Langfuse Cloud and the open-source version?
+
+The Langfuse team provides Langfuse Cloud as a managed solution to simplify the initial setup of Langfuse and to minimize the operational overhead of maintaining high availability in production. You can chose to self-host Langfuse on your own infrastructure.
+
+#### What deployment options are available for Langfuse?
+
+1. Managed Cloud (cloud.langfuse.com), see [Pricing](/pricing) and [Security](/docs/data-security-privacy) page for details.
+2. [Self-hosted](/docs/deployment/self-host) on your own infrastructure. Contact us if you are interested in additional support.
+
+#### How does Authentication and RBAC work in Langfuse?
+
+Langfuse offers a list of prebuilt roles which apply on a project level to restrict access ([RBAC documentation](/docs/rbac)).
+
+If needed, environments (production, staging, development) can be separated into different projects in Langfuse to restrict access to production/sensitive data while making it easier to share development environments with the team and other stakeholders.
+
+SSO with Langfuse is simple. Currently Google, GitHub, Azure AD are supported and this can easily be extended to other providers. As an enteprise customer, you can also enforce SSO for your organization.
+
+#### What is the easiest way to try Langfuse?
+
+The Hobby Plan on [Langfuse Cloud](https://cloud.langfuse.com) includes enough resources to try Langfuse for free while in a non-production environment, no credit card required.
+
+Alternatively, you can quickly spin up Langfuse on your own machine using `docker compose up` ([docs](/docs/deployment/local)).
+
+---
+
+import { Callout } from "nextra-theme-docs";
+
+<Callout type="info" emoji="✨">
+  We collect the most common questions and answers here. If you have questions
+  that are not answered, please reach out to us: enterprise@langfuse.com
+</Callout>

@@ -43,7 +43,7 @@ const BentoCard = ({
   <Link
     key={name}
     className={cn(
-      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded border lg:cursor-default",
+      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded border",
       // light styles
       "bg-white",
       // dark styles
@@ -59,7 +59,9 @@ const BentoCard = ({
       <h3 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
         {name}
       </h3>
-      <p className="max-w-lg text-neutral-400">{description}</p>
+      <p className="max-w-lg dark:text-neutral-400 text-neutral-500">
+        {description}
+      </p>
     </div>
 
     <div className="pointer-events-none absolute bottom-0 flex w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">

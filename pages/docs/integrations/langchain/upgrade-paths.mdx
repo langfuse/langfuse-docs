@@ -1,0 +1,175 @@
+# Upgrade Paths: Langchain Integration
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  This doc is a collection of upgrade paths for different versions of the
+  integration. If you want to add the integration to your project, you should start with the latest version and follow the [integration guide](/docs/integrations/langchain/tracing).
+
+</Callout>
+
+Lanfuse and Langchain are under active development. Thus, we are constantly improving the intgration. This means that we sometimes need to make breaking changes to our APIs or need to react to breaking changes in Langchain. We try to keep these to a minimum and to provide clear upgrade paths when we do make them.
+
+**Python**
+
+- [From v1.x.x to v2.x.x](#python2)
+
+**JS/TS**
+
+- [From v2.x.x to v3.x.x](#js3)
+- [From v1.x.x to v2.x.x](#js2)
+
+## Python [#python]
+
+### From v1.x.x to v2.x.x [#python2]
+
+The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
+
+```python
+from langfuse.callback import CallbackHandler
+langfuse_handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+
+# Setup Langchain
+from langchain.chains import LLMChain
+...
+chain = LLMChain(llm=llm, prompt=prompt, callbacks=[langfuse_handler])
+
+# Add Langfuse handler as callback
+chain.run(input="<first_user_input>", callbacks=[langfuse_handler])
+chain.run(input="<second_user_input>", callbacks=[langfuse_handler])
+
+```
+
+So far, invoking the chain multiple times would group the observations in one trace.
+
+```bash
+TRACE
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+```
+
+We changed this, so that each invocation will end up on its own trace. This allows us to derive the user inputs and outputs to Langchain applications.
+
+```bash
+TRACE_1
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+
+TRACE_2
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+```
+
+If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Get Langchain handler for a trace
+trace = langfuse.trace()
+langfuse_handler = trace.get_langchain_handler()
+
+# langfuse_handler will use the trace for all invocations
+```
+
+## JS/TS [#js]
+
+### From v2.x.x to v3.x.x [#js3]
+
+Requires [`langchain ^0.1.10`](https://github.com/langchain-ai/langchainjs/releases/tag/0.1.10). Langchain released a new stable version of the Callback Handler interface and this version of the Langfuse SDK implements it. Older versions are no longer supported.
+
+### From v1.x.x to v2.x.x [#js2]
+
+The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+
+// create a handler
+const langfuseHandler = new CallbackHandler({
+  publicKey: LANGFUSE_PUBLIC_KEY,
+  secretKey: LANGFUSE_SECRET_KEY,
+});
+
+import { LLMChain } from "langchain/chains";
+
+// create a chain
+const chain = new LLMChain({
+  llm: model,
+  prompt,
+  callbacks: [langfuseHandler],
+});
+
+// execute the chain
+await chain.call(
+  { product: "<user_input_one>" },
+  { callbacks: [langfuseHandler] }
+);
+await chain.call(
+  { product: "<user_input_two>" },
+  { callbacks: [langfuseHandler] }
+);
+```
+
+So far, invoking the chain multiple times would group the observations in one trace.
+
+```bash
+TRACE
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+```
+
+We changed this, so that each invocation will end up on its own trace. This is a more sensible default setting for most users.
+
+```bash
+TRACE_1
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+
+TRACE_2
+|
+|-- SPAN: Retrieval
+|   |
+|   |-- SPAN: LLM Chain
+|   |   |
+|   |   |-- GENERATION: ChatOpenAi
+```
+
+If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
+
+```typescript
+const trace = langfuse.trace({ id: "special-id" });
+// CallbackHandler will use the trace with the id "special-id" for all invocations
+const langfuseHandler = new CallbackHandler({ root: trace });
+```

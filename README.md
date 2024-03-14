@@ -12,13 +12,13 @@ Pre-requisites: Node.js 18+, pnpm
 
 ## Python cookbooks
 
-All Python docs are Jupyter notebooks in the `cookbook/` directory.
+All Jupyter notebooks are in the `cookbook/` directory.
 
 To render them within the documentation site, we convert them to markdown using `jupyter nbconvert`, move them to right path in the pages/ directory where they are rendered by Nextra (remark).
 
 Steps after updating notebooks:
 
-1. Load python shell/env which has jupyter installed, e.g. `pyenv shell anaconda3-2023.03`
+1. Load python shell/env which has jupyter installed, e.g. `poetry install && poetry shell`
 2. Run `bash scripts/update_cookbook_docs.sh`
 3. Commit the changed markdown files
 
