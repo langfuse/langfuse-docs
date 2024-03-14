@@ -1,3 +1,8 @@
+---
+description: Cookbook with examples of the Langfuse Integration for Langchain (JS/TS).
+category: Integrations
+---
+
 # Cookbook: Langchain Integration (JS/TS)
 
 This is a cookbook with examples of the Langfuse Integration for Langchain (JS/TS).

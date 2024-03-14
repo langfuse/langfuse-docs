@@ -1,5 +1,6 @@
 ---
 description: Fully async and typed Python SDK. Uses Pydantic objects for data verification.
+category: Integrations
 ---
 
 # Python SDK

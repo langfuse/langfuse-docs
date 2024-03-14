@@ -1,5 +1,6 @@
 ---
 description: Example of Open Source Prompt Management for Langchain applications using Langfuse.
+category: Prompt Management
 ---
 
 # Example: Langfuse Prompt Management with Langchain (Python)

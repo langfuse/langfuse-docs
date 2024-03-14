@@ -1,5 +1,6 @@
 ---
 description: This cookbook demonstate use of Langfuse with Azure OpenAI and Langchain for prompt versioning and evaluations.
+category: Integrations
 ---
 
 # Langfuse Tracing and Prompt Management for Azure OpenAI and Langchain
