@@ -6,7 +6,7 @@ export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
   className,
 }) => (
   <div className={className}>
-    <Callout type="info" emoji="ℹ️">
+    <Callout type="info">
       <div className="flex flex-wrap gap-1 md:justify-between md:items-center">
         <span>This is a Jupyter notebook</span>
         <div className="flex gap-2 flex-wrap">

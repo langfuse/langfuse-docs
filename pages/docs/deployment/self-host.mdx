@@ -10,6 +10,13 @@ Langfuse Server, which includes the API and Web UI, is open-source and can be se
 
 For a detailed component and architecture diagram, refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md).
 
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  Looking for a managed solution? Consider [Langfuse
+  Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
+</Callout>
+
 ## Prerequisites: Postgres Database
 
 Langfuse requires a persistent Postgres database to store its state. You can use a managed service on AWS, Azure, or GCP, or host it yourself. Once the database is ready, keep the connection string handy.
@@ -50,10 +57,9 @@ docker run --name langfuse \
 ghcr.io/langfuse/langfuse:latest
 ```
 
-import { Callout } from "nextra/components";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info">
 
 We follow _semantic versioning_ for Langfuse releases, i.e. breaking changes are only introduced in a new major version.
 
@@ -70,7 +76,7 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 | Variable                                                                                 | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`                                                                           | Required           | Connection string of your Postgres database. Instead of `DATABASE_URL`, you can also use `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` and `DATABASE_NAME`.                                                                                                                                                                                                                               |
-| `DIRECT_URL`                                                                             | `DATABASE_URL`     | Connection string of your Postgres database used for database migrations. Use this if you want to use a different user for migrations or use connection pooling on `DATABASE_URL`.                                                                                                                                                                                                                    |
+| `DIRECT_URL`                                                                             | `DATABASE_URL`     | Connection string of your Postgres database used for database migrations. Use this if you want to use a different user for migrations or use connection pooling on `DATABASE_URL`. **For large deployments**, configure the database user with long timeouts as migrations might need a while to complete.                                                                                            |
 | `SHADOW_DATABASE_URL`                                                                    |                    | If your database user lacks the `CREATE DATABASE` permission, you must create a shadow database and configure the "SHADOW_DATABASE_URL". This is often the case if you use a Cloud database. Refer to the [Prisma docs](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/shadow-database#cloud-hosted-shadow-databases-must-be-created-manually) for detailed instructions. |
 | `NEXTAUTH_URL`                                                                           | Required           | URL of your deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`. Required for successful authentication via OAUTH.                                                                                                                                                                                                                                                                   |
 | `NEXTAUTH_SECRET`                                                                        | Required           | Used to validate login session cookies, generate secret with at least 256 entropy using `openssl rand -base64 32`.                                                                                                                                                                                                                                                                                    |
@@ -89,12 +95,13 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 
 To enable OAuth/SSO provider sign-in for Langfuse, refer to the [NextAuth.js docs](https://next-auth.js.org/providers/google).
 
-| Provider | Variables                                                                           |
-| -------- | ----------------------------------------------------------------------------------- |
-| Google   | `AUTH_GOOGLE_CLIENT_ID`, `AUTH_GOOGLE_CLIENT_SECRET`                                |
-| GitHub   | `AUTH_GITHUB_CLIENT_ID`, `AUTH_GITHUB_CLIENT_SECRET`                                |
-| AzureAD  | `AUTH_AZURE_AD_CLIENT_ID`, `AUTH_AZURE_AD_CLIENT_SECRET`, `AUTH_AZURE_AD_TENANT_ID` |
-| Okta     | [PR](https://github.com/langfuse/langfuse/pull/506) needs to be tested              |
+| Provider | Variables                                                                                                                               |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Google   | `AUTH_GOOGLE_CLIENT_ID`, `AUTH_GOOGLE_CLIENT_SECRET`, optionally `AUTH_GOOGLE_ALLOW_ACCOUNT_LINKING=true`                               |
+| GitHub   | `AUTH_GITHUB_CLIENT_ID`, `AUTH_GITHUB_CLIENT_SECRET`, optionally `AUTH_GITHUB_ALLOW_ACCOUNT_LINKING=true`                               |
+| AzureAD  | `AUTH_AZURE_AD_CLIENT_ID`, `AUTH_AZURE_AD_CLIENT_SECRET`, `AUTH_AZURE_AD_TENANT_ID`, optionally `AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true` |
+| Okta     | [PR](https://github.com/langfuse/langfuse/pull/506) needs to be tested                                                                  |
+| Auth0    | [PR](https://github.com/langfuse/langfuse/pull/1290) needs to be tested                                                                 |
 
 ### Health Check Endpoint
 
@@ -127,9 +134,10 @@ If you encounter issues, ensure the following:
 
 Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
 
-<Frame className="max-w-md block mb-0" border>
+<Frame className="max-w-md block" border>
   ![Langfuse releases](/images/docs/github-watch-changelog.gif)
 </Frame>
+
 <span>_Watch the repository on GitHub to get notified about new releases_</span>
 
 ### How to update
@@ -185,7 +193,7 @@ Optionally, you can apply the new model definitions to existing data using the f
 
 ## Platform-specific information
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info">
   This section is work in progress and relies on community contributions. The
   Langfuse team/maintainers do not have the capacity to maintain or test this
   section. If you have successfully deployed Langfuse on a specific platform,

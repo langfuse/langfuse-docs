@@ -1,5 +1,6 @@
 ---
 description: Learn how to use Langfuse for open source observability/tracing of LLM API routes powered by the Vercel AI SDK.
+category: Integrations
 ---
 
 # Cookbook: Vercel AI SDK (JS/TS)

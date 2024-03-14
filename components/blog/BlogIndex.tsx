@@ -4,7 +4,7 @@ import Image from "next/image";
 import { type Page } from "nextra";
 
 export const BlogIndex = ({ maxItems }: { maxItems?: number }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
     {(getPagesUnderRoute("/blog") as Array<Page & { frontMatter: any }>)
       .slice(0, maxItems)
       .map((page) => (
