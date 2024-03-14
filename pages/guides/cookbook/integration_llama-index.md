@@ -93,9 +93,9 @@ langfuse_callback_handler.flush()
 Done! ✨ You see traces of your index and query in your Langfuse project.
 
 Example traces (public links):
-1. [Index](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/5268a183-b47b-4797-8ba7-fcaff0e26438)
-2. [Query](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/d84d38b5-1dbc-47ce-bcad-893e1a39aefa)
-3. [Query (chat)](https://cloud.langfuse.com/project/clsuh9o2y0000mbztvdptt1mh/traces/7101af0c-5716-448e-8a80-a02a04f70ccb)
+1. [Query](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/traces/f2e7f721-0940-4139-9b3a-e5cc9b0cb2d3)
+2. [Query (chat)](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/traces/89c62a4d-e992-4923-a6b7-e2f27ae4cff3)
+3. [Session](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/sessions/notebook-session-2)
 
 Trace in Langfuse:
 
