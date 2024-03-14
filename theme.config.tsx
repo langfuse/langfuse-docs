@@ -71,7 +71,7 @@ const config: DocsThemeConfig = {
       const { asPath } = useRouter();
       if (type === "separator" && title === "Switcher") {
         return (
-          <div className="-mx-2">
+          <div className="-mx-2 hidden md:block">
             {[
               { title: "Docs", path: "/docs", Icon: LibraryBig },
               { title: "Guides", path: "/guides", Icon: FileCode },

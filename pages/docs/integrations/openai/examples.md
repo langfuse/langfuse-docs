@@ -1,5 +1,6 @@
 ---
 description: Drop-in replacement of OpenAI SDK to get full observability in Langfuse by changing only the import
+category: Integrations
 ---
 
 # Cookbook: OpenAI Integration (Python)

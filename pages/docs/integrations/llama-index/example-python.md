@@ -1,5 +1,6 @@
 ---
 description: Example cookbook for the LlamaIndex Langfuse integration.
+category: Integrations
 ---
 
 # Cookbook LlamaIndex Integration

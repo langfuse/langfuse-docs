@@ -1,3 +1,8 @@
+---
+description: End-to-end example of creating a dataset, adding items, and running experiments with Langfuse datasets.
+category: Datasets
+---
+
 # Langfuse Datasets Cookbook
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.

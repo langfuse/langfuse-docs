@@ -1,3 +1,8 @@
+---
+description: Use RAGAS to evaluate your RAG pipelines traced with Langfuse to measure the quality of your retrieval and sythesis.
+category: Evaluation
+---
+
 # Evaluation of RAG pipelines with Ragas
 
 Langfuse offers the feature to score your traces and spans. They can be used in multiple ways across Langfuse:
