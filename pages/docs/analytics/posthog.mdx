@@ -1,0 +1,126 @@
+---
+description: Display your Langfuse metrics in Posthog dashboards.
+---
+
+# PostHog Integration (Beta)
+
+import { CloudflareVideo } from "@/components/Video";
+
+[PostHog](https://posthog.com) is a popular choice for OSS product analytics. While Langfuse offers [analytics](/docs/analytics) out of the box, many of our users have asked for a way to **integrate their LLM related metrics that they capture with Langfuse into their PostHog dashboards**.
+
+We've built an integration to make it easy to answer questions like:
+
+- _"Are my most active users also the ones who are most engaged with my LLM content?"_
+- _"Does interacting with the LLM feature relate to higher retention rates?"_
+- _"How does the LLM feature impact my conversion rates?"_
+- _"Does the user feedback that I capture in Langfuse correlate with the user behavior that I see in PostHog?"_
+
+## Example PostHog Dashboard
+
+<CloudflareVideo
+  videoId="d27b3b672f9091495c05444df12b23cf"
+  aspectRatio={16 / 9.33}
+  gifStyle
+/>
+
+## Get started
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="ℹ️">
+  This is a beta feature and currently only available for users of our managed
+  service.
+</Callout>
+
+Interested to use this integration for your Langfuse project? Reach out to us: early-access@langfuse.com
+
+## Build a dashboard in PostHog
+
+Once integrated, you can build a dashboard in PostHog to visualize your Langfuse metrics. Use the _AI Metrics_ template to get started with a pre-built dashboard that includes the most common metrics from Langfuse.
+
+<Frame border className="max-w-xs block">
+  ![PostHog Dashboard Template](/images/docs/posthog-template.png)
+</Frame>
+
+## Integration details
+
+On a daily schedule Langfuse batches aggregated events and metrics to your PostHog instance.
+
+### Metadata matching
+
+Matching of metadata helps to join the data from Langfuse with the data from PostHog:
+
+| Langfuse                                                      | PostHog        | Notes                                                                     |
+| ------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------- |
+| `user_id`                                                     | `$distinct_id` |                                                                           |
+| `trace.timestamp`, `generation.started_at`, `score.timestamp` | `timestamp`    |                                                                           |
+| `trace.metadata.$posthog_session_id`                          | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
+
+### User properties
+
+We send the following user properties via `'$set'`:
+
+- `langfuse_user_url`: Deeplink to the [user profile](/docs/tracing/users) in Langfuse.
+
+### Events
+
+You can decide which events you want to send to PostHog. By default, we send all of the following events:
+
+#### Event: `langfuse trace`
+
+- `timestamp`: The time the event occurred.
+- `langfuse_trace_name`: The name of the trace.
+- `langfuse_url`: The URL of the trace.
+- `langfuse_id`: The unique identification of the trace.
+- `langfuse_cost_usd`: The total cost associated with the trace.
+- `langfuse_count_observations`: The number of observations in the trace.
+- `langfuse_session_id`: The session ID related to the event.
+- `langfuse_project_id`: An ID associated with the project related to the event.
+- `langfuse_user_id`: User ID related to the event. If it's null, it's marked as langfuse_unknown_user.
+- `langfuse_latency`: The latency of the event.
+- `langfuse_release`: Information relating to the event release.
+- `langfuse_version`: The version of the event.
+- `langfuse_tags`: Any tags associated with the event.
+- `langfuse_integration_version`: The integration version of LangFuse.
+
+#### Event: `langfuse generation`
+
+- `timestamp`: The start time of the generation.
+- `langfuse_generation_name`: The name of the generation.
+- `langfuse_trace_name`: Name of the trace related to the generation.
+- `langfuse_url`: The URL of the generation on the host platform.
+- `langfuse_id`: Unique identifier of the generation.
+- `langfuse_cost_usd`: Computed total cost of the generation.
+- `langfuse_input_units`: Number of tokens utilized in prompting the generation.
+- `langfuse_output_units`: Number of tokens produced by the generation.
+- `langfuse_total_units`: Total number of tokens consumed in the generation process.
+- `langfuse_unit`: The units used for the generation (likely tokens).
+- `langfuse_session_id`: The session ID associated with the trace of the generation.
+- `langfuse_project_id`: The project identification where the generation happened.
+- `langfuse_user_id`: The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
+- `langfuse_latency`: The observed latency of the generation.
+- `langfuse_release`: Release information of the trace attached with the generation.
+- `langfuse_version`: The versioning info about the generation.
+- `langfuse_model`: The model used during this generation's process.
+- `langfuse_level`: The level associated with the generation.
+- `langfuse_tags`: Any tags attached to the trace of the generation.
+- `langfuse_integration_version`: The integration version with LangFuse.
+
+#### Event `langfuse score`
+
+- `timestamp`: The time when the score event occurred.
+- `langfuse_score_name`: The name associated with the score.
+- `langfuse_score_value`: The value of the score.
+- `langfuse_score_comment`: Any comments attached with the score.
+- `langfuse_trace_name`: The name of the trace associated with the score.
+- `langfuse_id`: The unique identification of the score.
+- `langfuse_session_id`: The session identification related to the score's trace.
+- `langfuse_project_id`: The project identification linked with the score's trace.
+- `langfuse_user_id`: The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.
+- `langfuse_release`: The release information of the trace associated with the score.
+- `langfuse_tags`: Any tags related to the trace of the score.
+- `langfuse_integration_version`: The integration version with LangFuse.
+
+## Questions?
+
+If you have any questions about this integration, please reach out to us at early-access@langfuse.com
