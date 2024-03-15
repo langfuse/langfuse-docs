@@ -10,14 +10,19 @@ If you use one of our main integrations ([OpenAI](/docs/integrations/openai), [L
 
 For a detailed API reference, see our [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators).
 
-Here's a simple example of our decorators-based Python SDK:
+_Simple example:_
 
 ```python /@observe()/
 from langfuse.decorators import observe
+from langfuse.openai import openai # OpenAI integration
 
 @observe()
 def child():
-    print("Hello, from a nested function!")
+    return openai.Completion.create(
+        model="text-davinci-003",
+        prompt="Once upon a time",
+        max_tokens=5
+    )
 
 @observe()
 def main():
@@ -26,8 +31,6 @@ def main():
 
 main()
 ```
-
-Voilà! ✨ Langfuse will generate a trace with a nested span for you.
 
 ## Installation & setup
 
@@ -45,8 +48,6 @@ pip install langfuse
 
 If you haven't done so yet, [sign up to Langfuse](https://cloud.langfuse.com/auth/sign-up) and obtain your API keys from the project settings. Alternatively, you can also run Langfuse locally or self-host.
 
-Configure your environment variables to reflect the correct values for `LANGFUSE_HOST`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_PUBLIC_KEY`. You can use either a `.env` file at the root of your application in combination with `python-dotenv`, or set them directly
-
 import PythonEnv from "@/components-mdx/env-python.mdx";
 import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
 
@@ -63,9 +64,9 @@ import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
 
 ### Add the Langfuse decorator
 
-To use the Langfuse decorator, import it from the `langfuse.decorators` module and apply it to the functions you want to trace.
+To use the Langfuse `@observe()` decorator, import it from the `langfuse.decorators` module and apply it to the functions you want to trace.
 
-```python
+```python /@observe()/
 from langfuse.decorators import observe
 
 @observe()
@@ -74,6 +75,33 @@ def main():
 
 main()
 ```
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  Done! ✨ Read on to learn how to capture additional information, LLM calls,
+  and more with Langfuse Python decorators.
+</Callout>
+
+<Callout type="warning">
+
+In a short-lived environment like AWS Lambda, make sure to call `flush()` before the
+function terminates to avoid losing events.
+
+```python /langfuse_context.flush()/
+from langfuse.decorators import langfuse_context
+from langfuse.decorators import observe
+
+@observe()
+def main():
+    print("Hello, from the main function!")
+
+main()
+
+langfuse_context.flush()
+```
+
+</Callout>
 
 </Steps>
 
