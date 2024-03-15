@@ -1,5 +1,6 @@
 ---
 description: Langfuse Python SDK - a decorators-based integration to give you powerful tracing, evals, and analytics for your LLM application
+category: SDKs
 ---
 
 # Python SDK Guide

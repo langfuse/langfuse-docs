@@ -1,13 +1,16 @@
 ---
+title: Python SDK (Legacy)
 description: Fully async and typed Python SDK. Uses Pydantic objects for data verification.
-category: Integrations
+category: SDKs
 ---
 
-# Python SDK
+# Python SDK (Legacy)
 
 [![PyPI](https://img.shields.io/pypi/v/langfuse?style=flat-square)](https://pypi.org/project/langfuse/)
 
 This is a Python SDK used to send LLM data to Langfuse in a convenient way. It uses a worker Thread and an internal queue to manage requests to the Langfuse backend asynchronously. Hence, the SDK adds only minimal latency to your application.
+
+For most use cases, you should check out the [decorator-based SDK](http://langfuse.com/docs/sdk/python/decorators), which is more convenient and easier to use. This SDK is more low-level and is only recommended if you need more control over the request process.
 
 ## Installation
 
