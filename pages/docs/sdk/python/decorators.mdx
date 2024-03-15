@@ -51,13 +51,13 @@ If you haven't done so yet, [sign up to Langfuse](https://cloud.langfuse.com/aut
 import PythonEnv from "@/components-mdx/env-python.mdx";
 import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
 
-<Tabs items={["os", ".env"]}>
+<Tabs items={["os.environ", "python-dotenv"]}>
   <Tab>
     <PythonEnvOs />
   </Tab>
   <Tab>
-    Use `python-dotenv` to load the environment variables from a `.env` file at
-    the root of your application.
+    Use [`python-dotenv`](https://pypi.org/project/python-dotenv/) to load the
+    environment variables from a `.env` file at the root of your application.
     <PythonEnv />
   </Tab>
 </Tabs>
@@ -105,7 +105,7 @@ langfuse_context.flush()
 
 </Steps>
 
-## Basic usage
+## Advanced usage
 
 Langfuse simplifies observability in LLM-powered applications by organizing activities into traces. Each trace contains observations: spans for nested activities, events for distinct actions, or generations for LLM interactions. This setup mirrors your app's execution flow, offering insights into performance and behavior. See our [Tracing documentation](/docs/tracing/overview) for more details on Langfuse's telemetry model.
 
