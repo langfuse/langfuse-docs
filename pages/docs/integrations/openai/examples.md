@@ -167,6 +167,7 @@ Many applications require more than one OpenAI call. Langfuse `decorators` allow
 
 
 ```python
+from langfuse.openai import openai
 from langfuse.decorators import langfuse_context, observe
 
 @observe() # decorator to automatically create trace and nest generations
@@ -238,6 +239,7 @@ Some of the functionality enabled by custom traces:
 
 
 ```python
+from langfuse.openai import openai
 from langfuse.decorators import langfuse_context, observe
 
 @observe() # decorator to automatically create trace and nest generations

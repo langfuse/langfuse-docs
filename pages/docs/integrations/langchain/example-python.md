@@ -266,12 +266,10 @@ trace = langfuse.score(
 
 ## Interoperability with Langfuse Python SDK
 
-To use all functionalities of Langfuse, use the `get_langchain_handler()`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/integrations/langchain).
+To use all functionalities of Langfuse, use the `get_current_langchain_handler()` by simply calling `langfuse_context.get_current_langchain_handler()` in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/integrations/langchain).
 
 
 ### How it works
-
-In Langfuse, we can get a Langchain callback handler by simply calling `langfuse_context.get_current_langchain_handler()` in the context of a trace or span when using `decorators`.
 
 
 ```python
