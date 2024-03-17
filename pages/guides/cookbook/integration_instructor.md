@@ -32,6 +32,77 @@ os.environ["LANGFUSE_SECRET_KEY"] = ""
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
+## Get started
+
+It is easy to use instructur with Langfuse. Simply patch your Langfuse wrapper of an OpenAI client with instructor and that is it. As you can see below, this works with both synchronous and asynchronous clients.
+
+### Langfuse-Instructor integration with sychnronous OpenAI client
+
+
+```python
+import instructor
+from langfuse.openai import OpenAI
+from pydantic import BaseModel
+
+# Patch Langfuse wrapper of synchronous OpenAI client with instructor
+client = instructor.patch(OpenAI())
+
+class WeatherDetail(BaseModel):
+    city: str
+    temperature: int
+
+# Run synchronous OpenAI client
+weather_info = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    response_model=WeatherDetail,
+    messages=[
+        {"role": "user", "content": "The weather in Paris is 18 degrees Celsius."},
+    ],
+)
+
+print(weather_info.model_dump_json(indent=2))
+"""
+{
+  "city": "Paris",
+  "temperature": 18
+}
+"""
+```
+
+### Langfuse-Instructor integration with asychnronous OpenAI client
+
+
+```python
+import instructor
+from langfuse.openai import AsyncOpenAI
+from pydantic import BaseModel
+
+# Patch Langfuse wrapper of synchronous OpenAI client with instructor
+client = instructor.apatch(AsyncOpenAI())
+
+class WeatherDetail(BaseModel):
+    city: str
+    temperature: int
+
+# Run asynchronous OpenAI client
+task = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    response_model=WeatherDetail,
+    messages=[
+        {"role": "user", "content": "The weather in Paris is 18 degrees Celsius."},
+    ],
+)
+
+response = await task
+print(response.model_dump_json(indent=2))
+"""
+{
+  "city": "Paris",
+  "temperature": 18
+}
+"""
+```
+
 ## Example
 
 In this example, we first classify customer feedback into categories like `PRAISE`, `SUGGESTION`, `BUG` and `QUESTION`, and further scores the relvance of each feedback to the business on a scale of 0.0 to 1.0. In this case, we use the asynchronous OpenAI client `AsyncOpenAI` to classify and evaluate the feedback.
@@ -103,17 +174,18 @@ async def classify_feedback(feedback: str) -> Tuple[FeedbackClassification, floa
             ],
         )
 
-        # Retrieve trace_id of current trace
-        trace_id = langfuse_context.get_current_trace_id()
+        # Retrieve observation_id of current span
+        observation_id = langfuse_context.get_current_observation_id()
 
-        return feedback, response, trace_id
+        return feedback, response, observation_id
 
-def score_relevance(trace_id: str, relevance_score: float):
+def score_relevance(trace_id: str, observation_id: str, relevance_score: float):
     """
-    Score the relevance of a feedback query in Langfuse given the trace_id.
+    Score the relevance of a feedback query in Langfuse given the observation_id.
     """
     langfuse.score(
         trace_id=trace_id,
+        observation_id=observation_id,
         name="feedback-relevance",
         value=relevance_score
     )
@@ -124,7 +196,7 @@ async def main(feedbacks: List[str]):
     results = []
 
     for task in asyncio.as_completed(tasks):
-        feedback, classification, trace_id = await task
+        feedback, classification, observation_id = await task
         result = {
             "feedback": feedback,
             "classification": [c.value for c in classification.classification],
@@ -132,8 +204,11 @@ async def main(feedbacks: List[str]):
         }
         results.append(result)
 
+        # Retrieve trace_id of current trace
+        trace_id = langfuse_context.get_current_trace_id()
+
         # Score the relevance of the feedback in Langfuse
-        score_relevance(trace_id, classification.relevance_score)
+        score_relevance(trace_id, observation_id, classification.relevance_score)
 
     # Flush observations to Langfuse
     langfuse_context.flush()
@@ -158,18 +233,18 @@ if __name__ == "__main__":
 Feedback: I have a question about my recent order.
 Classification: ['QUESTION']
 Relevance Score: 0.0
+Feedback: Could you add more features to your app?
+Classification: ['SUGGESTION']
+Relevance Score: 0.0
 Feedback: The chat bot on your website does not work.
 Classification: ['BUG']
 Relevance Score: 0.9
 Feedback: Your customer service is exceptional!
 Classification: ['PRAISE']
-Relevance Score: 1.0
-Feedback: Could you add more features to your app?
-Classification: ['SUGGESTION']
-Relevance Score: 0.0
+Relevance Score: 0.9
 """
 ```
 
 Go to https://cloud.langfuse.com or your own instance to see your trace.
 
-!TODO: Put screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/0fbbca65-77e7-4564-92e3-216cdf407127)
+!TODO: Put screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/d5b9eb6f-2f2e-429b-a9f8-17aaffddfdba)
