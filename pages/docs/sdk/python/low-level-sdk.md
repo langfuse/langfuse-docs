@@ -1,10 +1,10 @@
 ---
-title: Python SDK (Legacy)
+title: Python SDK (Low-level)
 description: Fully async and typed Python SDK. Uses Pydantic objects for data verification.
 category: SDKs
 ---
 
-# Python SDK (Legacy)
+# Python SDK (Low-level)
 
 [![PyPI](https://img.shields.io/pypi/v/langfuse?style=flat-square)](https://pypi.org/project/langfuse/)
 
