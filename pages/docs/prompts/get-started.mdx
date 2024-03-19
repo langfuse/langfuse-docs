@@ -277,6 +277,28 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
+Decorators
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe(as_type="generation")
+def nested_generation():
+    prompt = langfuse.get_prompt("movie-critic")
+
+    langfuse_context.update_current_observation(
+        prompt=prompt,
+    )
+
+@observe()
+def main():
+  nested_generation()
+
+fn()
+```
+
+Low-level SDK
+
 ```diff
 langfuse.generation(
     ...
