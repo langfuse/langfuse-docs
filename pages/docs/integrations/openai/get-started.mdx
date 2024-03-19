@@ -216,7 +216,7 @@ If you want to add further properties or observations to the trace, read the nex
 
 ### Interoperability with Langfuse Python SDK
 
-Use the OpenAI integration in combination with the regular Langfuse SDKs ([full reference](/docs/sdk/python)) if you want to:
+Use the OpenAI integration in combination with the Langfuse `@observe()` decorator ([docs](/docs/sdk/python/decorators)) if you want to:
 
 - Add non-OpenAI related observations to the trace.
 - Group multiple OpenAI calls into a single trace while customizing the trace.
@@ -233,7 +233,7 @@ Use the OpenAI integration in combination with the regular Langfuse SDKs ([full 
 Desired trace structure:
 
 ```
-TRACE: capital-poem-generator
+TRACE: capital_poem_generator(input="Bulgaria")
 |
 |-- GENERATION: get-capital
 |
@@ -242,83 +242,18 @@ TRACE: capital-poem-generator
 
 Implementation:
 
-```python {5,8,20,29}
-from langfuse import Langfuse
+```python /@observe()/
+from langfuse.decorators import observe
 from langfuse.openai import openai
 
-# initialize SDK
-langfuse = Langfuse()
-
-# create trace and add params
-trace = langfuse.trace(name="capital-poem-generator")
-
-# create multiple completions, pass trace_id to each
-
-country = "Bulgaria"
-
-capital = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "What is the capital of the country?"},
-      {"role": "user", "content": country}],
-  name="get-capital",
-  trace_id=trace_id
-).choices[0].message.content
-
-poem = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a poet. Create a poem about this city."},
-      {"role": "user", "content": capital}],
-  name="generate-poem",
-  trace_id=trace_id
-).choices[0].message.content
-```
-
-</Tab>
-<Tab>
-Desired trace structure:
-
-```
-TRACE: capital-poem-generator
-|
-|-- SPAN: Bulgaria
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-|
-|-- SPAN: France
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-```
-
-Implementation
-
-```python showLineNumbers {5,8,12,20-21,30-31,35}
-from langfuse import Langfuse
-from langfuse.openai import openai
-
-# initialize SDK
-langfuse = Langfuse()
-
-# create trace and add params
-trace = langfuse.trace(name="capital-poem-generator")
-
-for country in ["Bulgaria", "France"]:
-  # create span
-  span = trace.span(name=country)
-
+@observe()
+def capital_poem_generator(capital)
   capital = openai.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "What is the capital of the country?"},
         {"role": "user", "content": country}],
     name="get-capital",
-    trace_id=trace.id,
-    parent_observation_id=span.id,
   ).choices[0].message.content
 
   poem = openai.chat.completions.create(
@@ -327,15 +262,63 @@ for country in ["Bulgaria", "France"]:
         {"role": "system", "content": "You are a poet. Create a poem about this city."},
         {"role": "user", "content": capital}],
     name="generate-poem",
-    trace_id=trace.id,
-    parent_observation_id=span.id,
   ).choices[0].message.content
+  return poem
 
-  # End span to get span-level latencies
-  span.end()
+capital_poem_generator("Bulgaria")
 ```
 
-_Note that you need to provide `trace_id` and `parent_observation_id` to each generation._
+</Tab>
+<Tab>
+Desired trace structure:
+
+```
+TRACE: poems(input=["Bulgaria", "France"])
+|
+|-- SPAN: capital_poem_generator(input="Bulgaria")
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+|
+|-- SPAN: capital_poem_generator(input="France")
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+```
+
+Implementation
+
+```python
+from langfuse.openai import openai
+
+@observe()
+def capital_poem_generator(capital)
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+  ).choices[0].message.content
+  return poem
+
+@observe()
+def poems(countries):
+    for country in countries:
+        capital_poem_generator(country)
+
+poems(["Bulgaria", "France"])
+```
 
 </Tab>
 </Tabs>
