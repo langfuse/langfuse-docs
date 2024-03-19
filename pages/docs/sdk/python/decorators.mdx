@@ -81,6 +81,7 @@ Import the `@observe()` decorator and apply it to the functions you want to trac
 
 - nesting via context vars
 - timings/durations
+- function name
 - args and kwargs as input dict
 - returned values as output
 
@@ -110,7 +111,7 @@ import { Callout } from "nextra/components";
 <Callout type="warning">
 
 In a short-lived environment like AWS Lambda, make sure to call `flush()` before the
-function terminates to avoid losing events.
+function terminates to avoid losing events. [Learn more](#flush).
 
 ```python /langfuse_context.flush()/ /langfuse_context/
 from langfuse.decorators import observe, langfuse_context
@@ -152,9 +153,11 @@ def main():
 main()
 ```
 
-### Disable capturing of input/output
+### Capturing of input/output
 
-By default, the `@observe()` decorator captures the input arguments and output results of the function. You can disable this behavior by setting the `capture_input` and `capture_output` parameters to `False`.
+By default, the `@observe()` decorator captures the input arguments and output results of the function.
+
+**You can disable this** behavior by setting the `capture_input` and `capture_output` parameters to `False`.
 
 ```python /capture_input=False/ /capture_output=False/
 from langfuse.decorators import observe
@@ -166,7 +169,7 @@ def fn(secret_arg):
 fn("my secret arg")
 ```
 
-You can manually set the input and output of the observation using `langfuse_context.update_current_observation` (details below).
+You can **manually set the input and output** of the observation using `langfuse_context.update_current_observation` (details below).
 
 ```python /langfuse_context.update_current_observation/ /capture_input=False/ /capture_output=False/
 from langfuse.decorators import langfuse_context, observe
@@ -186,23 +189,36 @@ This will result in a trace with only sanitized input and output, and no actual 
 
 ## Decorator context
 
-Enhancing the detail and relevance of your observability data in Langfuse is straightforward. By leveraging the `langfuse_context.update_current_observation` and `langfuse_context.update_current_trace` methods, you can enrich the context of your observability data directly within the scope of the function being observed.
+Use the `langfuse_context` object to interact with the decorator context. This object is a thread-local singleton and can be accessed from anywhere within the function context.
 
-When adding parameters, consider the specific observation type that is in context. The [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators#LangfuseDecorator.update_current_observation) provides a comprehensive list of the parameters you can set per observation type. Trace parameters can be updated from any point within the nested function hierarchy.
+### Add additional attributes to the trace and observations
+
+In addition to the attributes automatically captured by the decorator, you can add others to use the full features of Langfuse.
+
+<Callout type="info">
+
+Please read the reference for more details on available parameters:
+
+- `langfuse_context.update_current_observation` ([reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators#LangfuseDecorator.update_current_observation)): Update the trace/span of the current function scope
+- `langfuse_context.update_current_trace` ([reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators#LangfuseDecorator.update_current_trace)): Update the trace itself, can also be called within any deeply nested span within the trace
+
+</Callout>
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
-```python
+```python /langfuse_context.update_current_observation/ /langfuse_context.update_current_trace/
 from langfuse.decorators import langfuse_context, observe
 
-
-@observe(as_type="generation")
-def deeply_nested_llm_call():
+@observe()
+def deeply_nested_fn():
     # Enrich the current observation with a custom name, input, and output
+    # All of these parameters override the default values captured by the decorator
     langfuse_context.update_current_observation(
-        name="Deeply nested LLM call", input="Ping?", output="Pong!"
+        name="Deeply nested LLM call",
+        input="Ping?",
+        output="Pong!"
     )
-    # Set the parent trace's name from within a nested observation
+    # Updates the trace, overriding the default trace name `main` (function name)
     langfuse_context.update_current_trace(
         name="Trace name set from deeply_nested_llm_call",
         session_id="1234",
@@ -210,40 +226,115 @@ def deeply_nested_llm_call():
         tags=["tag1", "tag2"],
         public=True
     )
-
+    return "output" # This output will not be captured as we have overridden it
 
 @observe()
-def nested_span():
+def nested_fn():
     # Update the current span with a custom name and level
-    langfuse_context.update_current_observation(name="Nested Span", level="WARNING")
-    deeply_nested_llm_call()
-
+    # Overrides the default span name
+    langfuse_context.update_current_observation(
+        name="Nested Span",
+        level="WARNING"
+    )
+    deeply_nested_fn()
 
 @observe()
 def main():
-    nested_span()
-
+    # This will be the trace as it is the highest level function
+    nested_fn()
 
 # Execute the main function to generate the enriched trace
 main()
-
-# Flush the enriched data to the Langfuse platform for analysis
-langfuse_context.flush()
 ```
 
-On the Langfuse platform the trace now shows with the updated name from the `deeply_nested_llm_call`, and the observations will be enriched with the appropriate data points.
+### Get trace URL
 
-![python_decorators_enriched-nesting](/images/cookbook/python_decorators_enriched-nesting.png)
+You can get the URL of the current trace using `langfuse_context.get_current_trace_url()`. Works anywhere within the function context, also in deeply nested functions.
 
-### Flush observations
+```python /langfuse_context.get_current_trace_url()/
+from langfuse.decorators import langfuse_context, observe
 
-The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments such as AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
+@observe()
+def main():
+    print(langfuse_context.get_current_trace_url())
 
-To avoid this, ensure that the `langfuse_context.flush()` method is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
+main()
+```
 
-## Additional features
+### Trace/observation IDs
 
-### Scoring
+By default, Langfuse assigns random IDs to all logged events.
+
+#### Get trace and observation IDs
+
+You can access the current trace and observation IDs from the `langfuse_context` object.
+
+```python /langfuse_context.get_current_trace_id()/ /langfuse_context.get_current_observation_id/
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    print(langfuse_context.get_current_trace_id())
+    print(langfuse_context.get_current_observation_id())
+
+fn()
+```
+
+#### Set custom IDs
+
+If you have your own unique ID (e.g. messageId, traceId, correlationId), you can easily set those as trace or observation IDs for effective lookups in Langfuse. Just pass the `langfuse_observation_id` keyword argument to the decorated function.
+
+```python /langfuse_observation_id="my-custom-request-id"/ /langfuse_observation_id="my-custom-request-id"/
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def process_user_request(user_id, request_data, **kwargs):
+    # Function logic here
+    pass
+
+@observe(**kwargs)
+def main():
+    process_user_request(
+        "user_id",
+        "request",
+        langfuse_observation_id="my-custom-request-id",
+    )
+
+
+main(langfuse_observation_id="my-custom-request-id")
+```
+
+## Interoperability with integrations
+
+The decorator is fully interoperable with our main integrations: [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index). Thereby you can easily trace and evaluate functions that use (a combination of) these integrations.
+
+### OpenAI
+
+The [drop-in `openai` integration](/docs/integrations/openai) is fully compatible with the `@observe()` decorator. It automatically adds a generation observation to the trace within the current context.
+
+```python /openai/
+from langfuse.decorators import observe
+from langfuse.openai import openai
+
+@observe()
+def story():
+    return openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        max_tokens=100,
+        messages=[
+          {"role": "system", "content": "You are a great storyteller."},
+          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
+        ],
+    ).choices[0].message.content
+
+@observe()
+def main():
+    return story()
+
+main()
+```
+
+## Adding scores
 
 [Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. They can created manually via the Langfuse UI or via the SDKs.
 
@@ -253,11 +344,13 @@ To avoid this, ensure that the `langfuse_context.flush()` method is called befor
 | value     | number | no       | The value of the score. Can be any number, often standardized to 0..1 |
 | comment   | string | yes      | Additional context/explanation of the score.                          |
 
+<Tabs items={["Within the decorator context","Outside the decorated function"]}>
+<Tab>
+
 You can attach a score to the current observation context by calling `langfuse_context.score_current_observation`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse_context.score_current_trace`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
-
 
 # This will create a new span under the trace
 @observe()
@@ -280,72 +373,31 @@ def nested_span():
 def main():
     nested_span()
 
-
 main()
-
-# Flush the trace to send it to the Langfuse platform
-langfuse_context.flush()
 ```
 
-### Custom IDs
+</Tab>
+<Tab>
 
-If you have your own unique ID representing an execution (messageId, traceId, correlationId), you can easily set those as trace or observation IDs for effective lookups in Langfuse. To set a custom ID for a trace or observation, simply pass the `langfuse_observation_id` as a keyword argument _within the traced function_. Requiring `langfuse_observation_id` to be set as a keyword argument (kwarg) here rather than as a static decorator argument enables ID assignment at runtime.
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-
-@observe()
-def process_user_request(user_id, request_data, **kwargs):
-    # Function logic here
-    pass
-
-
-def main():
-    user_id = "user123"
-    request_data = {"action": "login"}
-
-    # Custom ID for tracking
-    custom_observation_id = f"{user_id}-{request_data['action']}"
-    process_user_request(
-        user_id=user_id,
-        request_data=request_data,
-        # Pass the custom observation ID to the function
-        langfuse_observation_id=custom_observation_id,
-    )
-
-
-main()
-
-# Flush the trace to send it to the Langfuse platform
-langfuse_context.flush()
-```
-
-Alternatively you may also score a trace or observation from outside its context, since the `trace_id` or the `trace_id` in combination with the `observation_id` are sufficient to attach a score even from outside the function context. See the [Python SDK docs](https://python.reference.langfuse.com/langfuse/client#Langfuse.score) on the score method on the Langfuse client object.
+The decorators expose the trace_id and observation_id which are necessary to add scores outside of the decorated functions. This is useful whenever you want to add scores asynchronously, e.g. based on user feedback.
 
 ```python
 from langfuse import Langfuse
 from langfuse.decorators import langfuse_context, observe
 
-# Initialize the Langfuse client
-langfuse_client = Langfuse()
-
-
 # Create a new trace
 @observe()
 def main():
     trace_id = langfuse_context.get_current_trace_id()
-
     return "function_result", trace_id
-
-
-# Flush the trace to send it to the Langfuse platform
-langfuse_context.flush()
 
 # Execute the main function to generate a trace
 _, trace_id = main()
+```
 
-# Score the trace from outside the trace context
+```python
+# Score the trace from outside the trace context using the low-level SDK
+langfuse_client = Langfuse()
 langfuse_client.score(
     trace_id=trace_id,
     name="user-explicit-feedback",
@@ -354,19 +406,24 @@ langfuse_client.score(
 )
 ```
 
+</Tab>
+</Tabs>
+
+## Additional configuration
+
+### Flush observations [#flush]
+
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments such as AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
+
+To avoid this, ensure that the `langfuse_context.flush()` method is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
+
 ### Debug mode
 
 Enable debug mode to get verbose logs. Set the debug mode via the environment variable `LANGFUSE_DEBUG=True`.
 
 ### Authentication check
 
-Use `langfuse_context.auth_check()` to verify that your host and API credentials are valid.
-
-### Releases and versions
-
-Track `releases` in Langfuse to relate traces in Langfuse with the versioning of your application. This can be done by setting the environment variable `LANGFUSE_RELEASE` or setting it as a trace parameter.
-
-If no release is set, this defaults to [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3).
+Use `langfuse_context.auth_check()` to verify that your host and API credentials are valid. This operation is blocking and is not recommended for production use.
 
 ## API reference
 
