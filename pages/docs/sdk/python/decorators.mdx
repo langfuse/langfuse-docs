@@ -2,35 +2,48 @@
 description: A decorator-based integration to give you powerful tracing, evals, and analytics for your LLM application
 ---
 
-# Langfuse Python Decorators
+# Decorator-based Python Integration
 
-The Langfuse Python SDK uses decorators for you to effortlessly integrate [Langfuse Tracing](/docs/tracing) into your LLM applications. It supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs and outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code.
+Integrate [Langfuse Tracing](/docs/tracing) into your LLM applications with the Langfuse Python SDK using the `@observe()` decorator.
 
-If you use one of our main integrations ([OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index)), these will also get tracked if you enable the respective integration (more on this below).
+The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs and outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully itneroperable with our main integrations (more on this below): [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index)
 
-For a detailed API reference, see our [Python SDK API Reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators).
+See the [reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators) for a comprehensive list of all available parameters and methods.
 
-_Simple example_
+Want more control over the traces logged to Langfuse? Check out the [low-level Python SDK](/docs/sdk/python/low-level-sdk).
 
-```python /@observe()/
+## Example
+
+_Simple example (decorator + openai integration)_
+
+```python /@observe()/ filename="main.py"
 from langfuse.decorators import observe
 from langfuse.openai import openai # OpenAI integration
 
 @observe()
-def child():
-    return openai.Completion.create(
-        model="text-davinci-003",
-        prompt="Once upon a time",
-        max_tokens=5
-    )
+def story():
+    return openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        max_tokens=100,
+        messages=[
+          {"role": "system", "content": "You are a great storyteller."},
+          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
+        ],
+    ).choices[0].message.content
 
 @observe()
 def main():
-    print("Hello, from the main function!")
-    child()
+    return story()
 
 main()
 ```
+
+_Trace in Langfuse ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/fac231bc-90ee-490a-aa32-78c4269474e3?observation=36544d09-dec7-48ff-88c3-6c2ae3fe2baf))_
+
+<Frame fullWidth>
+  ![Simple OpenAI decorator
+  trace](/images/docs/python-decorator-simple-trace.png)
+</Frame>
 
 ## Installation & setup
 
@@ -64,14 +77,25 @@ import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
 
 ### Add the Langfuse decorator
 
-To use the Langfuse `@observe()` decorator, import it from the `langfuse.decorators` module and apply it to the functions you want to trace.
+Import the `@observe()` decorator and apply it to the functions you want to trace. By default it captures:
+
+- nesting via context vars
+- timings/durations
+- args and kwargs as input dict
+- returned values as output
+
+The decorator will automatically create a trace for the top-level function and spans for any nested functions. Learn more about the tracing data model [here](/docs/tracing/overview).
 
 ```python /@observe()/
 from langfuse.decorators import observe
 
 @observe()
+def fn():
+    pass
+
+@observe()
 def main():
-    print("Hello, from the main function!")
+    fn()
 
 main()
 ```
@@ -88,9 +112,8 @@ import { Callout } from "nextra/components";
 In a short-lived environment like AWS Lambda, make sure to call `flush()` before the
 function terminates to avoid losing events.
 
-```python /langfuse_context.flush()/
-from langfuse.decorators import langfuse_context
-from langfuse.decorators import observe
+```python /langfuse_context.flush()/ /langfuse_context/
+from langfuse.decorators import observe, langfuse_context
 
 @observe()
 def main():
@@ -105,54 +128,63 @@ langfuse_context.flush()
 
 </Steps>
 
-## Advanced usage
+## Decorator arguments
 
-Langfuse simplifies observability in LLM-powered applications by organizing activities into traces. Each trace contains observations: spans for nested activities, events for distinct actions, or generations for LLM interactions. This setup mirrors your app's execution flow, offering insights into performance and behavior. See our [Tracing documentation](/docs/tracing/overview) for more details on Langfuse's telemetry model.
+> See [SDK reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators#observe) for full details.
 
-Langfuse simplifies application tracing with the `@observe()` decorator, automating the tracking of execution times and the nesting hierarchy of calls. This approach allows you to seamlessly integrate observability by simply decorating the functions you'd like to trace, and focusing on feature development while Langfuse handles the intricacies of contexts and nested calls.
+### Specify `as_type` of created observation
 
-### Capture traces
+Observations in Langfuse can be of type `span`, `event`, and `generation` (learn more about the [tracing data model](/docs/tracing/overview)). By default, the `@observe()` decorator creates spans for nested functions and traces for the top-level function.
 
-In Langfuse, traces serve as the foundational element, acting as containers for various observations within your application. Traces are capable of representing comprehensive execution flows, such as those found in chained LLM applications, backend endpoint processes, or any complex sequence involving multiple observations. This hierarchical structure allows for a detailed and organized view of application performance and behavior.
+You can override this behavior by specifying the `as_type` parameter.
 
-Utilizing the `@observe()` decorator provided by the Langfuse Python SDK, you can designate the top-level function in a sequence as a trace. Subsequent nested function calls decorated with `@observe()` are automatically recognized as either spans, which are subdivisions of a trace capturing specific operations, or generations, which are specialized observations for LLM interactions.
-
-Here's a concise example demonstrating how to employ the Langfuse decorator to capture traces, spans, and generations, and how to finalize the trace by flushing it to the Langfuse platform for analysis:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
+```python /@observe(as_type="generation")/
+from langfuse.decorators import observe
 
 @observe(as_type="generation")
-def deeply_nested_llm_call():
-    # Logic for a deeply nested LLM call
+def fn():
     pass
-
-
-@observe()
-def nested_span():
-    # This creates a new span within the trace
-    deeply_nested_llm_call()
-
 
 @observe()
 def main():
-    # The entry point creating a new trace
-    nested_span()
+    fn()
 
-
-# Execute the main function to initiate the trace
 main()
-
-# Flush the collected data to the Langfuse platform
-langfuse_context.flush()
 ```
 
-This will be the resulting hierarchy from the above executions:
+### Disable capturing of input/output
 
-![python_decorators_nesting](/images/cookbook/python_decorators_nesting.png)
+By default, the `@observe()` decorator captures the input arguments and output results of the function. You can disable this behavior by setting the `capture_input` and `capture_output` parameters to `False`.
 
-### Enrich elements
+```python /capture_input=False/ /capture_output=False/
+from langfuse.decorators import observe
+
+@observe(capture_input=False, capture_output=False)
+def fn(secret_arg):
+    return "super secret output"
+
+fn("my secret arg")
+```
+
+You can manually set the input and output of the observation using `langfuse_context.update_current_observation` (details below).
+
+```python /langfuse_context.update_current_observation/ /capture_input=False/ /capture_output=False/
+from langfuse.decorators import langfuse_context, observe
+
+@observe(capture_input=False, capture_output=False)
+def fn(secret_arg):
+    langfuse_context.update_current_observation(
+        input="sanitized input", # any serializable object
+        output="sanitized output", # any serializable object
+    )
+    return "super secret output"
+
+fn("my secret arg")
+```
+
+This will result in a trace with only sanitized input and output, and no actual function arguments or return values.
+
+## Decorator context
 
 Enhancing the detail and relevance of your observability data in Langfuse is straightforward. By leveraging the `langfuse_context.update_current_observation` and `langfuse_context.update_current_trace` methods, you can enrich the context of your observability data directly within the scope of the function being observed.
 
