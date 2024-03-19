@@ -71,7 +71,7 @@ main_fn("hi there");
 
 Voilà! ✨ Langfuse will generate a trace with a nested span for you.
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/21128edc-27bf-4643-92f9-84d66c63de8d
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/21128edc-27bf-4643-92f9-84d66c63de8d
 
 ## Add additional parameters to the trace
 
@@ -120,9 +120,7 @@ main()
 
 On the Langfuse platform the trace now shows with the updated name from the `deeply_nested_llm_call`, and the observations will be enriched with the appropriate data points.
 
-![python_decorators_enriched-nesting](/images/cookbook/python_decorators_enriched-nesting.png)
-
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f16e0151-cca8-4d90-bccf-1d9ea0958afb
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f16e0151-cca8-4d90-bccf-1d9ea0958afb
 
 ## Log an LLM Call using `as_type="generation"`
 
@@ -144,7 +142,7 @@ def main_fn():
 main_fn()
 ```
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3255f178-e91f-4683-8eee-e5b2023bc724?observation=cc3f19ed-b04a-4bd9-937d-278ff8e4bb05
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3255f178-e91f-4683-8eee-e5b2023bc724?observation=cc3f19ed-b04a-4bd9-937d-278ff8e4bb05
 
 ## Customize input/output
 
@@ -163,7 +161,7 @@ def stealth_fn(input: str):
 stealth_fn("Super secret content")
 ```
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6bdeb443-ef8c-41d8-a8a1-68fe75639428
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6bdeb443-ef8c-41d8-a8a1-68fe75639428
 
 Alternatively, you can **override input and output** via `update_current_observation` (or `update_current_trace`):
 
@@ -189,7 +187,7 @@ def main_fn():
 main_fn()
 ```
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d3c3ad92-d85d-4437-aaf3-7587d84f398c
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d3c3ad92-d85d-4437-aaf3-7587d84f398c
 
 ## Interoperability with other Integrations
 
@@ -295,7 +293,7 @@ main();
 ```
 
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4fcd93e3-79f2-474a-8e25-0e21c616249a
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4fcd93e3-79f2-474a-8e25-0e21c616249a
 
 ## Flush observations
 
@@ -352,7 +350,7 @@ def main():
 main()
 ```
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/1dfcff43-34c3-4888-b99a-bb9b9afd57c9
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/1dfcff43-34c3-4888-b99a-bb9b9afd57c9
 
 #### Outside the decorated function
 
@@ -410,7 +408,7 @@ langfuse_client.score(
 );
 ```
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0090556d-015c-48cb-bc33-4af29b05af31
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0090556d-015c-48cb-bc33-4af29b05af31
 
 ### Customize IDs
 
@@ -449,7 +447,7 @@ def main():
 main()
 ```
 
-View example here: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/custom-bbda815f-c61a-4cf5-a545-7fceeef1b635
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/custom-bbda815f-c61a-4cf5-a545-7fceeef1b635
 
 ### Debug mode
 Enable debug mode to get verbose logs. Set the debug mode via the environment variable `LANGFUSE_DEBUG=True`.
