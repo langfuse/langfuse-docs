@@ -399,11 +399,11 @@ def llama_index_fn(question: str):
 
 | Parameter | Type   | Optional | Description                                                           |
 | --------- | ------ | -------- | --------------------------------------------------------------------- |
-| name      | string | no       | Identifier of the score.                                              |
-| value     | number | no       | The value of the score. Can be any number, often standardized to 0..1 |
-| comment   | string | yes      | Additional context/explanation of the score.                          |
+| `name`    | string | no       | Identifier of the score.                                              |
+| `value`   | number | no       | The value of the score. Can be any number, often standardized to 0..1 |
+| `comment` | string | yes      | Additional context/explanation of the score.                          |
 
-<Tabs items={["Within the decorator context","Outside the decorated function"]}>
+<Tabs items={["Within the decorated context","Outside the decorated function"]}>
 <Tab>
 
 You can attach a score to the current observation context by calling `langfuse_context.score_current_observation`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse_context.score_current_trace`:
