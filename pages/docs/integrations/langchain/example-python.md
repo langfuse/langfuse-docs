@@ -266,7 +266,9 @@ trace = langfuse.score(
 
 ## Interoperability with Langfuse Python SDK
 
-To use all functionalities of Langfuse, use the `get_current_langchain_handler()` by simply calling `langfuse_context.get_current_langchain_handler()` in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/integrations/langchain).
+You can use this integration in combination with the `observe()` decorator from the Langfuse Python SDK. Thereby, you can trace non-Langchain code, combine multiple Langchain invocations in a single trace, and use the full functionality of the Langfuse Python SDK.
+
+The `langfuse_context.get_current_langchain_handler()` method exposes a LangChain callback handler in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/sdk/python/decorators#langchain).
 
 
 ### How it works
@@ -331,7 +333,6 @@ Invoke it multiple times as part of a nested trace.
 ```python
 from langfuse.decorators import langfuse_context, observe
 
-
 # On span "Physics"."Favorites"
 @observe()  # decorator to automatically log function as sub-span to Langfuse
 def favorites():
@@ -340,7 +341,6 @@ def favorites():
     # invoke chain with langfuse handler
     chain.invoke({"person": "Richard Feynman"},
                  config={"callbacks": [langfuse_handler]})
-
 
 # On span "Physics"
 @observe()  # decorator to automatically log function as span to Langfuse
@@ -354,7 +354,6 @@ def physics():
                  config={"callbacks": [langfuse_handler]})
     favorites()
 
-
 # On trace
 @observe()  # decorator to automatically log function as trace to Langfuse
 def main():
@@ -365,15 +364,9 @@ def main():
                  config={"callbacks": [langfuse_handler]})
     physics()
 
-
 main()
-
-# Flush observations to Langfuse
-langfuse_context.flush()
 ```
 
 View it in Langfuse
-
-TODO: Replace screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/ef84093a-a259-4a92-9138-3a8420707245)
 
 ![Trace of Nested Langchain Runs in Langfuse](https://langfuse.com/images/docs/langchain_python_trace_interoperability.png)

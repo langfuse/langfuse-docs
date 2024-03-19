@@ -163,12 +163,12 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ### Group multiple generations into a single trace
 
-Many applications require more than one OpenAI call. Langfuse `decorators` allows to nest all LLM calls of a single API invocation into the same `trace` with just a few lines of code.
+Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
 
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import langfuse_context, observe
+from langfuse.decorators import observe
 
 @observe() # decorator to automatically create trace and nest generations
 def main(country: str, user_id: str, **kwargs) -> str:
@@ -197,33 +197,9 @@ def main(country: str, user_id: str, **kwargs) -> str:
 
 # run main function and let Langfuse decorator do the rest
 print(main("Bulgaria", "admin"))
-
-# Flush observations to Langfuse
-langfuse_context.flush()
-```
-
-#### Optional: Set `trace_id` manually
-
-Optionally, you can pass your own `trace_id` to Langfuse, for example if you want to sync it with your internal ids. Just pass your id as a `keyword arguments` with the name `langfuse_observation_id`.
-
-
-```python
-from langfuse.decorators import langfuse_context
-from uuid import uuid4
-
-# create random trace_id, could also use existing id from your application, e.g. conversation id
-trace_id = str(uuid4())
-
-# run main function with kwarg langfuse_observation_id and let Langfuse decorator do the rest
-print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
-
-# Flush observations to Langfuse
-langfuse_context.flush()
 ```
 
 Go to https://cloud.langfuse.com or your own instance to see your trace.
-
-TODO: update screenshot https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/012958ab-8e9b-40f6-be56-7fbb09e99716
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
 
@@ -283,16 +259,13 @@ def main(country: str, user_id: str, **kwargs) -> str:
 # create random trace_id, could also use existing id from your application, e.g. conversation id
 trace_id = str(uuid4())
 
-# run main function and let Langfuse decorator do the rest
+# run main function, set your own id, and let Langfuse decorator do the rest
 print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
-
-# Flush observations to Langfuse
-langfuse_context.flush()
 ```
 
-### Add scores to generation
+### Programmatically add scores
 
-You can also add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some other evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
+You can add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some programmatic evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 
 The score is associated to the trace using the `trace_id`.
 
@@ -310,13 +283,10 @@ def main():
 
     # rest of your application ...
 
-    return trace_id
-
-# flush the trace to send it to the Langfuse platform
-langfuse_context.flush()
+    return "res", trace_id
 
 # execute the main function to generate a trace
-trace_id = main()
+_, trace_id = main()
 
 # Score the trace from outside the trace context
 langfuse.score(
@@ -325,9 +295,3 @@ langfuse.score(
     value=1
 )
 ```
-
-Go to https://cloud.langfuse.com or your own instance to see your trace with score.
-
-TODO: Update screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/5e27c0d2-1aa7-4eac-8bcb-2ade9c553324)
-
-![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)
