@@ -16,27 +16,9 @@ Want more control over the traces logged to Langfuse? Check out the [low-level P
 
 _Simple example (decorator + openai integration)_
 
-```python /@observe()/ filename="main.py"
-from langfuse.decorators import observe
-from langfuse.openai import openai # OpenAI integration
+import GetStarted from "@/components-mdx/get-started-python-decorator-openai.mdx";
 
-@observe()
-def story():
-    return openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        max_tokens=100,
-        messages=[
-          {"role": "system", "content": "You are a great storyteller."},
-          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
-        ],
-    ).choices[0].message.content
-
-@observe()
-def main():
-    return story()
-
-main()
-```
+<GetStarted />
 
 _Trace in Langfuse ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/fac231bc-90ee-490a-aa32-78c4269474e3?observation=36544d09-dec7-48ff-88c3-6c2ae3fe2baf))_
 

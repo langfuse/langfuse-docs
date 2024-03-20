@@ -17,22 +17,144 @@ This quickstart helps you to integrate your LLM application with Langfuse. It wi
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
 import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
+import EnvPython from "@/components-mdx/env-python.mdx";
+import EnvJs from "@/components-mdx/env-js.mdx";
+import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
 
-<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","API"]}>
+<Tabs items={["Python Decorator + OpenAI","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
 
 <Tab>
-{/* Python */}
+{/* Decorator + OpenAI */}
+
+The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. In this quickstart we also use the Langfuse [OpenAI integration](/docs/integrations/openai) to automatically capture all model parameters.
+
+Do you want to track any model in Python? See the [decorator documentation](/docs/sdk/python/decorators) for more details.
+
+```bash
+pip install langfuse openai
+```
+
+<EnvPython />
+
+<GetStartedDecoratorOpenai />
+
+</Tab>
+<Tab>
+{/* JS/TS */}
+
+```sh
+npm i langfuse
+# or
+yarn add langfuse
+
+# Node.js < 18
+npm i langfuse-node
+
+# Deno
+import { Langfuse } from "https://esm.sh/langfuse"
+```
+
+<EnvJs />
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript/guide).
+
+```typescript filename="server.ts"
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// Example generation creation
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-3.5-turbo",
+  modelParameters: {
+    temperature: 0.9,
+    maxTokens: 2000,
+  },
+  input: messages,
+});
+
+// Application code
+const chatCompletion = await llm.respond(prompt);
+
+// End generation - sets endTime
+generation.end({
+  output: chatCompletion,
+});
+```
+
+</Tab>
+<Tab>
+{/* OpenAI SDK (Python) */}
+The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously.
 
 ```bash
 pip install langfuse
 ```
 
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
+<EnvPython />
+
+```diff filename=".py"
+- import openai
++ from langfuse.openai import openai
 ```
+
+Use the OpenAI SDK as you would normally. Example:
+
+```python
+completion = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator."},
+      {"role": "user", "content": "1 + 1 = "}],
+)
+```
+
+</Tab>
+<Tab>
+{/* Langchain (Python) */}
+
+The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+
+<GetStartedLangchainPythonArgs />
+
+For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+
+</Tab>
+<Tab>
+{/* Langchain (JS) */}
+
+The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+
+<GetStartedLangchainJsArgs />
+
+For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+
+</Tab>
+<Tab>
+{/* LlamaIndex */}
+
+The [integration](/docs/integrations/llama-index) uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
+
+```bash
+pip install llama-index langfuse
+```
+
+<GetStartedLlamaindexPythonArgs />
+
+Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
+
+</Tab>
+<Tab>
+{/* Python low-level */}
+
+The [low-level SDK](/docs/sdk/python/low-level-sdk) gives you full control over the traces logged to Langfuse. For a less verbose integration, consider using the `@observe()` decorator.
+
+```bash
+pip install langfuse
+```
+
+<EnvPython />
 
 Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
 
@@ -66,128 +188,11 @@ langfuse.flush()
 
 </Tab>
 <Tab>
-{/* JS/TS */}
-
-```sh
-npm i langfuse
-# or
-yarn add langfuse
-
-# Node.js < 18
-npm i langfuse-node
-
-# Deno
-import { Langfuse } from "https://esm.sh/langfuse"
-```
-
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
-
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript/guide).
-
-```typescript filename="server.ts"
-import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-// Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-3.5-turbo",
-  modelParameters: {
-    temperature: 0.9,
-    maxTokens: 2000,
-  },
-  input: messages,
-});
-
-// Application code
-const chatCompletion = await llm.respond(prompt);
-
-// End generation - sets endTime
-generation.end({
-  output: chatCompletion,
-});
-```
-
-</Tab>
-<Tab>
-{/* OpenAI SDK (Python) */}
-The integration is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously.
-
-```bash
-pip install langfuse
-```
-
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-...";
-LANGFUSE_PUBLIC_KEY="pk-lf-...";
-LANGFUSE_HOST="https://cloud.langfuse.com"; # 🇪🇺 EU region
-# LANGFUSE_HOST="https://us.cloud.langfuse.com"; # 🇺🇸 US region
-```
-
-```diff filename=".py"
-- import openai
-+ from langfuse.openai import openai
-```
-
-Use the OpenAI SDK as you would normally. Example:
-
-```python
-completion = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a very accurate calculator."},
-      {"role": "user", "content": "1 + 1 = "}],
-)
-```
-
-</Tab>
-<Tab>
-{/* Langchain (Python) */}
-
-The integration uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
-
-<GetStartedLangchainPythonArgs />
-
-For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
-
-</Tab>
-<Tab>
-{/* Langchain (JS) */}
-
-The integration uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
-
-<GetStartedLangchainJsArgs />
-
-For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
-
-</Tab>
-<Tab>
-{/* LlamaIndex */}
-
-The integration uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
-
-```bash
-pip install llama-index langfuse
-```
-
-<GetStartedLlamaindexPythonArgs />
-
-Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
-
-</Tab>
-<Tab>
 {/* API */}
 
 [API reference](https://api.reference.langfuse.com) for custom integrations. OpenAPI spec available.
 
 </Tab>
-
 </Tabs>
 
 import { Callout } from "nextra-theme-docs";
@@ -237,8 +242,14 @@ import IconOpenai from "@/components/icons/openai";
 <Cards num={2}>
   <Card
     icon={<IconPython />}
-    title="Python SDK"
-    href="/docs/sdk/python"
+    title="Python Decorator"
+    href="/docs/sdk/python/decorators"
+    arrow
+  />
+  <Card
+    icon={<IconPython />}
+    title="Python low-level SDK"
+    href="/docs/sdk/python/low-level-sdk"
     arrow
   />
   <Card
