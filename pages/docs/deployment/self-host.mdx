@@ -244,6 +244,11 @@ To host Langfuse on Google Cloud Run, you need to follow these steps using Googl
     postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true
     ```
 
+    Also, set `DIRECT_URL` for database migrations, without `&pgbouncer=true`, the value should look like this:
+    ```
+    postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none
+    ```
+
 15. Finally, you can finish deploying the application.
 
 ### AWS (via Stitch)
