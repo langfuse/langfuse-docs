@@ -38,7 +38,12 @@ const Circle = forwardRef<
       href={href}
     >
       {title && (
-        <span className="w-[4.4rem] md:w-20 text-right text-sm md:text-base">
+        <span
+          className={cn(
+            "w-[4.4rem] md:w-20 text-right text-sm md:text-base",
+            title.length > 20 && "text-xs md:text-xs"
+          )}
+        >
           {title}
         </span>
       )}
@@ -163,7 +168,7 @@ export default function Integrations() {
           <div className="flex flex-row items-center justify-between">
             <Circle
               ref={inMoreRef}
-              title="Litellm, Flowise, Langflow"
+              title="Litellm, Flowise, Langflow, Vercel AI, Superagent"
               href="/docs/integrations/overview"
             >
               <MoreHorizontal className="h-5 w-5" />
