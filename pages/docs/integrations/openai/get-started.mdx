@@ -171,7 +171,127 @@ openai.chat.completions.create(
 )
 ```
 
-### Group multiple LLM calls into a single trace
+### Use Traces
+
+[Langfuse Tracing](/docs/tracing) groups multiple observations (can be any LLM or non-LLM call) into a single trace. This integration by default creates a single trace for each openai call.
+
+- Add non-OpenAI related observations to the trace.
+- Group multiple OpenAI calls into a single trace while customizing the trace.
+- Have more control over the trace structure.
+- Use all Langfuse Tracing features.
+
+<Callout type="info">
+  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing/overview)
+  to the basic concepts.
+</Callout>
+
+You can use any of the following three options:
+
+1. [Python `@observe()` decorator](/docs/sdk/python/decorators)
+2. Set `trace_id` property, best if you have an existing id from your application.
+3. Use the [low-level SDK](/docs/sdk/python/low-level-sdk) to create traces manually and add OpenAI calls to it.
+
+<Tabs items={["Python Decorator", "Set trace_id", "Low-level SDK"]}>
+<Tab>
+
+<Tabs items={["Trace", "Trace and nested spans"]}>
+<Tab>
+
+Desired trace structure:
+
+```
+TRACE: capital_poem_generator(input="Bulgaria")
+|
+|-- GENERATION: get-capital
+|
+|-- GENERATION: generate-poem
+```
+
+Implementation:
+
+```python /@observe()/
+from langfuse.decorators import observe
+from langfuse.openai import openai
+
+@observe()
+def capital_poem_generator(capital)
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+  ).choices[0].message.content
+  return poem
+
+capital_poem_generator("Bulgaria")
+```
+
+</Tab>
+<Tab>
+Desired trace structure:
+
+```
+TRACE: poems(input=["Bulgaria", "France"])
+|
+|-- SPAN: capital_poem_generator(input="Bulgaria")
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+|
+|-- SPAN: capital_poem_generator(input="France")
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+```
+
+Implementation
+
+```python /@observe()/
+from langfuse.openai import openai
+
+@observe()
+def capital_poem_generator(capital)
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+  ).choices[0].message.content
+  return poem
+
+@observe()
+def poems(countries):
+    for country in countries:
+        capital_poem_generator(country)
+
+poems(["Bulgaria", "France"])
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
 
 Usually, this integration creates a single trace in Langfuse for each openai call. If you want to group multiple openai calls into a single trace, you can use the `trace_id` property. This can be either a random id or an existing id from your application that will be unique to this execution.
 
@@ -212,20 +332,10 @@ TRACE (id: trace_id)
 |-- GENERATION: generate-poem
 ```
 
-If you want to add further properties or observations to the trace, read the next section.
+If you want more control over the trace structure, use the Decorator or Low-level SDK.
 
-### Interoperability with Langfuse Python SDK
-
-Use the OpenAI integration in combination with the regular Langfuse SDKs ([full reference](/docs/sdk/python)) if you want to:
-
-- Add non-OpenAI related observations to the trace.
-- Group multiple OpenAI calls into a single trace while customizing the trace.
-- Have more control over the trace structure.
-
-<Callout type="info">
-  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing/overview)
-  to the basic concepts.
-</Callout>
+</Tab>
+<Tab>
 
 <Tabs items={["Trace", "Trace and nested spans"]}>
 <Tab>
@@ -336,6 +446,9 @@ for country in ["Bulgaria", "France"]:
 ```
 
 _Note that you need to provide `trace_id` and `parent_observation_id` to each generation._
+
+</Tab>
+</Tabs>
 
 </Tab>
 </Tabs>

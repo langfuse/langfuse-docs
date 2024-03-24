@@ -101,6 +101,7 @@ const nonPermanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
   ["/docs/sdk", "/docs/sdk/overview"],
+  ["/docs/sdk/python", "/docs/sdk/python/decorators"],
   ["/cookbook", "/guides"],
   ["/cookbook/:path*", "/guides/cookbook/:path*"],
   ["/docs/sdk/typescript", "/docs/sdk/typescript/guide"],

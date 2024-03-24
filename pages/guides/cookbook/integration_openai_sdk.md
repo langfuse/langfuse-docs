@@ -163,52 +163,47 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ### Group multiple generations into a single trace
 
-Many applications require more than one OpenAI call. In Langfuse, all LLM calls of a single API invocation can be grouped into the same `trace`.
-
-There are 2 options: (1) pass a `trace_id` (own or random string) or (2) create a trace with the Langfuse SDK.
-
-#### Simple: `trace_id` as string
-
-To get started, you can just add an identifier from your own application (e.g., conversation-id) to the openai calls – or create a random id.
+Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
 
 
 ```python
-# create random trace_id
-# could also use existing id from your application, e.g. conversation id
-from uuid import uuid4
-trace_id = str(uuid4())
+from langfuse.openai import openai
+from langfuse.decorators import observe
 
-# create multiple completions, pass trace_id to each
+@observe() # decorator to automatically create trace and nest generations
+def main(country: str, user_id: str, **kwargs) -> str:
+    # nested generation 1: use openai to get capital of country
+    capital = openai.chat.completions.create(
+      name="geography-teacher",
+      model="gpt-3.5-turbo",
+      messages=[
+          {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+          {"role": "user", "content": country}],
+      temperature=0,
+    ).choices[0].message.content
 
-country = "Bulgaria"
+    # nested generation 2: use openai to write poem on capital
+    poem = openai.chat.completions.create(
+      name="poet",
+      model="gpt-3.5-turbo",
+      messages=[
+          {"role": "system", "content": "You are a poet. Create a poem about a city."},
+          {"role": "user", "content": capital}],
+      temperature=1,
+      max_tokens=200,
+    ).choices[0].message.content
 
-capital = openai.chat.completions.create(
-  name="geography-teacher",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
-      {"role": "user", "content": country}],
-  temperature=0,
-  trace_id=trace_id
-).choices[0].message.content
+    return poem
 
-poem = openai.chat.completions.create(
-  name="poet",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a poet. Create a poem about a city."},
-      {"role": "user", "content": capital}],
-  temperature=1,
-  max_tokens=200,
-  trace_id=trace_id
-).choices[0].message.content
+# run main function and let Langfuse decorator do the rest
+print(main("Bulgaria", "admin"))
 ```
 
 Go to https://cloud.langfuse.com or your own instance to see your trace.
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
 
-#### Fully featured: interoperability with Langfuse SDK
+#### Fully featured: Interoperability with Langfuse SDK
 
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
@@ -220,74 +215,83 @@ Some of the functionality enabled by custom traces:
 
 
 ```python
-from langfuse import Langfuse
+from langfuse.openai import openai
+from langfuse.decorators import langfuse_context, observe
 
-# initialize SDK
-langfuse = Langfuse()
+@observe() # decorator to automatically create trace and nest generations
+def main(country: str, user_id: str, **kwargs) -> str:
+    # nested generation 1: use openai to get capital of country
+    capital = openai.chat.completions.create(
+      name="geography-teacher",
+      model="gpt-3.5-turbo",
+      messages=[
+          {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
+          {"role": "user", "content": country}],
+      temperature=0,
+    ).choices[0].message.content
 
-# create trace and add params
-trace = langfuse.trace(
-    # optional, if you want to use your own id
-    # id = "my-trace-id",
+    # nested generation 2: use openai to write poem on capital
+    poem = openai.chat.completions.create(
+      name="poet",
+      model="gpt-3.5-turbo",
+      messages=[
+          {"role": "system", "content": "You are a poet. Create a poem about a city."},
+          {"role": "user", "content": capital}],
+      temperature=1,
+      max_tokens=200,
+    ).choices[0].message.content
 
-    name = "country-poems",
-    user_id = "user@example.com",
-    metadata = {
+    # rename trace and set attributes (e.g., medatata) as needed
+    langfuse_context.update_current_trace(
+        name="City poem generator",
+        session_id="1234",
+        user_id=user_id,
+        tags=["tag1", "tag2"],
+        public=True,
+        metadata = {
         "env": "development",
-    },
-    release = "v0.0.21"
-)
+        },
+        release = "v0.0.21"
+    )
 
-# get traceid to pass to openai calls
-trace_id = trace.id
+    return poem
 
-# create multiple completions, pass trace_id to each
+# create random trace_id, could also use existing id from your application, e.g. conversation id
+trace_id = str(uuid4())
 
-country = "Bulgaria"
-
-capital = openai.chat.completions.create(
-  name="geography-teacher",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
-      {"role": "user", "content": country}],
-  temperature=0,
-  trace_id=trace_id
-).choices[0].message.content
-
-poem = openai.chat.completions.create(
-  name="poet",
-  model="gpt-3.5-turbo",
-  messages=[
-      {"role": "system", "content": "You are a poet. Create a poem about a city."},
-      {"role": "user", "content": capital}],
-  temperature=1,
-  max_tokens=200,
-  trace_id=trace_id
-).choices[0].message.content
+# run main function, set your own id, and let Langfuse decorator do the rest
+print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 ```
 
-You can also use the nesting capabilities of Langfuse Tracing by providing a `parent_observation_id`. For example, this can be the id of a span that you created via the Langfuse Python SDK.
+### Programmatically add scores
 
-### Add scores to generation
+You can add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some programmatic evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 
-You can also add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some other evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
-
-The score is associated to the trace using the `trace_id` (see previous step).
+The score is associated to the trace using the `trace_id`.
 
 
 ```python
 from langfuse import Langfuse
+from langfuse.decorators import langfuse_context, observe
 
 langfuse = Langfuse()
 
+@observe() # decorator to automatically create trace and nest generations
+def main():
+    # get trace_id of current trace
+    trace_id = langfuse_context.get_current_trace_id()
+
+    # rest of your application ...
+
+    return "res", trace_id
+
+# execute the main function to generate a trace
+_, trace_id = main()
+
+# Score the trace from outside the trace context
 langfuse.score(
     trace_id=trace_id,
     name="my-score-name",
     value=1
-);
+)
 ```
-
-Go to https://cloud.langfuse.com or your own instance to see your trace with score.
-
-![Trace with score](https://langfuse.com/images/docs/openai-trace-with-score.png)
