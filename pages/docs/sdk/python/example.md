@@ -81,7 +81,7 @@ Two utility methods:
 - `langfuse_context.update_current_observation`: Update the trace/span of the current function scope
 - `langfuse_context.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
 
-For details on available attributes, have a look at the [reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators#LangfuseDecorator.update_current_observation)
+For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
@@ -465,4 +465,4 @@ assert langfuse_context.auth_check()
 
 ## Learn more
 
-See Docs and [SDK reference](https://feat-add-tracing-decorators.langfuse-python.pages.dev/langfuse/decorators) for more details. Questions? Add them on [GitHub Discussions](https://github.com/orgs/langfuse/discussions/categories/support).
+See Docs and [SDK reference](https://python.reference.langfuse.com/langfuse/decorators) for more details. Questions? Add them on [GitHub Discussions](https://github.com/orgs/langfuse/discussions/categories/support).
