@@ -213,7 +213,7 @@ Cloud Run is an excellent method for deploying Langfuse easily and at scale. Clo
 
 To host Langfuse on Google Cloud Run, you need to follow these steps using Google Cloud Build because Google Cloud Run doesn't support GitHub Container Registry:
 
-1. First, mirror the latest release of Langfuse to your private GitHub repository. You can do this by using [this link](https://github.com/new/import).
+1. First, mirror the latest release of Langfuse to your private GitHub repository. You can do this by using [this link](https://github.com/new/import). Note: Use the `production` branch as the main branch, the Langfuse `main` branch includes unreleased features and might not be stable.
 
 2. Whenever there's a new tagged release, merge it into the main branch of your private GitHub repository.
 
@@ -221,7 +221,7 @@ To host Langfuse on Google Cloud Run, you need to follow these steps using Googl
 
 > Note: You can use the Slack RSS app to monitor the Langfuse [release feed here](https://github.com/langfuse/langfuse/releases.atom).
 
-#### How to Setup Project on Google Cloud Run
+**Setup Project on Google Cloud Run**
 
 1. Open Google Cloud Run.
 2. Click on Create Service.
@@ -245,6 +245,7 @@ To host Langfuse on Google Cloud Run, you need to follow these steps using Googl
     ```
 
     Also, set `DIRECT_URL` for database migrations, without `&pgbouncer=true`, the value should look like this:
+
     ```
     postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none
     ```
