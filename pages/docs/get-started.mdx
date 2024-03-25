@@ -20,15 +20,16 @@ import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamain
 import EnvPython from "@/components-mdx/env-python.mdx";
 import EnvJs from "@/components-mdx/env-js.mdx";
 import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
+import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
 
-<Tabs items={["Python Decorator + OpenAI","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
+<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
 
 <Tab>
 {/* Decorator + OpenAI */}
 
 The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. In this quickstart we also use the Langfuse [OpenAI integration](/docs/integrations/openai) to automatically capture all model parameters.
 
-Do you want to track any model in Python? See the [decorator documentation](/docs/sdk/python/decorators) for more details.
+Not using OpenAI? Switch to the _"Python Decorator + any LLM"_ tab.
 
 ```bash
 pip install langfuse openai
@@ -37,6 +38,20 @@ pip install langfuse openai
 <EnvPython />
 
 <GetStartedDecoratorOpenai />
+
+</Tab>
+<Tab>
+{/* Decorator + Any LLM */}
+
+The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. If you do not use any of our native intgerations, you can trace any LLM call via `@observe(as_type="generation")`. Below find an example using the Anthropic SDK.
+
+```bash
+pip install langfuse anthropic
+```
+
+<EnvPython />
+
+<GetStartedDecoratorAnyLlm />
 
 </Tab>
 <Tab>
