@@ -124,25 +124,55 @@ On the Langfuse platform the trace now shows with the updated name from the `dee
 
 ## Log an LLM Call using `as_type="generation"`
 
-Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation.
+Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)). 
+
+This works with any LLM provider/SDK. In this example, we'll use Anthropic.
 
 
 ```python
-from langfuse.decorators import observe
-
-@observe(as_type="generation")
-def nested_llm_call():
-    # Logic for a deeply nested LLM call
-    pass
-
-@observe()
-def main_fn():
-    nested_llm_call()
-
-main_fn()
+%pip install anthropic
 ```
 
-> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3255f178-e91f-4683-8eee-e5b2023bc724?observation=cc3f19ed-b04a-4bd9-937d-278ff8e4bb05
+
+```python
+os.environ["ANTHROPIC_API_KEY"] = ""
+
+import anthropic
+anthopic_client = anthropic.Anthropic()
+```
+
+
+```python
+# Wrap LLM function with decorator
+@observe(as_type="generation")
+def anthropic_completion(**kwargs):
+  # extract some fields from kwargs
+  kwargs_clone = kwargs.copy()
+  input = kwargs_clone.pop('messages', None)
+  model = kwargs_clone.pop('model', None)
+  langfuse_context.update_current_observation(
+      input=input,
+      model=model,
+      metadata=kwargs_clone
+  )
+  
+  # return result
+  return anthopic_client.messages.create(**kwargs).content[0].text
+
+@observe()
+def main():
+  return anthropic_completion(
+      model="claude-3-opus-20240229",
+      max_tokens=1024,
+      messages=[
+          {"role": "user", "content": "Hello, Claude"}
+      ]
+  )
+
+main()
+```
+
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ece9079d-e12c-4c0e-9dc3-8805d0bbe8ec?observation=723c04ff-cdca-4716-8143-e691129be315
 
 ## Customize input/output
 
