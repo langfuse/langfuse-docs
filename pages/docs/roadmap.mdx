@@ -84,23 +84,6 @@ Subscribe to our mailing list to get occasional email updates about new features
 ## 🧪 Pre-release
 
 - Integration to push Langfuse metrics to [PostHog](https://github.com/PostHog/posthog) ([integration docs](/docs/analytics/posthog))
-- Decorator-based Python integration ([GitHub post](https://github.com/orgs/langfuse/discussions/1009) with installation instructions)
-
-  ```python
-  from langfuse.decorators import observe
-
-  @observe()
-  def span_inside_trace():
-      print("Hello, from a span inside a trace!")
-
-
-  @observe()
-  def function_to_trace():
-      print("Hello, from the parent trace!")
-      span_inside_trace()
-
-  function_to_trace()
-  ```
 
 _Please reach out if you are interested in testing these features before they are released to provide feedback and help shape the future of Langfuse: early-access@langfuse.com._
 
