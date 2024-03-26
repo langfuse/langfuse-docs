@@ -82,6 +82,8 @@ const nonPermanentRedirects = [
   // Redirects to bridge all kinds of old links to new links
   ["/docs/reference", "https://api.reference.langfuse.com/"],
   ["/docs/integrations/api", "https://api.reference.langfuse.com/"],
+  ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
+  ["/docs/integrations/sdk/python", "/docs/sdk/python"],
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/typescript", "/docs/integrations/langchain/tracing"],
@@ -101,6 +103,7 @@ const nonPermanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
   ["/docs/sdk", "/docs/sdk/overview"],
+  ["/docs/sdk/python", "/docs/sdk/python/decorators"],
   ["/cookbook", "/guides"],
   ["/cookbook/:path*", "/guides/cookbook/:path*"],
   ["/docs/sdk/typescript", "/docs/sdk/typescript/guide"],

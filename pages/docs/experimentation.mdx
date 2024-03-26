@@ -37,8 +37,25 @@ The SDKs look for a `release` in the following order:
 
 <Tab>
 
+Decorators
+
+```python /release="<release_tag>"/
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        release="<release_tag>"
+    )
+
+fn()
+```
+
+Low-level SDK
+
 ```python /release="<release_tag>"/
 from langfuse import Langfuse
+
 langfuse = Langfuse(
   release="<release_tag>"
 )
@@ -48,6 +65,7 @@ langfuse = Langfuse(
 
 ```typescript /release: "<release_tag>"/
 import { Langfuse } from "langfuse";
+
 langfuse = new Langfuse({
   release: "<release_tag>",
 });
@@ -57,6 +75,7 @@ langfuse = new Langfuse({
 
 ```python /release="<release_tag>"/
 from langfuse.callback import CallbackHandler
+
 handler = CallbackHandler(release="<release_tag>")
 ```
 
@@ -64,6 +83,7 @@ handler = CallbackHandler(release="<release_tag>")
 
 ```typescript /release: "<release_tag>"/
 import { CallbackHandler } from "langfuse-langchain";
+
 const handler = new CallbackHandler({
   release: "<release_tag>",
 });
@@ -104,6 +124,27 @@ The `version` parameter can be added to `traces` and all observation types (`spa
 <Tabs items={["Python", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
 
+Decorators
+
+```python /version="1.0"/
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    # trace level
+    langfuse_context.update_current_trace(
+        version="1.0",
+    )
+
+    # observation level
+    langfuse_context.update_current_observation(
+        version="1.0",
+    )
+fn()
+```
+
+Low-level SDK
+
 ```python /version="1.0"/
 langfuse.generation(
   name="guess-countries",
@@ -128,6 +169,7 @@ langfuse.generation({
 
 ```python /version="1.0"/
 from langfuse.callback import CallbackHandler
+
 handler = CallbackHandler(version="1.0")
 ```
 
@@ -135,6 +177,7 @@ handler = CallbackHandler(version="1.0")
 
 ```typescript /version: "1.0"/
 import { CallbackHandler } from "langfuse-langchain";
+
 const handler = new CallbackHandler({
   version: "1.0",
 });

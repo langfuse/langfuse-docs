@@ -84,23 +84,7 @@ Subscribe to our mailing list to get occasional email updates about new features
 ## 🧪 Pre-release
 
 - Integration to push Langfuse metrics to [PostHog](https://github.com/PostHog/posthog) ([integration docs](/docs/analytics/posthog))
-- Decorator-based Python integration ([GitHub post](https://github.com/orgs/langfuse/discussions/1009) with installation instructions)
-
-  ```python
-  from langfuse.decorators import observe
-
-  @observe()
-  def span_inside_trace():
-      print("Hello, from a span inside a trace!")
-
-
-  @observe()
-  def function_to_trace():
-      print("Hello, from the parent trace!")
-      span_inside_trace()
-
-  function_to_trace()
-  ```
+- Evaluation service to run custom model-based evals on historical and newly ingested traces
 
 _Please reach out if you are interested in testing these features before they are released to provide feedback and help shape the future of Langfuse: early-access@langfuse.com._
 
@@ -108,17 +92,16 @@ _Please reach out if you are interested in testing these features before they ar
 
 - Manual evaluations in Langfuse UI along multiple dimensions, currently only a single dimension is supported
 - Improved datasets UI/UX
-- Evaluation service to run custom model-based evals on historical and newly ingested traces
+- Prompt playground connected to datasets and prompt management
 - Infrastructure: queued ingestion to handle large and spiky loads on small instances
 - Improved tables across the Langfuse UI to display all relevant information and be more user-friendly
 - Move to SDK references generated from docstrings to improve the developer experience (Intellisense) and reduce the risk of errors
+- Langchain integration: support batch (Python), async (Python), streaming (Python) methods
 - SOC2 (Type 2) and ISO27001 certification for Langfuse Cloud
 
 ## 🔮 Planned
 
 - Datasets: make them usable in CI (e.g GitHub Actions)
-- Langchain integration: support batch (Python) and async (Python) methods
-- Prompt playground connected to datasets and prompt management
 - Prompt management: multiple environments, comments on versions
 - Infrastructure: add OLAP database for faster analytical queries
 
