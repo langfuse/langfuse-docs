@@ -209,7 +209,46 @@ Optionally, you can apply the new model definitions to existing data using the f
 
 ### Google Cloud Platform (Cloud Run)
 
-Cloud Run is an excellent method for deploying Langfuse easily and at scale. Cloud Run does not support deploying containers directly from the GitHub Container Registry (ghcr.io) used by Langfuse. To avoid the need to pull the container and push it to the Google registry, you can refer to this [guide](https://github.com/orgs/langfuse/discussions/1013#discussioncomment-8328524) or use Cloud Build. Note: you can use Google for SSO.
+To host Langfuse on Google Cloud Run, you need to follow these steps using Google Cloud Build because Google Cloud Run doesn't support GitHub Container Registry:
+
+1. First, mirror the latest release of Langfuse to your private GitHub repository. You can do this by using [this link](https://github.com/new/import). Note: Make sure to mirror the `production` branch, the Langfuse `main` branch includes unreleased features and might not be stable.
+
+2. Whenever there's a new tagged release, merge the latest commit on the Langfuse `production` branch into the `production` branch of your private GitHub repository.
+
+3. Push the `production` branch to your private repository, which now contains the new tagged release. This action will automatically deploy Langfuse on Google Cloud Run.
+
+> Note: You can use the Slack RSS app to monitor the Langfuse [release feed here](https://github.com/langfuse/langfuse/releases.atom).
+
+**Setup Project on Google Cloud Run**
+
+1. Open Google Cloud Run.
+2. Click on Create Service.
+3. Choose GitHub integration to deploy from a repository continuously. Then click on Set up with Cloud Build.
+4. Authorize Google Cloud access to your GitHub and select the repository.
+5. In the Build Configuration, change the branch to production (i.e. `^production$`).
+6. Select Build Type as Dockerfile and specify the source location as `/web/Dockerfile`.
+7. Click on Save.
+8. Now, Configure the service name and region according to your requirements.
+9. Select authentication as 'Allow unauthenticated invocations', as Langfuse will have its own built-in Authentication that you can use.
+10. Choose 'CPU Allocation and Pricing' as "CPU is only allocated during request processing" to scale down the instance to 0 when there are no requests.
+11. Configure ingress control according to your needs. For most cases, 'All' should suffice.
+12. Under "Container(s), Volumes, Networking & Security", specify container port as `3000`. Then click the "Secrets & Variables" tab. Add the required environment variables: `SALT`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, and `DATABASE_URL`, etc.
+13. The `NEXTAUTH_URL` will be the URL of the deployed service, which you can update later when the service finishes building and gets deployed.
+14. Now, set up the database. Note: Your Cloud Run service won't be assigned a static IP, so you can't whitelist the ingress IP in Cloud SQL or any other hosted databases. Instead, utilize the Google Cloud Proxy. Scroll down to "Cloud SQL connections" and enable access to the SQL instance hosting the database for Langfuse. After that, go to the "Secrets & Variables" section of the Container setup and add `DATABASE_URL` as an environment variable.
+
+    Here's what the value should look like:
+
+    ```
+    postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true
+    ```
+
+    Also, set `DIRECT_URL` for database migrations, without `&pgbouncer=true`, the value should look like this:
+
+    ```
+    postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none
+    ```
+
+15. Finally, you can finish deploying the application.
 
 ### AWS (via Stitch)
 
