@@ -208,13 +208,14 @@ Optionally, you can apply the new model definitions to existing data using the f
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
 
 ### Google Cloud Platform (Cloud Run)
+
 To host Langfuse on Google Cloud Run, you need to follow these steps using Google Cloud Build because Google Cloud Run doesn't support GitHub Container Registry:
 
-1. First, mirror the latest release of Langfuse to your private GitHub repository. You can do this by using [this link](https://github.com/new/import). Note: Use the `production` branch as the main branch, the Langfuse `main` branch includes unreleased features and might not be stable.
+1. First, mirror the latest release of Langfuse to your private GitHub repository. You can do this by using [this link](https://github.com/new/import). Note: Make sure to mirror the `production` branch, the Langfuse `main` branch includes unreleased features and might not be stable.
 
-2. Whenever there's a new tagged release, merge it into the main branch of your private GitHub repository.
+2. Whenever there's a new tagged release, merge the latest commit on the Langfuse `production` branch into the `production` branch of your private GitHub repository.
 
-3. Push the main branch to your private repository, which now contains the new tagged release. This action will automatically deploy Langfuse on Google Cloud Run.
+3. Push the `production` branch to your private repository, which now contains the new tagged release. This action will automatically deploy Langfuse on Google Cloud Run.
 
 > Note: You can use the Slack RSS app to monitor the Langfuse [release feed here](https://github.com/langfuse/langfuse/releases.atom).
 
