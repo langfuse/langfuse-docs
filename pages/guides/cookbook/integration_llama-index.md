@@ -13,7 +13,7 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/llama-inde
 
 
 ```python
-%pip install langfuse llama_index --upgrade
+%pip install langfuse llama_index llama-index-callbacks-langfuse --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
@@ -36,11 +36,12 @@ At the root of your LlamaIndex application, you need to register Langfuse's `Lla
 
 
 ```python
+from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse.llama_index import LlamaIndexCallbackHandler
 
 langfuse_callback_handler = LlamaIndexCallbackHandler() # get langfuse's llamaindex callback handler
-CallbackManager([langfuse_callback_handler]) # instantiate callback manager
+Settings.callback_manager = CallbackManager([langfuse_callback_handler]) # register callback handler in settings
 ```
 
 ## Examples
@@ -53,7 +54,6 @@ todo: add screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x0
 
 
 ```python
-from llama_index.llms.openai import OpenAI
 from llama_index.core.chat_engine import SimpleChatEngine
 
 prompt = (
@@ -66,19 +66,10 @@ prompt = (
     "answer the question of the user"
 )
 
-# Initialize the LLM
-langfuse_callback_handler = LlamaIndexCallbackHandler() # get langfuse's llamaindex callback handler
-llm = OpenAI(model="gpt-3.5-turbo", callback_manager=CallbackManager([langfuse_callback_handler]))
-
-chat_engine = SimpleChatEngine.from_defaults(
-    system_prompt=prompt,
-    llm=llm
-)
+chat_engine = SimpleChatEngine.from_defaults(system_prompt=prompt)
 response = chat_engine.chat(
     "What is Langfuse?"
 )
-
-langfuse_callback_handler.flush()
 ```
 
 ### RetrievalQA
@@ -108,22 +99,15 @@ index = VectorStoreIndex.from_documents(city_docs)
 
 
 ```python
-from llama_index.llms.openai import OpenAI
 from llama_index.agent.openai import OpenAIAgent
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-# initialize the LLM
-langfuse_callback_handler = LlamaIndexCallbackHandler() # get langfuse's llamaindex callback handler
-llm = OpenAI(model="gpt-3.5-turbo", callback_manager=CallbackManager([langfuse_callback_handler]))
 
 # define a query engine tool for the index with metadata
-query_engine = index.as_query_engine(llm=llm)
+query_engine = index.as_query_engine()
 tool_metadata = ToolMetadata(name="CityInfoTool", description="Tool for querying city information.")
 query_engine_tool = QueryEngineTool(query_engine=query_engine, metadata=tool_metadata)
 
-agent = OpenAIAgent.from_tools([query_engine_tool], llm=llm, verbose=True)
+agent = OpenAIAgent.from_tools([query_engine_tool], verbose=True)
 ```
 
 
@@ -131,8 +115,15 @@ agent = OpenAIAgent.from_tools([query_engine_tool], llm=llm, verbose=True)
 # example query about a specific city
 query = "What is known about the city of Boston?"
 response = agent.chat(query)
-langfuse_callback_handler.flush()
 ```
+
+    Added user message to memory: What is known about the city of Boston?
+    === Calling Function ===
+    Calling function: CityInfoTool with args: {"input":"Boston"}
+    Got output: Boston is one of the oldest municipalities in the United States and is known for its rich history.
+    ========================
+    
+
 
 ### Agent with tools
 
@@ -159,23 +150,15 @@ useless_tool = FunctionTool.from_defaults(fn=useless_tool)
 
 
 ```python
-from llama_index.llms.openai import OpenAI
 from llama_index.agent.openai import OpenAIAgent
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-# initialize the LLM
-langfuse_callback_handler = LlamaIndexCallbackHandler() # get langfuse's llamaindex callback handler
-llm = OpenAI(model="gpt-3.5-turbo", callback_manager=CallbackManager([langfuse_callback_handler]))
 
 # create an OpenAIAgent with custom tools
-agent = OpenAIAgent.from_tools([useless_tool, add_tool], llm=llm, verbose=True)
+agent = OpenAIAgent.from_tools([useless_tool, add_tool], verbose=True)
 ```
 
 
 ```python
 response = agent.chat("What is 5 + 2?", tool_choice="auto")
-langfuse_callback_handler.flush()
 ```
 
     Added user message to memory: What is 5 + 2?
@@ -208,8 +191,6 @@ trace = langfuse.score(
     value=1,
     comment="I like how personalized the response is"
 )
-
-langfuse_callback_handler.flush()
 ```
 
 ## Interoperability with Langfuse Python SDK
@@ -220,8 +201,6 @@ In Langfuse, we can get a LlamaIndex callback handler by simply calling `langfus
 
 
 ```python
-from llama_index.llms.openai import OpenAI
-from llama_index.core import VectorStoreIndex
 from langfuse.decorators import langfuse_context, observe
 
 # create a trace via Langfuse decorators and get a LlamaIndex Callback handler for it
@@ -243,102 +222,132 @@ main()
 
 ### Example
 
-We will run the same `JSONalyzeQueryEngine`, a query able to perform statistical analysis on JSON Lists, ultiple times at different places within the hierarchy of a trace.
+We will run a `RetrievalQA` agent as seen before, to nest multiple two questions on a set of books in one trace.
 
 ```
-TRACE: json-data-analysis
+TRACE: book-recommendation-analysis
 |
-|-- SPAN: age_analysis
+|-- SPAN: genre_analysis
+|   |
+|   |-- SPAN: crete_genre_index
+|   |
+|   |-- SPAN: query_for_genre
 |
-|-- SPAN: occupation_analysis
+|-- SPAN: author_analysis
 |   |
-|   |-- SPAN: all_occupations_query
+|   |-- SPAN: crete_author_index
 |   |
-|   |-- SPAN: most_common_occupation_query
-```
-
-
-```python
-%pip install sqlite-utils --upgrade # library needed to run JSONalyzeQueryEngine
-```
-
-
-```python
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-from llama_index.llms.openai import OpenAI
-from llama_index.core.query_engine import JSONalyzeQueryEngine
-
-json_list = [
-    {
-        "name": "John Doe",
-        "age": 30,
-        "occupation": "Software Engineer"
-    },
-    {
-        "name": "Jane Smith",
-        "age": 28,
-        "occupation": "Data Scientist"
-    },
-    {
-        "name": "Alice Johnson",
-        "age": 35,
-        "occupation": "Product Manager"
-    }
-]
-
-# initialize the LLM
-langfuse_callback_handler = LlamaIndexCallbackHandler() # get langfuse's llamaindex callback handler
-llm = OpenAI(model="gpt-3.5-turbo", callback_manager=CallbackManager([langfuse_callback_handler]))
-
-# initialize JSONalyze Query Engine
-json_stats_query_engine = JSONalyzeQueryEngine(list_of_dict=json_list, llm=llm, verbose=True)
+|   |-- SPAN: query_for_author
 ```
 
 
 ```python
 from langfuse.decorators import langfuse_context, observe
+from llama_index.core import Settings, Document, VectorStoreIndex
+from llama_index.core.callbacks import CallbackManager
+from llama_index.agent.openai import OpenAIAgent
+from llama_index.core.tools import QueryEngineTool, ToolMetadata
+
+# Sample book data
+book_data = {
+    "genres": {
+        "Fantasy": ["Harry Potter and the Sorcerer's Stone", "The Hobbit", "A Game of Thrones"],
+        "Science Fiction": ["Dune", "The Martian", "Neuromancer"],
+        "Mystery": ["The Girl with the Dragon Tattoo", "Gone Girl", "The Da Vinci Code"]
+    },
+    "authors": {
+        "J.K. Rowling": ["Harry Potter and the Sorcerer's Stone", "Harry Potter and the Chamber of Secrets"],
+        "George R.R. Martin": ["A Game of Thrones", "A Clash of Kings"],
+        "Agatha Christie": ["Murder on the Orient Express", "And Then There Were None"]
+    }
+}
 
 @observe() # automtically log function as a trace to Langfuse
-def main_analysis():
-    # set trace name, session_id, and user_id
+def main_recommendation_system():
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    genre_analysis()
+    author_analysis()
+
     langfuse_context.update_current_trace(
-        name="json-data-analysis",
-        session_id="session-analysis",
-        user_id="user-1"
+        name="book-recommendation-analysis",
+        session_id="session-bookrec",
+        user_id="user-3"
     )
-    age_analysis()
-    occupation_analysis()
 
 @observe() # automtically log function as a span to Langfuse
-def age_analysis():
-    query_str = "What is the average age of the individuals in the dataset?"
-    response = json_stats_query_engine.query(query_str)
-    print("Age Analysis:", response)
+def genre_analysis():
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    genre_index = create_genre_index()
+    query_for_genre(genre_index, "Fantasy")
+
+@observe() # automtically log function as a sub-span to Langfuse
+def create_genre_index():
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    genre_docs = [Document(text=", ".join(titles), metadata={"genre": genre})
+                  for genre, titles in book_data["genres"].items()]
+    return VectorStoreIndex.from_documents(genre_docs)
+
+@observe() # automtically log function as a sub-span to Langfuse
+def query_for_genre(index, genre):
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    query_engine = index.as_query_engine()
+    tool_metadata = ToolMetadata(name="GenreTool", description="Tool for querying book genres.")
+    query_engine_tool = QueryEngineTool(query_engine=query_engine, metadata=tool_metadata)
+
+    agent = OpenAIAgent.from_tools([query_engine_tool], verbose=True)
+    query = f"What books are in the {genre} genre?"
+    response = agent.chat(query)
 
 @observe() # automtically log function as a span to Langfuse
-def occupation_analysis():
-    all_occupations_query()
-    most_common_occupation_query()
+def author_analysis():
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    author_index = create_author_index()
+    query_for_author(author_index, "J.K. Rowling")
 
 @observe() # automtically log function as a sub-span to Langfuse
-def all_occupations_query():
-    query_str = "What are the different occupations among the individuals?"
-    response = json_stats_query_engine.query(query_str)
-    print("Occupation Analysis:", response)
+def create_author_index():
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    author_docs = [Document(text=", ".join(titles), metadata={"author": author})
+                   for author, titles in book_data["authors"].items()]
+    return VectorStoreIndex.from_documents(author_docs)
 
 @observe() # automtically log function as a sub-span to Langfuse
-def most_common_occupation_query():
-    query_str = "What is the most common occupation among the individuals?"
-    response = json_stats_query_engine.query(query_str)
-    print("Most Common Occupation Analysis:", response)
+def query_for_author(index, author_name):
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
 
-main_analysis()
-langfuse_context.flush()
+    query_engine = index.as_query_engine()
+    tool_metadata = ToolMetadata(name="AuthorTool", description="Tool for querying book authors.")
+    query_engine_tool = QueryEngineTool(query_engine=query_engine, metadata=tool_metadata)
+
+    agent = OpenAIAgent.from_tools([query_engine_tool], verbose=True)
+    query = f"What books has {author_name} written?"
+    response = agent.chat(query)
+
+main_recommendation_system()
 ```
 
 View it in Langfuse
 
-todo: update screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/ca1f0f94-04ef-4eab-b5a4-453af4718ee8)
+todo: update screenshot (https://cloud.langfuse.com/project/clr4qu8qv0000yu4ja339x02u/traces/225508bf-ec84-4c87-b881-0e539081bc5f)
 
 ![Trace of Nested Langchain Runs in Langfuse](https://langfuse.com/images/docs/langchain_python_trace_interoperability.png)
