@@ -11,12 +11,12 @@ const withBundleAnalyzer = NextBundleAnalyzer({
  * img-src https to allow loading images from SSO providers
  */
 const cspHeader = `
-  default-src 'self' https://ph.langfuse.com https://*.posthog.com wss://*.crisp.chat https://*.crisp.chat;
-  script-src 'self' 'unsafe-eval' https://*.crisp.chat https://ph.langfuse.com https://static.cloudflareinsights.com https://*.stripe.com;
-  style-src 'self' 'unsafe-inline' https://*.crisp.chat;
+  default-src 'self' https: wss:;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
+  style-src 'self' 'unsafe-inline' https:;
   img-src 'self' https: blob: data:;
-  font-src 'self' https://*.crisp.chat;
-  frame-src 'self' https://challenges.cloudflare.com https://*.stripe.com;
+  font-src 'self' https:;
+  frame-src 'self' https:;
   worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';
