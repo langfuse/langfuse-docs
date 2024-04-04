@@ -15,6 +15,7 @@ const cspHeader = `
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
   style-src 'self' 'unsafe-inline' https:;
   img-src 'self' https: blob: data:;
+  media-src 'self' https: blob: data:;
   font-src 'self' https:;
   frame-src 'self' https:;
   worker-src 'self' blob:;
