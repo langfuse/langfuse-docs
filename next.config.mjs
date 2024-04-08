@@ -182,6 +182,10 @@ const nonPermanentRedirects = [
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
+
+  // User-reported broken links
+  ["/superagent", "/docs/integrations/superagent"],
+  ["/guides/cookbook/langfuse_prompt_with_langchain", "/guides/cookbook/prompt_management_langchain"]
 ];
 
 const permanentRedirects = []
