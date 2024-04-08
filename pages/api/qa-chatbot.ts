@@ -45,7 +45,7 @@ export default async function handler(req: Request, res: Response) {
   const messages = body.messages;
 
   // Exclude additional fields from being sent to OpenAI
-  const openAiMessages = messages.map(({ content, role }) => ({
+  const openAiMessageHistory = messages.map(({ content, role }) => ({
     content,
     role: role,
   }));
@@ -153,7 +153,9 @@ export default async function handler(req: Request, res: Response) {
   });
 
   const promptName =
-    contextText !== "" ? "qa-answer-with-context" : "qa-answer-no-context";
+    contextText !== ""
+      ? "qa-answer-with-context-chat"
+      : "qa-answer-no-context-chat";
 
   const promptSpan = trace.span({
     name: "fetch-prompt-from-langfuse",
@@ -161,27 +163,26 @@ export default async function handler(req: Request, res: Response) {
       promptName,
     },
   });
-  const prompt = await langfuse.getPrompt(promptName);
-  const compiledSystemMessage = prompt.compile({
+  const langfusePrompt = await langfuse.getPrompt(promptName, undefined, {
+    type: "chat",
+  });
+  const compiledLangfuseMessages = langfusePrompt.compile({
     context: contextText,
   });
   promptSpan.end({
-    output: { compiledSystemMessage, version: prompt.version },
+    output: { compiledLangfuseMessages, version: langfusePrompt.version },
   });
 
   const assembledMessages = [
-    {
-      role: "system",
-      content: compiledSystemMessage,
-    },
-    ...openAiMessages,
+    ...compiledLangfuseMessages,
+    ...openAiMessageHistory,
   ];
 
   const generation = trace.generation({
     name: "generation",
     input: assembledMessages as any,
     model: "gpt-3.5-turbo",
-    prompt,
+    prompt: langfusePrompt,
   });
 
   const response = await openai.createChatCompletion({
