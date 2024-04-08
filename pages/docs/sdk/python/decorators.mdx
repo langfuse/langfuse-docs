@@ -6,7 +6,7 @@ description: A decorator-based integration to give you powerful tracing, evals, 
 
 Integrate [Langfuse Tracing](/docs/tracing) into your LLM applications with the Langfuse Python SDK using the `@observe()` decorator.
 
-The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs and outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully itneroperable with our main integrations (more on this below): [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index)
+The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index)
 
 See the [reference](https://python.reference.langfuse.com/langfuse/decorators) for a comprehensive list of all available parameters and methods.
 
@@ -117,7 +117,7 @@ langfuse_context.flush()
 
 ### Log any LLM call
 
-In addition to the native intgerations with LangChain, LlamaIndex, and OpenAI (details [below](#frameworks)), you can log any LLM call by decorating it with `@observe(as_type="generation")`.
+In addition to the native intgerations with LangChain, LlamaIndex, and OpenAI (details [below](#frameworks)), you can log any LLM call by decorating it with `@observe(as_type="generation")`. **Important:** Make sure the `as_type="generation"` decorated function is called inside another `@observe()`-decorated function for it to have a top-level trace. 
 
 Optionally, you can parse some of the arguments to the LLM call and pass them to [`langfuse_context.update_current_observation`](#additional-attributes) to enrich the trace.
 
