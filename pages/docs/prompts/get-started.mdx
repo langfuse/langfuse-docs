@@ -154,6 +154,7 @@ prompt = langfuse.get_prompt("movie-critic")
 
 # Insert variables into prompt template
 compiled_prompt = prompt.compile(movie="Dune 2")
+# -> "Do you like Dune 2?"
 ```
 
 Chat prompts
@@ -164,6 +165,7 @@ chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg i
 
 # Insert variables into chat prompt template
 compiled_chat_prompt = chat_prompt.compile(movie="Dune 2")
+# -> [{"role": "system", "content": "You are an expert on Dune 2"}]
 ```
 
 Optional parameters
