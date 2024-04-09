@@ -106,7 +106,7 @@ If you already have a prompt with the same name, the prompt will be added as a n
 // Create a text prompt
 await langfuse.createPrompt({
   name: "movie-critic",
-  type: "text", 
+  type: "text",
   prompt: "Do you like {{movie}}?",
   isActive: true, // directly promote to production?
   config: {
@@ -209,7 +209,9 @@ Chat prompts
 
 ```typescript
 // Get current production version of a chat prompt
-const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, { type: "chat" }); // type option infers the prompt type (default is 'text')
+const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+}); // type option infers the prompt type (default is 'text')
 
 // Insert variables into chat prompt template
 const compiledChatPrompt = chatPrompt.compile({ movie: "Dune 2" });
@@ -312,7 +314,11 @@ Chat prompts
 
 ```typescript
 // Get current production version of a chat prompt
-const langfusePrompt = await langfuse.getPrompt("movie-critic-chat", undefined, { type: "chat" });
+const langfusePrompt = await langfuse.getPrompt(
+  "movie-critic-chat",
+  undefined,
+  { type: "chat" }
+);
 
 // Example using ChatPromptTemplate
 const promptTemplate = ChatPromptTemplate.fromMessages(
@@ -350,7 +356,9 @@ prompt.config;
 
 Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing/overview) to the prompt version. This allows you to track metrics by movie-critic and version in the Langfuse UI.
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+This is currently unavailable when using the LangChain or LlamaIndex integration.
+
+<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)"]}>
 <Tab>
 
 Decorators
@@ -393,6 +401,22 @@ langfuse.generation({
 +   prompt: prompt
     ...
 })
+```
+
+</Tab>
+
+<Tab>
+
+```python /langfuse_prompt=prompt/
+prompt = langfuse.get_prompt("calculator")
+
+openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": prompt.compile(base=10)},
+    {"role": "user", "content": "1 + 1 = "}],
+  langfuse_prompt=prompt
+)
 ```
 
 </Tab>

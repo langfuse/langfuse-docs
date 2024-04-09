@@ -159,7 +159,8 @@ def summarize_story(story):
     model = model,
     temperature = temperature,
     messages = messages,
-    response_format = { "type": "json_object" }
+    response_format = { "type": "json_object" },
+    langfuse_prompt = prompt # capture used prompt version in trace
   )
 
   # Parse response as JSON
