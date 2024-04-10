@@ -12,7 +12,7 @@ Pre-requisites: Node.js 18+, pnpm
 
 ## Python cookbooks
 
-All Jupyter notebooks are in the `cookbook/` directory.
+All Jupyter notebooks are in the `cookbook/` directory. For JS/TS notebooks we use Deno, see Readme in cookbook folder for more details.
 
 To render them within the documentation site, we convert them to markdown using `jupyter nbconvert`, move them to right path in the pages/ directory where they are rendered by Nextra (remark).
 
