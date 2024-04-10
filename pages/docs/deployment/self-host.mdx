@@ -115,6 +115,7 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` | comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com` |
 | `AUTH_DISABLE_USERNAME_PASSWORD`    | Set to `true` to disable email/password sign for all users. Only OAuth/SSO providers can be used to sign in.                                                     |
+| `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in.                                                                                 |
 
 ### Health Check Endpoint
 
@@ -262,7 +263,6 @@ To host Langfuse on Google Cloud Run, you need to follow these steps using Googl
     ```
 
 15. Finally, you can finish deploying the application.
-
 
 ### AWS (Fargate)
 
