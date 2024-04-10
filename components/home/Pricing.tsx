@@ -179,7 +179,7 @@ const sections = [
       },
       {
         name: "SOC2 Type II and ISO27001 reports",
-        tiers: { Hobby: false, Pro: false, Team: "Q1 2024" },
+        tiers: { Hobby: false, Pro: false, Team: "April 2024" },
       },
       {
         name: "Security reviews",

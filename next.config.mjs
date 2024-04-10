@@ -6,6 +6,27 @@ const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
+/**
+ * CSP headers
+ * img-src https to allow loading images from SSO providers
+ */
+const cspHeader = `
+  default-src 'self' https: wss:;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
+  style-src 'self' 'unsafe-inline' https:;
+  img-src 'self' https: blob: data:;
+  media-src 'self' https: blob: data:;
+  font-src 'self' https:;
+  frame-src 'self' https:;
+  worker-src 'self' blob:;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+  upgrade-insecure-requests;
+  block-all-mixed-content;
+`;
+
 // nextra config
 const withNextra = nextra({
   theme: 'nextra-theme-docs',
@@ -35,6 +56,40 @@ const nextraConfig = withNextra({
         pathname: '/**',
       },
     ],
+  },
+  headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "x-frame-options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "autoplay=*, fullscreen=*, microphone=*",
+          },
+        ],
+      },
+      {
+        source: "/:path((?!api).*)*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: cspHeader.replace(/\n/g, ""),
+          },
+        ],
+      },
+    ]
   },
   redirects: async () => [
     ...nonPermanentRedirects.map(([source, destination]) => ({
@@ -82,6 +137,8 @@ const nonPermanentRedirects = [
   // Redirects to bridge all kinds of old links to new links
   ["/docs/reference", "https://api.reference.langfuse.com/"],
   ["/docs/integrations/api", "https://api.reference.langfuse.com/"],
+  ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
+  ["/docs/integrations/sdk/python", "/docs/sdk/python"],
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/typescript", "/docs/integrations/langchain/tracing"],
@@ -101,6 +158,7 @@ const nonPermanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
   ["/docs/sdk", "/docs/sdk/overview"],
+  ["/docs/sdk/python", "/docs/sdk/python/decorators"],
   ["/cookbook", "/guides"],
   ["/cookbook/:path*", "/guides/cookbook/:path*"],
   ["/docs/sdk/typescript", "/docs/sdk/typescript/guide"],
@@ -124,6 +182,10 @@ const nonPermanentRedirects = [
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
+
+  // User-reported broken links
+  ["/superagent", "/docs/integrations/superagent"],
+  ["/guides/cookbook/langfuse_prompt_with_langchain", "/guides/cookbook/prompt_management_langchain"]
 ];
 
 const permanentRedirects = []

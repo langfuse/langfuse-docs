@@ -140,10 +140,10 @@ If a tokenizer is specified for the model, Langfuse automatically calculates tok
 
 The following tokenizers are currently supported:
 
-| Tokenizer | Package                                                                            |
-| --------- | ---------------------------------------------------------------------------------- |
-| `openai`  | [`js-tiktoken`](https://www.npmjs.com/package/js-tiktoken)                         |
-| `claude`  | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
+| Model     | Tokenizer     | Used package                                                                       | Comment |
+| --------- | ------------- | ---------------------------------------------------------------------------------- |------------- |
+| `gpt*`    | `cl100k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |  |
+| `claude*` | `claude`      | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) | According to Anthropic, their tokenizer is not accurate for Claude 3 models. If possible, send us the tokens from their API response. |
 
 ### Cost
 

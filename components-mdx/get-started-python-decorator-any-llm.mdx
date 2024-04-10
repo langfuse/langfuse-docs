@@ -1,0 +1,32 @@
+```python /@observe(as_type="generation")/ /@observe()/ filename="main.py"
+import anthropic
+anthopic_client = anthropic.Anthropic()
+
+# Wrap LLM function with decorator
+@observe(as_type="generation")
+def anthropic_completion(**kwargs):
+  # optional, extract some fields from kwargs
+  kwargs_clone = kwargs.copy()
+  input = kwargs_clone.pop('messages', None)
+  model = kwargs_clone.pop('model', None)
+  langfuse_context.update_current_observation(
+      input=input,
+      model=model,
+      metadata=kwargs_clone
+  )
+
+  # return result
+  return anthopic_client.messages.create(**kwargs).content[0].text
+
+@observe()
+def main():
+  return anthropic_completion(
+      model="claude-3-opus-20240229",
+      max_tokens=1024,
+      messages=[
+          {"role": "user", "content": "Hello, Claude"}
+      ]
+  )
+
+main()
+```
