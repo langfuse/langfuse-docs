@@ -17,10 +17,10 @@ Exemplary use cases:
 ```python
 langfuse.score(
     trace_id=message.trace_id,
-    observation_id=message.generation_id,
+    observation_id=message.generation_id, # optional
     name="quality",
     value=1,
-    comment="Factually correct",
+    comment="Factually correct", # optional
 )
 ```
 
@@ -32,10 +32,10 @@ langfuse.score(
 ```typescript
 await langfuse.score({
   traceId: message.traceId,
-  observationId: message.generationId,
+  observationId: message.generationId, // optional
   name: "quality",
   value: 1,
-  comment: "Factually correct",
+  comment: "Factually correct", // optional
 });
 ```
 
