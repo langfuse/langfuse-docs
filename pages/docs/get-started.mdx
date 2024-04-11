@@ -78,6 +78,10 @@ import { Langfuse } from "langfuse";
 
 const langfuse = new Langfuse();
 
+const trace = langfuse.trace({
+  name: "my-AI-application-endpoint",
+});
+
 // Example generation creation
 const generation = trace.generation({
   name: "chat-completion",
