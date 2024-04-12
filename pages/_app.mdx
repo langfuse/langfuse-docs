@@ -24,6 +24,14 @@ export default function App({ Component, pageProps }) {
           if (process.env.NODE_ENV === "development") posthog.debug();
         },
       });
+      window.pylon = {
+        chat_settings: {
+          app_id: "6b7b398c-951c-4424-b30b-357e428f1143",
+          email: "demo@langfuse.com",
+          name: "Langfuse Demo",
+          // avatar_url: user.profileImgUrl,
+        },
+      };
     }
     // Track page views
     const handleRouteChange = (path) => {
@@ -39,7 +47,7 @@ export default function App({ Component, pageProps }) {
     <div className={`${GeistSans.variable} font-sans ${GeistMono.variable}`}>
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
-        {process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ? <CrispWidget /> : null}
+        {/* process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ? <CrispWidget /> : null */}
       </PostHogProvider>
       <Hubspot />
       <Script
@@ -47,6 +55,8 @@ export default function App({ Component, pageProps }) {
         strategy="beforeInteractive"
         type="text/javascript"
       />
+      <Script id="pylon" strategy="afterInteractive" src="https://widget.usepylon.com/widget/6b7b398c-951c-4424-b30b-357e428f1143" type="text/javascript" />
     </div>
-  );
+
+);
 }
