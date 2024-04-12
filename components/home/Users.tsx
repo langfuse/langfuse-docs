@@ -10,8 +10,8 @@ import mavaLight from "./img/mava_light.png";
 import mavaDark from "./img/mava_dark.png";
 import frontifyLight from "./img/frontify_light.svg";
 import frontifyDark from "./img/frontify_dark.svg";
-import berryLight from "./img/berry_light.png";
-import berryDark from "./img/berry_light.png";
+import posthogLight from "./img/posthog_light.svg";
+import posthogDark from "./img/posthog_dark.svg";
 import { HomeSection } from "./components/HomeSection";
 
 type User = {
@@ -41,10 +41,10 @@ const users: User[] = [
     href: "https://alphawatch.ai",
   },
   {
-    name: "Berry",
-    lightImage: berryLight,
-    darkImage: berryDark,
-    href: "https://www.berryapp.io",
+    name: "PostHog",
+    lightImage: posthogLight,
+    darkImage: posthogDark,
+    href: "https://posthog.com",
   },
   {
     name: "Mava",
