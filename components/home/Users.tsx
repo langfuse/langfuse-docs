@@ -24,10 +24,10 @@ type User = {
 
 const users: User[] = [
   {
-    name: "Pigment",
-    lightImage: pigmentLight,
-    darkImage: pigmentDark,
-    href: "https://pigment.com",
+    name: "PostHog",
+    lightImage: posthogLight,
+    darkImage: posthogDark,
+    href: "https://posthog.com",
   },
   {
     name: "frontify",
@@ -43,10 +43,10 @@ const users: User[] = [
     className: "w-16 sm:w-24",
   },
   {
-    name: "PostHog",
-    lightImage: posthogLight,
-    darkImage: posthogDark,
-    href: "https://posthog.com",
+    name: "Pigment",
+    lightImage: pigmentLight,
+    darkImage: pigmentDark,
+    href: "https://pigment.com",
   },
   {
     name: "Mava",
