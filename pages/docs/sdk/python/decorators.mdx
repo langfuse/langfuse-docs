@@ -328,7 +328,7 @@ def langchain_fn(person: str):
     # Get Langchain Callback Handler scoped to the current trace context
     langfuse_handler = langfuse_context.get_current_langchain_handler()
 
-    # Pass handler to invoke
+    # Pass handler to invoke of your langchain chain/agent
     chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
 
 langchain_fn("John Doe")
