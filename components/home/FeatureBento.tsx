@@ -58,7 +58,7 @@ const features = [
     Icon: GanttChart,
     name: "Tracing",
     description: "Detailed production traces to debug LLM applications faster.",
-    href: "/docs/tracing/overview",
+    href: "/docs/tracing",
     cta: "Learn more",
     background: (
       <BentoBgImage

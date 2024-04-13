@@ -132,7 +132,7 @@ If you are running a short-lived application, you need to flush Langfuse to ensu
 openai.flush_langfuse()
 ```
 
-Learn more about queuing and batching of events [here](/docs/tracing/overview).
+Learn more about queuing and batching of events [here](/docs/tracing).
 
 ### Debug mode
 
@@ -152,9 +152,9 @@ You can add the following properties to the openai method, e.g. `openai.chat.com
 | ----------------------- | ---------------------------------------------------------------------------- |
 | `name`                  | Set `name` to identify a specific type of generation.                        |
 | `metadata`              | Set `metadata` with additional information that you want to see in Langfuse. |
-| `session_id`            | The current [session](/docs/tracing/sessions).                               |
-| `user_id`               | The current [user_id](/docs/tracing/users).                                  |
-| `tags`                  | Set [tags](/docs/tracing/tags) to categorize and filter traces.              |
+| `session_id`            | The current [session](/docs/tracing-features/sessions).                      |
+| `user_id`               | The current [user_id](/docs/tracing-features/users).                         |
+| `tags`                  | Set [tags](/docs/tracing-features/tags) to categorize and filter traces.     |
 | `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 | `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 
@@ -181,8 +181,8 @@ openai.chat.completions.create(
 - Use all Langfuse Tracing features.
 
 <Callout type="info">
-  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing/overview)
-  to the basic concepts.
+  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing) to the
+  basic concepts.
 </Callout>
 
 You can use any of the following three options:

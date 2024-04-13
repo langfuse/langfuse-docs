@@ -129,7 +129,6 @@ const nonPermanentRedirects = [
   // Redirect to overview pages
   ...[
     "/docs/integrations",
-    "/docs/tracing",
     "/docs/scores",
     "/docs/datasets",
   ].map((path) => [path, path + "/overview"]),
@@ -169,19 +168,29 @@ const nonPermanentRedirects = [
   ["/docs/scores/model-based-evals/langchain", "/cookbook/evaluation_with_langchain"],
   ["/experimentation", "/docs/experimentation"],
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
-  ["/docs/debugging-ui", "/docs/tracing/overview"],
-  ["/observability", "/docs/tracing/overview"],
+  ["/docs/debugging-ui", "/docs/tracing"],
+  ["/observability", "/docs/tracing"],
   ["/docs/openai", "/docs/integrations/openai/get-started"],
   ["/docs/integrations/openai", "/docs/integrations/openai/get-started"],
   ["/docs/api", "https://api.reference.langfuse.com/"],
   ["/docs/qa-chatbot", "/docs/demo"],
-  ["/docs/user-explorer", "/docs/tracing/users"],
-  ["/docs/sessions", "/docs/tracing/sessions"],
+  ["/docs/user-explorer", "/docs/tracing-features/users"],
+  ["/docs/sessions", "/docs/tracing-features/sessions"],
   ["/docs/deployment/cloud", "/security"],
   ["/docs/schedule-demo", "/schedule-demo"],
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
+
+  // Reorder Tracing section
+  ["/docs/tracing/overview", "/docs/tracing"],
+  ["/docs/tracing-features", "/docs/tracing"],
+  ...[
+    "sessions",
+    "users",
+    "tags",
+    "url",
+  ].map((path) => [`/docs/tracing/${path}`, `/docs/tracing-features/${path}`]),
 
   // User-reported broken links
   ["/superagent", "/docs/integrations/superagent"],

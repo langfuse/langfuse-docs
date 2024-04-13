@@ -11,13 +11,11 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/langchain)
 
 ## Setup
 
-
 ```python
 %pip install langfuse langchain langchain_openai --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
-
 
 ```python
 import os
@@ -32,13 +30,11 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
 os.environ["OPENAI_API_KEY"] = "***"
 ```
 
-
 ```python
 from langfuse.callback import CallbackHandler
 
 langfuse_handler = CallbackHandler()
 ```
-
 
 ```python
 # Tests the SDK connection with the server
@@ -50,7 +46,6 @@ langfuse_handler.auth_check()
 ### Sequential Chain
 
 ![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
-
 
 ```python
 # further imports
@@ -84,7 +79,6 @@ review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse
 
 ![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
 
-
 ```python
 from operator import itemgetter
 from langchain_openai import ChatOpenAI
@@ -111,12 +105,11 @@ chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[l
 
 ### ConversationChain
 
-We'll use a [session](https://langfuse.com/docs/tracing/sessions) in Langfuse to track this conversation with each invocation being a single trace.
+We'll use a [session](https://langfuse.com/docs/tracing-features/sessions) in Langfuse to track this conversation with each invocation being a single trace.
 
 In addition to the traces of each run, you also get a conversation view of the entire session:
 
 ![Session view of ConversationChain in Langfuse](https://langfuse.com/images/docs/langchain_session.png)
-
 
 ```python
 from langchain.chains import ConversationChain
@@ -130,22 +123,18 @@ conversation = ConversationChain(
 )
 ```
 
-
 ```python
 # Create a callback handler with a session
 langfuse_handler = CallbackHandler(session_id="conversation_chain")
 ```
 
-
 ```python
 conversation.predict(input="Hi there!", callbacks=[langfuse_handler])
 ```
 
-
 ```python
 conversation.predict(input="How to build great developer tools?", callbacks=[langfuse_handler])
 ```
-
 
 ```python
 conversation.predict(input="Summarize your last response", callbacks=[langfuse_handler])
@@ -155,17 +144,14 @@ conversation.predict(input="Summarize your last response", callbacks=[langfuse_h
 
 ![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
 
-
 ```python
 import os
 os.environ["SERPAPI_API_KEY"] = ""
 ```
 
-
 ```python
 %pip install unstructured chromadb tiktoken google-search-results python-magic langchainhub --upgrade
 ```
-
 
 ```python
 from langchain.document_loaders import UnstructuredURLLoader
@@ -197,7 +183,6 @@ chain.invoke(query, config={"callbacks":[langfuse_handler]})
 
 ### Agent
 
-
 ```python
 from langchain.agents import AgentExecutor, load_tools, create_openai_functions_agent
 from langchain_openai import ChatOpenAI
@@ -216,14 +201,12 @@ agent_executor.invoke({"input": "What is Langfuse?"}, config={"callbacks":[langf
 
 ### AzureOpenAI
 
-
 ```python
 os.environ["AZURE_OPENAI_ENDPOINT"] = "<Azure OpenAI endpoint>"
 os.environ["AZURE_OPENAI_API_KEY"] = "<Azure OpenAI API key>"
 os.environ["OPENAI_API_TYPE"] = "azure"
 os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
 ```
-
 
 ```python
 from langchain_openai import AzureChatOpenAI
@@ -244,7 +227,6 @@ chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]
 ## Adding scores to traces
 
 To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `langfuse_handler.get_trace_id()`
-
 
 ```python
 from langfuse import Langfuse
@@ -270,9 +252,7 @@ You can use this integration in combination with the `observe()` decorator from 
 
 The `langfuse_context.get_current_langchain_handler()` method exposes a LangChain callback handler in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/sdk/python/decorators#langchain).
 
-
 ### How it works
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -316,7 +296,6 @@ TRACE: person-locator
 
 Setup chain
 
-
 ```python
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -328,7 +307,6 @@ chain = prompt | model
 ```
 
 Invoke it multiple times as part of a nested trace.
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
