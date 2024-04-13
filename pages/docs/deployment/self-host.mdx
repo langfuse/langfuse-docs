@@ -221,9 +221,44 @@ Optionally, you can apply the new model definitions to existing data using the f
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
 
-### Google Cloud Platform (Cloud Run)
+### Google Cloud Platform (Cloud Run & Cloud SQL)
 
-To host Langfuse on Google Cloud Run, you cannot use the image hosted on GitHub Container Registry. Instead, pull from Docker Hub: [langfuse/langfuse](https://hub.docker.com/r/langfuse/langfuse).
+To host Langfuse on Google Cloud Run, you cannot use the image hosted on GitHub Container Registry. Instead, pull from Docker Hub: [langfuse/langfuse:2](https://hub.docker.com/r/langfuse/langfuse). Note: use tag `2` to pin the major version.
+
+**Create Cloud SQL Instance:**
+
+1. Open Google Cloud SQL.
+2. Click on Create Instance.
+3. Choose PostgreSQL and configure the instance according to your requirements.
+4. You'll need the following details:
+   - default > user: postgres
+   - default > database schema: public
+   - setup > password: `<password>`
+   - connection > connection name: `<google-cloud-project-id>:<region-id>:<sql-instance-id>`
+
+**Steps:**
+
+1.  Open Google Cloud Run.
+2.  Click on Create Service.
+3.  Enter the following container image URL: `docker.io/langfuse/langfuse:2`. We use tag `2` to pin the major version.
+4.  Configure the service name and region according to your requirements.
+5.  Select authentication as 'Allow unauthenticated invocations', as Langfuse will have its own built-in Authentication that you can use.
+6.  Choose 'CPU Allocation and Pricing' as "CPU is only allocated during request processing" to scale down the instance to 0 when there are no requests.
+7.  Configure ingress control according to your needs. For most cases, 'All' should suffice.
+8.  "Container(s), Volumes, Networking & Security":
+
+    - Specify container port as `3000`.
+    - On "Variables & Secrets" tab, add the required environment variables (see table above): `SALT`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, and `DATABASE_URL`, etc.
+      - To configure Cloud SQL, add the following:
+        - `DATABASE_URL` as the connection string to the Cloud SQL instance. `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true`
+        - `DIRECT_URL` for database migrations, without `&pgbouncer=true`, the value should look like this: `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none`
+      - Set `NEXTAUTH_URL` to `http://localhost:3000`. This is a placeholder, we'll update it later.
+
+9.  Scroll all the way down to enable the Cloud SQL connections. Select the created Cloud SQL instance in the dropdown. Context: Your Cloud Run service won't be assigned a static IP, so you can't whitelist the ingress IP in Cloud SQL or any other hosted databases. Instead, we use the Google Cloud SQL Proxy.
+10. Finally, you can finish deploying the application.
+11. While the application is deployed for the first time, you can see how the database migrations are applied in the logs.
+12. Once the application is up and running, you can find the Cloud Run service URL on top of the page. Now, choose "Edit and deploy new revision" to update the `NEXTAUTH_URL` environment variable to the Cloud Run service URL ending in `.run.app`.
+13. Optionally, configure a custom domain for the Cloud Run service.
 
 ### AWS (Fargate)
 
