@@ -19,6 +19,7 @@ type User = {
   lightImage: StaticImageData;
   darkImage: StaticImageData;
   href: string;
+  className?: string;
 };
 
 const users: User[] = [
@@ -39,6 +40,7 @@ const users: User[] = [
     lightImage: alphawatchLight,
     darkImage: alphawatchDark,
     href: "https://alphawatch.ai",
+    className: "w-16 sm:w-24",
   },
   {
     name: "PostHog",
@@ -58,7 +60,10 @@ const UserLogo = ({ user }: { user: User }) => {
   return (
     <a
       href={user.href}
-      className={cn("relative h-12 sm:h-16 w-20 sm:w-40 cursor-pointer")}
+      className={cn(
+        "relative h-12 sm:h-16 w-20 sm:w-40 cursor-pointer",
+        user.className
+      )}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -87,7 +92,7 @@ export const Users = () => {
         Teams building complex LLM apps rely on Langfuse
       </h2>
       <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden">
-        <Marquee className="[--gap:4rem]">
+        <Marquee className="[--gap:2rem] lg:[--gap:5rem]">
           {users.map((user) => (
             <UserLogo key={user.name} user={user} />
           ))}
