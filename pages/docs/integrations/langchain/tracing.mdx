@@ -109,7 +109,7 @@ Use the Langchain integration in combination with the regular Langfuse SDKs if y
 
 Learn more about the structure of a trace [here](/docs/tracing).
 
-<Tabs items={["Python Decorator", "Python low-level SDK", "JS"]}>
+<Tabs items={["Python Decorator", "JS", "Python low-level SDK"]}>
 <Tab>
 {/* Python decorator */}
 
@@ -126,11 +126,43 @@ def main():
         user_id="session-1234",
     )
     # get the langchain handler for the current trace
-    langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
 
-    # use the handler to trace langchain runs within this function ...
+    # Your Langchain code
+
+    # Add Langfuse handler as callback (classic and LCEL)
+    chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
 
 main()
+```
+
+</Tab>
+<Tab>
+{/* JS */}
+
+```typescript
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+// Get Langchain handler for a trace
+const trace = langfuse.trace();
+const langfuseHandlerTrace = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback (classic and LCEL)
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandlerTrace] }
+);
+
+// Get Langchain handler for a span
+const span = trace.span();
+const langfuseHandlerSpan = new CallbackHandler({ root: span });
+
+// Add Langfuse handler as callback (classic and LCEL)
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandlerSpan] }
+);
 ```
 
 </Tab>
@@ -146,26 +178,15 @@ langfuse = Langfuse()
 trace = langfuse.trace()
 langfuse_handler_trace = trace.get_langchain_handler()
 
+# Add Langfuse handler as callback (classic and LCEL)
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler_trace]})
+
 # Get Langchain handler for a span
 span = trace.span()
 langfuse_handler_span = span.get_langchain_handler()
-```
 
-</Tab>
-<Tab>
-{/* JS */}
-
-```typescript
-import { CallbackHandler, Langfuse } from "langfuse-langchain";
-const langfuse = new Langfuse();
-
-// Get Langchain handler for a trace
-const trace = langfuse.trace();
-const langfuseHandlerTrace = new CallbackHandler({ root: trace });
-
-// Get Langchain handler for a span
-const span = trace.span();
-const langfuseHandlerSpan = new CallbackHandler({ root: span });
+# Add Langfuse handler as callback (classic and LCEL)
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler_span]})
 ```
 
 </Tab>
