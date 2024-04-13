@@ -8,10 +8,10 @@ The Users view provides an overview of all users. It also offers an in-depth loo
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)","LlamaIndex","Flowise"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
-Decorators
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -19,20 +19,20 @@ from langfuse.decorators import langfuse_context, observe
 @observe()
 def fn():
     langfuse_context.update_current_trace(
-        user_id="your-user-id"
+        user_id="user-id"
     )
 
 fn()
 ```
 
-Low-level SDK
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
 from langfuse import Langfuse
 langfuse = Langfuse()
 
 trace = langfuse.trace(
-    user_id="your-user-id"
+    user_id="user-id"
 )
 ```
 
@@ -44,12 +44,16 @@ import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
 const trace = langfuse.trace({
-  userId: "your-user-id",
+  userId: "user-id",
 });
 ```
 
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
 </Tab>
 <Tab>
+
+When using the [OpenAI SDK Integration](/docs/integrations/openai), pass `user_id` as an additional argument:
 
 ```python
 from langfuse.openai import openai
@@ -63,31 +67,95 @@ completion = openai.chat.completions.create(
   temperature=0,
 
   # add user_id as additional argument
-  user_id="your-user-id"
+  user_id="user-id"
 )
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set `user_id` via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.openai import openai
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        user_id="user-id"
+    )
+
+    completion = openai.chat.completions.create(
+      name="test-chat",
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a calculator."},
+        {"role": "user", "content": "1 + 1 = "}],
+      temperature=0,
+    )
+
+fn()
 ```
 
 </Tab>
 <Tab>
+
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `user_id` as a keyword argument:
 
 ```python
 handler = CallbackHandler(
-  user_id="your-user-id"
+  user_id="user-id"
 )
 ```
 
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `user_id` via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        user_id="user-id"
+    )
+
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Pass handler to invoke of your langchain chain/agent
+    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
+
+fn()
+```
+
 </Tab>
 <Tab>
 
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `userId` to the constructor:
+
 ```typescript
 const handler = new CallbackHandler({
-  userId: "your-user-id",
+  userId: "user-id",
 });
+```
+
+When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `userId` via `langfuse.trace()`:
+
+```typescript
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  userId: "user-id",
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 ```
 
 </Tab>
 
 <Tab>
+
+When using the [LlamaIndex Integration](/docs/integrations/llama-index), set `user_id` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `user_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
 
 ```python
 from llama_index.core import Settings
@@ -99,11 +167,33 @@ langfuse_callback_handler = LlamaIndexCallbackHandler()
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
 langfuse_callback_handler.set_trace_params(
-  user_id="user-id",
+  user_id="user-id"
 )
 ```
 
-All LlamaIndex traces created after `set_trace_params` will include the `user_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set `user_id` via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from llama_index.core import Document, VectorStoreIndex
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+
+@observe()
+def llama_index_fn(question: str):
+    langfuse_context.update_current_trace(
+        user_id="user-id"
+    )
+
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    # Run application
+    index = VectorStoreIndex.from_documents([doc1,doc2])
+    response = index.as_query_engine().query(question)
+    return response
+```
 
 </Tab>
 

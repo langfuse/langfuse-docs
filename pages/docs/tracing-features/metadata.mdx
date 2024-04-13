@@ -1,14 +1,12 @@
 ---
-description: Tags help to filter and organize traces in Langfuse based on use case, functions/apis used, environment and other criteria.
+description: Add any customer metadata to your traces to better understand your users, application and experiments.
 ---
 
-# Tagging traces
+# Metadata
 
-import { CloudflareVideo } from "@/components/Video";
+Traces and observations (see [Langfuse Data Model](/docs/tracing)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
 
-Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
-
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -19,7 +17,7 @@ from langfuse.decorators import langfuse_context, observe
 @observe()
 def fn():
     langfuse_context.update_current_trace(
-        tags=["tag-1", "tag-2"]
+        metadata={"key":"value"}
     )
 
 fn()
@@ -32,7 +30,7 @@ from langfuse import Langfuse
 langfuse = Langfuse()
 
 trace = langfuse.trace(
-    tags=["tag-1", "tag-2"]
+    metadata={"key":"value"}
 )
 ```
 
@@ -44,7 +42,7 @@ import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
 const trace = langfuse.trace({
-  tags: ["tag-1", "tag-2"],
+  metadata: { key: "value" },
 });
 ```
 
@@ -53,7 +51,7 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai), pass `tags` as an additional argument:
+When using the [OpenAI SDK Integration](/docs/integrations/openai), pass `metadata` as an additional argument:
 
 ```python
 from langfuse.openai import openai
@@ -66,12 +64,12 @@ completion = openai.chat.completions.create(
     {"role": "user", "content": "1 + 1 = "}],
   temperature=0,
 
-  # add tags as additional argument
-  tags=["tag-1", "tag-2"]
+  # add user_id as additional argument
+  metadata={"key":"value"}
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set `metadata` via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -80,7 +78,7 @@ from langfuse.openai import openai
 @observe()
 def fn():
     langfuse_context.update_current_trace(
-        tags=["tag-1", "tag-2"]
+        metadata={"key":"value"}
     )
 
     completion = openai.chat.completions.create(
@@ -98,15 +96,15 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` as a keyword argument:
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `metadata` as a keyword argument:
 
 ```python
 handler = CallbackHandler(
-  tags=["tag-1", "tag-2"]
+  metadata={"key":"value"}
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `metadata` via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -114,7 +112,7 @@ from langfuse.decorators import langfuse_context, observe
 @observe()
 def fn():
     langfuse_context.update_current_trace(
-        tags=["tag-1", "tag-2"]
+        metadata={"key":"value"}
     )
 
     langfuse_handler = langfuse_context.get_current_langchain_handler()
@@ -128,22 +126,22 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` to the constructor:
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `metadata` to the constructor:
 
 ```typescript
 const handler = new CallbackHandler({
-  tags: ["tag-1", "tag-2"],
+  metadata: { key: "value" },
 });
 ```
 
-When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via `langfuse.trace()`:
+When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `metadata` via `langfuse.trace()`:
 
 ```typescript
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 
 const trace = langfuse.trace({
-  tags: ["tag-1", "tag-2"],
+  metadata: { key: "value" },
 });
 const langfuseHandler = new CallbackHandler({ root: trace });
 
@@ -155,7 +153,7 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 <Tab>
 
-When using the [LlamaIndex Integration](/docs/integrations/llama-index), set `tags` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
+When using the [LlamaIndex Integration](/docs/integrations/llama-index), set `metadata` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `metadata`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
 
 ```python
 from llama_index.core import Settings
@@ -167,11 +165,11 @@ langfuse_callback_handler = LlamaIndexCallbackHandler()
 Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
 langfuse_callback_handler.set_trace_params(
-  tags=["tag-1", "tag-2"]
+  metadata={"key":"value"}
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set `metadata` via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -182,7 +180,7 @@ from llama_index.core.callbacks import CallbackManager
 @observe()
 def llama_index_fn(question: str):
     langfuse_context.update_current_trace(
-        tags=["tag-1", "tag-2"]
+        metadata={"key":"value"}
     )
 
     # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
@@ -197,18 +195,9 @@ def llama_index_fn(question: str):
 
 </Tab>
 
+<Tab>
+You can set the `metadata` via the override configs, see the [Flowise Integration docs](/docs/flowise) for more details.
+
+</Tab>
+
 </Tabs>
-
-### Working with tags
-
-Tags enable you to flexibly add metadata to your traces.
-You can filter for tags in the Langfuse UI and [GET API](https://api.reference.langfuse.com/).
-
-When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
-
-<CloudflareVideo
-  videoId="e4902f5c5d05ad85b5ecf9443864494d"
-  aspectRatio={3.6 / 3}
-  className="max-w-2xl mt-8"
-  gifStyle
-/>

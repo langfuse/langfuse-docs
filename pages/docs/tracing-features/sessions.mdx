@@ -16,7 +16,7 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
-Decorators
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -30,7 +30,7 @@ def fn():
 fn()
 ```
 
-Low-level SDK
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
 from langfuse import Langfuse
@@ -53,8 +53,12 @@ const trace = langfuse.trace({
 });
 ```
 
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
 </Tab>
 <Tab>
+
+When using the [OpenAI SDK Integration](/docs/integrations/openai), pass the `session_id` as an additional argument:
 
 ```python
 from langfuse.openai import openai
@@ -72,8 +76,34 @@ completion = openai.chat.completions.create(
 )
 ```
 
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set the session_id via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.openai import openai
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        session_id="your-session-id"
+    )
+
+    completion = openai.chat.completions.create(
+      name="test-chat",
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a calculator."},
+        {"role": "user", "content": "1 + 1 = "}],
+      temperature=0,
+    )
+
+fn()
+```
+
 </Tab>
 <Tab>
+
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass the `session_id` as a keyword argument:
 
 ```python
 handler = CallbackHandler(
@@ -81,8 +111,29 @@ handler = CallbackHandler(
 )
 ```
 
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set the session_id via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        session_id="your-session-id"
+    )
+
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Pass handler to invoke of your langchain chain/agent
+    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
+
+fn()
+```
+
 </Tab>
 <Tab>
+
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass the `sessionId` to the constructor:
 
 ```typescript
 const handler = new CallbackHandler({
@@ -90,9 +141,26 @@ const handler = new CallbackHandler({
 });
 ```
 
+When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set the sessionId via `langfuse.trace()`:
+
+```typescript
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  sessionId: "your-session-id",
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
 </Tab>
 
 <Tab>
+
+When using the [LlamaIndex Integration](/docs/integrations/llama-index), set the `session_id` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `session_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
 
 ```python
 from llama_index.core import Settings
@@ -108,7 +176,29 @@ langfuse_callback_handler.set_trace_params(
 )
 ```
 
-All LlamaIndex traces created after `set_trace_params` will include the `session_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the session_id via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from llama_index.core import Document, VectorStoreIndex
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+
+@observe()
+def llama_index_fn(question: str):
+    langfuse_context.update_current_trace(
+        session_id="your-session-id"
+    )
+
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    # Run application
+    index = VectorStoreIndex.from_documents([doc1,doc2])
+    response = index.as_query_engine().query(question)
+    return response
+```
 
 </Tab>
 
@@ -134,3 +224,7 @@ _Example session spanning multiple traces_
 - Publish a session to share with others as a public link ([example](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/sessions/lf.docs.conversation.TL4KDlo))
 - Bookmark a session to easily find it later
 - Manually evaluate sessions by adding `scores` from the Langfuse UI
+
+```
+
+```
