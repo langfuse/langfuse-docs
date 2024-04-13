@@ -15,7 +15,7 @@ Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it
 <Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
 
-Decorators
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -27,7 +27,7 @@ def fn():
 fn()
 ```
 
-Low-level SDK
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
 trace = langfuse.trace(...)
@@ -44,21 +44,23 @@ trace.getTraceUrl()
 </Tab>
 <Tab>
 
-Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/tracing#interoperability)).
+Use the interoperability of the Langfuse Python `@observe()` Decorator with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/tracing#interoperability)).
 
 ```python
-# Intialize Langfuse Client
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse.decorators import langfuse_context, observe
 
-# Create a Langfuse trace for an execution of your application
-trace = langfuse.trace()
+@observe()
+def fn():
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
 
-# Get Langchain handler for this trace
-langfuse_handler = trace.get_langchain_handler()
+    # Your Langchain code
 
-# Get the trace URL
-langfuse_handler.get_trace_url()
+    # Add Langfuse handler as callback (classic and LCEL)
+    chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
+
+    langfuse_context.get_current_trace_url()
+
+fn()
 ```
 
 **Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.

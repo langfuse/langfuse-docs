@@ -16,7 +16,7 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
-Decorators
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -30,7 +30,7 @@ def fn():
 fn()
 ```
 
-Low-level SDK
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
 from langfuse import Langfuse
@@ -52,6 +52,8 @@ const trace = langfuse.trace({
   sessionId: "your-session-id",
 });
 ```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
 <Tab>
