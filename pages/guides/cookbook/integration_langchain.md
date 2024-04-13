@@ -111,7 +111,7 @@ chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[l
 
 ### ConversationChain
 
-We'll use a [session](https://langfuse.com/docs/tracing/sessions) in Langfuse to track this conversation with each invocation being a single trace.
+We'll use a [session](https://langfuse.com/docs/tracing-features/sessions) in Langfuse to track this conversation with each invocation being a single trace.
 
 In addition to the traces of each run, you also get a conversation view of the entire session:
 

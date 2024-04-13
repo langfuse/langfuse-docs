@@ -92,9 +92,9 @@ export default async function handler(req: Request, res: Response) {
     // initialize Langfuse 
     const trace = langfuse.trace({
         name: "QA",
-        // Langfuse session tracking: https://langfuse.com/docs/tracing/sessions
+        // Langfuse session tracking: https://langfuse.com/docs/tracing-features/sessions
         sessionId: req.sessionId, 
-        // Langfuse user tracking: https://langfuse.com/docs/tracing/users
+        // Langfuse user tracking: https://langfuse.com/docs/tracing-features/users
         userId: req.userId,
         // Make public, so everyone can view it via its URL (for this demo)
         public: true
@@ -251,7 +251,7 @@ console.log(response.headers.get("X-Langfuse-Trace-Url"))
 
 ![Trace in Langfuse UI](https://langfuse.com/images/cookbook/js_tracing_example_vercel_ai_sdk_trace.png)
 
-PS: As I ran this notebook a couple of times while putting it together, you can find a public [session](https://langfuse.com/docs/tracing/sessions) view of me asking the same question `What is love?` [here](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/sessions/testSession).
+PS: As I ran this notebook a couple of times while putting it together, you can find a public [session](https://langfuse.com/docs/tracing-features/sessions) view of me asking the same question `What is love?` [here](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/sessions/testSession).
 
 ## Production Demo
 

@@ -67,7 +67,7 @@ Import the `@observe()` decorator and apply it to the functions you want to trac
 - args and kwargs as input dict
 - returned values as output
 
-The decorator will automatically create a trace for the top-level function and spans for any nested functions. Learn more about the tracing data model [here](/docs/tracing/overview).
+The decorator will automatically create a trace for the top-level function and spans for any nested functions. Learn more about the tracing data model [here](/docs/tracing).
 
 ```python /@observe()/
 from langfuse.decorators import observe
@@ -117,7 +117,7 @@ langfuse_context.flush()
 
 ### Log any LLM call
 
-In addition to the native intgerations with LangChain, LlamaIndex, and OpenAI (details [below](#frameworks)), you can log any LLM call by decorating it with `@observe(as_type="generation")`. **Important:** Make sure the `as_type="generation"` decorated function is called inside another `@observe()`-decorated function for it to have a top-level trace. 
+In addition to the native intgerations with LangChain, LlamaIndex, and OpenAI (details [below](#frameworks)), you can log any LLM call by decorating it with `@observe(as_type="generation")`. **Important:** Make sure the `as_type="generation"` decorated function is called inside another `@observe()`-decorated function for it to have a top-level trace.
 
 Optionally, you can parse some of the arguments to the LLM call and pass them to [`langfuse_context.update_current_observation`](#additional-attributes) to enrich the trace.
 

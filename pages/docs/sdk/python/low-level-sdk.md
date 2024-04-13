@@ -115,12 +115,12 @@ Traces are the top-level entity in the Langfuse API. They represent an execution
 | input | object | yes | The input of the trace. Can be any JSON object.
 | output | object | yes | The output of the trace. Can be any JSON object.
 | metadata | object | yes | Additional metadata of the trace. Can be any JSON object. Metadata is merged when being updated via the API.
-| user_id | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/tracing/users).
-| session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/tracing/sessions) in Langfuse. Use your own session/thread identifier.
+| user_id | string | yes | The id of the user that triggered the execution. Used to provide [user-level analytics](https://langfuse.com/docs/tracing-features/users).
+| session_id | string| yes | Used to group multiple traces into a [session](https://langfuse.com/docs/tracing-features/sessions) in Langfuse. Use your own session/thread identifier.
 | version | string | yes | The version of the trace type. Used to understand how changes to the trace type affect metrics. Useful in debugging.
 | release | string | yes | The release identifier of the current deployment. Used to understand how changes of different deployments affect metrics. Useful in debugging.
 | tags | string[] | yes | Tags are used to categorize or label traces. Traces can be filtered by tags in the UI and GET API. Tags can also be changed in the UI. Tags are merged and never deleted via the API. |
-| public | boolean | yes | You can make a trace `public` to share it via a [public link](https://langfuse.com/docs/tracing/). This allows others to view the trace without needing to log in or be members of your Langfuse project. |
+| public | boolean | yes | You can make a trace `public` to share it via a [public link](https://langfuse.com/docs/tracing-features/). This allows others to view the trace without needing to log in or be members of your Langfuse project. |
 
 
 ```python

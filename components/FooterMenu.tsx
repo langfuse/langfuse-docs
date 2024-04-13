@@ -9,7 +9,7 @@ const menuItems: {
     items: [
       {
         name: "LLM Tracing",
-        href: "/docs/tracing/overview",
+        href: "/docs/tracing",
       },
       {
         name: "Prompt Management",

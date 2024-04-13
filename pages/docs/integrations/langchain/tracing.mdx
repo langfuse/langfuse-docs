@@ -10,7 +10,7 @@ import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-
 
 # Tracing for Langchain (Python & JS/TS)
 
-[Langfuse Tracing](/docs/tracing/overview) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/modules/callbacks/), [JS](https://js.langchain.com/docs/modules/callbacks/)). Thereby, the Langfuse SDK automatically creates a nested trace for every run of your Langchain applications.
+[Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/modules/callbacks/), [JS](https://js.langchain.com/docs/modules/callbacks/)). Thereby, the Langfuse SDK automatically creates a nested trace for every run of your Langchain applications.
 
 import { CloudflareVideo } from "@/components/Video";
 
@@ -79,8 +79,8 @@ When initializing the Langfuse handler, you can pass the following **optional** 
 
 | Python       | JS/TS       | Type   | Description                                                                                     |
 | ------------ | ----------- | ------ | ----------------------------------------------------------------------------------------------- |
-| `user_id`    | `userId`    | string | The current [user](/docs/tracing/users).                                                        |
-| `session_id` | `sessionId` | string | The current [session](/docs/tracing/sessions).                                                  |
+| `user_id`    | `userId`    | string | The current [user](/docs/tracing-features/users).                                               |
+| `session_id` | `sessionId` | string | The current [session](/docs/tracing-features/sessions).                                         |
 | `release`    | `release`   | string | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
 | `version`    | `version`   | string | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
 | `trace_name` |             | string | Customize the name of the created traces. Defaults to name of chain.                            |
@@ -107,7 +107,7 @@ Use the Langchain integration in combination with the regular Langfuse SDKs if y
 - Add non-Langchain related observations to the trace.
 - Group multiple Langchain runs into a single trace.
 
-Learn more about the structure of a trace [here](/docs/tracing/overview).
+Learn more about the structure of a trace [here](/docs/tracing).
 
 <Tabs items={["Python Decorator", "Python low-level SDK", "JS"]}>
 <Tab>

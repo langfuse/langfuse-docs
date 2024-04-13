@@ -10,7 +10,7 @@ import { Callout } from "nextra-theme-docs";
 
 > It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs. Designed for both beginners and experts, LlamaIndex provides a user-friendly high-level API for easy data ingestion and querying, alongside customizable lower-level APIs for detailed module adaptation.
 
-Langfuse offers a simple integration for automatic capture of [traces](/docs/tracing/overview) and metrics generated in LlamaIndex applications. **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
+Langfuse offers a simple integration for automatic capture of [traces](/docs/tracing) and metrics generated in LlamaIndex applications. **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
 
 <Callout type="info">
   Currently only Python is supported by this integration. If you are interested
@@ -83,7 +83,7 @@ If you are running a short-lived application, you need to flush Langfuse to ensu
 langfuse_handler.flush()
 ```
 
-Learn more about queuing and batching of events [here](/docs/tracing/overview).
+Learn more about queuing and batching of events [here](/docs/tracing).
 
 ### Custom trace parameters [#set-trace-params]
 
@@ -93,9 +93,9 @@ You can update trace parameters at any time to add additional context to a trace
 | ------------ | ------------------------------------------------------------------------- |
 | `name`       | Identify a specific type of trace, e.g. a use case or functionality.      |
 | `metadata`   | Additional information that you want to see in Langfuse. Can be any JSON. |
-| `session_id` | The current [session](/docs/tracing/sessions).                            |
-| `user_id`    | The current [user_id](/docs/tracing/users).                               |
-| `tags`       | [Tags](/docs/tracing/tags) to categorize and filter traces.               |
+| `session_id` | The current [session](/docs/tracing-features/sessions).                   |
+| `user_id`    | The current [user_id](/docs/tracing-features/users).                      |
+| `tags`       | [Tags](/docs/tracing-features/tags) to categorize and filter traces.      |
 | `version`    | The specified version to trace [experiments](/docs/experimentation).      |
 | `release`    | The specified release to trace [experiments](/docs/experimentation).      |
 
