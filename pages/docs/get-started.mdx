@@ -22,7 +22,7 @@ import EnvJs from "@/components-mdx/env-js.mdx";
 import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
 import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
 
-<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
+<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
 
 <Tab>
 {/* Decorator + OpenAI */}
@@ -131,7 +131,28 @@ completion = openai.chat.completions.create(
 
 </Tab>
 <Tab>
-{/* Langchain (Python) */}
+{/* OpenAI (JS/TS) */}
+
+<EnvJs />
+
+With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
+
+```typescript
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const openai = observeOpenAI(new OpenAI());
+
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+  model: "gpt-3.5-turbo",
+  max_tokens: 300,
+});
+```
+
+</Tab>
+<Tab>
+{/* LangChain */}
 
 The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
 
