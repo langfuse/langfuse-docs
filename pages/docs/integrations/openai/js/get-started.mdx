@@ -1,5 +1,5 @@
 ---
-description: Simple wrapper around OpenAI SDK to get full observability in Langfuse
+description: Simple wrapper around OpenAI SDK (JS/TS) to get full observability in Langfuse
 ---
 
 import { Callout } from "nextra-theme-docs";
@@ -55,32 +55,28 @@ The integration is compatible with OpenAI SDK versions `>=4.32.0`. // TODO: chec
 npm install langfuse openai
 ```
 
-### Wrap the OpenAI SDK
-
-```typescript
-import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
-
-const openai = observeOpenAI(new OpenAI());
-```
-
 ### Call OpenAI methods with the wrapped client
 
 Langfuse wraps the OpenAI SDK and provides the functionality and method signatures. You can call them as usual.
 
 The `observeOpenAI` function automatically instantiates a Langfuse client in the background. You can either configure the client with environment variables or pass the configuration directly to the `observeOpenAI` function.
 
+import EnvJS from "@/components-mdx/env-js.mdx";
+
 <Tabs items={["Environment variables", "Directly passed variables"]}>
   <Tab>
     Add your Langfuse credentials to your environment variables. You can find your credentials in your project settings in the Langfuse UI. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
-
-import EnvJS from "@/components-mdx/env-js.mdx";
 
     <EnvJS />
 
     With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
 
     ```typescript
+    import OpenAI from "openai";
+    import { observeOpenAI } from "langfuse";
+
+    const openai = observeOpenAI(new OpenAI());
+
     const res = await openai.chat.completions.create({
       messages: [{ role: "system", content: "Tell me a story about a dog." }],
       model: "gpt-3.5-turbo",
@@ -93,6 +89,9 @@ import EnvJS from "@/components-mdx/env-js.mdx";
     Pass your Langfuse credentials directly as `clientInitParams` to the `observeOpenAI` function. You can find your credentials in your project settings in the Langfuse UI.
 
     ```typescript
+    import OpenAI from "openai";
+    import { observeOpenAI } from "langfuse";
+
     const res = await observeOpenAI(new OpenAI(), {
       clientInitParams: {
         publicKey: "pk-lf-...",
@@ -107,7 +106,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
     ```
 
   <Callout type="info">
-    The Langfuse client is a singleton. Initialization params are only used for the first call. Subsequent calls will use the same client.
+    The Langfuse client is a singleton to efficiently batch events to the Langfuse API. Initialization params are only used for the first time an openAI client is wrapped. Subsequently wrapped OpenAI clients will use the same Langfuse client.
   </Callout>
   </Tab>
 </Tabs>
