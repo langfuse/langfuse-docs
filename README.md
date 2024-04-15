@@ -1,3 +1,5 @@
+![GitHub Banner](https://github.com/langfuse/langfuse-docs/assets/2834609/e403ad73-73fa-43f0-9925-292b05ce58de)
+
 # Langfuse Docs
 
 Repo for [langfuse.com](https://langfuse.com), based on [Nextra](https://nextra.site/)
