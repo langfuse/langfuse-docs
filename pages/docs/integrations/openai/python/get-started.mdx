@@ -2,6 +2,8 @@
 description: Drop-in replacement of OpenAI SDK to get full observability in Langfuse by changing only the import.
 ---
 
+import { Callout } from "nextra-theme-docs";
+
 # Observability for OpenAI SDK (Python)
 
 If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import.
@@ -10,8 +12,6 @@ If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement
 - import openai
 + from langfuse.openai import openai
 ```
-
-_Looking for the JS/TS version? [Check it out here](/docs/integrations/openai/js/get-started)._
 
 Langfuse automatically tracks:
 
@@ -29,6 +29,11 @@ import { CloudflareVideo } from "@/components/Video";
   aspectRatio={16 / 9.8}
   gifStyle
 />
+
+<Callout type="info">
+  Looking for the JS/TS version? [Check it out
+  here](/docs/integrations/openai/js/get-started).
+</Callout>
 
 ## How it works
 
@@ -172,8 +177,6 @@ openai.chat.completions.create(
 - Group multiple OpenAI calls into a single trace while customizing the trace.
 - Have more control over the trace structure.
 - Use all Langfuse Tracing features.
-
-import { Callout } from "nextra/components";
 
 <Callout type="info">
   New to Langfuse Tracing? Checkout this [introduction](/docs/tracing) to the
