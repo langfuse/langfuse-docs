@@ -13,8 +13,16 @@ export const ChangelogHeader = () => {
     (page) => page.route === router.pathname
   ) as Page & { frontMatter: any };
 
-  const { title, description, ogImage, ogVideo, gif, date, author } =
-    page.frontMatter;
+  const {
+    title,
+    description,
+    ogImage,
+    ogVideo,
+    gif,
+    date,
+    author,
+    showOgInHeader,
+  } = page.frontMatter;
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">
@@ -46,7 +54,7 @@ export const ChangelogHeader = () => {
         </div>
       </div>
 
-      {ogVideo ? (
+      {showOgInHeader === false ? null : ogVideo ? (
         <Video src={ogVideo} gifStyle />
       ) : ogImage ? (
         <Image
