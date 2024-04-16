@@ -225,6 +225,8 @@ Optionally, you can apply the new model definitions to existing data using the f
 
 The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run for the containerized application and Cloud SQL for the database.
 
+#### Option 1: UI Deployment
+
 **Create Cloud SQL Instance:**
 
 1. Open Google Cloud SQL.
@@ -260,7 +262,7 @@ The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run
 12. Once the application is up and running, you can find the Cloud Run service URL on top of the page. Now, choose "Edit and deploy new revision" to update the `NEXTAUTH_URL` environment variable to the Cloud Run service URL ending in `.run.app`.
 13. Optionally, configure a custom domain for the Cloud Run service.
 
-**Use Cloud Build to deploy**
+#### Option 2: Cloud Build
 
 Google Cloud Build is GCP's continuous integration and continuous deployment (CI/CD) service that automates the building, testing, and deployment of your applications. To deploy Langfuse, you can specify your workflow in a cloudbuild.yaml file. Additionally, GCP's Secret Manager can be used to securely handle sensitive information like DATABASE_URL and NEXTAUTH_SECRET. Below is an example of how to set up a Cloud Build configuration:
 
@@ -268,10 +270,10 @@ Google Cloud Build is GCP's continuous integration and continuous deployment (CI
 # Deployment configuration for Langfuse on Google Cloud Run
 substitutions:
   _SERVICE_NAME: langfuse
-  _REGION: europe-west1
-  _PROJECT_ID: your-project-id  # Change to your Google Cloud project ID
+  _REGION: europe-west1 # Change to your desired region
+  _PROJECT_ID: your-project-id # Change to your Google Cloud project ID
 
-tags: ['${_PROJECT_ID}', '${_SERVICE_NAME}']
+tags: ["${_PROJECT_ID}", "${_SERVICE_NAME}"]
 
 steps:
   # Step to deploy the Docker image to Google Cloud Run
@@ -298,7 +300,6 @@ steps:
                             NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest, \
                             DATABASE_URL=DATABASE_URL:latest, \
                             DIRECT_URL=DIRECT_URL:latest
-
 ```
 
 You can submit this build using [`gcloud build submit`](https://cloud.google.com/sdk/gcloud/reference/builds/submit) in your local console by issuing the below in the same folder as the `cloudbuild.yaml` file.
@@ -311,9 +312,9 @@ gcloud builds submit .
 
 For automatic rebuilds upon new commits, set up a [Cloud Build Trigger](https://cloud.google.com/build/docs/automating-builds/create-manage-triggers) linked to your repository holding the `cloudbuild.yaml` file. This will redeploy Langfuse whenever changes are pushed to the repository.
 
-**AlloyDB**
+#### Note on AlloyDB
 
-[AlloyDB](https://cloud.google.com/alloydb) is a fully-managed postgres compatible database offered by Google Cloud Platform that is tuned for better performance for tasks such as analytical queries and in-database embeddings.  It is recommend you use it within a [Shared VPC](https://cloud.google.com/vpc/docs/shared-vpc) with your Cloud Run runtime, which will expose AlloyDB's private ip address to your application.  If you are using it the DB connection string changes slightly:
+[AlloyDB](https://cloud.google.com/alloydb) is a fully-managed postgres compatible database offered by Google Cloud Platform that is tuned for better performance for tasks such as analytical queries and in-database embeddings. It is recommend you use it within a [Shared VPC](https://cloud.google.com/vpc/docs/shared-vpc) with your Cloud Run runtime, which will expose AlloyDB's private ip address to your application. If you are using it the DB connection string changes slightly:
 
 ```
 # ALLOYDB_CONNECTION_STRING
