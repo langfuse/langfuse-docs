@@ -47,7 +47,7 @@ import { CloudflareVideo } from "@/components/Video";
 
 ### Install Langfuse SDK
 
-The integration is compatible with OpenAI SDK versions `>=4.32.0`. // TODO: check backward compat
+The integration is compatible with OpenAI SDK versions `>=4.0.0`. 
 
 ```sh
 npm install langfuse openai
@@ -149,7 +149,7 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 Example:
 
 ```typescript
-const res = await observeOpenAI(openai, {
+const res = await observeOpenAI(new OpenAI(), {
   generationName: "Traced generation",
   metadata: { someMetadataKey: "someValue" },
   sessionId: "session-id",
@@ -207,7 +207,7 @@ TRACE: capital-poem-generator
 **Implementation**
 
 ```typescript {12, 17, 30}
-import langfuse, { observeOpenAI } from "langfuse";
+import Langfuse, { observeOpenAI } from "langfuse";
 
 // Initialize SDKs
 const langfuse = new Langfuse();
