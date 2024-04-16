@@ -113,7 +113,8 @@ const menuItems: {
         name: "About us",
         href: "/about",
       },
-      { name: "Contact", href: "mailto:support@langfuse.com" },
+      { name: "Support", href: "/support" },
+      { name: "Why Langfuse?", href: "/why" },
       {
         name: "Schedule Demo",
         href: "/schedule-demo",
