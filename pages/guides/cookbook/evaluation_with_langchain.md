@@ -22,7 +22,7 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 
 
 ```python
-%pip install langfuse langchain openai cohere tiktoken --upgrade
+%pip install langfuse langchain langchain-openai --upgrade
 ```
 
 
@@ -106,8 +106,8 @@ In this section, we define functions to set up the Langchain eval based on the e
 
 
 ```python
-from langchain.evaluation import load_evaluator, EvaluatorType
-from langchain import PromptTemplate, OpenAI, LLMChain
+from langchain.evaluation import load_evaluator
+from langchain_openai import OpenAI
 from langchain.evaluation.criteria import LabeledCriteriaEvalChain
 
 def get_evaluator_for_key(key: str):
