@@ -14,7 +14,7 @@ import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
-import IconDiscord from "./icons/discord";
+import IconGithub from "./icons/github";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -64,9 +64,9 @@ export const DocsSupport = () => {
       </h3>
       <div className="flex gap-3 flex-wrap">
         <Button variant="outline" size="sm" asChild>
-          <a href="/discord" target="_blank">
-            <span>Discord</span>
-            <IconDiscord className="h-4 w-4 ml-3" />
+          <a href="/gh-support" target="_blank">
+            <span>GitHub Q&A</span>
+            <IconGithub className="h-4 w-4 ml-3" />
           </a>
         </Button>
         <Button variant="outline" size="sm" onClick={() => openChat()}>
@@ -79,8 +79,8 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="https://cal.com/marc-kl/office-hours" target="_blank">
-            <span>Talk to founder</span>
+          <a href="https://cal.com/marc-kl/demo" target="_blank">
+            <span>Talk to sales</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>
         </Button>
