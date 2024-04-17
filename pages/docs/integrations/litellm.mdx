@@ -10,22 +10,15 @@ You can find more in-depth documentation in the [LiteLLM docs](https://litellm.v
 
 ## Integration
 
+<Tabs items={["LiteLLM Python SDK", "LiteLLM (Proxy) with OpenAI SDK Wrapper", "LiteLLM (Proxy) with UI-enabled Integration"]} >
+<Tab>
 By adding the callback you can instantly log your responses across all providers with Langfuse.
 
-```python filename="main.py"
-# API keys from project settings in Langfuse
-os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
-os.environ["LANGFUSE_SECRET_KEY"] = "your key"
+## Setup
 
-# Langfuse host
-os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"]="https://us.cloud.langfuse.com" # 🇺🇸 US region
-
-# Set callback
-litellm.success_callback = ["langfuse"]
+```sh
+pip install langfuse>=2.0.0 litellm
 ```
-
-## Full Example
 
 ```python filename="main.py"
 from litellm import completion
@@ -43,20 +36,100 @@ os.environ["COHERE_API_KEY"] = ""
 
 # set callbacks
 litellm.success_callback = ["langfuse"]
+litellm.failure_callback = ["langfuse"] 
+
+```
+
+## Quick Example
+
+```python filename="main.py"
+import litellm
 
 # openai call
-response = completion(
+openai_response = litellm.completion(
   model="gpt-3.5-turbo",
   messages=[
     {"role": "user", "content": "Hi 👋 - i'm openai"}
   ]
 )
 
+print(openai_response)
+
 # cohere call
-response = completion(
+cohere_response = litellm.completion(
   model="command-nightly",
   messages=[
     {"role": "user", "content": "Hi 👋 - i'm cohere"}
   ]
 )
+print(cohere_response)
+
 ```
+
+## Set Custom Trace ID, Trace User ID and Tags
+
+```python filename="main.py"
+from litellm import completion
+
+# set custom langfuse trace params and generation params
+response = completion(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm openai"}
+  ],
+  metadata={
+      "generation_name": "test-generation",   # set langfuse Generation Name
+      "generation_id": "gen-id",              # set langfuse Generation ID 
+      "trace_id": "trace-id",                 # set langfuse Trace ID
+      "trace_user_id": "user-id",             # set langfuse Trace User ID
+      "session_id": "session-id",             # set langfuse Session ID
+      "tags": ["tag1", "tag2"]                # set langfuse Tags
+  },
+)
+
+print(response)
+
+```
+
+## Use LangChain ChatLiteLLM + Langfuse
+
+```sh
+pip install langchain
+```
+
+```python filename="main.py"
+from langchain.chat_models import ChatLiteLLM
+from langchain.schema import HumanMessage
+import litellm
+
+
+chat = ChatLiteLLM(
+  model="gpt-3.5-turbo"
+  model_kwargs={
+      "metadata": {
+        "trace_user_id": "user-id", # set Langfuse Trace User ID
+        "session_id": "session-id", # set Langfuse Session ID
+        "tags": ["tag1", "tag2"] # set Langfuse Tags
+      }
+    }
+  )
+messages = [
+    HumanMessage(
+        content="what model are you"
+    )
+]
+chat(messages)
+
+```
+
+</Tab>
+<Tab>
+LiteLLM (Proxy) with OpenAI SDK Wrapper
+
+By adding the callback you can instantly log your responses across all providers with Langfuse.
+
+</Tab>
+<Tab>
+LiteLLM (Proxy) with UI-enabled Integration
+</Tab>
+</Tabs>
