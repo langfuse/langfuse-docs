@@ -8,6 +8,49 @@ import { Callout } from "nextra-theme-docs";
 
 Model-based evaluations are a powerful tool to automate the evaluation of LLM applications integrated with Langfuse. With model-based evalutions, LLMs are used to score a specific session/trace/LLM-call in Langfuse on criteria such as correctness, toxicity, or hallucinations.
 
+## Via Langfuse UI (beta)
+
+<Callout type="info">
+Reach out to [max@langfuse.com](mailto:max@langfuse.com) if you want to try this out.
+</Callout>
+
+### Create an eval template
+
+First, we need to sepcify how the LLM call for the eval should look like. We aimed for maximum felxibility to adjust the eval template to your needs:
+- Select the model and its parameters
+- Define the evaluation prompt together with the variables which will inserted into the prompt.
+- We use function calling to extract the eval output. Specify the descriptions for the function parameters `score` and `reasoning`.
+
+<Frame fullWidth border className="mt-10 mb-5">
+  ![Langfuse](/images/docs/eval-template.png)
+</Frame>
+
+
+
+### Create an eval config
+
+Second, we need to specify when to run the eval template we created above.
+
+- Select the eval template to run
+- When running the evals, we will attach scores to the Traces. Specify the score name.
+- Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
+- Select, which part of a trace should be inserted into the prompt. In the screenshot, we use the `Input` from the `Trace` for `query` variable and the `Output` from the `Generation` for the variable `generation`. Note, in this example, we choose the latest `Generation` with name `llm-generation`.
+- Modify sampling to execute the evaluations on a randomly chosen subset of the traces.
+- Add a delay to the eval execution once a trace is ingested to ensure the trace is fully processed before evaluation is executed.
+
+<Frame fullWidth border className="mt-10 mb-5">
+  ![Langfuse](/images/docs/eval-config.png)
+</Frame>
+
+
+### See the scores
+
+Upon ingestion of new traces, head over to the trace detail view to see the scores attached to the trace.
+
+<Frame fullWidth border className="mt-10 mb-5">
+  ![Langfuse](/images/docs/eval-score.png)
+</Frame>
+
 ## Via Python SDK
 
 You can run model-based evals on data in Langfuse via the Python SDK. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case. Popular libraries are:
@@ -18,10 +61,3 @@ You can run model-based evals on data in Langfuse via the Python SDK. This gives
 - UpTrain evals ([Cookbook](/guides/cookbook/evaluation_with_uptrain))
 - Whylabs Langkit
 
-## Via Langfuse UI
-
-<Callout type="info">
-
-**Coming soon**: Langfuse evaluation service to run model-based evals directly from the Langfuse UI/Server. Ping us if you are interested to join the beta testing.
-
-</Callout>
