@@ -231,6 +231,11 @@ await langfuse.flushAsync();
 
 
 ```typescript
+import Langfuse from "npm:langfuse";
+
+// Init Langfuse SDK
+const langfuse = new Langfuse();
+
 // Create trace and add params
 const trace = langfuse.trace({ name: "capital-poem-generator" });
 
