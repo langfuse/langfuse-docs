@@ -45,10 +45,12 @@ export const Releases = ({
       <Header
         title="We Ship Fast"
         description="We are all figuring out the best workflow for LLM engineering together. Here's what we've released in the past 14 days."
-        button={{
-          href: "https://github.com/langfuse",
-          text: "GitHub",
-        }}
+        buttons={[
+          {
+            href: "https://github.com/langfuse",
+            text: "GitHub",
+          },
+        ]}
       />
       <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded">
         <Marquee className="[--duration:50s]">
