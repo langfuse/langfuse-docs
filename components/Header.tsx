@@ -8,12 +8,12 @@ export const Header = ({
   title,
   description,
   className,
-  button,
+  buttons,
   h = "h2",
 }: {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  button?: { href: string; text: string };
+  buttons?: { href: string; text: string }[];
   h?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }) => {
@@ -35,12 +35,16 @@ export const Header = ({
           {description}
         </p>
       )}
-      {button && (
-        <Button variant="ghost" className="mt-6" asChild>
-          <Link href={button.href}>
-            {button.text} <ArrowRight size={14} className="ml-2" />
-          </Link>
-        </Button>
+      {buttons && (
+        <div className="flex gap-2 justify-center">
+          {buttons.map((button) => (
+            <Button variant="ghost" className="mt-6" asChild>
+              <Link href={button.href}>
+                {button.text} <ArrowRight size={14} className="ml-2" />
+              </Link>
+            </Button>
+          ))}
+        </div>
       )}
     </div>
   );
