@@ -215,20 +215,20 @@ const config: DocsThemeConfig = {
     Card,
     Cards,
   },
-  // banner: {
-  //   key: "golden-kitty-banner",
-  //   dismissible: true,
-  //   text: (
-  //     <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Langfuse won a Golden Kitty Award in AI Infra →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "launch-week",
+    dismissible: true,
+    text: (
+      <Link href="/launch">
+        {/* mobile */}
+        <span className="sm:hidden">Langfuse Launch Week 1 →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Get ready for Langfuse Launch Week 1, Apr 22 - 26 →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
