@@ -19,7 +19,7 @@ import { Callout } from "nextra/components";
 
 ## Prerequisites: Postgres Database
 
-Langfuse requires a persistent Postgres database to store its state. You can use a managed service on AWS, Azure, or GCP, or host it yourself. Once the database is ready, keep the connection string handy.
+Langfuse requires a persistent Postgres database to store its state. You can use a managed service on AWS, Azure, or GCP, or host it yourself. Once the database is ready, keep the connection string handy. At least version 12 is required.
 
 ## Deploying the Application
 
@@ -143,6 +143,7 @@ If you encounter issues, ensure the following:
 - SSO: Ensure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL`, and the OAuth client needs to be configured with the correct callback URL.
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
+- Make sure you are at least on Postgres 12.
 
 ## Updating the Application [#update]
 
