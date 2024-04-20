@@ -4,14 +4,14 @@ description: Open Source LLM Observability and Tracing with Langfuse. Integrates
 
 # LLM Application Tracing
 
-LLM apps use increasingly complex abstractions (chains, agents with tools, advanced prompts). The nested traces in Langfuse help to understand what is going on and get to the root cause of problems.
+LLM applications use increasingly complex abstractions, such as chains, agents with tools, and advanced prompts. The nested traces in Langfuse help to understand what is happening and identify the root cause of problems.
 
 ![RAG Trace in Langfuse](/images/docs/tracing-rag.png)
 _Example trace of our [public demo](/docs/demo)_
 
-## Why use tracing for an LLM application?
+## Why Use Tracing for an LLM Application?
 
-- Capture the full context of the execution including: api calls, context, prompts, parallelism, and more
+- Capture the full context of the execution, including API calls, context, prompts, parallelism, and more
 - Track model usage and cost
 - Collect user feedback
 - Identify low-quality outputs
@@ -19,23 +19,23 @@ _Example trace of our [public demo](/docs/demo)_
 
 ## Why Langfuse?
 
-- Open source
+- Open-source
 - Low performance overhead
 - SDKs for Python and JavaScript
 - Integrated with popular frameworks: OpenAI SDK (Python), Langchain (Python, JS), LlamaIndex (Python)
 - Public API for custom integrations
 - Suite of tools for the whole LLM application development lifecycle
 
-## Introduction to traces in Langfuse
+## Introduction to Traces in Langfuse
 
 A trace in Langfuse consists of the following objects:
 
-- A `trace` typically represents a single request or operation. It contains overall input and output of the function and metadata about the request, such as the user, the session, and tags.
+- A `trace` typically represents a single request or operation. It contains the overall input and output of the function, as well as metadata about the request, such as the user, the session, and tags.
 - Each trace can contain multiple `observations` to log the individual steps of the execution.
   - Observations are of different types:
-    - `Events` are the basic building block. They are used to track discrete events in a trace.
+    - `Events` are the basic building blocks. They are used to track discrete events in a trace.
     - `Spans` represent durations of units of work in a trace.
-    - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
+    - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
   - Observations can be nested.
 
 <div className="grid grid-cols-2 mt-4 gap-2 md:gap-4">

@@ -19,11 +19,9 @@ import { observeOpenAI } from "langfuse";
 
 const openai = observeOpenAI(new OpenAI());
 
-openai.chat.completions
-  .create({
-    messages: [{ role: "system", content: "Tell me a story about a dog." }],
-  })
-  .then((res) => console.log(res));
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+});
 ```
 
 Langfuse automatically tracks:
@@ -49,7 +47,7 @@ import { CloudflareVideo } from "@/components/Video";
 
 ### Install Langfuse SDK
 
-The integration is compatible with OpenAI SDK versions `>=4.32.0`. // TODO: check backward compat
+The integration is compatible with OpenAI SDK versions `>=4.0.0`.
 
 ```sh
 npm install langfuse openai
@@ -115,6 +113,18 @@ Done!✨ You now have full observability of your OpenAI calls in Langfuse.
 
 </Steps>
 
+Check out the notebook for end-to-end examples of the integration:
+
+import { FileCode } from "lucide-react";
+
+<Cards>
+  <Card
+    title="Example notebook"
+    href="/docs/integrations/openai/js/examples"
+    icon={<FileCode />}
+  />
+</Cards>
+
 ## Troubleshooting
 
 ### Queuing and batching of events
@@ -151,7 +161,7 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 Example:
 
 ```typescript
-const res = await observeOpenAI(openai, {
+const res = await observeOpenAI(new OpenAI(), {
   generationName: "Traced generation",
   metadata: { someMetadataKey: "someValue" },
   sessionId: "session-id",
@@ -209,7 +219,7 @@ TRACE: capital-poem-generator
 **Implementation**
 
 ```typescript {12, 17, 30}
-import langfuse, { observeOpenAI } from "langfuse";
+import Langfuse, { observeOpenAI } from "langfuse";
 
 // Initialize SDKs
 const langfuse = new Langfuse();
