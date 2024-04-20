@@ -1,3 +1,8 @@
+---
+description: Learn how to use Langfuse for open source observability/tracing of the OpenAI JS SDK by adding `observeOpenAI`.
+category: Integrations
+---
+
 # Cookbook: OpenAI Integration (JS/TS)
 
 This cookbook provides examples of the Langfuse Integration for OpenAI (JS/TS). Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
