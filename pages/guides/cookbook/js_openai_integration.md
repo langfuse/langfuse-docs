@@ -1,34 +1,39 @@
 # Cookbook: OpenAI Integration (JS/TS)
 
-This is a cookbook with examples of the Langfuse Integration for OpenAI (JS/TS).
+This cookbook provides examples of the Langfuse Integration for OpenAI (JS/TS). Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
 
-Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
-
-*Note: We are using Deno.js in this cookbook requiring different synthax for importing packages and setting env variables.*
+*Note: This cookbook uses Deno.js, which requires different syntax for importing packages and setting environment variables.*
 
 ## Setup
 
 The integration is compatible with OpenAI SDK versions >=4.0.0.
 
-### Environment Variables
+You can set the secrets either via (1) environment variables or (2) initParams.
+
+### Environment Variables (Option 1)
 
 
 ```typescript
-import OpenAI from "npm:openai";
-import { observeOpenAI } from "npm:langfuse";
-
-// Set env variables
+// Set env variables, Deno-specific syntax
 Deno.env.set("OPENAI_API_KEY", "");
 Deno.env.set("LANGFUSE_PUBLIC_KEY", "");
 Deno.env.set("LANGFUSE_SECRET_KEY", "");
-Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com") // Your host, defaults to https://cloud.langfuse.com
-// For US data region, set this to "https://us.cloud.langfuse.com"
+Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com") // For US data region, set this to "https://us.cloud.langfuse.com"
+```
 
+
+```typescript
+import OpenAI from "npm:openai@^4.0.0";
+import { observeOpenAI } from "npm:langfuse@^3.6.0";
+```
+
+
+```typescript
 // Initialize OpenAI client with observerOpenAI wrapper
 const openai = observeOpenAI(new OpenAI());
 ```
 
-### Directly passed variables
+### InitParams (Option 2)
 
 
 ```typescript
@@ -56,14 +61,19 @@ const completion = await openai.chat.completions.create({
   max_tokens: 100,
 });
 
-console.log(completion.choices[0]?.message.content);
-
+// notebook only: await events being flushed to Langfuse
 await openai.flushAsync();
+
+console.log(completion.choices[0]?.message.content);
 ```
+
+Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c4d32379-749f-460e-ad88-a95f0820c855
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/js_integration_openai_simple.png)
 
 ### Chat completion (streaming)
 
-Simple example using the OpenAI streaming functionality.
+Simple example using OpenAI streaming, passing custom parameters to rename the generation and add a tag to the trace.
 
 
 ```typescript
@@ -81,20 +91,23 @@ for await (const chunk of stream) {
     const content = chunk.choices[0]?.delta?.content || '';
     console.log(content);
   }
-// Flush the client
+
+// notebook only: await events being flushed to Langfuse
 await openaiWithLangfuse.flushAsync();
 ```
 
-### Fully featured: Interoperability with Langfuse SDK
+Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7c7acc02-6129-448b-84d3-5973e0256175
 
-The trace is a core object in Langfuse and you can add rich metadata to it. See JS/TS SDK docs for full documentation on this.
+### Add additional metadata and parameters
 
-Some of the functionality enabled by custom traces:
+The trace is a core object in Langfuse, and you can add rich metadata to it. Refer to the JS/TS SDK documentation and the [reference](https://js.reference.langfuse.com/functions/langfuse.observeOpenAI.html) for comprehensive details.
 
-- custom name to identify a specific trace-type
-- user-level tracking
-- experiment tracking via versions and releases
-- custom metadata
+Example usage:
+
+- Assigning a custom name to identify a specific trace type
+- Enabling user-level tracking
+- Tracking experiments through versions and releases
+- Adding custom metadata
 
 
 ```typescript
@@ -116,9 +129,11 @@ const completion = await openaiWithLangfuse.chat.completions.create({
   max_tokens: 100,
 });
 
-// Flush the client
+// notebook only: await events being flushed to Langfuse
 await openaiWithLangfuse.flushAsync();
 ```
+
+Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8c7ac9d0-ae3d-43cd-a69b-ef8ce888fd4a
 
 ### Function Calling
 
@@ -170,11 +185,15 @@ if (tool_call[0].function.name === "getWeather") {
     console.log(answer);
 }
 
+// notebook only: await events being flushed to Langfuse
 await openaiWithLangfuse.flushAsync();
 ```
 
+Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ef0a2a2c-e9b5-44cf-b984-4b184dc711a7
+
 ### Group multiple generations into a single trace
-Use the Langfuse JS/TS SDK to create traces or spans manually and add OpenAI calls to it.
+
+Use the Langfuse JS/TS SDK to create traces or spans and add OpenAI calls to it by passing the trace/span as a `parent` to the `observeOpenAI` wrapper.
 
 
 ```typescript
@@ -223,9 +242,13 @@ const poem = (
 // End span to get span-level latencies
 span.end();
  
-// Flush the Langfuse client belonging to the parent span
+// notebook only: await events being flushed to Langfuse
 await langfuse.flushAsync();
 ```
+
+Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/02e76ecc-b233-4617-bc29-67538ea1a41c
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/js_integration_openai_grouped.png)
 
 ### Update trace
 
@@ -282,9 +305,16 @@ trace.update({
     name:"City poem generator",
     tags: ["updated"],
     metadata: {"env": "development"},
-    release: "v0.0.2"
+    release: "v0.0.2",
+    output: poem,
 });
 
-// Flush the Langfuse client belonging to the parent span
+// notebook only: await events being flushed to Langfuse
 await langfuse.flushAsync();
 ```
+
+Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4a40e120-348f-4c22-bf16-453d5486f47a
+
+## Get started
+
+Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
