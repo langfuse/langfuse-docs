@@ -2,15 +2,21 @@
 
 This cookbook provides examples of the Langfuse Integration for OpenAI (JS/TS). Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
 
-*Note: This cookbook uses Deno.js, which requires different syntax for importing packages and setting environment variables.*
-
 ## Setup
 
 The integration is compatible with OpenAI SDK versions >=4.0.0.
 
-You can set the secrets either via (1) environment variables or (2) initParams.
+*Note: This cookbook uses Deno.js, which requires different syntax for importing packages and setting environment variables.*
 
-### Environment Variables (Option 1)
+
+```typescript
+import OpenAI from "npm:openai@^4.0.0";
+import { observeOpenAI } from "npm:langfuse@^3.6.0";
+```
+
+You can set the secrets either via (1) environment variables or (2) initParams:
+
+### 1. Environment Variables
 
 
 ```typescript
@@ -23,17 +29,11 @@ Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com") // For US data regio
 
 
 ```typescript
-import OpenAI from "npm:openai@^4.0.0";
-import { observeOpenAI } from "npm:langfuse@^3.6.0";
-```
-
-
-```typescript
 // Initialize OpenAI client with observerOpenAI wrapper
 const openai = observeOpenAI(new OpenAI());
 ```
 
-### InitParams (Option 2)
+### 2. InitParams
 
 
 ```typescript
