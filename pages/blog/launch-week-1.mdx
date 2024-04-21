@@ -23,8 +23,6 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 We’re excited to announce Langfuse's first launch week. We're kicking it off on Monday April 22nd and will release a major upgrade to the Langfuse platform every day until Friday.
 
-**How to follow along?** You can check back on this page for updates throughout the week. We will pin the latest launch to the top of this page. You can also follow us on socials:
-
 - ⭐️ [Star us](https://github.com/langfuse/langfuse/) on Github & see _all_ of our releases!
 - [Twitter](https://x.com/langfuse) will be our main channel for all of Launch Week #1
 - Join our [first town hall](#townhall) on Wednesday
@@ -32,6 +30,25 @@ We’re excited to announce Langfuse's first launch week. We're kicking it off o
 import { Tweet } from "@/components/Tweet";
 
 <Tweet id="1781324385774674407" />
+
+## Launches
+
+### Day 0: OpenAI JS SDK Integration
+
+```typescript /import { observeOpenAI } from "langfuse"/ /observeOpenAI/
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+// wrap the OpenAI SDK
+const openai = observeOpenAI(new OpenAI());
+
+// use the OpenAI SDK as you normally would
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story." }],
+});
+```
+
+We [launched](/changelog/2024-04-21-openai-integration-JS-SDK) a new wrapper for the OpenAI JS SDK. This integration, designed to enable easier monitoring of OpenAI API usage, features seamless observability with enhancements like automatic tracking of prompts, completions, and API errors, as well as insights into model usage and costs. After a soft launch that gathered user feedback for improvements, the integration is now fully available, complete with comprehensive [documentation](/docs/integrations/openai/js/get-started) and an [example notebook](/docs/integrations/openai/js/examples).
 
 ## Launch Week Events
 
