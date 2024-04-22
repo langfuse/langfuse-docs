@@ -22,6 +22,7 @@ export const ChangelogHeader = () => {
     date,
     author,
     showOgInHeader,
+    badge,
   } = page.frontMatter;
 
   return (
@@ -43,6 +44,7 @@ export const ChangelogHeader = () => {
             day: "numeric",
             timeZone: "UTC",
           })}
+          {!!badge && ` | ${badge}`}
         </div>
         <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
           <div>
