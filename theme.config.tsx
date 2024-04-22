@@ -20,6 +20,10 @@ import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { FileCode, LibraryBig } from "lucide-react";
+import {
+  AvailabilityBanner,
+  AvailabilitySidebar,
+} from "./components/availability";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -106,6 +110,10 @@ const config: DocsThemeConfig = {
   },
   toc: {
     backToTop: true,
+    extraContent: () => {
+      const { frontMatter } = useConfig();
+      return <AvailabilitySidebar frontMatter={frontMatter} />;
+    },
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
@@ -214,6 +222,7 @@ const config: DocsThemeConfig = {
     Steps,
     Card,
     Cards,
+    AvailabilityBanner,
   },
   banner: {
     key: "launch-week",
