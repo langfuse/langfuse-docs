@@ -126,6 +126,9 @@ const nonPermanentRedirects = [
   ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
 
+  ["/townhall", "https://cal.com/marc-kl/langfuse-townhall-1?month=2024-04&date=2024-04-24&slot=2024-04-24T19%3A00%3A00.000Z&bookingUid=a9d94746-4fbe-4108-9d41-c9f2e0c2ee5c"],
+  ["/launch", "/blog/launch-week-1"],
+
   // Redirect to overview pages
   ...[
     "/docs/integrations",
@@ -148,6 +151,9 @@ const nonPermanentRedirects = [
   ["/docs/integrations/llama-index", "/docs/integrations/llama-index/get-started"],
   ["/docs/integrations/llama-index/overview", "/docs/integrations/llama-index/get-started"],
   ["/docs/integrations/llama-index/cookbook", "/docs/integrations/llama-index/example-python"],
+  ["/docs/integrations/openai/get-started", "/docs/integrations/openai/python/get-started"],
+  ["/docs/integrations/openai/examples", "/docs/integrations/openai/python/examples"],
+  ["/docs/integrations/openai/track-errors", "/docs/integrations/openai/python/track-errors"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm"],
   ["/docs/langflow", "/docs/integrations/langflow"],

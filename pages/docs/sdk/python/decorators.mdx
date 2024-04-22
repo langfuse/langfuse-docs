@@ -456,6 +456,13 @@ Enable debug mode to get verbose logs. Set the debug mode via the environment va
 
 Use `langfuse_context.auth_check()` to verify that your host and API credentials are valid. This operation is blocking and is not recommended for production use.
 
+## Limitations
+
+Known limitations:
+
+- When run in `ThreadPoolExecutor`, separate traces for each thread are created.
+- Large input/output data can lead to performance issues. We recommend disabling capturing input/output for these methods and manually add the relevant information via `langfuse_context.update_current_observation`.
+
 ## API reference
 
 See the [Python SDK API reference](https://python.reference.langfuse.com/langfuse/decorators) for more details.

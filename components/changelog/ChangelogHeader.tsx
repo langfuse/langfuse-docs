@@ -13,8 +13,17 @@ export const ChangelogHeader = () => {
     (page) => page.route === router.pathname
   ) as Page & { frontMatter: any };
 
-  const { title, description, ogImage, ogVideo, gif, date, author } =
-    page.frontMatter;
+  const {
+    title,
+    description,
+    ogImage,
+    ogVideo,
+    gif,
+    date,
+    author,
+    showOgInHeader,
+    badge,
+  } = page.frontMatter;
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">
@@ -35,6 +44,7 @@ export const ChangelogHeader = () => {
             day: "numeric",
             timeZone: "UTC",
           })}
+          {!!badge && ` | ${badge}`}
         </div>
         <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
           <div>
@@ -46,7 +56,7 @@ export const ChangelogHeader = () => {
         </div>
       </div>
 
-      {ogVideo ? (
+      {showOgInHeader === false ? null : ogVideo ? (
         <Video src={ogVideo} gifStyle />
       ) : ogImage ? (
         <Image

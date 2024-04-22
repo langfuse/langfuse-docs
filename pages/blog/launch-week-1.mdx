@@ -1,0 +1,83 @@
+---
+title: "Langfuse Launch Week #1"
+date: 2024/04/19
+description: "A week full of new features releases, starting Monday, April 22"
+tag: launchweek
+ogImage: /images/blog/launch-week-1/langfuse-launch-week.png
+author: Clemens
+---
+
+<BlogHeader
+  title="Langfuse Launch Week #1"
+  description="Announcing our first Launch Week, starting Monday, April 22"
+  authors={["clemensrawert", "marcklingen", "maxdeichmann"]}
+/>
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<Frame fullWidth className="mb-12">
+  ![Langfuse](/images/blog/launch-week-1/langfuse-launch-week.png)
+</Frame>
+
+## Joins us for Launch Week #1
+
+We’re excited to announce Langfuse's first launch week. We're kicking it off on Monday April 22nd and will release a major upgrade to the Langfuse platform every day until Friday.
+
+- ⭐️ [Star us](https://github.com/langfuse/langfuse/) on Github & see _all_ of our releases!
+- [Twitter](https://x.com/langfuse) will be our main channel for all of Launch Week #1
+- Join our [first town hall](#townhall) on Wednesday
+
+import { Tweet } from "@/components/Tweet";
+
+<Tweet id="1781324385774674407" />
+
+## Launches
+
+### Day 0: OpenAI JS SDK Integration
+
+```typescript /import { observeOpenAI } from "langfuse"/ /observeOpenAI/
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+// wrap the OpenAI SDK
+const openai = observeOpenAI(new OpenAI());
+
+// use the OpenAI SDK as you normally would
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story." }],
+});
+```
+
+We [launched](/changelog/2024-04-21-openai-integration-JS-SDK) a new wrapper for the OpenAI JS SDK. This integration, designed to enable easier monitoring of OpenAI API usage, features seamless observability with enhancements like automatic tracking of prompts, completions, and API errors, as well as insights into model usage and costs. After a soft launch that gathered user feedback for improvements, the integration is now fully available, complete with comprehensive [documentation](/docs/integrations/openai/js/get-started) and an [example notebook](/docs/integrations/openai/js/examples).
+
+## Launch Week Events
+
+### Wednesday: First virtual town hall [#townhall]
+
+You're invited to our first virtual town hall. We (Max, Marc and Clemens) will be demoing new features in Langfuse, answering questions and talking about where we're taking the project. We're looking forward to hanging out!
+
+- When: Wednesday, April 24th, noon PT, 9pm CET
+- Where: Google Meet
+- [**Sign up here**](/townhall)
+
+### Friday: Langfuse 2.0 on Product Hunt
+
+We will end the week with the launch of **Langfuse 2.0** on Product Hunt on Friday, April 26th. After our [initial launch](/ph) last year – which led to a [Golden Kitty Award](https://www.producthunt.com/golden-kitty-awards/hall-of-fame?year=2023#ai-infra) – we are very excited to be back on Product Hunt.
+
+## Learn More About Langfuse
+
+import { FileCode, BookOpen, Video } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Docs"
+    href="/docs/integrations/llama-index/get-started"
+    icon={<BookOpen />}
+  />
+  <Card title="Quickstart" href="/docs/get-started" icon={<BookOpen />} />
+  <Card
+    title="Cookbooks"
+    href="/docs/integrations/llama-index/example-python"
+    icon={<FileCode />}
+  />
+</Cards>
