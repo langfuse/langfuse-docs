@@ -38,24 +38,27 @@ We've built an integration to make it easy to answer questions like:
 
 ## Get started
 
-import { Callout } from "nextra/components";
+<Steps>
 
-<Callout type="info" emoji="ℹ️">
-  This is a beta feature and currently only available for users of our managed
-  service.
-</Callout>
+### Enable the integration
 
-Interested to use this integration for your Langfuse project? Reach out to us: early-access@langfuse.com
+Configure this integration in your Langfuse project settings. You will need to provide your PostHog Hostname and API key.
 
-## Build a dashboard in PostHog
+<Frame border className="max-w-lg block">
+  ![Posthog Integration Settings](/images/docs/posthog-settings.png)
+</Frame>
 
-Once integrated, you can build a dashboard in PostHog to visualize your Langfuse metrics. Use the _AI Metrics_ template to get started with a pre-built dashboard that includes the most common metrics from Langfuse.
+### Build a dashboard in PostHog
+
+Once integrated, you can build a dashboard in PostHog to visualize your Langfuse metrics (see [reference below](#details)). Use the _AI Metrics_ template to get started with a pre-built dashboard that includes the most common metrics from Langfuse.
 
 <Frame border className="max-w-xs block">
   ![PostHog Dashboard Template](/images/docs/posthog-template.png)
 </Frame>
 
-## Integration details
+</Steps>
+
+## Integration details [#details]
 
 On a daily schedule Langfuse batches aggregated events and metrics to your PostHog instance.
 
@@ -133,7 +136,3 @@ You can decide which events you want to send to PostHog. By default, we send all
 - `langfuse_release`: The release information of the trace associated with the score.
 - `langfuse_tags`: Any tags related to the trace of the score.
 - `langfuse_integration_version`: The integration version with LangFuse.
-
-## Questions?
-
-If you have any questions about this integration, please reach out to us at early-access@langfuse.com

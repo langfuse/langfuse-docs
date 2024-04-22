@@ -21,8 +21,6 @@ export function AvailabilitySidebar(props: {
     .filter(([key, value]) => key.startsWith("availability"))
     .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
-  console.log(relevantFrontMatter);
-
   if (Object.keys(relevantFrontMatter).length === 0) return null;
 
   return (
