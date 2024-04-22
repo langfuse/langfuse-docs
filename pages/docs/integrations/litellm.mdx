@@ -8,15 +8,17 @@ description: Open source observability for LiteLLM via the native integration. A
 
 You can find more in-depth documentation in the [LiteLLM docs](https://litellm.vercel.app/docs/observability/langfuse_integration).
 
+There are three ways to integrate LiteLLM with Langfuse:
+
 ## Integration
 
-<Tabs items={["LiteLLM Python SDK", "LiteLLM (Proxy) with OpenAI SDK Wrapper", "LiteLLM (Proxy) with UI-enabled Integration"]} >
+<Tabs items={["LiteLLM Python SDK", "LiteLLM (Proxy) with OpenAI SDK", "LiteLLM UI"]} >
 <Tab>
-By adding the callback you can instantly log your responses across all providers with Langfuse.
+The LiteLLM Python SDK is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
 
 ## Setup
 
-```sh
+```
 pip install langfuse>=2.0.0 litellm
 ```
 
@@ -24,8 +26,8 @@ pip install langfuse>=2.0.0 litellm
 from litellm import completion
 
 ## set env variables
-os.environ["LANGFUSE_PUBLIC_KEY"] = "your key"
-os.environ["LANGFUSE_SECRET_KEY"] = "your key"
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
 
 # Langfuse host
 os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
@@ -124,12 +126,23 @@ chat(messages)
 
 </Tab>
 <Tab>
-LiteLLM (Proxy) with OpenAI SDK Wrapper
+import { FileCode } from "lucide-react";
 
-By adding the callback you can instantly log your responses across all providers with Langfuse.
+The LiteLLM proxy is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
+<br />
+To see a full end-to-end example, check out the LiteLLM cookbook.
 
+<Cards num={2}>
+<Card
+    title="Example LiteLLM (Proxy)"
+    href="/cookbook/LiteLLM"
+    icon={<FileCode />}
+  />
+</Cards>
 </Tab>
 <Tab>
-LiteLLM (Proxy) with UI-enabled Integration
+By setting the callback to Langfuse in the LiteLLM Admin UI you can instantly log your responses across all providers.
+
+// Screenshot of LiteLLM UI
 </Tab>
 </Tabs>
