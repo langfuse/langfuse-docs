@@ -237,7 +237,7 @@ const config: DocsThemeConfig = {
         <span className="sm:hidden">Langfuse Launch Week 1 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week, Day 1: PostHog Integration →
+          Langfuse Launch Week, Day 2: LLM Playground →
         </span>
       </Link>
     ),
