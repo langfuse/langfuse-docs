@@ -7,6 +7,7 @@ import {
   Steps,
   Card,
   Cards,
+  Callout,
 } from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
@@ -24,6 +25,7 @@ import {
   AvailabilityBanner,
   AvailabilitySidebar,
 } from "./components/availability";
+import { CloudflareVideo } from "./components/Video";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -223,6 +225,8 @@ const config: DocsThemeConfig = {
     Card,
     Cards,
     AvailabilityBanner,
+    Callout,
+    CloudflareVideo,
   },
   banner: {
     key: "launch-week",
