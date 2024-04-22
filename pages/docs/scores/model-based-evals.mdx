@@ -10,14 +10,34 @@ Model-based evaluations are a powerful tool to automate the evaluation of LLM ap
 
 There are two ways to run model-based evaluations in Langfuse:
 
-1. [Via the Langfuse UI (beta)](#ui)
-2. [Via the Python SDK or API](#sdk)
+1. [Via the Python SDK or API](#sdk)
+2. [Via the Langfuse UI (beta)](#ui)
+
+## Via Python SDK [#sdk]
+
+You can run your own model-based evals on data in Langfuse via the Python SDK. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
+
+Popular libraries:
+
+- OpenAI Evals
+- Langchain Evaluators ([Cookbook](/guides/cookbook/evaluation_with_langchain))
+- RAGAS for RAG applications ([Cookbook](/guides/cookbook/evaluation_of_rag_with_ragas))
+- UpTrain evals ([Cookbook](/guides/cookbook/evaluation_with_uptrain))
+- Whylabs Langkit
 
 ## Via Langfuse UI (beta) [#ui]
 
+<AvailabilityBanner
+  availability={{
+    hobby: "private-beta",
+    pro: "private-beta",
+    team: "private-beta",
+    selfHosted: "not-available",
+  }}
+/>
+
 <Callout type="info">
-  Model-based evaluation is currently in beta on Langfuse Cloud. Ping us via the
-  chat widget if you are interested to join the beta.
+  Ping us via the chat widget if you are interested to join the private beta.
 </Callout>
 
 import { CloudflareVideo } from "@/components/Video";
@@ -62,15 +82,3 @@ Upon receiving new traces, navigate to the trace detail view to see the associat
 </Frame>
 
 </Steps>
-
-## Via Python SDK [#sdk]
-
-You can run your own model-based evals on data in Langfuse via the Python SDK. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
-
-Popular libraries:
-
-- OpenAI Evals
-- Langchain Evaluators ([Cookbook](/guides/cookbook/evaluation_with_langchain))
-- RAGAS for RAG applications ([Cookbook](/guides/cookbook/evaluation_of_rag_with_ragas))
-- UpTrain evals ([Cookbook](/guides/cookbook/evaluation_with_uptrain))
-- Whylabs Langkit
