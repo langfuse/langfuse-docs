@@ -26,19 +26,35 @@ This post is a deep dive into the `@observe()` decorator, our design objectives,
 
 ## Goals
 
-When starting to work on the decorator, we wanted to make everything simple that's complex when manually instrumenting your code. The decorator should:
+When starting to work on the decorator, we wanted to make everything simple that's complex when manually instrumenting your code. Consider this real-world trace of a complex agent, where maintaining the nesting hierarchy manually using the low-level SDK used to come with additional complexity and boilerplate code:
 
-- Trace all function calls and their outputs in a single trace
-- Be fully compatible with the native [integrations](/docs/integrations) with LangChain, LlamaIndex, and the OpenAI SDK
+![Deeply-nested user trace](/images/blog/python-decorator/complex-trace.png)
+
+The goal of the `@observe()` decorator is to abstract away the complexity of creating and nesting traces and spans, and to make it easy to trace complex applications. 
+
+The decorator should:
+
+- Trace all function calls and their outputs in a single trace while maintaining the nesting hierarchy
 - Be easy to use and require minimal changes to your code
-- Automatically capture the function name, arguments, return value, exceptions, execution time, and nesting of functions
+- Automatically capture the function name, arguments, return value, streamed completions, exceptions, execution time, and nesting of functions
+- Be fully compatible with the native [integrations](/docs/integrations) with LangChain, LlamaIndex, and the OpenAI SDK
 - Encourage reusable abstractions across an LLM-based application without needing to consider how to pass trace objects around
+- Support async environments for our many users that run performance-optimized LLM apps
 
 ## Design decisions
 
 1. The decorator reuses the low-level SDK to create traces and asynchronously batch them to the Langfuse API. This implementation was derived from the PostHog SDKs and is [tested](/guides/cookbook/langfuse_sdk_performance_test) to have little to no impact on the performance of your application.
-2. The decorator uses context managers to handle the nesting of functions and the creation of spans. This way, you can easily see which function calls are nested within others. Another popular implementation is to add uuids to the stack trace, but we did not want to pollute the stack trace.
-3. Use the same `observe()` decorator to create a trace (outermost function) and to add spans to the trace (inner functions). This way, functions can be used in multiple traces without needing to be strictly a "trace" or a "span" function.
+2. The decorator maintains a call stack internally that keeps track of nested function calls to reflect the observation hierarchy in the trace
+3. For async-safety, the decorator leverages [Python Contextvars](https://docs.python.org/3/library/contextvars.html) for managing its state
+4. The same `observe()` decorator is used to create a trace (outermost decorated function) and to add spans to the trace (inner decorated functions). This way, functions can be used in multiple traces without needing to be strictly a "trace" or a "span" function.
+
+### Limitation: Python Contextvars and ThreadPoolExecutors
+
+The power of observability is most visible in complex applications with production workloads. Async and concurrent environments are common in these applications, and the decorator should work seamlessly in these environments. The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. This allows you to use the decorator in reliably in async functions.
+
+However, an important exception are Python's ThreadPoolExecutors and ProcessPoolExecutors. The decorator will not work correctly in these environments, as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
+
+In short, the decorator will work in async environments, but not in ThreadPoolExecutors or ProcessPoolExecutors.
 
 ## Before and after
 
