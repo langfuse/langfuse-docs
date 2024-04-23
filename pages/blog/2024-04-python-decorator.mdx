@@ -16,11 +16,11 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["marcklingen", "hassiebpakzad"]}
 />
 
-When our team initially built complex agents for web scraping and code generation while in Y Combinator [1], we quickly recognized the need for new LLM-focused observability to truly understand how our applications produced their outputs. It wasn't just about the LLM calls, but also the retrieval steps, chaining of separate calls, function calling, obtaining the right JSON output, and various API calls that the agents should perform behind the scenes.
+When we initially built complex agents for web scraping and code generation while in Y Combinator, we quickly recognized the need for new LLM-focused observability to truly understand how our applications produced their outputs. It wasn't just about the LLM calls, but also the retrieval steps, chaining of separate calls, function calling, obtaining the right JSON output, and various API calls that the agents should perform behind the scenes. In the end, all these steps led to them breaking many times on our initial users.
 
 This insight prompted us to start working on Langfuse. As many teams were experimenting, we prioritized easy integrations with frameworks like LangChain and LlamaIndex, as well as wrapping the OpenAI SDK to log individual LLM calls. As applications become increasingly complex and agents are deployed in production, the ability to trace complex applications is even more crucial.
 
-[Traces](/docs/tracing) are at the core of the Langfuse platform. Until now, generating a trace was straightforward if you used a framework. However, if you didn't, you had to use the low-level SDKs to manually create and nest trace objects, which added verbose instrumentation code to a project. Inspired by the developer experience of tools we admire, such as Sentry and Modal, we created the `@observe()` decorator for Langfuse to make tracing your Python code as simple as possible.
+[Traces](/docs/tracing) are at the core of the Langfuse platform. Until now, generating a trace was straightforward if you used a framework. However, if you didn't, you had to use the low-level SDKs to manually create and nest trace objects, which added verbose instrumentation code to a project. Inspired by the developer experience of tools we admire, such as Sentry and Modal, we created the `@observe()` decorator for Langfuse to make tracing your Python code as simple as possible. Note: we plan to revamp our JS/TS tracing as well.
 
 This post is a deep dive into the `@observe()` decorator, our design objectives, challenges we faced when implementing it, and how it can help you trace complex LLM applications.
 
@@ -37,30 +37,30 @@ The decorator should:
 - Trace all function calls and their outputs in a single trace while maintaining the nesting hierarchy
 - Be easy to use and require minimal changes to your code
 - Automatically capture the function name, arguments, return value, streamed completions, exceptions, execution time, and nesting of functions
-- Be fully compatible with the native [integrations](/docs/integrations) with LangChain, LlamaIndex, and the OpenAI SDK
+- Be fully compatible with the native [Langfuse integrations](/docs/integrations) for LangChain, LlamaIndex, and the OpenAI SDK
 - Encourage reusable abstractions across an LLM-based application without needing to consider how to pass trace objects around
 - Support async environments for our many users that run performance-optimized LLM apps
 
 ## Design decisions
 
 1. The decorator reuses the low-level SDK to create traces and asynchronously batch them to the Langfuse API. This implementation was derived from the PostHog SDKs and is [tested](/guides/cookbook/langfuse_sdk_performance_test) to have little to no impact on the performance of your application.
-2. The decorator maintains a call stack internally that keeps track of nested function calls to reflect the observation hierarchy in the trace
-3. For async-safety, the decorator leverages [Python Contextvars](https://docs.python.org/3/library/contextvars.html) for managing its state
+2. The decorator maintains a call stack internally that keeps track of nested function calls to reflect the observation hierarchy in the trace.
+3. To be async-safe, the decorator leverages [Python Contextvars](https://docs.python.org/3/library/contextvars.html) for managing its state.
 4. The same `observe()` decorator is used to create a trace (outermost decorated function) and to add spans to the trace (inner decorated functions). This way, functions can be used in multiple traces without needing to be strictly a "trace" or a "span" function.
 
-### Limitation: Python Contextvars and ThreadPoolExecutors
+## Limitation: Python Contextvars and ThreadPoolExecutors
 
 The power of observability is most visible in complex applications with production workloads. Async and concurrent environments are common in these applications, and the decorator should work seamlessly in these environments. The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. This allows you to use the decorator in reliably in async functions.
 
 However, an important exception are Python's ThreadPoolExecutors and ProcessPoolExecutors. The decorator will not work correctly in these environments, as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
 
-In short, the decorator will work in async environments, but not in ThreadPoolExecutors or ProcessPoolExecutors.
+In short, the decorator will work correctly in async environments, but not in ThreadPoolExecutors or ProcessPoolExecutors.
 
 ## Before and after
 
 ### Status quo: Low-level SDK
 
-The low-level SDK is very flexible but it is also _very_ verbose and requires passing of Langfuse objects 👇
+The low-level SDK is very flexible but it is also _very_ verbose and requires passing of Langfuse objects.
 
 ```python /langfuse = Langfuse()/ /span = trace.span(name="story")/ /trace_id=trace.id/ /parent_observation_id=span.id/ /span.end(output=output)/ /trace = langfuse.trace("main")/ /trace/
 from langfuse import Langfuse
@@ -91,7 +91,7 @@ def main():
 
 ### `@observe()` decorator to the rescue
 
-All complexity is abstracted away and you can focus on your business logic 👇 The OpenAI SDK wrapper is aware that it is run within a decorated function and automatically adds its logs to the trace.
+All complexity is abstracted away and you can focus on your business logic. The OpenAI SDK wrapper is aware that it is run within a decorated function and automatically adds its logs to the trace.
 
 ```python /@observe()/
 from langfuse.decorators import observe
@@ -124,9 +124,9 @@ main()
 
 The decorator completely replaces the need to use the low-level SDK. It allows for the creation and manipulation of traces, and you can add custom scores and evaluations to these traces as well. Have a look at the extensive [documentation](/docs/sdk/python/decorators) for more details.
 
-**Langfuse is natively integrated with LangChain, LlamaIndex, and the OpenAI SDK and the decorator is [fully compatible](/docs/sdk/python/example#interoperability-with-other-integrations) with these integrations.** As a result, you can, in a single trace, use the decorator on the outermost function, decorate function calls and API calls that are non-LLM related, and use the native instrumentation for the OpenAI SDK, LangChain and Llama Index.
+Langfuse is natively integrated with LangChain, LlamaIndex, and the OpenAI SDK and the decorator is [fully compatible](/docs/sdk/python/example#interoperability-with-other-integrations) with these integrations. As a result, you can, in a single trace, use the decorator on the outermost function, decorate function calls and API calls that are non-LLM related, and use the native instrumentation for the OpenAI SDK, LangChain and Llama Index.
 
-Example:
+Example ([cookbook](/guides/cookbook/python_decorators#interoperability-with-other-integrations)):
 
 ```python
 from langfuse.openai import openai
@@ -174,13 +174,13 @@ main();
 
 ## Outlook
 
-The decorator drive open tracing for teams that don't want to commit to a single application framework or ecosystem, but want to easily switch between frameworks while still Langfuse as a single [platform](/docs) for all experimentation, observability and evaluation needs.
+The decorator drives open tracing for teams that don't want to commit to a single application framework or ecosystem, but want to easily switch between frameworks while relying on Langfuse as a single [platform](/docs) for all experimentation, observability and evaluation needs.
 
-Roadmap: The decorator is currently only available for Python. We are working on a similar implementation for JS/TS. The decorator currently does not support class methods. We are working on a solution for this.
+Roadmap: The decorator is currently only available for Python. We are working on a similar implementation for JS/TS. The decorator currently does not support class methods.
 
 ## Thank you
 
-Big thanks to everyone who tried the decorator while it was in beta and provided feedback. We've received multiple Gists of potential implementations by community members of their own integrations before getting the decorator to the current state. We're excited to see what you build with it!
+Thank you to everyone who tested the decorator during the beta phase and provided feedback. We've received several Gists from community members showcasing their own decorator implementations built using Langfuse before the decorator was released as an official integration. We're excited to see what you create with it!
 
 ## Get Started
 
