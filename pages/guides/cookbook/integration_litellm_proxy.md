@@ -1,5 +1,5 @@
 ---
-description: Cookbook with examples of the Langfuse Integration for LiteLLM (Proxy)
+description: The stack to use any of 100+ models without having to change your code and with full observability.
 category: Integrations
 ---
 
