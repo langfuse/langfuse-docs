@@ -5,7 +5,8 @@ category: Integrations
 
 # Cookbook: crewAI Integration
 
-This is a cookbook with examples of the Langfuse Integration for crewAI.
+This is a cookbook with examples of the Langfuse Integration for crewAI.<br>
+It utilizes the Langfuse OpenAI Integration and observe() decorator.
 
 _Note: crewAI is compatible with Python >=3.10, <=3.13._
 
@@ -24,21 +25,21 @@ import os
 
 os.environ["LANGFUSE_PUBLIC_KEY"] = ""
 os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # For US data region, set this to "https://us.cloud.langfuse.com"
 
 os.environ["OPENAI_API_KEY"] = ""
 ```
+
+Import the Langfuse OpenAI integration and check the server connection.
 
 
 ```python
 from langfuse.openai import auth_check
 
-# Tests the SDK connection with the server
 auth_check()
 ```
 
-## Create Custom Tool
+### Create Custom Tool
 
 For more information on how to create custom tools for the crewAI framework, please visit the [crewAI docs](https://docs.crewai.com/how-to/Create-Custom-Tools).
 
@@ -52,32 +53,35 @@ def multiplication_tool(first_number: int, second_number: int) -> str:
     return first_number * second_number
 ```
 
-## Assemble Crew
+### Assemble Crew
+
+For detailed instructions on setting up your crew, please refer to the [crewAI documentation](https://docs.crewai.com/how-to/Creating-a-Crew-and-kick-it-off/).
 
 
 ```python
-from crewai import Agent, Task, Process, Crew
+from crewai import Agent, Task, Crew
 
 writer = Agent(
         role="Writer",
-        goal="You write lesssons of math for kids.",
+        goal="You make math engaging and understandable for young children through poetry",
         backstory="You're an expert in writing haikus but you know nothing of math.",
-        tools=[multiplication_tool],
+        tools=[multiplication_tool],  
     )
 
-task = Task(description=("What is {multiplication}?"), expected_output=("Write a haiku containing the solution"), agent=writer)
+task = Task(description=("What is {multiplication}?"),
+            expected_output=("Compose a haiku that includes the answer."),
+            agent=writer)
 
 crew = Crew(
   agents=[writer],
   tasks=[task],
-  share_crew=True
+  share_crew=False
 )
-
 ```
 
 ## Examples
 
-### Simple Example using observer() decorator
+### Simple Example using OpenAI Integration and observer() decorator
 
 You can use this integration in combination with the `observe()` decorator from the Langfuse Python SDK. Thereby, you can trace non-Langchain code, combine multiple Langchain invocations in a single trace, and use the full functionality of the Langfuse Python SDK.
 
@@ -85,52 +89,33 @@ Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and 
 
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse.decorators import observe
 
 @observe()
-def create_haiku_simple(input):
+def create_simple_haiku(input):
     result = crew.kickoff(inputs={"multiplication": input})
-    print(result)
+    return result
 
-create_haiku_simple("1 * 3")
+create_simple_haiku("3 * 3")
 ```
 
-### Example using observer() decorator with custom tracing
+### Example using OpenAI Integration and observer() decorator with custom tracing
 
 
 ```python
 from langfuse.decorators import langfuse_context
 
 @observe()
-def create_haiku_rich(input):
+def create_custom_haiku(input):
     result = crew.kickoff(inputs={"multiplication": input})
     langfuse_context.update_current_observation(
         name="Crew AI Trace",
         session_id="session_id",
         user_id="user_id",
-        tags=["crew_ai", "haiku"],
-        output=result,
+        tags=["haiku"],
+        metadata={"env": "prod"}
     )
-    print(result)
+    return result
 
-create_haiku_rich("5 * 3")
-```
-
-### Example using CallbackHandler()
-
-
-```python
-from langchain_openai import ChatOpenAI
-from langfuse.callback import CallbackHandler
-from langfuse import Langfuse
-
-langfuse_handler = CallbackHandler()
-
-crew_with_langfuse = Crew(
-  agents=[writer],
-  tasks=[task],
-  manager_callbacks=[langfuse_handler],
-)
-res = crew_with_langfuse.kickoff(inputs={"multiplication": "3 * 3"})
-print(res)
+create_custom_haiku("5 * 3")
 ```
