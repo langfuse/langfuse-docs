@@ -5,8 +5,9 @@ category: Integrations
 
 # Cookbook: crewAI Integration
 
-This is a cookbook with examples of the Langfuse Integration for crewAI.<br>
-It utilizes the Langfuse OpenAI Integration and observe() decorator.
+This is a cookbook with examples of the Langfuse Integration for [crewAI](https://docs.crewai.com/) ([GitHub](https://github.com/joaomdmoura/crewai/)).<br>
+It utilizes the Langfuse [OpenAI Integration](https://langfuse.com/docs/integrations/openai/python/get-started) and the [@observe() decorator](https://langfuse.com/docs/sdk/python/decorators). The OpenAI Integration ensures that each step executed by your crew is logged as a new generation in the system. The @observe() decorator automatically and asynchronously groups these logs into a single trace.
+
 
 _Note: crewAI is compatible with Python >=3.10, <=3.13._
 
@@ -81,11 +82,11 @@ crew = Crew(
 
 ## Examples
 
-### Simple Example using OpenAI Integration and observer() decorator
+### Simple Example using OpenAI Integration and @observe() decorator
 
-You can use this integration in combination with the `observe()` decorator from the Langfuse Python SDK. Thereby, you can trace non-Langchain code, combine multiple Langchain invocations in a single trace, and use the full functionality of the Langfuse Python SDK.
+You can use this integration in combination with the `@observe()` decorator from the Langfuse Python SDK. Thereby, you can trace non-Langchain code, combine multiple Langchain invocations in a single trace, and use the full functionality of the Langfuse Python SDK.
 
-Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/sdk/python/decorators).
+Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing).
 
 
 ```python
@@ -99,7 +100,7 @@ def create_simple_haiku(input):
 create_simple_haiku("3 * 3")
 ```
 
-### Example using OpenAI Integration and observer() decorator with custom tracing
+### Example with additional trace attributes
 
 
 ```python
