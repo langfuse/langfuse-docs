@@ -151,6 +151,7 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 | Property         | Description                                                                  |
 | ---------------- | ---------------------------------------------------------------------------- |
 | `generationName` | Set `generationName` to identify a specific type of generation.              |
+| `langfusePrompt` | Pass a created or fetched Langfuse prompt to link it with the generations    |
 | `metadata`       | Set `metadata` with additional information that you want to see in Langfuse. |
 | `sessionId`      | The current [session](/docs/tracing-features/sessions).                      |
 | `userId`         | The current [user_id](/docs/tracing-features/users).                         |
@@ -183,6 +184,27 @@ const res = await observeOpenAI(new OpenAI(), {
   the same client is used for all calls, you do not need to worry about
   mistakingly having multiple clients running.
 </Callout>
+
+### Link to Langfuse prompts
+
+With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
+
+```typescript
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
+
+const res = await observeOpenAI(new OpenAI(), {
+  langfusePrompt,
+}).completions.create({
+  prompt: langfusePrompt.prompt,
+  model: "gpt-3.5-turbo-instruct",
+  max_tokens: 300,
+});
+```
+
+Resulting generations are now linked to the prompt in Langfuse, allowing you to track prompt usage and performance.
 
 ### Nested traces
 
