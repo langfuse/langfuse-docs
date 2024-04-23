@@ -5,7 +5,8 @@ category: Integrations
 
 # Cookbook: LiteLLM (Proxy) Integration
 
-The LiteLLM Proxy simplifies your work by standardizing API interactions across multiple providers such as OpenAI, Azure, Anthropic, and others. It removes the complexity of direct API calls by centralizing interactions with over 50 large language model APIs through a single endpoint, allowing you to focus on innovation rather than integration details.
+The [LiteLLM Proxy](https://docs.litellm.ai/docs/) ([GitHub](https://github.com/BerriAI/litellm)) simplifies your work by standardizing 100+ model provider APIs on the OpenAI API schema. It removes the complexity of direct API calls by centralizing interactions with these APIs through a single endpoint, allowing you to focus on innovation rather than integration details. <br />
+As LiteLLM standardizes models on the OpenAI schema, we can use the Langfuse integration for JS and Python to natively instrument calls to all these 100+ models.
 
 Let's dive into how you can set up and start using LiteLLM with Langfuse:
 
@@ -56,7 +57,10 @@ The Lite LLM Proxy should be now running on http://0.0.0.0:4000
 To verify the connection you can run `litellm --test`
 
 
-### Example using Langfuse Wrapped OpenAI SDK
+### Example using Langfuse OpenAI Integration
+The Langfuse SDK offers a wrapper function around the OpenAI SDK, automatically logging all OpenAI calls as generations to Langfuse.
+
+For more details, please refer to our [documentation](https://langfuse.com/docs/integrations/openai/python/get-started).
 
 
 ```python
@@ -86,6 +90,9 @@ llama_completion = client.chat.completions.create(
 )
 print(llama_completion.choices[0].message.content)
 ```
+
+[GPT-Completion](https://cloud.langfuse.com/project/clqz0knc900024jay4kgx7nja/traces/58c384f6-37e9-4628-bd2b-e6b9709804a5) <br />
+[LLama-Completion](https://cloud.langfuse.com/project/clqz0knc900024jay4kgx7nja/traces/c9aa13cc-b601-4d3d-8243-eac72e244dfc)
 
 ### Example using @observe() decorator
 
@@ -142,5 +149,6 @@ def rap_battle():
 
 # Call the function
 rap_battle()
-
 ```
+
+[rap_battle](https://cloud.langfuse.com/project/clqz0knc900024jay4kgx7nja/traces/549d1815-436c-4fa3-9a3b-857b5628a44f)
