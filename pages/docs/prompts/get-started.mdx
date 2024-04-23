@@ -2,9 +2,6 @@
 description: Manage and version your prompts in Langfuse (open source). When retrieved, they are cached by the Langfuse SDKs for low latency.
 ---
 
-import { Callout } from "nextra-theme-docs";
-import { CloudflareVideo } from "@/components/Video";
-
 # Prompt Management
 
 Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is basically a **Prompt CMS** (Content Management System).
@@ -358,7 +355,7 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 
 This is currently unavailable when using the LangChain or LlamaIndex integration.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)"]}>
+<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)"]}>
 <Tab>
 
 Decorators
@@ -417,6 +414,25 @@ openai.chat.completions.create(
     {"role": "user", "content": "1 + 1 = "}],
   langfuse_prompt=prompt
 )
+```
+
+</Tab>
+
+<Tab>
+
+```typescript /langfusePrompt,/
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
+
+const res = await observeOpenAI(new OpenAI(), {
+  langfusePrompt,
+}).completions.create({
+  prompt: langfusePrompt.prompt,
+  model: "gpt-3.5-turbo-instruct",
+  max_tokens: 300,
+});
 ```
 
 </Tab>
