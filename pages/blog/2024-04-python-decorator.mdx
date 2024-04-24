@@ -24,6 +24,22 @@ This insight prompted us to start working on Langfuse. As many teams were experi
 
 This post is a deep dive into the `@observe()` decorator, our design objectives, challenges we faced when implementing it, and how it can help you trace complex LLM applications.
 
+_tldr:_
+
+<Frame className="max-w-lg">
+  ![Decorator Meme](/images/blog/python-decorator/decorator-meme.jpg)
+</Frame>
+
+## Introduction
+
+In this video, we introduce the decorator and why we think it's an awesome abstraction to merge all Langfuse integrations. _If you are familiar with it, skip this video and jump to the next section._
+
+<CloudflareVideo
+  videoId="8a1f9282ef64c2bd0d932c92d6185668"
+  aspectRatio={16 / 9.37}
+  title="Decorator Integration"
+/>
+
 ## Goals
 
 When starting to work on the decorator, we wanted to make everything simple that's complex when manually instrumenting your code. Consider this real-world trace of a complex agent, where maintaining the nesting hierarchy manually using the low-level SDK used to come with additional complexity and boilerplate code.
@@ -202,7 +218,7 @@ Thank you to everyone who tested the decorator during the beta phase and provide
 
 Run the end-to-end cookbook on your Langfuse traces or learn more about model-based evals in Langfuse.
 
-import { FileCode, BookOpen } from "lucide-react";
+import { FileCode, BookOpen, Video as VideoIcon } from "lucide-react";
 
 <Cards num={3}>
   <Card title="Docs" href="/docs/sdk/python/decorators" icon={<BookOpen />} />
@@ -210,5 +226,10 @@ import { FileCode, BookOpen } from "lucide-react";
     title="Example notebook"
     href="/docs/sdk/python/example"
     icon={<FileCode />}
+  />
+  <Card
+    title="Video introduction"
+    href="/guides/videos/introducing-python-decorator"
+    icon={<VideoIcon />}
   />
 </Cards>
