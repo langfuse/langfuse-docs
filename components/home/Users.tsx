@@ -12,6 +12,8 @@ import frontifyLight from "./img/frontify_light.svg";
 import frontifyDark from "./img/frontify_dark.svg";
 import posthogLight from "./img/posthog_light.svg";
 import posthogDark from "./img/posthog_dark.svg";
+import fortoLight from "./img/forto_light.svg";
+import fortoDark from "./img/forto_dark.svg";
 import { HomeSection } from "./components/HomeSection";
 
 type User = {
@@ -30,7 +32,7 @@ const users: User[] = [
     href: "https://posthog.com",
   },
   {
-    name: "frontify",
+    name: "Frontify",
     lightImage: frontifyLight,
     darkImage: frontifyDark,
     href: "https://www.frontify.com",
@@ -47,6 +49,12 @@ const users: User[] = [
     lightImage: pigmentLight,
     darkImage: pigmentDark,
     href: "https://pigment.com",
+  },
+  {
+    name: "Forto",
+    lightImage: fortoLight,
+    darkImage: fortoDark,
+    href: "https://forto.com",
   },
   {
     name: "Mava",
