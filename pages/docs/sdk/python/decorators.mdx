@@ -318,7 +318,7 @@ main()
 
 The [native LangChain integration](/docs/integrations/langchain) is fully compatible with the `@observe()` decorator. It automatically adds a generation to the trace within the current context.
 
-`langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
+`langfuse_context.get_current_langchain_handler()` exposes a callback handler scoped to the current trace context. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
 
 ```python /langfuse_handler = langfuse_context.get_current_langchain_handler()/ /langfuse_handler/
 from operator import itemgetter
