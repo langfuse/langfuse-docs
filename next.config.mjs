@@ -117,6 +117,7 @@ const nonPermanentRedirects = [
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/new-issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/issues", "https://github.com/langfuse/langfuse/issues"],
+  ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
 
   ["/security", "/docs/data-security-privacy"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
