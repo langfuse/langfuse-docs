@@ -10,9 +10,29 @@ You can find more in-depth documentation in the [LiteLLM docs](https://litellm.v
 
 There are three ways to integrate LiteLLM with Langfuse:
 
+1. LiteLLM Proxy with OpenAI SDK Wrapper, the proxy standardizes 100+ models on the OpenAI API schema and the Langfuse OpenAI SDK wrapper instruments the LLM calls.
+2. LiteLLM Python SDK which can send logs to Langfuse if the environment variables are set.
+3. LiteLLM Proxy which can send logs to Langfuse if enabled in the UI.
+
 ## Integration
 
-<Tabs items={["LiteLLM Python SDK", "LiteLLM (Proxy) with OpenAI SDK", "LiteLLM UI"]} >
+<Tabs items={["LiteLLM Proxy + Langfuse OpenAI SDK Wrapper", "LiteLLM Python SDK", "LiteLLM Proxy (UI)"]} >
+<Tab>
+import { FileCode } from "lucide-react";
+
+The LiteLLM proxy is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
+
+<br />
+To see a full end-to-end example, check out the LiteLLM cookbook.
+
+<Cards num={2}>
+<Card
+    title="Example LiteLLM (Proxy)"
+    href="/guides/cookbook/integration_litellm_proxy"
+    icon={<FileCode />}
+  />
+</Cards>
+</Tab>
 <Tab>
 The LiteLLM Python SDK is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
 
@@ -38,7 +58,7 @@ os.environ["COHERE_API_KEY"] = ""
 
 # set callbacks
 litellm.success_callback = ["langfuse"]
-litellm.failure_callback = ["langfuse"] 
+litellm.failure_callback = ["langfuse"]
 
 ```
 
@@ -81,7 +101,7 @@ response = completion(
   ],
   metadata={
       "generation_name": "test-generation",   # set langfuse Generation Name
-      "generation_id": "gen-id",              # set langfuse Generation ID 
+      "generation_id": "gen-id",              # set langfuse Generation ID
       "trace_id": "trace-id",                 # set langfuse Trace ID
       "trace_user_id": "user-id",             # set langfuse Trace User ID
       "session_id": "session-id",             # set langfuse Session ID
@@ -126,24 +146,10 @@ chat(messages)
 
 </Tab>
 <Tab>
-import { FileCode } from "lucide-react";
-
-The LiteLLM proxy is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
-<br />
-To see a full end-to-end example, check out the LiteLLM cookbook.
-
-<Cards num={2}>
-<Card
-    title="Example LiteLLM (Proxy)"
-    href="/cookbook/integration_litellm"
-    icon={<FileCode />}
-  />
-</Cards>
-</Tab>
-<Tab>
 By setting the callback to Langfuse in the LiteLLM UI you can instantly log your responses across all providers. <br />
-For more information on how to setup the Proxy UI, see the [LiteLLM docs](https://docs.litellm.ai/docs/proxy/ui). 
+For more information on how to setup the Proxy UI, see the [LiteLLM docs](https://docs.litellm.ai/docs/proxy/ui).
 
 ![Set Langfuse as callback in Proxy UI](https://langfuse.com/images/docs/litellm-ui.png)
+
 </Tab>
 </Tabs>
