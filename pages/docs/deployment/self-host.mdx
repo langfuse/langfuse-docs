@@ -341,6 +341,99 @@ You can deploy Langfuse to Azure via the Azure Developer CLI using this template
 
 Not really a platform, but Kubernetes is a popular way to deploy Langfuse. You can find community-maintained templates at [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s).
 
+### Heroku
+
+A deployment to heroku is possible by using the [docker image of Langfuse](https://langfuse.com/changelog/2023-08-16-prebuilt-docker-image) which is also [available via dockerhub](https://hub.docker.com/r/langfuse/langfuse).
+
+To deploy this image on heroku you have to run through the steps in the following deployment guide:
+
+1. Pull the docker image. This can be achieved by running the following command in your terminal:
+
+```
+docker pull ghcr.io/langfuse/langfuse:latest
+```
+
+2. Get the ID of the pulled image
+
+*Linux / MacOS*:
+
+Running the following command should result in directly printing the image ID
+
+```
+docker images | grep ghcr.io/langfuse/langfuse | awk '{print $3}'
+```
+
+Following this tutorial, you will always have to insert this image ID when {IMAGE_ID} is written.
+
+*Windows*:
+
+On windows you can print the full information of the pulled image using:
+
+```
+docker images | findstr /S "ghcr.io/langfuse/langfuse"
+```
+
+This will result in something like:
+
+```
+ghcr.io/langfuse/langfuse                                           latest          cec90c920468   28 hours ago    595MB
+```
+
+Here you have to manually retrieve the image ID which in this case is `cec90c920468`. It should be located between the tag `latest` and the created `28 hours ago` in this example.
+
+3. Prepare your terminal and docker image
+
+First of all, you will have to be logged in to heroku using
+
+```
+heroku login
+```
+
+If this is not working, please visit the [heroku CLI setup](https://devcenter.heroku.com/articles/heroku-cli).
+
+If you succeeded in logging in to heroku via the CLI, you can continue by following the next steps:
+
+Tag the docker image (Insert your image ID into the command). You will also have to insert the name of your heroku app/dyno into {HEROKU_APP_NAME}:
+
+```
+docker tag {IMAGE_ID} registry.heroku.com/{HEROKU_APP_NAME}/web
+```
+
+4. Setup a database for your heroku app
+
+In the dashboard of your heroku app, add the `Heroku Postgres`-AddOn. This will add a PostgreSQL database to your application. 
+
+5. Set the environment variables
+
+For the minimum deployment in heroku, you will have to set the following environment variables (taken from [langfuse docs](https://langfuse.com/docs/deployment/self-host#configuring-environment-variables):
+
+(The database URL is your database connection string starting with `postgres://` in the configuration of your added PostgreSQL database)
+
+```
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+SALT=
+```
+
+If you want to use OAuth add environment variables according to the [provided link](https://langfuse.com/docs/deployment/self-host#configuring-environment-variables)
+
+6. Push to heroku container registry
+
+In this step you will push the docker image to the heroku container registry: (Insert the name of your heroku app/dyno)
+
+```
+docker push registry.heroku.com/{HEROKU_APP_NAME}/web
+```
+
+7. Deploy the docker image from the heroku registry
+
+In the last step you will have to execute the following command to finally deploy the image. Again insert the name of your heroku app:
+
+```
+heroku container:release web --app={HEROKU_APP_NAME}
+```
+
 ## FAQ
 
 - **Are there prebuilt ARM images available?** No, currently we do not publish official ARM images. However, you can build your own ARM images using the Dockerfile in the Langfuse repository.
