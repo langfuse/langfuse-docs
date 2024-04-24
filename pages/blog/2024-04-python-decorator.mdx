@@ -1,7 +1,7 @@
 ---
 title: "Trace complex LLM applications with the Langfuse decorator (Python)"
-date: 2024/04/22
-description: When building RAG or agents, lots of LLM calls and non-LLM inputs feeds into the final output. The Langfuse decorator allows you to trace and evaluate it holistically.
+date: 2024/04/24
+description: When building RAG or agents, lots of LLM calls and non-LLM inputs feeds into the final output. The Langfuse decorator allows you to trace and evaluate holistically.
 ogImage: /images/changelog/2024-03-24-python-decorator.png
 tag: integration
 author: Marc
@@ -11,8 +11,8 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Trace complex LLM applications with the Langfuse decorator (Python)"
-  description="When building RAG or agents, lots of LLM calls and non-LLM inputs feeds into the final output. The Langfuse decorator allows you to trace and evaluate it holistically."
-  date="April 21, 2024"
+  description="When building RAG or agents, lots of LLM calls and non-LLM inputs feeds into the final output. The Langfuse decorator allows you to trace and evaluate holistically."
+  date="April 24, 2024"
   authors={["marcklingen", "hassiebpakzad"]}
 />
 
@@ -26,9 +26,15 @@ This post is a deep dive into the `@observe()` decorator, our design objectives,
 
 ## Goals
 
-When starting to work on the decorator, we wanted to make everything simple that's complex when manually instrumenting your code. Consider this real-world trace of a complex agent, where maintaining the nesting hierarchy manually using the low-level SDK used to come with additional complexity and boilerplate code:
+When starting to work on the decorator, we wanted to make everything simple that's complex when manually instrumenting your code. Consider this real-world trace of a complex agent, where maintaining the nesting hierarchy manually using the low-level SDK used to come with additional complexity and boilerplate code.
 
-![Deeply-nested user trace](/images/blog/python-decorator/complex-trace.png)
+_Example of a nested trace with multiple LLM, non-LLM calls and a LangChain chain_
+
+<Video
+  src="/images/blog/python-decorator/complex-trace.mp4"
+  gifStyle
+  aspectRatio={16 / 9.93}
+/>
 
 The goal of the `@observe()` decorator is to abstract away the complexity of creating and nesting traces and spans, and to make it easy to trace complex applications.
 
@@ -176,7 +182,17 @@ main();
 
 The decorator drives open tracing for teams that don't want to commit to a single application framework or ecosystem, but want to easily switch between frameworks while relying on Langfuse as a single [platform](/docs) for all experimentation, observability and evaluation needs.
 
-Roadmap: The decorator is currently only available for Python. We are working on a similar implementation for JS/TS. The decorator currently does not support class methods.
+Roadmap: The decorator is currently only available for Python. We will add a similar implementation for JS/TS.
+
+## Add-on
+
+If you want to built complex applications while being able to easily switch between models, we strongly recommend using this stack:
+
+- Langfuse Decorator for tracing
+- Langfuse OpenAI SDK Wrapper for automatic instrumentation of OpenAI calls
+- LiteLLM Proxy for standardization of 100+ models on the OpenAI API
+
+Have a look at [this cookbook](/guides/cookbook/integration_litellm_proxy) to see an end-to-end example – we really think you'll like this stack and there are lots of teams in the Langfuse Community who built on top of it.
 
 ## Thank you
 

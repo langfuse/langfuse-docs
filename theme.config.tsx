@@ -25,7 +25,7 @@ import {
   AvailabilityBanner,
   AvailabilitySidebar,
 } from "./components/availability";
-import { CloudflareVideo } from "./components/Video";
+import { CloudflareVideo, Video } from "./components/Video";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -227,6 +227,7 @@ const config: DocsThemeConfig = {
     AvailabilityBanner,
     Callout,
     CloudflareVideo,
+    Video,
   },
   banner: {
     key: "launch-week",
