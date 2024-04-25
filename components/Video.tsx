@@ -14,6 +14,7 @@ export const CloudflareVideo = ({
   className,
   gifStyle = false,
   poster,
+  posterStartTime = 1,
   title,
 }: {
   videoId: string;
@@ -21,6 +22,7 @@ export const CloudflareVideo = ({
   gifStyle?: boolean;
   className?: string;
   poster?: string;
+  posterStartTime?: number;
   title?: string;
 }) => {
   return (
@@ -28,7 +30,7 @@ export const CloudflareVideo = ({
       src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
       poster={
         poster ??
-        `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`
+        `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif?time=${posterStartTime}s`
       }
       aspectRatio={aspectRatio}
       gifStyle={gifStyle}
