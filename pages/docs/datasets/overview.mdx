@@ -16,7 +16,17 @@ Datasets have a name which is unique within a project.
 <Tab>
 
 ```python
-langfuse.create_dataset(name="<dataset_name>")
+langfuse.create_dataset(
+    name="<dataset_name>",
+    # optional description
+    description="My first dataset",
+    # optional metadata
+    metadata={
+        "author": "Alice",
+        "date": "2022-01-01",
+        "type": "benchmark"
+    }
+)
 ```
 
 _See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
@@ -25,7 +35,17 @@ _See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to 
 <Tab>
 
 ```ts
-langfuse.createDataset("<dataset_name>");
+langfuse.createDataset({
+  name: "<dataset_name>",
+  // optional description
+  description: "My first dataset",
+  // optional metadata
+  metadata: {
+    author: "Alice",
+    date: "2022-01-01",
+    type: "benchmark",
+  },
+});
 ```
 
 </Tab>
@@ -46,13 +66,17 @@ Individual items can be added to a dataset by providing the input and optionally
 ```python
 langfuse.create_dataset_item(
     dataset_name="<dataset_name>",
-    # any python object or value
+    # any python object or value, optional
     input={
         "text": "hello world"
     },
     # any python object or value, optional
     expected_output={
         "text": "hello world"
+    },
+    # metadata, optional
+    metadata={
+        "model": "llama3",
     }
 )
 ```
@@ -72,6 +96,10 @@ langfuse.createDatasetItem({
   // any JS object or value, optional
   expectedOutput: {
     text: "hello world",
+  },
+  // metadata, optional
+  metadata: {
+    model: "llama3",
   },
 });
 ```
@@ -105,22 +133,29 @@ Optionally, the output of the application can be evaluated to compare different 
 dataset = langfuse.get_dataset("<dataset_name>")
 
 for item in dataset.items:
-    # execute application function and get Langfuse parent observation (span/generation/event)
+    # execute application function and get langfuse_object (trace/span/generation/event)
     # output also returned as it is used to evaluate the run
-    generation, output = my_llm_application.run(item.input)
+    # you can also link using ids, see sdk reference for details
+    langfuse_object, output = my_llm_application.run(item.input)
 
     # link the execution trace to the dataset item and give it a run_name
-    item.link(generation, "<run_name>")
+    item.link(
+        langfuse_object,
+        "<run_name>",
+        run_description="My first run", # optional
+        run_metadata={ "model": "llama3" } # optional
+    )
 
     # optionally, evaluate the output to compare different runs more easily
-    generation.score(
+    langfuse_object.score(
         name="<example_eval>",
         # any float value
         value=my_eval_fn(
             item.input,
             output,
             item.expected_output
-        )
+        ),
+        comment="This is a comment" # optional, useful to add reasoning
     )
 ```
 
@@ -133,17 +168,22 @@ _See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to 
 const dataset = await langfuse.getDataset("<dataset_name>");
 
 for (const item of dataset.items) {
-  // execute application function and get Langfuse parent observation (span/generation/event)
+  // execute application function and get langfuseObject (trace/span/generation/event)
   // output also returned as it is used to evaluate the run
-  const [generation, output] = await myLlmApplication.run(item.input);
+  // you can also link using ids, see sdk reference for details
+  const [langfuseObject, output] = await myLlmApplication.run(item.input);
 
   // link the execution trace to the dataset item and give it a run_name
-  await item.link(generation, "<run_name>");
+  await item.link(langfuseObject, "<run_name>", {
+    description: "My first run", // optional run description
+    metadata: { model: "llama3" }, // optional run metadata
+  });
 
   // optionally, evaluate the output to compare different runs more easily
-  generation.score({
+  langfuseObject.score({
     name: "<score_name>",
     value: myEvalFunction(item.input, output, item.expectedOutput),
+    comment: "This is a comment", // optional, useful to add reasoning
   });
 }
 ```
@@ -178,11 +218,14 @@ classDiagram
 direction LR
     class Dataset {
         name
+        description
+        metadata
     }
 
     class DatasetItem {
         input
         expected_output
+        metadata
     }
 
     Dataset "1" --> "n" DatasetItem
@@ -191,6 +234,8 @@ direction LR
 
     class DatasetRun {
         name
+        description
+        metadata
     }
 
     Dataset "1" --> "n" DatasetRun
@@ -199,17 +244,34 @@ direction LR
     class DatasetRunItem {
     }
 
+    class Trace {
+        input
+        output
+        metadata
+    }
+
     class Observation {
+        input
+        output
+        metadata
     }
 
 
     DatasetRunItem "1" --> "1" DatasetItem
-    DatasetRunItem "1" --> "1" Observation
+
+    Trace "1" --> "n" Observation
+    DatasetRunItem "1" --> "1" Trace
+    DatasetRunItem "1" --> "0..1" Observation
+
+
 
     Observation "1" --> "n" Score
+
+    Trace "1" --> "n" Score
 
     class Score {
         name
         value
+        comment
     }
 ```
