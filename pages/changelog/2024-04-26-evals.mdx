@@ -1,0 +1,79 @@
+---
+date: 2024-04-26
+badge: Launch Week 1 🚀
+title: Model based evals
+description: Use Langfuse evaluations to gain confidence in the quality of your LLM application.
+ogVideo: /images/changelog/2024-04-25-datasets-v2.mp4
+showOgInHeader: false
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+On the last day of [Launch Week 1](/blog/launch-week-1), we're happy to release [Model Based Evals](/docs/scores/model-based-evals/). Getting a sense for the quality of your LLM application is tediuous and crucial at the same time.
+
+You have to manually read all the lengthy LLM outputs to judge feature quality manually. This is very time consuming and error prone, especially when you are tweaking the LLM feature a lot.
+With Model Based Evals, you sit back and ship, while Langfuse takes care of building up a large dataset of scored Traces.
+
+<CloudflareVideo
+  videoId="bb521aa5ad9160ce723a6a77376f5651"
+  aspectRatio={16 / 9.5}
+  title="Datasets v2"
+  className="mt-10"
+/>
+
+### Write your own templates
+
+Our users build wildly different LLM applications. Hence, they need customised prompts to evaluate their LLM features. That's why we made sure that you can write your own prompts and specify the variables that should inserted into the prompt when the eval runs.
+
+<Frame border className="max-w-2xl">
+  ![Metadata across dataset
+  objects](/images/changelog/2024-04-26-evals-hallucination.png)
+</Frame>
+
+
+
+### Langfuse-managed battle tested templates
+
+We did the research and found the most successful prompts for evals. While they are not a guarantee for the most accurate scores, they are a great starting point. You can choose from a variety of templates and use them as they are or tweak them to your needs.
+
+
+### Full integration with Langfuse Tracing
+
+While you can specify the template and the variables, you can also specify how Langfuse should use this template. You can use powerful filters to select which newly ingested traces the tempate should run on. When Langfuse identified a Trace that matches the filter, it will extract the variables form the Trace objects and insert them into the template. To save cost, you can also sample the traces that should be evaluated.
+
+<Frame  border className="max-w-2xl">
+  ![Metadata across dataset
+  objects](/images/changelog/2024-04-26-evals-config.gif)
+</Frame>
+
+
+
+### Build up a large dataset of scored traces
+
+While Langfuse evaluates your traces, it will generate `Scores` and attach them to the `Traces`. You can use these scores to get a quick impression on application performance in the dashboard, filter by scores in our tables, and add them 
+
+
+<Frame  border className="max-w-2xl">
+  ![Metadata across dataset
+  objects](/images/changelog/2024-04-26-evals-log.png)
+</Frame>
+
+
+### Runs all async in Langfuse
+
+You can trigger evals conveniently in the UI while we take care of running them in the backgroung. While you sleep or work on the next feature.
+
+
+
+
+## Learn more
+
+import { Book, FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Model based evals docs" href="/docs/scores/model-based-evals/" icon={<Book />} />
+</Cards>
+import {CloudflareVideo} from "@/components/Video"
