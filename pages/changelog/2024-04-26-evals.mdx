@@ -42,7 +42,8 @@ We did the research and found the most successful prompts for evals. While they 
 
 ### Full integration with Langfuse Tracing
 
-While you can specify the template and the variables, you can also specify how Langfuse should use this template. You can use powerful filters to select which newly ingested traces the tempate should run on. When Langfuse identified a Trace that matches the filter, it will extract the variables form the Trace objects and insert them into the template. To save cost, you can also sample the traces that should be evaluated.
+In addition to defining the template and its variables, you can also dictate how Langfuse should use this template. You have the option to apply a large amount of filters to choose which newly added traces the template should be applied to. 
+Once Langfuse finds a Trace that aligns with the filter, it will extract the variables from the Trace objects and ingest them into the template. To optimize cost, you can also sample the traces for evaluation.
 
 <Frame  border className="max-w-2xl">
   ![Metadata across dataset
@@ -53,7 +54,7 @@ While you can specify the template and the variables, you can also specify how L
 
 ### Build up a large dataset of scored traces
 
-While Langfuse evaluates your traces, it will generate `Scores` and attach them to the `Traces`. You can use these scores to get a quick impression on application performance in the dashboard, filter by scores in our tables, and add them 
+While Langfuse evaluates your traces, it will generate `Scores` and attach them to the `Traces`. You can use these scores to get a quick impression on application performance in the dashboard, filter Traces or Generations by scores in our tables, and add them to Datasets.
 
 
 <Frame  border className="max-w-2xl">
