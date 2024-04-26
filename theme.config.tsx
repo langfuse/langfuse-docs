@@ -233,12 +233,12 @@ const config: DocsThemeConfig = {
     key: "launch-week",
     dismissible: true,
     text: (
-      <Link href="/launch">
+      <Link href="/ph">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse Launch Week 1 →</span>
+        <span className="sm:hidden">Support our Launch on ProductHunt →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week, Day 4: Datasets v2 →
+          Support our Launch on ProductHunt: Langfuse 2.0 →
         </span>
       </Link>
     ),
