@@ -1,21 +1,22 @@
 ---
 date: 2024-04-26
 badge: Launch Week 1 🚀
-title: Model-based evals
-description: Use Langfuse evaluations to gain confidence in the quality of your LLM application.
+title: Model-based evaluations
+description: Run model-based evaluations on traces in Langfuse to scale your evaluation workflows. Start with one of our battletested templates or use your own custom templates.
 ogVideo: /images/changelog/2024-04-25-datasets-v2.mp4
 showOgInHeader: false
-author: Marc
+author: Max
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-On the final day of [Launch Week 1](/blog/launch-week-1), we're happy to release [model-based Evals](/docs/scores/model-based-evals/). So far, it was easy to measure LLM cost and latency. Evals will help our users to increase confidence in the quality of their LLM applications without human interaction.
+On the final day of [Launch Week 1](/blog/launch-week-1), we're happy to release the biggest change to Langfuse yet: [Model-based evaluations](/docs/scores/model-based-evals/).
 
-If you want to judge feature quality of your LLM feature, you have to manually read all the lengthy LLM outputs  or ask your users to do that for you. This is very time consuming and error prone. Especially when you try to be a good engineer iterating fast on your LLM feature.
-With model-based Evals, you can specify an LLM call that Langfuse will execute for you on each `trace`. You can sit back and ship new features, while Langfuse takes care of building up a large dataset of scored `traces`.
+So far, it was easy to measure LLM cost and latency in Langfuse. Quality is based on [scores](/docs/scores) which can be user feedback, manual labeling results, or be ingested by evaluation pipelines that you built yourself using the Langfuse SDKs/API.
+
+Model-based Evaluations in Langfuse make it way easier to continuously evalutate your application on the dimensions you care about. These can be: hallucinations, toxicity, relevance, correctness, conciseness, and so much more. We provide you with some battle-tested templates to get you started, but you can also write your own templates to cover any niche use case that might be exclusive to your application.
 
 <CloudflareVideo
   videoId="bb521aa5ad9160ce723a6a77376f5651"
@@ -24,22 +25,15 @@ With model-based Evals, you can specify an LLM call that Langfuse will execute f
   className="mt-10"
 />
 
-### Write your own templates
-
-Our users build wildly different LLM applications. Therefore, they need to have full flexibility of the templates which will be sent to the LLM to make them work for their use cases. That's why we made sure that you can write your own prompts and specify the variables that Langfuse should inserted into the template when the eval runs.
-
-<Frame border className="max-w-2xl">
-  ![Metadata across dataset
-  objects](/images/changelog/2024-04-26-evals-hallucination.png)
-</Frame>
-
+## Highlights
 
 
 ### Langfuse-managed battle tested templates
 
-We did the research and found the most successful prompts for evals. While they are not a guarantee for the most accurate scores, they are a great starting point. We committ to keeping them updated to help you starting off successfully with evals. Of course, you can adjust these templates to your needs.
+There is no such thing as the perfect eval template as it depends a lot on the application domain and evaluation goals. However, for the most popular evaluation criteria, we benchmarked many evaluation templates and included the best perfroming ones as templates in Langfuse. These templates are a great starting point and you can easily customize them.
 
-We found eval great templates for the following criteria:
+**Templates**
+
 - Hallucination
 - Helpfulness
 - Relevance
@@ -49,19 +43,29 @@ We found eval great templates for the following criteria:
 - Contextcorrectness
 - Conciseness
 
+ We are very much open for feedback and contributions on this template library as we want to extend it with more templates over time.
+
+
+### Write your own templates
+
+You can create custom eval templates specific to your needs as you have full control over the prompt that is used by Langfuse and the variables that are inserted into it.
+
+
+<Frame border className="max-w-2xl">
+  ![Metadata across dataset
+  objects](/images/changelog/2024-04-26-evals-hallucination.png)
+</Frame>
 
 ### Full integration with Langfuse Tracing
 
-Eval are most successful, if the template contains the right context. We made sure that you can easily access the Tracing data when applying the template. 
-First, you can use rich filters to specify on which newly ingested `trace` the template should be applied to. 
-Second, once Langfuse finds a `trace` that aligns with the filter, it will extract the variables from the `trace` objects and compile them into the template. Finally, we will make the LLM call and store the results in the `scores` object.
+When using Langfuse Tracing, many different API routes and environments are often monitored within the same project. As model-based evaluations often only make sense when being tailored to a specific use case, you can apply all filters that you know from the trace UI to narrow down the list of traces on which the eval should be applied.
 
 <Frame  border className="max-w-2xl">
   ![Metadata across dataset
   objects](/images/changelog/2024-04-26-evals-config.gif)
 </Frame>
 
-
+Many evaluation goals require including the right context from a trace. For example you might want to evaluate whether a certain api call was actually necessary, or the context that was retrieved from a database was relevant to the user query. That's why with Langfuse Evaluations, you can easily access all Tracing data within the evaluation templates.
 
 ### Build up a large dataset of scored traces
 
@@ -72,17 +76,18 @@ While Langfuse evaluates your traces, it will generate `scores` and attach them 
   objects](/images/changelog/2024-04-26-evals-log.png)
 </Frame>
 
+Scores are also available via the API for easy exports or use in downstream systems.
 
 ### Runs all async in Langfuse
 
-We did all the heavy lifting of running evals asynchronously for you. You just have to configure it, and we will do the job in the background while you sleep.
+We did all the heavy lifting of running evals asynchronously for you. You can rely on the Langfuse Tracing SDKs to log out traces in the background, and Langfuse Evaluations will then apply your eval jobs within the Langfuse infrastructure. This way you can scale your evaluation workflows without worrying about impacting your users or the performance of your application.
 
 
 ## Learn more
 
-import { Book, FileCode } from "lucide-react";
+import { Book } from "lucide-react";
 
 <Cards num={2}>
-  <Card title="Model based evals docs" href="/docs/scores/model-based-evals/" icon={<Book />} />
+  <Card title="Documentation" href="/docs/scores/model-based-evals" icon={<Book />} />
 </Cards>
-import {CloudflareVideo} from "@/components/Video"
+
