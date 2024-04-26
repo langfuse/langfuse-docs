@@ -230,8 +230,8 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "launch-week",
-    dismissible: true,
+    key: "ph-2",
+    dismissible: false,
     text: (
       <Link href="/ph">
         {/* mobile */}
