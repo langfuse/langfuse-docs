@@ -46,25 +46,29 @@ Popular libraries:
 
 <Steps>
 
+### Store an API key
+
+To use evals, you have to bring your won API keys. We store them encrypted on our servers. To do so, navigate to the settings page and store your API key.
+
 ### Create an eval template
 
 First, we need to specify how the evaluation template:
 
 - Select the model and its parameters.
-- Define the evaluation prompt together with the variables that will be inserted into the prompt. Example prompts can be found [here](https://docs.google.com/document/d/1dzHziThPdvdPRnVf77RD5d5Cjq6JQZ0qeo2RUHzoWgM).
+- Customise one of the Langfuse managed prompt templates or write your own.
 - We use function calling to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`.
 
-<Frame border>![Langfuse](/images/docs/eval-template.png)</Frame>
+<Frame border>![Langfuse](/images/docs/eval-configuration.gif)</Frame>
 
 ### Create an eval config
 
-Second, we need to specify when to run the evaluation template we created above.
+Second, we need to specify on which `traces` Langfuse should run the template we created above.
 
 - Select the evaluation template to run.
-- When running the evaluations, scores will be attached to the Traces. Specify the score name.
+- Specify the name of the `scores` which will be created.
 - Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
-- Specify which part of a trace should be inserted into the prompt. Use the `Input` from the `Trace` for the `query` variable and the `Output` from the `Generation` for the `generation` variable. In this example, choose the latest `Generation` with the name `llm-generation`.
-- Modify sampling to execute the evaluations on a randomly chosen subset of the traces.
+- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects. This is how you get the context form the `trace` into the template.
+- Modify sampling to save LLM API cost.
 - Add a delay to the evaluation execution once a trace is ingested to ensure the trace is fully processed before the evaluation is executed.
 
 <Frame border>![Langfuse](/images/docs/eval-config.png)</Frame>
