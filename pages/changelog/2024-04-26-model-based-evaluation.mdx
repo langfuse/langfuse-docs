@@ -3,8 +3,6 @@ date: 2024-04-26
 badge: Launch Week 1 🚀
 title: Model-based evaluations
 description: Run model-based evaluations on traces in Langfuse to scale your evaluation workflows. Start with one of our battletested templates or use your own custom templates.
-ogVideo: /images/changelog/2024-04-25-datasets-v2.mp4
-showOgInHeader: false
 author: Max
 ---
 
@@ -18,9 +16,7 @@ So far, it was easy to measure LLM cost and latency in Langfuse. Quality is base
 
 Model-based Evaluations in Langfuse make it way easier to continuously evalutate your application on the dimensions you care about. These can be: hallucinations, toxicity, relevance, correctness, conciseness, and so much more. We provide you with some battle-tested templates to get you started, but you can also write your own templates to cover any niche use case that might be exclusive to your application.
 
-
 ## Highlights
-
 
 ### Langfuse-managed battle tested templates
 
@@ -37,13 +33,11 @@ There is no such thing as the perfect eval template as it depends a lot on the a
 - Contextcorrectness
 - Conciseness
 
- We are very much open for feedback and contributions on this template library as we want to extend it with more templates over time.
-
+We are very much open for feedback and contributions on this template library as we want to extend it with more templates over time.
 
 ### Write your own templates
 
 You can create custom eval templates specific to your needs as you have full control over the prompt that is used by Langfuse and the variables that are inserted into it.
-
 
 <Frame border className="max-w-2xl">
   ![Metadata across dataset
@@ -54,7 +48,7 @@ You can create custom eval templates specific to your needs as you have full con
 
 When using Langfuse Tracing, many different API routes and environments are often monitored within the same project. As model-based evaluations often only make sense when being tailored to a specific use case, you can apply all filters that you know from the trace UI to narrow down the list of traces on which the eval should be applied.
 
-<Frame  border className="max-w-2xl">
+<Frame border className="max-w-2xl">
   ![Metadata across dataset
   objects](/images/changelog/2024-04-26-evals-config.gif)
 </Frame>
@@ -65,9 +59,8 @@ Many evaluation goals require including the right context from a trace. For exam
 
 While Langfuse evaluates your traces, it will generate `scores` and attach them to the `traces`. Scores are at the core of our platform and fully integrated. You can use them to get a quick overview of LLM quality over time in the dashboards or drill down by filtering by scores across the UI.
 
-<Frame  border className="max-w-2xl">
-  ![Metadata across dataset
-  objects](/images/changelog/2024-04-26-evals-log.png)
+<Frame border className="max-w-2xl">
+  ![Metadata across dataset objects](/images/changelog/2024-04-26-evals-log.png)
 </Frame>
 
 Scores are also available via the API for easy exports or use in downstream systems.
@@ -76,12 +69,14 @@ Scores are also available via the API for easy exports or use in downstream syst
 
 We did all the heavy lifting of running evals asynchronously for you. You can rely on the Langfuse Tracing SDKs to log out traces in the background, and Langfuse Evaluations will then apply your eval jobs within the Langfuse infrastructure. This way you can scale your evaluation workflows without worrying about impacting your users or the performance of your application.
 
-
 ## Learn more
 
 import { Book } from "lucide-react";
 
 <Cards num={2}>
-  <Card title="Documentation" href="/docs/scores/model-based-evals" icon={<Book />} />
+  <Card
+    title="Documentation"
+    href="/docs/scores/model-based-evals"
+    icon={<Book />}
+  />
 </Cards>
-
