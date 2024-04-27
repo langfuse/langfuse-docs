@@ -95,12 +95,12 @@ const UserLogo = ({ user }: { user: User }) => {
 
 export const Users = () => {
   return (
-    <HomeSection className="pt-6 md:pt-6">
+    <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
       <h2 className="text-center text-lg font-semibold leading-8 mb-6">
         Teams building complex LLM apps rely on Langfuse
       </h2>
       <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden">
-        <Marquee className="[--gap:2rem] lg:[--gap:5rem]">
+        <Marquee className="[--gap:2rem] lg:[--gap:4rem]">
           {users.map((user) => (
             <UserLogo key={user.name} user={user} />
           ))}
