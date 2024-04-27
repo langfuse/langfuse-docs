@@ -89,10 +89,11 @@ export const Video = ({
           style={{
             backgroundImage: poster ? `url(${poster})` : undefined,
           }}
-          onMouseEnter={() => {
+          onMouseMove={() => {
             remote.startLoading();
           }}
           onClick={() => {
+            remote.startLoading();
             remote.play();
             setPanelDismissed(true);
           }}
