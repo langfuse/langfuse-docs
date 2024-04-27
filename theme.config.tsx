@@ -230,10 +230,10 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "ph-2",
+    key: "launch-week-5",
     dismissible: false,
     text: (
-      <Link href="/ph">
+      <Link href="/launch">
         {/* mobile */}
         <span className="sm:hidden">Langfuse Launch Week →</span>
         {/* desktop */}
