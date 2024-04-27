@@ -54,7 +54,7 @@ Second, we need to specify on which `traces` Langfuse should run the template we
 - Select the evaluation template to run.
 - Specify the name of the `scores` which will be created as a result of the evaluation.
 - Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
-- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. This is how you get the context form the `trace` into the template.
+- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. Tell You can choose to take `Input`, `Output` or `metadata` form each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
 - Reduce the sampling to not run evals on each trace to save LLM API cost.
 - Add a delay to the evaluation execution. This is how you can ensure all data arrived at Langfuse servers before evaluation is exeucted.
 
