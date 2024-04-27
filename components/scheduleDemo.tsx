@@ -10,10 +10,20 @@ export function ScheduleDemoPage() {
         title="Talk to us"
         description="Get a demo by one of the founders to learn more about Langfuse"
         h="h1"
-        button={{
-          href: "/enterprise",
-          text: "Enterprise FAQ",
-        }}
+        buttons={[
+          {
+            href: "/enterprise",
+            text: "Enterprise FAQ",
+          },
+          {
+            href: "/video",
+            text: "Watch 3 min demo",
+          },
+          {
+            href: "/docs",
+            text: "Docs",
+          },
+        ]}
       />
       <ScheduleDemo />
       <Background />

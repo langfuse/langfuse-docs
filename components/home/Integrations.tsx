@@ -83,10 +83,12 @@ export default function Integrations() {
       <Header
         title="Works with any LLM app and model"
         description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
-        button={{
-          href: "/docs/integrations/overview",
-          text: "Integration docs",
-        }}
+        buttons={[
+          {
+            href: "/docs/integrations/overview",
+            text: "Integration docs",
+          },
+        ]}
       />
       <div
         className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background py-4 px-2 md:p-12"

@@ -138,7 +138,7 @@ export default function FeatureBento() {
       <Header
         title="Tools for the full development workflow"
         description="All Langfuse features are tightly integrated with Langfuse Tracing."
-        button={{ href: "/docs", text: "Explore docs" }}
+        buttons={[{ href: "/docs", text: "Explore docs" }]}
       />
       <BentoGrid>
         {features.map((feature) => (
