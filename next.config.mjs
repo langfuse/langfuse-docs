@@ -109,8 +109,8 @@ const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
-  ["/video", "/guides/videos/2-min"],
-  ["/docs/video", "/guides/videos/2-min"],
+  ["/video", "/guides/videos/introducing-langfuse-2.0"],
+  ["/docs/video", "/guides/videos/introducing-langfuse-2.0"],
   ["/roadmap", "/docs/roadmap"],
   ["/ph", "https://www.producthunt.com/posts/langfuse-2-0-llm-engineering-platform"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
@@ -189,6 +189,7 @@ const nonPermanentRedirects = [
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
+  ["/guides/videos/2-min", "/guides/videos/introducing-langfuse-2.0"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
