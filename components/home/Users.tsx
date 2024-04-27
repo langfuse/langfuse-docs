@@ -14,6 +14,8 @@ import posthogLight from "./img/posthog_light.svg";
 import posthogDark from "./img/posthog_dark.svg";
 import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
+import fletchLight from "./img/fletch_light.svg";
+import fletchDark from "./img/fletch_dark.svg";
 import { HomeSection } from "./components/HomeSection";
 
 type User = {
@@ -62,6 +64,12 @@ const users: User[] = [
     darkImage: mavaDark,
     href: "https://mava.app",
   },
+  {
+    name: "Fletch",
+    lightImage: fletchLight,
+    darkImage: fletchDark,
+    href: "https://fletch.ai/",
+  },
 ];
 
 const UserLogo = ({ user }: { user: User }) => {
@@ -69,7 +77,7 @@ const UserLogo = ({ user }: { user: User }) => {
     <a
       href={user.href}
       className={cn(
-        "relative h-12 sm:h-16 w-20 sm:w-40 cursor-pointer",
+        "relative h-12 sm:h-16 w-20 sm:w-36 cursor-pointer",
         user.className
       )}
       target="_blank"
