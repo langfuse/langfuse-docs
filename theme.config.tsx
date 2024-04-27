@@ -235,10 +235,10 @@ const config: DocsThemeConfig = {
     text: (
       <Link href="/ph">
         {/* mobile */}
-        <span className="sm:hidden">Support our Launch on ProductHunt →</span>
+        <span className="sm:hidden">Langfuse Launch Week →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Support our Launch on ProductHunt: Langfuse 2.0 →
+          Langfuse Launch Week, Day 5: Model-based Evaluation →
         </span>
       </Link>
     ),
