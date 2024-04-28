@@ -87,7 +87,7 @@ export function Hero() {
 
 const ProductHuntBadge = () => (
   <a
-    href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
+    href="https://www.producthunt.com/posts/langfuse-2-0?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
     target="_blank"
   >
     <Image
