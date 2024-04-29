@@ -21,7 +21,7 @@ _Simple example application_
 
 
 ```python
-%pip install langfuse openai langchain --upgrade
+%pip install langfuse openai langchain_openai langchain --upgrade
 ```
 
 
@@ -177,26 +177,30 @@ run_experiment(
 
 
 ```python
-from datetime import datetime
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
-
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage
+ 
 def run_my_langchain_llm_app(input, system_message, callback_handler):
+  prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            system_message,
+        ),
+        MessagesPlaceholder(variable_name="messages"),
+    ]
+  )
+  chat = ChatOpenAI()
+  chain = prompt | chat
 
-  # needs to include {country}
-  messages = [
-    SystemMessage(
-      content=system_message
-    ),
-    HumanMessage(
-      content=input
-    ),
-  ]
-  chat = ChatOpenAI(callbacks=[callback_handler])
-  completion = chat(messages)
-
-  return completion.content
+  res = chain.invoke(
+    { "messages": [HumanMessage(content=input)] },
+    config={"callbacks":[callback_handler]}
+  )
+  
+  return res
 ```
 
 
