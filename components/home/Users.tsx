@@ -16,6 +16,8 @@ import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
 import fletchLight from "./img/fletch_light.svg";
 import fletchDark from "./img/fletch_dark.svg";
+import sumupLight from "./img/sumup_light.svg";
+import sumupDark from "./img/sumup_dark.svg";
 import { HomeSection } from "./components/HomeSection";
 
 type User = {
@@ -69,6 +71,12 @@ const users: User[] = [
     lightImage: fletchLight,
     darkImage: fletchDark,
     href: "https://fletch.ai/",
+  },
+  {
+    name: "Sumup",
+    lightImage: sumupLight,
+    darkImage: sumupDark,
+    href: "https://sumup.com",
   },
 ];
 
