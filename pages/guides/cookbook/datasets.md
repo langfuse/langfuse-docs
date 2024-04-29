@@ -209,7 +209,7 @@ def run_langchain_experiment(experiment_name, system_message):
 
     completion = run_my_langchain_llm_app(item.input["country"], system_message, handler)
 
-    handler.root_span.score(
+    handler.trace.score(
       name="exact_match",
       value=simple_evaluation(completion, item.expected_output)
     )
