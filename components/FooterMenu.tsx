@@ -27,6 +27,10 @@ const menuItems: {
         name: "Metrics",
         href: "/docs/analytics",
       },
+      {
+        name: "Playground",
+        href: "/docs/playground",
+      },
     ],
   },
   {
@@ -77,6 +81,10 @@ const menuItems: {
       {
         name: "Interactive Demo",
         href: "/demo",
+      },
+      {
+        name: "Video demo (3 min)",
+        href: "/video",
       },
       {
         name: "Changelog",

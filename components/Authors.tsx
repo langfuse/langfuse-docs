@@ -40,7 +40,7 @@ export const Authors = (props: { authors: (keyof typeof allAuthors)[] }) => {
   return (
     <div className="flex flex-wrap gap-5 sm:gap-10 justify-center py-7">
       {authors.map((author) => (
-        <Author author={author} />
+        <Author author={author} key={author} />
       ))}
     </div>
   );

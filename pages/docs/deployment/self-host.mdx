@@ -90,6 +90,7 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 | `EMAIL_FROM_ADDRESS`                                                                                 |                    | Configure from address for transactional email. Required if `SMTP_CONNECTION_URL` is set.                                                                                                                                                                                                                                                                                                             |
 | `S3_ENDPOINT`<br/>`S3_ACCESS_KEY_ID`<br/>`S3_SECRET_ACCESS_KEY`<br/>`S3_BUCKET_NAME`<br/>`S3_REGION` |                    | Optional S3 configuration to enable large exports from the UI.                                                                                                                                                                                                                                                                                                                                        |
 | `DB_EXPORT_PAGE_SIZE`                                                                                | `1000`             | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                               |
+| `ENABLE_EVENT_LOG`                                                                                   | `true`             | Set to `false` to disable logging raw events to the `events` table in the database. This table is useful for debugging your instance but not required to run the application.                                                                                                                                                                                                                         |
 
 ### Authentication
 
@@ -340,6 +341,95 @@ You can deploy Langfuse to Azure via the Azure Developer CLI using this template
 ### Kubernetes
 
 Not really a platform, but Kubernetes is a popular way to deploy Langfuse. You can find community-maintained templates at [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s).
+
+### Heroku
+
+To deploy this image on heroku you have to run through the steps in the following deployment guide:
+
+1. **Pull the docker image. This can be achieved by running the following command in your terminal:**
+
+   ```
+   docker pull langfuse/langfuse:2
+   ```
+
+2. **Get the ID of the pulled image**
+
+   _Linux / MacOS_:
+
+   Running the following command should result in directly printing the image ID
+
+   ```
+   docker images | grep langfuse/langfuse | awk '[print $3]'
+   ```
+
+   Following this tutorial, you will always have to insert this image ID when [IMAGE_ID] is written.
+
+   _Windows_:
+
+   On windows you can print the full information of the pulled image using:
+
+   ```
+   docker images | findstr /S "langfuse/langfuse"
+   ```
+
+   This will result in something like:
+
+   ```
+   langfuse/langfuse                                           2          cec90c920468   28 hours ago    595MB
+   ```
+
+   Here you have to manually retrieve the image ID which in this case is `cec90c920468`. It should be located between the tag `2` and the created `28 hours ago` in this example.
+
+3. **Prepare your terminal and docker image**
+
+   First of all, you will have to be logged in to heroku using
+
+   ```
+   heroku login
+   ```
+
+   If this is not working, please visit the [heroku CLI setup](https://devcenter.heroku.com/articles/heroku-cli).
+
+   If you succeeded in logging in to heroku via the CLI, you can continue by following the next steps:
+
+   Tag the docker image (Insert your image ID into the command). You will also have to insert the name of your heroku app/dyno into [HEROKU_APP_NAME]:
+
+   ```
+   docker tag [IMAGE_ID] registry.heroku.com/[HEROKU_APP_NAME]/web
+   ```
+
+4. **Setup a database for your heroku app**
+
+   In the dashboard of your heroku app, add the `Heroku Postgres`-AddOn. This will add a PostgreSQL database to your application.
+
+5. **Set the environment variables**
+
+   For the minimum deployment in heroku, you will have to set the following environment variables (see table above). The `DATABASE_URL` is your database connection string starting with `postgres://` in the configuration of your added PostgreSQL database.
+
+   ```
+   DATABASE_URL=
+   NEXTAUTH_SECRET=
+   NEXTAUTH_URL=
+   SALT=
+   ```
+
+   Have a look at the other optional environment variables in the table above and set them if needed to configure your deployment.
+
+6. **Push to heroku container registry**
+
+   In this step you will push the docker image to the heroku container registry: (Insert the name of your heroku app/dyno)
+
+   ```
+   docker push registry.heroku.com/[HEROKU_APP_NAME]/web
+   ```
+
+7. **Deploy the docker image from the heroku registry**
+
+   In the last step you will have to execute the following command to finally deploy the image. Again insert the name of your heroku app:
+
+   ```
+   heroku container:release web --app=[HEROKU_APP_NAME]
+   ```
 
 ## FAQ
 

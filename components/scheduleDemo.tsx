@@ -15,6 +15,14 @@ export function ScheduleDemoPage() {
             href: "/enterprise",
             text: "Enterprise FAQ",
           },
+          {
+            href: "/video",
+            text: "Watch 3 min demo",
+          },
+          {
+            href: "/docs",
+            text: "Docs",
+          },
         ]}
       />
       <ScheduleDemo />

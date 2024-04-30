@@ -7,6 +7,7 @@ import {
   Steps,
   Card,
   Cards,
+  Callout,
 } from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
@@ -20,6 +21,11 @@ import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { FileCode, LibraryBig } from "lucide-react";
+import {
+  AvailabilityBanner,
+  AvailabilitySidebar,
+} from "./components/availability";
+import { CloudflareVideo, Video } from "./components/Video";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -106,6 +112,10 @@ const config: DocsThemeConfig = {
   },
   toc: {
     backToTop: true,
+    extraContent: () => {
+      const { frontMatter } = useConfig();
+      return <AvailabilitySidebar frontMatter={frontMatter} />;
+    },
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
@@ -214,21 +224,25 @@ const config: DocsThemeConfig = {
     Steps,
     Card,
     Cards,
+    AvailabilityBanner,
+    Callout,
+    CloudflareVideo,
+    Video,
   },
-  // banner: {
-  //   key: "golden-kitty-banner",
-  //   dismissible: true,
-  //   text: (
-  //     <Link href="https://www.producthunt.com/golden-kitty-awards/hall-of-fame">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Langfuse won a Golden Kitty Award →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Langfuse won a Golden Kitty Award in AI Infra →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "launch-week-5",
+    dismissible: false,
+    text: (
+      <Link href="/launch">
+        {/* mobile */}
+        <span className="sm:hidden">Langfuse Launch Week →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Langfuse Launch Week, Day 5: Model-based Evaluation →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

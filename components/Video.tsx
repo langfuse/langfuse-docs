@@ -14,6 +14,7 @@ export const CloudflareVideo = ({
   className,
   gifStyle = false,
   poster,
+  posterStartTime = 1,
   title,
 }: {
   videoId: string;
@@ -21,6 +22,7 @@ export const CloudflareVideo = ({
   gifStyle?: boolean;
   className?: string;
   poster?: string;
+  posterStartTime?: number;
   title?: string;
 }) => {
   return (
@@ -28,7 +30,7 @@ export const CloudflareVideo = ({
       src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
       poster={
         poster ??
-        `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif`
+        `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif?time=${posterStartTime}s`
       }
       aspectRatio={aspectRatio}
       gifStyle={gifStyle}
@@ -87,19 +89,20 @@ export const Video = ({
           style={{
             backgroundImage: poster ? `url(${poster})` : undefined,
           }}
-          onMouseEnter={() => {
+          onMouseMove={() => {
             remote.startLoading();
           }}
           onClick={() => {
+            remote.startLoading();
             remote.play();
             setPanelDismissed(true);
           }}
         >
-          <div className="p-3 md:p-6 rounded-full bg-black group-hover:ring-8 ring-black/20 bg-opacity-75 hover:bg-opacity-90 transition flex">
+          <div className="p-3 md:p-6 rounded-full bg-black/80 group-hover:bg-black/90 group-hover:ring-8 ring-black/20 transition flex">
             <Play className="h-6 w-6 text-white" />
           </div>
-          <div className="mt-3 md:mt-6 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="flex gap-2 text-xs md:text-sm font-semibold bg-black/90 text-white py-1 px-3 rounded-full">
+          <div className="mt-3 md:mt-6 transition-opacity duration-300">
+            <span className="flex gap-2 text-xs md:text-sm font-semibold bg-black/80 group-hover:bg-black/90 transition-all text-white py-1 px-3 rounded-full">
               {title && <span>{title}</span>}
               {durationString && (
                 <span className="text-white/70">{durationString}</span>

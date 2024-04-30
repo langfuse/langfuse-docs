@@ -109,14 +109,16 @@ const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
-  ["/video", "/guides/videos/2-min"],
-  ["/docs/video", "/guides/videos/2-min"],
+  ["/video", "/guides/videos/introducing-langfuse-2.0"],
+  ["/docs/video", "/guides/videos/introducing-langfuse-2.0"],
   ["/roadmap", "/docs/roadmap"],
-  ["/ph", "https://www.producthunt.com/posts/langfuse"],
+  ["/ph", "https://www.producthunt.com/posts/langfuse-2-0-llm-engineering-platform"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/new-issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/issues", "https://github.com/langfuse/langfuse/issues"],
+  ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
+  ["/sticker", "/stickers"],
 
   ["/security", "/docs/data-security-privacy"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
@@ -125,6 +127,9 @@ const nonPermanentRedirects = [
   ["/gh-support", "https://github.com/orgs/langfuse/discussions/categories/support"],
   ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
+
+  ["/townhall", "https://cal.com/marc-kl/langfuse-townhall-1?month=2024-04&date=2024-04-24&slot=2024-04-24T19%3A00%3A00.000Z&bookingUid=a9d94746-4fbe-4108-9d41-c9f2e0c2ee5c"],
+  ["/launch", "/blog/launch-week-1"],
 
   // Redirect to overview pages
   ...[
@@ -145,6 +150,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/integrations/langchain/typescript", "/docs/integrations/langchain/tracing"],
   ["/docs/integrations/langchain/overview", "/docs/integrations/langchain/tracing"],
+  ["/docs/integrations/langchain/get-started ", "/docs/integrations/langchain/tracing"],
   ["/docs/integrations/llama-index", "/docs/integrations/llama-index/get-started"],
   ["/docs/integrations/llama-index/overview", "/docs/integrations/llama-index/get-started"],
   ["/docs/integrations/llama-index/cookbook", "/docs/integrations/llama-index/example-python"],
@@ -184,6 +190,7 @@ const nonPermanentRedirects = [
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
+  ["/guides/videos/2-min", "/guides/videos/introducing-langfuse-2.0"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],

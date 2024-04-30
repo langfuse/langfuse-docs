@@ -1,10 +1,11 @@
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import {
-  Box,
+  Database,
   GanttChart,
   GitPullRequestArrow,
   LineChart,
   ThumbsUp,
+  FlaskConical,
 } from "lucide-react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
@@ -86,6 +87,15 @@ const features = [
     className: "md:col-start-1 md:col-end-2 md:row-start-1 md:row-end-3",
   },
   {
+    Icon: FlaskConical,
+    name: "Playground",
+    description: "Test different prompts and models right in the Langfuse UI.",
+    href: "/docs/playground",
+    cta: "Learn more",
+    background: null,
+    className: "md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4",
+  },
+  {
     Icon: ThumbsUp,
     name: "Evaluation",
     description:
@@ -93,17 +103,17 @@ const features = [
     href: "/docs/scores/overview",
     cta: "Learn more",
     background: null,
-    className: "md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4",
+    className: "md:col-start-3 md:col-end-3 md:row-start-1 md:row-end-2",
   },
   {
-    Icon: Box,
+    Icon: Database,
     name: "Datasets",
     description:
       "Derive datasets from production data to fine-tune models and test your LLM application.",
     href: "/docs/datasets/overview",
     cta: "Learn more",
     background: null,
-    className: "md:col-start-3 md:col-end-3 md:row-start-1 md:row-end-2",
+    className: "md:col-start-3 md:col-end-3 md:row-start-2 md:row-end-3",
   },
   {
     Icon: LineChart,
@@ -118,7 +128,7 @@ const features = [
         alt="Metrics"
       />
     ),
-    className: "md:col-start-3 md:col-end-3 md:row-start-2 md:row-end-4",
+    className: "md:col-start-3 md:col-end-3 md:row-start-3 md:row-end-4",
   },
 ];
 
@@ -127,7 +137,7 @@ export default function FeatureBento() {
     <HomeSection id="features">
       <Header
         title="Tools for the full development workflow"
-        description="All Langfuse features are tightly integrated with Langfuse tracing."
+        description="All Langfuse features are tightly integrated with Langfuse Tracing."
         buttons={[{ href: "/docs", text: "Explore docs" }]}
       />
       <BentoGrid>

@@ -36,9 +36,9 @@ export const Header = ({
         </p>
       )}
       {buttons && (
-        <div className="flex gap-2 justify-center">
-          {buttons.map((button) => (
-            <Button variant="ghost" className="mt-6" asChild>
+        <div className="mt-6 flex flex-row gap-2 justify-center flex-wrap">
+          {buttons.map((button, i) => (
+            <Button variant="ghost" asChild>
               <Link href={button.href}>
                 {button.text} <ArrowRight size={14} className="ml-2" />
               </Link>
