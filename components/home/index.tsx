@@ -1,5 +1,6 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
+import Security from "./Security";
 import { Users } from "./Users";
 import dynamic from "next/dynamic";
 
@@ -24,6 +25,7 @@ export const Home = () => (
       <FeatureBento />
       <Integrations />
       <OpenSource />
+      <Security />
       <Pricing />
       {/* <FromTheBlog /> */}
       {/* <CTA /> */}
