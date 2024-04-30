@@ -1,7 +1,7 @@
 ---
 title: "Langfuse Launch Week #1"
 date: 2024/04/19
-description: "A week full of new features releases, starting Monday, April 22"
+description: "A week full of new features releases"
 tag: launchweek
 ogImage: /images/blog/launch-week-1/langfuse-launch-week.png
 author: Clemens
@@ -9,7 +9,7 @@ author: Clemens
 
 <BlogHeader
   title="Langfuse Launch Week #1"
-  description="Announcing our first Launch Week, starting Monday, April 22"
+  description="A week full of new features releases"
   authors={["clemensrawert", "marcklingen", "maxdeichmann"]}
 />
 
@@ -65,11 +65,42 @@ We teamed up with [PostHog](https://posthog.com) (OSS product analytics) to inte
 <CloudflareVideo
   videoId="3cfab665df39518f15fc18813cf82e3f"
   aspectRatio={16 / 10.47}
-  className="max-w-3xl"
   title="LLM Playground"
 />
 
 We're excited to introduce the [**LLM Playground**](/docs/playground) to Langfuse. By making prompt engineering possible directly in Langfuse, we take another step in our mission to build a feature-complete LLM engineering platform that helps you along the full live cycle of your LLM application. With the LLM playground, you can now test and iterate your prompts directly in Langfuse. Either start from scratch or jump into the playground from an existing prompt in your project. See the [docs](/docs/playground) for more details and let us know what you think in the [GitHub discussion](https://github.com/orgs/langfuse/discussions/1170).
+
+### Day 3: Decorator-based integration for Python
+
+<CloudflareVideo
+  videoId="8a1f9282ef64c2bd0d932c92d6185668"
+  aspectRatio={16 / 9.37}
+  title="Decorator Integration"
+/>
+
+We're happy to share that the Decorator-based integration for Python now supports all Langfuse features and is the recommended way to use Langfuse in Python. The decorator makes integrating with Langfuse so much easier. Head over to the [Python Decorator docs](/docs/sdk/python/decorators) to learn more. All inputs, outputs, timings are captured automatically, and it works with all other [Langfuse integrations](/docs/integrations) (LangChain, LlamaIndex, OpenAI SDK, ...). To celebrate this milestone, we wrote a [blog post](/blog/2024-04-python-decorator) on the technical details and created the [example notebook](/guides/cookbook/example_decorator_openai_langchain) shown in the video as it demonstrates what's really cool about the decorator. Thanks again to [@lshalon](https://github.com/lshalon) and [@AshisGhosh](https://github.com/AshisGhosh) for your contributions to this!
+
+### Day 4: Datasets v2
+
+<CloudflareVideo
+  videoId="bb521aa5ad9160ce723a6a77376f5651"
+  aspectRatio={16 / 9.5}
+  title="Datasets v2"
+/>
+
+We're thrilled to release Datasets v2, featuring significant enhancements to the dataset experience in Langfuse. Improvements include a new editor powered by Codemirror, metadata support on all objects, tables that render inputs/outputs side-by-side, the ability to link dataset runs to traces, and the option to create dataset items directly from traces. We've also extended the public API with new endpoints for programmatic management of datasets. Check out the [changelog](/changelog/2024-04-25-datasets-v2) which summarizes all the new features and improvements.
+
+### Day 5: Model-based Evaluations
+
+<CloudflareVideo
+  videoId="c2debc8ad9e9df71d56f813510ffdf80"
+  aspectRatio={16 / 9}
+  title="Model-based Evaluations in Langfuse"
+  className="mt-10"
+  posterStartTime={137}
+/>
+
+On the final day of Launch Week 1, we're happy to release the biggest change to Langfuse yet: Model-based evaluations run right in Langfuse. So far, it was easy to measure LLM cost and latency in Langfuse. Quality is based on [scores](/docs/scores) which can be user feedback, manual labeling results, or be ingested by evaluation pipelines that you built yourself using the Langfuse SDKs/API. Model-based Evaluations in Langfuse make it way easier to continuously evalutate your application on the dimensions you care about. These can be: hallucinations, toxicity, relevance, correctness, conciseness, and so much more. We provide you with some battle-tested templates to get you started, but you can also write your own templates to cover any niche use case that might be exclusive to your application. Check out the [changelog](/changelog/2024-04-26-model-based-evaluation) or watch the video to learn more about all the details.
 
 ## Launch Week Events
 
@@ -78,12 +109,13 @@ We're excited to introduce the [**LLM Playground**](/docs/playground) to Langfus
 You're invited to our first virtual town hall. We (Max, Marc and Clemens) will be demoing new features in Langfuse, answering questions and talking about where we're taking the project. We're looking forward to hanging out!
 
 - When: Wednesday, April 24th, noon PT, 9pm CET
-- Where: Google Meet
-- [**Sign up here**](/townhall)
+- [Recording on YouTube](https://www.youtube.com/watch?v=WGERHcRnBYQ)
 
 ### Friday: Langfuse 2.0 on Product Hunt
 
-We will end the week with the launch of **Langfuse 2.0** on Product Hunt on Friday, April 26th. After our [initial launch](/ph) last year – which led to a [Golden Kitty Award](https://www.producthunt.com/golden-kitty-awards/hall-of-fame?year=2023#ai-infra) – we are very excited to be back on Product Hunt.
+We will end the week with the launch of **Langfuse 2.0** on Product Hunt on Friday, April 26th. After our initial launch last year – which led to a [Golden Kitty Award](https://www.producthunt.com/golden-kitty-awards/hall-of-fame?year=2023#ai-infra) – we are very excited to be back on Product Hunt.
+
+[Launch post](https://www.producthunt.com/posts/langfuse-2-0) (_Spoiler: Langfuse became the #1 product of the day 🥇_)
 
 ## Learn More About Langfuse
 

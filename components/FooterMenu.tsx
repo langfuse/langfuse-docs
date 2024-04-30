@@ -27,6 +27,10 @@ const menuItems: {
         name: "Metrics",
         href: "/docs/analytics",
       },
+      {
+        name: "Playground",
+        href: "/docs/playground",
+      },
     ],
   },
   {
@@ -65,6 +69,14 @@ const menuItems: {
         href: "/docs/integrations/langflow",
       },
       {
+        name: "Vercel AI SDK",
+        href: "/docs/sdk/typescript/example-vercel-ai",
+      },
+      {
+        name: "Instructor",
+        href: "/docs/integrations/instructor",
+      },
+      {
         name: "API",
         href: "https://api.reference.langfuse.com/",
       },
@@ -79,6 +91,10 @@ const menuItems: {
         href: "/demo",
       },
       {
+        name: "Video demo (3 min)",
+        href: "/video",
+      },
+      {
         name: "Changelog",
         href: "/changelog",
       },
@@ -91,8 +107,8 @@ const menuItems: {
         href: "/pricing",
       },
       {
-        name: "Status",
-        href: "https://status.langfuse.com",
+        name: "Enterprise",
+        href: "/enterprise",
       },
       {
         name: "Self-hosting",
@@ -101,6 +117,11 @@ const menuItems: {
       {
         name: "Open Source",
         href: "/docs/open-source",
+      },
+      { name: "Why Langfuse?", href: "/why" },
+      {
+        name: "Status",
+        href: "https://status.langfuse.com",
       },
     ],
   },
@@ -114,7 +135,6 @@ const menuItems: {
         href: "/about",
       },
       { name: "Support", href: "/support" },
-      { name: "Why Langfuse?", href: "/why" },
       {
         name: "Schedule Demo",
         href: "/schedule-demo",

@@ -6,11 +6,19 @@ description: A decorator-based integration to give you powerful tracing, evals, 
 
 Integrate [Langfuse Tracing](/docs/tracing) into your LLM applications with the Langfuse Python SDK using the `@observe()` decorator.
 
-The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index)
+The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index).
 
 See the [reference](https://python.reference.langfuse.com/langfuse/decorators) for a comprehensive list of all available parameters and methods.
 
 Want more control over the traces logged to Langfuse? Check out the [low-level Python SDK](/docs/sdk/python/low-level-sdk).
+
+## Overview
+
+<CloudflareVideo
+  videoId="8a1f9282ef64c2bd0d932c92d6185668"
+  aspectRatio={16 / 9.37}
+  title="Decorator Integration"
+/>
 
 ## Example
 
@@ -310,7 +318,7 @@ main()
 
 The [native LangChain integration](/docs/integrations/langchain) is fully compatible with the `@observe()` decorator. It automatically adds a generation to the trace within the current context.
 
-`langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
+`langfuse_context.get_current_langchain_handler()` exposes a callback handler scoped to the current trace context. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
 
 ```python /langfuse_handler = langfuse_context.get_current_langchain_handler()/ /langfuse_handler/
 from operator import itemgetter

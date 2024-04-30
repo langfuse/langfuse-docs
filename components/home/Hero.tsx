@@ -8,6 +8,7 @@ import phDark from "./img/ph_product_of_the_day_dark.png";
 import GoldenKittyAwardSVG from "./img/ph_gke_ai_infra.svg";
 import GoldenKittyAwardSVGWhite from "./img/ph_gke_ai_infra_white.svg";
 import { HomeSection } from "./components/HomeSection";
+import { CloudflareVideo } from "../Video";
 
 export function Hero() {
   return (
@@ -74,18 +75,19 @@ export function Hero() {
         </div>
       </div>
       {/* <div className="aspect-video bg-blue-200"></div> */}
-      {/* <CloudflareVideo
-        videoId="ff57153dd945da86f7549c1f30daaea2"
-        aspectRatio={1.71}
-        title="What is Langfuse?"
-      /> */}
+      <CloudflareVideo
+        videoId="fc956675646a9f989193bfd8755d3aec"
+        aspectRatio={16 / 9}
+        title="Introducing Langfuse 2.0"
+        posterStartTime={71}
+      />
     </HomeSection>
   );
 }
 
 const ProductHuntBadge = () => (
   <a
-    href="https://www.producthunt.com/posts/langfuse?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
+    href="https://www.producthunt.com/posts/langfuse-2-0?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-langfuse"
     target="_blank"
   >
     <Image

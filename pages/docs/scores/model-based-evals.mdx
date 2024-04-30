@@ -8,20 +8,9 @@ Model-based evaluations are a powerful tool to automate the evaluation of LLM ap
 
 There are two ways to run model-based evaluations in Langfuse:
 
-1. [Via the Python SDK or API](#sdk)
-2. [Via the Langfuse UI (beta)](#ui)
+1. [Via the Langfuse UI (beta)](#ui)
+2. [Via the Python SDK or API](#sdk)
 
-## Via Python SDK [#sdk]
-
-You can run your own model-based evals on data in Langfuse via the Python SDK. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
-
-Popular libraries:
-
-- OpenAI Evals
-- Langchain Evaluators ([Cookbook](/guides/cookbook/evaluation_with_langchain))
-- RAGAS for RAG applications ([Cookbook](/guides/cookbook/evaluation_of_rag_with_ragas))
-- UpTrain evals ([Cookbook](/guides/cookbook/evaluation_with_uptrain))
-- Whylabs Langkit
 
 ## Via Langfuse UI (beta) [#ui]
 
@@ -34,40 +23,51 @@ Popular libraries:
   }}
 />
 
-<Callout type="info">
-  Ping us via the chat widget if you are interested to join the private beta.
-</Callout>
-
 <CloudflareVideo
-  videoId="ba61cde5e2c57c14db0cda551d4d8a2c"
-  aspectRatio={16 / 9.58}
-  title="Model-based evaluations"
+  videoId="c2debc8ad9e9df71d56f813510ffdf80"
+  aspectRatio={16 / 9}
+  title="Model-based Evaluations in Langfuse"
+  className="mt-10"
+  posterStartTime={137}
 />
 
 <Steps>
 
+### Store an API key
+
+To use evals, you have to bring your own LLM API keys. To do so, navigate to the settings page and insert your API key. We store them encrypted on our servers.
+
 ### Create an eval template
 
-First, we need to specify how the evaluation template:
+First, we need to specify the evaluation template:
 
 - Select the model and its parameters.
-- Define the evaluation prompt together with the variables that will be inserted into the prompt. Example prompts can be found [here](https://docs.google.com/document/d/1dzHziThPdvdPRnVf77RD5d5Cjq6JQZ0qeo2RUHzoWgM).
-- We use function calling to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`.
+- Customise one of the Langfuse managed prompt templates or write your own.
+- We use function calling to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`. This is how you can direct the LLM to score on a specific range and provide specific reasoning for the score.
 
-<Frame border>![Langfuse](/images/docs/eval-template.png)</Frame>
+<Frame border>![Langfuse](/images/docs/eval-hallucination-template.png)</Frame>
 
 ### Create an eval config
 
-Second, we need to specify when to run the evaluation template we created above.
+Second, we need to specify on which `traces` Langfuse should run the template we created above.
 
 - Select the evaluation template to run.
-- When running the evaluations, scores will be attached to the Traces. Specify the score name.
+- Specify the name of the `scores` which will be created as a result of the evaluation.
 - Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
-- Specify which part of a trace should be inserted into the prompt. Use the `Input` from the `Trace` for the `query` variable and the `Output` from the `Generation` for the `generation` variable. In this example, choose the latest `Generation` with the name `llm-generation`.
-- Modify sampling to execute the evaluations on a randomly chosen subset of the traces.
-- Add a delay to the evaluation execution once a trace is ingested to ensure the trace is fully processed before the evaluation is executed.
+- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. You can choose to take `Input`, `Output` or `metadata` form each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
+- Reduce the sampling to not run evals on each trace. This helps to save LLM API cost.
+- Add a delay to the evaluation execution. This is how you can ensure all data arrived at Langfuse servers before evaluation is exeucted.
 
 <Frame border>![Langfuse](/images/docs/eval-config.png)</Frame>
+
+### See the progress
+
+Once the configruation is saved, Langfuse will start running the evals on the traces that match the filter. You can see the progress on the config page or the log table.
+
+<Frame border className="max-w-lg">
+  ![Langfuse](/images/docs/evals-log.png)
+</Frame>
+
 
 ### See scores
 
@@ -78,3 +78,16 @@ Upon receiving new traces, navigate to the trace detail view to see the associat
 </Frame>
 
 </Steps>
+
+
+## Via Python SDK [#sdk]
+
+You can run your own model-based evals on data in Langfuse via the Python SDK. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
+
+Popular libraries:
+
+- OpenAI Evals
+- Langchain Evaluators ([Cookbook](/guides/cookbook/evaluation_with_langchain))
+- RAGAS for RAG applications ([Cookbook](/guides/cookbook/evaluation_of_rag_with_ragas))
+- UpTrain evals ([Cookbook](/guides/cookbook/evaluation_with_uptrain))
+- Whylabs Langkit

@@ -25,7 +25,7 @@ import {
   AvailabilityBanner,
   AvailabilitySidebar,
 } from "./components/availability";
-import { CloudflareVideo } from "./components/Video";
+import { CloudflareVideo, Video } from "./components/Video";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -227,17 +227,18 @@ const config: DocsThemeConfig = {
     AvailabilityBanner,
     Callout,
     CloudflareVideo,
+    Video,
   },
   banner: {
-    key: "launch-week",
-    dismissible: true,
+    key: "launch-week-5",
+    dismissible: false,
     text: (
       <Link href="/launch">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse Launch Week 1 →</span>
+        <span className="sm:hidden">Langfuse Launch Week →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week, Day 2: LLM Playground →
+          Langfuse Launch Week, Day 5: Model-based Evaluation →
         </span>
       </Link>
     ),
