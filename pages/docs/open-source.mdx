@@ -15,9 +15,15 @@ Learn more about what's next for Langfuse on our [roadmap](/docs/roadmap).
 
 ## License
 
-Langfuse is licensed under an [MIT license](https://github.com/langfuse/langfuse/blob/main/LICENSE), with the exception of the `/ee` folder of the repository, if applicable.
+Langfuse is licensed under an MIT license, with the exception of the `/ee` and `/web/src/ee` folders of the repository. These directories contain features that are commercially licensed. They are available on Langfuse Cloud and in the Enterprise Edition of Langfuse Self-Hosted. See [License](https://github.com/langfuse/langfuse/blob/main/LICENSE) for more details.
 
-Currently, our focus is entirely on open source. However, we may consider commercializing premium features as part of an enterprise version in the future. For specific requirements, please contact us at enterprise@langfuse.com
+The Langfuse core product and all Langfuse-maintained integrations and SDKs are fully open-source and licensed under the MIT license.
+
+## Enterprise Edition (EE) FAQ
+
+- What features are EE and what is MIT-licensed when self-hosting Langfuse? The core of Langfuse is MIT licensed and open-source (tracing, integrations, public API, prompt management). There are no restrictions on usage, modification or deployment of these features when self-hosting Langfuse. The EE features are commercially licensed add-on features that are not required for the core functionality of Langfuse (e.g., model-based evaluation, llm playground, SSO enforcement, etc.). The documentation and codebase are clearly marked ("Where is this feature available?") to indicate which features are MIT-licensed and which parts are EE (commercially licensed).
+- Do I risk executing EE code when using Langfuse without a license? No, the EE features are only available when you have a license. You do not risk using EE features if you self-host Langfuse without a license, unless you modify the codebase to circumvent the checks.
+- Do I need to care about the difference between MIT and EE when using Langfuse Cloud? No, depending on which tier of Langfuse Cloud you are on, you will have access to features that are both MIT and EE licensed.
 
 ## Repositories
 
@@ -39,3 +45,13 @@ Here are the best ways to contribute to Langfuse via GitHub:
 1. Submit and vote on [Ideas](/ideas).
 2. Create and comment on [Issues](/issues).
 3. Create a pull request. See see [Contributing.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) to get started.
+
+## Dependencies
+
+Langfuse packages use open-source dependencies. Find a complete list in the configuration files across our repositories:
+
+- Langfuse server: monorepo with [multiple `package.json` files](https://github.com/search?q=repo%3Alangfuse%2Flangfuse%20package.json&type=code)
+- Langfuse Python SDK: main [`pyproject.toml`](https://github.com/langfuse/langfuse-python/blob/main/pyproject.toml)
+- Langfuse JS SDK: monorepo with [multiple `package.json` files](https://github.com/search?q=repo%3Alangfuse%2Flangfuse-js%20package.json&type=code)
+
+As the core Langfuse server is most actively developed, we run an [automated license check](https://github.com/langfuse/langfuse/actions/workflows/licencecheck.yml) on every change to avoid adding dependencies with non-permissive licenses. If you find any issues, please let us know.
