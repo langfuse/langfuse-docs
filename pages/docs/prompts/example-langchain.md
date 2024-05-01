@@ -52,7 +52,7 @@ We add the prompt used in this example via the SDK. Alternatively, you can also 
 - `Name` that identifies the prompt in Langfuse Prompt Management
 - Prompt with prompt template incl. `{{input variables}}`
 - Config including `model_name` and `temperature`
-- `is_active` to immediately use prompt
+- `labels` to include `production` to immediately use prompt as the default
 
 
 ```python
@@ -67,7 +67,7 @@ langfuse.create_prompt(
         "model":"gpt-3.5-turbo-1106",
         "temperature": 0,
     },
-    is_active=True
+    labels=["production"]
 );
 ```
 

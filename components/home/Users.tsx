@@ -12,6 +12,12 @@ import frontifyLight from "./img/frontify_light.svg";
 import frontifyDark from "./img/frontify_dark.svg";
 import posthogLight from "./img/posthog_light.svg";
 import posthogDark from "./img/posthog_dark.svg";
+import fortoLight from "./img/forto_light.svg";
+import fortoDark from "./img/forto_dark.svg";
+import fletchLight from "./img/fletch_light.svg";
+import fletchDark from "./img/fletch_dark.svg";
+import sumupLight from "./img/sumup_light.svg";
+import sumupDark from "./img/sumup_dark.svg";
 import { HomeSection } from "./components/HomeSection";
 
 type User = {
@@ -30,7 +36,7 @@ const users: User[] = [
     href: "https://posthog.com",
   },
   {
-    name: "frontify",
+    name: "Frontify",
     lightImage: frontifyLight,
     darkImage: frontifyDark,
     href: "https://www.frontify.com",
@@ -49,10 +55,28 @@ const users: User[] = [
     href: "https://pigment.com",
   },
   {
+    name: "Forto",
+    lightImage: fortoLight,
+    darkImage: fortoDark,
+    href: "https://forto.com",
+  },
+  {
     name: "Mava",
     lightImage: mavaLight,
     darkImage: mavaDark,
     href: "https://mava.app",
+  },
+  {
+    name: "Fletch",
+    lightImage: fletchLight,
+    darkImage: fletchDark,
+    href: "https://fletch.ai/",
+  },
+  {
+    name: "Sumup",
+    lightImage: sumupLight,
+    darkImage: sumupDark,
+    href: "https://sumup.com",
   },
 ];
 
@@ -61,7 +85,7 @@ const UserLogo = ({ user }: { user: User }) => {
     <a
       href={user.href}
       className={cn(
-        "relative h-12 sm:h-16 w-20 sm:w-40 cursor-pointer",
+        "relative h-12 sm:h-16 w-20 sm:w-36 cursor-pointer",
         user.className
       )}
       target="_blank"
@@ -87,12 +111,12 @@ const UserLogo = ({ user }: { user: User }) => {
 
 export const Users = () => {
   return (
-    <HomeSection className="pt-6 md:pt-6">
+    <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
       <h2 className="text-center text-lg font-semibold leading-8 mb-6">
         Teams building complex LLM apps rely on Langfuse
       </h2>
       <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden">
-        <Marquee className="[--gap:2rem] lg:[--gap:5rem]">
+        <Marquee className="[--gap:2rem] lg:[--gap:4rem]">
           {users.map((user) => (
             <UserLogo key={user.name} user={user} />
           ))}

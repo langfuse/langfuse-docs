@@ -2,8 +2,6 @@
 description: Simple wrapper around OpenAI SDK (JS/TS) to get full observability in Langfuse
 ---
 
-import { Callout } from "nextra-theme-docs";
-
 # Observability for OpenAI SDK (JS/TS)
 
 <Callout type="info">
@@ -33,8 +31,6 @@ Langfuse automatically tracks:
 
 _In the Langfuse Console_
 
-import { CloudflareVideo } from "@/components/Video";
-
 <CloudflareVideo
   videoId="53740b20a378b166552ff1941ed38e4c"
   aspectRatio={16 / 9.8}
@@ -47,7 +43,7 @@ import { CloudflareVideo } from "@/components/Video";
 
 ### Install Langfuse SDK
 
-The integration is compatible with OpenAI SDK versions `>=4.0.0`. 
+The integration is compatible with OpenAI SDK versions `>=4.0.0`.
 
 ```sh
 npm install langfuse openai
@@ -113,6 +109,18 @@ Done!✨ You now have full observability of your OpenAI calls in Langfuse.
 
 </Steps>
 
+Check out the notebook for end-to-end examples of the integration:
+
+import { FileCode } from "lucide-react";
+
+<Cards>
+  <Card
+    title="Example notebook"
+    href="/docs/integrations/openai/js/examples"
+    icon={<FileCode />}
+  />
+</Cards>
+
 ## Troubleshooting
 
 ### Queuing and batching of events
@@ -139,6 +147,7 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 | Property         | Description                                                                  |
 | ---------------- | ---------------------------------------------------------------------------- |
 | `generationName` | Set `generationName` to identify a specific type of generation.              |
+| `langfusePrompt` | Pass a created or fetched Langfuse prompt to link it with the generations    |
 | `metadata`       | Set `metadata` with additional information that you want to see in Langfuse. |
 | `sessionId`      | The current [session](/docs/tracing-features/sessions).                      |
 | `userId`         | The current [user_id](/docs/tracing-features/users).                         |
@@ -171,6 +180,27 @@ const res = await observeOpenAI(new OpenAI(), {
   the same client is used for all calls, you do not need to worry about
   mistakingly having multiple clients running.
 </Callout>
+
+### Link to Langfuse prompts
+
+With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
+
+```typescript
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
+
+const res = await observeOpenAI(new OpenAI(), {
+  langfusePrompt,
+}).completions.create({
+  prompt: langfusePrompt.prompt,
+  model: "gpt-3.5-turbo-instruct",
+  max_tokens: 300,
+});
+```
+
+Resulting generations are now linked to the prompt in Langfuse, allowing you to track prompt usage and performance.
 
 ### Nested traces
 

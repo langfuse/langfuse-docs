@@ -50,7 +50,7 @@ We add the prompt used in this example via the SDK. Alternatively, you can also 
 - `Name` that identifies the prompt in Langfuse Prompt Management
 - Prompt with `json_schema` variable
 - Config including `model_name`, `temperature`, and `json_schema`
-- `is_active` to immediately use prompt
+- `labels` to include `production` to immediately use the prompt as the default
 
 
 ```python
@@ -69,7 +69,7 @@ langfuse.create_prompt(
             "critic_score": "number (between 0 bad and 10 exceptional)"
         }
     },
-    is_active=True
+    labels=["production"]
 );
 ```
 

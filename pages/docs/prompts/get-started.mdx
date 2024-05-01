@@ -2,9 +2,6 @@
 description: Manage and version your prompts in Langfuse (open source). When retrieved, they are cached by the Langfuse SDKs for low latency.
 ---
 
-import { Callout } from "nextra-theme-docs";
-import { CloudflareVideo } from "@/components/Video";
-
 # Prompt Management
 
 Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is basically a **Prompt CMS** (Content Management System).
@@ -36,7 +33,8 @@ Platform benefits:
     "supported_languages": ["en", "fr"]
   },
   "version": 1,
-  "is_active": true
+  "labels": ["production", "staging", "latest"],
+  "tags": ["movies"]
 }
 ```
 
@@ -45,7 +43,7 @@ Platform benefits:
 - `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`). For chat prompts, this is a list of chat messages each with `role` and `content`.
 - `config`: Optional JSON object to store any parameters (e.g. model parameters or model tools).
 - `version`: Integer to indicate the version of the prompt. The version is automatically incremented when creating a new prompt version.
-- `is_active`: Boolean to indicate if the prompt version is in production. This is the default version that is returned when fetching the prompt by name.
+- `labels`: Labels that can be used to fetch specific prompt versions in the SDKs. The default-served prompt version is the one with the `production` label. The `latest` label is automatically maintained by Langfuse and points to the latest version. Labels are unique per prompt name.
 
 ## How it works
 
@@ -74,12 +72,12 @@ langfuse.create_prompt(
     name="movie-critic",
     type="text",
     prompt="Do you like {{movie}}?",
-    is_active=True,  # directly promote to production?
+    labels=["production"],  # directly promote to production
     config={
         "model": "gpt-3.5-turbo",
         "temperature": 0.7,
         "supported_languages": ["en", "fr"],
-    },  # optionally, add configs (e.g. model parameters or model tools)
+    },  # optionally, add configs (e.g. model parameters or model tools) or tags
 )
 
 # Create a chat prompt
@@ -87,12 +85,12 @@ langfuse.create_prompt(
     name="movie-critic-chat",
     type="chat",
     prompt=[{"role": "system", "content": "You are an expert on {{movie}}"}],
-    is_active=True,  # directly promote to production?
+    labels=["production"],  # directly promote to production
     config={
         "model": "gpt-3.5-turbo",
         "temperature": 0.7,
         "supported_languages": ["en", "fr"],
-    },  # optionally, add configs (e.g. model parameters or model tools)
+    },  # optionally, add configs (e.g. model parameters or model tools) or tags
 )
 ```
 
@@ -108,12 +106,12 @@ await langfuse.createPrompt({
   name: "movie-critic",
   type: "text",
   prompt: "Do you like {{movie}}?",
-  isActive: true, // directly promote to production?
+  labels: ["production"], // directly promote to production
   config: {
     model: "gpt-3.5-turbo",
     temperature: 0.7,
     supported_languages: ["en", "fr"],
-  }, // optionally, add configs (e.g. model parameters or model tools)
+  }, // optionally, add configs (e.g. model parameters or model tools) or tags
 });
 
 // Create a chat prompt
@@ -121,12 +119,12 @@ await langfuse.createPrompt({
   name: "movie-critic-chat",
   type: "chat",
   prompt: [{ role: "system", content: "You are an expert on {{movie}}" }],
-  isActive: true, // directly promote to production?
+  labels: ["production"], // directly promote to production
   config: {
     model: "gpt-3.5-turbo",
     temperature: 0.7,
     supported_languages: ["en", "fr"],
-  }, // optionally, add configs (e.g. model parameters or model tools)
+  }, // optionally, add configs (e.g. model parameters or model tools) or tags
 });
 ```
 
@@ -174,6 +172,12 @@ Optional parameters
 # Get specific version
 prompt = langfuse.get_prompt("movie-critic", version=1)
 
+# Get specific label
+prompt = langfuse.get_prompt("movie-critic", label="staging")
+
+# Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+prompt = langfuse.get_prompt("movie-critic", label="latest")
+
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 ```
@@ -220,8 +224,14 @@ const compiledChatPrompt = chatPrompt.compile({ movie: "Dune 2" });
 Optional parameters
 
 ```typescript
-// Get specific version of a prompt (here version 1). Prompt is returned even if not active.
+// Get specific version of a prompt (here version 1)
 const prompt = await langfuse.getPrompt("movie-critic", 1);
+
+// Get specific label
+const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "staging" });
+
+// Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "latest" });
 
 // Extend cache TTL from default 1 to 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
@@ -274,6 +284,12 @@ Optional parameters
 ```python
 # Get specific version
 prompt = langfuse.get_prompt("movie-critic", version=1)
+
+# Get specific label
+prompt = langfuse.get_prompt("movie-critic", label="staging")
+
+# Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+prompt = langfuse.get_prompt("movie-critic", label="latest")
 
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
@@ -329,8 +345,14 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 Optional parameters
 
 ```typescript
-// Get specific version of a prompt (here version 1). Prompt is returned even if not active.
+// Get specific version of a prompt (here version 1)
 const prompt = await langfuse.getPrompt("movie-critic", 1);
+
+// Get specific label
+const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "staging" });
+
+// Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "latest" });
 
 // Extend cache TTL from default 1 to 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
@@ -358,7 +380,7 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 
 This is currently unavailable when using the LangChain or LlamaIndex integration.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)"]}>
+<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)"]}>
 <Tab>
 
 Decorators
@@ -421,18 +443,30 @@ openai.chat.completions.create(
 
 </Tab>
 
+<Tab>
+
+```typescript /langfusePrompt,/
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
+
+const res = await observeOpenAI(new OpenAI(), {
+  langfusePrompt,
+}).completions.create({
+  prompt: langfusePrompt.prompt,
+  model: "gpt-3.5-turbo-instruct",
+  max_tokens: 300,
+});
+```
+
+</Tab>
+
 </Tabs>
 
 ### Rollbacks (optional)
 
-Set a prompt version to `active` when creating it via the SDKs. In the Langfuse UI, you can promote a specific prompt version to quickly rollback:
-
-<CloudflareVideo
-  videoId="0a1cc222b766594947efd00af62e7a67"
-  aspectRatio={16.2 / 9}
-  gifStyle
-  className="max-w-xl"
-/>
+When a prompt has a `production` label, then that version will be served by default in the SDKs. You can quickly rollback to a previous version by setting the `production` label to that previous version in the Langfuse UI.
 
 </Steps>
 

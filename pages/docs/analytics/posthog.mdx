@@ -1,10 +1,21 @@
 ---
 description: Display your Langfuse metrics in Posthog dashboards.
+availability.hobby: public-beta
+availability.pro: public-beta
+availability.team: public-beta
+availability.selfHosted: not-available
 ---
 
-# PostHog Integration (Beta)
+# PostHog Integration
 
-import { CloudflareVideo } from "@/components/Video";
+<AvailabilityBanner
+  availability={{
+    hobby: "public-beta",
+    pro: "public-beta",
+    team: "public-beta",
+    selfHosted: "not-available",
+  }}
+/>
 
 [PostHog](https://posthog.com) is a popular choice for OSS product analytics. While Langfuse offers [analytics](/docs/analytics) out of the box, many of our users have asked for a way to **integrate their LLM related metrics that they capture with Langfuse into their PostHog dashboards**.
 
@@ -15,6 +26,34 @@ We've built an integration to make it easy to answer questions like:
 - _"How does the LLM feature impact my conversion rates?"_
 - _"Does the user feedback that I capture in Langfuse correlate with the user behavior that I see in PostHog?"_
 
+<CloudflareVideo
+  videoId="24f7e625588a979f380effedda66a8ac"
+  aspectRatio={16 / 9.53}
+  title="PostHog Integration"
+/>
+
+## Get started
+
+<Steps>
+
+### Enable the integration
+
+Configure this integration in your Langfuse project settings. You will need to provide your PostHog Hostname and API key.
+
+<Frame border className="max-w-lg block">
+  ![Posthog Integration Settings](/images/docs/posthog-settings.png)
+</Frame>
+
+### Build a dashboard in PostHog
+
+Once integrated, you can build a dashboard in PostHog to visualize your Langfuse metrics (see [reference below](#details)). Use the _AI Metrics_ template to get started with a pre-built dashboard that includes the most common metrics from Langfuse.
+
+<Frame border className="max-w-xs block">
+  ![PostHog Dashboard Template](/images/docs/posthog-template.png)
+</Frame>
+
+</Steps>
+
 ## Example PostHog Dashboard
 
 <CloudflareVideo
@@ -23,26 +62,7 @@ We've built an integration to make it easy to answer questions like:
   gifStyle
 />
 
-## Get started
-
-import { Callout } from "nextra/components";
-
-<Callout type="info" emoji="ℹ️">
-  This is a beta feature and currently only available for users of our managed
-  service.
-</Callout>
-
-Interested to use this integration for your Langfuse project? Reach out to us: early-access@langfuse.com
-
-## Build a dashboard in PostHog
-
-Once integrated, you can build a dashboard in PostHog to visualize your Langfuse metrics. Use the _AI Metrics_ template to get started with a pre-built dashboard that includes the most common metrics from Langfuse.
-
-<Frame border className="max-w-xs block">
-  ![PostHog Dashboard Template](/images/docs/posthog-template.png)
-</Frame>
-
-## Integration details
+## Integration details [#details]
 
 On a daily schedule Langfuse batches aggregated events and metrics to your PostHog instance.
 
@@ -120,7 +140,3 @@ You can decide which events you want to send to PostHog. By default, we send all
 - `langfuse_release`: The release information of the trace associated with the score.
 - `langfuse_tags`: Any tags related to the trace of the score.
 - `langfuse_integration_version`: The integration version with LangFuse.
-
-## Questions?
-
-If you have any questions about this integration, please reach out to us at early-access@langfuse.com
