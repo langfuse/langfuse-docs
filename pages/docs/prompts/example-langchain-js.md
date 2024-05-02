@@ -80,7 +80,7 @@ prompt.prompt
 
 and the config object
 
-```python
+```typescript
 prompt.config
 ```
 
