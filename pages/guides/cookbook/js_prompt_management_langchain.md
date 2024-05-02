@@ -80,17 +80,13 @@ prompt.prompt
 
 and the config object
 
-
-```typescript
+```python
 prompt.config
 ```
 
-
-
-
-    { modelName: [32m"gpt-4"[39m, temperature: [33m1[39m }
-
-
+```
+{ modelName: [32m"gpt-4"[39m, temperature: [33m1[39m }
+ ```
 
 #### Transform prompt into Langchain PromptTemplate
 
