@@ -102,24 +102,20 @@ prompt.compile(json_schema="TEST SCHEMA")
 
 And it includes the config object
 
-
 ```python
 prompt.config
 ```
 
-
-
-
-    {'model': 'gpt-3.5-turbo-1106',
-     'json_schema': {'genre': 'string (genre of story)',
-      'keywords': 'array of strings',
-      'key_content': 'string (1 sentence)',
-      'critic_score': 'number (between 0 bad and 10 exceptional)',
-      'main_character': 'string (name of protagonist)',
-      'critic_review_comment': 'string (write similar to a new york times critic)'},
-     'temperature': 0}
-
-
+```
+{'model': 'gpt-3.5-turbo-1106',
+ 'json_schema': {'genre': 'string (genre of story)',
+  'keywords': 'array of strings',
+  'key_content': 'string (1 sentence)',
+  'critic_score': 'number (between 0 bad and 10 exceptional)',
+  'main_character': 'string (name of protagonist)',
+  'critic_review_comment': 'string (write similar to a new york times critic)'},
+ 'temperature': 0}
+ ```
 
 ### Create example function
 
