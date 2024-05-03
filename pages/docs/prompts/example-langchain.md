@@ -79,9 +79,13 @@ Prompt in Langfuse UI
 
 ### Get current prompt version from Langfuse
 
+
 ```python
 # Get current production version of prompt
 langfuse_prompt = langfuse.get_prompt("event-planner")
+```
+
+```python
 print(langfuse_prompt.prompt)
 ```
 
