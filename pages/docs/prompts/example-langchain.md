@@ -79,15 +79,15 @@ Prompt in Langfuse UI
 
 ### Get current prompt version from Langfuse
 
-
 ```python
 # Get current production version of prompt
 langfuse_prompt = langfuse.get_prompt("event-planner")
 print(langfuse_prompt.prompt)
 ```
 
-    Plan an event titled {{Event Name}}. The event will be about: {{Event Description}}. The event will be held in {{Location}} on {{Date}}. Consider the following factors: audience, budget, venue, catering options, and entertainment. Provide a detailed plan including potential vendors and logistics.
-
+```
+Plan an event titled {{Event Name}}. The event will be about: {{Event Description}}. The event will be held in {{Location}} on {{Date}}. Consider the following factors: audience, budget, venue, catering options, and entertainment. Provide a detailed plan including potential vendors and logistics.
+ ```
 
 ### Transform into Langchain PromptTemplate
 
