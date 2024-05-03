@@ -104,5 +104,5 @@ const welcomeMessage: Message = {
   id: "announcement-1",
   content: `👋 Do you have any questions about Langfuse? Ask me!
 
-_⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public demo project. Responses might be inaccurate, check docs or chat with humans (the founders) via the chat widget._`,
+_⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public demo project. Responses may be inaccurate. Please check the documentation for details or reach out to us via the chat widget._`,
 } as const;
