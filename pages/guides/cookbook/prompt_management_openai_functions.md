@@ -179,7 +179,7 @@ As she carried on with her mysterious deed, she found an unanticipated reward. J
 
 
 ```python
-summarize_story(STORY)
+summary = summarize_story(STORY)
 ```
 
 ```
