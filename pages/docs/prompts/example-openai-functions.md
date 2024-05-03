@@ -177,27 +177,23 @@ As she carried on with her mysterious deed, she found an unanticipated reward. J
 """
 ```
 
-
 ```python
 summarize_story(STORY)
 ```
 
-
-
-
-    {'genre': 'Fantasy',
-     'keywords': ['lonely cat',
-      'invisible',
-      'benevolent spirit',
-      'unsung hero',
-      'mysterious deed',
-      'true happiness'],
-     'key_content': 'In a bustling city, a lonely cat named Whisper discovers an abandoned hat with the power to make her invisible, leading her to become a benevolent spirit and unsung hero to the less fortunate.',
-     'critic_score': 9,
-     'main_character': 'Whisper',
-     'critic_review_comment': "Whisper's journey from loneliness to self-discovery through acts of kindness is a heartwarming and enchanting tale that captivates the reader with its magical elements and profound message about true happiness."}
-
-
+```
+{'genre': 'Fantasy',
+ 'keywords': ['lonely cat',
+  'invisible',
+  'benevolent spirit',
+  'unsung hero',
+  'mysterious deed',
+  'true happiness'],
+ 'key_content': 'In a bustling city, a lonely cat named Whisper discovers an abandoned hat with the power to make her invisible, leading her to become a benevolent spirit and unsung hero to the less fortunate.',
+ 'critic_score': 9,
+ 'main_character': 'Whisper',
+ 'critic_review_comment': "Whisper's journey from loneliness to self-discovery through acts of kindness is a heartwarming and enchanting tale that captivates the reader with its magical elements and profound message about true happiness."}
+ ```
 
 ## View trace in Langfuse
 
