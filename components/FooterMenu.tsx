@@ -153,7 +153,7 @@ const menuItems: {
       { name: "Imprint", href: "/imprint" },
       {
         name: "Terms",
-        href: "/tos",
+        href: "/terms",
       },
       {
         name: "Privacy",

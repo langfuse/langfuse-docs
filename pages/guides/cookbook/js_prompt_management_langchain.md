@@ -34,7 +34,7 @@ We add the prompt used in this example via the SDK. Alternatively, you can also 
 - `Name` that identifies the prompt in Langfuse Prompt Management
 - Prompt with `topic` variable
 - Config including `modelName`, `temperature`
-- `isActive` to immediately use prompt
+- `labels` to include `production` to immediately use prompt as the default
 
 For the sake of this notebook, we will add the prompt in Langfuse and use it right away. Usually, you'd update the prompt from time to time in Langfuse and your application fetches the current production version.
 
@@ -47,7 +47,7 @@ const prompt =  await langfuse.createPrompt({
       modelName: "gpt-4",
       temperature: 1,
     }, // optionally, add configs (e.g. model parameters or model tools)
-    isActive: true // directly promote to production
+    labels: ["production"] // directly promote to production
 });
 ```
 
@@ -80,17 +80,13 @@ prompt.prompt
 
 and the config object
 
-
 ```typescript
 prompt.config
 ```
 
-
-
-
-    { modelName: [32m"gpt-4"[39m, temperature: [33m1[39m }
-
-
+```
+{ modelName: [32m"gpt-4"[39m, temperature: [33m1[39m }
+ ```
 
 #### Transform prompt into Langchain PromptTemplate
 
@@ -181,7 +177,7 @@ const prompt =  await langfuse.createPrompt({
         required: ["tone", "word_count", "chat_response"],
       }
     }, // optionally, add configs (e.g. model parameters or model tools)
-    isActive: true // directly promote to production
+    labels: ["production"] // directly promote to production
 });
 ```
 

@@ -229,20 +229,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  banner: {
-    key: "launch-week-5",
-    dismissible: false,
-    text: (
-      <Link href="/launch">
-        {/* mobile */}
-        <span className="sm:hidden">Langfuse Launch Week →</span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Langfuse Launch Week, Day 5: Model-based Evaluation →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "launch-week-5",
+  //   dismissible: false,
+  //   text: (
+  //     <Link href="/launch">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">Langfuse Launch Week →</span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         Langfuse Launch Week, Day 5: Model-based Evaluation →
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;
