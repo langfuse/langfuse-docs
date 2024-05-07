@@ -21,6 +21,7 @@ langfuse.score(
     name="quality",
     value=1,
     comment="Factually correct", # optional
+    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
 )
 ```
 
@@ -36,6 +37,7 @@ await langfuse.score({
   name: "quality",
   value: 1,
   comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
 });
 ```
 
