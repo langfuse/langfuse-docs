@@ -158,7 +158,7 @@ conversation.predict(input="Summarize your last response", callbacks=[langfuse_h
 
 ```python
 import os
-os.environ["SERPAPI_API_KEY"] = "5d6cc4242798da588187a95da472c584c82d8675fe6a3ea233233c6b7b0a05f2"
+os.environ["SERPAPI_API_KEY"] = ""
 ```
 
 
