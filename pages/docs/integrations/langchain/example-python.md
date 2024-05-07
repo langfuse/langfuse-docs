@@ -47,39 +47,6 @@ langfuse_handler.auth_check()
 
 ## Examples
 
-### Sequential Chain
-
-![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
-
-
-```python
-# further imports
-from langchain_openai import OpenAI
-from langchain.chains import LLMChain, SimpleSequentialChain
-from langchain.prompts import PromptTemplate
-
-llm = OpenAI()
-template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
-    Title: {title}
-    Playwright: This is a synopsis for the above play:"""
-prompt_template = PromptTemplate(input_variables=["title"], template=template)
-synopsis_chain = LLMChain(llm=llm, prompt=prompt_template)
-template = """You are a play critic from the New York Times. Given the synopsis of play, it is your job to write a review for that play.
-    Play Synopsis:
-    {synopsis}
-    Review from a New York Times play critic of the above play:"""
-prompt_template = PromptTemplate(input_variables=["synopsis"], template=template)
-review_chain = LLMChain(llm=llm, prompt=prompt_template)
-overall_chain = SimpleSequentialChain(
-    chains=[synopsis_chain, review_chain],
-)
-
-# invoke
-review = overall_chain.invoke("Tragedy at sunset on the beach", {"callbacks":[langfuse_handler]}) # add the handler to the run method
-# run
-review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler]) # add the handler to the run method
-```
-
 ### Sequential Chain in Langchain Expression Language (LCEL)
 
 ![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
@@ -107,6 +74,39 @@ chain2 = (
 )
 
 chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[langfuse_handler]})
+```
+
+#### Runnable methods
+
+Runnables are units of work that can be invoked, batched, streamed, transformed and composed.
+
+The examples below show how to use the following methods with Langfuse:
+
+- invoke/ainvoke: Transforms a single input into an output.
+
+- batch/abatch: Efficiently transforms multiple inputs into outputs.
+
+- stream/astream: Streams output from a single input as it’s produced.
+
+
+```python
+# Async Invoke
+await chain2.ainvoke({"person": "biden", "language": "german"}, config={"callbacks":[langfuse_handler]})
+
+# Batch
+chain2.batch([{"person": "elon musk", "language": "english"}, {"person": "mark zuckerberg", "language": "english"}], config={"callbacks":[langfuse_handler]})
+
+# Async Batch
+await chain2.abatch([{"person": "jeff bezos", "language": "english"}, {"person": "tim cook", "language": "english"}], config={"callbacks":[langfuse_handler]})
+
+# Stream
+for chunk in chain2.stream({"person": "steve jobs", "language": "english"}, config={"callbacks":[langfuse_handler]}):
+    print("Streaming chunk:", chunk)
+
+# Async Stream
+async for chunk in chain2.astream({"person": "bill gates", "language": "english"}, config={"callbacks":[langfuse_handler]}):
+    print("Async Streaming chunk:", chunk)
+
 ```
 
 ### ConversationChain
@@ -158,19 +158,22 @@ conversation.predict(input="Summarize your last response", callbacks=[langfuse_h
 
 ```python
 import os
-os.environ["SERPAPI_API_KEY"] = ""
+os.environ["SERPAPI_API_KEY"] = "5d6cc4242798da588187a95da472c584c82d8675fe6a3ea233233c6b7b0a05f2"
 ```
 
 
 ```python
-%pip install unstructured chromadb tiktoken google-search-results python-magic langchainhub --upgrade
+%pip install unstructured selenium langchain-chroma --upgrade
 ```
 
 
 ```python
-from langchain.document_loaders import UnstructuredURLLoader
-from langchain.vectorstores import Chroma
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.document_loaders import SeleniumURLLoader
+from langchain_chroma import Chroma
+from langchain_community.embeddings.sentence_transformer import (
+    SentenceTransformerEmbeddings,
+)
+from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
@@ -179,7 +182,7 @@ langfuse_handler = CallbackHandler()
 urls = [
     "https://raw.githubusercontent.com/langfuse/langfuse-docs/main/public/state_of_the_union.txt",
 ]
-loader = UnstructuredURLLoader(urls=urls)
+loader = SeleniumURLLoader(urls=urls)
 llm = OpenAI()
 documents = loader.load()
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -239,6 +242,39 @@ model = AzureChatOpenAI(
 chain = prompt | model
 
 chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]})
+```
+
+### Sequential Chain [Legacy]
+
+![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
+
+
+```python
+# further imports
+from langchain_openai import OpenAI
+from langchain.chains import LLMChain, SimpleSequentialChain
+from langchain.prompts import PromptTemplate
+
+llm = OpenAI()
+template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
+    Title: {title}
+    Playwright: This is a synopsis for the above play:"""
+prompt_template = PromptTemplate(input_variables=["title"], template=template)
+synopsis_chain = LLMChain(llm=llm, prompt=prompt_template)
+template = """You are a play critic from the New York Times. Given the synopsis of play, it is your job to write a review for that play.
+    Play Synopsis:
+    {synopsis}
+    Review from a New York Times play critic of the above play:"""
+prompt_template = PromptTemplate(input_variables=["synopsis"], template=template)
+review_chain = LLMChain(llm=llm, prompt=prompt_template)
+overall_chain = SimpleSequentialChain(
+    chains=[synopsis_chain, review_chain],
+)
+
+# invoke
+review = overall_chain.invoke("Tragedy at sunset on the beach", {"callbacks":[langfuse_handler]}) # add the handler to the run method
+# run [LEGACY]
+review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler])# add the handler to the run method
 ```
 
 ## Adding scores to traces
