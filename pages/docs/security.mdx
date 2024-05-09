@@ -33,7 +33,7 @@ Exposing PII to LLMs can pose serious security and privacy risks, such as violat
 
 The example below shows a simple application that summarizes a given court transcript. For privacy reasons, the application wants to anonymize PII before the information is fed into the model, and then un-redact the response to produce a coherent summary.
 
-To read more about other security risks, including prompt injection, banned topics, or malicious URLs, please visit the LLM Guard [documentation](https://llm-guard.com/).
+To read more about other security risks, including prompt injection, banned topics, or malicious URLs, please visit the LLM Guard [documentation](https://llm-guard.com/) or check out or Security cookbook.
 
 ### Installation & Setup
 
@@ -112,7 +112,6 @@ main()
   Read more about model-based evaluations and how to get started with them here: https://langfuse.com/docs/scores/model-based-evals
 </Callout>
 
-
 Tools like LLM Guard help to scan prompts before they get sent to the model. You can then use Langfuse to provide another layer of security after the fact by evaluating the completed responses. Langfuse's [model-based evaluations](https://langfuse.com/docs/scores/model-based-evals) will run asynchronously and scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup.
 
 Integrating Langfuse into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues.
@@ -120,5 +119,3 @@ Integrating Langfuse into your team's workflow can help teams identify which sec
 #### Track Latency and Accuracy
 
 Another way is to monitor the latency and accuracy of security tools. Langfuse allows users to see how much time each step the security process takes. Another way Langfuse can be used is allowing users to monitor the risk scores returned by certain scanners and using that information to calibrate the sensitivity of their models and fine-tune their models to protect against known security risks.
-
-INSERT IMAGE OR VIDEO HERE

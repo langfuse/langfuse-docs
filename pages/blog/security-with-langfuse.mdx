@@ -1,0 +1,116 @@
+---
+title: Security Tools with Langfuse
+date: 
+description: Survey of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate security risks.
+ogImage: 
+tag: integration
+author: 
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Security in Langfuse"
+  description="How to use Langfuse to trace, prevent, and evaluate common security risks common to LLM-based applications."
+  date=""
+  authors={[]}
+/>
+
+Protecting against security risks and attacks is becoming increasingly important for LLM-based applications. Not only do LLM applications need to be secure to protect users' private and sensitive information, they also need ensure a certain level of quality and safety of their models' responses to maintain the quality of their product.
+
+The [OWASP Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) list identifies a consensus of the most critical security risks for LLM applications, 
+
+This post offers an overview of how you can use security tools in conjunction with Langfuse to monitor and protect against common security risks.
+
+## Introduction
+
+In this video, we walk through an example of how to use the open-source security library LLM Guard, and how to integrate Langfuse to monitor the security process.
+
+<!-- 
+<CloudflareVideo
+  videoId="8a1f9282ef64c2bd0d932c92d6185668"
+  aspectRatio={16 / 9.37}
+  title="Decorator Integration"
+/> -->
+
+WILL ATTACH VIDEO LATER
+
+## How Does Langfuse Help?
+
+Langfuse can be integrated at several points of your workflow. Here are some ways Langfuse can help monitor and identify security risks:
+
+- **Latency**: Track the latency for each step of the security screening.
+- **Evaluate and compare security tools**:
+    - `langfuse_context.score_current_observation` can be used to track scores (for things like violence, relevance, appropriateness) and see analytics on the dashboard
+    - Track prompts and completions
+    - Most commonly flagged topics
+- **Flag potentially malicious or sensitive prompts**
+- **Model-based evaluations**: Evaluate the completed responses. Langfuse's [model-based evaluations](https://langfuse.com/docs/scores/model-based-evals) will run asynchronously and scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup.
+
+The following code snippet shows how to use LLM Guard, an open-source security tool, with Langfuse decorators to observe the trace.
+
+```python
+from llm_guard.input_scanners import Anonymize
+from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
+from langfuse.openai import openai # OpenAI integration
+from langfuse.decorators import observe, langfuse_context
+from llm_guard.output_scanners import Deanonymize
+
+prompt = """
+Plaintiff, Jane Doe, by and through her attorneys, files this complaint 
+against Defendant, Big Corporation, and alleges upon information and belief, 
+except for those allegations pertaining to personal knowledge, that on or about 
+July 15, 2023, at the Defendant's manufacturing facility located at 123 Industrial Way, Springfield, Illinois, Defendant negligently failed to maintain safe working conditions, 
+leading to Plaintiff suffering severe and permanent injuries. As a direct and proximate 
+result of Defendant's negligence, Plaintiff has endured significant physical pain, emotional distress, and financial hardship due to medical expenses and loss of income. Plaintiff seeks compensatory damages, punitive damages, and any other relief the Court deems just and proper.
+"""
+
+@observe()
+def anonymize(input: str):
+  scanner = Anonymize(vault, preamble="Insert before prompt", allowed_names=["John Doe"], hidden_names=["Test LLC"],
+                    recognizer_conf=BERT_LARGE_NER_CONF, language="en")
+  sanitized_prompt, is_valid, risk_score = scanner.scan(prompt)
+  return sanitized_prompt
+
+@observe()
+def deanonymize(sanitized_prompt: str, answer: str):
+  scanner = Deanonymize(vault)
+  sanitized_model_output, is_valid, risk_score = scanner.scan(sanitized_prompt, answer)
+
+  return sanitized_model_output
+
+@observe()
+def summarize_transcript(prompt: str):
+  sanitized_prompt = anonymize(prompt)
+
+  answer = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        max_tokens=100,
+        messages=[
+          {"role": "system", "content": "Summarize the given court transcript."},
+          {"role": "user", "content": sanitized_prompt}
+        ],
+    ).choices[0].message.content
+
+  sanitized_model_output = deanonymize(sanitized_prompt, answer)
+
+  return sanitized_model_output
+
+@observe()
+def main():
+    return summarize_transcript(prompt)
+
+main()
+```
+
+<Callout type="info">
+  Want to see more security issues and how to address them? Run our [cookbook]().
+</Callout>
+
+## About Langfuse
+
+Langfuse is the go-to open source LLM engineering platform. It is used by teams to track and analyze their LLM app in production with regards to quality, cost, and latency across product releases and use cases.
+
+## Questions / Feedback?
+
+Langfuse is committed to being an open-source project. We welcome any feedback or questions on [GitHub Discussions](https://langfuse.com/ideas) or [Discord](https://discord.com/invite/7NXusRtqYU)!
