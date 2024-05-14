@@ -173,6 +173,25 @@ This will result in a trace with only sanitized input and output, and no actual 
 
 Use the `langfuse_context` object to interact with the decorator context. This object is a thread-local singleton and can be accessed from anywhere within the function context.
 
+### Configure the Langfuse client
+
+The decorator manages the Langfuse client for you. If you need to configure the client, you can do so via the `langfuse_context.configure` method **at the top of your application** before executing any decorated functions.
+
+```python /langfuse_context.configure/
+from langfuse.decorators import langfuse_context
+
+# Configure the Langfuse client
+langfuse_context.configure(
+    httpx_client=custom_httpx_client,
+    host=custom_host,
+    enabled=True,
+)
+```
+
+By setting the `enabled` parameter to `False`, you can disable the decorator and prevent any traces from being sent to Langfuse. 
+
+See the [API Reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.configure) for more details on the available parameters.
+
 ### Add additional attributes to the trace and observations [#additional-attributes]
 
 In addition to the attributes automatically captured by the decorator, you can add others to use the full features of Langfuse.
