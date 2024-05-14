@@ -6,17 +6,32 @@ description: Survey of common security problems facing LLM-based applications an
 
 There are a host of potential security risks involved with LLM-based applications, such as prompt injection, leakage of personally identifiable information (PII), or harmful prompts. Langfuse can be used to monitor and protect against these security risks.
 
+Langfuse's features, especially [traces](https://langfuse.com/docs/tracing) and [model-based evaluations](https://langfuse.com/docs/scores/overview), can be used in tandem with security tools. Langfuse can be used to:
+
+- Trace security tools to debug and observe whether they work as expected
+- Track and analyze security metrics such as risk scores
+- Is fully async, meaning it does not interrupt program execution
+
 In the example below we use the open source library [LLM Guard](https://llm-guard.com/), but there are other open-source and/or paid security tools available, such as Prompt Armor, Nemo Guardrails, Microsoft Azure Responsible AI, and Lakera Guard.
 
 ## Overview
 
-Short video here?
+Short video here. Here's the rough outline of what I was going to say:
+- Overview of what this doc is: a guide to how to think about security measures and how to integrate Langfuse
+- What it is not: a comprehensive security tooling kit, exhaustive, nor a new feature
+- Walk through an example: anonymize and deanonymize
+  - then walk through langfuse UI to see how you can observe latency, accuracy, inputs/outputs, risk scores
+  - then can show how to do model-based evaluation to provide another layer of security
 
 ## How Can Langfuse Help Mitigate Security Risks?
+
+Security tools like LLM Guard can help with security measures in the following ways:
 
 1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
 2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
 3. Evaluating prompts and completions in Langfuse based on qualities like toxicity, relevance, or sensitive material.
+
+Langfuse can be used to trace each step of the security screening, recording metrics such as latency, accuracy, risk scores, and more. Traces can be monitored to ensure security tools are working as expected, and can also be used to benchmark different libraries against each other.
 
 ## Example: Personally Identifiable Information
 
@@ -33,7 +48,7 @@ Exposing PII to LLMs can pose serious security and privacy risks, such as violat
 
 The example below shows a simple application that summarizes a given court transcript. For privacy reasons, the application wants to anonymize PII before the information is fed into the model, and then un-redact the response to produce a coherent summary.
 
-To read more about other security risks, including prompt injection, banned topics, or malicious URLs, please visit the LLM Guard [documentation](https://llm-guard.com/) or check out or Security cookbook.
+To read more about other security risks, including prompt injection, banned topics, or malicious URLs, please visit the LLM Guard [documentation](https://llm-guard.com/) or check out or Security [cookbook](/cookbook/security.ipynb).
 
 ### Installation & Setup
 
