@@ -153,7 +153,7 @@ const menuItems: {
       { name: "Imprint", href: "/imprint" },
       {
         name: "Terms",
-        href: "/tos",
+        href: "/terms",
       },
       {
         name: "Privacy",
@@ -189,7 +189,7 @@ const FooterMenu = () => {
         <div />
       </div>
       <div className="my-8 font-mono text-sm">
-        © 2022-{new Date().getFullYear()} Finto Technologies
+        © 2022-{new Date().getFullYear()} Langfuse GmbH
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ We add the prompt used in this example via the SDK. Alternatively, you can also 
 - `Name` that identifies the prompt in Langfuse Prompt Management
 - Prompt with `json_schema` variable
 - Config including `model_name`, `temperature`, and `json_schema`
-- `is_active` to immediately use prompt
+- `labels` to include `production` to immediately use the prompt as the default
 
 
 ```python
@@ -69,7 +69,7 @@ langfuse.create_prompt(
             "critic_score": "number (between 0 bad and 10 exceptional)"
         }
     },
-    is_active=True
+    labels=["production"]
 );
 ```
 
@@ -102,24 +102,20 @@ prompt.compile(json_schema="TEST SCHEMA")
 
 And it includes the config object
 
-
 ```python
 prompt.config
 ```
 
-
-
-
-    {'model': 'gpt-3.5-turbo-1106',
-     'json_schema': {'genre': 'string (genre of story)',
-      'keywords': 'array of strings',
-      'key_content': 'string (1 sentence)',
-      'critic_score': 'number (between 0 bad and 10 exceptional)',
-      'main_character': 'string (name of protagonist)',
-      'critic_review_comment': 'string (write similar to a new york times critic)'},
-     'temperature': 0}
-
-
+```
+{'model': 'gpt-3.5-turbo-1106',
+ 'json_schema': {'genre': 'string (genre of story)',
+  'keywords': 'array of strings',
+  'key_content': 'string (1 sentence)',
+  'critic_score': 'number (between 0 bad and 10 exceptional)',
+  'main_character': 'string (name of protagonist)',
+  'critic_review_comment': 'string (write similar to a new york times critic)'},
+ 'temperature': 0}
+ ```
 
 ### Create example function
 
@@ -183,25 +179,22 @@ As she carried on with her mysterious deed, she found an unanticipated reward. J
 
 
 ```python
-summarize_story(STORY)
+summary = summarize_story(STORY)
 ```
 
-
-
-
-    {'genre': 'Fantasy',
-     'keywords': ['lonely cat',
-      'invisible',
-      'benevolent spirit',
-      'unsung hero',
-      'mysterious deed',
-      'true happiness'],
-     'key_content': 'In a bustling city, a lonely cat named Whisper discovers an abandoned hat with the power to make her invisible, leading her to become a benevolent spirit and unsung hero to the less fortunate.',
-     'critic_score': 9,
-     'main_character': 'Whisper',
-     'critic_review_comment': "Whisper's journey from loneliness to self-discovery through acts of kindness is a heartwarming and enchanting tale that captivates the reader with its magical elements and profound message about true happiness."}
-
-
+```
+{'genre': 'Fantasy',
+ 'keywords': ['lonely cat',
+  'invisible',
+  'benevolent spirit',
+  'unsung hero',
+  'mysterious deed',
+  'true happiness'],
+ 'key_content': 'In a bustling city, a lonely cat named Whisper discovers an abandoned hat with the power to make her invisible, leading her to become a benevolent spirit and unsung hero to the less fortunate.',
+ 'critic_score': 9,
+ 'main_character': 'Whisper',
+ 'critic_review_comment': "Whisper's journey from loneliness to self-discovery through acts of kindness is a heartwarming and enchanting tale that captivates the reader with its magical elements and profound message about true happiness."}
+ ```
 
 ## View trace in Langfuse
 

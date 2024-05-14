@@ -139,6 +139,8 @@ By default, the `@observe()` decorator captures the input arguments and output r
 
 **You can disable this** behavior by setting the `capture_input` and `capture_output` parameters to `False`.
 
+The decorator implementation supports capturing any serializable object as input and output such as strings, numbers, lists, dictionaries, and more. Python `generators` which are common when streaming LLM responses are supported as return values from decorated functions, but not as input arguments.
+
 ```python /capture_input=False/ /capture_output=False/
 from langfuse.decorators import observe
 
@@ -466,10 +468,55 @@ Use `langfuse_context.auth_check()` to verify that your host and API credentials
 
 ## Limitations
 
-Known limitations:
+### Using ThreadPoolExecutors or ProcessPoolExecutors
 
-- When run in `ThreadPoolExecutor`, separate traces for each thread are created.
-- Large input/output data can lead to performance issues. We recommend disabling capturing input/output for these methods and manually add the relevant information via `langfuse_context.update_current_observation`.
+The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors *and* when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation. 
+
+For example when a @observe-decorated function uses a ThreadPoolExecutor to make concurrent LLM requests the context that holds important info on the nesting hierarchy ("we are inside another trace") is not copied over correctly to the child threads. So the created generations will not be linked to the trace and be 'orphaned'. In the UI, you will see a trace missing those generations.
+
+A workaround is to manually copy over the context to the new threads or processes. This is the recommmended approach when using ThreadPoolExecutors or ProcessPoolExecutors directly:
+
+```python
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextvars import copy_context
+
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def execute_task(*args):
+    return args
+
+task_args = [["a", "b"], ["c", "d"]]
+
+@observe()
+def execute_groups(task_args):
+    with ThreadPoolExecutor(3) as executor:
+        futures = []
+
+        for task_arg in task_args:
+            ctx = copy_context()
+            task = lambda p=task_arg: ctx.run(execute_task, *p)
+
+            futures.append(executor.submit(task))
+
+        for future in as_completed(futures):
+            future.result()
+
+    return [f.result() for f in futures]
+
+execute_groups(task_args)
+
+langfuse_context.flush()
+```
+
+The executions inside the ThreadPoolExecutor will now be correctly associated with the trace opened by the `execute_groups` function.
+
+<Callout type="info">
+When spawning threads manually with `threading.Thread` rather than via `ThreadPoolExecutor`, contextvars are copied over correctly as no executor is used. The decorator works as intended in this case.
+</Callout>
+
+### Large input/output data
+Large input/output data can lead to performance issues. We recommend disabling capturing input/output for these methods and manually add the relevant information via `langfuse_context.update_current_observation`.
 
 ## API reference
 

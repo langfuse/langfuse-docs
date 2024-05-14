@@ -182,6 +182,26 @@ If you exit the application, use `shutdownAsync` method to make sure all request
 await langfuse.shutdownAsync();
 ```
 
+**If you run on Vercel**, the [`waitUntil()`](https://vercel.com/docs/functions/functions-api-reference#waituntil) method enqueues an asynchronous task to be performed during the lifecycle of the request. It doesn't block the response, but should complete before shutting down the function. Thereby, it ensures that all events are flushed before the function exits without delaying the response.
+
+```sh
+npm i @vercel/functions
+```
+
+```javascript
+import { waitUntil } from "@vercel/functions";
+
+export async function POST(req, res) {
+  // your code involving langfuse
+
+  // Flush events to Langfuse without blocking the response
+  waitUntil(langfuse.flushAsync());
+
+  // Send response to client
+  return res.status(200).send("OK");
+}
+```
+
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}

@@ -133,7 +133,7 @@ When running an experiment on a dataset, the application that shall be tested is
 
 Optionally, the output of the application can be evaluated to compare different runs more easily. Use any evaluation function and add a score to the observation. More details on scores/evals [here](/docs/scores/overview).
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)"]}>
+<Tabs items={["Python", "JS/TS", "Langchain (Python)", "LlamaIndex (Python)"]}>
 <Tab>
 
 ```python
@@ -207,6 +207,27 @@ for item in dataset.items:
 
     # Execute application and pass custom handler
     my_langchain_chain.run(item.input, callbacks=[handler])
+```
+
+</Tab>
+<Tab>
+
+```python
+from llama_index.core.callbacks import CallbackManager
+from llama_index.core import Settings
+
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # LlamaIndex callback handler that automatically links the execution trace to the dataset item
+    handler = item.get_llama_index_handler(run_name="<run_name>")
+
+    # Update the global LlamaIndex callback manager
+    Settings.callback_manager = CallbackManager([handler])
+
+    # Run your LlamaIndex application on the input
+    index = VectorStoreIndex.from_documents([doc1,doc2])
+    response = index.as_query_engine().query(item.input)
 ```
 
 </Tab>
