@@ -4,13 +4,14 @@ description: Survey of common security problems facing LLM-based applications an
 
 # Security with Langfuse
 
-There are a host of potential security risks involved with LLM-based applications, such as prompt injection, leakage of personally identifiable information (PII), or harmful prompts. Langfuse can be used to monitor and protect against these security risks.
+There are a host of potential security risks involved with LLM-based applications. These include prompt injection, leakage of personally identifiable information (PII), or harmful prompts. Langfuse can be used to monitor and protect against these security risks.
 
 Langfuse's features, especially [traces](https://langfuse.com/docs/tracing) and [model-based evaluations](https://langfuse.com/docs/scores/overview), can be used in tandem with security tools. Langfuse can be used to:
 
-- Trace security tools to debug and observe whether they work as expected
-- Track and analyze security metrics such as risk scores
-- Is fully async, meaning it does not interrupt program execution
+- Integrate with Security Libraries (e.g. Prompt Guard, Nemo Guardrails, Prompt Armour, Lakera Guard)
+- Trace these security tools to observe and debug whether they work as expected
+- Track and analyze risk scores
+- Do all of this fully async, meaning it does not interrupt program execution
 
 In the example below we use the open source library [LLM Guard](https://llm-guard.com/), but there are other open-source and/or paid security tools available, such as Prompt Armor, Nemo Guardrails, Microsoft Azure Responsible AI, and Lakera Guard.
 
@@ -133,4 +134,4 @@ Integrating Langfuse into your team's workflow can help teams identify which sec
 
 #### Track Latency and Accuracy
 
-Another way is to monitor the latency and accuracy of security tools. Langfuse allows users to see how much time each step the security process takes. Another way Langfuse can be used is allowing users to monitor the risk scores returned by certain scanners and using that information to calibrate the sensitivity of their models and fine-tune their models to protect against known security risks.
+Another benefit of Langfuse is monitoring the latency and accuracy of security tools. Langfuse allows users to see how much time (and also cost) each step the security process takes. Another way Langfuse can be used is allowing users to monitor the risk scores returned by certain scanners and using that information to calibrate the sensitivity of their models and fine-tune their models to protect against known security risks.

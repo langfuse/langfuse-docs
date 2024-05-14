@@ -1,51 +1,53 @@
 ---
-title: Security Tools with Langfuse
-date: 
+title: LLM Security in Langfuse
+date: 2024/05/14
 description: Survey of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate security risks.
 ogImage: 
 tag: integration
-author: 
+author: Lydia You
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Security in Langfuse"
-  description="How to use Langfuse to trace, prevent, and evaluate common security risks common to LLM-based applications."
-  date=""
-  authors={[]}
+  title="Using LLM Security packages in Langfuse"
+  description="How to use Langfuse to trace, prevent, and evaluate risks common to LLM-based applications."
+  date="2024/05/14"
+  authors={["lydiayou"]}
 />
 
-Protecting against security risks and attacks is becoming increasingly important for LLM-based applications. Not only do LLM applications need to be secure to protect users' private and sensitive information, they also need ensure a certain level of quality and safety of their models' responses to maintain the quality of their product.
+Protecting against security risks and attacks is becoming increasingly important for productionizing LLM apps. Not only do LLM applications need to be secure to protect users' private and sensitive information, they also need ensure a level of quality and safety of responses to maintain product standards. 
 
-The [OWASP Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) list identifies a consensus of the most critical security risks for LLM applications, 
-
-This post offers an overview of how you can use security tools in conjunction with Langfuse to monitor and protect against common security risks.
+This post offers an overview of how you can use security tools in conjunction with Langfuse to monitor and protect against common security risks. The [OWASP Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) list is a useful resource on the topic. It provides a consensus of the most critical security risks for LLM applications. 
 
 ## Introduction
 
-In this video, we walk through an example of how to use the open-source security library LLM Guard, and how to integrate Langfuse to monitor the security process.
+In the video below, we walk through an example of how to use the open-source security library LLM Guard, and how to integrate Langfuse to monitor and protect against common security risks.
 
-<!-- 
+{/* 
 <CloudflareVideo
   videoId="8a1f9282ef64c2bd0d932c92d6185668"
   aspectRatio={16 / 9.37}
   title="Decorator Integration"
-/> -->
+/> */}
 
 WILL ATTACH VIDEO LATER
 
 ## How Does Langfuse Help?
 
-Langfuse can be integrated at several points of your workflow. Here are some ways Langfuse can help monitor and identify security risks:
+Langfuse can be used to prevent, identify and mitigate security risks to your application. You can include measures at several points of your workflow:
 
-- **Latency**: Track the latency for each step of the security screening.
-- **Evaluate and compare security tools**:
-    - `langfuse_context.score_current_observation` can be used to track scores (for things like violence, relevance, appropriateness) and see analytics on the dashboard
-    - Track prompts and completions
-    - Most commonly flagged topics
-- **Flag potentially malicious or sensitive prompts**
-- **Model-based evaluations**: Evaluate the completed responses. Langfuse's [model-based evaluations](https://langfuse.com/docs/scores/model-based-evals) will run asynchronously and scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup.
+
+- **Controlling LLM interactions**
+  - **Input Controls** Flag potentially malicious or sensitive prompts and completion and decide whether to send them to the model
+  - **Output Controls**: Evaluate model ouputs for risks before returning them to your users. Sanitize outputs and prevent data leakage.
+  - **Security Libraries**: You can integrate Langfuse with most popular libraries such as LLM Guard, Nemo Guardrails or Prompt Armour. 
+- **Post-Ingestion - Evaluate residual risks**
+  - You can use Langfuse's native functionality to scan your logs for residual risks and devise strategies to mitigate them
+  - **Model-based evaluations**: Evaluate completed responses. Langfuse's [model-based evaluations](https://langfuse.com/docs/scores/model-based-evals) will run asynchronously on incoming traces and can scan and score for attributes such as toxicity or politeness. 
+  - **Review and Mitigate**: Become aware of potential risks and mitigate through reviewing and iterating on your application to mitigate security risks
+- **Balancing trade-offs**
+  - **Latency**: Track how much latency is added to your traces through adding security steps.
 
 The following code snippet shows how to use LLM Guard, an open-source security tool, with Langfuse decorators to observe the trace.
 
@@ -107,10 +109,13 @@ main()
   Want to see more security issues and how to address them? Run our [cookbook]().
 </Callout>
 
+
+Link Out To Cookbook here
+
 ## About Langfuse
 
-Langfuse is the go-to open source LLM engineering platform. It is used by teams to track and analyze their LLM app in production with regards to quality, cost, and latency across product releases and use cases.
+Langfuse is the open source LLM engineering platform. It is used by teams to track and analyze their LLM app in production with regards to quality, cost, and latency across product releases and use cases.
 
 ## Questions / Feedback?
 
-Langfuse is committed to being an open-source project. We welcome any feedback or questions on [GitHub Discussions](https://langfuse.com/ideas) or [Discord](https://discord.com/invite/7NXusRtqYU)!
+Langfuse is committed to being an open-source project. We welcome any feedback or questions on [GitHub Discussions](https://langfuse.com/ideas).
