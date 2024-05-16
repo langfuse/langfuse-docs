@@ -1,0 +1,114 @@
+---
+description: Open source observability for Mirascope applications. Automatically capture detailed traces of how users interact with your application.
+---
+
+# Mirascope Integration
+
+**Mirascope** ([GitHub](https://github.com/mirascope/mirascope)) is a Python toolkit for building LLM applications.
+
+> Developing LLM-applications with Mirascope feels just like writing the Python code you’re already used to.
+> Python Toolkit for LLMs: Mirascope simplifies the development of applications using Large Language Models (LLMs) by providing an intuitive interface similar to standard Python coding practices.
+
+## How to use Mirascope with Langfuse
+
+```python
+from mirascope.langfuse import with_langfuse
+```
+
+Mirascope automatically passes the Langfuse [`observe()` decorator](/docs/sdk/python/decorators) to all relevant functions within Mirascope via its `with_langfuse` decorator.
+
+## Example
+
+### Call
+
+This is a basic call example but will work with all of Mirascope's call functions, `call`, `stream`, `call_async`, `stream_async`.
+
+```python /@with_langfuse/ /from mirascope.langfuse import with_langfuse/
+import os
+from mirascope.langfuse import with_langfuse
+from mirascope.anthropic import AnthropicCall
+
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+
+
+@with_langfuse
+class BookRecommender(AnthropicCall):
+    prompt_template = "Please recommend some {genre} books"
+
+    genre: str
+
+
+recommender = BookRecommender(genre="fantasy")
+response = recommender.call()  # this will automatically get logged with langfuse
+print(response.content)
+#> Here are some recommendations for great fantasy book series: ...
+```
+
+This will give you:
+
+- A trace around the AnthropicCall.call() that captures items like the prompt template, and input/output attributes and more.
+- Human-readable display of the conversation with the agent
+- Details of the response, including the number of tokens used
+
+<Frame border fullWidth>
+  ![Mirascope Trace call](/images/docs/miracope-trace-call.png)
+</Frame>
+
+### Extract
+
+> Mirascope's extraction functionality is built on top of Pydantic and offers a convenient `extract` method on extractor classes to extract structured information from LLM outputs. This method leverages tools (function calling) to reliably extract the required structured data. ([Docs](https://docs.mirascope.io/latest/concepts/extracting_structured_information_using_llms/))
+
+```python /@with_langfuse/ /from mirascope.langfuse import with_langfuse/
+import os
+from mirascope.langfuse import with_langfuse
+from mirascope.openai import OpenAIExtractor
+
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+
+class TaskDetails(BaseModel):
+    description: str
+    due_date: str
+    priority: Literal["low", "normal", "high"]
+
+
+@with_langfuse
+class TaskExtractor(OpenAIExtractor[TaskDetails]):
+    extract_schema: Type[TaskDetails] = TaskDetails
+    prompt_template = """
+    Extract the task details from the following task:
+    {task}
+    """
+
+    task: str
+
+
+task = "Submit quarterly report by next Friday. Task is high priority."
+task_details = TaskExtractor(
+    task=task
+).extract()  # this will be logged automatically with langfuse
+assert isinstance(task_details, TaskDetails)
+print(task_details)
+# > description='Submit quarterly report' due_date='next Friday' priority='high'
+```
+
+This will give you the same view as you would get from using the [OpenAI integration](/docs/integrations/openai). We will be adding more extraction support for other providers soon.
+
+<Frame border fullWidth>
+  ![Mirascope Trace extract](/images/docs/miracope-trace-extract.png)
+</Frame>
+
+## Learn more
+
+import { BookOpen } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Mirascope Docs"
+    href="https://docs.mirascope.io/"
+    icon={<BookOpen />}
+  />
+</Cards>

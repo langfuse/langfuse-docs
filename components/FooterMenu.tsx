@@ -77,6 +77,10 @@ const menuItems: {
         href: "/docs/integrations/instructor",
       },
       {
+        name: "Mirascope",
+        href: "/docs/integrations/mirascope",
+      },
+      {
         name: "API",
         href: "https://api.reference.langfuse.com/",
       },
