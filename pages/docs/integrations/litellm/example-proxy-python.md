@@ -1,5 +1,5 @@
 ---
-description: The stack to use any of 100+ models without having to change your code and with full observability.
+description: The stack to use any of 100+ models in Python without having to change your code and with full observability.
 category: Integrations
 ---
 
@@ -69,7 +69,6 @@ In this example, we'll use GPT-3.5-turbo directly from OpenAI, and llama3 and mi
 The Lite LLM Proxy should be now running on http://0.0.0.0:4000
 
 To verify the connection you can run `litellm --test`
-
 
 ## Log single LLM Call via Langfuse OpenAI Wrapper
 The Langfuse SDK offers a wrapper function around the OpenAI SDK, automatically logging all OpenAI calls as generations to Langfuse.

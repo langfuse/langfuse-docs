@@ -1,4 +1,5 @@
 ---
+title: OSS Observability for Instructor
 description: Open-source observability for Instructor, a popular library to get structured (JSON, Pydantic) LLM outputs.
 category: Integrations
 ---

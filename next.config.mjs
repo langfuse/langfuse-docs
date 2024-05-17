@@ -157,6 +157,8 @@ const nonPermanentRedirects = [
   ["/docs/integrations/openai/get-started", "/docs/integrations/openai/python/get-started"],
   ["/docs/integrations/openai/examples", "/docs/integrations/openai/python/examples"],
   ["/docs/integrations/openai/track-errors", "/docs/integrations/openai/python/track-errors"],
+  ["/docs/integrations/openai/python", "/docs/integrations/openai/python/get-started"],
+  ["/docs/integrations/openai/js", "/docs/integrations/openai/js/get-started"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/integrations/litellm", "/docs/integrations/litellm/tracing"],
