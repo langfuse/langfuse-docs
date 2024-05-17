@@ -12,8 +12,7 @@ export default function Security() {
         title="Enterprise Security"
         description={
           <span>
-            Langfuse is built with security in mind. Langfuse Cloud is compliant
-            with SOC 2 Type II, ISO 27001, and GDPR frameworks.
+            Langfuse is built with security in mind. Langfuse Cloud is SOC 2 Type II and ISO 27001 certified and GDPR compliant.
           </span>
         }
         className="mb-0"
