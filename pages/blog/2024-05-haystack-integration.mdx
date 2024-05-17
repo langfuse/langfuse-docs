@@ -26,6 +26,13 @@ Thanks to the team at deepset for developing the integration. We're excited to s
 
 The `langfuse-haystack` package integrates tracing capabilities into Haystack (2.x) pipelines using Langfuse. You can then add `LangfuseConnector` as a tracer to automatically trace the operations and data flow within the pipeline.
 
+<CloudflareVideo
+  videoId="36a42457d879923f84681f8fe62443e4"
+  aspectRatio={16 / 10.26}
+  title="Haystack Trace"
+  gifStyle
+/>
+
 ## What is Haystack?
 
 [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative (RAG) pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
@@ -98,10 +105,6 @@ basic_rag_pipeline = Pipeline()
     basic_rag_pipeline.add_component("prompt_builder", prompt_builder)
     basic_rag_pipeline.add_component("llm", OpenAIGenerator(model="gpt-3.5-turbo", generation_kwargs={"n": 2}))
 ```
-
-<Frame fullWidth border>
-  ![Trace of Haystack pipeline](/images/docs/haystack-langfuse-1.png)
-</Frame>
 
 For each trace, you can see:
 
