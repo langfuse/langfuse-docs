@@ -77,6 +77,7 @@ Add Langfuse credentials to your code
 ```python
 openai.langfuse_public_key"pk-lf-..."
 openai.langfuse_secret_key="sk-lf-..."
+openai.langfuse_enabled=True # Default is True, set to False to disable Langfuse
 openai.langfuse_host="https://cloud.langfuse.com" # 🇪🇺 EU region
 # openai.langfuse_host="https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
@@ -135,6 +136,9 @@ If you are having issues with the integration, you can enable debug mode to get 
 ```python
 openai.langfuse_debug=True
 ```
+
+### Streaming function / tool calls
+The capture of input and output when streaming function / tool calls is currently not supported. Please upvote this feature request in the [GitHub discussion](https://github.com/orgs/langfuse/discussions/2055) if you would like to see this supported going forward.
 
 ## Advanced usage
 
