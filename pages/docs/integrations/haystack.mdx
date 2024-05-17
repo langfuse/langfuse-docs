@@ -1,22 +1,22 @@
 ---
-description: Open source observability for Superagent. Automatically capture detailed traces and metrics for agent execution.
+description: Langfuse integration to easily observe and monitor pipelines built by Haystack, an open-source Python framework developed by deepset. 
 ---
 
 # 🌾 Haystack <> Langfuse Integration
 
 We're excited to highlight a Langfuse integration with Haystack! This integration allows you to easily trace your Haystack pipelines in the Langfuse UI.
 
+Thanks to the team at deepset for developing the integration. These docs are adapted from their write up, which you can read [here](https://haystack-home-git-tt-2024-may-langfuse-deepset-overnice.vercel.app/blog/langfuse-integration).
+
 ## What is Haystack?
 
 [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
-
-Big thanks to the team at deepset for developing the integration. You can read their write up [here](https://haystack.deepset.ai/blog/langfuse-integration).
 
 ## How Can Langfuse Help?
 
 The `langfuse-haystack` package integrates tracing capabilities into Haystack (2.x) pipelines using Langfuse.
 
-[Langfuse](https://langfuse.com) is helpful in the following ways:
+[Langfuse](https://langfuse.com) is helpful for Haystack pipelines in the following ways:
 
 - Capture comprehensive details of the execution trace in a beautiful UI dashboard
   - Latency
@@ -26,9 +26,7 @@ The `langfuse-haystack` package integrates tracing capabilities into Haystack (2
 - Capture the full context of the execution
 - Building fine-tuning and testing datasets
 
-Langfuse integration with a tool like Haystack can help monitor model performance, can assist with pinpointing areas for improvement, or creating datasets for fine-tuning and testing from your pipeline executions.
-
-This cookbook walks through building a simple RAG pipeline using Haystack and how to observe the trace in Langfuse.
+Langfuse integration with a tool like Haystack can help monitor model performance, can assist with pinpointing areas for improvement, or create datasets from your pipeline executions for fine-tuning and testing.
 
 ## Installation and Setup
 
@@ -38,7 +36,7 @@ Install the necessary packages:
 pip install langfuse-haystack langfuse
 ```
 
-And then some more dependencies to parse data for a RAG pipeline:
+And then some dependencies to parse data for a RAG pipeline. Read more about how Haystack approaches parsing and storing data for retrieval [here](https://docs.haystack.deepset.ai/docs/components_overview).
 
 ```shell
 pip install sentence-transformers datasets mwparserfromhell
@@ -46,11 +44,30 @@ pip install sentence-transformers datasets mwparserfromhell
 
 Then set the environment variables. You can find your Langfuse public and private API keys in the dashboard. Make sure to set `HAYSTACK_CONTENT_TRACING_ENABLED` to `true`.
 
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["HAYSTACK_CONTENT_TRACING_ENABLED"] = "True"
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
 ## Langfuse Integration with Basic RAG Pipeline
 
 You can build a basic RAG pipeline very (based off of the Haystack [documentation](https://docs.haystack.deepset.ai/docs/get_started)) walks through building a basic retrieval-augmented generative (RAG) pipeline. First you'll load your data to the Document Store, then connect components together into a RAG pipeline, and finally ask a question.
 
 First we build the pipeline. Add `LangfuseConnector` to the pipeline as a tracer. There's no need to connect it to any other component. The `LangfuseConnector` will automatically trace the operations and data flow within the pipeline. Then add the other components, like the text embedder, retriever, prompt builder and the model, and connect them together in the order they will be used in the pipeline.
+
+<Steps>
+
+### Import packages
 
 ```python
 from datasets import load_dataset
@@ -61,6 +78,13 @@ from haystack.components.generators import OpenAIGenerator
 from haystack.components.retrievers import InMemoryEmbeddingRetriever
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack_integrations.components.connectors.langfuse import LangfuseConnector
+```
+
+### Create the pipeline with necessary components
+
+Add `LangfuseConnector` to the pipeline as a tracer. There's no need to connect it to any other component. Add the other components, like the text embedder, retriever, prompt builder and the model, and connect them together in the order they will be used in the pipeline.
+
+```python
 def get_pipeline(document_store: InMemoryDocumentStore):
     retriever = InMemoryEmbeddingRetriever(document_store=document_store, top_k=2)
 
@@ -94,7 +118,10 @@ def get_pipeline(document_store: InMemoryDocumentStore):
     basic_rag_pipeline.connect("prompt_builder", "llm")
 
     return basic_rag_pipeline
-  
+```
+
+### Load data
+
 Then we load data into DocumentStore. In this example, we use the `trivia_qa_tiny` [dataset](https://huggingface.co/datasets/SpeedOfMagic/trivia_qa_tiny?row=26).
 
 ```python
@@ -118,7 +145,13 @@ for entry in dataset:
 
 # Write the embedded documents to the document store
 document_store.write_documents(docs_with_embeddings)
-Then ask a question based on the data we loaded in.
+```
+
+### Run the pipeline
+
+Now you can ask a question and you will get a response informed by the data we loaded into the pipeline.
+
+```python
 pipeline = get_pipeline(document_store)
 question = "What can you tell me about Truman Capote?"
 response = pipeline.run({"text_embedder": {"text": question}, "prompt_builder": {"question": question}})
@@ -139,6 +172,8 @@ Head over to the Langfuse dashboard to see the trace at this URL: https://cloud.
 
 ![Trace of Haystack pipeline](/public/images/docs/haystack-langfuse-1.png)
 
+</Steps>
+
 For each trace, you can see:
 
 - Latency for each component of the pipeline
@@ -156,7 +191,7 @@ You can score traces using a number of methods:
 - Through user feedback
 - Model-based evaluation
 - Through SDK/API
-- Manually, in the Langfuise UI
+- Manually, in the Langfuse UI
 
 Read more about how to score [here](https://langfuse.com/docs/scores/overview).
 
@@ -181,7 +216,6 @@ langfuse.score(
 ```
 
 See the trace with the score added: https://cloud.langfuse.com/project/clvh71wlt0000wpuqhferayy5/traces/345f3776-76e0-4053-95c9-d4e865302ff1
-
 
 ## Acknowledgement
 
