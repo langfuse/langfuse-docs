@@ -104,7 +104,7 @@ Public trace links for the following examples:
 
 ## Trace nested LLM Calls using Langfuse JS SDK
 
-To capture nested LLM calls, use `langfuse.trace` to create a parent trace and pass it to `observeOpenAI`. This allows you to group multiple generations into a single trace, providing a comprehensive view of the interactions. You can also add rich metadata to the trace, such as custom names, tags, and userid. For more details, refer to the [Langfuse JS/TS SDK documentation](https://langfuse.com/docs/sdk/js/traces).
+To capture nested LLM calls, use `langfuse.trace` to create a parent trace and pass it to `observeOpenAI`. This allows you to group multiple generations into a single trace, providing a comprehensive view of the interactions. You can also add rich metadata to the trace, such as custom names, tags, and userid. For more details, refer to the [Langfuse JS/TS SDK documentation](https://langfuse.com/docs/sdk/typescript/guide).
 
 We'll use the trace to log a rap battle between GPT-3.5-turbo, llama3, and mistral.
 
