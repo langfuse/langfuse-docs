@@ -57,7 +57,9 @@ langfuse = Langfuse()
 | `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"`       
 | `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
 | `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
-| n/a, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
+| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
 
 ## Tracing
 
