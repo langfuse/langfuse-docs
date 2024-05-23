@@ -7,9 +7,10 @@ import { useRouter } from "next/router";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { CrispWidget } from "@/components/supportChat"
+import { SessionProvider } from "next-auth/react"
 import { Hubspot, hsPageView } from "@/components/analytics/hubspot"
 
-export default function App({ Component, pageProps }) {
+export default function App({ Component, pageProps: { session, ...pageProps } }) {
   const router = useRouter()
   useEffect(() => {
     // Initialize PostHog
@@ -40,6 +41,7 @@ export default function App({ Component, pageProps }) {
 return (
 
     <>
+      <SessionProvider session={session}>
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
         {
@@ -55,6 +57,7 @@ return (
           data-auto-block="on"
           data-website-uuid="488cc3b0-ed5a-4e9d-81f2-76014dcae784"
         />
+      </SessionProvider>
     </>
 
 );
