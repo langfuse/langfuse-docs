@@ -3,10 +3,29 @@
 This page guides you through setting up the Sharepoint data connector to sync data and keep your files up-to-date with agents.
 
 ## Prerequisite
-To set up the Sharepoint data connector, you'll need you to create and register application in Azure Entra.
+This source requires Application permissions. Follow these [instructions](https://learn.microsoft.com/en-us/graph/auth-v2-service?context=graph%2Fapi%2F1.0&view=graph-rest-1.0&tabs=http) for creating an app in the Azure portal. This process will produce the client_id, client_secret, and tenant_id needed for the tap configuration file.
 
 ### Set up the Sharepoint connector
-Log into your Google account.
-On the Set up the source page, select Amplitude from the Source type dropdown.
-Click Set up source.
-Supported Streams
+ 1. Login to [Azure Portal](https://login.microsoftonline.com/)  
+ 2. Click upper-left menu icon and select **Azure Active Directory**  
+ 3. Select **App Registrations**  
+ 4. Click **New registration**  
+ 5. Register an application  
+       i. Name:  
+      ii. Supported account types: Accounts in this organizational directory only  
+     iii. Register (button)  
+ 6. Record the client_id and tenant_id which will be used by the tap for authentication and API integration.  
+ 7. Select **Certificates & secrets**  
+ 8. Provide **Description and Expires**  
+      i. Description: tap-microsoft-teams client secret  
+     ii. Expires: 1-year  
+    iii. Add  
+ 9. Copy the client secret value, this will be the client_secret  
+10. Select **API permissions**  
+
+### Setup 2  
+1. Enter **Tenant ID**, **Client ID** and **Client secret**.  
+2. Click button **Test Connection**  
+3. Choose **name** of the SharePoint site. | required  
+4. Choose the **path of the folder** in the SharePoint site. | required  
+5. Mark **recursive** if you need that all files from all subfolders will be downloaded (default False)  
