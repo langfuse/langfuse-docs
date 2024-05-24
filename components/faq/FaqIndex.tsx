@@ -30,8 +30,8 @@ export const FaqIndex = () => {
           return tagA.localeCompare(tagB);
         })
         .map(([tag, pages]) => (
-          <div key={tag}>
-            <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 mt-8 text-2xl">
+          <div key={tag} className="my-10">
+            <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-2xl">
               {tag.charAt(0).toUpperCase() + tag.slice(1)}
             </h3>
             <Cards num={1}>

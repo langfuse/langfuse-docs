@@ -3,8 +3,14 @@ import {
   getFaqPages,
   getFilteredFaqPages,
 } from "@/components/faq/FaqPreview";
+import { getPagesUnderRoute } from "nextra/context";
 
 export const getStaticPaths = async () => {
+  // this page is a catch-all for all tags and generates a page for each tag that has no dedicated page
+  // We create dedicated pages as these auto-generated ones do not appear in the main menu
+  const excludeTagsWithDistinctPages = getPagesUnderRoute("/faq/tag").map(
+    (page) => page.route.split("/").pop()
+  );
   const allTags = getFaqPages().reduce((acc, page) => {
     const tags = page.frontMatter?.tags || [];
     tags.forEach((tag) => {
@@ -15,19 +21,19 @@ export const getStaticPaths = async () => {
     return acc;
   }, []);
   return {
-    paths: allTags.map((tag) => ({
-      params: {
-        tag: tag,
-      },
-    })),
+    paths: allTags
+      .filter((tag) => !excludeTagsWithDistinctPages.includes(tag))
+      .map((tag) => ({
+        params: {
+          tag: tag,
+        },
+      })),
     fallback: false, // false or "blocking"
   };
 };
 
 export const getStaticProps = async ({ params }) => {
-  console.log("Params", params);
   const tag = decodeURIComponent(params.tag);
-  console.log("Tag", tag);
   const faqPages = getFaqPages();
   const filteredFaqPages = getFilteredFaqPages(faqPages, [tag], 10);
   return {
