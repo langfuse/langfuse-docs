@@ -132,10 +132,10 @@ Langfuse's client SDKs and integrations are all designed to queue and batch requ
 
 All integrations have a sensible default configuration, but you can customise the batching behaviour to suit your needs.
 
-| Option (Python) [SDK constructor, Environment]      | Option (JS)          | Description                                              |
-| -------------------- | -------------------- | -------------------------------------------------------- |
-| `flush_at`, `LANGFUSE_FLUSH_AT`           | `flushAt`            | The maximum number of events to batch up before sending. |
-| `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s)  | `flushInterval` (ms) | The maximum time to wait before sending a batch.         |
+| Option (Python) [SDK constructor, Environment]  | Option (JS)          | Description                                              |
+| ----------------------------------------------- | -------------------- | -------------------------------------------------------- |
+| `flush_at`, `LANGFUSE_FLUSH_AT`                 | `flushAt`            | The maximum number of events to batch up before sending. |
+| `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s) | `flushInterval` (ms) | The maximum time to wait before sending a batch.         |
 
 You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=1000` to send every second.
 
@@ -242,3 +242,9 @@ langfuse_handler.flush()
 
 </Tab>
 </Tabs>
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["tracing"]} />
