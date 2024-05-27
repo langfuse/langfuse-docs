@@ -6,6 +6,20 @@ import Link from "next/link";
 
 const PREVIEW_PAGES_PER_TAG = 5;
 
+const wordCasing = {
+  api: "API",
+  openai: "OpenAI",
+  langchain: "LangChain",
+};
+
+export const formatTag = (tag: string) =>
+  tag
+    .replaceAll("-", " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => wordCasing[word.toLowerCase()] || word)
+    .join(" ");
+
 export const FaqIndex = () => {
   const pages = getPagesUnderRoute("/faq/all") as Array<
     Page & { frontMatter: any }
@@ -32,7 +46,7 @@ export const FaqIndex = () => {
         .map(([tag, pages]) => (
           <div key={tag} className="my-10">
             <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-2xl">
-              {tag.charAt(0).toUpperCase() + tag.replaceAll("-", " ").slice(1)}
+              {formatTag(tag)}
             </h3>
             <Cards num={1}>
               {pages.slice(0, PREVIEW_PAGES_PER_TAG).map((page) => (
