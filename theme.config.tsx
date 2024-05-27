@@ -20,7 +20,7 @@ import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
-import { FileCode, LibraryBig } from "lucide-react";
+import { FileCode, LibraryBig, CircleHelp } from "lucide-react";
 import {
   AvailabilityBanner,
   AvailabilitySidebar,
@@ -81,6 +81,7 @@ const config: DocsThemeConfig = {
             {[
               { title: "Docs", path: "/docs", Icon: LibraryBig },
               { title: "Guides", path: "/guides", Icon: FileCode },
+              { title: "FAQ", path: "/faq", Icon: CircleHelp },
             ].map((item) =>
               asPath.startsWith(item.path) ? (
                 <div

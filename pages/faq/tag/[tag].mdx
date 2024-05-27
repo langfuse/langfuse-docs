@@ -1,0 +1,116 @@
+import {
+  FaqList,
+  getFaqPages,
+  getFilteredFaqPages,
+} from "@/components/faq/FaqPreview";
+import { getPagesUnderRoute } from "nextra/context";
+
+export const getStaticPaths = async () => {
+  // this page is a catch-all for all tags and generates a page for each tag that has no dedicated page
+  // We create dedicated pages as these auto-generated ones do not appear in the main menu
+  const excludeTagsWithDistinctPages = getPagesUnderRoute("/faq/tag").map(
+    (page) => page.route.split("/").pop()
+  );
+  const allTags = getFaqPages().reduce((acc, page) => {
+    const tags = page.frontMatter?.tags || [];
+    tags.forEach((tag) => {
+      if (!acc.includes(tag)) {
+        acc.push(tag);
+      }
+    });
+    return acc;
+  }, []);
+  return {
+    paths: allTags
+      .filter((tag) => !excludeTagsWithDistinctPages.includes(tag))
+      .map((tag) => ({
+        params: {
+          tag: tag,
+        },
+      })),
+    fallback: false, // false or "blocking"
+  };
+};
+
+export const getStaticProps = async ({ params }) => {
+  const tag = decodeURIComponent(params.tag);
+  const faqPages = getFaqPages();
+  const filteredFaqPages = getFilteredFaqPages(faqPages, [tag], 10);
+  return {
+    props: {
+      ssg: {
+        tag: params.tag,
+        filteredFaqPages: filteredFaqPages,
+      },
+    },
+  };
+};
+
+import { useData } from "nextra/data";
+
+export const SsgFaqList = () => {
+  // Get the data from SSG, and render it as a component.
+  const { filteredFaqPages } = useData();
+  return <FaqList pages={filteredFaqPages} renderAsCards />;
+};
+
+export const SsgTagName = () => {
+  const { tag } = useData();
+  return <span>{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>;
+};
+
+<div class="nextra-breadcrumb -mt-1 -mb-0.5 nx-flex nx-items-center nx-gap-1 nx-overflow-hidden nx-text-sm nx-text-gray-500 dark:nx-text-gray-400 contrast-more:nx-text-current">
+  <div
+    class="nx-whitespace-nowrap nx-transition-colors nx-min-w-[24px] nx-overflow-hidden nx-text-ellipsis"
+    title="FAQ"
+  >
+    FAQ
+  </div>
+  <svg
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    class="nx-w-3.5 nx-shrink-0"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M9 5l7 7-7 7"
+    ></path>
+  </svg>
+  <div
+    class="nx-whitespace-nowrap nx-transition-colors nx-min-w-[24px] nx-overflow-hidden nx-text-ellipsis"
+    title="By Tags"
+  >
+    By Tags
+  </div>
+  <svg
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    class="nx-w-3.5 nx-shrink-0"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M9 5l7 7-7 7"
+    ></path>
+  </svg>
+  <div
+    class="nx-whitespace-nowrap nx-transition-colors nx-font-medium nx-text-gray-700 contrast-more:nx-font-bold contrast-more:nx-text-current dark:nx-text-gray-100 contrast-more:dark:nx-text-current"
+    title="Security"
+  >
+    <SsgTagName />
+  </div>
+</div>
+
+# FAQ: <SsgTagName />
+
+<Callout type="info">
+  Have any other questions? Please add them on [GitHub
+  Discussions](/gh-support).
+</Callout>
+
+<SsgFaqList />

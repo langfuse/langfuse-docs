@@ -121,11 +121,77 @@ Datasets > Items: `+ New item`
 
 **Create items from production data**
 
+<Tabs items={["UI", "Python", "JS/TS"]}>
+<Tab>
 In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
+</Tab>
+<Tab>
+
+```python
+langfuse.create_dataset_item(
+    dataset_name="<dataset_name>",
+    input={ "text": "hello world" },
+    expected_output={ "text": "hello world" },
+    # link to a trace
+    source_trace_id="<trace_id>",
+    # optional: link to a specific span, event, or generation
+    source_observation_id="<observation_id>"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+langfuse.createDatasetItem({
+  datasetName: "<dataset_name>",
+  input: { text: "hello world" },
+  expectedOutput: { text: "hello world" },
+  // link to a trace
+  sourceTraceId: "<trace_id>",
+  // optional: link to a specific span, event, or generation
+  sourceObservationId: "<observation_id>",
+});
+```
+
+</Tab>
+</Tabs>
 
 **Edit/archive items**
 
-In the UI, you can edit or archive items by clicking on the item in the table. Archiving items will remove them from future experiment runs.
+Archiving items will remove them from future experiment runs.
+
+<Tabs items={["UI", "Python", "JS/TS"]}>
+<Tab>
+In the UI, you can edit or archive items by clicking on the item in the table.
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```python
+langfuse.create_dataset_item(
+    id="<item_id>",
+    # example: update status to "ARCHIVED"
+    status="ARCHIVED"
+)
+```
+
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```ts
+langfuse.createDatasetItem({
+  id: "<item_id>",
+  // example: update status to "ARCHIVED"
+  status: "ARCHIVED",
+});
+```
+
+</Tab>
+</Tabs>
 
 ## Run experiment on a dataset
 
