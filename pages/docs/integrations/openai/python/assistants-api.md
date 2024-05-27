@@ -1,14 +1,18 @@
 ---
-title: OSS Observability for OpenAI Assistants
+title: OSS Observability for OpenAI Assistants API
 description: Use of Langfuse decorator to trace calls made to openai assistants
 category: Integrations
 ---
 
-# Langfuse Observability for OpenAI Assistants API
+# Cookbook: Observability for OpenAI Assistants API with Langfuse
 
-This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with Langfuse.
+This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with [Langfuse tracing](https://langfuse.com/docs/tracing).
 
 Note: The native [OpenAI SDK wrapper](https://langfuse.com/docs/integrations/openai/python/get-started) does not support tracing of the OpenAI assistants API, you need to instrument it via the decorator as shown in this notebook.
+
+## What is the Assistants API?
+
+The Assistants API from OpenAI allows developers to build AI assistants that can utilize multiple tools and data sources in parallel, such as code interpreters, file search, and custom tools created by calling functions. These assistants can access OpenAI's language models like GPT-4 with specific prompts, maintain persistent conversation histories, and process various file formats like text, images, and spreadsheets. Developers can fine-tune the language models on their own data and control aspects like output randomness. The API provides a framework for creating AI applications that combine language understanding with external tools and data.
 
 ## Setup
 
