@@ -129,6 +129,7 @@ const nonPermanentRedirects = [
   ["/docs/analytics", "/docs/analytics/overview"],
 
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
+  ["/join-us", "/careers"],
 
   ["/launch", "/blog/launch-week-1"],
 
