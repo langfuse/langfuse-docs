@@ -128,6 +128,8 @@ const nonPermanentRedirects = [
   ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
 
+  ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
+
   ["/launch", "/blog/launch-week-1"],
 
   // Redirect to overview pages
