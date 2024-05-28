@@ -50,4 +50,8 @@ result = agent_executor.with_config({"run_name": "File Agent"}).invoke(
 
 ## Custom name argument on Langchain classes
 
-You can also pass a custom `name` argument to Langchain classes. This will override the default name of the class.
+You can also pass a custom `name` argument to Langchain classes. This will override the default name of the class when shown in a Langfuse trace.
+
+```python
+model = ChatOpenAI(name="generate-rating")
+```
