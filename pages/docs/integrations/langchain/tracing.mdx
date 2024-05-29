@@ -227,14 +227,14 @@ await langfuseHandler.shutdownAsync();
 </Tab>
 </Tabs>
 
-If you want to flush events synchronously without shutting down Langfuse, you can use the `flush` method.
+If you want to flush events synchronously at a certain point, you can use the `flush` method. This will wait for all events that are still in the background queue to be sent to the Langfuse API. This is usually discouraged in production environments.
 
 <Tabs items={["Python", "JS"]}>
 <Tab>
 {/* Python */}
 
 ```python
-langfuse_handler.flush_async()
+langfuse_handler.flush()
 ```
 
 </Tab>
