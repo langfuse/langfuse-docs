@@ -122,5 +122,5 @@ Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfus
 
 There's a lot more you can do:
 
-- **Mirascope**: Head over to [their docs](https://https://docs.mirascope.io/latest/) to learn more about what you can do with the framework.
+- **Mirascope**: Head over to [their docs](https://docs.mirascope.io/latest/) to learn more about what you can do with the framework.
 - **Langfuse**: Have a look at Evals, Datasets, Prompt Management to start exploring [all that Langfuse can do](https://langfuse.com/docs).
