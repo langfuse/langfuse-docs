@@ -165,7 +165,7 @@ const sections = [
         tiers: {
           Hobby: "US or EU",
           Pro: "US or EU",
-          Team: "Custom regions available",
+          Team: "US or EU",
         },
       },
     ],
