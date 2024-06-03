@@ -165,7 +165,7 @@ const sections = [
         tiers: {
           Hobby: "US or EU",
           Pro: "US or EU",
-          Team: "Custom regions available",
+          Team: "US or EU",
         },
       },
     ],
@@ -302,7 +302,7 @@ export default function Pricing({
         </div>
         {isPricingPage ? (
           <>
-            <SelfHost className="mt-10" />
+            <CallOutSelfhostEnterprise className="mt-10" />
             <div className="relative">
               <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                 {/* Feature comparison (up to lg) */}
@@ -599,14 +599,14 @@ export default function Pricing({
               </Link>
               .
             </div>
-            <SelfHost className="mt-3" />
+            <CallOutSelfhostEnterprise className="mt-3" />
           </>
         )}
       </div>
     </HomeSection>
   );
 }
-const SelfHost = ({ className }: { className?: string }) => (
+const CallOutSelfhostEnterprise = ({ className }: { className?: string }) => (
   <div className={cn("text-center", className)}>
     Langfuse is also easy to{" "}
     <Link href="/docs/deployment/local" className="underline">
@@ -616,7 +616,11 @@ const SelfHost = ({ className }: { className?: string }) => (
     <Link href="/docs/deployment/self-host" className="underline">
       self-host
     </Link>
-    .
+    . Find out more about{" "}
+    <Link href="/enterprise" className="underline">
+      Langfuse for Enterprise
+    </Link>{" "}
+    (cloud and on-premise).
   </div>
 );
 

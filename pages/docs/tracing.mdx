@@ -124,6 +124,12 @@ import { Users, Tag, MessagesSquare, Braces, Globe } from "lucide-react";
   />
 </Cards>
 
+## Enable/disable tracing
+
+All Langfuse SDKs and integrations are designed to be non-intrusive. You can add Langfuse tracing to your application while being able to enable it only in specific environments.
+
+By default, the Langfuse Tracing is enabled if an API key is set. You can manually disable tracing via the `enabled` flag. See the documentation for the specific SDK or integration for more details.
+
 ## Event queuing/batching [#queuing-batching]
 
 Langfuse's client SDKs and integrations are all designed to queue and batch requests in the background to optimize API calls and network time. Batches are determined by a combination of time and size (number of events and size of batch).

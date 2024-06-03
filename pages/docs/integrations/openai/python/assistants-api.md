@@ -14,6 +14,10 @@ Note: The native [OpenAI SDK wrapper](https://langfuse.com/docs/integrations/ope
 
 The Assistants API from OpenAI allows developers to build AI assistants that can utilize multiple tools and data sources in parallel, such as code interpreters, file search, and custom tools created by calling functions. These assistants can access OpenAI's language models like GPT-4 with specific prompts, maintain persistent conversation histories, and process various file formats like text, images, and spreadsheets. Developers can fine-tune the language models on their own data and control aspects like output randomness. The API provides a framework for creating AI applications that combine language understanding with external tools and data.
 
+## Example Trace Output
+
+![OpenAI Assistants Trace in Langfuse](https://langfuse.com/images/docs/openai-assistants-trace.png)
+
 ## Setup
 
 Install the required packages:
@@ -111,7 +115,7 @@ Retrieve the assistant's response from the thread:
 import json
 from langfuse.decorators import langfuse_context
 
-@observe(as_type="generation")
+@observe()
 def get_response(thread_id, run_id):
     client = OpenAI()
     
@@ -128,8 +132,14 @@ def get_response(thread_id, run_id):
         thread_id=thread_id,
     )
     input_messages = [{"role": message.role, "content": message.content[0].text.value} for message in message_log.data[::-1][:-1]]
-    
-    langfuse_context.update_current_observation(
+
+    # log internal generation within the openai assistant as a separate child generation to langfuse
+    # get langfuse client used by the decorator, uses the low-level Python SDK
+    langfuse_client = langfuse_context._get_langfuse()
+    # pass trace_id and current observation ids to the newly created child generation
+    langfuse_client.generation(
+        trace_id=langfuse_context.get_current_trace_id(),
+        parent_observation_id=langfuse_context.get_current_observation_id(),
         model=run.model,
         usage=run.usage,
         input=input_messages,
@@ -138,26 +148,25 @@ def get_response(thread_id, run_id):
     
     return assistant_response, run
 
-# wrapper function as we want get_response to be a generation to track tokens
-# -> generations need to have a parent trace
-@observe()
-def get_response_trace(thread_id, run_id):
-    return get_response(thread_id, run_id)
-
-response = get_response_trace(thread.id, run.id)
+response = get_response(thread.id, run.id)
 print(f"Assistant response: {response[0]}")
 ```
 
-**[Public link of example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3020450b-e9b7-4c12-b4fe-7288b6324118?observation=a083878e-73dd-4c47-867e-db4e23050fac) of fetching the response**
+**[Public link of example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e0933ea5-6806-4eb7-aed8-a42d23c57096?observation=401fb816-22e5-45ac-a4c9-e437b120f2e7) of fetching the response**
 
 ## All in one trace
 
 
 ```python
+import time
+
 @observe()
 def run_math_tutor(user_input):
     assistant = create_assistant()
     run, thread = run_assistant(assistant.id, user_input)
+
+    time.sleep(5) # notebook only, wait for the assistant to finish
+
     response = get_response(thread.id, run.id)
     
     return response[0]
@@ -169,6 +178,10 @@ print(f"Assistant response: {response}")
 
 The Langfuse trace shows the flow of creating the assistant, running it on a thread with user input, and retrieving the response, along with the captured input/output data.
 
-**[Public link of example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/1b2d53ad-f5d2-4f1e-9121-628b5ca1b5b2)**
+**[Public link of example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b3b7b128-5664-4f42-9fab-31999da9e2f1)**
 
+![OpenAI Assistants Trace in Langfuse](https://langfuse.com/images/docs/openai-assistants-trace.png)
 
+## Learn more
+
+If you use non-Assistants API endpoints, you can use the OpenAI SDK wrapper for tracing. Check out the [Langfuse documentation](https://langfuse.com/docs/integrations/openai/python/get-started) for more details.
