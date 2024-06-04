@@ -18,6 +18,8 @@ import fletchLight from "./img/fletch_light.svg";
 import fletchDark from "./img/fletch_dark.svg";
 import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
+import khanacademyLight from "./img/khanacademy_light.png";
+import khanacademyDark from "./img/khanacademy_dark.png";
 import { HomeSection } from "./components/HomeSection";
 
 type User = {
@@ -49,6 +51,19 @@ const users: User[] = [
     className: "w-16 sm:w-24",
   },
   {
+    name: "Khan Academy",
+    lightImage: khanacademyLight,
+    darkImage: khanacademyDark,
+    href: "https://www.khanacademy.org",
+    className: "w-30 sm:w-44",
+  },
+  {
+    name: "Mava",
+    lightImage: mavaLight,
+    darkImage: mavaDark,
+    href: "https://mava.app",
+  },
+  {
     name: "Pigment",
     lightImage: pigmentLight,
     darkImage: pigmentDark,
@@ -61,16 +76,11 @@ const users: User[] = [
     href: "https://forto.com",
   },
   {
-    name: "Mava",
-    lightImage: mavaLight,
-    darkImage: mavaDark,
-    href: "https://mava.app",
-  },
-  {
     name: "Fletch",
     lightImage: fletchLight,
     darkImage: fletchDark,
     href: "https://fletch.ai/",
+    className: "w-16 sm:w-24",
   },
   {
     name: "Sumup",
