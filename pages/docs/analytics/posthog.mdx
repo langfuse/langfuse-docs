@@ -84,7 +84,9 @@ We send the following user properties via `'$set'`:
 
 ### Events
 
-You can decide which events you want to send to PostHog. By default, we send all of the following events:
+The integration sends the following events to PostHog.
+
+Is there any additional information that would be helpful? You can request more events or properties [here](/ideas).
 
 #### Event: `langfuse trace`
 
@@ -141,3 +143,7 @@ You can decide which events you want to send to PostHog. By default, we send all
 - `langfuse_release`: The release information of the trace associated with the score.
 - `langfuse_tags`: Any tags related to the trace of the score.
 - `langfuse_integration_version`: The integration version with LangFuse.
+
+## Troubleshooting
+
+**Missing data in PostHog?** Please check that you have correctly entered the PostHog hostname and API key in your Langfuse project settings. Also, if you use the PostHog free-tier, please make sure that you have not exceeded the event limits as PostHog drops events when the limit is reached. Reach out to us if you encounter any other issues with the integration.
