@@ -179,6 +179,7 @@ const nonPermanentRedirects = [
   ["/docs/sdk/typescript", "/docs/sdk/typescript/guide"],
   ["/docs/sdk/typescript-web", "/docs/sdk/typescript/guide-web"],
   ["/docs/scores/evals", "/docs/scores/model-based-evals"],
+  ["/docs/scores/manually", "/docs/scores/annotation"],
   ["/docs/scores/model-based-evals/overview", "/docs/scores/model-based-evals"],
   ["/docs/scores/model-based-evals/ragas", "/cookbook/evaluation_of_rag_with_ragas"],
   ["/docs/scores/model-based-evals/langchain", "/cookbook/evaluation_with_langchain"],

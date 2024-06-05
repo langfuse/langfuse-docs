@@ -312,7 +312,7 @@ See documentation of spans above on how to use the langfuse client and ids if yo
 
 ## Scores
 
-[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can be created via the Langfuse UI annotation workflow or via the SDKs.
 
 If the score relates to a specific step of the trace, specify the `observation_id`.
 

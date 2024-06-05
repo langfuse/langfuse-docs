@@ -222,7 +222,7 @@ You can score traces using a number of methods:
 - Through user feedback
 - Model-based evaluation
 - Through SDK/API
-- Manually, in the Langfuise UI
+- Using annotation in the Langfuse UI
 
 The example below walks through a simple way to score the chat generator's response via the Python SDK. It adds a score of 1 to the trace above with the comment "Cordial and relevant" because the model's response was very polite and factually correct. You can then sort these scores to identify low-quality output or to monitor the quality of responses.
 
