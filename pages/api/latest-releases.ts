@@ -46,7 +46,9 @@ export default async function handler(
         const latestRelease = data[0]; // Assuming the latest release is the first in the array
         return {
           repo: REPOS[index],
-          latestRelease: latestRelease ? latestRelease.tag_name : "No releases",
+          latestRelease: latestRelease ? latestRelease.tag_name : undefined,
+          publishedAt: latestRelease ? latestRelease.published_at : undefined,
+          url: latestRelease ? latestRelease.html_url : undefined,
         };
       })
     );
