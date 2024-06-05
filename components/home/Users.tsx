@@ -6,8 +6,6 @@ import pigmentLight from "./img/pigment_light.svg";
 import pigmentDark from "./img/pigment_dark.svg";
 import alphawatchLight from "./img/alphawatch_light.png";
 import alphawatchDark from "./img/alphawatch_dark.png";
-import mavaLight from "./img/mava_light.png";
-import mavaDark from "./img/mava_dark.png";
 import frontifyLight from "./img/frontify_light.svg";
 import frontifyDark from "./img/frontify_dark.svg";
 import posthogLight from "./img/posthog_light.svg";
@@ -56,12 +54,6 @@ const users: User[] = [
     darkImage: khanacademyDark,
     href: "https://www.khanacademy.org",
     className: "w-30 sm:w-44",
-  },
-  {
-    name: "Mava",
-    lightImage: mavaLight,
-    darkImage: mavaDark,
-    href: "https://mava.app",
   },
   {
     name: "Pigment",
