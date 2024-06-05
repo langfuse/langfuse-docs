@@ -54,10 +54,13 @@ langfuse = Langfuse()
 | --- | --- | ---
 | `LANGFUSE_PUBLIC_KEY`, `public_key` | Public key, get in project settings |
 | `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings |
-| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"`       
+| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"` |
+| no env, `enabled` | Optional. Manually enable/disable tracing. | If keys are provided, enabled defaults to `True`, otherwise `False` |
 | `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
 | `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
-| n/a, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
+| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
 
 ## Tracing
 
@@ -309,7 +312,7 @@ See documentation of spans above on how to use the langfuse client and ids if yo
 
 ## Scores
 
-[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can be created via the Langfuse UI annotation workflow or via the SDKs.
 
 If the score relates to a specific step of the trace, specify the `observation_id`.
 

@@ -65,6 +65,8 @@ import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
   </Tab>
 </Tabs>
 
+When no API keys are provided, a single warning is logged, and no traces are sent to Langfuse.
+
 ### Add the Langfuse decorator
 
 Import the `@observe()` decorator and apply it to the functions you want to trace. By default it captures:
@@ -172,6 +174,25 @@ This will result in a trace with only sanitized input and output, and no actual 
 ## Decorator context
 
 Use the `langfuse_context` object to interact with the decorator context. This object is a thread-local singleton and can be accessed from anywhere within the function context.
+
+### Configure the Langfuse client
+
+The decorator manages the Langfuse client for you. If you need to configure the client, you can do so via the `langfuse_context.configure` method **at the top of your application** before executing any decorated functions.
+
+```python /langfuse_context.configure/
+from langfuse.decorators import langfuse_context
+
+# Configure the Langfuse client
+langfuse_context.configure(
+    httpx_client=custom_httpx_client,
+    host=custom_host,
+    enabled=True,
+)
+```
+
+By setting the `enabled` parameter to `False`, you can disable the decorator and prevent any traces from being sent to Langfuse.
+
+See the [API Reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.configure) for more details on the available parameters.
 
 ### Add additional attributes to the trace and observations [#additional-attributes]
 
@@ -377,7 +398,7 @@ def llama_index_fn(question: str):
 
 ## Adding scores
 
-[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. They can created manually via the Langfuse UI or via the SDKs.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. They can be created via our annotation workflow in the Langfuse UI or via the SDKs.
 
 | Parameter | Type   | Optional | Description                                                           |
 | --------- | ------ | -------- | --------------------------------------------------------------------- |
@@ -470,7 +491,7 @@ Use `langfuse_context.auth_check()` to verify that your host and API credentials
 
 ### Using ThreadPoolExecutors or ProcessPoolExecutors
 
-The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors *and* when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation. 
+The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors _and_ when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
 
 For example when a @observe-decorated function uses a ThreadPoolExecutor to make concurrent LLM requests the context that holds important info on the nesting hierarchy ("we are inside another trace") is not copied over correctly to the child threads. So the created generations will not be linked to the trace and be 'orphaned'. In the UI, you will see a trace missing those generations.
 
@@ -512,10 +533,13 @@ langfuse_context.flush()
 The executions inside the ThreadPoolExecutor will now be correctly associated with the trace opened by the `execute_groups` function.
 
 <Callout type="info">
-When spawning threads manually with `threading.Thread` rather than via `ThreadPoolExecutor`, contextvars are copied over correctly as no executor is used. The decorator works as intended in this case.
+  When spawning threads manually with `threading.Thread` rather than via
+  `ThreadPoolExecutor`, contextvars are copied over correctly as no executor is
+  used. The decorator works as intended in this case.
 </Callout>
 
 ### Large input/output data
+
 Large input/output data can lead to performance issues. We recommend disabling capturing input/output for these methods and manually add the relevant information via `langfuse_context.update_current_observation`.
 
 ## API reference

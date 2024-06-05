@@ -9,6 +9,8 @@ import { Header } from "../Header";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
 import LangfuseIcon from "@/public/icon.svg";
 import LangchainIcon from "./img/langchain_icon.png";
+import HaystackIcon from "./img/haystack_icon.png";
+import LitellmIcon from "./img/litellm_icon.png";
 import Image from "next/image";
 import Link from "next/link";
 import IconPython from "../icons/python";
@@ -74,6 +76,8 @@ export default function Integrations() {
   const inLangchainRef = useRef<HTMLDivElement>(null);
   const inApiRef = useRef<HTMLDivElement>(null);
   const inLlamaindexRef = useRef<HTMLDivElement>(null);
+  const inLitellmRef = useRef<HTMLDivElement>(null);
+  const inHaystackRef = useRef<HTMLDivElement>(null);
   const inMoreRef = useRef<HTMLDivElement>(null);
 
   const langfuseNodeRef = useRef<HTMLDivElement>(null);
@@ -135,14 +139,6 @@ export default function Integrations() {
                 height={40}
               />
             </Circle>
-            <Circle ref={langfuseNodeRef} className="h-16 w-16">
-              <Image
-                src={LangfuseIcon}
-                alt="Langfuse Icon"
-                width={28}
-                height={28}
-              />
-            </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
             <Circle
@@ -155,6 +151,42 @@ export default function Integrations() {
                 alt="Llama-index Icon"
                 width={35}
                 height={35}
+              />
+            </Circle>
+            <Circle ref={langfuseNodeRef} className="h-16 w-16">
+              <Image
+                src={LangfuseIcon}
+                alt="Langfuse Icon"
+                width={28}
+                height={28}
+              />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle
+              ref={inLitellmRef}
+              title="LiteLLM (proxy)"
+              href="/docs/integrations/litellm"
+            >
+              <Image
+                src={LitellmIcon}
+                alt="Langchain Icon"
+                width={40}
+                height={40}
+              />
+            </Circle>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <Circle
+              ref={inHaystackRef}
+              title="Haystack"
+              href="/docs/integrations/haystack"
+            >
+              <Image
+                src={HaystackIcon}
+                alt="Langchain Icon"
+                width={28}
+                height={28}
               />
             </Circle>
           </div>
@@ -170,7 +202,7 @@ export default function Integrations() {
           <div className="flex flex-row items-center justify-between">
             <Circle
               ref={inMoreRef}
-              title="Litellm, Flowise, Langflow, Vercel AI, Superagent, Instructor"
+              title="Flowise, Langflow, Vercel AI SDK, Superagent, Instructor, Mirascope, ..."
               href="/docs/integrations/overview"
             >
               <MoreHorizontal className="h-5 w-5" />
@@ -211,6 +243,18 @@ export default function Integrations() {
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={inLlamaindexRef}
+          toRef={langfuseNodeRef}
+          duration={3}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={inLitellmRef}
+          toRef={langfuseNodeRef}
+          duration={3}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={inHaystackRef}
           toRef={langfuseNodeRef}
           duration={3}
         />

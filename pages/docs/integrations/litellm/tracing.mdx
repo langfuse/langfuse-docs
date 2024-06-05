@@ -1,4 +1,5 @@
 ---
+title: OSS Observability for LiteLLM
 description: Open source observability for LiteLLM via the native integration. Automatically capture detailed traces and metrics for every request.
 ---
 
@@ -6,37 +7,68 @@ description: Open source observability for LiteLLM via the native integration. A
 
 **LiteLLM** ([GitHub](https://github.com/BerriAI/litellm)): Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs).
 
-You can find more in-depth documentation in the [LiteLLM docs](https://litellm.vercel.app/docs/observability/langfuse_integration).
-
 There are three ways to integrate LiteLLM with Langfuse:
 
 1. LiteLLM Proxy with OpenAI SDK Wrapper, the proxy standardizes 100+ models on the OpenAI API schema and the Langfuse OpenAI SDK wrapper instruments the LLM calls.
-2. LiteLLM Python SDK which can send logs to Langfuse if the environment variables are set.
-3. LiteLLM Proxy which can send logs to Langfuse if enabled in the UI.
+2. LiteLLM Proxy which can send logs to Langfuse if enabled in the UI.
+3. LiteLLM Python SDK which can send logs to Langfuse if the environment variables are set.
 
-## Integration
+Example trace in Langfuse using multiple models via LiteLLM:
 
-<Tabs items={["LiteLLM Proxy + Langfuse OpenAI SDK Wrapper", "LiteLLM Python SDK", "LiteLLM Proxy (UI)"]} >
-<Tab>
-import { FileCode } from "lucide-react";
+<CloudflareVideo
+  videoId="dfdceaac91bffe7a76975a040cc3321b"
+  aspectRatio={16 / 12}
+  title="Haystack Trace"
+  className="mt-8"
+  gifStyle
+/>
 
-The LiteLLM proxy is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
+---
 
-<br />
+## 1. LiteLLM Proxy + Langfuse OpenAI SDK Wrapper
+
+<Callout type="info">
+  This is the preferred way to integrate LiteLLM with Langfuse. The Langfuse
+  OpenAI SDK wrapper automatically captures token counts, latencies, streaming
+  response times (time to first token), API errors, and more.
+</Callout>
+
+How this works:
+
+1. The [LiteLLM Proxy](https://docs.litellm.ai/docs/simple_proxy) standardizes 100+ models on the OpenAI API schema
+2. and the Langfuse OpenAI SDK wrapper ([Python](/docs/integrations/openai/python), [JS/TS](/docs/integrations/openai/js)) instruments the LLM calls.
+
 To see a full end-to-end example, check out the LiteLLM cookbook.
 
+import { FileCode } from "lucide-react";
+
 <Cards num={2}>
-<Card
-    title="Example LiteLLM (Proxy)"
-    href="/guides/cookbook/integration_litellm_proxy"
+  <Card
+    title="Python Cookbook"
+    href="/docs/integrations/litellm/example-proxy-python"
+    icon={<FileCode />}
+  />
+  <Card
+    title="JS/TS Cookbook"
+    href="/docs/integrations/litellm/example-proxy-js"
     icon={<FileCode />}
   />
 </Cards>
-</Tab>
-<Tab>
-The LiteLLM Python SDK is a simple way to integrate LiteLLM with Langfuse. You can set the success and failure callbacks to Langfuse to log all responses.
 
-## Setup
+## 2. Send Logs from LiteLLM Proxy to Langfuse
+
+By setting the callback to Langfuse in the LiteLLM UI you can instantly log your responses across all providers. For more information on how to setup the Proxy UI, see the [LiteLLM docs](https://docs.litellm.ai/docs/proxy/ui).
+
+<Frame border>
+  ![Set Langfuse as callback in Proxy
+  UI](https://langfuse.com/images/docs/litellm-ui.png)
+</Frame>
+
+---
+
+## 3. LiteLLM Python SDK
+
+Instead of the proxy, you can also use the native LiteLLM Python client. You can find more in-depth documentation in the [LiteLLM docs](https://litellm.vercel.app/docs/observability/langfuse_integration).
 
 ```
 pip install langfuse>=2.0.0 litellm
@@ -62,7 +94,7 @@ litellm.failure_callback = ["langfuse"]
 
 ```
 
-## Quick Example
+### Quick Example
 
 ```python filename="main.py"
 import litellm
@@ -88,7 +120,7 @@ print(cohere_response)
 
 ```
 
-## Set Custom Trace ID, Trace User ID and Tags
+### Set Custom Trace ID, Trace User ID and Tags
 
 ```python filename="main.py"
 from litellm import completion
@@ -113,7 +145,7 @@ print(response)
 
 ```
 
-## Use LangChain ChatLiteLLM + Langfuse
+### Use LangChain ChatLiteLLM + Langfuse
 
 ```sh
 pip install langchain
@@ -144,12 +176,6 @@ chat(messages)
 
 ```
 
-</Tab>
-<Tab>
-By setting the callback to Langfuse in the LiteLLM UI you can instantly log your responses across all providers. <br />
-For more information on how to setup the Proxy UI, see the [LiteLLM docs](https://docs.litellm.ai/docs/proxy/ui).
+### Customize Langfuse Python SDK via Environment Variables
 
-![Set Langfuse as callback in Proxy UI](https://langfuse.com/images/docs/litellm-ui.png)
-
-</Tab>
-</Tabs>
+To customise Langfuse settings, use the [Langfuse environment variables](/docs/sdk/python/low-level-sdk#initialize-client). These will be picked up by the LiteLLM SDK on initialization as it uses the Langfuse Python SDK under the hood.

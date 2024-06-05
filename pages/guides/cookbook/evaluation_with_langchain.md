@@ -43,7 +43,7 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-os.environ['EVAL_MODEL'] = "text-davinci-003"
+os.environ['EVAL_MODEL'] = "gpt-3.5-turbo-instruct"
 
 # Langchain Eval types
 EVAL_TYPES={
