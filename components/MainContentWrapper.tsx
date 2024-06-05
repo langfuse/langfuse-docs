@@ -79,7 +79,7 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="https://cal.com/marc-kl/demo" target="_blank">
+          <a href="/schedule-demo" target="_blank">
             <span>Talk to sales</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>
