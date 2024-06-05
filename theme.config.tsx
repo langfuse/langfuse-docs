@@ -37,7 +37,7 @@ const config: DocsThemeConfig = {
     extraContent: (
       <>
         <a
-          className="p-1 hidden sm:inline-block hover:opacity-80"
+          className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
           href="https://langfuse.com/discord"
           aria-label="Langfuse Discord"
