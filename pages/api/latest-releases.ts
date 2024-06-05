@@ -53,14 +53,10 @@ export default async function handler(
       })
     );
 
-    return (
-      res
-        .status(200)
-        .setHeader("Content-Type", "application/json")
-        // Only CDN should cache the response for 1 minute
-        .setHeader("Cache-Control", "public, s-maxage=60")
-        .json(langfuseReleases)
-    );
+    return res
+      .status(200)
+      .setHeader("Content-Type", "application/json")
+      .json(langfuseReleases);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
