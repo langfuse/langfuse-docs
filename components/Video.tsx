@@ -60,7 +60,9 @@ export const Video = ({
   const remote = useMediaRemote(mediaPlayerRef);
   const { duration } = useMediaStore(mediaPlayerRef);
   const durationString = duration
-    ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60)} min`
+    ? `${Math.floor(duration / 60)}:${String(
+        Math.floor(duration % 60)
+      ).padStart(2, "0")} min`
     : null;
 
   return (
