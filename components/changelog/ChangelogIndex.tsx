@@ -2,7 +2,7 @@ import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
 import { type Page } from "nextra";
-import { Video } from "../Video";
+import { CloudflareVideo, Video } from "../Video";
 
 export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
   <div className="mt-12 max-w-6xl mx-auto divide-y divide-primary/10">
@@ -37,7 +37,13 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
           </div>
           <div className="md:col-span-3">
             <Link key={page.route} href={page.route} className="block group">
-              {page.frontMatter?.ogVideo ? (
+              {page.frontMatter?.ogCloudflareVideo ? (
+                <CloudflareVideo
+                  videoId={page.frontMatter?.ogCloudflareVideo}
+                  gifStyle
+                  className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
+                />
+              ) : page.frontMatter?.ogVideo ? (
                 <Video
                   src={page.frontMatter.ogVideo}
                   gifStyle

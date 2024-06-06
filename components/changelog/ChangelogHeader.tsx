@@ -4,7 +4,7 @@ import { Page } from "nextra";
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { Author } from "../Authors";
-import { Video } from "../Video";
+import { CloudflareVideo, Video } from "../Video";
 
 export const ChangelogHeader = () => {
   const router = useRouter();
@@ -17,6 +17,7 @@ export const ChangelogHeader = () => {
     title,
     description,
     ogImage,
+    ogCloudflareVideo,
     ogVideo,
     gif,
     date,
@@ -56,7 +57,9 @@ export const ChangelogHeader = () => {
         </div>
       </div>
 
-      {showOgInHeader === false ? null : ogVideo ? (
+      {showOgInHeader === false ? null : ogCloudflareVideo ? (
+        <CloudflareVideo videoId={ogCloudflareVideo} gifStyle />
+      ) : ogVideo ? (
         <Video src={ogVideo} gifStyle />
       ) : ogImage ? (
         <Image
