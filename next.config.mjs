@@ -138,6 +138,7 @@ const nonPermanentRedirects = [
     "/docs/integrations",
     "/docs/scores",
     "/docs/datasets",
+    "/docs/security",
   ].map((path) => [path, path + "/overview"]),
 
   // Redirects to bridge all kinds of old links to new links
