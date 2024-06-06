@@ -159,6 +159,11 @@ Langfuse is released through tagged semver releases. Check [GitHub releases](htt
 
 ### How to update
 
+<Callout type="info">
+  We recommend enabling automated updates within the current major version to
+  benefit from the latest features, bug fixes, and security patches.
+</Callout>
+
 To update the application:
 
 1. Stop the container.
@@ -167,9 +172,7 @@ To update the application:
 
 During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
 
-We recommend enabling automated updates to benefit from the latest features, bug fixes, and security patches.
-
-### Apply newly supported models to existing data in Langfuse [#migrate-models]
+### (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
 
 Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
 
@@ -210,7 +213,7 @@ Optionally, you can apply the new model definitions to existing data using the f
 
 ## Kubernetes deployments
 
-Kubernetes is a popular choice when deploying Langfuse when teams maintain the rest of their infrastructure via Kubernetes. You can find community-maintained templates and Helm Chart in the [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s) repository.
+Kubernetes is a popular choice for deploying Langfuse when teams maintain the rest of their infrastructure using Kubernetes. You can find community-maintained templates and Helm Charts in the [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s) repository.
 
 If you encounter any bugs or have suggestions for improvements, please contribute to the repository by submitting issues or pull requests.
 
