@@ -7,7 +7,6 @@ import { CloudflareVideo, Video } from "../Video";
 export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
   <div className="mt-12 max-w-6xl mx-auto divide-y divide-primary/10">
     {(getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>)
-      .filter((page) => page.route !== "/changelog")
       .slice(0, maxItems)
       .sort(
         (a, b) =>
