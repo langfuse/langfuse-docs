@@ -199,7 +199,35 @@ When running an experiment on a dataset, the application that shall be tested is
 
 Optionally, the output of the application can be evaluated to compare different runs more easily. Use any evaluation function and add a score to the observation. More details on scores/evals [here](/docs/scores/overview).
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)", "LlamaIndex (Python)"]}>
+<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "LlamaIndex (Python)"]}>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Make sure your application function is decorated with @observe decorator to automatically link the trace
+    with item.observe(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as trace_id:
+        # run your @observe() decorated application on the dataset item input
+        output = my_llm_application.run(item.input)
+
+        # optionally, evaluate the output to compare different runs more easily
+        langfuse.score(
+            trace_id=trace.id,
+            name="<example_eval>",
+            # any float value
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+```
+
+_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client and see the [Python decorator](/docs/sdk/python/decorators) docs on how to use the `@observe` decorator for your main application function._
+
+</Tab>
 <Tab>
 
 ```python
@@ -279,21 +307,14 @@ for item in dataset.items:
 <Tab>
 
 ```python
-from llama_index.core.callbacks import CallbackManager
-from llama_index.core import Settings
-
 dataset = langfuse.get_dataset("<dataset_name>")
 
 for item in dataset.items:
-    # LlamaIndex callback handler that automatically links the execution trace to the dataset item
-    handler = item.get_llama_index_handler(run_name="<run_name>")
-
-    # Update the global LlamaIndex callback manager
-    Settings.callback_manager = CallbackManager([handler])
-
-    # Run your LlamaIndex application on the input
-    index = VectorStoreIndex.from_documents([doc1,doc2])
-    response = index.as_query_engine().query(item.input)
+    # This context manager will automatically link the execution trace to the dataset item
+    with item.observe_llama_index(run_name="<run_name>"):
+        # Run your LlamaIndex application on the input
+        index = VectorStoreIndex.from_documents([doc1, doc2])
+        response = index.as_query_engine().query(item.input)
 ```
 
 </Tab>
