@@ -4,6 +4,10 @@
 
 Repo for [langfuse.com](https://langfuse.com), based on [Nextra](https://nextra.site/)
 
+## GitHub Codespaces
+
+You can easily contribute to the docs using GitHub Codespaces. Just click on the "Code" button and select "Open with Codespaces". This will open a new Codespace with all the dependencies installed and the development server running.
+
 ## Local Development
 
 Pre-requisites: Node.js 18+, pnpm
