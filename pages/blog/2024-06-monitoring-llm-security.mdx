@@ -34,10 +34,14 @@ In the video below, we walk through an example of how to use the open-source sec
 
 ## How to Monitor LLM Security
 
+<Callout type="info">
+
 LLM Security can be addressed with a combination of
 
-- strong run-time security measures by LLM security libraries
-- and asynchrounous evaluations of the effectiveness of these measures in Langfuse
+- LLM Security libraries for run-time security measures
+- Langfuse for the ex-post evaluation of the effectiveness of these measures
+
+</Callout>
 
 ### 1. Run-time security measures with LLM security libraries
 
@@ -45,7 +49,7 @@ There are several popular security libraries that can be used to mitigate securi
 
 1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
 2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
-3. Evaluating prompts and completions in Langfuse based on qualities like toxicity, relevance, or sensitive material.
+3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
 
 ### 2. Asynchronous monitoring and evaluation of security measures with Langfuse
 
