@@ -40,6 +40,7 @@ export const ChangelogIndex = ({ maxItems }: { maxItems?: number }) => (
                 <CloudflareVideo
                   videoId={page.frontMatter?.ogCloudflareVideo}
                   gifStyle
+                  aspectRatio={16 / 9}
                   className="mb-14 rounded relative overflow-hidden shadow-md group-hover:shadow-lg ring-0 border-0"
                 />
               ) : page.frontMatter?.ogVideo ? (

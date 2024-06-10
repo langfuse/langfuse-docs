@@ -58,7 +58,11 @@ export const ChangelogHeader = () => {
       </div>
 
       {showOgInHeader === false ? null : ogCloudflareVideo ? (
-        <CloudflareVideo videoId={ogCloudflareVideo} gifStyle />
+        <CloudflareVideo
+          videoId={ogCloudflareVideo}
+          aspectRatio={16 / 9}
+          gifStyle
+        />
       ) : ogVideo ? (
         <Video src={ogVideo} gifStyle />
       ) : ogImage ? (
