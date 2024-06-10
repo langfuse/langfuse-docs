@@ -1,4 +1,5 @@
 ---
+title: OSS Observability for LangChain
 description: Open source observability for your Langchain application. Python and JS/TS. Automatically capture rich traces and metrics.
 ogImage: /images/docs/langchain_og.png
 ---
@@ -54,7 +55,7 @@ Prefer end-to-end examples?
 
 import { FileCode, GitPullRequestArrow } from "lucide-react";
 
-<Cards num={2}>
+<Cards num={3}>
   <Card
     title="Example (Python)"
     href="/docs/integrations/langchain/example-python"
@@ -65,6 +66,11 @@ import { FileCode, GitPullRequestArrow } from "lucide-react";
     href="/docs/integrations/langchain/example-javascript"
     icon={<FileCode />}
   />
+  <Card
+    title="Example Langserve (Python)"
+    href="/docs/integrations/langchain/example-python-langserve"
+    icon={<FileCode />}
+  />
 </Cards>
 
 ## Additional Configuration
@@ -73,13 +79,14 @@ import { FileCode, GitPullRequestArrow } from "lucide-react";
 
 When initializing the Langfuse handler, you can pass the following **optional** arguments to use more advanced features.
 
-| Python       | JS/TS       | Type   | Description                                                                                     |
-| ------------ | ----------- | ------ | ----------------------------------------------------------------------------------------------- |
-| `user_id`    | `userId`    | string | The current [user](/docs/tracing-features/users).                                               |
-| `session_id` | `sessionId` | string | The current [session](/docs/tracing-features/sessions).                                         |
-| `release`    | `release`   | string | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
-| `version`    | `version`   | string | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
-| `trace_name` |             | string | Customize the name of the created traces. Defaults to name of chain.                            |
+| Python       | JS/TS       | Type    | Description                                                                                     |
+| ------------ | ----------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `user_id`    | `userId`    | string  | The current [user](/docs/tracing-features/users).                                               |
+| `session_id` | `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                         |
+| `release`    | `release`   | string  | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
+| `version`    | `version`   | string  | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
+| `trace_name` |             | string  | Customize the name of the created traces. Defaults to name of chain.                            |
+| `enabled`    | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
 
 ### Supported Langchain interfaces
 
@@ -95,10 +102,6 @@ When initializing the Langfuse handler, you can pass the following **optional** 
 | streaming         | ✅     | ✅    |
 
 We are interested in your feedback! Raise an issue on [GitHub](/ideas) to request support for additional interfaces.
-
-### Customizing the names of trace objects
-
-See [Langchain docs](https://docs.smith.langchain.com/cookbook/tracing-examples/runnable-naming) for details on how to pass custom `run_name`s.
 
 ### Interoperability with Langfuse SDKs [#interoperability]
 
@@ -209,7 +212,7 @@ If you are running a short-lived application, you need to shutdown Langfuse to e
 {/* Python */}
 
 ```python
-langfuse_handler.shutdown_async()
+langfuse_handler.shutdown()
 ```
 
 </Tab>
@@ -224,14 +227,14 @@ await langfuseHandler.shutdownAsync();
 </Tab>
 </Tabs>
 
-If you want to flush events synchronously without shutting down Langfuse, you can use the `flush` method.
+If you want to flush events synchronously at a certain point, you can use the `flush` method. This will wait for all events that are still in the background queue to be sent to the Langfuse API. This is usually discouraged in production environments.
 
 <Tabs items={["Python", "JS"]}>
 <Tab>
 {/* Python */}
 
 ```python
-langfuse_handler.flush_async()
+langfuse_handler.flush()
 ```
 
 </Tab>
@@ -245,3 +248,9 @@ await langfuseHandler.flushAsync();
 
 </Tab>
 </Tabs>
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["integration-langchain"]} />

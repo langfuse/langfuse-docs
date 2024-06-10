@@ -188,9 +188,13 @@ export default async function handler(req: Request, res: Response) {
                 output: completion,
             });
 
-            // Make sure all events are successifully send to Langfuse
-            // before the stream terminates.
-            await langfuse.shutdownAsync();
+            // Make sure all events are successifully send to Langfuse before the stream terminates.
+            await langfuse.flushAsync();
+
+            // If you run on Vercel, waitUntil will do this in a non-blocking way
+            // npm i @vercel/functions
+            // import { waitUntil } from "@vercel/functions";
+            // waitUntil(langfuse.flushAsync())
         },
     });
 

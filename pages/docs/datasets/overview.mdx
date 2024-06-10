@@ -121,11 +121,77 @@ Datasets > Items: `+ New item`
 
 **Create items from production data**
 
+<Tabs items={["UI", "Python", "JS/TS"]}>
+<Tab>
 In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
+</Tab>
+<Tab>
+
+```python
+langfuse.create_dataset_item(
+    dataset_name="<dataset_name>",
+    input={ "text": "hello world" },
+    expected_output={ "text": "hello world" },
+    # link to a trace
+    source_trace_id="<trace_id>",
+    # optional: link to a specific span, event, or generation
+    source_observation_id="<observation_id>"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+langfuse.createDatasetItem({
+  datasetName: "<dataset_name>",
+  input: { text: "hello world" },
+  expectedOutput: { text: "hello world" },
+  // link to a trace
+  sourceTraceId: "<trace_id>",
+  // optional: link to a specific span, event, or generation
+  sourceObservationId: "<observation_id>",
+});
+```
+
+</Tab>
+</Tabs>
 
 **Edit/archive items**
 
-In the UI, you can edit or archive items by clicking on the item in the table. Archiving items will remove them from future experiment runs.
+Archiving items will remove them from future experiment runs.
+
+<Tabs items={["UI", "Python", "JS/TS"]}>
+<Tab>
+In the UI, you can edit or archive items by clicking on the item in the table.
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```python
+langfuse.create_dataset_item(
+    id="<item_id>",
+    # example: update status to "ARCHIVED"
+    status="ARCHIVED"
+)
+```
+
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```ts
+langfuse.createDatasetItem({
+  id: "<item_id>",
+  // example: update status to "ARCHIVED"
+  status: "ARCHIVED",
+});
+```
+
+</Tab>
+</Tabs>
 
 ## Run experiment on a dataset
 
@@ -133,7 +199,35 @@ When running an experiment on a dataset, the application that shall be tested is
 
 Optionally, the output of the application can be evaluated to compare different runs more easily. Use any evaluation function and add a score to the observation. More details on scores/evals [here](/docs/scores/overview).
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)"]}>
+<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "LlamaIndex (Python)"]}>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Make sure your application function is decorated with @observe decorator to automatically link the trace
+    with item.observe(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as trace_id:
+        # run your @observe() decorated application on the dataset item input
+        output = my_llm_application.run(item.input)
+
+        # optionally, evaluate the output to compare different runs more easily
+        langfuse.score(
+            trace_id=trace.id,
+            name="<example_eval>",
+            # any float value
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+```
+
+_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client and see the [Python decorator](/docs/sdk/python/decorators) docs on how to use the `@observe` decorator for your main application function._
+
+</Tab>
 <Tab>
 
 ```python
@@ -210,6 +304,20 @@ for item in dataset.items:
 ```
 
 </Tab>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # This context manager will automatically link the execution trace to the dataset item
+    with item.observe_llama_index(run_name="<run_name>"):
+        # Run your LlamaIndex application on the input
+        index = VectorStoreIndex.from_documents([doc1, doc2])
+        response = index.as_query_engine().query(item.input)
+```
+
+</Tab>
 </Tabs>
 
 ## Evaluate dataset runs
@@ -282,3 +390,9 @@ direction LR
         comment
     }
 ```
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["datasets"]} />

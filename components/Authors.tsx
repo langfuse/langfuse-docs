@@ -37,6 +37,11 @@ export const allAuthors = {
     image: "/images/people/marliesmayerhofer.jpg",
     twitter: "marliessophie",
   },
+  lydiayou: {
+    firstName: "Lydia",
+    name: "Lydia You",
+    image: "/images/people/lydiayou.jpg",
+  },
 } as const;
 
 export const Authors = (props: { authors: (keyof typeof allAuthors)[] }) => {
@@ -63,10 +68,10 @@ export const Author = (props: { author: string }) => {
 
   return (
     <a
-      href={`https://twitter.com/${author.twitter}`}
+      href={author.twitter ? `https://twitter.com/${author.twitter}` : "#"}
       className="group shrink-0"
       target="_blank"
-      key={author.twitter}
+      key={props.author}
       rel="noopener noreferrer"
     >
       <div className="flex items-center gap-4" key={author.name}>

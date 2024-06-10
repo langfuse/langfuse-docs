@@ -98,13 +98,15 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 
 To enable OAuth/SSO provider sign-in for Langfuse, add the following environment variables:
 
-| Provider                                               | Variables                                                                                                                                        | OAuth Redirect URL            |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| [Google](https://next-auth.js.org/providers/google)    | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`<br/>`AUTH_GOOGLE_ALLOW_ACCOUNT_LINKING=true` (optional)                                  | `/api/auth/callback/google`   |
-| [GitHub](https://next-auth.js.org/providers/github)    | `AUTH_GITHUB_CLIENT_ID`<br/>`AUTH_GITHUB_CLIENT_SECRET`<br/>`AUTH_GITHUB_ALLOW_ACCOUNT_LINKING=true` (optional)                                  | `/api/auth/callback/github`   |
-| [AzureAD](https://next-auth.js.org/providers/azure-ad) | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID`<br/>`AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true` (optional) | `/api/auth/callback/azure-ad` |
-| [Okta](https://next-auth.js.org/providers/okta)        | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER`<br/>`AUTH_OKTA_ALLOW_ACCOUNT_LINKING=true` (optional)                 | `/api/auth/callback/okta`     |
-| [Auth0](https://next-auth.js.org/providers/auth0)      | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER`<br/>`AUTH_AUTH0_ALLOW_ACCOUNT_LINKING=true` (optional)             | `/api/auth/callback/auth0`    |
+| Provider                                                                                                                                                                                                 | Variables                                                                                                                                                                              | OAuth Redirect URL            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| [Google](https://next-auth.js.org/providers/google)                                                                                                                                                      | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`<br/>`AUTH_GOOGLE_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                        | `/api/auth/callback/google`   |
+| [GitHub](https://next-auth.js.org/providers/github)                                                                                                                                                      | `AUTH_GITHUB_CLIENT_ID`<br/>`AUTH_GITHUB_CLIENT_SECRET`<br/>`AUTH_GITHUB_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                        | `/api/auth/callback/github`   |
+| [AzureAD](https://next-auth.js.org/providers/azure-ad)                                                                                                                                                   | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID`<br/>`AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true` (optional)                                       | `/api/auth/callback/azure-ad` |
+| [Okta](https://next-auth.js.org/providers/okta)                                                                                                                                                          | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER`<br/>`AUTH_OKTA_ALLOW_ACCOUNT_LINKING=true` (optional)                                                       | `/api/auth/callback/okta`     |
+| [Auth0](https://next-auth.js.org/providers/auth0)                                                                                                                                                        | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER`<br/>`AUTH_AUTH0_ALLOW_ACCOUNT_LINKING=true` (optional)                                                   | `/api/auth/callback/auth0`    |
+| [AWS Cognito](https://next-auth.js.org/providers/cognito)                                                                                                                                                | `AUTH_COGNITO_CLIENT_ID`<br/>`AUTH_COGNITO_CLIENT_SECRET`<br/>`AUTH_COGNITO_ISSUER`<br/>`AUTH_COGNITO_ALLOW_ACCOUNT_LINKING=true` (optional)                                           | `/api/auth/callback/cognito`  |
+| [Custom OAuth](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([implementation](https://github.com/langfuse/langfuse/blob/main/packages/shared/src/server/auth.ts#L60)) | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI)<br/>`AUTH_CUSTOM_ALLOW_ACCOUNT_LINKING=true` (optional) | `/api/auth/callback/custom`   |
 
 Use `*_ALLOW_ACCOUNT_LINKING` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified.
 
@@ -158,6 +160,11 @@ Langfuse is released through tagged semver releases. Check [GitHub releases](htt
 
 ### How to update
 
+<Callout type="info">
+  We recommend enabling automated updates within the current major version to
+  benefit from the latest features, bug fixes, and security patches.
+</Callout>
+
 To update the application:
 
 1. Stop the container.
@@ -166,9 +173,7 @@ To update the application:
 
 During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
 
-We recommend enabling automated updates to benefit from the latest features, bug fixes, and security patches.
-
-### Apply newly supported models to existing data in Langfuse [#migrate-models]
+### (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
 
 Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
 
@@ -206,6 +211,12 @@ Optionally, you can apply the new model definitions to existing data using the f
    ```
 
 4. Clean up: remove the `.env` file to avoid connecting to the production database from your local machine.
+
+## Kubernetes deployments
+
+Kubernetes is a popular choice for deploying Langfuse when teams maintain the rest of their infrastructure using Kubernetes. You can find community-maintained templates and Helm Charts in the [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s) repository.
+
+If you encounter any bugs or have suggestions for improvements, please contribute to the repository by submitting issues or pull requests.
 
 ## Platform-specific information
 
@@ -328,19 +339,11 @@ postgresql://<USER>:<PASSWORD>@<ALLOY_DB_PRIVATE_IP>:5432/<ALLOY_DB_DATABASE>/?s
 postgresql://<USER>:<PASSWORD>@<ALLOY_DB_PRIVATE_IP>:5432/<ALLOY_DB_DATABASE>/?sslmode=none
 ```
 
-### AWS (Fargate)
-
-Deploy Langfuse to AWS using the AWS Fargate service for serverless container deployment. You can find the deployment guide and Cloud Development Kit (CDK) scripts here: [AI4Organization/langfuse-ecr-ecs-deployment-cdk](https://github.com/AI4Organization/langfuse-ecr-ecs-deployment-cdk).
-
 ### Azure
 
 Deploy Langfuse to Azure using the Azure Container Instances service for a flexible and low-maintenance container deployment. Note: you can use Azure AD for SSO.
 
 You can deploy Langfuse to Azure via the Azure Developer CLI using this template: [Azure-Samples/langfuse-on-azure](https://github.com/Azure-Samples/langfuse-on-azure).
-
-### Kubernetes
-
-Not really a platform, but Kubernetes is a popular way to deploy Langfuse. You can find community-maintained templates and Helm Chart at [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s).
 
 ### Heroku
 
@@ -431,11 +434,6 @@ To deploy this image on heroku you have to run through the steps in the followin
    heroku container:release web --app=[HEROKU_APP_NAME]
    ```
 
-## FAQ
-
-- **Are there prebuilt ARM images available?** No, currently we do not publish official ARM images. However, you can build your own ARM images using the Dockerfile in the Langfuse repository.
-- **Can I deploy multiple instances of Langfuse behind a load balancer?** Yes, you can deploy multiple instances of Langfuse behind a load balancer. Make sure that your database is configured to handle the number of connections.
-
 ## Support
 
 If you experience any issues, please join us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
@@ -443,3 +441,9 @@ If you experience any issues, please join us on [Discord](/discord) or contact t
 For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
 
 Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["self-hosting"]} />

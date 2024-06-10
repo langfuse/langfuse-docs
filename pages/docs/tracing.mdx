@@ -124,6 +124,12 @@ import { Users, Tag, MessagesSquare, Braces, Globe } from "lucide-react";
   />
 </Cards>
 
+## Enable/disable tracing
+
+All Langfuse SDKs and integrations are designed to be non-intrusive. You can add Langfuse tracing to your application while being able to enable it only in specific environments.
+
+By default, the Langfuse Tracing is enabled if an API key is set. You can manually disable tracing via the `enabled` flag. See the documentation for the specific SDK or integration for more details.
+
 ## Event queuing/batching [#queuing-batching]
 
 Langfuse's client SDKs and integrations are all designed to queue and batch requests in the background to optimize API calls and network time. Batches are determined by a combination of time and size (number of events and size of batch).
@@ -132,10 +138,10 @@ Langfuse's client SDKs and integrations are all designed to queue and batch requ
 
 All integrations have a sensible default configuration, but you can customise the batching behaviour to suit your needs.
 
-| Option (Python)      | Option (JS)          | Description                                              |
-| -------------------- | -------------------- | -------------------------------------------------------- |
-| `flush_at`           | `flushAt`            | The maximum number of events to batch up before sending. |
-| `flush_interval` (s) | `flushInterval` (ms) | The maximum time to wait before sending a batch.         |
+| Option (Python) [SDK constructor, Environment]  | Option (JS)          | Description                                              |
+| ----------------------------------------------- | -------------------- | -------------------------------------------------------- |
+| `flush_at`, `LANGFUSE_FLUSH_AT`                 | `flushAt`            | The maximum number of events to batch up before sending. |
+| `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s) | `flushInterval` (ms) | The maximum time to wait before sending a batch.         |
 
 You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=1000` to send every second.
 
@@ -182,6 +188,26 @@ If you exit the application, use `shutdownAsync` method to make sure all request
 await langfuse.shutdownAsync();
 ```
 
+**If you run on Vercel**, the [`waitUntil()`](https://vercel.com/docs/functions/functions-api-reference#waituntil) method enqueues an asynchronous task to be performed during the lifecycle of the request. It doesn't block the response, but should complete before shutting down the function. Thereby, it ensures that all events are flushed before the function exits without delaying the response.
+
+```sh
+npm i @vercel/functions
+```
+
+```javascript
+import { waitUntil } from "@vercel/functions";
+
+export async function POST(req, res) {
+  // your code involving langfuse
+
+  // Flush events to Langfuse without blocking the response
+  waitUntil(langfuse.flushAsync());
+
+  // Send response to client
+  return res.status(200).send("OK");
+}
+```
+
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}
@@ -222,3 +248,9 @@ langfuse_handler.flush()
 
 </Tab>
 </Tabs>
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["tracing"]} />

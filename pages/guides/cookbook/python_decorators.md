@@ -335,7 +335,7 @@ Make sure to call `langfuse_context.flush()` before exiting to prevent this. Thi
 
 ### Scoring
 
-[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. You can create them manually in the Langfuse UI, run model-based evaluation or ingest via the SDK.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. You can create them via our annotation workflow in the Langfuse UI, run model-based evaluation or ingest via the SDK.
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---

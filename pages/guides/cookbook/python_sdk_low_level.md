@@ -54,10 +54,13 @@ langfuse = Langfuse()
 | --- | --- | ---
 | `LANGFUSE_PUBLIC_KEY`, `public_key` | Public key, get in project settings |
 | `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings |
-| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"`       
+| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"` |
+| no env, `enabled` | Optional. Manually enable/disable tracing. | If keys are provided, enabled defaults to `True`, otherwise `False` |
 | `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
 | `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
-| n/a, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
+| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
 
 ## Tracing
 
@@ -309,7 +312,7 @@ See documentation of spans above on how to use the langfuse client and ids if yo
 
 ## Scores
 
-[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can created manually via the Langfuse UI or via the SDKs.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can be created via Annotation in the Langfuse UI or via the SDKs.
 
 If the score relates to a specific step of the trace, specify the `observation_id`.
 
@@ -405,6 +408,38 @@ Use auth_check() to verify that your host and api credentials are correct.
 
 ```python
 langfuse.auth_check()
+```
+
+### Google Cloud Functions
+
+When using Langfuse in a Google Cloud Function or a Firebase Function, the underlying managed Python runtime has issues with threading whenever threads are spawned off the main scope and not inside the actual function scope. [See here](https://www.googlecloudcommunity.com/gc/Serverless/The-issue-with-pythons-s-threading-on-Google-Function/m-p/614384). Since Langfuse uses background threads to deliver the observability events, this will lead to incomplete traces.
+
+Make sure to initialize Langfuse always _inside_ the function body. If you want to reuse the created Langfuse clients in different modules, use lazy initialization of the Langfuse client to ensure the actual initialization occurs inside the function execution context.
+
+```python
+import functions_framework
+from langfuse import Langfuse
+
+
+# Lazy initialization of the Langfuse client to allow imports in other modules
+def get_langfuse():
+    if not hasattr(get_langfuse, "langfuse"):
+        get_langfuse.langfuse = Langfuse(debug=True)
+
+    return get_langfuse.langfuse
+
+
+# Google Cloud Function
+@functions_framework.http
+def hello_world(request):
+    langfuse = get_langfuse()
+
+    response = "Hello world!"
+    langfuse.trace(name="my-cloud-function", output=response)
+
+    langfuse.flush()  # Ensure all events are sent before the function terminates
+
+    return response
 ```
 
 ## Upgrading from v1.x.x to v2.x.x
