@@ -484,9 +484,32 @@ Alternatively, you can enable debugging to get detailed logs of what's happening
 langfuse.debug();
 ```
 
-## Short lived execution environments (lambda, serverless) [#lambda]
+## Short lived execution environments (lambda, serverless, Vercel, Cloudflare) [#lambda]
 
-The SDK is optimize to run in the background to queue and flush all requests. When the process exits use `await langfuse.shutdownAsync()` to make sure all requests are flushed and pending requests are awaited.
+The SDK is optimize to run in the background to queue and flush all requests. Events can get lost if the process exits before all requests are flushed. To ensure all events are sent, use one of the following patterns:
+
+### Option 1: Waiting for `flushAsync` but returning immediately
+
+Some platforms/frameworks support waiting for promises after the response but before exiting the process. This is the preferred way to ensure all events are sent without blocking the process.
+
+Note: Most of these execution environments have a timeout after which the process is killed. Some of them lack observability to monitor these dangling promises.
+
+- Cloudflare workers: [`waitUntil`](https://developers.cloudflare.com/workers/runtime-apis/handlers/fetch) ([mdn](https://developer.mozilla.org/en-US/docs/Web/API/ExtendableEvent/waitUntil), [example](https://gist.github.com/arunesh90/3b0fef2c1c77b106b14ebba9ea26321c))
+- Vercel (e.g. NextJs): [`waitUntil`](https://vercel.com/docs/functions/functions-api-reference#waituntil)
+
+  ```sh
+  npm i @vercel/functions
+  ```
+
+  ```typescript
+  import { waitUntil } from "@vercel/functions";
+  // within the api handler
+  waitUntil(langfuse.flushAsync());
+  ```
+
+### Option 2: `shutdownAsync`
+
+When the process exits use `await langfuse.shutdownAsync()` to make sure all requests are flushed and pending requests are awaited. Call this once at the end of your process.
 
 Example:
 
@@ -519,7 +542,9 @@ This release includes breaking changes only for users of the [Langchain JS integ
 You can automatically migrate your codebase using [grit](https://www.grit.io/), either [online](https://app.grit.io/migrations/new/langfuse_node_v2) or with the following CLI command:
 
 ```
+
 npx @getgrit/launcher apply langfuse_node_v2
+
 ```
 
 The grit binary executes entirely locally with AST-based transforms. Be sure to audit its changes: we suggest ensuring you have a clean working tree beforehand, and running `git add --patch` afterwards.
