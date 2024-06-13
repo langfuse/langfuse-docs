@@ -232,20 +232,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "launch-week-5",
-  //   dismissible: false,
-  //   text: (
-  //     <Link href="/launch">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Langfuse Launch Week →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Langfuse Launch Week, Day 5: Model-based Evaluation →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "banner-hiring-june",
+    dismissible: true,
+    text: (
+      <Link href="/careers">
+        {/* mobile */}
+        <span className="sm:hidden">Join us in Engineering & DevRel →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          We're hiring. Join us in Product Eng, Backend Eng, and DevRel →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
