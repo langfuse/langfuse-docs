@@ -67,15 +67,48 @@ Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metr
 ```python
 # import metrics
 from ragas.metrics import faithfulness, answer_relevancy, context_precision
-from ragas.metrics.critique import SUPPORTED_ASPECTS, harmfulness
+from ragas.metrics.critique import harmfulness
 
 # metrics you chose
-metrics = [faithfulness, answer_relevancy, context_precision, harmfulness]
+metrics = [faithfulness, answer_relevancy, context_precision, harmfulness]    
+```
 
-for m in metrics:
-    print(m.name)
-    # also init the metrics
-    m.init_model()
+Now you have to initialize the metrics with LLMs and Embeddings of your choice. In this example we are going to use OpenAI.
+
+
+```python
+from ragas.run_config import RunConfig
+from ragas.metrics.base import MetricWithLLM, MetricWithEmbeddings
+
+
+# util function to init Ragas Metrics
+def init_ragas_metrics(metrics, llm, embedding):
+    for metric in metrics:
+        if isinstance(metric, MetricWithLLM):
+            metric.llm = llm
+        if isinstance(metric, MetricWithEmbeddings):
+            metric.embeddings = embedding
+        run_config = RunConfig()
+        metric.init(run_config)
+```
+
+
+```python
+from langchain_openai.chat_models import ChatOpenAI
+from langchain_openai.embeddings import OpenAIEmbeddings
+
+# wrappers
+from ragas.llms import LangchainLLMWrapper
+from ragas.embeddings import LangchainEmbeddingsWrapper
+
+llm = ChatOpenAI()
+emb = OpenAIEmbeddings()
+
+init_ragas_metrics(
+    metrics,
+    llm=LangchainLLMWrapper(llm),
+    embedding=LangchainEmbeddingsWrapper(emb),
+)
 ```
 
 ## The Setup
@@ -113,12 +146,12 @@ Here we are defining a utility function to score your trace with the metrics you
 
 
 ```python
-def score_with_ragas(query, chunks, answer):
+async def score_with_ragas(query, chunks, answer):
     scores = {}
     for m in metrics:
         print(f"calculating {m.name}")
-        scores[m.name] = m.score_single(
-            {'question': query, 'contexts': chunks, 'answer': answer}
+        scores[m.name] = await m.ascore(
+            row={"question": query, "contexts": chunks, "answer": answer}
         )
     return scores
 ```
@@ -152,7 +185,7 @@ trace.span(
 )
 
 # compute scores for the question, context, answer tuple
-ragas_scores = score_with_ragas(question, contexts, answer)
+ragas_scores = await score_with_ragas(question, contexts, answer)
 ragas_scores
 ```
 
