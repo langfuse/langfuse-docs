@@ -39,8 +39,8 @@ dependencies:
     specifier: ^1.0.4
     version: 1.0.4(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
   '@supabase/supabase-js':
-    specifier: ^2.43.4
-    version: 2.43.4
+    specifier: ^2.43.5
+    version: 2.43.5
   '@tanstack/react-table':
     specifier: ^8.16.0
     version: 8.17.3(react-dom@18.3.1)(react@18.3.1)
@@ -51,8 +51,8 @@ dependencies:
     specifier: ^0.6.15
     version: 0.6.15(@types/react@18.3.3)(maverick.js@0.37.0)(react@18.3.1)(vidstack@0.6.15)
   ai:
-    specifier: ^3.1.34
-    version: 3.1.35(react@18.3.1)(solid-js@1.8.17)(svelte@4.2.18)(vue@3.4.27)(zod@3.23.8)
+    specifier: ^3.1.36
+    version: 3.1.36(react@18.3.1)(solid-js@1.8.17)(svelte@4.2.18)(vue@3.4.29)(zod@3.23.8)
   autoprefixer:
     specifier: ^10.4.19
     version: 10.4.19(postcss@8.4.38)
@@ -156,8 +156,8 @@ devDependencies:
 
 packages:
 
-  /@ai-sdk/provider-utils@0.0.13(zod@3.23.8):
-    resolution: {integrity: sha512-cB2dPm9flj+yin5sjBLFcXdW8sZtAXLE/OLKgz9uHpHM55s7mnwZrDGfO6ot/ukHTxDDJunZLW7qSjgK/u0F1g==}
+  /@ai-sdk/provider-utils@0.0.14(zod@3.23.8):
+    resolution: {integrity: sha512-PCQFN3MlC6DShS/81IFU9NVvt9OekQGiZTEowRc2AwAwWrDsv7er3UkcMswFAL/Z7xZKjgu0dZTNH1z9oUlo7A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -179,8 +179,8 @@ packages:
       json-schema: 0.4.0
     dev: false
 
-  /@ai-sdk/react@0.0.1(react@18.3.1)(zod@3.23.8):
-    resolution: {integrity: sha512-y6KXzxRR7vmAgDVnS/hnLPt3RztvWOisANBw47O1o1D2nDeUqTo8E/SNw2J8mzzlRInGaw40EREY8jEf9AcwWQ==}
+  /@ai-sdk/react@0.0.2(react@18.3.1)(zod@3.23.8):
+    resolution: {integrity: sha512-segG03b5Gdt5h2Q41Ylfn88Rv5OiyXBZOi1ycQ/4MSkQX0D6WLJ8QhNIPkI5ie2qLeQA7sVqFLVuDTnpZQtDSg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ^19
@@ -188,16 +188,16 @@ packages:
       react:
         optional: true
     dependencies:
-      '@ai-sdk/provider-utils': 0.0.13(zod@3.23.8)
-      '@ai-sdk/ui-utils': 0.0.1(zod@3.23.8)
+      '@ai-sdk/provider-utils': 0.0.14(zod@3.23.8)
+      '@ai-sdk/ui-utils': 0.0.2(zod@3.23.8)
       react: 18.3.1
       swr: 2.2.0(react@18.3.1)
     transitivePeerDependencies:
       - zod
     dev: false
 
-  /@ai-sdk/solid@0.0.1(solid-js@1.8.17)(zod@3.23.8):
-    resolution: {integrity: sha512-5WWdoqpemYW66rMZUYF4sbDtZfF96Vt8RtrzpLv+95ZUM1nY1elxAWpHCeOyYEjWJE5+eiKpUs6Jr5mP2/gz8Q==}
+  /@ai-sdk/solid@0.0.2(solid-js@1.8.17)(zod@3.23.8):
+    resolution: {integrity: sha512-zGj01mXzar10XwRwWGb0tQ4dLf4M3lGGdcZ2eDm79BN2U4KhNtEwyELKg+EaKdqHgfYJDyiotuqKjT4bcEFttQ==}
     engines: {node: '>=18'}
     peerDependencies:
       solid-js: ^1.7.7
@@ -205,7 +205,7 @@ packages:
       solid-js:
         optional: true
     dependencies:
-      '@ai-sdk/ui-utils': 0.0.1(zod@3.23.8)
+      '@ai-sdk/ui-utils': 0.0.2(zod@3.23.8)
       solid-js: 1.8.17
       solid-swr-store: 0.10.7(solid-js@1.8.17)(swr-store@0.10.6)
       swr-store: 0.10.6
@@ -213,8 +213,8 @@ packages:
       - zod
     dev: false
 
-  /@ai-sdk/svelte@0.0.1(svelte@4.2.18)(zod@3.23.8):
-    resolution: {integrity: sha512-bpjTLKOwdcXjJzboq15etT1hdnRI1ErPZweWSsu1/LJlEFzD1M0qpZQwWHwPquYkzeppXOgsLrUZ+9D2RoC47Q==}
+  /@ai-sdk/svelte@0.0.2(svelte@4.2.18)(zod@3.23.8):
+    resolution: {integrity: sha512-q5heL7XxDzm2z3mxEESZuTx4rgOKMiKA5UkobFrUQgdJeE2jk/Efyl+1urvU8JWOZ5gokDS8beW1WA10LuuIvw==}
     engines: {node: '>=18'}
     peerDependencies:
       svelte: ^3.0.0 || ^4.0.0
@@ -222,25 +222,25 @@ packages:
       svelte:
         optional: true
     dependencies:
-      '@ai-sdk/provider-utils': 0.0.13(zod@3.23.8)
-      '@ai-sdk/ui-utils': 0.0.1(zod@3.23.8)
+      '@ai-sdk/provider-utils': 0.0.14(zod@3.23.8)
+      '@ai-sdk/ui-utils': 0.0.2(zod@3.23.8)
       sswr: 2.1.0(svelte@4.2.18)
       svelte: 4.2.18
     transitivePeerDependencies:
       - zod
     dev: false
 
-  /@ai-sdk/ui-utils@0.0.1(zod@3.23.8):
-    resolution: {integrity: sha512-zOr1zIw/EH4fEQvDKsqYG3wY7GW32h8Wrx0lQpSAP59UCA4zgHBH6ogF5oj7+LUuWjT6be9S0G3l/tEPyRyxEw==}
+  /@ai-sdk/ui-utils@0.0.2(zod@3.23.8):
+    resolution: {integrity: sha512-CpWKvYO99UC72oHUts5MrJGPHEoOWrxhN4R8KjeHanZn7cosJ3bal++seSGJrwDz2ImqrpfAdRHmQtdbsCCOyQ==}
     engines: {node: '>=18'}
     dependencies:
-      '@ai-sdk/provider-utils': 0.0.13(zod@3.23.8)
+      '@ai-sdk/provider-utils': 0.0.14(zod@3.23.8)
     transitivePeerDependencies:
       - zod
     dev: false
 
-  /@ai-sdk/vue@0.0.1(vue@3.4.27)(zod@3.23.8):
-    resolution: {integrity: sha512-B3qAW22FYGy1ltobnF7LiPAmARTrCkH15qjw4WAXCnvRohsYOFTDACOBEsXRfa1OHmqWsUOYeNtE/oPhK3ybqw==}
+  /@ai-sdk/vue@0.0.2(vue@3.4.29)(zod@3.23.8):
+    resolution: {integrity: sha512-AfhB1YbdvqeZKheBsjeRsYZOJK2N/InC0VtWook08jiLgI47cau444Bj5dmx6401a1de/3tjw218G4rpJM/icA==}
     engines: {node: '>=18'}
     peerDependencies:
       vue: ^3.3.4
@@ -248,9 +248,9 @@ packages:
       vue:
         optional: true
     dependencies:
-      '@ai-sdk/ui-utils': 0.0.1(zod@3.23.8)
-      swrv: 1.0.4(vue@3.4.27)
-      vue: 3.4.27(typescript@5.4.5)
+      '@ai-sdk/ui-utils': 0.0.2(zod@3.23.8)
+      swrv: 1.0.4(vue@3.4.29)
+      vue: 3.4.29(typescript@5.4.5)
     transitivePeerDependencies:
       - zod
     dev: false
@@ -1463,8 +1463,8 @@ packages:
       '@supabase/node-fetch': 2.6.15
     dev: false
 
-  /@supabase/functions-js@2.3.1:
-    resolution: {integrity: sha512-QyzNle/rVzlOi4BbVqxLSH828VdGY1RElqGFAj+XeVypj6+PVtMlD21G8SDnsPQDtlqqTtoGRgdMlQZih5hTuw==}
+  /@supabase/functions-js@2.4.1:
+    resolution: {integrity: sha512-8sZ2ibwHlf+WkHDUZJUXqqmPvWQ3UHN0W30behOJngVh/qHHekhJLCFbh0AjkE9/FqqXtf9eoVvmYgfCLk5tNA==}
     dependencies:
       '@supabase/node-fetch': 2.6.15
     dev: false
@@ -1476,8 +1476,8 @@ packages:
       whatwg-url: 5.0.0
     dev: false
 
-  /@supabase/postgrest-js@1.15.2:
-    resolution: {integrity: sha512-9/7pUmXExvGuEK1yZhVYXPZnLEkDTwxgMQHXLrN5BwPZZm4iUCL1YEyep/Z2lIZah8d8M433mVAUEGsihUj5KQ==}
+  /@supabase/postgrest-js@1.15.5:
+    resolution: {integrity: sha512-YR4TiitTE2hizT7mB99Cl3V9i00RAY5sUxS2/NuWWzkreM7OeYlP2OqnqVwwb4z6ILn+j8x9e/igJDepFhjswQ==}
     dependencies:
       '@supabase/node-fetch': 2.6.15
     dev: false
@@ -1488,27 +1488,27 @@ packages:
       '@supabase/node-fetch': 2.6.15
       '@types/phoenix': 1.6.4
       '@types/ws': 8.5.10
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
     dev: false
 
-  /@supabase/storage-js@2.5.5:
-    resolution: {integrity: sha512-OpLoDRjFwClwc2cjTJZG8XviTiQH4Ik8sCiMK5v7et0MDu2QlXjCAW3ljxJB5+z/KazdMOTnySi+hysxWUPu3w==}
+  /@supabase/storage-js@2.6.0:
+    resolution: {integrity: sha512-REAxr7myf+3utMkI2oOmZ6sdplMZZ71/2NEIEMBZHL9Fkmm3/JnaOZVSRqvG4LStYj2v5WhCruCzuMn6oD/Drw==}
     dependencies:
       '@supabase/node-fetch': 2.6.15
     dev: false
 
-  /@supabase/supabase-js@2.43.4:
-    resolution: {integrity: sha512-/pLPaxiIsn5Vaz3s32HC6O/VNwfeddnzS0bZRpOW0AKcPuXroD8pT9G8mpiBlZfpKsMmq6k7tlhW7Sr1PAQ1lw==}
+  /@supabase/supabase-js@2.43.5:
+    resolution: {integrity: sha512-Y4GukjZWW6ouohMaPlYz8tSz9ykf9jY7w9/RhqKuScmla3Xiklce8eLr8TYAtA+oQYCWxo3RgS3B6O4rd/72FA==}
     dependencies:
       '@supabase/auth-js': 2.64.2
-      '@supabase/functions-js': 2.3.1
+      '@supabase/functions-js': 2.4.1
       '@supabase/node-fetch': 2.6.15
-      '@supabase/postgrest-js': 1.15.2
+      '@supabase/postgrest-js': 1.15.5
       '@supabase/realtime-js': 2.9.5
-      '@supabase/storage-js': 2.5.5
+      '@supabase/storage-js': 2.6.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -1737,77 +1737,78 @@ packages:
       vidstack: 0.6.15
     dev: false
 
-  /@vue/compiler-core@3.4.27:
-    resolution: {integrity: sha512-E+RyqY24KnyDXsCuQrI+mlcdW3ALND6U7Gqa/+bVwbcpcR3BRRIckFoz7Qyd4TTlnugtwuI7YgjbvsLmxb+yvg==}
+  /@vue/compiler-core@3.4.29:
+    resolution: {integrity: sha512-TFKiRkKKsRCKvg/jTSSKK7mYLJEQdUiUfykbG49rubC9SfDyvT2JrzTReopWlz2MxqeLyxh9UZhvxEIBgAhtrg==}
     dependencies:
       '@babel/parser': 7.24.7
-      '@vue/shared': 3.4.27
+      '@vue/shared': 3.4.29
       entities: 4.5.0
       estree-walker: 2.0.2
       source-map-js: 1.2.0
     dev: false
 
-  /@vue/compiler-dom@3.4.27:
-    resolution: {integrity: sha512-kUTvochG/oVgE1w5ViSr3KUBh9X7CWirebA3bezTbB5ZKBQZwR2Mwj9uoSKRMFcz4gSMzzLXBPD6KpCLb9nvWw==}
+  /@vue/compiler-dom@3.4.29:
+    resolution: {integrity: sha512-A6+iZ2fKIEGnfPJejdB7b1FlJzgiD+Y/sxxKwJWg1EbJu6ZPgzaPQQ51ESGNv0CP6jm6Z7/pO6Ia8Ze6IKrX7w==}
     dependencies:
-      '@vue/compiler-core': 3.4.27
-      '@vue/shared': 3.4.27
+      '@vue/compiler-core': 3.4.29
+      '@vue/shared': 3.4.29
     dev: false
 
-  /@vue/compiler-sfc@3.4.27:
-    resolution: {integrity: sha512-nDwntUEADssW8e0rrmE0+OrONwmRlegDA1pD6QhVeXxjIytV03yDqTey9SBDiALsvAd5U4ZrEKbMyVXhX6mCGA==}
+  /@vue/compiler-sfc@3.4.29:
+    resolution: {integrity: sha512-zygDcEtn8ZimDlrEQyLUovoWgKQic6aEQqRXce2WXBvSeHbEbcAsXyCk9oG33ZkyWH4sl9D3tkYc1idoOkdqZQ==}
     dependencies:
       '@babel/parser': 7.24.7
-      '@vue/compiler-core': 3.4.27
-      '@vue/compiler-dom': 3.4.27
-      '@vue/compiler-ssr': 3.4.27
-      '@vue/shared': 3.4.27
+      '@vue/compiler-core': 3.4.29
+      '@vue/compiler-dom': 3.4.29
+      '@vue/compiler-ssr': 3.4.29
+      '@vue/shared': 3.4.29
       estree-walker: 2.0.2
       magic-string: 0.30.10
       postcss: 8.4.38
       source-map-js: 1.2.0
     dev: false
 
-  /@vue/compiler-ssr@3.4.27:
-    resolution: {integrity: sha512-CVRzSJIltzMG5FcidsW0jKNQnNRYC8bT21VegyMMtHmhW3UOI7knmUehzswXLrExDLE6lQCZdrhD4ogI7c+vuw==}
+  /@vue/compiler-ssr@3.4.29:
+    resolution: {integrity: sha512-rFbwCmxJ16tDp3N8XCx5xSQzjhidYjXllvEcqX/lopkoznlNPz3jyy0WGJCyhAaVQK677WWFt3YO/WUEkMMUFQ==}
     dependencies:
-      '@vue/compiler-dom': 3.4.27
-      '@vue/shared': 3.4.27
+      '@vue/compiler-dom': 3.4.29
+      '@vue/shared': 3.4.29
     dev: false
 
-  /@vue/reactivity@3.4.27:
-    resolution: {integrity: sha512-kK0g4NknW6JX2yySLpsm2jlunZJl2/RJGZ0H9ddHdfBVHcNzxmQ0sS0b09ipmBoQpY8JM2KmUw+a6sO8Zo+zIA==}
+  /@vue/reactivity@3.4.29:
+    resolution: {integrity: sha512-w8+KV+mb1a8ornnGQitnMdLfE0kXmteaxLdccm2XwdFxXst4q/Z7SEboCV5SqJNpZbKFeaRBBJBhW24aJyGINg==}
     dependencies:
-      '@vue/shared': 3.4.27
+      '@vue/shared': 3.4.29
     dev: false
 
-  /@vue/runtime-core@3.4.27:
-    resolution: {integrity: sha512-7aYA9GEbOOdviqVvcuweTLe5Za4qBZkUY7SvET6vE8kyypxVgaT1ixHLg4urtOlrApdgcdgHoTZCUuTGap/5WA==}
+  /@vue/runtime-core@3.4.29:
+    resolution: {integrity: sha512-s8fmX3YVR/Rk5ig0ic0NuzTNjK2M7iLuVSZyMmCzN/+Mjuqqif1JasCtEtmtoJWF32pAtUjyuT2ljNKNLeOmnQ==}
     dependencies:
-      '@vue/reactivity': 3.4.27
-      '@vue/shared': 3.4.27
+      '@vue/reactivity': 3.4.29
+      '@vue/shared': 3.4.29
     dev: false
 
-  /@vue/runtime-dom@3.4.27:
-    resolution: {integrity: sha512-ScOmP70/3NPM+TW9hvVAz6VWWtZJqkbdf7w6ySsws+EsqtHvkhxaWLecrTorFxsawelM5Ys9FnDEMt6BPBDS0Q==}
+  /@vue/runtime-dom@3.4.29:
+    resolution: {integrity: sha512-gI10atCrtOLf/2MPPMM+dpz3NGulo9ZZR9d1dWo4fYvm+xkfvRrw1ZmJ7mkWtiJVXSsdmPbcK1p5dZzOCKDN0g==}
     dependencies:
-      '@vue/runtime-core': 3.4.27
-      '@vue/shared': 3.4.27
+      '@vue/reactivity': 3.4.29
+      '@vue/runtime-core': 3.4.29
+      '@vue/shared': 3.4.29
       csstype: 3.1.3
     dev: false
 
-  /@vue/server-renderer@3.4.27(vue@3.4.27):
-    resolution: {integrity: sha512-dlAMEuvmeA3rJsOMJ2J1kXU7o7pOxgsNHVr9K8hB3ImIkSuBrIdy0vF66h8gf8Tuinf1TK3mPAz2+2sqyf3KzA==}
+  /@vue/server-renderer@3.4.29(vue@3.4.29):
+    resolution: {integrity: sha512-HMLCmPI2j/k8PVkSBysrA2RxcxC5DgBiCdj7n7H2QtR8bQQPqKAe8qoaxLcInzouBmzwJ+J0x20ygN/B5mYBng==}
     peerDependencies:
-      vue: 3.4.27
+      vue: 3.4.29
     dependencies:
-      '@vue/compiler-ssr': 3.4.27
-      '@vue/shared': 3.4.27
-      vue: 3.4.27(typescript@5.4.5)
+      '@vue/compiler-ssr': 3.4.29
+      '@vue/shared': 3.4.29
+      vue: 3.4.29(typescript@5.4.5)
     dev: false
 
-  /@vue/shared@3.4.27:
-    resolution: {integrity: sha512-DL3NmY2OFlqmYYrzp39yi3LDkKxa5vZVwxWdQ3rG0ekuWscHraeIbnI8t+aZK7qhYqEqWKTUdijadunb9pnrgA==}
+  /@vue/shared@3.4.29:
+    resolution: {integrity: sha512-hQ2gAQcBO/CDpC82DCrinJNgOHI2v+FA7BDW4lMSPeBpQ7sRe2OLHWe5cph1s7D8DUQAwRt18dBDfJJ220APEA==}
     dev: false
 
   /acorn-jsx@5.3.2(acorn@8.11.3):
@@ -1828,8 +1829,14 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  /ai@3.1.35(react@18.3.1)(solid-js@1.8.17)(svelte@4.2.18)(vue@3.4.27)(zod@3.23.8):
-    resolution: {integrity: sha512-kr0GAKe3HrUqk0SSII8MrOyBC/Lsglh37ayYrGzzEo3QQ0igriBdVTQed+8UYljbnYikEglbLfwXAzg3qH6u4g==}
+  /acorn@8.12.0:
+    resolution: {integrity: sha512-RTvkC4w+KNXrM39/lWCUaG0IbRkWdCv7W/IOW9oU6SawyxulvkQy5HQPVTKxEjczcUvapcrw3cFx/60VN/NRNw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+    dev: false
+
+  /ai@3.1.36(react@18.3.1)(solid-js@1.8.17)(svelte@4.2.18)(vue@3.4.29)(zod@3.23.8):
+    resolution: {integrity: sha512-mYAMofD43mrdMa4m0Bd3W/xsrjJeAMBg+jBDZtWdQWb+mipE7gY0CVbcG4AgEYXkJdPFV7/I8d7fC6QKfAw5+w==}
     engines: {node: '>=18'}
     peerDependencies:
       openai: ^4.42.0
@@ -1847,12 +1854,12 @@ packages:
         optional: true
     dependencies:
       '@ai-sdk/provider': 0.0.10
-      '@ai-sdk/provider-utils': 0.0.13(zod@3.23.8)
-      '@ai-sdk/react': 0.0.1(react@18.3.1)(zod@3.23.8)
-      '@ai-sdk/solid': 0.0.1(solid-js@1.8.17)(zod@3.23.8)
-      '@ai-sdk/svelte': 0.0.1(svelte@4.2.18)(zod@3.23.8)
-      '@ai-sdk/ui-utils': 0.0.1(zod@3.23.8)
-      '@ai-sdk/vue': 0.0.1(vue@3.4.27)(zod@3.23.8)
+      '@ai-sdk/provider-utils': 0.0.14(zod@3.23.8)
+      '@ai-sdk/react': 0.0.2(react@18.3.1)(zod@3.23.8)
+      '@ai-sdk/solid': 0.0.2(solid-js@1.8.17)(zod@3.23.8)
+      '@ai-sdk/svelte': 0.0.2(svelte@4.2.18)(zod@3.23.8)
+      '@ai-sdk/ui-utils': 0.0.2(zod@3.23.8)
+      '@ai-sdk/vue': 0.0.2(vue@3.4.29)(zod@3.23.8)
       eventsource-parser: 1.1.2
       json-schema: 0.4.0
       jsondiffpatch: 0.6.0
@@ -2135,7 +2142,7 @@ packages:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
       '@types/estree': 1.0.5
-      acorn: 8.11.3
+      acorn: 8.12.0
       estree-walker: 3.0.3
       periscopic: 3.1.0
     dev: false
@@ -5694,7 +5701,7 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.15
       '@jridgewell/trace-mapping': 0.3.25
       '@types/estree': 1.0.5
-      acorn: 8.11.3
+      acorn: 8.12.0
       aria-query: 5.3.0
       axobject-query: 4.0.0
       code-red: 1.0.4
@@ -5736,12 +5743,12 @@ packages:
     resolution: {integrity: sha512-LqVcOHSB4cPGgitD1riJ1Hh4vdmITOp+BkmfmXRh4hSF/t7EnS4iD+SOTmq7w5pPm/SiPeto4ADbKS6dHUDWFA==}
     dev: false
 
-  /swrv@1.0.4(vue@3.4.27):
+  /swrv@1.0.4(vue@3.4.29):
     resolution: {integrity: sha512-zjEkcP8Ywmj+xOJW3lIT65ciY/4AL4e/Or7Gj0MzU3zBJNMdJiT8geVZhINavnlHRMMCcJLHhraLTAiDOTmQ9g==}
     peerDependencies:
       vue: '>=3.2.26 < 4'
     dependencies:
-      vue: 3.4.27(typescript@5.4.5)
+      vue: 3.4.29(typescript@5.4.5)
     dev: false
 
   /tabbable@6.2.0:
@@ -6166,19 +6173,19 @@ packages:
     resolution: {integrity: sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==}
     dev: false
 
-  /vue@3.4.27(typescript@5.4.5):
-    resolution: {integrity: sha512-8s/56uK6r01r1icG/aEOHqyMVxd1bkYcSe9j8HcKtr/xTOFWvnzIVTehNW+5Yt89f+DLBe4A569pnZLS5HzAMA==}
+  /vue@3.4.29(typescript@5.4.5):
+    resolution: {integrity: sha512-8QUYfRcYzNlYuzKPfge1UWC6nF9ym0lx7mpGVPJYNhddxEf3DD0+kU07NTL0sXuiT2HuJuKr/iEO8WvXvT0RSQ==}
     peerDependencies:
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
-      '@vue/compiler-dom': 3.4.27
-      '@vue/compiler-sfc': 3.4.27
-      '@vue/runtime-dom': 3.4.27
-      '@vue/server-renderer': 3.4.27(vue@3.4.27)
-      '@vue/shared': 3.4.27
+      '@vue/compiler-dom': 3.4.29
+      '@vue/compiler-sfc': 3.4.29
+      '@vue/runtime-dom': 3.4.29
+      '@vue/server-renderer': 3.4.29(vue@3.4.29)
+      '@vue/shared': 3.4.29
       typescript: 5.4.5
     dev: false
 
@@ -6269,8 +6276,8 @@ packages:
         optional: true
     dev: true
 
-  /ws@8.17.0:
-    resolution: {integrity: sha512-uJq6108EgZMAl20KagGkzCKfMEjxmKvZHG7Tlq0Z6nOky7YF7aq4mOx6xK8TJ/i1LeK4Qus7INktacctDgY8Ow==}
+  /ws@8.17.1:
+    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
