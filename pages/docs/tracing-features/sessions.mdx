@@ -13,7 +13,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "LiteLLM", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -98,6 +98,34 @@ def fn():
     )
 
 fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [LiteLLM](https://docs.litellm.ai/docs/observability/langfuse_integration), you can pass the `session_id` as a keyword argument:
+
+```python
+# pip install langfuse 
+import litellm
+import os
+
+# LLM API Keys
+os.environ['OPENAI_API_KEY']=""
+
+# set langfuse as a callback, litellm will send the data to langfuse
+litellm.success_callback = ["langfuse"] 
+ 
+# openai call
+response = litellm.completion(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm openai"}
+  ],
+  metadata={
+   "session_id": "session-1",
+  }
+)
 ```
 
 </Tab>
