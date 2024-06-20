@@ -204,7 +204,10 @@ langfuse.createDatasetItem({
 
 When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
 
-Optionally, the output of the application can be evaluated to compare different runs more easily. Use any evaluation function and add a score to the observation. More details on scores/evals [here](/docs/scores/overview).
+Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
+
+- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
+- Set up [model-based evaluation](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs.
 
 <Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "LlamaIndex (Python)"]}>
 <Tab>
@@ -230,6 +233,9 @@ for item in dataset.items:
             value=my_eval_fn(item.input, output, item.expected_output),
             comment="This is a comment",  # optional, useful to add reasoning
         )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
 ```
 
 _See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client and see the [Python decorator](/docs/sdk/python/decorators) docs on how to use the `@observe` decorator for your main application function._
@@ -265,6 +271,9 @@ for item in dataset.items:
         ),
         comment="This is a comment" # optional, useful to add reasoning
     )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
 ```
 
 _See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
@@ -294,6 +303,9 @@ for (const item of dataset.items) {
     comment: "This is a comment", // optional, useful to add reasoning
   });
 }
+
+// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+await langfuse.flushAsync();
 ```
 
 </Tab>
@@ -308,6 +320,9 @@ for item in dataset.items:
 
     # Execute application and pass custom handler
     my_langchain_chain.run(item.input, callbacks=[handler])
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
 ```
 
 </Tab>
@@ -322,12 +337,15 @@ for item in dataset.items:
         # Run your LlamaIndex application on the input
         index = VectorStoreIndex.from_documents([doc1, doc2])
         response = index.as_query_engine().query(item.input)
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
 ```
 
 </Tab>
 </Tabs>
 
-## Evaluate dataset runs
+## Analyze dataset runs
 
 After each experiment run on a dataset, you can check the aggregated score in the dataset runs table.
 
