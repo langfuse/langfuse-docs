@@ -10,6 +10,9 @@ Exemplary use cases:
 
 - **Deterministic rules at runtime**: e.g. check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse.
+- **Automated data pipeline**: continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+
+## How to add scores
 
 <Tabs items={["Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
@@ -50,3 +53,21 @@ Check out [API reference](/docs/api) for more details on POST/GET scores endpoin
 
 </Tab>
 </Tabs>
+
+## Data pipeline example
+
+```mermaid
+sequenceDiagram
+participant Application
+participant Langfuse
+participant Pipeline
+actor User
+
+Application ->> Langfuse: Ingest new traces
+Langfuse ->> Pipeline: Fetch traces via SDK/API
+Pipeline->>Pipeline: Run custom evaluation function/package
+Pipeline ->> Langfuse: Add score to trace via SDK/API
+Langfuse ->> User: Analyze evaluation scores via UI & API
+```
+
+You can run custom evaluations on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse.

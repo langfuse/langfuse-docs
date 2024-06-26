@@ -94,6 +94,12 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 
 ### Authentication
 
+#### Email/Password
+
+Email/password authentication is enabled by default. Users can sign up and log in using their email and password. To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`.
+
+If `SMTP_CONNECTION_URL` and `EMAIL_FROM_ADDRESS` are set, users can reset their password via an email link if they forget it. Alternatively, you can manually reset the password by editing the user in the database (change email), ask the user to sign up again and then reassign permissions via the membership tables.
+
 #### SSO
 
 To enable OAuth/SSO provider sign-in for Langfuse, add the following environment variables:
@@ -114,11 +120,10 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 
 #### Additional configuration
 
-| Variable                            | Description                                                                                                                                                      |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` | comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com` |
-| `AUTH_DISABLE_USERNAME_PASSWORD`    | Set to `true` to disable email/password sign for all users. Only OAuth/SSO providers can be used to sign in.                                                     |
-| `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in.                                                                                 |
+| Variable                            | Description                                                                                                                                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` | comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                         |
+| `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet. |
 
 ### Health Check Endpoint
 

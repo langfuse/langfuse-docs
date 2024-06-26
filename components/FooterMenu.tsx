@@ -20,6 +20,10 @@ const menuItems: {
         href: "/docs/scores/overview",
       },
       {
+        name: "Manual Annotation",
+        href: "/docs/scores/annotation",
+      },
+      {
         name: "Datasets",
         href: "/docs/datasets/overview",
       },
