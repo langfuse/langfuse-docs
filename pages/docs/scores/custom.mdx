@@ -4,15 +4,17 @@ description: Ingest custom scores via the Langfuse SDKs or API.
 
 # Custom Scores via API/SDKs
 
-Langfuse gives you full flexibility to ingest custom [`scores`](/docs/scores) via the Langfuse SDKs or API. This allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
+Langfuse gives you full flexibility to ingest custom [`scores`](/docs/scores) via the Langfuse SDKs or API. If scores are required to follow a specific schema, you can define and refer a score configuration (config) in the Langfuse UI or via our API. This workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
 
 Exemplary use cases:
 
 - **Deterministic rules at runtime**: e.g. check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
-- **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse.
+- **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
 - **Automated data pipeline**: continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
 
 ## How to add scores
+
+You can add scores via the Langfuse SDKs or API. When ingesting data via API you can define scores to be of data type numeric, categorical or boolean. Further, if you'd like to ensure that your scores follow a specific schema, you can define a score config in the Langfuse UI or via our API. 
 
 <Tabs items={["Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
@@ -53,6 +55,10 @@ Check out [API reference](/docs/api) for more details on POST/GET scores endpoin
 
 </Tab>
 </Tabs>
+
+## How to define score configurations 
+
+A score config includes the desired score name, data type, and constraints on score value range such as min and max values for numerical data types and custom categories for categorical data types. See [API reference](/docs/api) for more details on POST/GET score configs endpoints. Configs are crucial to ensure that scores comply with a specific schema therefore standardizing them for future analysis.
 
 ## Data pipeline example
 
