@@ -21,7 +21,7 @@ When ingesting scores, you may provide:
 - **Data Type**: optional, of type `NUMERIC`, `CATEGORICAL` or `BOOLEAN`
 - **Config Id**: optional, of type `string`
 
-**Certain score properties might be inferred based on your input**. If you don't provide a score data type it will always be inferred. See table below for details. For boolean and categorical data types, we will provide the score value in both numerical and string format if possible. The score value format that is not provided as input translated value is referred to as the inferred value in the tables below. On read for boolean scores both numerical and string representations of the score value will be returned, i.e. both 1 and True. For categorical scores, the string representation is always provided and a numerical mapping of the category will be produced only if a score config was provided. 
+**Certain score properties might be inferred based on your input**. If you don't provide a score data type it will always be inferred. See table below for details. For boolean and categorical data types, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below. On read for boolean scores both numerical and string representations of the score value will be returned, e.g. both 1 and True. For categorical scores, the string representation is always provided and a numerical mapping of the category will be produced only if a score config was provided. 
 
 ### Score ingestion: provide value only
 
