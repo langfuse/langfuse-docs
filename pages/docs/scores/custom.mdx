@@ -23,10 +23,13 @@ You can add scores via the Langfuse SDKs or API. When ingesting data via API you
 langfuse.score(
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
-    name="quality",
+    name="accuracy",
     value=1,
     comment="Factually correct", # optional
     id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific schema
+    data_type="CATEGORICAL" # optional, inferred if config_id passed, otherwise can be defined manually as NUMERIC, CATEGORICAL or BOOLEAN. Defaults to NUMERIC when not set
+    string_value="Correct" # optional, inferred if config_id passed or of type BOOLEAN, otherwise can be defined manually for CATEGORICAL data types
 )
 ```
 
@@ -39,10 +42,13 @@ langfuse.score(
 await langfuse.score({
   traceId: message.traceId,
   observationId: message.generationId, // optional
-  name: "quality",
+  name: "accuracy",
   value: 1,
   comment: "Factually correct", // optional
   id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific schema
+  dataType: "CATEGORICAL", // optional, inferred if configId passed, otherwise can be defined manually as NUMERIC, CATEGORICAL or BOOLEAN. Defaults to NUMERIC when not set
+  stringValue: "Correct", // optional, inferred if config_id passed or of type BOOLEAN, otherwise can be defined manually for CATEGORICAL data types
 });
 ```
 
