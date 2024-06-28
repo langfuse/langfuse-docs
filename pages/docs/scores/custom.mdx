@@ -54,14 +54,14 @@ Whenever you provide a config, the score data will be validated against the conf
 
 | Value      | Data Type     | Config Id   | Description                                             | Inferred Data Type | Inferred Value representation | Valid    |
 |------------|---------------|-------------|---------------------------------------------------------|--------------------|----------------------------|-------------|
-| `1`        | `Null`        | `78545`     | Data type inferred                                      | `NUMERIC`          | `Null`                     | Conditional |
-| `depth`    | `Null`        | `78545`     | Data type and numeric value inferred                    | `CATEGORICAL`      | `4` numeric config category mapping | Conditional |
-| `1`        | `NUMERIC`     | `78545`     | No properties inferred                                  |                    | `Null`                     | Conditional |
-| `depth`    | `CATEGORICAL` | `78545`     | Numeric value inferred                                  |                    | `4` numeric config category mapping | Conditional |
-| `1`        | `BOOLEAN`     | `78545`     | String value inferred                                   |                    | `True`                     | Conditional |
+| `1`        | `Null`        | `78545`     | Data type inferred                                      | `NUMERIC`          | `Null`                     | Conditional on config validation |
+| `depth`    | `Null`        | `12345`     | Data type and numeric value inferred                    | `CATEGORICAL`      | `4` numeric config category mapping | Conditional on config validation |
+| `1`        | `NUMERIC`     | `78545`     | No properties inferred                                  |                    | `Null`                     | Conditional on config validation |
+| `depth`    | `CATEGORICAL` | `12345`     | Numeric value inferred                                  |                    | `4` numeric config category mapping | Conditional on config validation |
+| `1`        | `BOOLEAN`     | `93547`     | String value inferred                                   |                    | `True`                     | Conditional on config validation |
 | `depth`    | `NUMERIC`     | `78545`     | Error: data type of value does not match provided data type  |               |                            | No          |
-| `1`        | `CATEGORICAL` | `78545`     | Error: data type of value does not match provided data type  |               |                            | No          |
-| `true`     | `BOOLEAN`     | `78545`     | Error: boolean data type expects numeric input value    |                    |                            | No          |
+| `1`        | `CATEGORICAL` | `12345`     | Error: data type of value does not match provided data type  |               |                            | No          |
+| `true`     | `BOOLEAN`     | `93547`     | Error: boolean data type expects numeric input value    |                    |                            | No          |
 
 
 
@@ -76,7 +76,7 @@ langfuse.score(
     value="Good", # required, can be passed as string or float 
     comment="Factually correct", # optional
     id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific schema
+    config_id="12345-6565-3453654-43543" # optional, to ensure that the score follows a specific schema
     data_type="CATEGORICAL" # optional, possibly inferred
 )
 ```
@@ -94,7 +94,7 @@ await langfuse.score({
   value: "Good", // required, can be passed as string or float 
   comment: "Factually correct", // optional
   id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific schema
+  configId: "12345-6565-3453654-43543", // optional, to ensure that the score follows a specific schema
   dataType: "CATEGORICAL", // optional, possibly inferred
 });
 ```
