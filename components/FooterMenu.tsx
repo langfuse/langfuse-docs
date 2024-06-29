@@ -65,6 +65,10 @@ const menuItems: {
         href: "/docs/integrations/litellm",
       },
       {
+        name: "Dify",
+        href: "/docs/integrations/dify",
+      },
+      {
         name: "Flowise",
         href: "/docs/integrations/flowise",
       },
