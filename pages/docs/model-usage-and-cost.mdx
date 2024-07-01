@@ -12,7 +12,7 @@ Across Langfuse, usage and cost are tracked for LLM generations:
 Both usage and cost can be either
 
 - [**ingested**](#ingest) via API, SDKs or integrations
-- or [**inferred**](#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](#custom-model-definitions) or request official support for new models via [GitHub](/issue).
+- or [**inferred**](#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](#custom-model-definitions) or request official support for new models via [GitHub](/issue). Inferred cost are calculated at the time of ingestion.
 
 Ingested usage and cost are prioritized over inferred usage and cost:
 
@@ -130,7 +130,7 @@ You can also ingest OpenAI-style usage via `generation.update()` and `generation
 
 ## Infer usage and/or cost [#infer]
 
-If either usage or cost are not ingested, Langfuse will attempt to infer the missing values based on the `model` parameter of the generation. This is especially useful for some model providers or self-hosted models which do not include usage or cost in the response.
+If either usage or cost are not ingested, Langfuse will attempt to infer the missing values based on the `model` parameter of the generation at the time of ingestion. This is especially useful for some model providers or self-hosted models which do not include usage or cost in the response.
 
 Langfuse comes with a **list of predefined popular models and their tokenizers** including **OpenAI, Anthropic, Google**. Check out the [full list](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/models) (you need to sign-in).
 
@@ -152,7 +152,7 @@ The following tokenizers are currently supported:
 
 Model definitions include prices per unit (input, output, total).
 
-Langfuse automatically calculates cost for ingested generations if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
+Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
 
 ### Custom model definitions [#custom-model-definitions]
 
