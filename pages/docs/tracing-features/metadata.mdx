@@ -6,7 +6,7 @@ description: Add any customer metadata to your traces to better understand your 
 
 Traces and observations (see [Langfuse Data Model](/docs/tracing)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI (Python)", "OpenAI (JS)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex", "Flowise"]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -91,6 +91,24 @@ def fn():
     )
 
 fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [OpenAI SDK Integration (JS)](/docs/integrations/openai/js), pass `metadata` as an additional argument:
+
+```typescript
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const res = await observeOpenAI(new OpenAI(), {
+  metadata: { someMetadataKey: "someValue" },
+}).chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+  model: "gpt-3.5-turbo",
+  max_tokens: 300,
+});
 ```
 
 </Tab>
