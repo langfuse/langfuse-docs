@@ -158,7 +158,26 @@ Langfuse automatically calculates cost for ingested generations at the time of i
 
 You can flexibly add your own model definitions to Langfuse. This is especially useful for self-hosted or fine-tuned models which are not included in the list of Langfuse maintained models.
 
-<Frame border>![Add model in UI](/images/docs/create-model.gif)</Frame>
+<Tabs items={["UI", "API"]}>
+
+<Tab>
+  <Frame border>![Add model in UI](/images/docs/create-model.gif)</Frame>
+</Tab>
+
+<Tab>
+
+Model definitions can also be managed programmatically via the Models API ([reference](https://api.reference.langfuse.com)):
+
+```bash
+GET    /api/public/models
+POST   /api/public/models
+GET    /api/public/models/{id}
+DELETE /api/public/models/{id}
+```
+
+</Tab>
+
+</Tabs>
 
 Models are matched to generations based on:
 
