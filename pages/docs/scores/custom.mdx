@@ -50,6 +50,7 @@ For example, let's assume you'd like to ingest a numeric score to measure **accu
 | `depth` | `NUMERIC` | `78545`   | Error: data type of value does not match provided data type |                    | No          |
 
 #### How to ingest a numeric score 
+Specifying a `configId` and `dataType` is only possible via API at the moment. We will add SDK support in due course.  
 <Tabs items={["Python SDK", "JS SDK", "API"]}>
 
 <Tab>
@@ -61,8 +62,6 @@ langfuse.score(
     value=0.9,
     comment="Factually correct", # optional
     id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific schema
-    data_type="NUMERIC" # optional, possibly inferred
 )
 ```
 
@@ -78,8 +77,6 @@ await langfuse.score({
   value: 0.9,
   comment: "Factually correct", // optional
   id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific schema
-  dataType: "NUMERIC", // optional, possibly inferred
 });
 ```
 
@@ -109,40 +106,15 @@ For example, let's assume you'd like to ingest a categorical score to measure **
 | `1`     | `CATEGORICAL` | `12345`   | Error: data type of value does not match provided data type |                    |                               | No                              |
 
 #### How to ingest a categorical score 
+Categorical scores can only be ingested via API at the moment. We will add SDK support in due course.
 <Tabs items={["Python SDK", "JS SDK", "API"]}>
 
 <Tab>
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="correctness",
-    value="correct",
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="12345-6565-3453654-43543" # optional, to ensure that the score follows a specific schema
-    data_type="CATEGORICAL" # optional, possibly inferred
-)
-```
-
-→ More details in [Python SDK docs](/docs/sdk/python)
+SDK Support coming soon, please refer to the [API](/docs/api) for now.
 </Tab>
 
 <Tab>
-```typescript
-await langfuse.score({
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "correctness",
-  value: "correct", 
-  comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  configId: "12345-6565-3453654-43543", // optional, to ensure that the score follows a specific schema
-  dataType: "CATEGORICAL", // optional, possibly inferred
-});
-```
-
-→ More details in [JS/TS SDK docs](/docs/sdk/typescript/guide#score)
+SDK Support coming soon, please refer to the [API](/docs/api) for now.
 </Tab>
 
 <Tab>
@@ -166,41 +138,16 @@ For example, let's assume you'd like to ingest a numeric score to measure **help
 | `depth` | `BOOLEAN`     | `93547`   | Error: data type of value does not match provided data type |               |     | No          |
 
 #### How to ingest a boolean score 
+Boolean scores can only be ingested via API at the moment. We will add SDK support in due course.
 <Tabs items={["Python SDK", "JS SDK", "API"]}>
 
 <Tab>
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="helpfulness",
-    value=1,
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="93547-6565-3453654-43543" # optional, to ensure that the score follows a specific schema
-    data_type="BOOLEAN" # optional, possibly inferred
-)
-```
+SDK Support coming soon, please refer to the [API](/docs/api) for now.
 </Tab>
-
-→ More details in [Python SDK docs](/docs/sdk/python)
 
 <Tab>
-```typescript
-await langfuse.score({
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "helpfulness",
-  value: 1,
-  comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  configId: "93547-6565-3453654-43543", // optional, to ensure that the score follows a specific schema
-  dataType: "BOOLEAN", // optional, possibly inferred
-});
-```
+SDK Support coming soon, please refer to the [API](/docs/api) for now.
 </Tab>
-
-→ More details in [JS/TS SDK docs](/docs/sdk/typescript/guide#score)
 
 <Tab>
 Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
