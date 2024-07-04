@@ -201,6 +201,7 @@ const nonPermanentRedirects = [
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],
   ["/guides/videos/2-min", "/guides/videos/introducing-langfuse-2.0"],
   ["/tos", "/terms"],
+  ["/docs/export-and-fine-tuning", "/docs/query-traces"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
