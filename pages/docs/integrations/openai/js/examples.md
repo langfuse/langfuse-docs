@@ -60,6 +60,12 @@ const openai = observeOpenAI(new OpenAI({apiKey: ""}),
 
 
 ```typescript
+import OpenAI from "npm:openai";
+import { observeOpenAI } from "npm:langfuse";
+
+// Configured via environment variables, see above
+const openai = observeOpenAI(new OpenAI());
+
 const completion = await openai.chat.completions.create({
   model: 'gpt-3.5-turbo',
   messages: [{ role: "system", content: "Tell me a joke." }],
@@ -82,6 +88,9 @@ Simple example using OpenAI streaming, passing custom parameters to rename the g
 
 
 ```typescript
+import OpenAI from "npm:openai";
+import { observeOpenAI } from "npm:langfuse";
+
 // Initialize OpenAI SDK with Langfuse
 const openaiWithLangfuse = observeOpenAI(new OpenAI(), { generationName: "OpenAI Stream Trace", tags: ["stream"]} )
 
@@ -116,6 +125,9 @@ Example usage:
 
 
 ```typescript
+import OpenAI from "npm:openai";
+import { observeOpenAI } from "npm:langfuse";
+
 // Initialize OpenAI SDK with Langfuse and custom parameters
 const openaiWithLangfuse = observeOpenAI(new OpenAI(), {
     generationName: "OpenAI Custom Trace",
@@ -144,6 +156,9 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 
 
 ```typescript
+import OpenAI from "npm:openai";
+import { observeOpenAI } from "npm:langfuse";
+
 // Initialize OpenAI SDK with Langfuse
 const openaiWithLangfuse = observeOpenAI(new OpenAI(), { generationName: "OpenAI FunctionCall Trace", tags: ["function"]} )
 
@@ -203,6 +218,9 @@ Use the Langfuse JS/TS SDK to create traces or spans and add OpenAI calls to it 
 
 ```typescript
 import Langfuse from "npm:langfuse";
+import { observeOpenAI } from "npm:langfuse";
+import OpenAI from "npm:openai";
+
 
 // Init Langfuse SDK
 const langfuse = new Langfuse();
@@ -216,7 +234,7 @@ const span = trace.span({ name: country });
 
 // Call OpenAI
 const capital = (
-  await observeOpenAI(openai, {
+  await observeOpenAI(new OpenAI(), {
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
@@ -229,7 +247,7 @@ const capital = (
 ).choices[0].message.content;
 
 const poem = (
-  await observeOpenAI(openai, {
+  await observeOpenAI(new OpenAI(), {
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
@@ -260,6 +278,8 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 
 ```typescript
 import Langfuse from "npm:langfuse";
+import { observeOpenAI } from "npm:langfuse";
+import OpenAI from "npm:openai";
 
 // Init Langfuse SDK
 const langfuse = new Langfuse();
@@ -271,7 +291,7 @@ const trace = langfuse.trace({ name: "capital-poem-generator" });
 const span = trace.span({ name: "France" });
 
 const capital = (
-  await observeOpenAI(openai, {
+  await observeOpenAI(new OpenAI(), {
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
@@ -284,7 +304,7 @@ const capital = (
 ).choices[0].message.content;
 
 const poem = (
-  await observeOpenAI(openai, {
+  await observeOpenAI(new OpenAI(), {
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
