@@ -378,7 +378,7 @@ capital = openai.chat.completions.create(
       {"role": "system", "content": "What is the capital of the country?"},
       {"role": "user", "content": country}],
   name="get-capital",
-  trace_id=trace_id
+  trace_id=trace.id
 ).choices[0].message.content
 
 poem = openai.chat.completions.create(
@@ -387,7 +387,7 @@ poem = openai.chat.completions.create(
       {"role": "system", "content": "You are a poet. Create a poem about this city."},
       {"role": "user", "content": capital}],
   name="generate-poem",
-  trace_id=trace_id
+  trace_id=trace.id
 ).choices[0].message.content
 ```
 

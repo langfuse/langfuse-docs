@@ -18,6 +18,8 @@ In this end-to-end example, we use the [stream-lifecycle callbacks](https://sdk.
 
 Hint: this is a deno-notebook and uses deno imports.
 
+This notebook still uses legacy methods of the Vercel AI SDK, we will update it soon to use the new methods.
+
 ## Backend API Route
 
 ### Setup

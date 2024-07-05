@@ -25,7 +25,7 @@ Langfuse requires a persistent Postgres database to store its state. You can use
 
 Deploy the application container to your infrastructure. You can use managed services like AWS ECS, Azure Container Instances, or GCP Cloud Run, or host it yourself.
 
-During the container startup, all database migrations will be applied automatically.
+During the container startup, all database migrations will be applied automatically. This can be optionally disabled via environment variables.
 
 <Tabs items={["Pin major version", "Use latest version"]}>
 
@@ -91,6 +91,7 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 | `S3_ENDPOINT`<br/>`S3_ACCESS_KEY_ID`<br/>`S3_SECRET_ACCESS_KEY`<br/>`S3_BUCKET_NAME`<br/>`S3_REGION` |                    | Optional S3 configuration to enable large exports from the UI.                                                                                                                                                                                                                                                                                                                                        |
 | `DB_EXPORT_PAGE_SIZE`                                                                                | `1000`             | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                               |
 | `ENABLE_EVENT_LOG`                                                                                   | `true`             | Set to `false` to disable logging raw events to the `events` table in the database. This table is useful for debugging your instance but not required to run the application.                                                                                                                                                                                                                         |
+| `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED`                                                          | `false`            | Set to `true` to disable automatic database migrations on docker startup.                                                                                                                                                                                                                                                                                                                             |
 
 ### Authentication
 
@@ -176,7 +177,7 @@ To update the application:
 2. Pull the latest container.
 3. Restart the application.
 
-During container startup, any necessary database migrations will be applied automatically if the database schema has changed.
+During container startup, any necessary database migrations will be applied automatically if the database schema has changed. This can be optionally disabled via environment variables.
 
 ### (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
 

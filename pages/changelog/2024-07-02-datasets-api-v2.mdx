@@ -1,0 +1,42 @@
+---
+date: 2024-07-02
+title: Datasets API v2
+description: Introduction of the new Datasets API v2 with improved performance for large datasets. Also, now all datasets-related objects are directly accessible via the API.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+This new API powers the `get_dataset()`/`getDataset()` method in the SDKs and added `get_dataset_runs()`/`getDatasetRuns()` to retrieve all runs of a dataset.
+
+Upgrade to the latest SDK versions to benefit from the new API routes or use the directly.
+
+## New routes
+
+### V2 replacing existing routes
+
+- `GET /api/public/v2/datasets/{datasetName}`
+- `GET /api/public/v2/datasets`
+- `POST /api/public/v2/datasets`
+
+V1 routes are still available but will be deprecated in the future.
+
+### Net new routes
+
+- `GET /api/public/dataset-items`
+- `GET /api/public/datasets/{datasetName}/runs`
+
+## Learn more
+
+import { BookOpen } from "lucide-react";
+
+<Cards num={3}>
+  <Card title="Datasets Docs" href="/docs/datasets" icon={<BookOpen />} />
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com"
+    icon={<BookOpen />}
+  />
+</Cards>
