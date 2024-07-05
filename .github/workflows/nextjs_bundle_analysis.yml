@@ -41,7 +41,15 @@ jobs:
         id: pnpm-install
         with:
           version: 8
-          run_install: true
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm install
 
       # DO NOT CACHE DUE TO NEXTRA CACHING ISSUES
       # - name: Restore next build
