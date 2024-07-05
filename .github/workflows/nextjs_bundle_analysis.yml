@@ -37,19 +37,16 @@ jobs:
       # If pnpm is used, you need to switch the previous step with the following one. pnpm does not create a package-lock.json
       # so the step above will fail to pull dependencies
       - uses: pnpm/action-setup@v4
-        name: Install pnpm
         id: pnpm-install
         with:
           version: 8
           run_install: false
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: pnpm install
+      - run: pnpm install
 
       # DO NOT CACHE DUE TO NEXTRA CACHING ISSUES
       # - name: Restore next build
