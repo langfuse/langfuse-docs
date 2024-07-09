@@ -257,8 +257,24 @@ The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run
    - setup > password: `<password>`
    - connection > connection name: `<google-cloud-project-id>:<region-id>:<sql-instance-id>`
 
-**Deploy on Cloud Run:**
+**Create OAuth Credentials**
+1. Open [API Credentials](https://console.cloud.google.com/apis/credentials)
+2. Click "Create Credentials" and then "OAuth Client ID"
+3. Choose "Web Application" and then give it an appropriate name
+4. Click Create
 
+**Create Secrets:**
+1. Open [Secret Manager](https://console.cloud.google.com/security/secret-manager)
+2. For each secret needed (at least `AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,` and `SALT`), click "Create Secret" and fill in the name and value.
+
+Notes:
+
+  - `DATABASE_URL` is the connection string to the Cloud SQL instance. `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true`
+  - `DIRECT_URL` is for database migrations, without `&pgbouncer=true`, the value should look like this: `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none`
+  - Set `NEXTAUTH_URL` to `http://localhost:3000`. This is a placeholder, we'll update it later.
+
+
+**Deploy on Cloud Run:**
 1.  Open Google Cloud Run.
 2.  Click on Create Service.
 3.  Enter the following container image URL: `docker.io/langfuse/langfuse:2`. We use tag `2` to pin the major version.
@@ -270,10 +286,6 @@ The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run
 
     - Specify container port as `3000`.
     - On "Variables & Secrets" tab, add the required environment variables (see table above): `SALT`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, and `DATABASE_URL`, etc.
-      - To configure Cloud SQL, add the following:
-        - `DATABASE_URL` as the connection string to the Cloud SQL instance. `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true`
-        - `DIRECT_URL` for database migrations, without `&pgbouncer=true`, the value should look like this: `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none`
-      - Set `NEXTAUTH_URL` to `http://localhost:3000`. This is a placeholder, we'll update it later.
 
 9.  Scroll all the way down to enable the Cloud SQL connections. Select the created Cloud SQL instance in the dropdown. Context: Your Cloud Run service won't be assigned a static IP, so you can't whitelist the ingress IP in Cloud SQL or any other hosted databases. Instead, we use the Google Cloud SQL Proxy.
 10. Finally, you can finish deploying the application.
@@ -291,6 +303,7 @@ substitutions:
   _SERVICE_NAME: langfuse
   _REGION: europe-west1 # Change to your desired region
   _PROJECT_ID: your-project-id # Change to your Google Cloud project ID
+  _SQL_INSTANCE_ID: my-cool-db # the name of the cloud sql database you create
 
 tags: ["${_PROJECT_ID}", "${_SERVICE_NAME}"]
 
@@ -302,23 +315,19 @@ steps:
     args:
       - "-c"
       - |
-        gcloud beta run deploy ${_SERVICE_NAME} --image docker.io/langfuse/langfuse:2 \
+        gcloud run deploy ${_SERVICE_NAME} --image docker.io/langfuse/langfuse:2 \
            --region ${_REGION} \
            --project ${_PROJECT_ID} \
            --platform managed \
+           --port 3000 \
            --allow-unauthenticated \
            --memory 2Gi \
            --cpu 1 \
            --min-instances 0 \
            --max-instances 3 \
            --set-env-vars HOSTNAME=0.0.0.0 \
-           --update-secrets AUTH_GOOGLE_CLIENT_ID=AUTH_GOOGLE_CLIENT_ID:latest, \
-                            AUTH_GOOGLE_CLIENT_SECRET=AUTH_GOOGLE_CLIENT_SECRET:latest, \
-                            SALT=SALT:latest, \
-                            NEXTAUTH_URL=LANGFUSE_URL:latest, \
-                            NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest, \
-                            DATABASE_URL=DATABASE_URL:latest, \
-                            DIRECT_URL=DIRECT_URL:latest
+           --add-cloudsql-instances=_PROJECT_ID:_REGION:_SQL_INSTANCE_ID \
+           --update-secrets AUTH_GOOGLE_CLIENT_ID=AUTH_GOOGLE_CLIENT_ID:latest,AUTH_GOOGLE_CLIENT_SECRET=AUTH_GOOGLE_CLIENT_SECRET:latest,SALT=SALT:latest,NEXTAUTH_URL=NEXTAUTH_URL:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest
 ```
 
 You can submit this build using [`gcloud build submit`](https://cloud.google.com/sdk/gcloud/reference/builds/submit) in your local console by issuing the below in the same folder as the `cloudbuild.yaml` file.
