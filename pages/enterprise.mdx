@@ -9,11 +9,11 @@ Langfuse addresses key challenges when deploying LLM-based applications within a
 Langfuse is licensed as an open-core project. It's core tracing features are MIT-licensed and freely available (also for commercial use). Some Langfuse features on the periphery are not available in the open-source version and cannot be used out of the box. Please refer to the Enterprise Edition FAQ [here](/docs/open-source#enterprise-edition-ee-faq). Please reach out to enterprise@langfuse.com to discuss an enterprise license (self-hosted or cloud) for your team. Enterprise licenses start at $500/month.
 
 **Select Introductory Resources**
+
 - Overview: [Slide Deck Langfuse](https://static.langfuse.com/langfuse_overview_02_07_2024.pdf) (July 2024)
 - [Why Langfuse?](/why)
 - [Langfuse has been included in the Thoughtsworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse)
 - [Enterprise Edition (EE) FAQ](/docs/open-source#enterprise-edition-ee-faq)
-
 
 ## Introduction to Langfuse
 
@@ -99,6 +99,36 @@ The Hobby Plan on [Langfuse Cloud](https://cloud.langfuse.com) includes enough r
 Alternatively, you can quickly spin up Langfuse on your own machine using `docker compose up` ([docs](/docs/deployment/local)).
 
 If you require security and compliance features to run a POC, please reach out to us at enterprise@langfuse.com.
+
+### Common Enterprise LLM Platform Architecture [#common-architecture]
+
+Langfuse aims to address the challenges of debugging, monitoring, and continuously improving LLM-based applications. It focuses on observability, evaluation, and prompt management.
+
+Langfuse is often deployed alongside a central LLM Gateway that provides schema translation, rate limiting, and PII redaction. The LLM Gateway can be an internal service or an open-source project like LiteLLM. If you use LiteLLM, you can leverage the native integration ([docs](/docs/integrations/litellm)).
+
+```mermaid
+graph LR
+  LLM["<strong>LLM</strong>
+  API or service"]
+  App["<strong>Application</strong>"]
+  LF["<strong>Langfuse</strong>
+  - Tracing/Observability
+  - Evaluation
+  - Prompt Management
+  - Cost Tracking
+  - ... (see documentation)"]
+  Gateway["<strong>LLM Gateway (optional)</strong>
+  Internal or Open-source (e.g. LiteLLM)
+  - Schema translation
+  - Rate limiting
+  - PII redaction"]
+
+  App -->|async tracing|LF
+  LF -->|prompt management| App
+  LLM --- App
+  LLM --- Gateway --- App
+  Gateway -->|"optional: forward llm calls"| LF
+```
 
 ## Talk to us
 
