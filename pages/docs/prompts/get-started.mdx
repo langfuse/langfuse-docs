@@ -180,9 +180,6 @@ prompt = langfuse.get_prompt("movie-critic", label="latest")
 
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
-
-# Add a fallback prompt to use when the network request fail and no cache is available
-prompt = langfuse.get_prompt("movie-critic", fallback="Do you like {{movie}}?")
 ```
 
 Attributes
@@ -193,9 +190,6 @@ prompt.prompt
 
 # Config object
 prompt.config
-
-# Is fallback prompt used since network request fails and no cache was available
-prompt.is_fallback
 ```
 
 </Tab>
@@ -234,19 +228,18 @@ Optional parameters
 const prompt = await langfuse.getPrompt("movie-critic", 1);
 
 // Get specific label
-const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "staging" });
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "staging",
+});
 
 // Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
-const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "latest" });
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "latest",
+});
 
 // Extend cache TTL from default 1 to 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
-});
-
-// Add a fallback prompt to use when the network request fail and no cache is available
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
-  fallback: "Do you like {{movie}}?",
 });
 ```
 
@@ -258,9 +251,6 @@ prompt.prompt;
 
 // Config object
 prompt.config;
-
-// Is fallback prompt used since network request fails and no cache was available
-prompt.isFallback;
 ```
 
 </Tab>
@@ -307,9 +297,6 @@ prompt = langfuse.get_prompt("movie-critic", label="latest")
 
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
-
-# Add a fallback prompt to use when the network request fail and no cache is available
-prompt = langfuse.get_prompt("movie-critic", fallback="Do you like {{movie}}?")
 ```
 
 Attributes
@@ -320,9 +307,6 @@ prompt.prompt
 
 # Config object
 prompt.config
-
-# Is fallback prompt used since network request fails and no cache was available
-prompt.is_fallback
 ```
 
 </Tab>
@@ -369,19 +353,18 @@ Optional parameters
 const prompt = await langfuse.getPrompt("movie-critic", 1);
 
 // Get specific label
-const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "staging" });
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "staging",
+});
 
 // Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
-const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "latest" });
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "latest",
+});
 
 // Extend cache TTL from default 1 to 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
-});
-
-// Add a fallback prompt to use when the network request fail and no cache is available
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
-  fallback: "Do you like {{movie}}?",
 });
 ```
 
@@ -393,9 +376,6 @@ prompt.prompt;
 
 // Config object
 prompt.config;
-
-// Is fallback prompt used since network request fails and no cache was available
-prompt.isFallback;
 ```
 
 </Tab>
@@ -596,3 +576,63 @@ max       0.687994 sec
 ```
 
 </div>
+
+## Fallback for high availability (optional)
+
+The Langfuse API has high uptime and prompts are cached locally in the SDKs to prevent network issues from affecting your application.
+
+However, `get_prompt()`/`getPrompt()` will throw an exception if:
+
+1. No local (fresh or stale) cached prompt is available -> new application instance
+2. _and_ network request fails -> networking or Langfuse API issue
+
+To prevent this, you can optionally provide a `fallback` prompt that will be used in these cases. This is especially useful for critical applications where prompt availability is crucial.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Get `text` prompt with fallback
+prompt = langfuse.get_prompt(
+  "movie-critic",
+  fallback="Do you like {{movie}}?"
+)
+
+# Get `chat` prompt with fallback
+chat_prompt = langfuse.get_prompt(
+  "movie-critic-chat",
+  type="chat",
+  fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]
+)
+
+# True if the prompt is a fallback
+prompt.is_fallback
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+// Get `text` prompt with fallback
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  fallback: "Do you like {{movie}}?",
+});
+
+// Get `chat` prompt with fallback
+const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+  fallback: [{ role: "system", content: "You are an expert on {{movie}}" }],
+});
+
+// True if the prompt is a fallback
+prompt.isFallback;
+```
+
+</Tab>
+</Tabs>
