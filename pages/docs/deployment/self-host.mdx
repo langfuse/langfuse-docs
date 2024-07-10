@@ -257,24 +257,26 @@ The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run
    - setup > password: `<password>`
    - connection > connection name: `<google-cloud-project-id>:<region-id>:<sql-instance-id>`
 
-**Create OAuth Credentials**
+**Optionally: Create OAuth Credentials for sign-in with Google**
+
 1. Open [API Credentials](https://console.cloud.google.com/apis/credentials)
 2. Click "Create Credentials" and then "OAuth Client ID"
 3. Choose "Web Application" and then give it an appropriate name
 4. Click Create
 
 **Create Secrets:**
+
 1. Open [Secret Manager](https://console.cloud.google.com/security/secret-manager)
 2. For each secret needed (at least `AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,` and `SALT`), click "Create Secret" and fill in the name and value.
 
 Notes:
 
-  - `DATABASE_URL` is the connection string to the Cloud SQL instance. `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true`
-  - `DIRECT_URL` is for database migrations, without `&pgbouncer=true`, the value should look like this: `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none`
-  - Set `NEXTAUTH_URL` to `http://localhost:3000`. This is a placeholder, we'll update it later.
-
+- `DATABASE_URL` is the connection string to the Cloud SQL instance. `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true`
+- `DIRECT_URL` is for database migrations, without `&pgbouncer=true`, the value should look like this: `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none`
+- Set `NEXTAUTH_URL` to `http://localhost:3000`. This is a placeholder, we'll update it later.
 
 **Deploy on Cloud Run:**
+
 1.  Open Google Cloud Run.
 2.  Click on Create Service.
 3.  Enter the following container image URL: `docker.io/langfuse/langfuse:2`. We use tag `2` to pin the major version.
