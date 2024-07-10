@@ -384,7 +384,7 @@ prompt.config;
 
 ### Link with Langfuse Tracing (optional)
 
-Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a fallback prompt is used, no link will be created.
+Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a [fallback prompt](#fallback) is used, no link will be created.
 
 This is currently unavailable when using the LangChain or LlamaIndex integration.
 
@@ -512,7 +512,7 @@ While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, 
 
 <Callout type="info">
 
-When refetching a prompt fails but an expired version is in the cache, the SDKs will return the expired version, preventing application blockage due to network issues. If you'd like to have a safety net on the first fetch where the cache is empty, you can provide a fallback prompt.
+When refetching a prompt fails but an expired version is in the cache, the SDKs will return the expired version, preventing application blockage due to network issues. If you'd like to have a safety net on the first fetch where the cache is empty, you can provide a [fallback prompt](#fallback).
 
 </Callout>
 
@@ -577,7 +577,7 @@ max       0.687994 sec
 
 </div>
 
-## Fallback for high availability (optional)
+## Fallback for high availability (optional) [#fallback]
 
 The Langfuse API has high uptime and prompts are cached locally in the SDKs to prevent network issues from affecting your application.
 
