@@ -11,7 +11,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-Since the very beginning, all Langfuse Tracing data has been open and accessible via the Langfuse API. Today, we're excited to finally release the SDK methods to conveniently query traces and observations directly from the Langfuse API.
+Since the very beginning, all Langfuse Tracing data has been open and accessible via the Langfuse API. Today, we're excited to finally release the SDK methods to conveniently query traces, observations, and sessions directly from the Langfuse API.
 
 <Tabs items={["Python", "JS/TS"]}>
 <Tab>
@@ -35,6 +35,9 @@ observations = langfuse.fetch_observations()
 
 # Fetch a single observation by ID
 observation = langfuse.fetch_observation("observationId")
+
+# Fetch list of sessions
+sessions = langfuse.fetch_sessions()
 ```
 
 </Tab>
@@ -59,6 +62,9 @@ const observations = await langfuse.fetchObservations();
 
 // Fetch a single observation by ID
 const observation = await langfuse.fetchObservation("observationId");
+
+// Fetch list of sessions
+const sessions = await langfuse.fetchSessions();
 ```
 
 </Tab>

@@ -45,14 +45,18 @@ observations = langfuse.fetch_observations()
 
 # Fetch a single observation by ID
 observation = langfuse.fetch_observation("observationId")
+
+# Fetch list of sessions
+sessions = langfuse.fetch_sessions()
 ```
 
-Python SDK reference:
+Python SDK reference including all available filters:
 
 - [`fetch_traces()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_traces)
 - [`fetch_trace()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_trace)
 - [`fetch_observations()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_observations)
 - [`fetch_observation()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_observation)
+- [`fetch_sessions()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_sessions)
 
 </Tab>
 <Tab>
@@ -81,14 +85,18 @@ const observations = await langfuse.fetchObservations();
 
 // Fetch a single observation by ID
 const observation = await langfuse.fetchObservation("observationId");
+
+// Fetch list of sessions
+const sessions = await langfuse.fetchSessions();
 ```
 
-JS/TS SDK reference:
+JS/TS SDK reference including all available filters:
 
 - [`fetchTraces()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchTraces)
 - [`fetchTrace()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchTrace)
 - [`fetchObservations()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchObservations)
 - [`fetchObservation()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchObservation)
+- [`fetchSessions()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchSessions)
 
 </Tab>
 </Tabs>
@@ -105,6 +113,8 @@ GET /api/public/traces/:traceId
 
 GET /api/public/observations
 GET /api/public/observations/:observationId
+
+GET /api/public/sessions
 
 GET /api/public/scores
 GET /api/public/scores/:scoreId
