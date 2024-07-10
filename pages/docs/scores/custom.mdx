@@ -14,7 +14,7 @@ Exemplary use cases:
 
 ## How to add scores
 
-You can add scores via the Langfuse SDKs or API. You can define numeric, categorical or boolean scores. Further, if you'd like to ensure that your scores comply to a certain data range, you can define a score config in the Langfuse UI or via our API. 
+You can add scores via the Langfuse SDKs or API. You can define numeric, categorical or boolean scores. Jump to [score ingestion examples](/docs/scores/custom#score-ingestion-examples) for code snippets. Further, if you'd like to ensure that your scores comply to a certain data range, you can define a score config in the Langfuse UI or via our API. 
 
 When ingesting scores, you may provide:
 - **Value**: required, of type `string` or `float`. Please provide string values for categorical scores and float values for numeric and boolean scores.
@@ -33,24 +33,12 @@ Whenever you provide a config, the score data will be validated against the conf
   - **Categorical**: Value must map to one of the categories defined in the config
   - **Boolean**: Value must equal `0` or `1`
 
+### Score ingestion examples
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
 
 <Tab>
 Numeric scores are used to evaluate data that falls into a numerical range. When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
 
-For example, let's assume you'd like to ingest a numeric score to measure **accuracy**. We have included a table of possible score ingestion scenarios below.
-
-| Value   | Data Type | Config Id | Description                                      | Inferred Data Type | Valid       |
-|---------|-----------|-----------|--------------------------------------------------|--------------------|-------------|
-| `0.9`   | `Null`    | `Null`    | Data type is inferred                            | `NUMERIC`          | Yes         |
-| `0.9`   | `NUMERIC` | `Null`    | No properties inferred                           |                    | Yes         |
-| `depth` | `NUMERIC` | `Null`    | Error: data type of value does not match provided data type |                    | No          |
-| `0.9`   | `NUMERIC` | `78545`   | No properties inferred           |                    | Conditional on config validation |
-| `0.9`   | `Null`    | `78545`   | Data type inferred           | `NUMERIC`                   | Conditional on config validation |
-| `depth` | `NUMERIC` | `78545`   | Error: data type of value does not match provided data type |                    | No          |
-
-#### How to ingest a numeric score 
-Specifying a `configId` and `dataType` is only possible via API at the moment. We will add SDK support in due course.  
 <Tabs items={["Python SDK", "JS SDK", "API"]}>
 
 <Tab>
@@ -62,6 +50,8 @@ langfuse.score(
     value=0.9,
     comment="Factually correct", # optional
     id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific min/max value range
+    data_type="NUMERIC" # optional, possibly inferred
 )
 ```
 
@@ -71,12 +61,14 @@ langfuse.score(
 <Tab>
 ```typescript
 await langfuse.score({
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "accuracy",
-  value: 0.9,
-  comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+    traceId: message.traceId,
+    observationId: message.generationId, // optional
+    name: "accuracy",
+    value: 0.9,
+    comment: "Factually correct", // optional
+    id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+    configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific min/max value range
+    dataType: "NUMERIC", // optional, possibly inferred
 });
 ```
 
@@ -87,6 +79,18 @@ await langfuse.score({
 Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
 </Tab>
 
+#### Example ingestion cases for numeric scores
+For example, let's assume you'd like to ingest a numeric score to measure **accuracy**. We have included a table of possible score ingestion scenarios below.
+
+| Value   | Data Type | Config Id | Description                                      | Inferred Data Type | Valid       |
+|---------|-----------|-----------|--------------------------------------------------|--------------------|-------------|
+| `0.9`   | `Null`    | `Null`    | Data type is inferred                            | `NUMERIC`          | Yes         |
+| `0.9`   | `NUMERIC` | `Null`    | No properties inferred                           |                    | Yes         |
+| `depth` | `NUMERIC` | `Null`    | Error: data type of value does not match provided data type |                    | No          |
+| `0.9`   | `NUMERIC` | `78545`   | No properties inferred           |                    | Conditional on config validation |
+| `0.9`   | `Null`    | `78545`   | Data type inferred           | `NUMERIC`                   | Conditional on config validation |
+| `depth` | `NUMERIC` | `78545`   | Error: data type of value does not match provided data type |                    | No          |
+
 </Tabs>
 
 </Tab>
@@ -94,6 +98,47 @@ Check out [API reference](/docs/api) for more details on POST/GET scores endpoin
 <Tab>
 Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories. 
 
+<Tabs items={["Python SDK", "JS SDK", "API"]}>
+
+<Tab>
+```python
+langfuse.score(
+    trace_id=message.trace_id,
+    observation_id=message.generation_id, # optional
+    name="correctness",
+    value="correct",
+    comment="Factually correct", # optional
+    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    config_id="12345-6565-3453654-43543" # optional, to ensure that the score maps to a specific category defined in a score config 
+    data_type="CATEGORICAL" # optional, possibly inferred
+)
+```
+
+→ More details in [Python SDK docs](/docs/sdk/python)
+</Tab>
+
+<Tab>
+```typescript
+await langfuse.score({
+    traceId: message.traceId,
+    observationId: message.generationId, // optional
+    name: "correctness",
+    value: "correct", 
+    comment: "Factually correct", // optional
+    id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+    configId: "12345-6565-3453654-43543", // optional, to ensure that a score maps to a specific category defined in a score config
+    dataType: "CATEGORICAL", // optional, possibly inferred
+});
+```
+
+→ More details in [JS/TS SDK docs](/docs/sdk/typescript/guide#score)
+</Tab>
+
+<Tab>
+Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
+</Tab>
+
+#### Example ingestion cases for categorical scores
 For example, let's assume you'd like to ingest a categorical score to measure **correctness**. We have included a table of possible score ingestion scenarios below. 
 
 | Value   | Data Type     | Config Id | Description                                             | Inferred Data Type | Inferred Value representation | Valid                           |
@@ -105,28 +150,53 @@ For example, let's assume you'd like to ingest a categorical score to measure **
 | `correct` | `NULL` | `12345`   | Data type inferred                                  | `CATEGORICAL`     |      | Conditional on config validation |
 | `1`     | `CATEGORICAL` | `12345`   | Error: data type of value does not match provided data type |                    |                               | No                              |
 
-#### How to ingest a categorical score 
-Categorical scores can only be ingested via API at the moment. We will add SDK support in due course.
-<Tabs items={["Python SDK", "JS SDK", "API"]}>
-
-<Tab>
-SDK Support coming soon, please refer to the [API](/docs/api) for now.
-</Tab>
-
-<Tab>
-SDK Support coming soon, please refer to the [API](/docs/api) for now.
-</Tab>
-
-<Tab>
-Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
-</Tab>
-
 </Tabs>
 </Tab>
 
 <Tab>
 Boolean scores are used to evaluate data that falls into a binary range. When ingesting boolean scores, you can provide the value as a float. The value's string equivalent will be automatically populated and is accessible on read. If you provide a configId, the score's name and config's name must match as well as their data types. 
 
+<Tabs items={["Python SDK", "JS SDK", "API"]}>
+
+<Tab>
+```python
+langfuse.score(
+    trace_id=message.trace_id,
+    observation_id=message.generation_id, # optional
+    name="helpfulness",
+    value=1,
+    comment="Factually correct", # optional
+    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    config_id="93547-6565-3453654-43543" # optional, can be used to infer the score data type and validate the score value
+    data_type="BOOLEAN" # optional, possibly inferred
+)
+```
+
+→ More details in [Python SDK docs](/docs/sdk/python)
+</Tab>
+
+<Tab>
+```typescript
+await langfuse.score({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "helpfulness",
+  value: 1,
+  comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  configId: "93547-6565-3453654-43543", // optional, can be used to infer the score data type and validate the score value
+  dataType: "BOOLEAN", // optional, possibly inferred
+});
+```
+
+→ More details in [JS/TS SDK docs](/docs/sdk/typescript/guide#score)
+</Tab>
+
+<Tab>
+Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
+</Tab>
+
+#### Example ingestion cases for boolean scores
 For example, let's assume you'd like to ingest a numeric score to measure **helpfulness**. We have included a table of possible score ingestion scenarios below.
 
 | Value   | Data Type     | Config Id | Description    | Inferred Data Type | Inferred Value representation | Valid     |
@@ -137,21 +207,6 @@ For example, let's assume you'd like to ingest a numeric score to measure **help
 | `0.9`   | `Null`        | `93547`   | Data type and value's string equivalent inferred | `BOOLEAN` | `True`                        | Conditional on config validation |
 | `depth` | `BOOLEAN`     | `93547`   | Error: data type of value does not match provided data type |               |     | No          |
 
-#### How to ingest a boolean score 
-Boolean scores can only be ingested via API at the moment. We will add SDK support in due course.
-<Tabs items={["Python SDK", "JS SDK", "API"]}>
-
-<Tab>
-SDK Support coming soon, please refer to the [API](/docs/api) for now.
-</Tab>
-
-<Tab>
-SDK Support coming soon, please refer to the [API](/docs/api) for now.
-</Tab>
-
-<Tab>
-Check out [API reference](/docs/api) for more details on POST/GET scores endpoints.
-</Tab>
 </Tabs>
 </Tab>
 
