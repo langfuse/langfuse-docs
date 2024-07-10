@@ -180,6 +180,9 @@ prompt = langfuse.get_prompt("movie-critic", label="latest")
 
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
+
+# Add a fallback prompt to use when the network request fail and no cache is available
+prompt = langfuse.get_prompt("movie-critic", fallback="Do you like {{movie}}?")
 ```
 
 Attributes
@@ -190,6 +193,9 @@ prompt.prompt
 
 # Config object
 prompt.config
+
+# Is fallback prompt used since network request fails and no cache was available
+prompt.is_fallback
 ```
 
 </Tab>
@@ -237,6 +243,11 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "lat
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
 });
+
+// Add a fallback prompt to use when the network request fail and no cache is available
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  fallback: "Do you like {{movie}}?",
+});
 ```
 
 Attributes
@@ -247,6 +258,9 @@ prompt.prompt;
 
 // Config object
 prompt.config;
+
+// Is fallback prompt used since network request fails and no cache was available
+prompt.isFallback;
 ```
 
 </Tab>
@@ -293,6 +307,9 @@ prompt = langfuse.get_prompt("movie-critic", label="latest")
 
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
+
+# Add a fallback prompt to use when the network request fail and no cache is available
+prompt = langfuse.get_prompt("movie-critic", fallback="Do you like {{movie}}?")
 ```
 
 Attributes
@@ -303,6 +320,9 @@ prompt.prompt
 
 # Config object
 prompt.config
+
+# Is fallback prompt used since network request fails and no cache was available
+prompt.is_fallback
 ```
 
 </Tab>
@@ -358,6 +378,11 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, { label: "lat
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
 });
+
+// Add a fallback prompt to use when the network request fail and no cache is available
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  fallback: "Do you like {{movie}}?",
+});
 ```
 
 Attributes
@@ -368,6 +393,9 @@ prompt.prompt;
 
 // Config object
 prompt.config;
+
+// Is fallback prompt used since network request fails and no cache was available
+prompt.isFallback;
 ```
 
 </Tab>
@@ -376,7 +404,7 @@ prompt.config;
 
 ### Link with Langfuse Tracing (optional)
 
-Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations.  
+Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a fallback prompt is used, no link will be created.
 
 This is currently unavailable when using the LangChain or LlamaIndex integration.
 
@@ -504,7 +532,7 @@ While [Langfuse Tracing](/docs/tracing) is fully asynchronous and non-blocking, 
 
 <Callout type="info">
 
-When refetching a prompt fails but an expired version is in the cache, the SDKs will return the expired version, preventing application blockage due to network issues.
+When refetching a prompt fails but an expired version is in the cache, the SDKs will return the expired version, preventing application blockage due to network issues. If you'd like to have a safety net on the first fetch where the cache is empty, you can provide a fallback prompt.
 
 </Callout>
 
