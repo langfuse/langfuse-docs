@@ -8,6 +8,7 @@ const plans = [
 ] as const;
 
 const availabilities = [
+  { id: "ee", label: "Enterprise Edition", Icon: Check },
   { id: "full", label: "Full", Icon: Check },
   { id: "private-beta", label: "Private Beta", Icon: Check },
   { id: "public-beta", label: "Public Beta", Icon: Check },
