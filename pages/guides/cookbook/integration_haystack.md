@@ -69,6 +69,8 @@ The following code snippet (based off of the Haystack [documentation](https://do
 
 First we build the pipeline. Add `LangfuseConnector` to the pipeline as a tracer. There's no need to connect it to any other component. The `LangfuseConnector` will automatically trace the operations and data flow within the pipeline. Then add the other components, like the text embedder, retriever, prompt builder and the model, and connect them together in the order they will be used in the pipeline.
 
+**Note**: Make sure to set the `HAYSTACK_CONTENT_TRACING_ENABLED` environment variable before importing `LangfuseConnector`.
+
 
 ```python
 from datasets import load_dataset
@@ -177,6 +179,8 @@ Learn more about tracing in the [docs](https://langfuse.com/docs/tracing).
 ## RAG Pipeline with Chat
 
 Here is another example connecting a RAG pipeline to a chat generator. Using a component like Haystack's `DynamicChatPromptBuilder` is a great way to add a chat component to your application, which can add a level of personalization and interactivity to your program.
+
+**Note**: Make sure to set the `HAYSTACK_CONTENT_TRACING_ENABLED` environment variable before importing `LangfuseConnector`.
 
 
 ```python
