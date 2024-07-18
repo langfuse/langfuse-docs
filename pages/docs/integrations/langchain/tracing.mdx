@@ -144,6 +144,8 @@ def main():
 main()
 ```
 
+Limitation (decorator + langchain): The input/output of the Langchain code will not be added to the trace or span created by the decorator but to a child. Adding them would cause unwanted side-effects if they are set manually or if you add multiple Langchain runs.
+
 </Tab>
 <Tab>
 {/* JS */}
@@ -173,6 +175,15 @@ await chain.invoke(
 );
 ```
 
+If you want to add the input/output of the Langchain run to the trace or span itself, use the `updateRoot` flag in the `CallbackHandler` constructor.
+
+```typescript
+const langfuseHandlerTrace = new CallbackHandler({
+  root: trace,
+  updateRoot: true,
+});
+```
+
 </Tab>
 <Tab>
 {/* Python low-level */}
@@ -197,14 +208,18 @@ langfuse_handler_span = span.get_langchain_handler()
 chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler_span]})
 ```
 
+If you want to add the input/output of the Langchain run to the trace or span itself, use the `update_parent` flag.
+
+```python
+langfuse_handler_trace = trace.get_langchain_handler(update_parent=True)
+```
+
 </Tab>
 </Tabs>
 
 If you pass these callback handlers to your Langchain code, the events will be nested under the respective trace or span in the Langfuse.
 
 See the [cookbook](/docs/integrations/langchain/example-python) for an example of this in action (Python).
-
-Limitation: The input/output of the Langchain code will not be added to the trace or span. Adding them would cause unwanted side-effects if they are set manually or if you add multiple Langchain runs. If you want the input/output of the Langchain run on the trace/span, you need to add them yourself via the regular Langfuse SDKs.
 
 ### Queuing and flushing
 
