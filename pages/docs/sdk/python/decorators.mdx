@@ -54,6 +54,8 @@ If you haven't done so yet, [sign up to Langfuse](https://cloud.langfuse.com/aut
 import PythonEnv from "@/components-mdx/env-python.mdx";
 import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
 
+<Tabs items={["Environment variables", "langfuse_context.configure"]}>
+<Tab>
 <Tabs items={["os.environ", "python-dotenv"]}>
   <Tab>
     <PythonEnvOs />
@@ -63,6 +65,24 @@ import PythonEnvOs from "@/components-mdx/env-python-os.mdx";
     environment variables from a `.env` file at the root of your application.
     <PythonEnv />
   </Tab>
+</Tabs>
+</Tab>
+<Tab>
+
+If you prefer to set the API keys programmatically, you can do so via the `langfuse_context.configure` method. This method should be called **at the top of your application before executing any decorated functions**.
+
+```python /langfuse_context.configure/
+from langfuse.decorators import langfuse_context
+
+langfuse_context.configure(
+    secret_key="sk-lf-...",
+    public_key="pk-lf-...",
+    host="https://cloud.langfuse.com", # 🇪🇺 EU region
+    # host="https://us.cloud.langfuse.com" # 🇺🇸 US region
+)
+```
+
+</Tab>
 </Tabs>
 
 When no API keys are provided, a single warning is logged, and no traces are sent to Langfuse.
@@ -184,6 +204,8 @@ from langfuse.decorators import langfuse_context
 
 # Configure the Langfuse client
 langfuse_context.configure(
+    secret_key="sk-lf-...",
+    public_key="pk-lf-...",
     httpx_client=custom_httpx_client,
     host=custom_host,
     enabled=True,
