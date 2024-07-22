@@ -27,7 +27,7 @@ Let's dive right in!
 
 ```python
 import os
-from langfuse.openai import auth_check
+from langfuse.openai import openai
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
@@ -40,7 +40,7 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
  
 # Test connection to Langfuse, not recommended for production as it is blocking
-auth_check()
+openai.langfuse_auth_check()
 ```
 
 ## Setup Lite LLM Proxy
