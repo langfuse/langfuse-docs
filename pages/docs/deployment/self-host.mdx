@@ -63,11 +63,15 @@ import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
 We follow _semantic versioning_ for Langfuse releases, i.e. breaking changes are only introduced in a new major version.
 
-- We recommend [automated updates](#update) within a major version to benefit from the latest features, bug fixes, and security patches.
+- We recommend [automated updates](#update) within a major version to benefit from the latest features, bug fixes, and security patches (`docker pull langfuse/langfuse:2`).
 - Subscribe to our mailing list to get notified about new releases and new major versions.
   <ProductUpdateSignup source="self-host guide" className="my-3 max-w-sm" />
 
 </Callout>
+
+### Recommended Instance Size
+
+For production environments, we suggest using a configuration of 2 CPU cores and 3 GB of RAM for the Langfuse container. On AWS, this would equate to a `t3.medium` instance. The container is stateless, allowing you to autoscale it based on actual resource usage.
 
 ### Configuring Environment Variables
 
