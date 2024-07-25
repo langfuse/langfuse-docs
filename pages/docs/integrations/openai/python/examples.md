@@ -43,8 +43,6 @@ from langfuse.openai import openai
 
 ```python
 # For debugging, checks the SDK connection with the server. Do not use in production as it adds latency.
-from langfuse.openai import openai
-
 openai.langfuse_auth_check()
 ```
 
