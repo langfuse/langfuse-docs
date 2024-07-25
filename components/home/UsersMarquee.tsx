@@ -111,7 +111,7 @@ const UserLogo = ({ user }: { user: User }) => {
   );
 };
 
-export const Users = () => {
+export const UsersMarquee = () => {
   return (
     <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
       <h2 className="text-center text-lg font-semibold leading-8 mb-6">
