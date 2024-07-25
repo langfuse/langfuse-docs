@@ -233,15 +233,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "banner-ama",
+    key: "banner-hiring",
     dismissible: true,
     text: (
-      <Link href="https://lu.ma/8utmvnlv">
+      <Link href="/careers">
         {/* mobile */}
-        <span className="sm:hidden">Wednesday: Community AMA with Marc →</span>
+        <span className="sm:hidden">Join us in Engineering & DevRel →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          This Wednesday: Ask me Anything Community Session with co-founder & CEO Marc →
+          We're hiring. Join us in Product Eng, Backend Eng, and DevRel →
         </span>
       </Link>
     ),
