@@ -1,8 +1,8 @@
 import Image, { type StaticImageData } from "next/image";
 import pigmentLight from "./img/pigment_light.svg";
 import pigmentDark from "./img/pigment_dark.svg";
-import alphawatchLight from "./img/alphawatch_light.png";
-import alphawatchDark from "./img/alphawatch_dark.png";
+import agicapLight from "./img/agicap_light.svg";
+import agicapDark from "./img/agicap_dark.svg";
 import frontifyLight from "./img/frontify_light.svg";
 import frontifyDark from "./img/frontify_dark.svg";
 import posthogLight from "./img/posthog_light.svg";
@@ -39,18 +39,16 @@ const users: User[] = [
     href: "https://www.frontify.com",
   },
   {
-    name: "Alphawatch",
-    lightImage: alphawatchLight,
-    darkImage: alphawatchDark,
-    href: "https://alphawatch.ai",
-    className: "w-16 sm:w-24",
+    name: "Agicap",
+    lightImage: agicapLight,
+    darkImage: agicapDark,
+    href: "https://agicap.com",
   },
   {
     name: "Khan Academy",
     lightImage: khanacademyLight,
     darkImage: khanacademyDark,
     href: "https://www.khanacademy.org",
-    className: "w-30 sm:w-44",
   },
   {
     name: "Pigment",
@@ -69,7 +67,6 @@ const users: User[] = [
     lightImage: fletchLight,
     darkImage: fletchDark,
     href: "https://fletch.ai/",
-    className: "w-16 sm:w-24",
   },
   {
     name: "Sumup",
