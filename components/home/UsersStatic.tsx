@@ -1,10 +1,10 @@
 import Image, { type StaticImageData } from "next/image";
 import pigmentLight from "./img/pigment_light.svg";
 import pigmentDark from "./img/pigment_dark.svg";
-import agicapLight from "./img/agicap_light.svg";
-import agicapDark from "./img/agicap_dark.svg";
-import frontifyLight from "./img/frontify_light.svg";
-import frontifyDark from "./img/frontify_dark.svg";
+import circlebackLight from "./img/circleback_light.png";
+import circlebackDark from "./img/circleback_dark.png";
+import samsaraLight from "./img/samsara_light.png";
+import samsaraDark from "./img/samsara_dark.png";
 import posthogLight from "./img/posthog_light.svg";
 import posthogDark from "./img/posthog_dark.svg";
 import fortoLight from "./img/forto_light.svg";
@@ -33,16 +33,16 @@ const users: User[] = [
     href: "https://posthog.com",
   },
   {
-    name: "Frontify",
-    lightImage: frontifyLight,
-    darkImage: frontifyDark,
-    href: "https://www.frontify.com",
+    name: "Samsara",
+    lightImage: samsaraLight,
+    darkImage: samsaraDark,
+    href: "https://www.samsara.com",
   },
   {
-    name: "Agicap",
-    lightImage: agicapLight,
-    darkImage: agicapDark,
-    href: "https://agicap.com",
+    name: "Circleback",
+    lightImage: circlebackLight,
+    darkImage: circlebackDark,
+    href: "https://circleback.ai",
   },
   {
     name: "Khan Academy",
@@ -79,7 +79,7 @@ const users: User[] = [
 export const UsersStatic = () => (
   <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
     <div className="py-14">
-      <div className="container mx-auto px-4 md:px-8">
+      <div>
         <h2 className="text-center text-lg font-semibold leading-8 mb-6">
           Teams building complex LLM apps rely on Langfuse
         </h2>
@@ -89,7 +89,7 @@ export const UsersStatic = () => (
               <a
                 key={user.name}
                 href={user.href}
-                className="overflow-hidden w-1/2 md:w-1/4 xl:w-auto h-16 hover:opacity-100 opacity-80 transition p-4 xl:p-5"
+                className="overflow-hidden w-1/2 md:w-1/4 xl:w-auto h-16 hover:opacity-100 opacity-80 transition p-4 xl:p-4"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -97,13 +97,13 @@ export const UsersStatic = () => (
                   src={user.lightImage}
                   alt={user.name}
                   className="object-contain h-full w-full hidden dark:block"
-                  sizes="(min-width: 768px) 10vw, 20vw"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
                 />
                 <Image
                   src={user.darkImage}
                   alt={user.name}
                   className="object-contain h-full w-full dark:hidden"
-                  sizes="(min-width: 768px) 10vw, 20vw"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
                 />
               </a>
             ))}
