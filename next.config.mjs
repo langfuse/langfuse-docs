@@ -58,7 +58,7 @@ const nextraConfig = withNextra({
     ],
   },
   headers() {
-    return [
+    const headers = [
       {
         source: "/:path*",
         headers: [
@@ -89,7 +89,22 @@ const nextraConfig = withNextra({
           },
         ],
       },
-    ]
+    ];
+
+    // Do not index Vercel preview deployments
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') {
+      headers.push({
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+        source: '/:path*',
+      });
+    }
+
+    return headers;
   },
   redirects: async () => [
     ...nonPermanentRedirects.map(([source, destination]) => ({
