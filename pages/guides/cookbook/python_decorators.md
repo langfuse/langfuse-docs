@@ -156,8 +156,19 @@ def anthropic_completion(**kwargs):
       metadata=kwargs_clone
   )
   
+  response = anthopic_client.messages.create(**kwargs)
+
+  # See docs for more details on token counts and usd cost in Langfuse
+  # https://langfuse.com/docs/model-usage-and-cost
+  langfuse_context.update_current_observation(
+      usage={
+          "input": response.usage.input_tokens,
+          "output": response.usage.output_tokens
+      }
+  )
+
   # return result
-  return anthopic_client.messages.create(**kwargs).content[0].text
+  return response.content[0].text
 
 @observe()
 def main():
@@ -172,7 +183,7 @@ def main():
 main()
 ```
 
-> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ece9079d-e12c-4c0e-9dc3-8805d0bbe8ec?observation=723c04ff-cdca-4716-8143-e691129be315
+> **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/66d06dd7-eeec-40c1-9b11-aac0e9c4f2fe?observation=d48a45f8-593c-4013-8a8a-23665b94aeda
 
 ## Customize input/output
 
