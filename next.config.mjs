@@ -94,13 +94,13 @@ const nextraConfig = withNextra({
     // Do not index Vercel preview deployments
     if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') {
       headers.push({
+        source: '/:path*',
         headers: [
           {
             key: 'X-Robots-Tag',
             value: 'noindex',
           },
         ],
-        source: '/:path*',
       });
     }
 
