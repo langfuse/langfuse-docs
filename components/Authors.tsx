@@ -42,6 +42,11 @@ export const allAuthors = {
     name: "Lydia You",
     image: "/images/people/lydiayou.jpg",
   },
+  jannikmaierhoefer: {
+    firstName: "Jannik",
+    name: "Jannik Maierhöfer",
+    image: "/images/people/jannikmaierhoefer.jpg",
+  },
 } as const;
 
 export const Authors = (props: { authors: (keyof typeof allAuthors)[] }) => {
