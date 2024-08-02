@@ -17,7 +17,7 @@ The AI SDK (by Vercel) supports tracing via OpenTelemetry. Langfuse provides the
 
 <Steps>
 
-### Enabled Telemetry
+### Enable Telemetry
 
 While the feature is experimental, you can enable it by setting `experimental_telemetry` on each request that you want to trace.
 
@@ -29,7 +29,7 @@ const result = await generateText({
 });
 ```
 
-### Add Langfuse Exporter
+### Add `LangfuseExporter`
 
 You can set the Langfuse credentials via environment variables or directly to the `LangfuseExporter` constructor. Create a project in the Langfuse dashboard to get your `secretKey` and `publicKey`.
 
@@ -90,7 +90,7 @@ import { LangfuseExporter } from "langfuse-vercel";
 export function register() {
   registerOTel({
     serviceName: "langfuse-vercel-ai-nextjs-example",
-    traceExporter: new LangfuseExporter({ debug: true }),
+    traceExporter: new LangfuseExporter(),
   });
 }
 ```
