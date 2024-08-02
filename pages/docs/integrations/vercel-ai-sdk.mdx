@@ -11,7 +11,11 @@ import EnvJS from "@/components-mdx/env-js.mdx";
   future.
 </Callout>
 
-The AI SDK (by Vercel) supports tracing via OpenTelemetry. Langfuse provides the `LangfuseExporter` to collect these traces in Langfuse.
+The [Vercel AI SDK](https://sdk.vercel.ai/docs/introduction) is the TypeScript toolkit designed to help developers build AI-powered applications with React, Next.js, Vue, Svelte, Node.js, and more.
+
+The SDK supports tracing via OpenTelemetry. With the `LangfuseExporter` you can collect these traces in Langfuse.
+
+_Example Trace in Langfuse_
 
 <Frame border fullWidth>
   ![Vercel AI SDK Example Trace in
@@ -24,7 +28,7 @@ The AI SDK (by Vercel) supports tracing via OpenTelemetry. Langfuse provides the
 
 ### Enable Telemetry
 
-While the feature is experimental, you can enable it by setting `experimental_telemetry` on each request that you want to trace.
+While telemetry is experimental ([docs](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry#enabling-telemetry)), you can enable it by setting `experimental_telemetry` on each request that you want to trace.
 
 ```typescript {4}
 const result = await generateText({
@@ -34,7 +38,9 @@ const result = await generateText({
 });
 ```
 
-### Add `LangfuseExporter`
+### Collect traces with `LangfuseExporter`
+
+To collect the traces in Langfuse, you need to add the `LangfuseExporter` to your application.
 
 You can set the Langfuse credentials via environment variables or directly to the `LangfuseExporter` constructor. Create a project in the Langfuse dashboard to get your `secretKey` and `publicKey`.
 
@@ -61,6 +67,8 @@ new LangfuseExporter({
 
 </Tab>
 </Tabs>
+
+Now you need to resister this exporter via the OpenTelemetry SDK.
 
 <Tabs items={["NextJs","Node.js"]}>
 <Tab>
@@ -142,6 +150,11 @@ main().catch(console.error);
 
 </Tab>
 </Tabs>
+
+<Callout type="info" emoji="✨">
+  Done! All traces that contain AI SDK spans are automatically captured in
+  Langfuse.
+</Callout>
 
 </Steps>
 
