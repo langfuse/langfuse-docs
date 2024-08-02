@@ -57,10 +57,48 @@ new LangfuseExporter({
 </Tab>
 </Tabs>
 
-<Tabs items={["Node.js", "NextJs"]}>
+<Tabs items={["NextJs","Node.js"]}>
 <Tab>
 
-```typescript showLineNumbers {5, 8, 31}
+NextJS has experimental support for OpenTelemetry instrumentation on the framework level. Learn more about it in the [Next.js OpenTelemetry guide](https://nextjs.org/docs/app/building-your-application/optimizing/open-telemetry).
+
+Install dependencies:
+
+```bash
+npm install @vercel/otel langfuse-vercel @opentelemetry/api-logs @opentelemetry/instrumentation @opentelemetry/sdk-logs
+```
+
+Enable the `instrumentationHook` in your `next.config.js`:
+
+```typescript filename="next.config.js" {4}
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
+};
+
+module.exports = nextConfig;
+```
+
+Add `LangfuseExporter` to your instrumentation:
+
+```typescript filename="instrumentation.ts" {7}
+import { registerOTel } from "@vercel/otel";
+import { LangfuseExporter } from "langfuse-vercel";
+
+export function register() {
+  registerOTel({
+    serviceName: "langfuse-vercel-ai-nextjs-example",
+    traceExporter: new LangfuseExporter({ debug: true }),
+  });
+}
+```
+
+</Tab>
+<Tab>
+
+```typescript {5, 8, 31}
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -98,14 +136,13 @@ main().catch(console.error);
 ```
 
 </Tab>
-<Tab>
-
-NextJS has experimental support for OpenTelemetry instrumentation on the framework level. Learn more about it in the [Next.js OpenTelemetry guide](https://nextjs.org/docs/app/building-your-application/optimizing/open-telemetry).
-
-</Tab>
 </Tabs>
 
 </Steps>
+
+## Example Application
+
+We created a sample repository ([langfuse/langfuse-vercel-ai-nextjs-example](https://github.com/langfuse/langfuse-vercel-ai-nextjs-example)) based on the [next-openai](https://github.com/vercel/ai/tree/main/examples/next-openai) template to showcase the integration of Langfuse with Next.js and Vercel AI SDK.
 
 ## Customization
 
@@ -135,6 +172,14 @@ const result = await generateText({
 });
 ```
 
-### Learn more
+## Debugging
+
+Enable the `debug` option to see the logs of the exporter.
+
+```typescript
+new LangfuseExporter({ debug: true });
+```
+
+## Learn more
 
 See the [telemetry documentation](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry) of the Vercel AI SDK for more information.
