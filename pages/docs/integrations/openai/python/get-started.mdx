@@ -10,11 +10,14 @@ description: Drop-in replacement of OpenAI SDK (Python) to get full observabilit
   here](/docs/integrations/openai/js/get-started).
 </Callout>
 
-If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import.
+If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import. This works with OpenAI and Azure OpenAI.
 
 ```diff
 - import openai
 + from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
 Langfuse automatically tracks:
@@ -67,6 +70,9 @@ Change import
 ```diff
 - import openai
 + from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
 </Tab>
@@ -77,6 +83,9 @@ Change import
 ```diff
 - import openai
 + from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
 Add Langfuse credentials to your code
