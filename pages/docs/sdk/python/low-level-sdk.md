@@ -61,6 +61,8 @@ langfuse = Langfuse()
 | `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
 | `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
 | `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
+| `LANGFUSE_SAMPLE_RATE`, `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing. | 1.0
+
 
 ## Tracing
 
