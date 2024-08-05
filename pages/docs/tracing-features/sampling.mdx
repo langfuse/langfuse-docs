@@ -4,8 +4,11 @@ description: Configure sampling to control the volume of traces collected by the
 
 # Sampling
 
-Sampling can be used to control the volume of traces collected by the Langfuse server. By default, Langfuse samples 100% of all traces. You can configure the sampling rate by setting the `LANGFUSE_SAMPLING_RATE` environment variable or by using the `sampling_rate` parameter in the constructors of the Python SDK. Support for the JS SDK is coming soon.
-The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
+Sampling can be used to control the volume of traces collected by the Langfuse server. 
+
+You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1. The default value is 1, meaning that all traces are collected. A value of 0.5 means that only 50% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
+
+Support for the JS SDK is coming soon.
 
 <Tabs items={["Python", "OpenAI (Python)",  "Langchain (Python)", "LlamaIndex"]}>
 <Tab>
@@ -44,8 +47,6 @@ trace = langfuse.trace(
 When using the [OpenAI SDK Integration](/docs/integrations/openai)
 
 ```python
-
-
 # Either set the environment variable or configure the openai import. The latter takes precedence.
 os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
 
