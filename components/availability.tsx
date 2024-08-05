@@ -7,12 +7,23 @@ const plans = [
   { id: "selfHosted", label: "Self Hosted" },
 ] as const;
 
-const availabilities = [
+const availabilities: {
+  id: string;
+  label: string;
+  shortLabel?: string;
+  Icon: any;
+}[] = [
+  {
+    id: "enterprise",
+    label: "Enterprise Edition",
+    shortLabel: "Enterprise",
+    Icon: Check,
+  },
   { id: "full", label: "Full", Icon: Check },
   { id: "private-beta", label: "Private Beta", Icon: Check },
   { id: "public-beta", label: "Public Beta", Icon: Check },
   { id: "not-available", label: "Not Available", Icon: X },
-] as const;
+];
 
 export function AvailabilitySidebar(props: {
   frontMatter: Record<string, any>;
@@ -78,6 +89,11 @@ export function AvailabilityBanner(props: {
               <span className="hidden md:inline-block text-xs lg:text-sm">
                 {plan.availability.label}
               </span>
+              {plan.availability.shortLabel && (
+                <span className="inline-block md:hidden text-xs">
+                  ({plan.availability.shortLabel})
+                </span>
+              )}
             </div>
           </li>
         ))}
