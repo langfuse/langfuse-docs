@@ -9,8 +9,8 @@ import posthogLight from "./img/posthog_light.svg";
 import posthogDark from "./img/posthog_dark.svg";
 import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
-import fletchLight from "./img/fletch_light.svg";
-import fletchDark from "./img/fletch_dark.svg";
+import juiceboxLight from "./img/juicebox_light.svg";
+import juiceboxDark from "./img/juicebox_dark.svg";
 import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
@@ -63,10 +63,10 @@ const users: User[] = [
     href: "https://forto.com",
   },
   {
-    name: "Fletch",
-    lightImage: fletchLight,
-    darkImage: fletchDark,
-    href: "https://fletch.ai/",
+    name: "Juicebox",
+    lightImage: juiceboxLight,
+    darkImage: juiceboxDark,
+    href: "https://juicebox.ai/",
   },
   {
     name: "Sumup",
