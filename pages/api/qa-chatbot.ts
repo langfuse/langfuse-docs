@@ -181,12 +181,12 @@ export default async function handler(req: Request, res: Response) {
   const generation = trace.generation({
     name: "generation",
     input: assembledMessages as any,
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     prompt: langfusePrompt,
   });
 
   const response = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     stream: true,
     messages: assembledMessages,
   });
