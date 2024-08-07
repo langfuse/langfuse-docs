@@ -1,0 +1,101 @@
+---
+description: Configure sampling to control the volume of traces collected by the Langfuse server.
+---
+
+# Sampling
+
+Sampling can be used to control the volume of traces collected by the Langfuse server. 
+
+
+You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1. The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
+
+Support for the JS SDK is coming soon.
+
+<Tabs items={["Python", "OpenAI (Python)",  "Langchain (Python)", "LlamaIndex"]}>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
+
+@observe()
+def fn():
+    pass
+
+fn()
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+
+# Either set the environment variable or the constructor parameter. The latter takes precedence.
+os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
+langfuse = Langfuse(sample_rate=0.5)
+
+trace = langfuse.trace(
+  name="Rap Battle",
+)
+```
+
+</Tab>
+<Tab>
+
+When using the [OpenAI SDK Integration](/docs/integrations/openai)
+
+```python
+# Either set the environment variable or configure the openai import. The latter takes precedence.
+os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
+
+from langfuse.openai import openai
+openai.langfuse_sample_rate = 0.5
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+)
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/docs/integrations/langchain/tracing)
+
+```python
+from langfuse.callback import CallbackHandler
+
+# Either set the environment variable or the constructor parameter. The latter takes precedence.
+os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
+handler = CallbackHandler(
+  sample_rate=0.5
+)
+```
+</Tab>
+
+<Tab>
+
+When using the [LlamaIndex Integration](/docs/integrations/llama-index)
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse import langfuse
+
+# Either set the environment variable or the constructor parameter. The latter takes precedence.
+os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
+langfuse_callback_handler = LlamaIndexCallbackHandler(sample_rate=0.5)
+
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+```
+
+</Tab>
+
+</Tabs>

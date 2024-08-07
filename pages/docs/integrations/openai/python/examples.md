@@ -159,7 +159,48 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
 
-### Group multiple generations into a single trace
+## AzureOpenAI
+
+The integration also works with the `AzureOpenAI` and `AsyncAzureOpenAI` classes.
+
+
+```python
+AZURE_OPENAI_KEY=""
+AZURE_ENDPOINT=""
+AZURE_DEPLOYMENT_NAME="cookbook-gpt-4o-mini" # example deployment name
+```
+
+
+```python
+# instead of: from openai import AzureOpenAI
+from langfuse.openai import AzureOpenAI
+```
+
+
+```python
+client = AzureOpenAI(
+    api_key=AZURE_OPENAI_KEY,  
+    api_version="2023-03-15-preview",
+    azure_endpoint=AZURE_ENDPOINT
+)
+```
+
+
+```python
+client.chat.completions.create(
+  name="test-chat-azure-openai",
+  model=AZURE_DEPLOYMENT_NAME, # deployment name
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"someMetadataKey": "someValue"},
+)
+```
+
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7ceb3ee3-0f2a-4f36-ad11-87ff636efd1e
+
+## Group multiple generations into a single trace
 
 Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
 
@@ -201,7 +242,7 @@ Go to https://cloud.langfuse.com or your own instance to see your trace.
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
 
-#### Fully featured: Interoperability with Langfuse SDK
+## Fully featured: Interoperability with Langfuse SDK
 
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
@@ -261,7 +302,7 @@ trace_id = str(uuid4())
 print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 ```
 
-### Programmatically add scores
+## Programmatically add scores
 
 You can add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some programmatic evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 

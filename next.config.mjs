@@ -10,7 +10,7 @@ const withBundleAnalyzer = NextBundleAnalyzer({
  * CSP headers
  * img-src https to allow loading images from SSO providers
  */
-const cspHeader = `
+const cspHeader = process.env.NODE_ENV === 'production' ? `
   default-src 'self' https: wss:;
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
   style-src 'self' 'unsafe-inline' https:;
@@ -25,7 +25,7 @@ const cspHeader = `
   frame-ancestors 'none';
   upgrade-insecure-requests;
   block-all-mixed-content;
-`;
+`: "";
 
 // nextra config
 const withNextra = nextra({
