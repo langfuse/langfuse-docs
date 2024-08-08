@@ -135,28 +135,50 @@ result = get_math_solution(question)
 print(result.content)
 ```
 
-    {"steps":[{"explanation":"First, we need to isolate the term with the variable, 8x, by eliminating the constant term on the left-hand side. We do this by subtracting 7 from both sides of the equation.","output":"8x + 7 - 7 = -23 - 7"},{"explanation":"After subtracting 7 from both sides, the equation simplifies to 8x = -30.","output":"8x = -30"},{"explanation":"Next, to solve for x, we need to divide both sides of the equation by 8, the coefficient of x.","output":"8x/8 = -30/8"},{"explanation":"Dividing each side by 8 gives us x = -30/8, which simplifies to x = -15/4. This is done by dividing both the numerator and the denominator by 2.","output":"x = -15/4"}],"final_answer":"x = -15/4"}
+    {"steps":[{"explanation":"We need to isolate the term with the variable, 8x. So, we start by subtracting 7 from both sides to remove the constant term on the left side.","output":"8x + 7 - 7 = -23 - 7"},{"explanation":"The +7 and -7 on the left side cancel each other out, leaving us with 8x. The right side simplifies to -30.","output":"8x = -30"},{"explanation":"To solve for x, divide both sides of the equation by 8, which is the coefficient of x.","output":"x = -30 / 8"},{"explanation":"Simplify the fraction -30/8 by finding the greatest common divisor, which is 2.","output":"x = -15 / 4"}],"final_answer":"x = -15/4"}
 
 
 
 ```python
 # Print results step by step
-from IPython.display import Math, display
 
-def print_math_response(response):
-    result = json.loads(response)
-    steps = result['steps']
-    final_answer = result['final_answer']
-    for i in range(len(steps)):
-        print(f"Step {i+1}: {steps[i]['explanation']}\n")
-        display(Math(steps[i]['output']))
-        print("\n")
+result = json.loads(result.content)
+steps = result['steps']
+final_answer = result['final_answer']
+for i in range(len(steps)):
+    print(f"Step {i+1}: {steps[i]['explanation']}\n")
+    print(steps[i]['output'])
+    print("\n")
 
-    print("Final answer:\n\n")
-    display(Math(final_answer))
-
-print_math_response(result.content)
+print("Final answer:\n\n")
+print(final_answer)
 ```
+
+    Step 1: We need to isolate the term with the variable, 8x. So, we start by subtracting 7 from both sides to remove the constant term on the left side.
+    
+    8x + 7 - 7 = -23 - 7
+    
+    
+    Step 2: The +7 and -7 on the left side cancel each other out, leaving us with 8x. The right side simplifies to -30.
+    
+    8x = -30
+    
+    
+    Step 3: To solve for x, divide both sides of the equation by 8, which is the coefficient of x.
+    
+    x = -30 / 8
+    
+    
+    Step 4: Simplify the fraction -30/8 by finding the greatest common divisor, which is 2.
+    
+    x = -15 / 4
+    
+    
+    Final answer:
+    
+    
+    x = -15/4
+
 
 ## Step 3: See your trace in Langfuse
 
@@ -165,6 +187,57 @@ You can now see the trace and the JSON schema in Langfuse.
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3ecc3849-66c9-4eaf-b26b-bde26b7eebed)
 
 ![View example trace in the Langfuse UI](https://langfuse.com/images/cookbook/integration-openai-structured-outputs-tracing.png)
+
+## Alternative: Using the SDK `parse` helper
+
+The new SDK version adds a `parse` helper, allowing you to use your own Pydantic model without defining a JSON schema.
+
+
+```python
+from pydantic import BaseModel
+
+class MathReasoning(BaseModel):
+    class Step(BaseModel):
+        explanation: str
+        output: str
+
+    steps: list[Step]
+    final_answer: str
+
+def get_math_solution(question: str):
+    response = client.beta.chat.completions.parse(
+        model=openai_model,
+        messages=[
+            {"role": "system", "content": math_tutor_prompt},
+            {"role": "user", "content": question},
+        ],
+        response_format=MathReasoning,
+    )
+
+    return response.choices[0].message
+```
+
+
+```python
+result = get_math_solution(question).parsed
+
+print(result.steps)
+print("Final answer:")
+print(result.final_answer)
+```
+
+    [Step(explanation='To isolate the term with the variable on one side of the equation, start by subtracting 7 from both sides.', output='8x = -23 - 7'), Step(explanation='Combine like terms on the right side to simplify the equation.', output='8x = -30'), Step(explanation='Divide both sides by 8 to solve for x.', output='x = -30 / 8'), Step(explanation='Simplify the fraction by dividing both the numerator and the denominator by their greatest common divisor, which is 2.', output='x = -15 / 4')]
+    Final answer:
+    x = -15/4
+
+
+## See your trace in Langfuse
+
+You can now see the trace and your supplied Pydantic model in Langfuse.
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/59c4376a-c8eb-4ecb-8780-2f028b87e7eb)
+
+![View example trace in the Langfuse UI](https://langfuse.com/images/cookbook/integration_openai_structured_outputs_tracing_parse.png)
 
 ## Feedback
 
