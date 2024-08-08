@@ -55,6 +55,8 @@ This setup is useful for applications where each step needs to be displayed sepa
 
 (Example taken from [OpenAI cookbook](https://cookbook.openai.com/examples/structured_outputs_intro))
 
+**Note:** While OpenAI also offer structured output parsing via its beta API (`client.beta.chat.completions.parse`), this approach currently does not allow setting Langfuse specific attributes such as `name`, `metadata`, `userId` etc. Please use the approach using `response_format` with the standard `client.chat.completions.create` as described below.
+
 
 ```python
 # Use the Langfuse drop-in replacement to get full logging by changing only the import.
