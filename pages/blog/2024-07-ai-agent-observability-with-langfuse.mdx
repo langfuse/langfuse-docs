@@ -1,7 +1,7 @@
 ---
 title: "AI Agent Observability with Langfuse"
 date: 2024/07/31
-description: What is AI agent observability? Learn about agents and the importance of observability and tracking performance, cost, and user interactions. Explore tools like LangGraph, Llama Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to monitor and optimize your application.
+description: Learn about agents and the importance of monitoring and tracking performance, cost, and user interactions. Explore tools like LangGraph, Llama Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to trace and optimize your application.
 ogImage: /images/blog/ai-agent-observability/ai-agent-observability.png
 tag: showcase
 author: Jannik
@@ -51,9 +51,9 @@ In **single-agent setups**, one agent is responsible for solving the entire task
 
 ## What is AI Agent Observability?
 
-AI agent observability means tracking and analyzing the performance, behavior, and interactions of AI agents. This includes real-time monitoring of multiple LLM calls, control flows, decision-making processes, and outputs to ensure agents operate efficiently and accurately.
+Observing agents means tracking and analyzing the performance, behavior, and interactions of AI agents. This includes real-time monitoring of multiple LLM calls, control flows, decision-making processes, and outputs to ensure agents operate efficiently and accurately.
 
-[Langfuse](/) is an open-source observability tool that provides deep insights into metrics such as latency, cost, and error rates, enabling developers to debug, optimize, and enhance their AI systems. Using Langfuse observability, teams can identify and resolve issues, streamline workflows, and maintain high-quality outputs in complex, multi-step AI agents.
+[Langfuse](/) is an open-source LLM engineering platform that provides deep insights into metrics such as latency, cost, and error rates, enabling developers to debug, optimize, and enhance their AI systems. Using Langfuse observability, teams can identify and resolve issues, streamline workflows, and maintain high-quality outputs by evaluating agent responses in complex, multi-step AI agents.
 
 ### Why AI Agent Observability is Important
 
@@ -61,7 +61,7 @@ AI agent observability means tracking and analyzing the performance, behavior, a
 
 Agents use multiple steps to solve complex tasks, and inaccurate intermediary results can cause failures of the entire system. [Tracing](/docs/tracing) these intermediate steps and testing your application on known edge cases is essential.
 
-When deploying LLMs, some edge cases will always slip through in initial testing. A proper observability set-up helps identify these cases, allowing you to add them to future test sets for more robust evaluations. With [Datasets](/docs/datasets/overview), Langfuse allows you to collect datasets of inputs and expected outputs to benchmark new releases before deployment. Datasets can be incrementally updated with new edge cases found in production and integrated with existing CI/CD pipelines.
+When deploying LLMs, some edge cases will always slip through in initial testing. A proper analytics set-up helps identify these cases, allowing you to add them to future test sets for more robust agent evaluations. With [Datasets](/docs/datasets/overview), Langfuse allows you to collect examples of inputs and expected outputs to benchmark new releases before deployment. Datasets can be incrementally updated with new edge cases found in production and integrated with existing CI/CD pipelines.
 
 #### Tradeoff of Accuracy and Costs
 
@@ -73,9 +73,9 @@ Langfuse monitors both [costs](/docs/model-usage-and-cost) and [accuracy](/docs/
 
 #### Understanding User Interactions
 
-Observability allows you to capture how users interact with your LLM applications. This information is crucial for refining your AI application and tailoring responses to better meet user needs.
+AI agents analytics allows you to capture how users interact with your LLM applications. This information is crucial for refining your AI application and tailoring responses to better meet user needs.
 
-[Langfuse Analytics](/docs/analytics/overview) derives actionable insights from production data, helping you measure quality through user feedback and model-based [scoring](/docs/scores/overview) over time and across different versions. It also allows you to monitor cost and latency metrics in real-time, broken down by user, session, geography, and model version, enabling precise optimizations for your LLM application.
+[Langfuse Analytics](/docs/analytics/overview) derives insights from production data, helping you measure quality through user feedback and model-based [scoring](/docs/scores/overview) over time and across different versions. It also allows you to monitor cost and latency metrics in real-time, broken down by user, session, geography, and model version, enabling precise optimizations for your LLM application.
 
 ## Tools to build AI Agents
 
@@ -127,7 +127,7 @@ For prototypes and development by non-developers, no-code builders can be a grea
 
 #### Flowise
 
-Flowise ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. It lets you build customized LLM flows with a drag-and-drop editor. With the native Langfuse [integration](/docs/integrations/flowise), you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
+Flowise ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. It lets you build customized LLM flows with a drag-and-drop editor. With the native Langfuse [integration](/docs/integrations/flowise), you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to analyse and improve them.
 
 <Frame fullWidth border className="my-10">
   ![Flowise Example](/images/blog/ai-agent-observability/flowise.jpg)
@@ -141,7 +141,7 @@ Flowise ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. I
 
 Langflow ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
 
-With the native [integration](/docs/integrations/langflow), you can use Langflow to quickly create complex LLM applications in no code and then use Langfuse to monitor and improve them.
+With the native [integration](/docs/integrations/langflow), you can use Langflow to quickly create complex LLM applications in no code and then use Langfuse to monitor and debug them.
 
 <Frame fullWidth border className="my-10">
   ![Langflow Example](/images/blog/ai-agent-observability/langflow.jpg)
@@ -165,4 +165,4 @@ With the native Langfuse [integration](/docs/integrations/dify), you can use Dif
 
 ## Get Started
 
-If you want to get started with building your AI Agents and monitoring them with Langfuse, check out our [end-to-end example](/docs/integrations/langchain/example-python-langgraph) of building a simple agent with LangGraph and monitoring it with Langfuse.
+If you want to get started with building your AI Agents and monitoring them with Langfuse, check out our [end-to-end example](/docs/integrations/langchain/example-python-langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
