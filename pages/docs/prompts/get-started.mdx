@@ -180,6 +180,12 @@ prompt = langfuse.get_prompt("movie-critic", label="latest")
 
 # Extend cache TTL from default 60 to 300 seconds
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
+
+# Number of retries on fetching prompts from the server. Default is 2.
+prompt = langfuse.get_prompt("movie-critic", max_retries=3)
+
+# Timeout per call to the Langfuse API in seconds. Default is 20.
+prompt = langfuse.get_prompt("movie-critic", fetch_timeout_seconds=3)
 ```
 
 Attributes
@@ -241,6 +247,17 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
 });
+
+// Number of retries on fetching prompts from the server. Default is 2.
+const promptWithMaxRetries = await langfuse.getPrompt("movie-critic", undefined, {
+  maxRetries: 5,
+});
+
+// Timeout per call to the Langfuse API in milliseconds. Default is 10 seconds.
+const promptWithFetchTimeout = await langfuse.getPrompt("movie-critic", undefined, {
+  fetchTimeoutMs: 5000,
+});
+
 ```
 
 Attributes
