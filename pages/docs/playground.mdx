@@ -6,10 +6,10 @@ description: Test, iterate, and compare different prompts and models within the 
 
 <AvailabilityBanner
   availability={{
-    hobby: "public-beta",
-    pro: "public-beta",
-    team: "public-beta",
-    selfHosted: "not-available",
+    hobby: "full",
+    pro: "full",
+    team: "full",
+    selfHosted: "enterprise",
   }}
 />
 
@@ -44,12 +44,49 @@ You can either start from scratch or jump into the playground from an existing p
 
 ## Supported models
 
-<Callout type="info">
-  While in public beta, the Langfuse cloud playground is accessible to all users
-  and does not require bringing your own API keys.
-</Callout>
-
 Currently the playground supports the following models:
 
-- **OpenAI**: gpt-4-turbo-preview, gpt-4-1106-preview, gpt-4-0613, gpt-4-0125-preview, gpt-4, gpt-3.5-turbo-16k-0613, gpt-3.5-turbo-16k, gpt-3.5-turbo-1106, gpt-3.5-turbo-0613, gpt-3.5-turbo-0301, gpt-3.5-turbo-0125, gpt-3.5-turbo
-- **Anthropic**: claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307, claude-2.1, claude-2.0, claude-instant-1.2
+export function ModelList() {
+  const openAIModels = [
+    "gpt-4o",
+    "gpt-4o-2024-08-06",
+    "gpt-4o-2024-05-13",
+    "gpt-4o-mini",
+    "gpt-4o-mini-2024-07-18",
+    "gpt-4-turbo-preview",
+    "gpt-4-1106-preview",
+    "gpt-4-0613",
+    "gpt-4-0125-preview",
+    "gpt-4",
+    "gpt-3.5-turbo-16k-0613",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0613",
+    "gpt-3.5-turbo-0301",
+    "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo",
+  ];
+  const anthropicModels = [
+    "claude-3-5-sonnet-20240620",
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-2.1",
+    "claude-2.0",
+    "claude-instant-1.2",
+  ];
+  return (
+    <div>
+      <ul>
+        <li>
+          <strong>OpenAI / Azure OpenAI:</strong> {openAIModels.join(", ")}
+        </li>
+        <li>
+          <strong>Anthropic:</strong> {anthropicModels.join(", ")}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+<ModelList />

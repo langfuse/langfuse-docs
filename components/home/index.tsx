@@ -1,7 +1,7 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
 import Security from "./Security";
-import { Users } from "./Users";
+import { UsersStatic } from "./UsersStatic";
 import dynamic from "next/dynamic";
 
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
@@ -21,7 +21,7 @@ export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
       <Hero />
-      <Users />
+      <UsersStatic />
       <FeatureBento />
       <Integrations />
       <OpenSource />

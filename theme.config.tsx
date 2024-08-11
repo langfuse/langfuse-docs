@@ -233,7 +233,7 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "banner-hiring-june",
+    key: "banner-hiring",
     dismissible: true,
     text: (
       <Link href="/careers">

@@ -276,26 +276,52 @@ review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse
 
 ## Adding scores to traces
 
-To add [scores](/docs/scores) to traces created with the Langchain integration, access the traceId via `langfuse_handler.get_trace_id()`
+In addition to the attributes automatically captured by the decorator, you can add others to use the full features of Langfuse.
+
+Two utility methods:
+*   `langfuse_context.update_current_observation`: Update the trace/span of the current function scope
+*   `langfuse_context.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
+
+For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation).
+
+Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
 
 ```python
-from langfuse import Langfuse
-
-# Trace langchain run via the Langfuse CallbackHandler as shown above
-
-# Get id of the last created trace
-trace_id = langfuse_handler.get_trace_id()
-
-# Add score, e.g. via the Python SDK
-langfuse = Langfuse()
-trace = langfuse.score(
-    trace_id=trace_id,
-    name="user-explicit-feedback",
-    value=1,
-    comment="I like how personalized the response is"
-)
+from langfuse.decorators import langfuse_context, observe
+ 
+@observe(as_type="generation")
+def deeply_nested_llm_call():
+    # Enrich the current observation with a custom name, input, and output
+    langfuse_context.update_current_observation(
+        name="Deeply nested LLM call", input="Ping?", output="Pong!"
+    )
+    # Set the parent trace's name from within a nested observation
+    langfuse_context.update_current_trace(
+        name="Trace name set from deeply_nested_llm_call",
+        session_id="1234",
+        user_id="5678",
+        tags=["tag1", "tag2"],
+        public=True
+    )
+ 
+@observe()
+def nested_span():
+    # Update the current span with a custom name and level
+    langfuse_context.update_current_observation(name="Nested Span", level="WARNING")
+    deeply_nested_llm_call()
+ 
+@observe()
+def main():
+    nested_span()
+ 
+# Execute the main function to generate the enriched trace
+main()
 ```
+
+On the Langfuse platform the trace now shows with the updated name from the `deeply_nested_llm_call`, and the observations will be enriched with the appropriate data points.
+
+**Example trace:** https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f16e0151-cca8-4d90-bccf-1d9ea0958afb
 
 ## Interoperability with Langfuse Python SDK
 

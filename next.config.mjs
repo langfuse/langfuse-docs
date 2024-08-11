@@ -10,7 +10,7 @@ const withBundleAnalyzer = NextBundleAnalyzer({
  * CSP headers
  * img-src https to allow loading images from SSO providers
  */
-const cspHeader = `
+const cspHeader = process.env.NODE_ENV === 'production' ? `
   default-src 'self' https: wss:;
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
   style-src 'self' 'unsafe-inline' https:;
@@ -25,7 +25,7 @@ const cspHeader = `
   frame-ancestors 'none';
   upgrade-insecure-requests;
   block-all-mixed-content;
-`;
+`: "";
 
 // nextra config
 const withNextra = nextra({
@@ -58,7 +58,7 @@ const nextraConfig = withNextra({
     ],
   },
   headers() {
-    return [
+    const headers = [
       {
         source: "/:path*",
         headers: [
@@ -89,7 +89,22 @@ const nextraConfig = withNextra({
           },
         ],
       },
-    ]
+    ];
+
+    // Do not index Vercel preview deployments
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') {
+      headers.push({
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+      });
+    }
+
+    return headers;
   },
   redirects: async () => [
     ...nonPermanentRedirects.map(([source, destination]) => ({
