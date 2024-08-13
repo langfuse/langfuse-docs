@@ -14,7 +14,7 @@ const availabilities: {
   Icon: any;
 }[] = [
   {
-    id: "enterprise",
+    id: "ee",
     label: "Enterprise Edition",
     shortLabel: "Enterprise",
     Icon: Check,
