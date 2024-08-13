@@ -39,9 +39,8 @@ const config: DocsThemeConfig = {
         <a
           className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
-          href="https://langfuse.com/discord"
+          href="https://discord.langfuse.com"
           aria-label="Langfuse Discord"
-          rel="nofollow noreferrer"
         >
           <IconDiscord className="h-7 w-7" />
         </a>
