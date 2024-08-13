@@ -74,28 +74,22 @@ export function RolePermissionTable({ roleScopes }) {
       <RolePermissionTable
         roleScopes={{
           OWNER: [
-            "projects:view",
             "projects:create",
-            "projects:update",
-            "projects:delete",
-            "projects:transfer_organization",
+            "projects:transfer_org",
             "organizations:update",
             "organizations:delete",
-            "members:CUD",
-            "members:read",
+            "organizationMembers:CUD",
+            "organizationMembers:read",
           ],
           ADMIN: [
-            "projects:view",
             "projects:create",
-            "projects:update",
-            "projects:delete",
-            "projects:transfer_organization",
+            "projects:transfer_org",
             "organizations:update",
-            "members:CUD",
-            "members:read",
+            "organizationMembers:CUD",
+            "organizationMembers:read",
           ],
-          MEMBER: ["projects:view", "members:read"],
-          VIEWER: ["projects:view", "members:read"],
+          MEMBER: ["organizationMembers:read"],
+          VIEWER: [],
           NONE: [],
         }}
       />
@@ -107,6 +101,11 @@ export function RolePermissionTable({ roleScopes }) {
       <RolePermissionTable
         roleScopes={{
           OWNER: [
+            "project:read",
+            "project:update",
+            "project:delete",
+            "projectMembers:read",
+            "projectMembers:CUD",
             "apiKeys:read",
             "apiKeys:create",
             "apiKeys:delete",
@@ -118,7 +117,6 @@ export function RolePermissionTable({ roleScopes }) {
             "scores:CUD",
             "scoreConfigs:CUD",
             "scoreConfigs:read",
-            "project:update",
             "datasets:CUD",
             "prompts:CUD",
             "prompts:read",
@@ -134,7 +132,10 @@ export function RolePermissionTable({ roleScopes }) {
             "batchExport:create",
           ],
           ADMIN: [
+            "project:read",
             "project:update",
+            "projectMembers:read",
+            "projectMembers:CUD",
             "apiKeys:read",
             "apiKeys:create",
             "apiKeys:delete",
@@ -161,6 +162,8 @@ export function RolePermissionTable({ roleScopes }) {
             "batchExport:create",
           ],
           MEMBER: [
+            "project:read",
+            "projectMembers:read",
             "apiKeys:read",
             "objects:publish",
             "objects:bookmark",
@@ -180,6 +183,7 @@ export function RolePermissionTable({ roleScopes }) {
             "batchExport:create",
           ],
           VIEWER: [
+            "project:read",
             "prompts:read",
             "evalTemplate:read",
             "scoreConfigs:read",
@@ -187,6 +191,7 @@ export function RolePermissionTable({ roleScopes }) {
             "evalJobExecution:read",
             "llmApiKeys:read",
           ],
+          NONE: [],
         }}
       />
     </AccordionContent>
@@ -213,7 +218,7 @@ Any user with the `projects:create` permission can create a new project within a
 
 Only users with the `projects:transfer_organization` permission can transfer a project to another organization. This will remove the project from the current organization and add it to the new one. Access to the project will depend on the roles configured in the new organization.
 
-During this process, no data will be lost, all project settings, data, and configurations will be transferred to the new organization. As API credentials do not change, the projects remain fully operational during and after the transfer.
+During this process, no data will be lost, all project settings, data, and configurations will be transferred to the new organization. The project remains fully operational as API keys, settings (except for access management), and data will remain unchanged and associated with the project. All features (e.g. tracing, prompt management) will continue to work without any interruption.
 
 ## Project-level roles
 
