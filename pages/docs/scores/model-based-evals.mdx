@@ -8,43 +8,8 @@ Model-based evaluations (_LLM-as-a-judge_) are a powerful tool to automate the e
 
 There are two ways to run model-based evaluations in Langfuse:
 
-1. [Via external evaluation pipeline](#evaluation-pipeline)
 1. [Via the Langfuse UI (beta)](#ui)
-
-## Via External Evaluation Pipeline [#evaluation-pipeline]
-
-<AvailabilityBanner
-  availability={{
-    hobby: "full",
-    pro: "full",
-    team: "full",
-    selfHosted: "full",
-  }}
-/>
-
-```mermaid
-sequenceDiagram
-participant Application
-participant Langfuse
-participant Pipeline
-actor User
-
-Application ->> Langfuse: Ingest new traces
-Langfuse ->> Pipeline: Fetch traces via SDK/API
-Pipeline->>Pipeline: Run custom evaluation function/package
-Pipeline ->> Langfuse: Add score to trace via SDK/API
-Langfuse ->> User: Analyze evaluation scores via UI & API
-```
-
-You can run your own model-based evals on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
-
-Popular evaluation packages:
-
-- OpenAI Evals
-- Langchain Evaluators ([Example notebook](/guides/cookbook/evaluation_with_langchain))
-- RAGAS for RAG applications ([Example notebook](/guides/cookbook/evaluation_of_rag_with_ragas))
-- UpTrain evals ([Example notebook](/guides/cookbook/evaluation_with_uptrain))
-- Whylabs Langkit
+1. [Via external evaluation pipeline](#evaluation-pipeline)
 
 ## Via Langfuse UI (beta) [#ui]
 
@@ -111,3 +76,38 @@ Upon receiving new traces, navigate to the trace detail view to see the associat
 </Frame>
 
 </Steps>
+
+## Via External Evaluation Pipeline [#evaluation-pipeline]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    pro: "full",
+    team: "full",
+    selfHosted: "full",
+  }}
+/>
+
+```mermaid
+sequenceDiagram
+participant Application
+participant Langfuse
+participant Pipeline
+actor User
+
+Application ->> Langfuse: Ingest new traces
+Langfuse ->> Pipeline: Fetch traces via SDK/API
+Pipeline->>Pipeline: Run custom evaluation function/package
+Pipeline ->> Langfuse: Add score to trace via SDK/API
+Langfuse ->> User: Analyze evaluation scores via UI & API
+```
+
+You can run your own model-based evals on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
+
+Popular evaluation packages:
+
+- OpenAI Evals
+- Langchain Evaluators ([Example notebook](/guides/cookbook/evaluation_with_langchain))
+- RAGAS for RAG applications ([Example notebook](/guides/cookbook/evaluation_of_rag_with_ragas))
+- UpTrain evals ([Example notebook](/guides/cookbook/evaluation_with_uptrain))
+- Whylabs Langkit
