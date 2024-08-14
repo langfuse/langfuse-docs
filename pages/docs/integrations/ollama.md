@@ -1,6 +1,6 @@
 ---
 title: Observe local LLMs with Ollama and Langfuse
-description: Learn how to run large language models (LLMs) locally on your machine using Ollama and trace the outputs with Langfuse.  
+description: Learn how to run Open Source LLMs locally on your machine using Ollama and trace the outputs with Langfuse.  
 category: Integrations
 ---
 
