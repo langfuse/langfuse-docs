@@ -1,12 +1,12 @@
----  
-description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a multitude of different evaluation metrics like model-based evaluations, manual annotations or user feedback. This allows you to measure quality, tonality, factual accuracy, completeness, and relevance of your AI application.
+---
+description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations, manual annotations or user feedback. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
 ---
 
-# Scores & Evaluation
+# LLM Evaluation & Scoring
 
 ## What is LLM Evaluation?
 
-Evaluation is a critical aspect of developing and deploying LLM applications. Usually, teams use a multitude of different evaluation methods to score the performance of their AI application depending on the use case and the stage of the development process. 
+Evaluation is a critical aspect of developing and deploying LLM applications. Usually, teams use a multitude of different evaluation methods to score the performance of their AI application depending on the use case and the stage of the development process.
 
 Langfuse provides a flexible [scoring system](/docs/scores/getting-started) to capture all your evaluations in one place and make them actionable.
 
@@ -18,27 +18,28 @@ LLM evaluation is crucial for improving the accuracy and robustness of language 
 
 Common evaluation methods for LLMs involve assessing both **quantitative** metrics and **qualitative** aspects to measure performance, coherence, and relevance. These evaluations help pinpoint the models' strengths and areas for improvement, ensuring they generate accurate and contextually appropriate responses.
 
-Langfuse supports all forms of evaluation methods due to its open architecture and API (learn more about the Langfuse `score` object [here](/docs/scores/getting-started.mdx)). Depending on your needs in the development process, you can use one or multiple of the following evaluation methods: 
+Langfuse supports all forms of evaluation methods due to its open architecture and API (learn more about the Langfuse `score` object [here](/docs/scores/getting-started.mdx)). Depending on your needs in the development process, you can use one or multiple of the following evaluation methods:
 
-### 1\. Model-based Evaluation
+### 1\. Model-based Evaluation, Automated Evaluation & LLM-as-a-Judge
 
-Using [model-based evaluations](http://localhost:3333/docs/scores/model-based-evals) (LLM-as-a-judge) are a powerful tool to automatically assess LLM applications integrated with Langfuse. With this approach, an LLMs scores a particular session, trace, or LLM call in Langfuse based on factors such as accuracy, toxicity, or hallucinations.
+Using [model-based evaluations](/docs/scores/model-based-evals) (LLM-as-a-judge) is a powerful tool to automatically assess LLM applications integrated with Langfuse. With this approach, an LLMs scores a particular session, trace, or LLM call in Langfuse based on factors such as accuracy, toxicity, or hallucinations.
 
 There are two ways to run model-based evaluations in Langfuse:
-* [Via external evaluation pipeline](https://langfuse.com/docs/scores/model-based-evals\#evaluation-pipeline)  
-* [Via the Langfuse UI (beta)](https://langfuse.com/docs/scores/model-based-evals\#ui)
+
+- [Via the Langfuse UI (beta)](/docs/scores/model-based-evals#ui)
+- [Via external evaluation pipeline](/docs/scores/model-based-evals#evaluation-pipeline)
 
 ### 2\. Manual Annotation (in UI)
 
-With [manual annotations](https://langfuse.com/docs/scores/annotation), you can annotate a subset of traces and observations by hand. This allows you to collaborate with your team and add scores via the Langfuse UI.
+With [manual annotations](/docs/scores/annotation), you can annotate a subset of traces and observations by hand. This allows you to collaborate with your team and add scores via the Langfuse UI.
 
 ### 3\. User Feedback
 
-Capturing [user feedback](https://langfuse.com/docs/scores/user-feedback) in your AI application can be a valuable evaluation metric. Langfuse can capture explicit (e.g., thumbs up/down, 1-5 star rating) or implicit (e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output, human-in-the-loop) user feedback data.
+Capturing [user feedback](/docs/scores/user-feedback) in your AI application can be a valuable evaluation metric. Langfuse can capture explicit (e.g., thumbs up/down, 1-5 star rating) or implicit (e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output, human-in-the-loop) user feedback data.
 
 ### 4\. Custom via SDKs/API
 
-Langfuse gives you full flexibility to ingest [custom scores via the Langfuse SDKs or API](https://langfuse.com/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom human evaluation workflows.
+Langfuse gives you full flexibility to ingest [custom scores via the Langfuse SDKs or API](/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom human evaluation workflows.
 
 ## Getting Started
 
@@ -54,7 +55,7 @@ import { FileCode, BookOpen } from "lucide-react";
   />
 </Cards>
 
-## Evaluating LLM-based Agents 
+## Evaluating LLM-based Agents
 
 Besides single LLMs, you can also evaluate complex LLM-based agents. [Agent observability](/blog/2024-07-ai-agent-observability-with-langfuse) means tracking and analyzing the performance, behavior, and interactions of AI agents. This includes real-time monitoring of multiple LLM calls, control flows, decision-making processes, and outputs to ensure agents operate efficiently and accurately.
 
