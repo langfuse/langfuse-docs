@@ -112,7 +112,7 @@ Public trace links for the following examples:
 
 ## Trace nested LLM Calls via Langfuse OpenAI Wrapper and `@observe` decorator
 
-Via the Langfuse `@observe()` decorator we can automatically capture execution details fo any python function such as inputs, outputs, timings, and more. The decorator simplifies achieving in-depth observability in your applications with minimal code, especially when non-LLM calls are involved for knowledge retrieval (RAG) or api calls (agents).
+Via the Langfuse `@observe()` decorator we can automatically capture execution details of any python function such as inputs, outputs, timings, and more. The decorator simplifies achieving in-depth observability in your applications with minimal code, especially when non-LLM calls are involved for knowledge retrieval (RAG) or api calls (agents).
 
 For more details on how to utilize this decorator and customize your tracing, refer to our [documentation](https://langfuse.com/docs/sdk/python/decorators).
 

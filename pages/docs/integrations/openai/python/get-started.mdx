@@ -469,6 +469,42 @@ _Note that you need to provide `trace_id` and `parent_observation_id` to each ge
 </Tab>
 </Tabs>
 
+### OpenAI Beta APIs
+
+Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
+
+For **structured output parsing**, please use the `response_format` argument to `openai.chat.completions.create()` instead of the Beta API. This will allow you to set Langfuse attributes and metadata. 
+
+If you rely on parsing Pydantic defintions for your `response_format`, you may leverage the `type_to_response_format_param` utility function from the OpenAI Python SDK to convert the Pydantic definition to a `response_format` dictionary. This is the same function the OpenAI Beta API uses to convert Pydantic definitions to `response_format` dictionaries.
+
+```python
+from langfuse.openai import openai
+from openai.lib._parsing._completions import type_to_response_format_param
+from pydantic import BaseModel
+
+class CalendarEvent(BaseModel):
+  name: str
+  date: str
+  participants: list[str]
+
+
+completion = openai.chat.completions.create(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "system", "content": "Extract the event information."},
+        {
+            "role": "user",
+            "content": "Alice and Bob are going to a science fair on Friday.",
+        },
+    ],
+    response_format=type_to_response_format_param(CalendarEvent),
+)
+
+print(completion)
+
+openai.flush_langfuse()
+```
+
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";

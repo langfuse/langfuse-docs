@@ -9,8 +9,8 @@ import posthogLight from "./img/posthog_light.svg";
 import posthogDark from "./img/posthog_dark.svg";
 import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
-import fletchLight from "./img/fletch_light.svg";
-import fletchDark from "./img/fletch_dark.svg";
+import juiceboxLight from "./img/juicebox_light.svg";
+import juiceboxDark from "./img/juicebox_dark.svg";
 import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
@@ -63,10 +63,10 @@ const users: User[] = [
     href: "https://forto.com",
   },
   {
-    name: "Fletch",
-    lightImage: fletchLight,
-    darkImage: fletchDark,
-    href: "https://fletch.ai/",
+    name: "Juicebox",
+    lightImage: juiceboxLight,
+    darkImage: juiceboxDark,
+    href: "https://juicebox.ai/",
   },
   {
     name: "Sumup",
@@ -84,12 +84,12 @@ export const UsersStatic = () => (
           Teams building complex LLM apps rely on Langfuse
         </h2>
         <div className="relative mt-6">
-          <div className="flex flex-row flex-wrap xl:flex-nowrap justify-between">
+          <div className="flex flex-wrap xl:flex-nowrap justify-between">
             {users.map((user) => (
               <a
                 key={user.name}
                 href={user.href}
-                className="overflow-hidden w-1/2 md:w-1/4 xl:w-auto h-16 hover:opacity-100 opacity-80 transition p-4 xl:p-4"
+                className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-100 opacity-80 transition py-4 px-3"
                 target="_blank"
                 rel="noopener noreferrer"
               >

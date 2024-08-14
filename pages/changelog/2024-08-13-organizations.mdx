@@ -1,0 +1,80 @@
+---
+date: 2024-08-13
+title: Organizations
+description: Introducing organizations to manage projects and permissions across larger teams working in Langfuse.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { BookOpen } from "lucide-react";
+
+<ChangelogHeader />
+
+## What are Organizations?
+
+Until now, access control in Langfuse was purely based on projects and roles. This led to a flat structure that was not suitable for larger teams working on multiple projects. `Organizations` are top-level entities that contain projects. They allow for a more structured approach to managing users, projects, and permissions.
+
+```mermaid
+graph LR
+  A["User (via UI)"] -->|role| B[Organization]
+  B -->|1:n| C[Projects]
+  C -->|n:1| D[API Keys]
+```
+
+## Changes to the UI
+
+Start page to view all organizations and projects
+
+![Start page](/images/changelog/2024-08-13-organizations/organization-home.png)
+
+Navigate between projects with new project selector
+
+<CloudflareVideo
+  videoId="547bdf07e1b53dc60c0690f43c7e058a"
+  gifStyle
+  aspectRatio={768 / 452}
+  className="max-w-sm"
+/>
+
+Settings are now organized by level (organization/project) and topic
+
+<CloudflareVideo
+  videoId="cc2f74ad7277ca4049f37d76d1a8ecc6"
+  gifStyle
+  aspectRatio={1920 / 988}
+  className="rounded-lg"
+/>
+
+## Migration
+
+### Automated migration of existing projects
+
+A new organization has been created for each existing project.
+
+- The organization name is the same as the project name.
+- All user permissions were migrated to the organization level. This ensures that all existing projects and users can continue to work as before.
+- API Keys are unaffected by the migration and remain associated with the project.
+
+### Group projects into a single organization
+
+If you work with multiple projects in Langfuse, you can group them into a single organization by transferring projects via the project settings.
+
+This transfer will centralize user management and permissions in an organization. The project remains fully operational as API keys, settings (except for access management), and data will remain unchanged and associated with the project. All features (e.g. tracing, prompt management) will continue to work without any interruption.
+
+## Self-hosting configuration options
+
+This change added new configuration options for teams that self-host Langfuse:
+
+- Assign new users automatically to an organization via `LANGFUSE_DEFAULT_ORG_ID` and `LANGFUSE_DEFAULT_ORG_ROLE`.
+- Enterprise Edition: Manage allowlist of users who are allowed to create new organizations via `LANGFUSE_ALLOWED_ORGANIZATION_CREATORS`.
+
+## Learn more
+
+<Cards num={3}>
+  <Card title="RBAC Documentation" href="/docs/rbac" icon={<BookOpen />} />
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com"
+    icon={<BookOpen />}
+  />
+</Cards>

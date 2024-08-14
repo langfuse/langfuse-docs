@@ -10,7 +10,7 @@ const withBundleAnalyzer = NextBundleAnalyzer({
  * CSP headers
  * img-src https to allow loading images from SSO providers
  */
-const cspHeader = `
+const cspHeader = process.env.NODE_ENV === 'production' ? `
   default-src 'self' https: wss:;
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
   style-src 'self' 'unsafe-inline' https:;
@@ -25,7 +25,7 @@ const cspHeader = `
   frame-ancestors 'none';
   upgrade-insecure-requests;
   block-all-mixed-content;
-`;
+`: "";
 
 // nextra config
 const withNextra = nextra({
@@ -122,7 +122,7 @@ const nextraConfig = withNextra({
 
 const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
-  ["/discord", "https://discord.gg/7NXusRtqYU"],
+  ["/discord", "https://discord.langfuse.com"],
   ["/demo", "/docs/demo"],
   ["/video", "/guides/videos/introducing-langfuse-2.0"],
   ["/docs/video", "/guides/videos/introducing-langfuse-2.0"],
