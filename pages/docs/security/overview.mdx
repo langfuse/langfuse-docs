@@ -37,18 +37,6 @@ There are several popular security libraries that can be used to mitigate securi
 2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
 3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
 
-See how we use the open source library LLM Guard to anonymize and deanonymize PII and trace with Langfuse. All examples easily translate to other libraries.
-
-import { FileCode, BookOpen } from "lucide-react";
-
-<Cards num={4}>
-  <Card
-    title="Getting Started"
-    href="/docs/security/getting-started"
-    icon={<FileCode />}
-  />
-</Cards>
-
 ### 2. Monitoring and evaluation of security measures with Langfuse
 
 Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
@@ -60,11 +48,15 @@ Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each 
    - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
 4. Track Latency. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help disect the latencies of these checks within a trace to understand whether the checks are worth the wait.
 
-Learn how to monitor LLM security with Langfuse in this cookbook:
+## Get Started
 
-<Cards num={3}>
+See how we use the open source library LLM Guard to anonymize and deanonymize PII and trace with Langfuse. All examples easily translate to other libraries.
+
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards num={4}>
   <Card
-    title="Example: Monitoring LLM Security"
+    title="Getting Started"
     href="/docs/security/getting-started"
     icon={<FileCode />}
   />
