@@ -104,10 +104,14 @@ Langfuse ->> User: Analyze evaluation scores via UI & API
 
 You can run your own model-based evals on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
 
-Popular evaluation packages:
+The example notebook is a good template to get started with building your own evaluation pipeline.
 
-- OpenAI Evals
-- Langchain Evaluators ([Example notebook](/guides/cookbook/evaluation_with_langchain))
-- RAGAS for RAG applications ([Example notebook](/guides/cookbook/evaluation_of_rag_with_ragas))
-- UpTrain evals ([Example notebook](/guides/cookbook/evaluation_with_uptrain))
-- Whylabs Langkit
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Example: External Evaluation Pipeline"
+    href="/docs/scores/external-evaluation-pipelines"
+    icon={<FileCode />}
+  />
+</Cards>
