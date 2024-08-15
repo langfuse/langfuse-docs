@@ -28,7 +28,7 @@ For this example, we will use the Langfuse cloud version.
 
 In this example, we will use the Llama 3.1 model to create a simple chat completions application using the OpenAI Python SDK and Langfuse tracing.
 
-### **Step 1:** Setup Ollama
+### Step 1: Setup Ollama
 
 Start by [downloading Ollama](https://ollama.com/download) and pull the [Llama 3.1](https://ollama.com/library/llama3.1) model. See the [Ollama documentation](https://github.com/ollama/ollama/tree/main/docs) for further information.
 
@@ -56,7 +56,7 @@ curl http://localhost:11434/v1/chat/completions \
     }'
 ```
 
-### **Step 2:** Setup Langfuse
+### Step 2: Setup Langfuse
 
 Initialize the Langfuse client with your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from the project settings in the Langfuse UI and add them to your environment.
 
@@ -77,7 +77,7 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 %pip install langfuse openai --upgrade
 ```
 
-### **Step 3:** Use the OpenAI Python SDK to call the Llama3.1 Model
+### Step 3: Use the OpenAI Python SDK to call the Llama3.1 Model
 
 To use the Ollama model, we use the OpenAI Python SDK as Ollama has the same API (see above). To trace your LLM calls in Langfuse you can use the **drop-in replacement** ([docs](https://langfuse.com/docs/integrations/openai/python/get-started), this also works for JS/TS and via LangChain and LlamaIndex) to get full logging by changing only the import.
 
@@ -125,7 +125,7 @@ print(response.choices[0].message.content)
 
 In this example, we will use the Mistral 7B model to create a simple chat completions application using the OpenAI Python SDK and Langfuse tracing.
 
-### **Step 1:** Setup Ollama
+### Step 1: Setup Ollama
 
 Start by [downloading Ollama](https://ollama.com/download) and pulling the [Mistral 7B](https://ollama.com/library/mistral) model:
 
@@ -155,7 +155,7 @@ curl http://localhost:11434/v1/chat/completions \
 
 ```
 
-### **Step 2:** Setup Langfuse
+### Step 2: Setup Langfuse
 
 Initialize the Langfuse client with your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from the project settings in the Langfuse UI and add them to your environment.
 
@@ -174,7 +174,7 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
-### **Step 3:** Use the OpenAI Python SDK to call the Mistral Model
+### Step 3: Use the OpenAI Python SDK to call the Mistral Model
 
 
 ```python
@@ -202,7 +202,7 @@ print(response.choices[0].message.content)
      The most recently confirmed element is oganesson (Og), with symbol Og and atomic number 118. It was officially recognized by IUPAC (International Union of Pure and Applied Chemistry) in 2016, following the synthesis of several atoms at laboratories in Russia and Germany. The latest unofficially-recognized element is ununsextium (Uus), with atomic number 138. However, its synthesis is still under investigation, and IUPAC has yet to officially confirm its existence.
 
 
-### **Step 4:** See Traces in Langfuse 
+### Step 4: See Traces in Langfuse 
 
 [Example Trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/85693874-9ddb-4fd4-a386-0031933cb784)
 
