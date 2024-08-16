@@ -1,5 +1,5 @@
 ---
-title: OSS Observability for LangChain
+title: Open Source Observability for LangChain
 description: Open source tracing and monitoring for your LangChain application. Python and JS/TS. Automatically capture rich traces and metrics and evaluate outputs.
 ogImage: /images/docs/langchain_og.png
 ---
@@ -9,7 +9,7 @@ import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
 import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
 
-# Tracing for Langchain (Python & JS/TS)
+# Observability & Tracing for Langchain (Python & JS/TS)
 
 [Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/modules/callbacks/), [JS](https://js.langchain.com/docs/modules/callbacks/)). Thereby, the Langfuse SDK automatically creates a nested trace for every run of your Langchain applications. This allows you to log, analyze and debug your LangChain application.
 
@@ -20,7 +20,7 @@ import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-
   className="max-w-2xl"
 />
 
-## Add Langfuse to your Langchain application
+## Add Langfuse to your Langchain Application
 
 You can configure the integration via (1) constructor arguments or (2) environment variables. Get your Langfuse credentials from the Langfuse dashboard.
 
@@ -104,15 +104,15 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 
 When initializing the Langfuse handler, you can pass the following **optional** arguments to use more advanced features.
 
-| Python       | JS/TS       | Type    | Description                                                                                     |
-| ------------ | ----------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `user_id`    | `userId`    | string  | The current [user](/docs/tracing-features/users).                                               |
-| `session_id` | `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                         |
-| `release`    | `release`   | string  | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
-| `version`    | `version`   | string  | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
-| `trace_name` |             | string  | Customize the name of the created traces. Defaults to name of chain.                            |
-| `enabled`    | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
-| `sample_rate`    | `-`   | float | [Sample rate](/docs/tracing-features/sampling) for tracing.                                       |
+| Python        | JS/TS       | Type    | Description                                                                                     |
+| ------------- | ----------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `user_id`     | `userId`    | string  | The current [user](/docs/tracing-features/users).                                               |
+| `session_id`  | `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                         |
+| `release`     | `release`   | string  | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
+| `version`     | `version`   | string  | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
+| `trace_name`  |             | string  | Customize the name of the created traces. Defaults to name of chain.                            |
+| `enabled`     | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
+| `sample_rate` | `-`         | float   | [Sample rate](/docs/tracing-features/sampling) for tracing.                                     |
 
 ### Interoperability with Langfuse SDKs [#interoperability]
 
