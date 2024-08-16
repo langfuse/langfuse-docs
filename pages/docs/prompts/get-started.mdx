@@ -4,7 +4,11 @@ description: Manage and version your prompts in Langfuse (open source). When ret
 
 # Prompt Management
 
-Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is basically a **Prompt CMS** (Content Management System).
+Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is a **Prompt CMS** (Content Management System).
+
+## What is prompt management?
+
+**Prompt management is a systematic approach to storing, versioning and retrieving prompts in LLM applications.** Key aspects of prompt management include version control, decoupling prompts from code, monitoring, logging and optimizing prompts as well as integrating prompts with the rest of your application and tool stack.
 
 ## Why use prompt management?
 
@@ -18,7 +22,7 @@ Typical benefits of using a CMS apply here:
 
 Platform benefits:
 
-- Track performance of prompt versions in Langfuse Tracing.
+- Track performance of prompt versions in [Langfuse Tracing](/docs/tracing).
 
 ## Langfuse prompt object
 
@@ -249,15 +253,22 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 });
 
 // Number of retries on fetching prompts from the server. Default is 2.
-const promptWithMaxRetries = await langfuse.getPrompt("movie-critic", undefined, {
-  maxRetries: 5,
-});
+const promptWithMaxRetries = await langfuse.getPrompt(
+  "movie-critic",
+  undefined,
+  {
+    maxRetries: 5,
+  }
+);
 
 // Timeout per call to the Langfuse API in milliseconds. Default is 10 seconds.
-const promptWithFetchTimeout = await langfuse.getPrompt("movie-critic", undefined, {
-  fetchTimeoutMs: 5000,
-});
-
+const promptWithFetchTimeout = await langfuse.getPrompt(
+  "movie-critic",
+  undefined,
+  {
+    fetchTimeoutMs: 5000,
+  }
+);
 ```
 
 Attributes
