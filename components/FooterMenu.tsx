@@ -141,7 +141,7 @@ const menuItems: {
     heading: "About",
     items: [
       { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "/careers", notificationCount: 3 },
+      { name: "Careers", href: "/careers", notificationCount: 2 },
       {
         name: "About us",
         href: "/about",
@@ -206,7 +206,8 @@ const FooterMenu = () => {
         <div />
       </div>
       <div className="my-8 font-mono text-sm">
-        © 2022-{new Date().getFullYear()} Langfuse GmbH / Finto Technologies Inc.
+        © 2022-{new Date().getFullYear()} Langfuse GmbH / Finto Technologies
+        Inc.
       </div>
     </div>
   );
