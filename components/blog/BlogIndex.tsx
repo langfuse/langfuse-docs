@@ -6,6 +6,7 @@ import { type Page } from "nextra";
 export const BlogIndex = ({ maxItems }: { maxItems?: number }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
     {(getPagesUnderRoute("/blog") as Array<Page & { frontMatter: any }>)
+      .filter((page) => page.frontMatter?.showInBlogIndex !== false)
       .slice(0, maxItems)
       .map((page) => (
         <Link key={page.route} href={page.route} className="block mb-8 group">
