@@ -76,15 +76,16 @@ export function RolePermissionTable({ roleScopes }) {
           OWNER: [
             "projects:create",
             "projects:transfer_org",
-            "organizations:update",
-            "organizations:delete",
+            "organization:update",
+            "organization:delete",
             "organizationMembers:CUD",
             "organizationMembers:read",
+            "langfuseCloudBilling:CRUD",
           ],
           ADMIN: [
             "projects:create",
             "projects:transfer_org",
-            "organizations:update",
+            "organization:update",
             "organizationMembers:CUD",
             "organizationMembers:read",
           ],
@@ -130,6 +131,8 @@ export function RolePermissionTable({ roleScopes }) {
             "llmApiKeys:create",
             "llmApiKeys:delete",
             "batchExport:create",
+            "comments:CUD",
+            "comments:read",
           ],
           ADMIN: [
             "project:read",
@@ -160,6 +163,8 @@ export function RolePermissionTable({ roleScopes }) {
             "llmApiKeys:create",
             "llmApiKeys:delete",
             "batchExport:create",
+            "comments:CUD",
+            "comments:read",
           ],
           MEMBER: [
             "project:read",
@@ -181,6 +186,8 @@ export function RolePermissionTable({ roleScopes }) {
             "evalJobExecution:read",
             "llmApiKeys:read",
             "batchExport:create",
+            "comments:CUD",
+            "comments:read",
           ],
           VIEWER: [
             "project:read",
@@ -190,6 +197,7 @@ export function RolePermissionTable({ roleScopes }) {
             "evalJob:read",
             "evalJobExecution:read",
             "llmApiKeys:read",
+            "comments:read",
           ],
           NONE: [],
         }}
