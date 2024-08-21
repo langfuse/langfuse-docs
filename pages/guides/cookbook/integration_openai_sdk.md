@@ -48,7 +48,7 @@ openai.langfuse_auth_check()
 
 ## Examples
 
-### Chat completion
+### Chat completion (text)
 
 
 ```python
@@ -58,6 +58,35 @@ completion = openai.chat.completions.create(
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"someMetadataKey": "someValue"},
+)
+```
+
+### Chat completion (image)
+
+Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages. 
+
+Langfuse supports images passed via link. No support for base64 encoded images yet, see [roadmap](https://langfuse.com/docs/roadmap) for details.
+
+
+```python
+completion = openai.chat.completions.create(
+  name="test-url-image",
+  model="gpt-4o-mini", # GPT-4o, GPT-4o mini, and GPT-4 Turbo have vision capabilities
+  messages=[
+      {"role": "system", "content": "You are an AI trained to describe and interpret images. Describe the main objects and actions in the image."},
+      {"role": "user", "content": [
+        {"type": "text", "text": "What’s depicted in this image?"},
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "https://static.langfuse.com/langfuse-dev/langfuse-example-image.jpeg",
+          },
+        },
+      ],
+    }
+  ],
   temperature=0,
   metadata={"someMetadataKey": "someValue"},
 )
