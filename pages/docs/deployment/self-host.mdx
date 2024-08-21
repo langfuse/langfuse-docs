@@ -103,11 +103,19 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 
 ### Authentication
 
-#### Email/Password
+#### Email/Password [#auth-email-password]
 
 Email/password authentication is enabled by default. Users can sign up and log in using their email and password. To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`.
 
-If `SMTP_CONNECTION_URL` and `EMAIL_FROM_ADDRESS` are set, users can reset their password via an email link if they forget it. Alternatively, you can manually reset the password by editing the user in the database (change email), ask the user to sign up again and then reassign permissions via the membership tables.
+**Password Reset**
+
+- **If transactional emails are configured** on your instance via the `SMTP_CONNECTION_URL` and `EMAIL_FROM_ADDRESS` environments, users can reset their password by using the "Forgot password" link on the login page.
+
+- **If transactional emails are not set up**, passwords can be reset by following these steps:
+  1.  Update the email associated with your user account in database, such as by adding a prefix.
+  2.  You can then sign up again with a new password.
+  3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
+  4.  Finally, remove the old user account from the `users` table in database.
 
 #### SSO
 
