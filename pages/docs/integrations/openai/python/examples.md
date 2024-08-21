@@ -92,6 +92,10 @@ completion = openai.chat.completions.create(
 )
 ```
 
+Go to https://cloud.langfuse.com or your own instance to see your generation.
+
+![Chat completion](https://langfuse.com/images/docs/multi-modal-trace.png)
+
 ### Chat completion (streaming)
 
 Simple example using the OpenAI streaming functionality.
