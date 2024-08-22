@@ -10,12 +10,20 @@ Langfuse supports rendering Multi-Modal traces, including both text and image fo
 
 To utilize our Multi-Modal Trace support, your trace or observation `input`/`output` should include a list of messages comprising the conversation so far. Each message should contain a `role` (system, user, assistant) and `content`. To display multi-modal content, you can pass a combination of text and image URLs. We plan to extend support to base64 images, file attachments (e.g., PDFs), and audio soon. The `content` property of the messages follows the OpenAI convention.
 
+### Visual Representation in Langfuse 
+<Frame border>
+
+![Trace in Langfuse UI](/images/docs/multi-modal-trace.png)
+</Frame>
+
+### Content Format
+
 | Content             | Type   | Description                                                                 |
 |-------------------------|--------|-----------------------------------------------------------------------------|
 | Default: Text content            | string | The text contents of the message.                                           |
 | Multi-Modal: Array of content parts  | array  | An array of content parts with a defined type, each can be of type `text` or `image_url`. You can pass multiple images by adding multiple image_url content parts. |
 
-### Content Type Examples
+#### Content Examples
 
 <Tabs items={["Multi-Modal content","Text content"]}>
 
