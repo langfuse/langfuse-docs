@@ -37,12 +37,6 @@ _In the Langfuse Console_
 
 ## How it works
 
-<Callout>
-  This integration does not cover the OpenAI _Assistants API_. You can
-  instrument the assistants api via the `observe` decorator as shown in this
-  [notebook](/docs/integrations/openai/python/assistants-api).
-</Callout>
-
 <Steps>
 
 ### Install Langfuse SDK
@@ -145,6 +139,10 @@ openai.flush_langfuse()
 
 Learn more about queuing and batching of events [here](/docs/tracing).
 
+### Assistants API
+
+Tracing of the assistants api is not supported by this integration as OpenAI Assistants have server-side state that cannot easily be captured without additional api requests. We added some more information on how to best track usage of the assistants api in this [FAQ](/faq/all/openai-assistant-api).
+
 ### Debug mode
 
 If you are having issues with the integration, you can enable debug mode to get more information about the requests and responses.
@@ -172,7 +170,7 @@ You can add the following properties to the openai method, e.g. `openai.chat.com
 | `tags`                  | Set [tags](/docs/tracing-features/tags) to categorize and filter traces.     |
 | `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 | `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
-| `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing. |
+| `sample_rate`           | [Sample rate](/docs/tracing-features/sampling) for tracing.                  |
 
 Example:
 
@@ -473,7 +471,9 @@ _Note that you need to provide `trace_id` and `parent_observation_id` to each ge
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
 
-For **structured output parsing**, please use the `response_format` argument to `openai.chat.completions.create()` instead of the Beta API. This will allow you to set Langfuse attributes and metadata. 
+#### Structured Output
+
+For **structured output parsing**, please use the `response_format` argument to `openai.chat.completions.create()` instead of the Beta API. This will allow you to set Langfuse attributes and metadata.
 
 If you rely on parsing Pydantic defintions for your `response_format`, you may leverage the `type_to_response_format_param` utility function from the OpenAI Python SDK to convert the Pydantic definition to a `response_format` dictionary. This is the same function the OpenAI Beta API uses to convert Pydantic definitions to `response_format` dictionaries.
 
@@ -504,6 +504,10 @@ print(completion)
 
 openai.flush_langfuse()
 ```
+
+#### Assistants API
+
+Tracing of the assistants api is not supported by this integration as OpenAI Assistants have server-side state that cannot easily be captured without additional api requests. Check out this [notebook](/docs/integrations/openai/python/assistants-api) for an end-to-end example on how to best track usage of the assistants api in Langfuse.
 
 ## FAQ
 
