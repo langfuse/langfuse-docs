@@ -227,7 +227,7 @@ for item in dataset.items:
 
         # optionally, evaluate the output to compare different runs more easily
         langfuse.score(
-            trace_id=trace.id,
+            trace_id=trace_id,
             name="<example_eval>",
             # any float value
             value=my_eval_fn(item.input, output, item.expected_output),
