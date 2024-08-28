@@ -272,6 +272,18 @@ If you encounter any bugs or have suggestions for improvements, please contribut
 
 If you use [Porter](https://porter.run) to deploy your application, you can easily add a Langfuse instance to your cluster via the "Add-ons". The add-on will automatically configure the necessary environment variables, inject your database credentials, and deploy and autoscale the Langfuse container. Learn more about this in our [changelog](/changelog/2024-08-15-deployment-as-porter-add-on).
 
+### AWS
+
+We recommend deploying Langfuse on AWS using the Elastic Container Service (ECS) and Fargate for a scalable and low-maintenance container deployment. Note: you can use AWS Cognito for SSO.
+
+Have a look at this configuration template: [aws-samples/deploy-langfuse-on-ecs-with-fargate](https://github.com/aws-samples/deploy-langfuse-on-ecs-with-fargate)
+
+### Azure
+
+Deploy Langfuse to Azure using the Azure Container Instances service for a flexible and low-maintenance container deployment. Note: you can use Azure AD for SSO.
+
+You can deploy Langfuse to Azure via the Azure Developer CLI using this template: [Azure-Samples/langfuse-on-azure](https://github.com/Azure-Samples/langfuse-on-azure).
+
 ### Google Cloud Platform (Cloud Run & Cloud SQL)
 
 The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run for the containerized application and Cloud SQL for the database.
@@ -387,12 +399,6 @@ postgresql://<USER>:<PASSWORD>@<ALLOY_DB_PRIVATE_IP>:5432/<ALLOY_DB_DATABASE>/?s
 # ALLOYDB_DIRECT_URL
 postgresql://<USER>:<PASSWORD>@<ALLOY_DB_PRIVATE_IP>:5432/<ALLOY_DB_DATABASE>/?sslmode=none
 ```
-
-### Azure
-
-Deploy Langfuse to Azure using the Azure Container Instances service for a flexible and low-maintenance container deployment. Note: you can use Azure AD for SSO.
-
-You can deploy Langfuse to Azure via the Azure Developer CLI using this template: [Azure-Samples/langfuse-on-azure](https://github.com/Azure-Samples/langfuse-on-azure).
 
 ### Heroku
 
