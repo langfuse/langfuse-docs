@@ -18,6 +18,17 @@ Consider implementing an external evaluation pipeline if you need:
 
 If your use case meets any of this situations, let’s go ahead and implement your first external evaluation pipeline!
 
+<iframe
+  width="100%"
+  className="aspect-[3230/2160] rounded mt-10"
+  src="https://www.youtube.com/embed/rHfME8KDmIw?si=V4m8smxZ219AKmOU"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen
+></iframe>
+
 ---
 
 By the end of this cookbook, you’ll be able to:
