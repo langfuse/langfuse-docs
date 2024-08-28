@@ -1,6 +1,6 @@
 ---
-title: Observe local LLMs with Ollama and Langfuse
-description: Learn how to run Open Source LLMs locally on your machine using Ollama and trace the outputs with Langfuse.  
+title: Ollama Observability and Tracing for local LLMs using Langfuse
+description: Run Open Source LLMs locally on your machine with Ollama and trace ouputs with Langfuse for Open Source LLM Observability  
 category: Integrations
 ---
 
