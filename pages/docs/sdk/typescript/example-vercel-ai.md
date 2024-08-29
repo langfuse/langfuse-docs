@@ -5,6 +5,12 @@ category: Integrations
 
 # Cookbook: Vercel AI SDK (JS/TS)
 
+---
+
+**This notebook uses legacy methods of the Vercel AI SDK, please refer to the new [OpenTelemetry-based integration](https://langfuse.com/docs/integrations/vercel-ai-sdk).**
+
+---
+
 This is a cookbook with an end-to-end example on how to use [Langfuse Tracing](https://langfuse.com/docs/tracing) together with the [Vercel AI SDK](https://sdk.vercel.ai/docs).
 
 Vercel AI SDK capabilities (from the docs)
@@ -17,8 +23,6 @@ Vercel AI SDK capabilities (from the docs)
 In this end-to-end example, we use the [stream-lifecycle callbacks](https://sdk.vercel.ai/docs/guides/providers/openai#guide-save-to-database-after-completion) to log all LLM calls to Langfuse via the [Langfuse TS SDK](https://langfuse.com/docs/sdk/typescript/guide). It also supports Node.js, Serverless, and Edge Runtimes and intgrates well with Langchain JS ([integration docs](https://langfuse.com/docs/integrations/langchain)).
 
 Hint: this is a deno-notebook and uses deno imports.
-
-This notebook still uses legacy methods of the Vercel AI SDK, we will update it soon to use the new methods.
 
 ## Backend API Route
 

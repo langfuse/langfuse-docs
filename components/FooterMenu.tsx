@@ -78,7 +78,7 @@ const menuItems: {
       },
       {
         name: "Vercel AI SDK",
-        href: "/docs/sdk/typescript/example-vercel-ai",
+        href: "/docs/integrations/vercel-ai-sdk",
       },
       {
         name: "Instructor",
