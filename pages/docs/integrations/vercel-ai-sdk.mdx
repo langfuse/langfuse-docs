@@ -204,6 +204,11 @@ Enable the `debug` option to see the logs of the exporter.
 new LangfuseExporter({ debug: true });
 ```
 
+## Troubleshooting
+
+- If you deploy on Vercel, Vercel's OpenTelemetry Collector is only available on Pro and Enterprise Plans ([docs](https://vercel.com/docs/observability/otel-overview)).
+- You need to be on `"ai": "^3.3.0"` to use the telemetry feature as it was recently added. In case of any issues, please update to the latest version as this feature is under active development.
+
 ## Learn more
 
 See the [telemetry documentation](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry) of the Vercel AI SDK for more information.
