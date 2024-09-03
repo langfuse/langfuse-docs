@@ -47,7 +47,10 @@ Platform benefits:
 - `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`). For chat prompts, this is a list of chat messages each with `role` and `content`.
 - `config`: Optional JSON object to store any parameters (e.g. model parameters or model tools).
 - `version`: Integer to indicate the version of the prompt. The version is automatically incremented when creating a new prompt version.
-- `labels`: Labels that can be used to fetch specific prompt versions in the SDKs. The default-served prompt version is the one with the `production` label. The `latest` label is automatically maintained by Langfuse and points to the latest version. Labels are unique per prompt name.
+- `labels`: Labels that can be used to fetch specific prompt versions in the SDKs.
+  - When using a prompt without specifying a label, Langfuse will serve the version with the `production` label.
+  - `latest` points to the most recently created version.
+  - You can create any additional labels, e.g. for different environments (`staging`, `production`) or tenants (`tenant-1`, `tenant-2`).
 
 ## How it works
 
@@ -151,7 +154,7 @@ from langfuse import Langfuse
 # Initialize Langfuse client
 langfuse = Langfuse()
 
-# Get current production version of a text prompt
+# Get current `production` version of a text prompt
 prompt = langfuse.get_prompt("movie-critic")
 
 # Insert variables into prompt template
@@ -162,7 +165,7 @@ compiled_prompt = prompt.compile(movie="Dune 2")
 Chat prompts
 
 ```python
-# Get current production version of a chat prompt
+# Get current `production` version of a chat prompt
 chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg infers the prompt type (default is 'text')
 
 # Insert variables into chat prompt template
@@ -212,7 +215,7 @@ import { Langfuse } from "langfuse";
 // Iniitialize the Langfuse client
 const langfuse = new Langfuse();
 
-// Get current production version
+// Get current `production` version
 const prompt = await langfuse.getPrompt("movie-critic");
 
 // Insert variables into prompt template
@@ -222,7 +225,7 @@ const compiledPrompt = prompt.compile({ movie: "Dune 2" });
 Chat prompts
 
 ```typescript
-// Get current production version of a chat prompt
+// Get current `production` version of a chat prompt
 const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
   type: "chat",
 }); // type option infers the prompt type (default is 'text')
@@ -294,7 +297,7 @@ from langchain_core.prompts import ChatPromptTemplate
 # Initialize Langfuse client
 langfuse = Langfuse()
 
-# Get current production version
+# Get current `production` version
 langfuse_prompt = langfuse.get_prompt("movie-critic")
 
 # Example using ChatPromptTemplate
@@ -304,7 +307,7 @@ langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchai
 Chat prompts
 
 ```python
-# Get current production version of a chat prompt
+# Get current `production` version of a chat prompt
 langfuse_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
 
 # Create a Langchain ChatPromptTemplate from the Langfuse prompt chat messages
@@ -349,7 +352,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 const langfuse = new Langfuse();
 
-// Get current production version
+// Get current `production` version
 const langfusePrompt = await langfuse.getPrompt("movie-critic");
 
 // Example using ChatPromptTemplate
@@ -361,7 +364,7 @@ const promptTemplate = PromptTemplate.fromTemplate(
 Chat prompts
 
 ```typescript
-// Get current production version of a chat prompt
+// Get current `production` version of a chat prompt
 const langfusePrompt = await langfuse.getPrompt(
   "movie-critic-chat",
   undefined,
@@ -548,7 +551,7 @@ When refetching a prompt fails but an expired version is in the cache, the SDKs 
 <Tab>
 
 ```python
-# Get current production prompt version and cache for 5 minutes
+# Get current `production` prompt version and cache for 5 minutes
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 
 # Disable caching for a prompt
@@ -560,7 +563,7 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0)
 <Tab>
 
 ```typescript
-// Get current production version and cache prompt for 5 minutes
+// Get current `production` version and cache prompt for 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
 });
