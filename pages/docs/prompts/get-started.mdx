@@ -623,9 +623,6 @@ The caching duration is configurable if you wish to reduce network overhead of t
 ```python
 # Get current `production` prompt version and cache for 5 minutes
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
-
-# Disable caching for a prompt
-prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0)
 ```
 
 </Tab>
@@ -636,11 +633,6 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0)
 // Get current `production` version and cache prompt for 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
-});
-
-// Disable caching for a prompt
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
-  cacheTtlSeconds: 0,
 });
 ```
 
@@ -757,7 +749,7 @@ fetchPromptsOnStartup();
 <Tabs items={["Python", "JS/TS"]}>
 <Tab>
 
-```python
+```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
 from langfuse import Langfuse
 langfuse = Langfuse()
 
@@ -781,7 +773,7 @@ prompt.is_fallback
 </Tab>
 <Tab>
 
-```typescript
+```typescript /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
