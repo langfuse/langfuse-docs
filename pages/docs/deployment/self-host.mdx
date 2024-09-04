@@ -156,20 +156,28 @@ The Enterprise Edition of Langfuse include additional optional configuration opt
 | `LANGFUSE_UI_SUPPORT_HREF`               | Customize the support link reference in the menu and settings.                                                                                                             |
 | `LANGFUSE_UI_FEEDBACK_HREF`              | Replace the default feedback widget with your own feedback link.                                                                                                           |
 
-### Health Check Endpoint
+### Health and Readiness Check Endpoint
 
-Langfuse includes a health check endpoint at `/api/public/health`. This endpoint checks both API functionality and database connectivity.
+Langfuse includes a health check endpoint at `/api/public/health` and a readiness check endpoint at `/api/public/ready`.
+The health check endpoint checks both API functionality and database connectivity and indicates if the application is alive.
+The readiness check endpoint indicates if the application is ready to serve traffic.
 
-Access the health check endpoint:
+Access the health and readiness check endpoints:
 
 ```bash
 curl http://localhost:3000/api/public/health
+curl http://localhost:3000/api/public/ready
 ```
 
 The potential responses from the health check endpoint are:
 
 - `200 OK`: Both the API is functioning normally and a successful connection to the database was made.
 - `503 Service Unavailable`: Either the API is not functioning or it couldn't establish a connection to the database.
+
+The potential responses from the readiness check endpoint are:
+
+- `200 OK`: The application is ready to serve traffic.
+- `500 Internal Server Error`: The application received a SIGTERM or SIGINT and should not receive traffic.
 
 Applications and monitoring services can call this endpoint periodically for health updates.
 
