@@ -1,0 +1,41 @@
+---
+title: Langfuse Tracing Integrations
+description: Langfuse natively integrates with OpenAI SDK, Langchain (Python&JS), Flowise, LiteLLM, Langflow, and Superagent.
+---
+
+# Integration Overview
+
+Integrate your application with Langfuse to explore production traces and metrics.
+
+Objective:
+
+1. Capture [traces](/docs/tracing) of your application
+2. Add [scores](/docs/scores) to these traces to measure/evaluate quality of outputs
+
+There are currently six main ways to integrate with Langfuse:
+
+## Main Integrations
+
+| Integration                                              | Supports                   | Description                                                                                                                                      |
+| -------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [SDK](/docs/sdk)                                         | Python, JS/TS              | Manual instrumentation using the SDKs for full flexibility.                                                                                      |
+| [OpenAI](/docs/integrations/openai)                      | Python, JS/TS              | Automated instrumentation using drop-in replacement of OpenAI SDK.                                                                               |
+| [Langchain](/docs/integrations/langchain)                | Python, JS/TS              | Automated instrumentation by passing callback handler to Langchain application.                                                                  |
+| [LlamaIndex](/docs/integrations/llama-index/get-started) | Python                     | Automated instrumentation via LlamaIndex callback system.                                                                                        |
+| [Haystack](/docs/integrations/haystack)                  | Python                     | Automated instrumentation via Haystack content tracing system.                                                                                   |
+| [LiteLLM](/docs/integrations/litellm)                    | Python, JS/TS (proxy only) | Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs). |
+| [Vercel AI SDK](/docs/integrations/vercel-ai-sdk)        | JS/TS                      | TypeScript toolkit designed to help developers build AI-powered applications with React, Next.js, Vue, Svelte, Node.js.                          |
+| [API](/docs/api)                                         |                            | Directly call the public API. OpenAPI spec available.                                                                                            |
+
+## Packages integrated with Langfuse
+
+| Name                                        | Description                                                                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [Instructor](/docs/integrations/instructor) | Library to get structured LLM outputs (JSON, Pydantic)                                                                  |
+| [Dify](/docs/integrations/dify)             | Open source LLM app development platform with no-code builder.                                                          |
+| [Ollama](/docs/integrations/ollama)         | Easily run open source LLMs on your own machine.                                                                        |
+| [Mirascope](/docs/integrations/mirascope)   | Python toolkit for building LLM applications.                                                                           |
+| [Flowise](/docs/integrations/flowise)       | JS/TS no-code builder for customized LLM flows.                                                                         |
+| [Langflow](/docs/integrations/langflow)     | Python-based UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows. |
+
+Unsure which integration to choose? Ask us on [Discord](/discord) or in the chat.

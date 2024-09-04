@@ -1,0 +1,30 @@
+---
+title: Are there any limits to the Langfuse API?
+tags: [api]
+---
+
+# Are there any limits to the Langfuse API?
+
+While the [Langfuse API](https://api.reference.langfuse.com) is extremely open and flexible, there are some limits to ensure the stability and performance of the platform.
+
+## Langfuse Cloud
+
+### Payloads
+
+5MB per request and 5MB per response
+
+### Rate Limits
+
+| Plan                | Rate Limit               |
+| ------------------- | ------------------------ |
+| Hobby and Pro plans | 1000 requests per minute |
+| Team plan           | custom limits            |
+
+Rate limit response
+
+- HTTP status code 429
+- `Retry-After` response header with the number of seconds to wait before retrying
+
+## Self-hosted instances
+
+No hard limits, depends on your infrastructure capacity and load-balancer configuration.

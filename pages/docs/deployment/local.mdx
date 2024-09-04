@@ -1,70 +1,67 @@
 ---
-description: Self-hosting instructions for Langfuse using Docker
+description: Step-by-step guide to run Langfuse on your local machine using docker compose.
 ---
 
-# Local Machine
+import { Callout } from "nextra/components";
 
-This setup is the easiest to get started with. It will start a local database and the Langfuse server. The server is exposed on port `3000` by default.
+# Local Deployment
 
-It is not recommended to use this setup in production as the database is not persisted and environment variables are not secret. Checkout [Langfuse Cloud](/docs/deployment/cloud) for a production-ready setup maintained by the Langfuse team or alternatively [self-host](/docs/deployment/self-host).
+<Callout type="warning">
+  This setup is **not suitable for production use** as the database is not
+  persistent and environment variables are not kept secret. For a
+  production-ready setup, follow the [self-hosting
+  guide](/docs/deployment/self-host) or consider using [Langfuse
+  Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
+</Callout>
 
-Requirements: `docker` and `docker compose`, both included in [Docker Desktop](https://docs.docker.com/get-docker/)
+You can run Langfuse on your local machine using docker compose. This method is ideal for testing Langfuse and troubleshooting integration issues.
 
-## Start
+Requirements: `docker` and `docker compose`, both are included in [Docker Desktop](https://docs.docker.com/get-docker/)
+for Mac or Windows users.
+
+## Getting Started
 
 ```bash
-# Clone repository
+# Clone the Langfuse repository
 git clone https://github.com/langfuse/langfuse.git
 cd langfuse
 
-# Run server and db
-docker compose up -d
+# Start the server and database
+docker compose up
 ```
 
--> Visit http://localhost:3000
+<Callout type="info">
 
-## Upgrade
+Langfuse is now running on your local machine.
+
+- The server is accessible at: `http://localhost:3000`
+- Integrations: set the `HOST`/`BASEURL` of the SDKs to `http://localhost:3000`
+
+</Callout>
+
+## Updating Langfuse
+
+Docker has robust caching functionalities. To fetch the latest Langfuse container, you need to run `docker-compose pull`. Otherwise, Docker will use the cached version of the Langfuse container.
 
 ```bash
-# navigate to the Langfuse directory
+# Navigate to the Langfuse directory
 cd langfuse
 
-# Stop server and db
+# Stop the server and database
 docker compose down
 
-# Pull latest changes
+# Fetch the latest changes
 git pull
 docker-compose pull
 
-# Run server and db
-docker compose up -d
+# Restart the server and database
+docker compose up
 ```
 
-## Development setup
+## Setting Up a Development Environment
 
-It will start a local database via Docker and the Langfuse server via NPM. The development server will watch for changes and restart automatically.
+Refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) for detailed instructions on how to set up a development environment.
 
-```bash
-# Clone repository
-git clone https://github.com/langfuse/langfuse.git
-cd langfuse
+## Troubleshooting
 
-# Install dependencies
-npm install
-
-# Run the db in the background
-docker-compose -f docker-compose.dev.yml up -d
-
-# create an env file
-cp .env.dev.example .env
-
-# Apply database migrations
-npm run db:migrate
-
-# Optional: seed the database
-# npm run db:seed
-# npm run db:seed:examples
-
-# Start the development server
-npm run dev
-```
+The [self-hosting guide](/docs/deployment/self-host) is more extensive and includes troubleshooting steps which are also applicable to local deployments using docker compose.

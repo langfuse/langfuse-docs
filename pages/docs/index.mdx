@@ -1,21 +1,96 @@
 ---
-description: Introduction to Langfuse with quickstart instructions, tutorials, and more.
+title: Langfuse Documentation
+description: Langfuse is an open source LLM engineering platform. It includes observability, analytics, and experimentation features.
+faq-tags: [security]
 ---
 
-import { Button } from "@/components/ui/button";
-import { SiGithub, SiTypescript, SiPython, SiDiscord } from "react-icons/si";
-import { AiOutlineCloud } from "react-icons/ai";
-import Link from "next/link";
-import { Chat } from "@/components/qaChatbot";
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
-# Introduction
+# Docs
 
-Langfuse is an **open source product analytics suite for LLM apps**.
+> Langfuse is an open-source LLM engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications.
+
+## Overview: Core platform features
+
+### Develop
+
+- **Observability:** Instrument your app and start ingesting traces to Langfuse ([Quickstart](/docs/get-started), [Tracing](/docs/tracing))
+  - Track all LLM calls and all other relevant logics in your app
+  - [Async SDKs](/docs/sdk) for Python and JS/TS
+  - [`@observe()` decorator](/docs/sdk/python/decorators) for Python
+  - [Integrations](/docs/integrations/overview) for OpenAI SDK, Langchain, LlamaIndex, LiteLLM, Flowise and Langflow
+  - [API](https://api.reference.langfuse.com)
+- **Langfuse UI:** Inspect and debug complex logs and user sessions ([Demo](/docs/demo), [Tracing](/docs/tracing), [Sessions](/docs/tracing-features/sessions))
+- **Prompt Management:** Manage, version and deploy prompts from within Langfuse ([Prompt Management](/docs/prompts/get-started))
+- **Prompt Engineering:** Test and iterate on your prompts with the [LLM Playground](/docs/playground)
+
+### Monitor
+
+- **Analytics:** Track metrics (LLM cost, latency, quality) and gain insights from dashboards & data exports ([Analytics](/docs/analytics), [Daily Metrics API](/docs/analytics/daily-metrics-api))
+- **Evals:** Collect and calculate scores for your LLM completions ([Scores & Evaluations](/docs/scores))
+  - Run [model-based evaluations](/docs/scores/model-based-evals/overview) within Langfuse
+  - Collect [user feedback](/docs/scores/user-feedback)
+  - [Annotate](/docs/scores/annotation) observations in Langfuse
+
+### Test
+
+- **Experiments:** Track and test app behaviour before deploying a new version
+  - [Datasets](/docs/datasets/overview) let you test expected in and output pairs and benchmark performance before deployiong
+  - Track versions and releases in your application ([Experimentation](/docs/experimentation), [Prompt Management](/docs/prompts/get-started))
+
+## Get started
+
+<Cards num={3}>
+  <Card href="/docs/tracing" title="How tracing works" image arrow>
+    ![Quickstart icon (rocket)](/images/cards/code.svg)
+  </Card>
+  <Card href="/docs/get-started" title="Quickstart" image arrow>
+    ![Quickstart icon (rocket)](/images/cards/rocket.svg)
+  </Card>
+  <Card href="/docs/demo" title="Interactive demo" image arrow>
+    ![Interactive demo](/images/cards/robot.svg)
+  </Card>
+</Cards>
+
+## Why Langfuse?
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  We wrote a concise manifesto on: [Why Langfuse?](/why)
+</Callout>
+
+- Open-source
+- Model and framework agnostic
+- Built for production
+- Incrementally adoptable - start with a single LLM call or integration, then expand to full tracing of complex chains/agents
+- Use the GET API to build downstream use cases
+
+<div className="rounded px-5 py-5 my-10 bg-primary/5 ring-1 ring-primary/20">
+
+<h3 className="nx-font-semibold nx-tracking-tight nx-text-slate-900 dark:nx-text-slate-100 nx-text-2xl">
+  Challenges of building LLM applications and how Langfuse helps
+</h3>
+
+In implementing popular LLM use cases – such as retrieval augmented generation, agents using internal tools & APIs, or background extraction/classification jobs – developers face a unique set of challenges that is different from traditional software engineering:
+
+**Tracing & Control Flow**: Many valuable LLM apps rely on complex, repeated, chained or agentic calls to a foundation model. This makes debugging these applications hard as it is difficult to pinpoint the root cause of an issue in an extended control flow.
+
+_With Langfuse_, it is simple to capture the full context of an LLM application. Our client SDKs and integrations are model and framework agnostic and able to capture the full context of an execution. Users commonly track LLM inference, embedding retrieval, API usage and any other interaction with internal systems that helps pinpoint problems. Users of frameworks such as Langchain benefit from automated instrumentation, otherwise the SDKs offer an ergonomic way to define the steps to be tracked by Langfuse.
+
+**Output quality**: In traditional software engineering, developers are used to testing for the absence of exceptions and compliance with test cases. LLM-based applications are non-deterministic and there rarely is a hard-and-fast standard to assess quality. Understanding the quality of an application, especially at scale, and what ‘good’ evaluation looks like is a main challenge. This problem is accelerated by changes to hosted models that are outside of the user’s control.
+
+_With Langfuse_, users can attach scores to production traces (or even sub-steps of them) to move closer to measuring quality. Depending on the use case, these can be based on model-based evaluations, user feedback, manual labeling or other e.g. implicit data signals. These metrics can then be used to monitor quality over time, by specific users, and versions/releases of the application when wanting to understand the impact of changes deployed to production.
+
+**Mixed intent**: Many LLM apps do not tightly constrain user input. Conversational and agentic applications often contend with wildly varying inputs and user intent.
+This poses a challenge: teams build and test their app with their own mental model but real world users often have different goals and lead to many surprising and unexpected results.
+
+_With Langfuse_, users can classify inputs as part of their application and ingest this additional context to later analyze their users behavior in-depth.
 
 <Frame
   transparent
   fullWidth
-  className="mt-10 rounded-lg ring-primary/20 ring-1 dark:hidden"
+  className="mt-10 rounded ring-primary/20 ring-1 dark:hidden"
 >
   ![Langfuse Features along the development
   lifecycle](/images/docs/features-light.png)
@@ -23,65 +98,25 @@ Langfuse is an **open source product analytics suite for LLM apps**.
 <Frame
   transparent
   fullWidth
-  className="mt-10 rounded-lg ring-primary/20 ring-1 hidden dark:block"
+  className="mt-10 rounded ring-primary/20 ring-1 hidden dark:block"
 >
   ![Langfuse Features along the development
   lifecycle](/images/docs/features-dark.png)
 </Frame>
 <span>_Langfuse features along the development lifecycle_</span>
 
-## Features
+</div>
 
-1. [Integrations](/docs/integrations): Data collection via SDKs
-   - Tracing LLM chains by collecting specific data such as prompts, outputs, and configurations
-   - Measure quality of outputs via [Scores](/docs/scores)
-     - [Manually in Langfuse UI](/docs/scores/manually) (human-in-the-loop)
-     - [User feedback](/docs/scores/user-feedback), explicit or implicit, optionally directly from the browser via Web SDK
-     - [Model-based evaluation](/docs/scores/model-based-evals)
-     - [Custom via SDK/API](/docs/scores/custom)
-1. [Nested traces](/docs/tracing)
-   - Find the root cause of issues
-   - Segment traces based on user feedback and other metrics
-1. Analytics
-   - [User-level reporting](/docs/user-explorer): costs, usage, feedback/quality
-   - [Usage/cost](/docs/token-usage)
+## Updates
 
-## Why Langfuse?
+Langfuse evolves quickly, check out the [changelog](/changelog) for the latest updates.
 
-- [Open source](/docs/open-source) (MIT license)
-- Run Langfuse [self-hosted](/docs/deployment/self-host), [locally](/docs/deployment/local), or use [Langfuse cloud](/docs/deployment/cloud)
-- Model agnostic
-- Integration
+Subscribe to the **mailing list** to get notified about new major features:
 
-  - Fully async SDKs for:
-    - [JS/TS (Node, Edge)](/docs/sdk/typescript)
-    - [Python](/docs/sdk/python)
-  - [Langchain integration](/docs/langchain) (full integration in 5 minutes)
-  - [Public API](/docs/api)
-  - [OpenAI SDK](/docs/openai) (drop-in replacement, change only the import)
-  - [JS/TS Web SDK](/docs/sdk/typescript-web) to create scores from the client-side
-  - Incrementally adoptable, start with a single LLM call, expand to full tracing of complex chains/agents
-
-- Use [GET API](/docs/api) to build downstream use cases
-
-## What's next?
-
-<Cards num={3}>
-  <Card href="/docs/demo" title="Live demo" image arrow>
-    ![Live demo icon (Q&A Chatbot)](/images/cards/robot.svg)
-  </Card>
-  <Card href="/docs/get-started" title="Quickstart" image arrow>
-    ![Quickstart icon (rocket)](/images/cards/rocket.svg)
-  </Card>
-  <Card href="/docs/video" title="Langfuse in 2 minutes" image arrow>
-    ![Video demo icon (camera)](/images/cards/camera.svg)
-  </Card>
-</Cards>
+<ProductUpdateSignup source="langfuse.com/docs" className="mt-2" />
 
 ## Get in touch
 
-Langfuse is being actively developed in open source together with the community.
-Join our [Discord](/discord)! Provide feedback, report bugs, or request features
-via GitHub issues.
+We actively develop Langfuse in [open source](/docs/open-source). Join our [Discord](/discord), provide feedback, report bugs, or request features via GitHub [issues](/issue).
 
-If you want to chat about your use case, reach out to us via email (contact@langfuse.com) or [schedule a demo](/schedule-demo).
+Learn more about ways to get in touch on our [Support](/support) page.

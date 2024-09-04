@@ -1,16 +1,30 @@
 import { Background } from "./Background";
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
+import { Header } from "./Header";
 
 export function ScheduleDemoPage() {
   return (
     <section className="flex flex-col gap-10 w-full min-h-screen items-center py-20">
-      <div className="text-center">
-        <h1>Schedule Demo</h1>
-        <p className="text-lg text-primary/80 mt-3">
-          Talk to the founders to learn more about Langfuse
-        </p>
-      </div>
+      <Header
+        title="Talk to us"
+        description="Get a demo by one of the founders to learn more about Langfuse"
+        h="h1"
+        buttons={[
+          {
+            href: "/enterprise",
+            text: "Enterprise FAQ",
+          },
+          {
+            href: "/video",
+            text: "Watch 3 min demo",
+          },
+          {
+            href: "/docs",
+            text: "Docs",
+          },
+        ]}
+      />
       <ScheduleDemo />
       <Background />
     </section>

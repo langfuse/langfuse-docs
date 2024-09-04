@@ -1,0 +1,90 @@
+---
+description: Add multiple modalities to a single trace
+---
+
+# Multi-Modality
+
+Langfuse supports rendering Multi-Modal traces, including both text and image formats. We follow OpenAI's format convention. 
+
+## How to trace Multi-Modal content in Langfuse?
+
+To utilize our Multi-Modal Trace support, your trace or observation `input`/`output` should include a list of messages comprising the conversation so far. Each message should contain a `role` (system, user, assistant) and `content`. To display multi-modal content, you can pass a combination of text and image URLs. We plan to extend support to base64 images, file attachments (e.g., PDFs), and audio soon. The `content` property of the messages follows the [OpenAI convention](/docs/tracing-features/multi-modality#content-format).
+
+### Visual Representation in Langfuse 
+<Frame border>
+
+![Trace in Langfuse UI](/images/docs/multi-modal-trace.png)
+</Frame>
+
+### Content Format
+
+| Content             | Type   | Description                                                                 |
+|-------------------------|--------|-----------------------------------------------------------------------------|
+| Default: Text content            | string | The text contents of the message.                                           |
+| Multi-Modal: Array of content parts  | array  | An array of content parts with a defined type, each can be of type `text` or `image_url`. You can pass multiple images by adding multiple image_url content parts. |
+
+#### Content Examples
+
+<Tabs items={["Multi-Modal content","Text content"]}>
+
+<Tab>
+{/* Multi-modal: Image input */}
+```json
+{
+  "content": [
+    {
+      "role": "system",
+      "content": "You are an AI trained to describe and interpret images. Describe the main objects and actions in the image."
+    },
+    {
+      "role": "user",
+      "content": [
+        { 
+          "type": "text",
+          "text": "What's happening in this image?"
+        },
+        { 
+          "type": "image_url",
+          "image_url": {
+            "url": "https://example.com/image.jpg"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+##### Content Part Types
+
+<Tabs items={["Text content part","Image content part"]}>
+<Tab>
+| Property | Type   | Description                      |
+|----------|--------|----------------------------------|
+| type     | `text` | Type of content part             |
+| text     | string | Text content of the message      |
+</Tab>
+<Tab>
+| Property  | Type   | Description                      |
+|-----------|--------|----------------------------------|
+| type      | `image_url` | Type of content part             |
+| image_url | object | Object containing url and detail properties  |
+| image_url.url       | string | URL of the image                 |
+| image_url.detail    | string? | Optional: Detail level of image (low, high, auto) |
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
+```json
+{
+  "content": [
+    {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+    {"role": "user", "content": "1 + 1 = "}
+  ]
+}
+```
+</Tab>
+</Tabs>
+
+For more details and examples, refer to our [OpenAI cookbook](/docs/integrations/openai/python/examples).

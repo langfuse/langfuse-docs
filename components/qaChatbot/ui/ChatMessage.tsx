@@ -25,11 +25,11 @@ export function ChatMessage({
       className={cn("group relative mb-4 flex items-start lg:-ml-12")}
       {...props}
     >
-      <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow bg-background/50">
+      <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded border shadow bg-background/50">
         {message.role === "user" ? (
           <User className="h-4 w-4" />
         ) : (
-          <Image src="/icon256.png" alt="Langfuse" width={20} height={20} />
+          <Image src="/icon.svg" alt="Langfuse" width={20} height={20} />
         )}
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">

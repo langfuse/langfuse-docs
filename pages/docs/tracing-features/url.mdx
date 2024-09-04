@@ -1,0 +1,155 @@
+---
+description: Each trace has a unique URL that you can use to share it with others or to access it directly.
+---
+
+# Trace URLs
+
+Each trace has a unique URL that you can use to share it with others or to access it directly.
+
+## Get trace url
+
+Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
+
+<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.get_current_trace_url()
+
+fn()
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+trace = langfuse.trace(...)
+trace.get_trace_url()
+```
+
+</Tab>
+<Tab>
+```typescript
+const trace = langfuse.trace(...)
+trace.getTraceUrl()
+```
+
+</Tab>
+<Tab>
+
+Use the interoperability of the Langfuse Python `@observe()` Decorator with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/tracing#interoperability)).
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Your Langchain code
+
+    # Add Langfuse handler as callback (classic and LCEL)
+    chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
+
+    langfuse_context.get_current_trace_url()
+
+fn()
+```
+
+**Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.
+
+```
+handler.get_trace_url()
+```
+
+</Tab>
+<Tab>
+
+Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/tracing#interoperability)).
+
+```typescript
+// Intialize Langfuse Client
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+// Create a Langfuse trace for an execution of your application
+const trace = langfuse.trace();
+
+// Get Langchain handler for this trace
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Get the trace URL
+langfuseHandler.getTraceUrl();
+```
+
+**Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.
+
+```typescript
+handler.getTraceUrl();
+```
+
+</Tab>
+</Tabs>
+
+## Share trace via url
+
+By default, only members of your Langfuse project can view a trace.
+
+You can make a trace `public` to share it via a public link. This allows others to view the trace without needing to log in or be members of your Langfuse project.
+
+_Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99_
+
+<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
+<Tab>
+
+<CloudflareVideo
+  videoId="2b49a3463199ecfc4dfc17380f016e6f"
+  aspectRatio={15.55 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Decorators
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        public=True
+    )
+
+fn()
+```
+
+Low-level SDK
+
+```diff
+trace = langfuse.trace(
+    ...
++   public=True
+    ...
+)
+```
+
+</Tab>
+
+<Tab>
+```diff
+const trace = langfuse.trace({
+    ...
++   public: true,
+    ...
+});
+```
+
+</Tab>
+</Tabs>

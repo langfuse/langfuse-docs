@@ -1,77 +1,292 @@
 ---
-description: Langfuse tracing helps to monitor and debug complex LLM apps such as chains and agents.
+description: Open Source LLM Observability and Tracing with Langfuse. Integrates with OpenAI, LlamaIndex, LangChain, Python Decorators and more.
 ---
 
-# Tracing
+# LLM Observability & Application Tracing
 
-LLM apps use increasingly complex abstractions (chains, agents with tools, advanced prompts). The nested traces in Langfuse help to understand what is going on and get to the root cause of problems.
+LLM applications use increasingly complex abstractions, such as chains, agents with tools, and advanced prompts. **Nested traces** in Langfuse help to understand what is happening and identify the root cause of problems.
 
-## Introduction
+<CloudflareVideo
+  videoId="be2a8276c589a0de39ab846d505cf731"
+  aspectRatio={1.516}
+  gifStyle
+  className="block dark:hidden"
+/>
+<CloudflareVideo
+  videoId="835959b1fbe097cd396e7b20cd5cf91e"
+  aspectRatio={1.516}
+  gifStyle
+  className="hidden dark:block"
+/>
+_Example trace of our [public demo](/docs/demo)_
 
-Langfuse objects:
+## Why Use Tracing to gain observability into an LLM Application?
 
-- Each backend execution is logged with a single `trace`.
+- Capture the full context of the execution, including API calls, context, prompts, parallelism, and more
+- Track model usage and cost
+- Collect user feedback
+- Identify low-quality outputs
+- Build fine-tuning and testing datasets
+
+## Why Use Langfuse?
+
+- Open-source
+- Low performance overhead
+- SDKs for Python and JavaScript
+- Integrated with popular frameworks: OpenAI SDK (Python), Langchain (Python, JS), LlamaIndex (Python)
+- Multi-Modal tracing support
+- Public API for custom integrations
+- Suite of tools for the whole LLM application development lifecycle
+
+## Introduction to Observability & Traces in Langfuse
+
+A trace in Langfuse consists of the following objects:
+
+- A `trace` typically represents a single request or operation. It contains the overall input and output of the function, as well as metadata about the request, such as the user, the session, and tags.
 - Each trace can contain multiple `observations` to log the individual steps of the execution.
   - Observations are of different types:
-    - `Events` are the basic building block. They are used to track discrete events in a trace.
+    - `Events` are the basic building blocks. They are used to track discrete events in a trace.
     - `Spans` represent durations of units of work in a trace.
-    - `Generations` are spans which are used to log generations of AI models. They contain additional attributes about the model, the prompt/completion. For generations, [token usage](/docs/token-usage) is automatically calculated.
+    - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
   - Observations can be nested.
 
-Follow the integration docs to send traces to Langfuse. You can use:
+<div className="grid grid-cols-2 mt-4 gap-2 md:gap-4">
 
-- [Langfuse SDKs](/docs/sdk)
-- [Langchain integration](/docs/langchain)
-- [API](/docs/api)
+<div className="border rounded py-4 text-center">
 
-## Example
+**Hierarchical structure of traces in Langfuse**
 
-Automatically traced with Langchain integration:
-
-<Frame>![Agent trace](/images/agent-trace.gif)</Frame>
-
-## Detect and fix problems
-
-1. Collect user feedback from the frontend
-2. Filter down to executions that had poor quality
-3. Use the debugging UI to get to the root cause of the problem
-
-## Share via public link
-
-You can share a trace with anyone via a public link. The link is read-only.
-
-_Example: https://cloud.langfuse.com/public/traces/lf.docs.conversation.u6Wl2hG_
-
-<Frame>![Share trace via public link](/images/docs/trace-share-link.gif)</Frame>
-
-## Get trace url in SDK
-
-Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
-
-<Tabs items={["Python", "JS/TS"]}>
-<Tab>
-```python
-# trace object
-trace.get_trace_url()
+```mermaid
+classDiagram
+    Trace "1" *-- "n" Observation
+    Observation <|-- Event
+    Observation <|-- Span
+    Observation <|-- Generation
+    Observation o-- Observation: Nesting
 ```
 
+</div>
+
+<div className="border rounded py-4 text-center bg-background block dark:hidden">
+
+**Example trace in Langfuse UI**
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-light.png)
+
+</div>
+
+<div className="border rounded py-4 text-center bg-background hidden dark:block">
+
+**Example trace in Langfuse UI**
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-dark.png)
+
+</div>
+
+</div>
+
+## Get Started
+
+Follow the quickstart to add Langfuse tracing to your LLM app.
+
+import { Rocket, Joystick } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    icon={<Rocket size="24" />}
+    title="Quickstart"
+    href="/docs/get-started"
+    arrow
+  />
+  <Card
+    icon={<Joystick size="24" />}
+    title="Interactive demo"
+    href="/docs/demo"
+    arrow
+  />
+</Cards>
+
+## Advanced usage
+
+You can extend the tracing capabilities of Langfuse by using the following features:
+
+import {
+  Users,
+  Tag,
+  MessagesSquare,
+  Images,
+  Braces,
+  Globe,
+  Database,
+} from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Sessions"
+    href="/docs/tracing-features/sessions"
+    icon={<MessagesSquare />}
+    arrow
+  />
+  <Card
+    title="Multi-Modality"
+    href="/docs/tracing-features/multi-modality"
+    icon={<Images />}
+    arrow
+  />
+  <Card
+    title="Users"
+    href="/docs/tracing-features/users"
+    icon={<Users />}
+    arrow
+  />
+  <Card title="Tags" href="/docs/tracing-features/tags" icon={<Tag />} arrow />
+  <Card
+    title="Metadata"
+    href="/docs/tracing-features/metadata"
+    icon={<Braces />}
+    arrow
+  />
+  <Card
+    title="Trace URLs"
+    href="/docs/tracing-features/url"
+    icon={<Globe />}
+    arrow
+  />
+  <Card
+    title="Export traces"
+    href="/docs/query-traces"
+    icon={<Database />}
+    arrow
+  />
+</Cards>
+
+## Enable/disable tracing
+
+All Langfuse SDKs and integrations are designed to be non-intrusive. You can add Langfuse tracing to your application while being able to enable it only in specific environments.
+
+By default, the Langfuse Tracing is enabled if an API key is set. You can manually disable tracing via the `enabled` flag. See the documentation for the specific SDK or integration for more details.
+
+## Event queuing/batching [#queuing-batching]
+
+Langfuse's client SDKs and integrations are all designed to queue and batch requests in the background to optimize API calls and network time. Batches are determined by a combination of time and size (number of events and size of batch).
+
+### Configuration
+
+All integrations have a sensible default configuration, but you can customise the batching behaviour to suit your needs.
+
+| Option (Python) [SDK constructor, Environment]  | Option (JS)          | Description                                              |
+| ----------------------------------------------- | -------------------- | -------------------------------------------------------- |
+| `flush_at`, `LANGFUSE_FLUSH_AT`                 | `flushAt`            | The maximum number of events to batch up before sending. |
+| `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s) | `flushInterval` (ms) | The maximum time to wait before sending a batch.         |
+
+You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=1000` to send every second.
+
+### Manual flushing
+
+<Callout type="info">
+  This is especially relevant for short-lived applications like serverless
+  functions. If you do not flush the client, you may lose events.
+</Callout>
+
+If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
+
+<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
+
+<Tab>
+{/* Python */}
+
 ```python
-# Langchain callback handler
-handler.get_trace_url()
+# Decorator
+from langfuse.decorators import langfuse_context
+langfuse_context.flush()
+
+# low-level SDK
+langfuse.flush()
+```
+
+If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
+
+```python
+langfuse.shutdown()
 ```
 
 </Tab>
 <Tab>
-```typescript
-// trace object
-trace.getTraceUrl()
+{/* JS/TS */}
+
+```javascript
+await langfuse.flushAsync();
 ```
 
-```typescript
-// Langchain callback handler
-handler.getTraceUrl();
+If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
+
+```javascript
+await langfuse.shutdownAsync();
+```
+
+**If you run on Vercel**, the [`waitUntil()`](https://vercel.com/docs/functions/functions-api-reference#waituntil) method enqueues an asynchronous task to be performed during the lifecycle of the request. It doesn't block the response, but should complete before shutting down the function. Thereby, it ensures that all events are flushed before the function exits without delaying the response.
+
+```sh
+npm i @vercel/functions
+```
+
+```javascript
+import { waitUntil } from "@vercel/functions";
+
+export async function POST(req, res) {
+  // your code involving langfuse
+
+  // Flush events to Langfuse without blocking the response
+  waitUntil(langfuse.flushAsync());
+
+  // Send response to client
+  return res.status(200).send("OK");
+}
 ```
 
 </Tab>
+<Tab>
+{/* OpenAI SDK (Python) */}
 
+```python
+openai.flush()
+```
+
+</Tab>
+<Tab>
+{/* Langchain (Python) */}
+
+```python
+langfuse_handler.flush()
+```
+
+</Tab>
+<Tab>
+{/* Langchain (JS) */}
+
+```javascript
+await langfuseHandler.flushAsync();
+```
+
+If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
+
+```javascript
+await langfuseHandler.shutdownAsync();
+```
+
+</Tab>
+<Tab>
+{/* LlamaIndex */}
+
+```python
+langfuse_handler.flush()
+```
+
+</Tab>
 </Tabs>
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["tracing"]} />

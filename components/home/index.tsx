@@ -1,27 +1,35 @@
 import { Background } from "../Background";
-import { FeatTracing } from "./FeatTracing";
-import { FeatAnalytics } from "./FeatAnalytics";
-import { FromTheBlog } from "./FromTheBlog";
 import { Hero } from "./Hero";
-import { Pricing } from "./Pricing";
-import { Users } from "./Users";
-import { OpenSource } from "./OpenSource";
-import Integrations from "./Integrations";
+import Security from "./Security";
+import { UsersStatic } from "./UsersStatic";
+import dynamic from "next/dynamic";
+
+const FeatureBento = dynamic(() => import("./FeatureBento"), {
+  ssr: false,
+});
+const Integrations = dynamic(() => import("./Integrations"), {
+  ssr: false,
+});
+const OpenSource = dynamic(() => import("./OpenSource"), {
+  ssr: false,
+});
+const Pricing = dynamic(() => import("./Pricing"), {
+  ssr: false,
+});
 
 export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
-      <div className="px-2 md:container">
-        <Hero />
-        <Users />
-        <FeatTracing />
-        <FeatAnalytics />
-        <Integrations />
-        <OpenSource />
-        <Pricing />
-        <FromTheBlog />
-        {/* <CTA /> */}
-      </div>
+      <Hero />
+      <UsersStatic />
+      <FeatureBento />
+      <Integrations />
+      <OpenSource />
+      <Security />
+      <Pricing />
+      {/* <FromTheBlog /> */}
+      {/* <CTA /> */}
+      {/* <Footer /> */}
     </main>
     <Background />
   </>

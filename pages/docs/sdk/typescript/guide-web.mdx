@@ -1,0 +1,175 @@
+---
+description: Web SDK to report scores from the browser based on user interactions and feedback
+---
+
+# JS/TS SDK (Web)
+
+<div className="flex flex-row flex-wrap gap-2 mt-2">
+  <a href="https://github.com/langfuse/langfuse-js">
+    <img
+      alt="Github repository langfuse/langfuse-js"
+      src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=Github"
+    />
+  </a>
+  <a href="https://github.com/langfuse/langfuse-js/actions/workflows/ci.yml?query=branch%3Amain">
+    <img
+      src="https://img.shields.io/github/actions/workflow/status/langfuse/langfuse-js/ci.yml?style=flat-square&logo=Github&label=tests"
+      alt="CI test status"
+    />
+  </a>
+  <a href="https://www.npmjs.com/package/langfuse">
+    <img
+      src="https://img.shields.io/npm/v/langfuse?style=flat-square&label=npm+langfuse"
+      alt="npm langfuse"
+    />
+  </a>
+</div>
+
+The langfuse JS/TS SDK can be used to report scores client-side directly from the browser. It is commonly used to ingest scores into Langfuse which are based on implicit user interactions and feedback.
+
+→ Read more on [Scores in Langfuse](/docs/scores) and [collecting user feedback](/docs/scores/user-feedback)
+
+## Example
+
+<Tabs items={["React", "Vue"]}>
+<Tab>
+
+```typescript
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+    baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+    // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</Tab>
+<Tab>
+
+```html
+<template>
+  <div>
+    <button @click="handleUserFeedback(1)">👍</button>
+    <button @click="handleUserFeedback(0)">👎</button>
+  </div>
+</template>
+
+<script>
+  import { LangfuseWeb } from "langfuse";
+
+  export default {
+    props: {
+      traceId: {
+        type: String,
+        required: true,
+      },
+    },
+    data() {
+      return {
+        langfuseWeb: null,
+      };
+    },
+    created() {
+      this.langfuseWeb = new LangfuseWeb({
+        publicKey: process.env.VUE_APP_LANGFUSE_PUBLIC_KEY,
+        baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+        // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+      });
+    },
+    methods: {
+      async handleUserFeedback(value) {
+        await this.langfuseWeb.score({
+          traceId: this.traceId,
+          name: "user_feedback",
+          value,
+        });
+      },
+    },
+  };
+</script>
+```
+
+</Tab>
+</Tabs>
+
+We integrated the Web SDK into the Vercel AI Chatbot project to collect user feedback on individual messages. Read the [blog post](/blog/showcase-llm-chatbot) for more details and code examples.
+
+## Installation
+
+```sh npm2yarn
+npm i langfuse
+```
+
+In your application, set the **public api key** to create a client.
+
+```typescript
+import { LangfuseWeb } from "langfuse";
+
+const langfuseWeb = new LangfuseWeb({
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+});
+```
+
+Hint for Next.js users: you need to prefix the public key with `NEXT_PUBLIC_` to expose it in the frontend.
+
+### Options
+
+| Variable       | Description                                                                               | Default value                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| baseUrl        | BaseUrl of the Langfuse API; for US data region, set to `"https://us.cloud.langfuse.com"` | `"https://cloud.langfuse.com"`                                                                                                                          |
+| release        | The release number/hash of the application to provide analytics grouped by release.       | `process.env.LANGFUSE_RELEASE` or [common system environment names](https://github.com/langfuse/langfuse-js/blob/main/langfuse-core/src/release-env.ts) |
+| requestTimeout | Timeout in ms for requests                                                                | `10000`                                                                                                                                                 |
+
+## Create scores
+
+Scores are used to evaluate executions/traces. They are attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
+
+→ Read more on [Scores in Langfuse](/docs/scores)
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  While integrating Langfuse, it is important to either include the Langfuse Ids
+  in the response to the frontend or to use an own id as the trace id which is
+  available in both backend and frontend.
+</Callout>
+
+```typescript
+// pass traceId and observationId to front end
+await langfuseWeb.score({
+  traceId: message.traceId,
+  observationId: message.observationId,
+  name: "user-feedback",
+  value: 1,
+  comment: "I like how personalized the response is",
+});
+```
+
+**`langfuseWeb.score()` takes the following parameters**
+
+| parameter     | type   | optional | description                                                                                                                                                                                                                         |
+| ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| traceId       | string | no       | The id of the trace to which the score should be attached. Pass `trace.id` from backend or use a shared id that's available in backend and frontend (then set it in backend as trace id via `langfuse.trace({id: <yourTraceId>})`). |
+| observationId | string | yes      | The id of the observation to which the score should be attached. Pass from backend trace. E.g. `{generation, event, span}.id`                                                                                                       |
+| name          | string | no       | Identifier of the score.                                                                                                                                                                                                            |
+| value         | number | no       | The value of the score. Can be any number, often standardized to 0..1                                                                                                                                                               |
+| comment       | string | yes      | Additional context/explanation of the score.                                                                                                                                                                                        |

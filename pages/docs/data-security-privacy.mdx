@@ -1,27 +1,90 @@
-# Data privacy & security
+---
+description: Langfuse is enteprise-ready with its data privacy and security measures and controls. Langfuse is SOC2 Type2 and ISO 27001 certified.
+---
 
-We take data privacy and security very seriously. The data ingested into Langfuse are a core asset to your business and we treat it as such.
+# Data Privacy and Security
 
-## Security
+**At Langfuse, we prioritize data privacy and security.** We understand that the data you entrust to us is a vital asset to your business, and we treat it with the utmost care.
 
-- All data is encrypted at REST and in transit (via TLS).
-- Database in Frankfurt, Germany (AWS eu-central-1). US data region available upon request. Other regions and dedicated deployments available for enterprise customers.
-- Point-in-Time Recovery (PITR) using backups of database and Write Ahead Log.
-- SSO (Single Sign-On) is available for all users through OAuth 2.0 with Google and GitHub. You can request SSO enforcement for your organization (Team plan and above) to require 2FA (Two-Factor Authentication).
-- Contact: security@langfuse.com
+We take active steps to demonstrate our commitment to data security and privacy such as annual SOC2 Type 2 and ISO27001 audits.
 
-## Privacy
+With Langfuse Cloud, we handle:
 
-- [Privacy Policy](https://langfuse.com/privacy)
-- [Data Subject Access Request Form](https://app.termly.io/notify/47905712-56e1-4ad0-9bb7-8958f3263f90)
-- DPA (Data Processing Agreement) and subprocessor list available upon request.
-- Contact: privacy@langfuse.com
+- Deployment
+- Scaling
+- Upgrades and security patches
+- Ensuring high availability:
+  <iframe
+    src="https://status.langfuse.com/badge?theme=dark"
+    width="250"
+    height="30"
+    className="hidden dark:inline-block -mt-1"
+    style={{
+      colorScheme: "light", // Fixes incompatibility with Tailwind dark mode
+    }}
+  ></iframe>
+  <iframe
+    src="https://status.langfuse.com/badge?theme=light"
+    width="250"
+    height="30"
+    className="inline-block dark:hidden -mt-1"
+    style={{
+      colorScheme: "light", // Fixes incompatibility with Tailwind dark mode
+    }}
+  ></iframe>
 
-## Compliance
+## Security Measures
 
-- We are currently working towards **SOC 2** and **ISO 27001** compliance.
-- Contact: compliance@langfuse.com
+**Langfuse Cloud**
+
+- We encrypt all data at rest and in transit using TLS.
+- Our database and application run on AWS infrastructure, partly managed by Supabase and Vercel.
+  - US data region (https://us.cloud.langfuse.com): Northern California (AWS us-west-1) & Virginia (AWS us-east-1)
+  - EU data region (https://cloud.langfuse.com): Germany/Frankfurt (AWS eu-central-1) & Ireland (AWS eu-west-1)
+- We use Point-in-Time Recovery (PITR) with database backups and Write Ahead Log.
+- All users have access to SSO (Single Sign-On) through OAuth 2.0 with Google and GitHub. We can enforce SSO for your organization (Team plan and above) to require 2FA (Two-Factor Authentication).
+- For security inquiries, please contact us at security@langfuse.com
+
+**Self-hosted Instances**
+
+- For installation and configuration, see: [Self-hosting guide](/docs/deployment/self-host)
+- For architecture/component diagram, see: [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
+- For basic telemetry, see: [README.md](https://github.com/langfuse/langfuse/blob/main/README.md#telemetry)
+- For security inquiries, please contact us at security@langfuse.com
+
+## Privacy Measures
+
+- For our Privacy Policy, see: [Privacy Policy](https://langfuse.com/privacy)
+- For Data Subject Access Request Form, see: [Data Subject Access Request Form](https://app.termly.io/notify/47905712-56e1-4ad0-9bb7-8958f3263f90)
+- We can enter into a DPA (Data Processing Agreement) including a subprocessor list upon request. Please see our DPA Template [here](https://static.langfuse.com/legal/DPA_Langfuse_Template_11_07_2024.docx.pdf) for your prior review. Please email us at privacy@langfuse.com with a signed copy, we will then counter-sign your request. Please note that we require users to be on a Pro, Team or Enterprise Plan when we enter into DPAs with them.
+- For privacy inquiries, please contact us at privacy@langfuse.com
+
+## Compliance Measures
+
+| Framework     | Status (Langfuse Cloud)                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| GDPR          | Compliant. DPA available upon request on Pro and Team plan.                                                                 |
+| SOC 2 Type II | Certified. Report available upon request on Team plan.                                                                      |
+| ISO 27001     | Certified. Certificate available upon request on Team plan.                                                                 |
+| HIPAA         | Not compliant. However, compliance can be attained by [self-hosting](/docs/deployment/self-host) on own infrastructure/VPC. |
+
+For specific compliance requirements or questions, please contact us at compliance@langfuse.com
 
 ## Responsible Disclosure of Security Vulnerabilities
 
-We prioritize system security and highly appreciate the security community. Disclosing security vulnerabilities assists us in safeguarding the security and privacy of our users. Please submit actionable vulnerability reports to security@langfuse.com.
+We value the security community and prioritize system security. We encourage the disclosure of security vulnerabilities to help us protect the security and privacy of our users. Please send actionable vulnerability reports to security@langfuse.com.
+Please note that we currently do not operate a bug bounty program.
+
+## Whistleblowing
+
+We encourage employees and third parties to report breaches to us via email (legal@langfuse.com) or postal mail (address available [here](/imprint)). You can contact us anonymously or request that we protect your privacy. For more information, employees can refer to Langfuse's internal Responsible Disclosure Policy.
+
+## Notifications
+
+If you want to notify Langfuse of any security-related matters. Please reach out to us via security@langfuse.com
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["security"]} />

@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { BsGithub } from "react-icons/bs";
+import IconGithub from "./icons/github";
 
 export const GithubMenuBadge = () => (
   <a
     href="https://github.com/langfuse/langfuse"
-    className="group h-8 flex shrink-0 flex-row items-center rounded-md border border-primary/10 overflow-hidden transition-opacity"
+    className="group h-8 flex shrink-0 flex-row items-center rounded border border-primary/10 overflow-hidden transition-opacity"
     target="_blank"
     rel="nofollow noreferrer"
+    title="GitHub Repository"
   >
-    <div className="py-1 px-2 block bg-primary/10">
-      <BsGithub size={22} className="group-hover:opacity-80 opacity-100" />
+    <div className="py-1 px-1 block bg-primary/10">
+      <IconGithub className="group-hover:opacity-80 opacity-100 h-6 w-6" />
     </div>
-    <div className="py-1 px-2  text-sm group-hover:opacity-80 opacity-100 w-10">
+    <div className="py-1 text-center text-sm group-hover:opacity-80 opacity-100 w-10">
       <StarCount />
     </div>
   </a>
@@ -22,9 +23,11 @@ export const StarCount = () => {
 
   useEffect(() => {
     if (!stars)
-      fetch("https://api.github.com/repos/langfuse/langfuse").then((data) =>
-        data.json().then((json) => setStars(json.stargazers_count))
-      );
+      fetch("/api/stargazer-count")
+        .then((data) =>
+          data.json().then((json) => setStars(json.stargazers_count))
+        )
+        .catch((err) => console.error("Error while loading GitHub stars", err));
   }, []);
 
   return stars ? (

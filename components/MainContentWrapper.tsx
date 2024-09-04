@@ -8,28 +8,26 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { RxDiscordLogo } from "react-icons/rx";
 import { Textarea } from "./ui/textarea";
 import { openChat } from "./supportChat";
 import { Background } from "./Background";
-import cookbookRoutes from "../cookbook/_routes.json";
 import { NotebookBanner } from "./NotebookBanner";
+import { ProductUpdateSignup } from "./productUpdateSignup";
+import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
+import IconGithub from "./icons/github";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
 export const MainContentWrapper = (props) => {
   const router = useRouter();
-  const notebook = cookbookRoutes.find(
-    ({ destination }) => destination === router.pathname + ".md"
+  const cookbook = COOKBOOK_ROUTE_MAPPING.find(
+    (cookbook) => cookbook.path === router.pathname
   );
 
   return (
     <>
-      {notebook ? (
-        <NotebookBanner
-          src={notebook.source.replace(".md", ".ipynb")}
-          className="mb-4"
-        />
+      {cookbook ? (
+        <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
       ) : null}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
@@ -39,10 +37,22 @@ export const MainContentWrapper = (props) => {
         >
           <DocsFeedback key={router.pathname} />
           <DocsSupport />
+          <DocsSubscribeToUpdates />
         </div>
       ) : null}
       <Background />
     </>
+  );
+};
+
+export const DocsSubscribeToUpdates = () => {
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <h3 className="text-xl font-semibold">Subscribe to updates</h3>
+      <div className="flex gap-3 flex-wrap">
+        <ProductUpdateSignup source="docs-footer" small />
+      </div>
+    </div>
   );
 };
 
@@ -54,9 +64,9 @@ export const DocsSupport = () => {
       </h3>
       <div className="flex gap-3 flex-wrap">
         <Button variant="outline" size="sm" asChild>
-          <a href="/discord" target="_blank">
-            <span>Discord</span>
-            <RxDiscordLogo className="h-4 w-4 ml-3" />
+          <a href="/gh-support" target="_blank">
+            <span>GitHub Q&A</span>
+            <IconGithub className="h-4 w-4 ml-3" />
           </a>
         </Button>
         <Button variant="outline" size="sm" onClick={() => openChat()}>
@@ -69,8 +79,8 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="https://cal.com/marc-kl" target="_blank">
-            <span>Talk to founder</span>
+          <a href="/schedule-demo" target="_blank">
+            <span>Talk to sales</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>
         </Button>

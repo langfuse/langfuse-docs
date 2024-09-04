@@ -1,0 +1,99 @@
+---
+date: 2023-12-28
+title: SDKs v2.0.0
+description: We are excited to announce the release of v2.0.0 for Python and JS/TS SDKs. Langfuse has come a long way this year since initially launching v1 of the SDKs and it was time to finally group some necessary breaking changes into one release. The release includes simpler interfaces in Python, better defaults for the Langchain integration, and a performance upgrade for the JS/TS SDK. Read on for more details.
+author: Max
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+## Changes
+
+### Python: Removal of Pydantic Objects from Interfaces
+
+We have listened to your feedback and understood that importing Pydantic objects from our SDK is unintuitive and error prone. Hence, we removed Pydantic interfaces from function signatures. Your inputs are still validated and show improved logs in case validation fails.
+
+**v1.x.x**
+
+```python
+from langfuse.model import CreateTrace
+langfuse.trace(CreateTrace(name="My Trace"))
+```
+
+**v2.x.x**
+
+```python
+langfuse.trace(name="My Trace")
+```
+
+### JS/TS: Performance upgrade
+
+The biggest performance bottleneck for our SDKs was networking. We addressed this issue by implementing a batch endpoint on the server and migrating the Python SDK a few weeks ago. With the latest release, we have now added batching capabilities to the JS/TS SDK and migrated it to the new endpoint. As a result, we can handle production loads more efficiently and have also eliminated a significant amount of technical debt from our code base.
+
+### Increased Flexibility on Usage Field
+
+SDK 2.0 offers greater flexibility to handle diverse usage types while also maintaining compatibility with the OpenAI-style usage object. This allows us to add more usage units over the next few weeks. Here's a glimpse of how the new usage object works:
+
+**Generic style**
+
+```python
+langfuse.generation(
+    name="my-claude-generation",
+    usage={
+        "input": 50,
+        "output": 49,
+        "total": 99,
+        "unit": "CHARACTERS"
+    },
+)
+```
+
+**OpenAI style**
+
+```python
+langfuse.generation(
+    name="my-openai-generation",
+    usage={
+        "promptTokens": 50,
+        "completionTokens": 49,
+        "totalTokens": 99
+    }, # defaults to "TOKENS" unit
+)
+```
+
+### Langchain: New trace for every run
+
+For every chain run, a new trace is created. Previously all runs that were traced with the same Callback Handler instance were grouped into the same trace. While this was intended to be able to trace complex applications, it is not a great default for most users.
+
+For those who want this behavior, you can create a trace and get a Langchain Handler that is scoped to the trace ([docs](/docs/integrations/langchain/upgrade-paths)).
+
+### Other
+
+Refer to the documentation for a full list of changes: [Python](/docs/sdk/python#upgrading-from-v1xx-to-v2xx), [JS/TS](/docs/sdk/typescript/guide#upgrade1to2)
+
+## Migration
+
+We strongly encourage upgrading to v2 to get all performance benefits and future security upgrades.
+
+### Automated migration with grit.
+
+We teamed up with [grit.io](https://www.grit.io/) to automate the migration process. Find more details on how to migrate your code base with one command for [Python](/docs/sdk/python#upgrading-from-v1xx-to-v2xx) and [JS/TS](/docs/sdk/typescript/guide#upgrade1to2). The grit binary executes entirely locally with AST-based transforms. Thanks Team grit!
+
+```bash
+# JS/TS
+npx @getgrit/launcher apply langfuse_node_v2
+# Python
+npx @getgrit/launcher apply langfuse_v2
+```
+
+### Integrations
+
+If you use one of the Langfuse integrations, there’s nothing to do for you. You’ll benefit from the more robust core by just continuously upgrading to the latest version of Flowise/LiteLLM/Langflow.
+
+---
+
+Our focus remains on making Langfuse SDKs more intuitive and future-proof. We are constantly looking for ways to improve and welcome your feedback on [Discord](/discord) or [GitHub Issues](/issue).
+
+There is one more thing coming before the end of the year. Stay tuned!

@@ -21,7 +21,7 @@ export function Chat({ className }: { className?: string }) {
   const [input, setInput] = useState("");
   const controlledMessages = useRef<Message[]>([]);
   const latestUserMessage = useRef<Message | null>(null);
-  const latestMessageId = useRef<string | null>(null);
+  const latestTraceId = useRef<string | null>(null);
 
   const { messages, setMessages, append } = useChat({
     body: {
@@ -32,8 +32,8 @@ export function Chat({ className }: { className?: string }) {
     sendExtraMessageFields: true,
     onResponse(response) {
       // Get the latest message id from the server
-      const newMessageId = response.headers.get("X-Message-Id");
-      latestMessageId.current = newMessageId;
+      const newTraceId = response.headers.get("X-Trace-Id");
+      latestTraceId.current = newTraceId;
     },
     onFinish(message) {
       // Update controlledMessages
@@ -46,7 +46,7 @@ export function Chat({ className }: { className?: string }) {
       }
       controlledMessages.current.push({
         ...message,
-        id: latestMessageId.current ?? message.id,
+        id: latestTraceId.current ?? message.id,
       });
 
       // Update "ai" messages state
@@ -59,7 +59,7 @@ export function Chat({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden bg-background/40 shadow-lg rounded-lg",
+        "relative flex flex-col p-5 mt-10 h-[70vh] overflow-hidden bg-background/40 shadow-lg rounded",
         className
       )}
     >
@@ -104,5 +104,5 @@ const welcomeMessage: Message = {
   id: "announcement-1",
   content: `👋 Do you have any questions about Langfuse? Ask me!
 
-_⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the [live demo](/docs/demo). Humans (the founders) are available via the chat widget._`,
+_⚠️ Warning: Do not enter sensitive information. All chat messages can be viewed in the public demo project. Responses may be inaccurate. Please check the documentation for details or reach out to us via the chat widget._`,
 } as const;

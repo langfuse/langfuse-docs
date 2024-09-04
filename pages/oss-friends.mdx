@@ -1,0 +1,55 @@
+---
+description: "We are proud to collaborate with a diverse group of partners to promote open-source software and the values of transparency, collaboration, and community that it represents."
+---
+
+import { useData } from "nextra/data";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+export const getStaticProps = async () => {
+  const res = await fetch("https://formbricks.com/api/oss-friends");
+  const data = await res.json();
+  return {
+    props: {
+      ssg: {
+        OSSFriends: data.data,
+      },
+    },
+  };
+};
+
+export function OSSFriendsPage() {
+  const { OSSFriends } = useData();
+  return (
+    <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {OSSFriends.map((friend, index) => (
+        <div
+          key={index}
+          className="flex flex-col gap-2 overflow-hidden rounded p-4 ring-primary/30 ring-1"
+        >
+          <Link href={friend.href} className="text-xl font-bold">
+            {friend.name}
+          </Link>
+          <p className="my-2">{friend.description}</p>
+          <div className="mt-auto">
+            <Button target="_blank" variant="secondary" asChild>
+              <Link href={friend.href} rel="noopener">
+                Learn more
+              </Link>
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+# OSS Friends
+
+We are proud to collaborate with a diverse group of partners to promote open-source software and the values of transparency, collaboration, and community that it represents.
+
+[Learn more](/docs/open-source) about our commitment to open source.
+
+## Our friends
+
+<OSSFriendsPage />

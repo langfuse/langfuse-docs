@@ -1,0 +1,26 @@
+```bash
+pip install langfuse
+```
+
+```python
+# Initialize Langfuse handler
+from langfuse.callback import CallbackHandler
+langfuse_handler = CallbackHandler(
+    secret_key="sk-lf-...",
+    public_key="pk-lf-...",
+    host="https://cloud.langfuse.com", # 🇪🇺 EU region
+  # host="https://us.cloud.langfuse.com", # 🇺🇸 US region
+)
+
+# Your Langchain code
+
+# Add Langfuse handler as callback (classic and LCEL)
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
+```
+
+Also works for `run` and `predict` methods.
+
+```python
+chain.run(input="<user_input>", callbacks=[langfuse_handler]) # Legacy
+conversation.predict(input="<user_input>", callbacks=[langfuse_handler])
+```

@@ -7,46 +7,28 @@ import {
   Steps,
   Card,
   Cards,
+  Callout,
 } from "nextra-theme-docs";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
-import { BsDiscord } from "react-icons/bs";
 import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
-
-const footerNav = [
-  { name: "Contact", href: "mailto:contact@langfuse.com" },
-  {
-    name: "Schedule Demo",
-    href: "/schedule-demo",
-  },
-  { name: "Careers", href: "/careers" },
-  {
-    name: "Status",
-    href: "https://status.langfuse.com",
-  },
-];
-
-const footerLegalNav = [
-  { name: "Imprint", href: "/imprint" },
-  {
-    name: "Terms",
-    href: "/tos",
-  },
-  {
-    name: "Privacy",
-    href: "/privacy",
-  },
-];
+import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
+import { GeistSans } from "geist/font/sans";
+import IconDiscord from "./components/icons/discord";
+import FooterMenu from "./components/FooterMenu";
+import Link from "next/link";
+import { FileCode, LibraryBig, CircleHelp } from "lucide-react";
+import {
+  AvailabilityBanner,
+  AvailabilitySidebar,
+} from "./components/availability";
+import { CloudflareVideo, Video } from "./components/Video";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
-  feedback: {
-    content: null,
-  },
   main: MainContentWrapper,
   search: {
     placeholder: "Search...",
@@ -55,13 +37,12 @@ const config: DocsThemeConfig = {
     extraContent: (
       <>
         <a
-          className="p-1 hidden sm:inline-block hover:opacity-80"
+          className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
-          href="https://langfuse.com/discord"
+          href="https://discord.langfuse.com"
           aria-label="Langfuse Discord"
-          rel="nofollow noreferrer"
         >
-          <BsDiscord size={24} />
+          <IconDiscord className="h-7 w-7" />
         </a>
 
         <a
@@ -91,51 +72,64 @@ const config: DocsThemeConfig = {
   sidebar: {
     defaultMenuCollapseLevel: 1,
     toggleButton: true,
+    titleComponent: ({ type, title, route }) => {
+      const { asPath } = useRouter();
+      if (type === "separator" && title === "Switcher") {
+        return (
+          <div className="-mx-2 hidden md:block">
+            {[
+              { title: "Docs", path: "/docs", Icon: LibraryBig },
+              { title: "Guides", path: "/guides", Icon: FileCode },
+              { title: "FAQ", path: "/faq", Icon: CircleHelp },
+            ].map((item) =>
+              asPath.startsWith(item.path) ? (
+                <div
+                  key={item.path}
+                  className="group mb-3 flex flex-row items-center gap-3 nx-text-primary-800 dark:nx-text-primary-600"
+                >
+                  <item.Icon className="w-7 h-7 p-1 border rounded nx-bg-primary-100 dark:nx-bg-primary-400/10" />
+                  {item.title}
+                </div>
+              ) : (
+                <Link
+                  href={item.path}
+                  key={item.path}
+                  className="group mb-3 flex flex-row items-center gap-3 text-gray-500 hover:text-primary/100"
+                >
+                  <item.Icon className="w-7 h-7 p-1 border rounded group-hover:bg-border/30" />
+                  {item.title}
+                </Link>
+              )
+            )}
+          </div>
+        );
+      }
+      return title;
+    },
+  },
+  editLink: {
+    text: "Edit this page on GitHub",
+  },
+  toc: {
+    backToTop: true,
+    extraContent: () => {
+      const { frontMatter } = useConfig();
+      return <AvailabilitySidebar frontMatter={frontMatter} />;
+    },
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
-    text: (
-      <div className="flex md:justify-between md:flex-row flex-col items-center flex-1 flex-wrap gap-2 text-sm">
-        <div className="md:order-last flex flex-col lg:flex-row gap-y-1 gap-x-4">
-          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
-            {footerNav.map((nav) => (
-              <Link
-                key={nav.name}
-                href={nav.href}
-                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
-              >
-                {nav.name}
-              </Link>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center md:justify-end">
-            {footerLegalNav.map((nav) => (
-              <Link
-                key={nav.name}
-                href={nav.href}
-                className="inline rounded-none leading-6 text-primary/80 hover:text-primary whitespace-nowrap"
-              >
-                {nav.name}
-              </Link>
-            ))}
-            <a
-              href="#"
-              onClick={() => (window as any).displayPreferenceModal()}
-              className="inline rounded-none leading-6 text-primary/80 hover:text-primary"
-              id="termly-consent-preferences"
-            >
-              Cookie Preferences
-            </a>
-          </div>
-        </div>
-        <span className="text-primary/80">
-          MIT {new Date().getFullYear()} © Finto Technologies GmbH
-        </span>
-      </div>
-    ),
+    text: <FooterMenu />,
   },
   useNextSeoProps() {
     const { asPath } = useRouter();
+    const cookbook = COOKBOOK_ROUTE_MAPPING.find(
+      (cookbook) => cookbook.path === asPath
+    );
+    const canonical: string | undefined = cookbook?.canonicalPath
+      ? "https://langfuse.com" + cookbook.canonicalPath
+      : undefined;
+
     return {
       titleTemplate:
         asPath === "/"
@@ -145,6 +139,7 @@ const config: DocsThemeConfig = {
           : asPath.startsWith("/docs/guides/")
           ? "%s - Langfuse Guides"
           : "%s - Langfuse",
+      canonical,
     };
   },
   head: () => {
@@ -162,6 +157,10 @@ const config: DocsThemeConfig = {
       ? "Docs"
       : asPath.startsWith("/changelog/")
       ? "Changelog"
+      : asPath.startsWith("/cookbook/")
+      ? "Cookbook"
+      : asPath.startsWith("/faq/")
+      ? "FAQ"
       : "";
 
     const image = frontMatter.ogImage
@@ -172,6 +171,10 @@ const config: DocsThemeConfig = {
           description
         )}&section=${encodeURIComponent(section)}`;
 
+    const video = frontMatter.ogVideo
+      ? "https://langfuse.com" + frontMatter.ogVideo
+      : null;
+
     return (
       <>
         <meta name="theme-color" content="#000" />
@@ -181,12 +184,20 @@ const config: DocsThemeConfig = {
         <meta name="description" content={description} />
         <meta property="og:description" content={description} />
 
+        {video && <meta property="og:video" content={video} />}
+
         <meta property="og:image" content={image} />
         <meta property="twitter:image" content={image} />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site:domain" content="langfuse.com" />
         <meta name="twitter:url" content="https://langfuse.com" />
+
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html { --font-geist-sans: ${GeistSans.style.fontFamily}; }`,
+          }}
+        />
 
         <link
           rel="apple-touch-icon"
@@ -215,19 +226,25 @@ const config: DocsThemeConfig = {
     Steps,
     Card,
     Cards,
+    AvailabilityBanner,
+    Callout,
+    CloudflareVideo,
+    Video,
   },
-  // banner: {
-  //   key: "seed-banner",
-  //   dismissible: false,
-  //   text: (
-  //     <Link href="/blog/announcing-our-seed-round">
-  //       <span className="sm:hidden">Langfuse raised $4M →</span>
-  //       <span className="hidden sm:inline">
-  //         Langfuse raised $4M. Read the full announcement & what's next →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "banner-hiring",
+    dismissible: true,
+    text: (
+      <Link href="/careers">
+        {/* mobile */}
+        <span className="sm:hidden">Join us in Engineering & DevRel →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          We're hiring. Join us in Product Eng, Backend Eng, and DevRel →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

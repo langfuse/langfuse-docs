@@ -1,0 +1,212 @@
+---
+description: Tags help to filter and organize traces in Langfuse based on use case, functions/apis used, environment and other criteria.
+---
+
+# Tagging traces
+
+Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
+
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex"]}>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+fn()
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    tags=["tag-1", "tag-2"]
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  tags: ["tag-1", "tag-2"],
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using the [OpenAI SDK Integration](/docs/integrations/openai), pass `tags` as an additional argument:
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add tags as additional argument
+  tags=["tag-1", "tag-2"]
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set tags via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.openai import openai
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+    completion = openai.chat.completions.create(
+      name="test-chat",
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a calculator."},
+        {"role": "user", "content": "1 + 1 = "}],
+      temperature=0,
+    )
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` as a keyword argument:
+
+```python
+handler = CallbackHandler(
+  tags=["tag-1", "tag-2"]
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Pass handler to invoke of your langchain chain/agent
+    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` to the constructor:
+
+```typescript
+const handler = new CallbackHandler({
+  tags: ["tag-1", "tag-2"],
+});
+```
+
+When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via `langfuse.trace()`:
+
+```typescript
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  tags: ["tag-1", "tag-2"],
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+<Tab>
+
+When using the [LlamaIndex Integration](/docs/integrations/llama-index), set `tags` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse import langfuse
+
+# Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+langfuse_callback_handler.set_trace_params(
+  tags=["tag-1", "tag-2"]
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set tags via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from llama_index.core import Document, VectorStoreIndex
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+
+@observe()
+def llama_index_fn(question: str):
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    Settings.callback_manager = CallbackManager([langfuse_handler])
+
+    # Run application
+    index = VectorStoreIndex.from_documents([doc1,doc2])
+    response = index.as_query_engine().query(question)
+    return response
+```
+
+</Tab>
+
+</Tabs>
+
+### Working with tags
+
+Tags enable you to flexibly add metadata to your traces.
+You can filter for tags in the Langfuse UI and [GET API](https://api.reference.langfuse.com/).
+
+When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod').
+
+<CloudflareVideo
+  videoId="e4902f5c5d05ad85b5ecf9443864494d"
+  aspectRatio={3.6 / 3}
+  className="max-w-2xl mt-8"
+  gifStyle
+/>

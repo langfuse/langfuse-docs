@@ -1,0 +1,282 @@
+---
+title: Open Source Observability for LangChain
+description: Open source tracing and monitoring for your LangChain application. Python and JS/TS. Automatically capture rich traces and metrics and evaluate outputs.
+ogImage: /images/docs/langchain_og.png
+---
+
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
+
+# Observability & Tracing for Langchain (Python & JS/TS)
+
+[Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/modules/callbacks/), [JS](https://js.langchain.com/docs/modules/callbacks/)). Thereby, the Langfuse SDK automatically creates a nested trace for every run of your Langchain applications. This allows you to log, analyze and debug your LangChain application.
+
+<CloudflareVideo
+  videoId="cb700aef1f55d21418955390d4b0d859"
+  aspectRatio={16 / 11.9}
+  gifStyle
+  className="max-w-2xl"
+/>
+
+## Add Langfuse to your Langchain Application
+
+You can configure the integration via (1) constructor arguments or (2) environment variables. Get your Langfuse credentials from the Langfuse dashboard.
+
+<Tabs
+  items={[
+    "Python (constructor args)",
+    "Python (env)",
+    "JS (constructor args)",
+    "JS (env)",
+  ]}
+>
+  <Tab>
+    <GetStartedLangchainPythonArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsEnv />
+  </Tab>
+</Tabs>
+
+<Callout type="info" emoji="✨">
+  Done. Now you can explore detailed traces and metrics in the Langfuse
+  dashboard.
+</Callout>
+
+Prefer end-to-end examples?
+
+import { FileCode, GitPullRequestArrow } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Example (Python)"
+    href="/docs/integrations/langchain/example-python"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example (JS/TS)"
+    href="/docs/integrations/langchain/example-javascript"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example LangGraph (Python)"
+    href="/docs/integrations/langchain/example-python-langgraph"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example LangServe (Python)"
+    href="/docs/integrations/langchain/example-python-langserve"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## Supported LangChain interfaces
+
+| Feature/interface | Python | JS/TS |
+| ----------------- | ------ | ----- |
+| LCEL              | ✅     | ✅    |
+| `invoke()`        | ✅     | ✅    |
+| `run()`           | ✅     | ✅    |
+| `call()`          | ✅     | ✅    |
+| `predict()`       | ✅     | ✅    |
+| async             | ✅     | ✅    |
+| `batch()`         | ✅     | (✅)  |
+| streaming         | ✅     | ✅    |
+
+We are interested in your feedback! Raise an issue on [GitHub](/ideas) to request support for additional interfaces.
+
+## Supported LangChain features
+
+- **🕸️ LangGraph**: Works with Langfuse Integration. Requires Python 3.11+ ([GH issue](https://github.com/langfuse/langfuse/issues/1926)). See notebook for [example integration](/docs/integrations/langchain/example-python-langgraph).
+- **🏓 LangServe**: See notebook for [example integration](/docs/integrations/langchain/example-python-langserve).
+
+## Additional Configuration
+
+### Optional constructor arguments
+
+When initializing the Langfuse handler, you can pass the following **optional** arguments to use more advanced features.
+
+| Python        | JS/TS       | Type    | Description                                                                                     |
+| ------------- | ----------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `user_id`     | `userId`    | string  | The current [user](/docs/tracing-features/users).                                               |
+| `session_id`  | `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                         |
+| `release`     | `release`   | string  | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
+| `version`     | `version`   | string  | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
+| `trace_name`  |             | string  | Customize the name of the created traces. Defaults to name of chain.                            |
+| `enabled`     | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
+| `sample_rate` | `-`         | float   | [Sample rate](/docs/tracing-features/sampling) for tracing.                                     |
+
+### Interoperability with Langfuse SDKs [#interoperability]
+
+Use the Langchain integration in combination with the regular Langfuse SDKs if you want to:
+
+- Add non-Langchain related observations to the trace.
+- Group multiple Langchain runs into a single trace.
+
+Learn more about the structure of a trace [here](/docs/tracing).
+
+<Tabs items={["Python Decorator", "JS", "Python low-level SDK"]}>
+<Tab>
+{/* Python decorator */}
+
+```python /@observe()/ /from langfuse.decorators import langfuse_context, observe/ /langfuse_context.get_current_langchain_handler()/
+from langfuse.decorators import langfuse_context, observe
+
+# Create a trace via Langfuse decorators and get a Langchain Callback handler for it
+@observe() # automtically log function as a trace to Langfuse
+def main():
+    # update trace attributes (e.g, name, session_id, user_id)
+    langfuse_context.update_current_trace(
+        name="custom-trace",
+        session_id="user-1234",
+        user_id="session-1234",
+    )
+    # get the langchain handler for the current trace
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Your Langchain code
+
+    # Add Langfuse handler as callback (classic and LCEL)
+    chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
+
+main()
+```
+
+Limitation (decorator + langchain): The input/output of the Langchain code will not be added to the trace or span created by the decorator but to a child. Adding them would cause unwanted side-effects if they are set manually or if you add multiple Langchain runs.
+
+</Tab>
+<Tab>
+{/* JS */}
+
+```typescript
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+// Get Langchain handler for a trace
+const trace = langfuse.trace();
+const langfuseHandlerTrace = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback (classic and LCEL)
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandlerTrace] }
+);
+
+// Get Langchain handler for a span
+const span = trace.span();
+const langfuseHandlerSpan = new CallbackHandler({ root: span });
+
+// Add Langfuse handler as callback (classic and LCEL)
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandlerSpan] }
+);
+```
+
+If you want to add the input/output of the Langchain run to the trace or span itself, use the `updateRoot` flag in the `CallbackHandler` constructor.
+
+```typescript
+const langfuseHandlerTrace = new CallbackHandler({
+  root: trace,
+  updateRoot: true,
+});
+```
+
+</Tab>
+<Tab>
+{/* Python low-level */}
+
+```python
+# Intialize Langfuse Client
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Get Langchain handler for a trace
+trace = langfuse.trace()
+langfuse_handler_trace = trace.get_langchain_handler()
+
+# Add Langfuse handler as callback (classic and LCEL)
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler_trace]})
+
+# Get Langchain handler for a span
+span = trace.span()
+langfuse_handler_span = span.get_langchain_handler()
+
+# Add Langfuse handler as callback (classic and LCEL)
+chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler_span]})
+```
+
+If you want to add the input/output of the Langchain run to the trace or span itself, use the `update_parent` flag.
+
+```python
+langfuse_handler_trace = trace.get_langchain_handler(update_parent=True)
+```
+
+</Tab>
+</Tabs>
+
+If you pass these callback handlers to your Langchain code, the events will be nested under the respective trace or span in the Langfuse.
+
+See the [Langchain observability cookbook](/docs/integrations/langchain/example-python) for an example of this in action (Python).
+
+### Queuing and flushing
+
+The Langfuse SDKs queue and batch events in the background to reduce the number of network requests and improve overall performance. In a long-running application, this works without any additional configuration.
+
+If you are running a short-lived application, you need to shutdown Langfuse to ensure that all events are flushed before the application exits.
+
+<Tabs items={["Python", "JS"]}>
+<Tab>
+{/* Python */}
+
+```python
+langfuse_handler.shutdown()
+```
+
+</Tab>
+<Tab>
+
+{/* JS */}
+
+```typescript
+await langfuseHandler.shutdownAsync();
+```
+
+</Tab>
+</Tabs>
+
+If you want to flush events synchronously at a certain point, you can use the `flush` method. This will wait for all events that are still in the background queue to be sent to the Langfuse API. This is usually discouraged in production environments.
+
+<Tabs items={["Python", "JS"]}>
+<Tab>
+{/* Python */}
+
+```python
+langfuse_handler.flush()
+```
+
+</Tab>
+<Tab>
+
+{/* JS */}
+
+```typescript
+await langfuseHandler.flushAsync();
+```
+
+</Tab>
+</Tabs>
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["integration-langchain"]} />

@@ -66,7 +66,7 @@ const llm = new OpenAI();
 const res = await llm.call("<user-input>", { callbacks: [handler] });
 ```
 
-→ [Integration docs](/docs/langchain/typescript)
+→ [Integration docs](/docs/integrations/langchain/typescript)
 
 ## ⛓️ Langchain integrations with Trace context [#langchain-trace]
 
@@ -76,7 +76,6 @@ When using the Langchain Python integration, you can now add more context to the
 import uuid
 
 from langfuse.client import Langfuse
-from langfuse.model import CreateTrace
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -87,7 +86,7 @@ langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
 # create trace_id for future reference
 trace_id = str(uuid.uuid4())
 # create the Trace
-trace = langfuse.trace(CreateTrace(id=trace_id))
+trace = langfuse.trace(id=trace_id)
 # get a handler bound to the Trace
 handler = trace.getNewHandler()
 
@@ -98,7 +97,7 @@ chain = LLMChain(llm=llm, prompt=PromptTemplate(...))
 chain.run("<your-input>", callbacks=[handler])
 ```
 
-→ [Docs](/docs/langchain/python)
+→ [Docs](/docs/integrations/langchain/tracing)
 
 ## 📦 Trace context: Releases and versions [#releases-and-versions]
 
@@ -138,7 +137,7 @@ Releases are available for all SDKs. They can be added in three ways (in order o
   table](/images/blog/update-august-2023/release.jpg)
 </Frame>
 
-Learn more → [Python](/docs/sdk/python#releases-and-versions), [JS/TS](/docs/sdk/typescript#releases-and-versions)
+Learn more → [Python](/docs/sdk/python#releases-and-versions), [JS/TS](/docs/sdk/typescript/guide#releases-and-versions)
 
 ### Versions
 
@@ -164,7 +163,8 @@ We've added USD cost calculation for tokens. This is helpful to understand the c
   ![User reporting](/images/blog/update-august-2023/costs.gif)
 </Frame>
 
-Here is a [list](https://github.com/langfuse/langfuse/blob/main/prisma/migrations/20230901155336_add_pricing_data/migration.sql) of all the models we support so far. If you are missing a model, please let us know on [Discord](/discord).
+~~ Here is a list of all the models we support so far. If you are missing a model, please let us know on [Discord](/discord). ~~
+Update February 2024: Please refer to [Model Usage and Cost](https://langfuse.com/docs/model-usage-and-cost) for the latest info on how to calculate accurate costs.
 
 ## Token usage chart [#token-chart]
 

@@ -8,6 +8,10 @@ author: Marc
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
 
 <BlogHeader
   title="Langfuse Update — July 2023"
@@ -40,21 +44,29 @@ The details 👇
 
 For teams building their LLM app with Langchain, adopting Langfuse just got that much easier. We added a `CallbackHandler` to the Langfuse Python SDK that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
 
-```python /callbacks=[handler]/
-# Initialize Langfuse handler
-from langfuse.callback import CallbackHandler
-handler = CallbackHandler(PUBLIC_KEY, SECRET_KEY)
+<Tabs
+  items={[
+    "Python (constructor args)",
+    "Python (env)",
+    "JS (constructor args)",
+    "JS (env)",
+  ]}
+>
+  <Tab>
+    <GetStartedLangchainPythonArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsEnv />
+  </Tab>
+</Tabs>
 
-# Setup Langchain
-from langchain.chains import LLMChain
-...
-chain = LLMChain(llm=llm, prompt=prompt)
-
-# Add Langfuse handler as callback
-chain.run(input="<user_input", callbacks=[handler])
-```
-
-→ [Integration docs](/docs/langchain)
+→ [Integration docs](/docs/integrations/langchain/tracing)
 
 ## ⚡️ Improved SDKs for Python and JS/TS [#SDKs]
 
@@ -88,15 +100,15 @@ Until now, token counts needed to be ingested when logging new LLM calls. For Op
 | `gpt*`    | `cl100k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |
 | `claude*` | `claude`      | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
 
-→ [Learn more](/docs/token-usage)
+→ [Learn more](/docs/model-usage-and-cost)
 
 ## 🌟 Human-in-the-loop Evaluation [#human-in-the-loop-evaluation]
 
 Scores in Langfuse are essential to monitor the quality of your LLM app. Until now, scores were created via the Web SDK based on user feedback (e.g. thumbs up/down, implicit user feedback) or via the API (e.g. when running model-based evals).
 
-Many of you wanted to manually score generations in the UI as you or your team browse production logs. We've added this to the Langfuse UI:
+Many of you wanted to annotate generations in the UI as you or your team browse production logs. We've added this to the Langfuse UI:
 
-<Frame>![Add manual score in UI](/images/docs/score-manual.gif)</Frame>
+<Frame>![Annotate via the langfuse UI](/images/docs/score-manual.gif)</Frame>
 
 → [Learn more](/docs/scores)
 
@@ -108,7 +120,7 @@ More user-based analytics and features are coming soon, e.g. APIs to use this da
 
 <Frame>![User reporting](/images/blog/update-july-2023/users.gif)</Frame>
 
-→ [Learn more](/docs/user-explorer)
+→ [Learn more](/docs/tracing-features/users)
 
 ## 📈 Analytics (alpha) [#analytics]
 

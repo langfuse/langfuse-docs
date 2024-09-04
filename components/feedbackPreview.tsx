@@ -1,8 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import {
@@ -20,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Loader2, ThumbsDown, ThumbsUp } from "lucide-react";
 
 type Feedback = {
   timestamp: Date;
@@ -92,16 +91,16 @@ export default function FeedbackPreview() {
       <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
         Application
       </div>
-      <div className="flex flex-col p-3 ring-1 ring-gray-400 rounded-lg">
+      <div className="flex flex-col p-3 ring-1 ring-gray-400 rounded">
         <div className="font-bold text-xs dark:text-primary/80 mb-2">User</div>
-        <div className="p-3 ring-1 ring-gray-400 rounded-lg">
+        <div className="p-3 ring-1 ring-gray-400 rounded">
           What is the simplest way to make user feedback in my LLM application
           actionable?
         </div>
         <div className="font-bold text-xs dark:text-primary/80 mb-2 mt-5">
           Assistant
         </div>
-        <div className="p-3 ring-1 ring-gray-400 rounded-lg">
+        <div className="p-3 ring-1 ring-gray-400 rounded">
           As a helpful assistant I cannot help you with this question
         </div>
         <div className="flex gap-3 mt-3">
@@ -115,9 +114,9 @@ export default function FeedbackPreview() {
             onClick={() => handleFeedback("positive")}
           >
             {state === "loading-positive" ? (
-              <AiOutlineLoading3Quarters className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <FaThumbsUp />
+              <ThumbsUp size={16} />
             )}
           </Button>
           <Button
@@ -127,9 +126,9 @@ export default function FeedbackPreview() {
             onClick={() => handleFeedback("negative")}
           >
             {state === "loading-negative" ? (
-              <AiOutlineLoading3Quarters className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <FaThumbsDown />
+              <ThumbsDown size={16} />
             )}
           </Button>
         </div>
@@ -153,7 +152,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="ring-1 ring-gray-400 rounded-lg">
+    <div className="ring-1 ring-gray-400 rounded">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

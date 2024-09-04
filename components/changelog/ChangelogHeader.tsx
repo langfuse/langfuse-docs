@@ -4,6 +4,7 @@ import { Page } from "nextra";
 import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { Author } from "../Authors";
+import { CloudflareVideo, Video } from "../Video";
 
 export const ChangelogHeader = () => {
   const router = useRouter();
@@ -12,7 +13,18 @@ export const ChangelogHeader = () => {
     (page) => page.route === router.pathname
   ) as Page & { frontMatter: any };
 
-  const { title, description, ogImage, gif, date, author } = page.frontMatter;
+  const {
+    title,
+    description,
+    ogImage,
+    ogCloudflareVideo,
+    ogVideo,
+    gif,
+    date,
+    author,
+    showOgInHeader,
+    badge,
+  } = page.frontMatter;
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">
@@ -33,22 +45,33 @@ export const ChangelogHeader = () => {
             day: "numeric",
             timeZone: "UTC",
           })}
+          {!!badge && ` | ${badge}`}
         </div>
         <div className="flex flex-col gap-5 md:gap-10 md:flex-row justify-between md:items-center">
           <div>
-            <h1 className="text-3xl md:text-4xl text-pretty">{title}</h1>
+            <h1 className="text-2xl md:text-3xl text-pretty font-mono">
+              {title}
+            </h1>
           </div>
           <Author author={author} />
         </div>
       </div>
 
-      {ogImage ? (
+      {showOgInHeader === false ? null : ogCloudflareVideo ? (
+        <CloudflareVideo
+          videoId={ogCloudflareVideo}
+          aspectRatio={16 / 9}
+          gifStyle
+        />
+      ) : ogVideo ? (
+        <Video src={ogVideo} gifStyle />
+      ) : ogImage ? (
         <Image
           src={gif ?? ogImage}
           alt={title}
           width={1200}
           height={630}
-          className="rounded-lg"
+          className="rounded border"
           unoptimized={
             page.frontMatter.gif !== undefined ||
             page.frontMatter.ogImage?.endsWith(".gif")

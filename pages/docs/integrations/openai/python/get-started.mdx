@@ -1,0 +1,516 @@
+---
+title: OSS Observability for OpenAI SDK (Python)
+description: Drop-in replacement of OpenAI SDK (Python) to get full observability in Langfuse by changing only the import.
+---
+
+# Observability for OpenAI SDK (Python)
+
+<Callout type="info">
+  Looking for the JS/TS version? [Check it out
+  here](/docs/integrations/openai/js/get-started).
+</Callout>
+
+If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import. This works with OpenAI and Azure OpenAI.
+
+```diff
+- import openai
++ from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
+```
+
+Langfuse automatically tracks:
+
+- All prompts/completions with support for streaming, async and functions
+- Latencies
+- API Errors ([example](/docs/integrations/openai/track-errors))
+- Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
+
+_In the Langfuse Console_
+
+<CloudflareVideo
+  videoId="53740b20a378b166552ff1941ed38e4c"
+  aspectRatio={16 / 9.8}
+  gifStyle
+/>
+
+## How it works
+
+<Steps>
+
+### Install Langfuse SDK
+
+The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
+
+```sh
+pip install langfuse openai
+```
+
+### Switch to Langfuse Wrapped OpenAI SDK
+
+<Tabs items={["Environment variables", "Attributes"]}>
+
+<Tab>
+
+Add Langfuse credentials to your environment variables
+
+import EnvPython from "@/components-mdx/env-python.mdx";
+
+<EnvPython />
+
+Change import
+
+```diff
+- import openai
++ from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
+```
+
+</Tab>
+<Tab>
+
+Change import
+
+```diff
+- import openai
++ from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
+```
+
+Add Langfuse credentials to your code
+
+```python
+openai.langfuse_public_key"pk-lf-..."
+openai.langfuse_secret_key="sk-lf-..."
+openai.langfuse_enabled=True # Default is True, set to False to disable Langfuse
+openai.langfuse_host="https://cloud.langfuse.com" # 🇪🇺 EU region
+# openai.langfuse_host="https://us.cloud.langfuse.com" # 🇺🇸 US region
+```
+
+</Tab>
+
+</Tabs>
+
+Optional, checks the SDK connection with the server. Not recommended for production usage.
+
+```python
+openai.langfuse_auth_check()
+```
+
+### Use OpenAI SDK as usual
+
+_No changes required._
+
+Check out the notebook for end-to-end examples of the integration:
+
+import { FileCode } from "lucide-react";
+
+<Cards>
+  <Card
+    title="Example notebook"
+    href="/docs/integrations/openai/python/examples"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Error tracking example"
+    href="/docs/integrations/openai/python/track-errors"
+    icon={<FileCode />}
+  />
+</Cards>
+
+</Steps>
+
+## Troubleshooting
+
+### Queuing and batching of events
+
+The Langfuse SDKs queue and batches events in the background to reduce the number of network requests and improve overall performance. In a long-running application, this works without any additional configuration.
+
+If you are running a short-lived application, you need to flush Langfuse to ensure that all events are flushed before the application exits.
+
+```python
+openai.flush_langfuse()
+```
+
+Learn more about queuing and batching of events [here](/docs/tracing).
+
+### Assistants API
+
+Tracing of the assistants api is not supported by this integration as OpenAI Assistants have server-side state that cannot easily be captured without additional api requests. We added some more information on how to best track usage of the assistants api in this [FAQ](/faq/all/openai-assistant-api).
+
+### Debug mode
+
+If you are having issues with the integration, you can enable debug mode to get more information about the requests and responses.
+
+```python
+openai.langfuse_debug=True
+```
+
+### Streaming function / tool calls
+
+The capture of input and output when streaming function / tool calls is currently not supported. Please upvote this feature request in the [GitHub discussion](https://github.com/orgs/langfuse/discussions/2055) if you would like to see this supported going forward.
+
+## Advanced usage
+
+### Custom trace properties
+
+You can add the following properties to the openai method, e.g. `openai.chat.completions.create()`, to use additional Langfuse features:
+
+| Property                | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `name`                  | Set `name` to identify a specific type of generation.                        |
+| `metadata`              | Set `metadata` with additional information that you want to see in Langfuse. |
+| `session_id`            | The current [session](/docs/tracing-features/sessions).                      |
+| `user_id`               | The current [user_id](/docs/tracing-features/users).                         |
+| `tags`                  | Set [tags](/docs/tracing-features/tags) to categorize and filter traces.     |
+| `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
+| `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
+| `sample_rate`           | [Sample rate](/docs/tracing-features/sampling) for tracing.                  |
+
+Example:
+
+```python {6-7}
+openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 1 = "}],
+    name="test-chat",
+    metadata={"someMetadataKey": "someValue"},
+)
+```
+
+### Use Traces
+
+[Langfuse Tracing](/docs/tracing) groups multiple observations (can be any LLM or non-LLM call) into a single trace. This integration by default creates a single trace for each openai call.
+
+- Add non-OpenAI related observations to the trace.
+- Group multiple OpenAI calls into a single trace while customizing the trace.
+- Have more control over the trace structure.
+- Use all Langfuse Tracing features.
+
+<Callout type="info">
+  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing) to the
+  basic concepts.
+</Callout>
+
+You can use any of the following three options:
+
+1. [Python `@observe()` decorator](/docs/sdk/python/decorators)
+2. Set `trace_id` property, best if you have an existing id from your application.
+3. Use the [low-level SDK](/docs/sdk/python/low-level-sdk) to create traces manually and add OpenAI calls to it.
+
+<Tabs items={["Python Decorator", "Set trace_id", "Low-level SDK"]}>
+<Tab>
+
+<Tabs items={["Trace", "Trace and nested spans"]}>
+<Tab>
+
+Desired trace structure:
+
+```
+TRACE: capital_poem_generator(input="Bulgaria")
+|
+|-- GENERATION: get-capital
+|
+|-- GENERATION: generate-poem
+```
+
+Implementation:
+
+```python /@observe()/
+from langfuse.decorators import observe
+from langfuse.openai import openai
+
+@observe()
+def capital_poem_generator(country)
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+  ).choices[0].message.content
+  return poem
+
+capital_poem_generator("Bulgaria")
+```
+
+</Tab>
+<Tab>
+Desired trace structure:
+
+```
+TRACE: poems(input=["Bulgaria", "France"])
+|
+|-- SPAN: capital_poem_generator(input="Bulgaria")
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+|
+|-- SPAN: capital_poem_generator(input="France")
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+```
+
+Implementation
+
+```python /@observe()/
+from langfuse.openai import openai
+
+@observe()
+def capital_poem_generator(country)
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+  ).choices[0].message.content
+  return poem
+
+@observe()
+def poems(countries):
+    for country in countries:
+        capital_poem_generator(country)
+
+poems(["Bulgaria", "France"])
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
+
+Usually, this integration creates a single trace in Langfuse for each openai call. If you want to group multiple openai calls into a single trace, you can use the `trace_id` property. This can be either a random id or an existing id from your application that will be unique to this execution.
+
+```python {3,14,23}
+from langfuse.openai import openai
+from uuid import uuid4
+trace_id = str(uuid4())
+
+country = "Bulgaria"
+
+capital = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "What is the capital of the country?"},
+      {"role": "user", "content": country}],
+  temperature=0,
+  name="get-capital",
+  trace_id=trace_id
+).choices[0].message.content
+
+poem = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about this city."},
+      {"role": "user", "content": capital}],
+  name="generate-poem",
+  trace_id=trace_id
+).choices[0].message.content
+```
+
+Now both generations are grouped in the same trace with the `trace_id` assigned by you.
+
+```
+TRACE (id: trace_id)
+|
+|-- GENERATION: get-capital
+|
+|-- GENERATION: generate-poem
+```
+
+If you want more control over the trace structure, use the Decorator or Low-level SDK.
+
+</Tab>
+<Tab>
+
+<Tabs items={["Trace", "Trace and nested spans"]}>
+<Tab>
+
+Desired trace structure:
+
+```
+TRACE: capital-poem-generator
+|
+|-- GENERATION: get-capital
+|
+|-- GENERATION: generate-poem
+```
+
+Implementation:
+
+```python {5,8,20,29}
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# initialize SDK
+langfuse = Langfuse()
+
+# create trace and add params
+trace = langfuse.trace(name="capital-poem-generator")
+
+# create multiple completions, pass trace_id to each
+
+country = "Bulgaria"
+
+capital = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "What is the capital of the country?"},
+      {"role": "user", "content": country}],
+  name="get-capital",
+  trace_id=trace.id
+).choices[0].message.content
+
+poem = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a poet. Create a poem about this city."},
+      {"role": "user", "content": capital}],
+  name="generate-poem",
+  trace_id=trace.id
+).choices[0].message.content
+```
+
+</Tab>
+<Tab>
+Desired trace structure:
+
+```
+TRACE: capital-poem-generator
+|
+|-- SPAN: Bulgaria
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+|
+|-- SPAN: France
+|   |
+|   |-- GENERATION: get-capital
+|   |
+|   |-- GENERATION: generate-poem
+```
+
+Implementation
+
+```python showLineNumbers {5,8,12,20-21,30-31,35}
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# initialize SDK
+langfuse = Langfuse()
+
+# create trace and add params
+trace = langfuse.trace(name="capital-poem-generator")
+
+for country in ["Bulgaria", "France"]:
+  # create span
+  span = trace.span(name=country)
+
+  capital = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "What is the capital of the country?"},
+        {"role": "user", "content": country}],
+    name="get-capital",
+    trace_id=trace.id,
+    parent_observation_id=span.id,
+  ).choices[0].message.content
+
+  poem = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poet. Create a poem about this city."},
+        {"role": "user", "content": capital}],
+    name="generate-poem",
+    trace_id=trace.id,
+    parent_observation_id=span.id,
+  ).choices[0].message.content
+
+  # End span to get span-level latencies
+  span.end()
+```
+
+_Note that you need to provide `trace_id` and `parent_observation_id` to each generation._
+
+</Tab>
+</Tabs>
+
+</Tab>
+</Tabs>
+
+### OpenAI Beta APIs
+
+Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
+
+#### Structured Output
+
+For **structured output parsing**, please use the `response_format` argument to `openai.chat.completions.create()` instead of the Beta API. This will allow you to set Langfuse attributes and metadata.
+
+If you rely on parsing Pydantic defintions for your `response_format`, you may leverage the `type_to_response_format_param` utility function from the OpenAI Python SDK to convert the Pydantic definition to a `response_format` dictionary. This is the same function the OpenAI Beta API uses to convert Pydantic definitions to `response_format` dictionaries.
+
+```python
+from langfuse.openai import openai
+from openai.lib._parsing._completions import type_to_response_format_param
+from pydantic import BaseModel
+
+class CalendarEvent(BaseModel):
+  name: str
+  date: str
+  participants: list[str]
+
+
+completion = openai.chat.completions.create(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "system", "content": "Extract the event information."},
+        {
+            "role": "user",
+            "content": "Alice and Bob are going to a science fair on Friday.",
+        },
+    ],
+    response_format=type_to_response_format_param(CalendarEvent),
+)
+
+print(completion)
+
+openai.flush_langfuse()
+```
+
+#### Assistants API
+
+Tracing of the assistants api is not supported by this integration as OpenAI Assistants have server-side state that cannot easily be captured without additional api requests. Check out this [notebook](/docs/integrations/openai/python/assistants-api) for an end-to-end example on how to best track usage of the assistants api in Langfuse.
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["integration-openai"]} />

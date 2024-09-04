@@ -1,0 +1,144 @@
+---
+description: Conveniently fetch your LLM Observability traces for few-shotting, fine-tuning or further analysis.
+---
+
+# Query Traces
+
+Langfuse is [open-source](/docs/open-source) and data tracked with Langfuse is open. You can query/export data via: [SDKs](#sdks), [API](#api), and [Langfuse UI](#ui).
+
+Common use cases:
+
+- Train or [fine-tune](/docs/fine-tuning) models on the production traces in Langfuse. E.g. to create a small model after having used a large model in production for a specific use case.
+- Collect few-shot examples to improve quality of output.
+- Programmatically create [datasets](/docs/datasets).
+
+Want to learn more about the Langfuse data model? Check out our [introduction to tracing in Langfuse](/docs/tracing).
+
+## SDKs [#sdks]
+
+Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse(
+  secret_key="sk-lf-...",
+  public_key="pk-lf-...",
+  host="https://cloud.langfuse.com"  # 🇪🇺 EU region
+  # host="https://us.cloud.langfuse.com" # 🇺🇸 US region
+)
+
+# Fetch list of traces, supports filters and pagination
+traces = langfuse.fetch_traces()
+
+# Fetch a single trace by ID
+trace = langfuse.fetch_trace("traceId")
+
+# Fetch list of observations, supports filters and pagination
+observations = langfuse.fetch_observations()
+
+# Fetch a single observation by ID
+observation = langfuse.fetch_observation("observationId")
+
+# Fetch list of sessions
+sessions = langfuse.fetch_sessions()
+```
+
+Python SDK reference including all available filters:
+
+- [`fetch_traces()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_traces)
+- [`fetch_trace()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_trace)
+- [`fetch_observations()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_observations)
+- [`fetch_observation()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_observation)
+- [`fetch_sessions()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_sessions)
+
+</Tab>
+<Tab>
+
+```bash
+npm install langfuse
+```
+
+```typescript
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+});
+
+// Fetch list of traces, supports filters and pagination
+const traces = await langfuse.fetchTraces();
+
+// Fetch a single trace by ID
+const trace = await langfuse.fetchTrace("traceId");
+
+// Fetch list of observations, supports filters and pagination
+const observations = await langfuse.fetchObservations();
+
+// Fetch a single observation by ID
+const observation = await langfuse.fetchObservation("observationId");
+
+// Fetch list of sessions
+const sessions = await langfuse.fetchSessions();
+```
+
+JS/TS SDK reference including all available filters:
+
+- [`fetchTraces()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchTraces)
+- [`fetchTrace()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchTrace)
+- [`fetchObservations()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchObservations)
+- [`fetchObservation()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchObservation)
+- [`fetchSessions()`](https://js.reference.langfuse.com/classes/langfuse.Langfuse.html#fetchSessions)
+
+</Tab>
+</Tabs>
+
+## API [#api]
+
+All data in Langfuse is available via the API. Refer to the [API reference](https://api.reference.langfuse.com/) for more information.
+
+Example routes:
+
+```bash
+GET /api/public/traces
+GET /api/public/traces/:traceId
+
+GET /api/public/observations
+GET /api/public/observations/:observationId
+
+GET /api/public/sessions
+
+GET /api/public/scores
+GET /api/public/scores/:scoreId
+```
+
+## Export via UI [#ui]
+
+<Callout type="info">
+  This is currently only available for the `generations` table in the UI. We're
+  working on adding more export options for other objects.
+</Callout>
+
+All filters applied to the table will be applied to the export.
+
+Available export formats:
+
+- CSV
+- JSON
+
+<Frame>
+  ![Download generations in Langfuse
+  UI](https://static.langfuse.com/changelog-2023-09-18-export-generations.gif)
+</Frame>
+
+## Trouble exporting?
+
+If you're having trouble exporting data, please [let us know](#contact) and we'll help you out.

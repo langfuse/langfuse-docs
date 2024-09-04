@@ -19,6 +19,34 @@ export const allAuthors = {
     image: "/images/people/clemensrawert.jpg",
     twitter: "rawert",
   },
+  hassiebpakzad: {
+    firstName: "Hassieb",
+    name: "Hassieb Pakzad",
+    image: "/images/people/hassiebpakzad.jpg",
+    twitter: "hassiebpakzad",
+  },
+  richardkruemmel: {
+    firstName: "Richard",
+    name: "Richard Krümmel",
+    image: "/images/people/richardkruemmel.jpg",
+    twitter: "RichardKrue",
+  },
+  marliesmayerhofer: {
+    firstName: "Marlies",
+    name: "Marlies Mayerhofer",
+    image: "/images/people/marliesmayerhofer.jpg",
+    twitter: "marliessophie",
+  },
+  lydiayou: {
+    firstName: "Lydia",
+    name: "Lydia You",
+    image: "/images/people/lydiayou.jpg",
+  },
+  jannikmaierhoefer: {
+    firstName: "Jannik",
+    name: "Jannik Maierhöfer",
+    image: "/images/people/jannikmaierhoefer.jpg",
+  },
 } as const;
 
 export const Authors = (props: { authors: (keyof typeof allAuthors)[] }) => {
@@ -28,7 +56,7 @@ export const Authors = (props: { authors: (keyof typeof allAuthors)[] }) => {
   return (
     <div className="flex flex-wrap gap-5 sm:gap-10 justify-center py-7">
       {authors.map((author) => (
-        <Author author={author} />
+        <Author author={author} key={author} />
       ))}
     </div>
   );
@@ -45,10 +73,10 @@ export const Author = (props: { author: string }) => {
 
   return (
     <a
-      href={`https://twitter.com/${author.twitter}`}
+      href={author.twitter ? `https://twitter.com/${author.twitter}` : "#"}
       className="group shrink-0"
       target="_blank"
-      key={author.twitter}
+      key={props.author}
       rel="noopener noreferrer"
     >
       <div className="flex items-center gap-4" key={author.name}>

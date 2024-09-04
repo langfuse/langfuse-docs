@@ -1,21 +1,36 @@
 import ShimmerButton from "../magicui/shimmer-button";
-import { BsGithub } from "react-icons/bs";
 import Link from "next/link";
 import Changelog from "./Changelog";
 import { StarCount } from "../GitHubBadge";
+import { HomeSection } from "./components/HomeSection";
+import { Header } from "../Header";
+import IconGithub from "../icons/github";
 
-export const OpenSource = () => {
+export default function OpenSource() {
   return (
-    <section className="my-36 flex flex-col items-center gap-2">
-      <h2 className="text-center">Proudly Open Source</h2>
-      <p className="text-center text-lg text-primary/70">
-        We are committed to open source and Langfuse is easy to run locally and
-        self-hosted.
-      </p>
+    <HomeSection className="flex flex-col items-center">
+      <Header
+        title="Proudly Open Source"
+        description={
+          <span>
+            Langfuse is committed to open source. You can also run it{" "}
+            <Link href="/docs/deployment/local" className="underline">
+              locally
+            </Link>{" "}
+            or{" "}
+            <Link href="/docs/deployment/self-host" className="underline">
+              self-hosted
+            </Link>
+            .
+          </span>
+        }
+        className="mb-0"
+      />
+
       <Link href="https://github.com/langfuse/langfuse">
-        <ShimmerButton borderRadius="8px" className="mt-11">
+        <ShimmerButton borderRadius="0.25rem" className="mt-11">
           <div className="flex gap-4 items-center whitespace-pre-wrap bg-gradient-to-b from-white from-30% to-gray-300/70 bg-clip-text text-center text-md font-semibold leading-none tracking-tight text-transparent">
-            <BsGithub size={28} className="text-white" />
+            <IconGithub className="text-white h-9 w-9" />
             <span>langfuse/langfuse:</span>
             <StarCount />
             <span>⭐️</span>
@@ -23,6 +38,6 @@ export const OpenSource = () => {
         </ShimmerButton>
       </Link>
       <Changelog className="mt-14" />
-    </section>
+    </HomeSection>
   );
-};
+}

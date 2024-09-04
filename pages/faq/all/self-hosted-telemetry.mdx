@@ -1,0 +1,23 @@
+---
+title: What kind of telemetry does Langfuse collect?
+tags: [self-hosting]
+---
+
+# What kind of telemetry does Langfuse collect?
+
+By default, Langfuse automatically reports basic usage statistics of self-hosted instances to a centralized server (PostHog).
+
+## Why do we collect telemetry?
+
+This helps us to:
+
+1. Understand how Langfuse is used and improve the most relevant features.
+2. Track overall usage for internal and external (e.g. fundraising) reporting.
+
+## What data is collected?
+
+Only aggregated usage statistics are collected (e.g. number of ingested traces). None of the data is shared with third parties and it does not include any sensitive information. We want to be super transparent about this and you can find the exact data we collect [here](https://github.com/langfuse/langfuse/blob/main/web/src/features/telemetry/index.ts).
+
+## How can I opt-out?
+
+You can opt-out by setting `TELEMETRY_ENABLED=false`. This will disable all telemetry reporting to centralized servers.
