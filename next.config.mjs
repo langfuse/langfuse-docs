@@ -217,6 +217,7 @@ const nonPermanentRedirects = [
   ["/guides/videos/2-min", "/guides/videos/introducing-langfuse-2.0"],
   ["/tos", "/terms"],
   ["/docs/export-and-fine-tuning", "/docs/query-traces"],
+  ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
