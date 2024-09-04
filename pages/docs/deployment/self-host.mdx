@@ -99,8 +99,8 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 | `S3_ENDPOINT`<br/>`S3_ACCESS_KEY_ID`<br/>`S3_SECRET_ACCESS_KEY`<br/>`S3_BUCKET_NAME`<br/>`S3_REGION` |                    | Optional S3 configuration to enable large exports from the UI.                                                                                                                                                                                                                                                                                                                                        |
 | `DB_EXPORT_PAGE_SIZE`                                                                                | `1000`             | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                               |
 | `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED`                                                          | `false`            | Set to `true` to disable automatic database migrations on docker startup.                                                                                                                                                                                                                                                                                                                             |
-| `LANGFUSE_LOG_LEVEL`                                                                                 | `info`             | Set the log level for the application. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`. |
-| `LANGFUSE_LOG_FORMAT`                                                                                | `text`             | Set the log format for the application. Possible values are `text`, `json`. |
+| `LANGFUSE_LOG_LEVEL`                                                                                 | `info`             | Set the log level for the application. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                                                                                                                                                                                                                                                                                        |
+| `LANGFUSE_LOG_FORMAT`                                                                                | `text`             | Set the log format for the application. Possible values are `text`, `json`.                                                                                                                                                                                                                                                                                                                           |
 
 ### Authentication
 
@@ -146,7 +146,7 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 
 ### Configuring the Enterprise Edition [#ee]
 
-The Enterprise Edition of Langfuse include additional optional configuration options that can be set via environment variables.
+The Enterprise Edition ([compare versions](/docs/deployment/feature-overview)) of Langfuse includes additional optional configuration options that can be set via environment variables.
 
 | Variable                                 | Description                                                                                                                                                                |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -180,6 +180,30 @@ The potential responses from the readiness check endpoint are:
 - `500 Internal Server Error`: The application received a SIGTERM or SIGINT and should not receive traffic.
 
 Applications and monitoring services can call this endpoint periodically for health updates.
+
+### HTTPS
+
+For encryption in transit, HTTPS is strongly recommended. Langfuse itself does not handle HTTPS directly. Instead, HTTPS is typically managed at the infrastructure level. There are two main approaches to handle HTTPS for Langfuse:
+
+1. Load Balancer Termination:
+   In this approach, HTTPS is terminated at the load balancer level. The load balancer handles the SSL/TLS certificates and encryption, then forwards the decrypted traffic to the Langfuse container over HTTP. This is a common and straightforward method, especially in cloud environments.
+
+   - Pros: Simplifies certificate management as it is usually a fully managed service (e.g. AWS ALB), offloads encryption overhead from application servers.
+   - Cons: Traffic between load balancer and Langfuse container is unencrypted (though typically within a secure network).
+
+2. Service Mesh Sidecar:
+   This method involves using a service mesh like Istio or Linkerd. A sidecar proxy is deployed alongside each Langfuse container, handling all network traffic including HTTPS.
+
+   - Pros: Provides end-to-end encryption (mutual TLS), offers advanced traffic management and observability.
+   - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
+
+Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
+
+### Provisioning of default Langfuse organization and project
+
+By default, Langfuse will create a default organization and project when the application is started. This is useful for getting started quickly.
+
+You can disable the creation of the default organization and project by setting `LANGFUSE_DISABLE_DEFAULT_ORGANIZATION` and `LANGFUSE_DISABLE_DEFAULT_PROJECT` to `true`.
 
 ### Troubleshooting
 
@@ -261,24 +285,6 @@ Optionally, you can apply the new model definitions to existing data using the f
 Kubernetes is a popular choice for deploying Langfuse when teams maintain the rest of their infrastructure using Kubernetes. You can find community-maintained templates and Helm Charts in the [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s) repository.
 
 If you encounter any bugs or have suggestions for improvements, please contribute to the repository by submitting issues or pull requests.
-
-## HTTPS
-
-For encryption in transit, HTTPS is strongly recommended. Langfuse itself does not handle HTTPS directly. Instead, HTTPS is typically managed at the infrastructure level. There are two main approaches to handle HTTPS for Langfuse:
-
-1. Load Balancer Termination:
-   In this approach, HTTPS is terminated at the load balancer level. The load balancer handles the SSL/TLS certificates and encryption, then forwards the decrypted traffic to the Langfuse container over HTTP. This is a common and straightforward method, especially in cloud environments.
-
-   - Pros: Simplifies certificate management as it is usually a fully managed service (e.g. AWS ALB), offloads encryption overhead from application servers.
-   - Cons: Traffic between load balancer and Langfuse container is unencrypted (though typically within a secure network).
-
-2. Service Mesh Sidecar:
-   This method involves using a service mesh like Istio or Linkerd. A sidecar proxy is deployed alongside each Langfuse container, handling all network traffic including HTTPS.
-
-   - Pros: Provides end-to-end encryption (mutual TLS), offers advanced traffic management and observability.
-   - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
-
-Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
 
 ## Platform-specific information
 
