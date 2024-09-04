@@ -144,6 +144,33 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 | `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet. |
 | `AUTH_SESSION_MAX_AGE`              | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.     |
 
+### Headless Initialization [#initialization]
+
+By default, you need to create a user account, organization and project via the Langfuse UI before being able to use the API. You can find the API keys in the project settings within the UI.
+
+If you want to automatically initialize these resources, you can optionally use the following `LANGFUSE_INIT_*` environment variables. When these variables are set, Langfuse will automatically create the specified resources on startup if they don't already exist. This allows for easy integration with infrastructure-as-code and automated deployment pipelines.
+
+| Environment Variable               | Description                            | Required to Create Resource | Example            |
+| ---------------------------------- | -------------------------------------- | --------------------------- | ------------------ |
+| `LANGFUSE_INIT_ORG_ID`             | Unique identifier for the organization | Yes                         | `my-org`           |
+| `LANGFUSE_INIT_ORG_NAME`           | Name of the organization               | No                          | `My Org`           |
+| `LANGFUSE_INIT_PROJECT_ID`         | Unique identifier for the project      | Yes                         | `my-project`       |
+| `LANGFUSE_INIT_PROJECT_NAME`       | Name of the project                    | No                          | `My Project`       |
+| `LANGFUSE_INIT_PROJECT_PUBLIC_KEY` | Public API key for the project         | Yes                         | `lf_pk_1234567890` |
+| `LANGFUSE_INIT_PROJECT_SECRET_KEY` | Secret API key for the project         | Yes                         | `lf_sk_1234567890` |
+| `LANGFUSE_INIT_USER_EMAIL`         | Email address of the initial user      | Yes                         | `user@example.com` |
+| `LANGFUSE_INIT_USER_NAME`          | Name of the initial user               | No                          | `John Doe`         |
+| `LANGFUSE_INIT_USER_PASSWORD`      | Password for the initial user          | Yes                         | `password123`      |
+
+The different resources depend on each other in the following way. You can e.g. intialize an organization and a user wihtout having to also initialize a project and API keys, but you cannot initialize a project without also initializing an organization.
+
+```
+Organization
+├── Project      (part of organization)
+│   └── API Keys (set for project)
+└── User         (owner of organization)
+```
+
 ### Configuring the Enterprise Edition [#ee]
 
 The Enterprise Edition ([compare versions](/docs/deployment/feature-overview)) of Langfuse includes additional optional configuration options that can be set via environment variables.
