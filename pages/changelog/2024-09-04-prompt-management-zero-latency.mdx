@@ -49,6 +49,12 @@ Previously, if the cached version was stale, the SDK would wait for the latest v
 
 On first use, Langfuse prompt management still adds a small delay while the prompt is initially fetched from Langfuse. For most applications, this delay is negligible and does not need to be optimized. To ensure zero latency from the very first use, you can pre-fetch prompts on application startup. See [prompt management docs](/docs/prompts) for implementation details.
 
+## Customizing Cache Behavior
+
+You can customize the cache behavior by passing in a `cacheTtlSeconds` parameter to the `get_prompt` or `getPrompt` function. This allows you to control the freshness of the cached prompt and reduce unnecessary network requests.
+
+You can also disable caching by setting the `cacheTtlSeconds` to `0`. This will ensure that the prompt is fetched from the Langfuse API on every call. This is recommended for non-production use cases where you want to ensure that the prompt is always up to date with the latest version in Langfuse.
+
 ## Learn More
 
 import { Book } from "lucide-react";
