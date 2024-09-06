@@ -106,7 +106,11 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 
 #### Email/Password [#auth-email-password]
 
-Email/password authentication is enabled by default. Users can sign up and log in using their email and password. To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`.
+Email/password authentication is enabled by default. Users can sign up and log in using their email and password.
+
+To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. In this case, you need to set up [SSO](#sso) instead.
+
+If you want to provision a default user for your Langfuse instance, you can use the [`LANGFUSE_INIT_*`](#initialization) environment variables.
 
 **Password Reset**
 
