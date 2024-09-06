@@ -117,14 +117,16 @@ export const Usage = () => (
             ))}
           </div>
         </div>
-        <div className="inline-flex gap-10 py-2 px-4 mx-auto">
+        <div className="flex flex-row justify-around sm:justify-center sm:gap-10">
           {stats.map((item) => (
             <div key={item.name} className="text-center">
-              <p className="text-2xl font-bold text-primary/80 font-mono">
+              <p className="text-xl sm:text-2xl font-bold text-primary/80 font-mono">
                 <NumberTicker value={item.value} />
-                <span className="ml-1">{"+"}</span>
+                <span className="ml-1 hidden sm:inline">{"+"}</span>
               </p>
-              <p className="mt-2 text-sm text-primary/70">{item.name}</p>
+              <p className="mt-2 text-xs sm:text-sm text-primary/70">
+                {item.name}
+              </p>
             </div>
           ))}
         </div>
