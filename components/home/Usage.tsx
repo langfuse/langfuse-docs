@@ -1,4 +1,5 @@
 import Image, { type StaticImageData } from "next/image";
+import { HomeSection } from "./components/HomeSection";
 import pigmentLight from "./img/pigment_light.svg";
 import pigmentDark from "./img/pigment_dark.svg";
 import circlebackLight from "./img/circleback_light.png";
@@ -15,7 +16,8 @@ import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
 import khanacademyDark from "./img/khanacademy_dark.png";
-import { HomeSection } from "./components/HomeSection";
+import Link from "next/link";
+import NumberTicker from "@/components/ui/number-ticker";
 
 type User = {
   name: string;
@@ -76,14 +78,20 @@ const users: User[] = [
   },
 ];
 
-export const UsersStatic = () => (
+const stats = [
+  { name: "SDK installs / month", value: 2000000 },
+  { name: "GitHub stars", value: 5000 },
+  { name: "Docker pulls", value: 500000 },
+];
+
+export const Usage = () => (
   <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
     <div className="py-14">
-      <div>
-        <h2 className="text-center text-lg font-semibold leading-8 mb-6">
-          Teams building complex LLM apps rely on Langfuse
-        </h2>
-        <div className="relative mt-6">
+      <h2 className="text-center text-lg font-semibold leading-8 mb-8">
+        Teams building complex LLM apps rely on Langfuse
+      </h2>
+      <div className="flex flex-col gap-8">
+        <div className="relative">
           <div className="flex flex-wrap xl:flex-nowrap justify-between">
             {users.map((user) => (
               <a
@@ -108,6 +116,17 @@ export const UsersStatic = () => (
               </a>
             ))}
           </div>
+        </div>
+        <div className="inline-flex gap-10 py-2 px-4 mx-auto">
+          {stats.map((item) => (
+            <div key={item.name} className="text-center">
+              <p className="text-2xl font-bold text-primary/80 font-mono">
+                <NumberTicker value={item.value} />
+                <span className="ml-1">{"+"}</span>
+              </p>
+              <p className="mt-2 text-sm text-primary/70">{item.name}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
