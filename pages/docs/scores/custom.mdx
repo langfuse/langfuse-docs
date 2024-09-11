@@ -30,12 +30,12 @@ Python SDK example
 
 ```python
 langfuse.score(
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
     name="correctness",
     value=0.9,
-    data_type="NUMERIC" # optional, inferred if not provided
+    data_type="NUMERIC", # optional, inferred if not provided
     comment="Factually correct", # optional
 )
 ```
