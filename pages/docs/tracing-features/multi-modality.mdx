@@ -4,24 +4,32 @@ description: Add multiple modalities to a single trace
 
 # Multi-Modality
 
-Langfuse supports rendering Multi-Modal traces, including both text and image formats. We follow OpenAI's format convention. 
+Langfuse supports rendering Multi-Modal traces, including both text and image formats. We follow OpenAI's format convention.
 
 ## How to trace Multi-Modal content in Langfuse?
 
-To utilize our Multi-Modal Trace support, your trace or observation `input`/`output` should include a list of messages comprising the conversation so far. Each message should contain a `role` (system, user, assistant) and `content`. To display multi-modal content, you can pass a combination of text and image URLs. We plan to extend support to base64 images, file attachments (e.g., PDFs), and audio soon. The `content` property of the messages follows the [OpenAI convention](/docs/tracing-features/multi-modality#content-format).
+To utilize our Multi-Modal Trace support, your trace or observation `input`/`output` should include a list of messages comprising the conversation so far. Each message should contain a `role` (system, user, assistant) and `content`. To display multi-modal content, you can pass a combination of text and image URLs. The `content` property of the messages follows the [OpenAI convention](/docs/tracing-features/multi-modality#content-format).
 
-### Visual Representation in Langfuse 
+<Callout type="info">
+  We plan to extend support to base64 images, file attachments (e.g., PDFs), and
+  audio soon. Please add your upvote and any thoughts to this
+  [thread](https://github.com/orgs/langfuse/discussions/3004).
+</Callout>
+
+### Visual Representation in Langfuse
+
+When the "Markdown" option is enabled in the Langfuse UI, you can click on the image icon to preview the image inline.
+
 <Frame border>
-
-![Trace in Langfuse UI](/images/docs/multi-modal-trace.png)
+  ![Trace in Langfuse UI](/images/docs/multi-modal-trace.png)
 </Frame>
 
 ### Content Format
 
-| Content             | Type   | Description                                                                 |
-|-------------------------|--------|-----------------------------------------------------------------------------|
-| Default: Text content            | string | The text contents of the message.                                           |
-| Multi-Modal: Array of content parts  | array  | An array of content parts with a defined type, each can be of type `text` or `image_url`. You can pass multiple images by adding multiple image_url content parts. |
+| Content                             | Type   | Description                                                                                                                                                        |
+| ----------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Default: Text content               | string | The text contents of the message.                                                                                                                                  |
+| Multi-Modal: Array of content parts | array  | An array of content parts with a defined type, each can be of type `text` or `image_url`. You can pass multiple images by adding multiple image_url content parts. |
 
 #### Content Examples
 
@@ -57,20 +65,24 @@ To utilize our Multi-Modal Trace support, your trace or observation `input`/`out
 
 ##### Content Part Types
 
-<Tabs items={["Text content part","Image content part"]}>
+<Tabs items={["Text content part", "Image content part"]}>
 <Tab>
-| Property | Type   | Description                      |
-|----------|--------|----------------------------------|
-| type     | `text` | Type of content part             |
-| text     | string | Text content of the message      |
+
+| Property | Type   | Description                 |
+| -------- | ------ | --------------------------- |
+| type     | `text` | Type of content part        |
+| text     | string | Text content of the message |
+
 </Tab>
 <Tab>
-| Property  | Type   | Description                      |
-|-----------|--------|----------------------------------|
-| type      | `image_url` | Type of content part             |
-| image_url | object | Object containing url and detail properties  |
-| image_url.url       | string | URL of the image                 |
-| image_url.detail    | string? | Optional: Detail level of image (low, high, auto) |
+
+| Property         | Type        | Description                                       |
+| ---------------- | ----------- | ------------------------------------------------- |
+| type             | `image_url` | Type of content part                              |
+| image_url        | object      | Object containing url and detail properties       |
+| image_url.url    | string      | URL of the image                                  |
+| image_url.detail | string?     | Optional: Detail level of image (low, high, auto) |
+
 </Tab>
 </Tabs>
 
