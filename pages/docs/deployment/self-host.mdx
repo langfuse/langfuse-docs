@@ -101,6 +101,7 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 | `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED`                                                          | `false`            | Set to `true` to disable automatic database migrations on docker startup.                                                                                                                                                                                                                                                                                                                             |
 | `LANGFUSE_LOG_LEVEL`                                                                                 | `info`             | Set the log level for the application. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                                                                                                                                                                                                                                                                                        |
 | `LANGFUSE_LOG_FORMAT`                                                                                | `text`             | Set the log format for the application. Possible values are `text`, `json`.                                                                                                                                                                                                                                                                                                                           |
+| `NEXT_PUBLIC_BASE_PATH`                                                                              |                    | Set the base path for the application. This is useful if you want to deploy Langfuse on a subpath, especially when integrating Langfuse into existing infrastructure. Refer to the [section](#custom-base-path) below for details.                                                                                                                                                                    |
 
 ### Authentication
 
@@ -229,6 +230,41 @@ For encryption in transit, HTTPS is strongly recommended. Langfuse itself does n
    - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
 
 Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
+
+### Build Langfuse from source [#build-from-source]
+
+While we recommend using the prebuilt docker image, you can also build the image yourself from source.
+
+The repo includes multiple `Dockerfile` files. You only need to build the `web` Dockerfile as shown below.
+
+```bash
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+git checkout production # main branch includes unreleased changes that might be unstable
+docker build -t langfuse/langfuse -f ./web/Dockerfile .
+```
+
+### Custom Base Path [#custom-base-path]
+
+If you want to deploy Langfuse behind a custom base path (e.g. `https://yourdomain.com/langfuse`), you can set the `NEXT_PUBLIC_BASE_PATH` environment variable. This is useful if you want to deploy Langfuse on a subpath, especially when integrating Langfuse into existing infrastructure.
+
+As this base path is inlined in static assets, you cannot use the prebuilt docker image. **You need to build the image from source** with the `NEXT_PUBLIC_BASE_PATH` environment variable set at build time.
+
+When using a custom base path, `NEXTAUTH_URL` must be set to the full URL including the base path and `/api/auth`. For example, if you are deploying Langfuse at `https://yourdomain.com/langfuse`, you need to set:
+
+```bash filename=".env"
+NEXT_PUBLIC_BASE_PATH="/langfuse-base-path"
+NEXTAUTH_URL="https://yourdomain.com/langfuse-base-path/api/auth"
+```
+
+Build image with `NEXT_PUBLIC_BASE_PATH` as build argument:
+
+```bash /NEXT_PUBLIC_BASE_PATH/
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+git checkout production # main branch includes unreleased changes that might be unstable
+docker build -t langfuse/langfuse --build-arg NEXT_PUBLIC_BASE_PATH=/langfuse-base-path -f ./web/Dockerfile .
+```
 
 ### Troubleshooting
 
