@@ -36,7 +36,7 @@ Performance benefits compared to other implementations:
 {
   "name": "movie-critic",
   "type": "text",
-  "prompt": "Do you like {{movie}}?",
+  "prompt": "As a {{criticLevel}} movie critic, do you like {{movie}}?",
   "config": {
     "model": "gpt-3.5-turbo",
     "temperature": 0.5,
@@ -84,7 +84,7 @@ If you already have a prompt with the same `name`, the prompt will be added as a
 langfuse.create_prompt(
     name="movie-critic",
     type="text",
-    prompt="Do you like {{movie}}?",
+    prompt="As a {{criticlevel}} movie critic, do you like {{movie}}?",
     labels=["production"],  # directly promote to production
     config={
         "model": "gpt-3.5-turbo",
@@ -97,7 +97,10 @@ langfuse.create_prompt(
 langfuse.create_prompt(
     name="movie-critic-chat",
     type="chat",
-    prompt=[{"role": "system", "content": "You are an expert on {{movie}}"}],
+    prompt=[
+      { role: "system", content: "You are an {{criticlevel}} movie critic" },
+      { role: "user", content: "Do you like {{movie}}?" },
+    ],
     labels=["production"],  # directly promote to production
     config={
         "model": "gpt-3.5-turbo",
@@ -118,7 +121,7 @@ If you already have a prompt with the same name, the prompt will be added as a n
 await langfuse.createPrompt({
   name: "movie-critic",
   type: "text",
-  prompt: "Do you like {{movie}}?",
+  prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
   labels: ["production"], // directly promote to production
   config: {
     model: "gpt-3.5-turbo",
@@ -131,7 +134,10 @@ await langfuse.createPrompt({
 await langfuse.createPrompt({
   name: "movie-critic-chat",
   type: "chat",
-  prompt: [{ role: "system", content: "You are an expert on {{movie}}" }],
+  prompt: [
+    { role: "system", content: "You are an {{criticlevel}} movie critic" },
+    { role: "user", content: "Do you like {{movie}}?" },
+  ],
   labels: ["production"], // directly promote to production
   config: {
     model: "gpt-3.5-turbo",
@@ -164,8 +170,8 @@ langfuse = Langfuse()
 prompt = langfuse.get_prompt("movie-critic")
 
 # Insert variables into prompt template
-compiled_prompt = prompt.compile(movie="Dune 2")
-# -> "Do you like Dune 2?"
+compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> "As an expert movie critic, do you like Dune 2?"
 ```
 
 Chat prompts
@@ -175,8 +181,8 @@ Chat prompts
 chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg infers the prompt type (default is 'text')
 
 # Insert variables into chat prompt template
-compiled_chat_prompt = chat_prompt.compile(movie="Dune 2")
-# -> [{"role": "system", "content": "You are an expert on Dune 2"}]
+compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
 
 Optional parameters
@@ -225,7 +231,11 @@ const langfuse = new Langfuse();
 const prompt = await langfuse.getPrompt("movie-critic");
 
 // Insert variables into prompt template
-const compiledPrompt = prompt.compile({ movie: "Dune 2" });
+const compiledPrompt = prompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+// -> "As an expert movie critic, do you like Dune 2?"
 ```
 
 Chat prompts
@@ -237,7 +247,11 @@ const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
 }); // type option infers the prompt type (default is 'text')
 
 // Insert variables into chat prompt template
-const compiledChatPrompt = chatPrompt.compile({ movie: "Dune 2" });
+const compiledChatPrompt = chatPrompt.compile({
+  criticlevel: "expert",
+  movie: "Dune 2",
+});
+// -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
 
 Optional parameters
@@ -572,7 +586,7 @@ fetch_prompts_on_startup()
 @app.route('/get-movie-prompt/<movie>', methods=['GET'])
 def get_movie_prompt(movie):
     prompt = langfuse.get_prompt("movie-critic")
-    compiled_prompt = prompt.compile(movie=movie)
+    compiled_prompt = prompt.compile(criticlevel="expert", movie=movie)
     return jsonify({"prompt": compiled_prompt})
 
 if __name__ == '__main__':
@@ -601,7 +615,7 @@ fetchPromptsOnStartup();
 app.get("/get-movie-prompt/:movie", async (req, res) => {
   const movie = req.params.movie;
   const prompt = await langfuse.getPrompt("movie-critic");
-  const compiledPrompt = prompt.compile({ movie });
+  const compiledPrompt = prompt.compile({ criticlevel: "expert", movie });
   res.json({ prompt: compiledPrompt });
 });
 
