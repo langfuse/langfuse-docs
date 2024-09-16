@@ -238,9 +238,15 @@ While we recommend using the prebuilt docker image, you can also build the image
 The repo includes multiple `Dockerfile` files. You only need to build the `web` Dockerfile as shown below.
 
 ```bash
+# clone repo
 git clone https://github.com/langfuse/langfuse.git
 cd langfuse
-git checkout production # main branch includes unreleased changes that might be unstable
+
+# checkout production branch
+# main branch includes unreleased changes that might be unstable
+git checkout production
+
+# build image
 docker build -t langfuse/langfuse -f ./web/Dockerfile .
 ```
 
@@ -260,9 +266,15 @@ NEXTAUTH_URL="https://yourdomain.com/langfuse-base-path/api/auth"
 Build image with `NEXT_PUBLIC_BASE_PATH` as build argument:
 
 ```bash /NEXT_PUBLIC_BASE_PATH/
+# clone repo
 git clone https://github.com/langfuse/langfuse.git
 cd langfuse
-git checkout production # main branch includes unreleased changes that might be unstable
+
+# use production branch
+# main branch includes unreleased changes that might be unstable
+git checkout production
+
+# build image with NEXT_PUBLIC_BASE_PATH
 docker build -t langfuse/langfuse --build-arg NEXT_PUBLIC_BASE_PATH=/langfuse-base-path -f ./web/Dockerfile .
 ```
 
