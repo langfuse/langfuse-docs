@@ -523,52 +523,85 @@ const res = await observeOpenAI(new OpenAI(), {
 
 <Tab>
 
-```python /metadata={"langfuse_prompt": langfuse_prompt}/
+```python /"langfuse_prompt"/
 from langfuse import Langfuse
-from langchain_core.prompts import PromptTemplate
-from langchain_openai import OpenAI
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_openai import ChatOpenAI, OpenAI
 
 langfuse = Langfuse()
 
-langfuse_prompt = langfuse.get_prompt("movie-critic")
+# Text prompts:
+langfuse_text_prompt = langfuse.get_prompt("movie-critic")
 
-# Pass the langfuse_prompt to the PromptTemplate as metadata to link it to generations that use it
-langchain_prompt = PromptTemplate.from_template(
-    langfuse_prompt.get_langchain_prompt(),
-    metadata={"langfuse_prompt": langfuse_prompt},
+## Pass the langfuse_text_prompt to the PromptTemplate as metadata to link it to generations that use it
+langchain_text_prompt = PromptTemplate.from_template(
+    langfuse_text_prompt.get_langchain_prompt(),
+    metadata={"langfuse_prompt": langfuse_text_prompt},
 )
 
-# Use the prompt in a Langchain chain
+## Use the text prompt in a Langchain chain
 llm = OpenAI()
-chain = langchain_prompt | llm
+completion_chain = langchain_text_prompt | llm
 
-chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
+completion_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
+
+# Chat prompts:
+langfuse_chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
+
+## Manually set the metadata on the langchain_chat_prompt to link it to generations that use it
+langchain_chat_prompt = ChatPromptTemplate.from_messages(
+    langfuse_chat_prompt.get_langchain_prompt()
+)
+langchain_chat_prompt.metadata = {"langfuse_prompt": langfuse_chat_prompt}
+
+## Use the chat prompt in a Langchain chain
+chat_llm = ChatOpenAI()
+chat_chain = langchain_chat_prompt | chat_llm
+
+chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
 ```
 
 </Tab>
 
 <Tab>
 
-```typescript /metadata: { langfusePrompt: langfusePrompt }/
+```typescript /metadata: { langfusePrompt:/
 import { Langfuse } from "langfuse";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI, OpenAI } from "@langchain/openai";
 
 const langfuse = new Langfuse();
 
-const langfusePrompt = await langfuse.getPrompt("movie-critic"); // Fetch a previously created prompt
+// Text prompts
+const langfuseTextPrompt = await langfuse.getPrompt("movie-critic"); // Fetch a previously created text prompt
 
-// Pass the langfusePrompt to the PromptTemplate as metadata to link it to generations that use it
-const langchainPrompt = PromptTemplate.fromTemplate(
-  langfusePrompt.getLangchainPrompt(),
+// Pass the langfuseTextPrompt to the PromptTemplate as metadata to link it to generations that use it
+const langchainTextPrompt = PromptTemplate.fromTemplate(
+  langfuseTextPrompt.getLangchainPrompt(),
 ).withConfig({
-  metadata: { langfusePrompt: langfusePrompt },
+  metadata: { langfusePrompt: langfuseTextPrompt },
 });
 
 const model = new OpenAI();
-const chain = langchainPrompt.pipe(model)
+const chain = langchainTextPrompt.pipe(model)
 
 await chain.invoke({ movie: "Dune 2", criticlevel: "expert" });
+
+// Chat prompts
+const langfuseChatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+}); // type option infers the prompt type as chat (default is 'text')
+
+const langchainChatPrompt = ChatPromptTemplate.fromMessages(
+  langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
+).withConfig({
+  metadata: { langfusePrompt: langfuseTextPrompt },
+});
+
+const chatModel = new ChatOpenAI();
+const chatChain = langchainChatPrompt.pipe(chatModel)
+
+await chatChain.invoke({ movie: "Dune 2", criticlevel: "expert" });
 ```
 
 </Tab>
