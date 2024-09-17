@@ -21,7 +21,7 @@ const langfuseParams = {
 
 
 ```typescript
-import {Langfuse} from "npm:langfuse"
+import { Langfuse } from "npm:langfuse"
 const langfuse = new Langfuse(langfuseParams)
 ```
 
@@ -94,13 +94,17 @@ Use the utility method `.getLangchainPrompt()` to transform the Langfuse prompt 
 
 Context: Langfuse declares input variables in prompt templates using double brackets (`{{input variable}}`). Langchain uses single brackets for declaring input variables in PromptTemplates (`{input variable}`). The utility method `.getLangchainPrompt()` replaces the double brackets with single brackets.
 
+Also, pass the Langfuse prompt as metadata to the PromptTemplate to automatically link generations that use the prompt.
+
 
 ```typescript
 import { PromptTemplate } from "npm:@langchain/core/prompts"
 
 const promptTemplate = PromptTemplate.fromTemplate(
     prompt.getLangchainPrompt()
-  );
+  ).withConfig({
+    metadata: { langfusePrompt: prompt }
+  });
 ```
 
 #### Setup Langfuse Tracing for Langchain JS
