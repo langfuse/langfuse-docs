@@ -338,7 +338,11 @@ If you'd like to nest the the observations created from the decoratored function
 This is useful for distributed tracing use-cases, where decorated function executions are running in parallel or in the background and should be associated to single existing trace.
 
 <Callout type="info">
-The desired parent ID must be passed to the **top-level** decorated function as a keyword argument. Also, passing `langfuse_parent_trace_id` is required if a parent `langfuse_parent_observation_id` is requested.
+The desired parent ID must be passed to the **top-level** decorated function as a keyword argument, otherwise the parent ID setting will be ignored and the node remains inside the trace in the execution context.
+</Callout>
+
+<Callout type="info">
+Passing `langfuse_parent_trace_id` is required whenever a `langfuse_parent_observation_id` is requested.
 </Callout>
 
 ```python /langfuse_parent_trace_id/ /lanfuse_parent_observation_id/
