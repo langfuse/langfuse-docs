@@ -202,7 +202,7 @@ export default function Integrations() {
           <div className="flex flex-row items-center justify-between">
             <Circle
               ref={inMoreRef}
-              title="Dify, Flowise, Langflow, Instructor, Vercel AI SDK, Mirascope, ..."
+              title="DSPy, Dify, Flowise, Langflow, Instructor, Vercel AI SDK, Mirascope, ..."
               href="/docs/integrations/overview"
             >
               <MoreHorizontal className="h-5 w-5" />
