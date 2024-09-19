@@ -451,6 +451,20 @@ Notes:
 12. Once the application is up and running, you can find the Cloud Run service URL on top of the page. Now, choose "Edit and deploy new revision" to update the `NEXTAUTH_URL` environment variable to the Cloud Run service URL ending in `.run.app`.
 13. Optionally, configure a custom domain for the Cloud Run service.
 
+**Troubleshooting: Cloud SQL Connection Issues**
+
+If you encounter an error like "Error 403: boss::NOT_AUTHORIZED: Not authorized to access resource" or "Possibly missing permission cloudsql.instances.connect" when deploying the Langfuse container, you may need to grant 'Cloud SQL Client' permissions to the relevant service accounts. Here's how to resolve this:
+
+1. In the Google Cloud search box, search for and select "Service Accounts".
+2. Find the service accounts with names ending in `@appspot.gserviceaccount.com` and `-compute@developer.gserviceaccount.com`.
+3. In the Google Cloud search box, search for and select "IAM & Admin".
+4. Click "Grant Access", then "Add Principals".
+5. Enter the name of the first service account you found.
+6. Select the "Cloud SQL Client" role and save.
+7. Repeat steps 4-6 for the second service account.
+
+After granting these permissions, try redeploying your Cloud Run service. This should resolve any authorization issues related to connecting to your Cloud SQL instance.
+
 #### Option 2: Cloud Build
 
 Google Cloud Build is GCP's continuous integration and continuous deployment (CI/CD) service that automates the building, testing, and deployment of your applications. To deploy Langfuse, you can specify your workflow in a cloudbuild.yaml file. Additionally, GCP's Secret Manager can be used to securely handle sensitive information like DATABASE_URL and NEXTAUTH_SECRET. Below is an example of how to set up a Cloud Build configuration:
