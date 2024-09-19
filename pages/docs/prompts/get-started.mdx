@@ -308,7 +308,7 @@ prompt.config;
 
 <Tab>
 
-As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.get_langchain_prompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate.
+As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.get_langchain_prompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate. You can pass optional keyword arguments to `prompt.get_langchain_prompt(**kwargs)` in order to precompile some variables and handle the others with Langchain's PromptTemplate.
 
 ```python
 from langfuse import Langfuse
@@ -322,6 +322,9 @@ langfuse_prompt = langfuse.get_prompt("movie-critic")
 
 # Example using ChatPromptTemplate
 langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+
+# Example using ChatPromptTemplate with pre-compiled variables.
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt(strictness='tough'))
 ```
 
 Chat prompts
@@ -560,6 +563,14 @@ chat_chain = langchain_chat_prompt | chat_llm
 
 chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
 ```
+
+<Callout type='info'>
+If you use the `with_config` method on the PromptTemplate to create a new Langchain Runnable with updated config, please make sure to pass the `langfuse_prompt` in the `metadata` key as well.
+</Callout>
+
+<Callout type='info'>
+Set the `langfuse_prompt` metadata key only on PromptTemplates and not additionally on the LLM calls or elsewhere in your chains.
+</Callout>
 
 </Tab>
 
