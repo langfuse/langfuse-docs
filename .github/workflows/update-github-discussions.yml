@@ -8,8 +8,6 @@ on:
 jobs:
   update-discussions:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -26,7 +24,7 @@ jobs:
 
       - name: Run load_github_discussions.py
         env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACCESS_TOKEN: ${{ secrets.UPDATE_DISCUSSIONS_JSON_PAT }}
         run: python scripts/load_github_discussions.py
 
       - name: Commit and push if changed
