@@ -151,6 +151,8 @@ In addition to the native intgerations with LangChain, LlamaIndex, and OpenAI (d
 
 Optionally, you can parse some of the arguments to the LLM call and pass them to [`langfuse_context.update_current_observation`](#additional-attributes) to enrich the trace.
 
+If you want to see an example of how to do this, check out the [example cookbook](/guides/cookbook/integration_mistral_sdk) which wraps the Mistral SDK with the decorator.
+
 import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
 
 <GetStartedDecoratorAnyLlm />
@@ -327,6 +329,50 @@ def main():
 
 
 main(langfuse_observation_id="my-custom-request-id")
+```
+
+#### Set parent trace ID or parent span ID
+
+If you'd like to nest the the observations created from the decoratored function execution under an existing trace or span, you can pass the ID as a value to the `langfuse_parent_trace_id` or `langfuse_parent_observation_id` keyword argument to your decorated function. In that case, Langfuse will record that execution not under a standalone trace, but nest it under the provided entity.
+
+This is useful for distributed tracing use-cases, where decorated function executions are running in parallel or in the background and should be associated to single existing trace.
+
+<Callout type="info">
+The desired parent ID must be passed to the **top-level** decorated function as a keyword argument, otherwise the parent ID setting will be ignored and the node remains inside the trace in the execution context.
+</Callout>
+
+<Callout type="info">
+Passing `langfuse_parent_trace_id` is required whenever a `langfuse_parent_observation_id` is requested.
+</Callout>
+
+```python /langfuse_parent_trace_id/ /lanfuse_parent_observation_id/
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def process_user_request(user_id, request_data, **kwargs):
+    # Function logic here
+    pass
+
+@observe(**kwargs)
+def main():
+    process_user_request(
+        "user_id",
+        "request",
+        langfuse_observation_id="my-custom-request-id",
+    )
+
+# Set a parent trace id
+main(
+    langfuse_observation_id="my-custom-request-id", 
+    langfuse_parent_trace_id="some_existing_trace_id"
+)
+
+# Set a parent span id. Note that parent_trace_id must also be passed.
+main(
+    langfuse_observation_id="my-custom-request-id",
+    langfuse_parent_trace_id="some_existing_trace_id", 
+    lanfuse_parent_observation_id="some_existing_span_id", 
+)
 ```
 
 ## Interoperability with framework integrations [#frameworks]
@@ -521,7 +567,62 @@ The decorator uses Python's `contextvars` to store the current trace context and
 
 For example when a @observe-decorated function uses a ThreadPoolExecutor to make concurrent LLM requests the context that holds important info on the nesting hierarchy ("we are inside another trace") is not copied over correctly to the child threads. So the created generations will not be linked to the trace and be 'orphaned'. In the UI, you will see a trace missing those generations.
 
-A workaround is to manually copy over the context to the new threads or processes. This is the recommmended approach when using ThreadPoolExecutors or ProcessPoolExecutors directly:
+<Callout type="info">
+  When spawning threads manually with `threading.Thread` rather than via
+  `ThreadPoolExecutor`, contextvars are copied over correctly as no executor is
+  used. The decorator works as intended in this case.
+</Callout>
+
+
+There are 2 possible workarounds:
+
+#### 1. Pass the parent observation ID (recommended)
+
+The first and recommended workaround is to pass the parent observation id as a keyword argument to each multithreaded execution, thus re-establishing the link to the parent span or trace:
+
+```python /langfuse_parent_trace_id=trace_id/ /langfuse_parent_observation_id=observation_id/
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def execute_task(*args):
+    return args
+
+@observe()
+def execute_groups(task_args):
+    trace_id = langfuse_context.get_current_trace_id()
+    observation_id = langfuse_context.get_current_observation_id()
+
+    with ThreadPoolExecutor(3) as executor:
+        futures = [
+            executor.submit(
+                execute_task,
+                *task_arg,
+                langfuse_parent_trace_id=trace_id,
+                langfuse_parent_observation_id=observation_id,
+            )
+            for task_arg in task_args
+        ]
+
+        for future in as_completed(futures):
+            future.result()
+
+    return [f.result() for f in futures]
+
+@observe()
+def main():
+    task_args = [["a", "b"], ["c", "d"]]
+
+    execute_groups(task_args)
+
+main()
+
+langfuse_context.flush()
+```
+
+#### 2. Copy over the context
+
+The second workaround is to manually copy over the context to the new threads or processes:
 
 ```python
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -557,12 +658,6 @@ langfuse_context.flush()
 ```
 
 The executions inside the ThreadPoolExecutor will now be correctly associated with the trace opened by the `execute_groups` function.
-
-<Callout type="info">
-  When spawning threads manually with `threading.Thread` rather than via
-  `ThreadPoolExecutor`, contextvars are copied over correctly as no executor is
-  used. The decorator works as intended in this case.
-</Callout>
 
 ### Large input/output data
 

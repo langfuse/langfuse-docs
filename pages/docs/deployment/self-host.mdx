@@ -176,17 +176,22 @@ Organization
 └── User         (owner of organization)
 ```
 
+Troubleshooting:
+
+- If you use `LANGFUSE_INIT_*` in Docker Compose, do not double-quote the values ([GitHub issue](https://github.com/langfuse/langfuse/issues/3398)).
+
 ### Configuring the Enterprise Edition [#ee]
 
 The Enterprise Edition ([compare versions](/docs/deployment/feature-overview)) of Langfuse includes additional optional configuration options that can be set via environment variables.
 
-| Variable                                 | Description                                                                                                                                                                |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_ALLOWED_ORGANIZATION_CREATORS` | Comma-separated list of allowlisted users that can create new organizations. By default, all users can create organizations. E.g. `user1@langfuse.com,user2@langfuse.com`. |
-| `LANGFUSE_UI_API_HOST`                   | Customize the hostname that is referenced in the settings. Defaults to `window.origin`.                                                                                    |
-| `LANGFUSE_UI_DOCUMENTATION_HREF`         | Customize the documentation link reference in the menu and settings.                                                                                                       |
-| `LANGFUSE_UI_SUPPORT_HREF`               | Customize the support link reference in the menu and settings.                                                                                                             |
-| `LANGFUSE_UI_FEEDBACK_HREF`              | Replace the default feedback widget with your own feedback link.                                                                                                           |
+| Variable                                                                 | Description                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_ALLOWED_ORGANIZATION_CREATORS`                                 | Comma-separated list of allowlisted users that can create new organizations. By default, all users can create organizations. E.g. `user1@langfuse.com,user2@langfuse.com`.                                                                                                                                   |
+| `LANGFUSE_UI_API_HOST`                                                   | Customize the hostname that is referenced in the settings. Defaults to `window.origin`.                                                                                                                                                                                                                      |
+| `LANGFUSE_UI_DOCUMENTATION_HREF`                                         | Customize the documentation link reference in the menu and settings.                                                                                                                                                                                                                                         |
+| `LANGFUSE_UI_SUPPORT_HREF`                                               | Customize the support link reference in the menu and settings.                                                                                                                                                                                                                                               |
+| `LANGFUSE_UI_FEEDBACK_HREF`                                              | Replace the default feedback widget with your own feedback link.                                                                                                                                                                                                                                             |
+| `LANGFUSE_UI_LOGO_DARK_MODE_HREF`<br/>`LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | Co-brand the Langfuse interface with your own logo. Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower ratios (e.g., 2:3, 1:1) also work. The logo is fitted into a bounding box, so there are no specific pixel constraints. For reference, the example logo is 160px x 400px. |
 
 ### Health and Readiness Check Endpoint
 
@@ -288,6 +293,7 @@ If you encounter issues, ensure the following:
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 - Make sure you are at least on Postgres 12.
+- When using Docker Compose / Kubernetes, your application needs to connect to the Langfuse container at the docker internal network address that you specified, e.g. `http://langfuse:3000`/`http://langfuse.docker.internal:3000`. Learn more: [docker compose networking documentation](https://docs.docker.com/compose/how-tos/networking/), [kubernetes networking documentation](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
 
 ## Updating the Application [#update]
 
@@ -445,6 +451,20 @@ Notes:
 11. While the application is deployed for the first time, you can see how the database migrations are applied in the logs.
 12. Once the application is up and running, you can find the Cloud Run service URL on top of the page. Now, choose "Edit and deploy new revision" to update the `NEXTAUTH_URL` environment variable to the Cloud Run service URL ending in `.run.app`.
 13. Optionally, configure a custom domain for the Cloud Run service.
+
+**Troubleshooting: Cloud SQL Connection Issues**
+
+If you encounter an error like "Error 403: boss::NOT_AUTHORIZED: Not authorized to access resource" or "Possibly missing permission cloudsql.instances.connect" when deploying the Langfuse container, you may need to grant 'Cloud SQL Client' permissions to the relevant service accounts. Here's how to resolve this:
+
+1. In the Google Cloud search box, search for and select "Service Accounts".
+2. Find the service accounts with names ending in `@appspot.gserviceaccount.com` and `-compute@developer.gserviceaccount.com`.
+3. In the Google Cloud search box, search for and select "IAM & Admin".
+4. Click "Grant Access", then "Add Principals".
+5. Enter the name of the first service account you found.
+6. Select the "Cloud SQL Client" role and save.
+7. Repeat steps 4-6 for the second service account.
+
+After granting these permissions, try redeploying your Cloud Run service. This should resolve any authorization issues related to connecting to your Cloud SQL instance.
 
 #### Option 2: Cloud Build
 

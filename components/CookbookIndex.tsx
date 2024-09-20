@@ -3,7 +3,7 @@ import { type Page } from "nextra";
 import { Card, Cards } from "nextra-theme-docs";
 import { FileCode } from "lucide-react";
 
-export const CookbookIndex = () => (
+export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
   <>
     {Object.entries(
       (
@@ -20,10 +20,21 @@ export const CookbookIndex = () => (
         }, {} as Record<string, Array<Page & { frontMatter: any }>>)
     )
       .sort(([categoryA], [categoryB]) => {
+        // if categories are provided, use the order of the provided categories
+        if (categories) {
+          const indexA = categories.indexOf(categoryA);
+          const indexB = categories.indexOf(categoryB);
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        }
+
+        // if categories are not provided, use the default order, Other last
         if (categoryA === "Other") return 1;
         if (categoryB === "Other") return -1;
         return categoryA.localeCompare(categoryB);
       })
+      .filter(([category]) => !categories || categories.includes(category))
       .map(([category, pages]) => (
         <div key={category}>
           <h3 className="nx-font-semibold nx-tracking-tight nx-text-slate-900 dark:nx-text-slate-100 nx-mt-8 nx-text-2xl">

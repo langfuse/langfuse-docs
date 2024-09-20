@@ -1,3 +1,7 @@
+---
+category: SDKs
+---
+
 # Langfuse SDK Performance Test
 
 Langfuse shall have a minimal impact on latency. This is achieved by running almost entirely in the background and by batching all requests to the Langfuse API.
