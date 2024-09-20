@@ -105,7 +105,7 @@ def load_github_discussions():
     
     return result
 
-def save_discussions_to_json(discussions, filename="src/langfuse_discussions.json"):
+def save_discussions_to_json(discussions, filename="src/langfuse_github_discussions.json"):
     file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)
     
     with open(file_path, "w", encoding="utf-8") as f:
