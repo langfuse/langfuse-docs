@@ -293,6 +293,7 @@ If you encounter issues, ensure the following:
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 - Make sure you are at least on Postgres 12.
+- When using Docker Compose / Kubernetes, your application needs to connect to the Langfuse container at the docker internal network address that you specified, e.g. `http://langfuse:3000`/`http://langfuse.docker.internal:3000`. Learn more: [docker compose networking documentation](https://docs.docker.com/compose/how-tos/networking/), [kubernetes networking documentation](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
 
 ## Updating the Application [#update]
 
