@@ -1,7 +1,6 @@
 import requests
 import json
 import os
-from datetime import datetime
 
 def run_query(query, variables):
     url = 'https://api.github.com/graphql'
@@ -31,9 +30,11 @@ def load_github_discussions():
             endCursor
           }
           nodes {
+            number
             title
             url
             createdAt
+            upvoteCount
             category {
               name
             }
@@ -45,9 +46,6 @@ def load_github_discussions():
               nodes {
                 name
               }
-            }
-            reactions(content: THUMBS_UP) {
-              totalCount
             }
             answer {
               id
@@ -72,10 +70,11 @@ def load_github_discussions():
         
         for discussion in discussions['nodes']:
             all_discussions.append({
+                "number": discussion['number'],
                 "title": discussion['title'],
                 "href": discussion['url'],
                 "created_at": discussion['createdAt'],
-                "upvotes": discussion['reactions']['totalCount'],
+                "upvotes": discussion['upvoteCount'],
                 "resolved": discussion['answer'] is not None,
                 "labels": [label['name'] for label in discussion['labels']['nodes']],
                 "author": {
@@ -124,7 +123,3 @@ if __name__ == "__main__":
         print(f"Network error occurred: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
-
-
-
