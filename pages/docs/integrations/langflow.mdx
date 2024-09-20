@@ -55,7 +55,7 @@ langflow run
 Alternatively, you can run the Langflow CLI command with the environment variables set:
 
 ```
-LANGFLOW_LANGFUSE_SECRET_KEY=secret_key LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key langflow
+LANGFUSE_SECRET_KEY=secret_key LANGFUSE_PUBLIC_KEY=public_key langflow
 ```
 
 </Tab>
@@ -81,8 +81,8 @@ services:
     ports:
       - "7860:7860"
     environment:
-+     - LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
-+     - LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
++     - LANGFUSE_SECRET_KEY=secret_key
++     - LANGFUSE_PUBLIC_KEY=public_key
     command: langflow run --host 0.0.0.0
 ```
 
@@ -119,9 +119,9 @@ services:
       - "7860:7860"
     environment:
 +     # Tokens are to be created in Langfuse, then copy-pasted here. Then restart docker-compose.
-+     - LANGFLOW_LANGFUSE_SECRET_KEY=sk-lf-...
-+     - LANGFLOW_LANGFUSE_PUBLIC_KEY=pk-lf-...
-+     - LANGFLOW_LANGFUSE_HOST=http://langfuse-server:3000
++     - LANGFUSE_SECRET_KEY=sk-lf-...
++     - LANGFUSE_PUBLIC_KEY=pk-lf-...
++     - LANGFUSE_HOST=http://langfuse-server:3000
     command: langflow run --host 0.0.0.0
 
   # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
@@ -158,7 +158,7 @@ volumes:
 To test the connectivity between Langflow and Langfuse, run the following command:
 
 ```sh
-docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFLOW_LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
 
 # which should output the following:
 # http://langfuse-server:3000
