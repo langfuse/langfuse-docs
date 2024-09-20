@@ -4,6 +4,9 @@ on:
   #   schedule:
   #     - cron: "0 1 * * *" # Runs at 1 AM UTC daily
   workflow_dispatch: # Allows manual triggering
+  push:
+    branches:
+      - "**" # This will trigger on push to any branch
 
 jobs:
   update-discussions:
