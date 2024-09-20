@@ -27,7 +27,7 @@ jobs:
 
       - name: Run load_github_discussions.py
         env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/load_github_discussions.py
 
       - name: Commit and push if changed
