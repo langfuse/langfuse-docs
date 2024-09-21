@@ -230,7 +230,11 @@ const GhDiscussionsPreviewInternal = ({
               </DropdownMenuContent>
             </DropdownMenu>
             <Button asChild size="sm">
-              <Link href="https://github.com/orgs/langfuse/discussions/new/choose">
+              <Link
+                href="https://github.com/orgs/langfuse/discussions/new/choose"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <IconGithub className="mr-1" />
                 New discussion
               </Link>
