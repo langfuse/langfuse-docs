@@ -221,10 +221,20 @@ const GhDiscussionsPreviewInternal = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setSortType("upvotes")}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSortType("upvotes");
+                    setCurrentPage(1);
+                  }}
+                >
                   Upvotes
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortType("recent")}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSortType("recent");
+                    setCurrentPage(1);
+                  }}
+                >
                   Recent
                 </DropdownMenuItem>
               </DropdownMenuContent>
