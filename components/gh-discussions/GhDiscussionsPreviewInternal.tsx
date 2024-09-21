@@ -101,6 +101,8 @@ const GhDiscussionsPreviewInternal = ({
                 <Link
                   href={discussion.href}
                   className="text-blue-600 hover:underline font-medium"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {discussion.title}
                 </Link>
