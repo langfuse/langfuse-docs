@@ -21,22 +21,25 @@ import {
 } from "@/components/ui/pagination";
 import IconGithub from "../icons/github";
 import { cn } from "@/lib/utils";
+
 type SortType = "upvotes" | "recent";
 
-const ITEMS_PER_PAGE = 5;
+const categories = ["Support", "Ideas"];
 
 const GhDiscussionsPreviewInternal = ({
   labels,
   className,
+  itemsPerPage = 7,
+  filterCategory,
 }: {
   labels?: string[];
   className?: string;
+  itemsPerPage?: number;
+  filterCategory?: (typeof categories)[number];
 }) => {
   const [sortType, setSortType] = useState<SortType>("upvotes");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-
-  console.log(searchTerm);
 
   const filteredDiscussionCategories = useMemo(() => {
     return discussionCategories.map((category) => ({
@@ -68,45 +71,47 @@ const GhDiscussionsPreviewInternal = ({
       filteredDiscussionCategories.find((c) => c.category === category)
         ?.discussions || [];
     const sortedDiscussions = sortDiscussions(categoryDiscussions, sortType);
-    const totalPages = Math.ceil(sortedDiscussions.length / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const totalPages = Math.ceil(sortedDiscussions.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
     const displayedDiscussions = sortedDiscussions.slice(
       startIndex,
-      startIndex + ITEMS_PER_PAGE
+      startIndex + itemsPerPage
     );
 
     if (displayedDiscussions.length === 0) {
       return (
         <div className="text-center py-8">
-          <p className="text-gray-500">No discussions found.</p>
+          <p className="text-primary/70">No discussions found.</p>
         </div>
       );
     }
 
     return (
       <>
-        <ul className="space-y-4">
+        <ul className="space-y-3 pt-1">
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-start space-x-4 pb-4 border-b"
+              className="flex items-center space-x-1 pb-3 border-b last:border-none last:pb-0"
             >
-              <div className="flex flex-col items-center min-w-[60px]">
-                <span className="text-xl font-semibold">
+              <div className="flex flex-col items-center min-w-[60px] gap-0.5">
+                <span className="text-lg font-semibold leading-none">
                   {discussion.upvotes}
                 </span>
-                <span className="text-xs text-gray-500">votes</span>
+                <span className="text-xs text-primary/70 leading-none">
+                  votes
+                </span>
               </div>
-              <div className="flex-grow">
+              <div className="flex flex-col items-start">
                 <Link
                   href={discussion.href}
-                  className="text-blue-600 hover:underline font-medium"
+                  className="text-primary hover:underline font-medium text-sm leading-none"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {discussion.title}
                 </Link>
-                <div className="text-sm text-gray-600 mt-1">
+                <div className="text-xs text-primary/70 mt-0.5">
                   <span>by {discussion.author.login}</span>
                   <span className="mx-2">•</span>
                   <span>
@@ -114,13 +119,13 @@ const GhDiscussionsPreviewInternal = ({
                   </span>
                   {category === "Ideas" &&
                     discussion.labels.includes("✅ Done") && (
-                      <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                      <span className="ml-2 bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full text-xs">
                         Done
                       </span>
                     )}
                   {category === "Support" && (
                     <span
-                      className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                      className={`ml-2 px-1 py-0.5 rounded-full text-xs ${
                         discussion.resolved
                           ? "bg-green-100 text-green-800"
                           : "bg-yellow-100 text-yellow-800"
@@ -155,24 +160,26 @@ const GhDiscussionsPreviewInternal = ({
     }
 
     return (
-      <Pagination className="mt-4">
-        <PaginationContent>
+      <Pagination className="mt-4 border-t py-1">
+        <PaginationContent className="gap-1 items-center">
           <PaginationItem>
             <PaginationPrevious
+              size="xs"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             />
           </PaginationItem>
-          <div className="hidden sm:flex">
+          <div className="hidden sm:flex gap-1 items-center">
             {pageNumbers.map((pageNumber, index) =>
               pageNumber === null ? (
                 <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis />
+                  <PaginationEllipsis size="xs" />
                 </PaginationItem>
               ) : (
                 <PaginationItem key={pageNumber}>
                   <PaginationLink
                     onClick={() => setCurrentPage(pageNumber)}
                     isActive={currentPage === pageNumber}
+                    size="xs"
                   >
                     {pageNumber}
                   </PaginationLink>
@@ -182,6 +189,7 @@ const GhDiscussionsPreviewInternal = ({
           </div>
           <PaginationItem>
             <PaginationNext
+              size="xs"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(totalPages, prev + 1))
               }
@@ -193,30 +201,40 @@ const GhDiscussionsPreviewInternal = ({
   };
 
   return (
-    <div className={cn("w-full p-2 rounded-md border", className)}>
-      <Tabs defaultValue="Support" onValueChange={(value) => setCurrentPage(1)}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
-          <TabsList>
-            <TabsTrigger value="Support">
-              <IconGithub className="mr-1" />
-              Support
-            </TabsTrigger>
-            <TabsTrigger value="Ideas">
-              <IconGithub className="mr-1" />
-              Ideas
-            </TabsTrigger>
-          </TabsList>
-          <div className="flex items-center space-x-2">
+    <div className={cn("w-full", className)}>
+      <Tabs
+        defaultValue={filterCategory || categories[0]}
+        onValueChange={(value) => setCurrentPage(1)}
+      >
+        <div className="flex flex-wrap justify-between items-center mb-2 gap-2">
+          {!filterCategory && (
+            <TabsList>
+              {categories.map((category) => (
+                <TabsTrigger value={category}>
+                  <IconGithub className="mr-1" />
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          )}
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
             <Input
               type="text"
               placeholder="Search discussions..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-14 sm:w-36 h-9"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-36 sm:w-48 h-9"
             />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
                   Sort: {sortType === "upvotes" ? "Upvotes" : "Recent"}
                 </Button>
               </DropdownMenuTrigger>
@@ -244,14 +262,15 @@ const GhDiscussionsPreviewInternal = ({
                 href="https://github.com/orgs/langfuse/discussions/new/choose"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="whitespace-nowrap"
               >
-                <IconGithub className="mr-1" />
-                New discussion
+                <IconGithub className="mr-2" />
+                New
               </Link>
             </Button>
           </div>
         </div>
-        <div className="border p-2 rounded">
+        <div className="border rounded">
           <TabsContent value="Support">
             {renderDiscussions("Support")}
           </TabsContent>
