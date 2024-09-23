@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/pagination";
 import IconGithub from "../icons/github";
 import { cn } from "@/lib/utils";
+import IconMessage from "../icons/message";
 
 type SortType = "upvotes" | "recent";
 
@@ -128,31 +129,36 @@ const GhDiscussionsPreviewInternal = ({
                 >
                   {discussion.title}
                 </Link>
-                <div className="text-xs text-primary/70 mt-1.5">
+                <div className="text-xs text-primary/70 mt-1.5 flex items-center">
                   <span>{discussion.author.login}</span>
-                  <span className="mx-2">•</span>
+                  <span className="mx-1.5">•</span>
                   <span>
                     {new Date(discussion.created_at).toLocaleDateString()}
                   </span>
-                  {category === "Ideas" &&
-                    discussion.labels.includes("✅ Done") && (
-                      <>
-                        <span className="mx-2">•</span>
-                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1 py-0.5 rounded-full text-xs">
+
+                  <span className="mx-1.5">•</span>
+                  <div className="inline-flex items-center gap-1">
+                    <span
+                      className={`h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-primary/70 dark:text-gray-200`}
+                    >
+                      <IconMessage className="h-3" />
+                      {discussion.comment_count}
+                    </span>
+
+                    {category === "Ideas" &&
+                      discussion.labels.includes("✅ Done") && (
+                        <span className="h-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1.5 rounded-full text-xs">
                           Done
                         </span>
-                      </>
-                    )}
-                  {category === "Support" && discussion.resolved && (
-                    <>
-                      <span className="mx-2">•</span>
+                      )}
+                    {category === "Support" && discussion.resolved && (
                       <span
-                        className={`px-1 py-0.5 rounded-full text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200`}
+                        className={`h-4 px-1.5 rounded-full text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200`}
                       >
                         Resolved
                       </span>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </li>

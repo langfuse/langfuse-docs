@@ -36,6 +36,9 @@ def load_github_discussions():
             url
             createdAt
             upvoteCount
+            comments {
+              totalCount
+            }
             category {
               name
             }
@@ -76,6 +79,7 @@ def load_github_discussions():
                 "href": discussion['url'],
                 "created_at": discussion['createdAt'],
                 "upvotes": discussion['upvoteCount'],
+                "comment_count": discussion['comments']['totalCount'],  # Reverted this line
                 "resolved": discussion['answer'] is not None,
                 "labels": [label['name'] for label in discussion['labels']['nodes']],
                 "author": {
