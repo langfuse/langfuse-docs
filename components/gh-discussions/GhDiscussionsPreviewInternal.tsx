@@ -228,6 +228,22 @@ const GhDiscussionsPreviewInternal = ({
     );
   };
 
+  // Function to generate hidden links for all discussions
+  const generateHiddenLinks = () => {
+    return filteredDiscussionCategories.flatMap((category) =>
+      category.discussions.map((discussion) => (
+        <Link
+          key={discussion.number}
+          href={discussion.href}
+          rel="noopener noreferrer"
+          title={`Langfuse ${category.category}: ${discussion.title}`}
+        >
+          {discussion.title}
+        </Link>
+      ))
+    );
+  };
+
   const timeDiff = (() => {
     const timeDiff =
       new Date().getTime() - new Date(discussionsCached.updated_at).getTime();
@@ -242,6 +258,8 @@ const GhDiscussionsPreviewInternal = ({
 
   return (
     <div className={cn("w-full mt-4", className)}>
+      {/* Hidden links for indexing */}
+      <div className="hidden">{generateHiddenLinks()}</div>
       <Tabs
         defaultValue={getDefaultTab()}
         onValueChange={(value) => setCurrentPage(1)}
