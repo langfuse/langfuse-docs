@@ -56,6 +56,21 @@ const GhDiscussionsPreviewInternal = ({
     }));
   }, [labels, searchTerm]);
 
+  // Add this new function to determine the default tab
+  const getDefaultTab = (): (typeof categories)[number] => {
+    const supportDiscussions =
+      filteredDiscussionCategories.find((c) => c.category === "Support")
+        ?.discussions || [];
+    const ideaDiscussions =
+      filteredDiscussionCategories.find((c) => c.category === "Ideas")
+        ?.discussions || [];
+
+    if (filterCategory) return filterCategory;
+    if (supportDiscussions.length > 0) return "Support";
+    if (ideaDiscussions.length > 0) return "Ideas";
+    return categories[0]; // Fallback to the first category
+  };
+
   const sortDiscussions = (discussions: any[], type: SortType) => {
     return [...discussions].sort((a, b) => {
       if (type === "upvotes" && a.upvotes !== b.upvotes) {
@@ -201,7 +216,7 @@ const GhDiscussionsPreviewInternal = ({
   return (
     <div className={cn("w-full mt-4", className)}>
       <Tabs
-        defaultValue={filterCategory || categories[0]}
+        defaultValue={getDefaultTab()}
         onValueChange={(value) => setCurrentPage(1)}
       >
         <div className="flex flex-wrap justify-between items-center mb-2 gap-2">
