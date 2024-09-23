@@ -56,7 +56,7 @@ const GhDiscussionsPreviewInternal = ({
 
   const sortDiscussions = (discussions: any[], type: SortType) => {
     return [...discussions].sort((a, b) => {
-      if (type === "upvotes") {
+      if (type === "upvotes" && a.upvotes !== b.upvotes) {
         return b.upvotes - a.upvotes;
       } else {
         return (
@@ -81,7 +81,7 @@ const GhDiscussionsPreviewInternal = ({
     if (displayedDiscussions.length === 0) {
       return (
         <div className="text-center py-8">
-          <p className="text-primary/70">No discussions found.</p>
+          <p className="text-primary/70 text-sm">No discussions found.</p>
         </div>
       );
     }
@@ -92,7 +92,7 @@ const GhDiscussionsPreviewInternal = ({
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center space-x-1 pb-3 border-b last:border-none last:pb-0"
+              className="flex items-center space-x-1 pb-3 border-b last:border-none"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">
@@ -123,15 +123,11 @@ const GhDiscussionsPreviewInternal = ({
                         Done
                       </span>
                     )}
-                  {category === "Support" && (
+                  {category === "Support" && discussion.resolved && (
                     <span
-                      className={`ml-2 px-1 py-0.5 rounded-full text-xs ${
-                        discussion.resolved
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
+                      className={`ml-2 px-1 py-0.5 rounded-full text-xs bg-green-100 text-green-800`}
                     >
-                      {discussion.resolved ? "Resolved" : "Unresolved"}
+                      Resolved
                     </span>
                   )}
                 </div>
@@ -160,7 +156,7 @@ const GhDiscussionsPreviewInternal = ({
     }
 
     return (
-      <Pagination className="mt-4 border-t py-1">
+      <Pagination className="border-t py-1">
         <PaginationContent className="gap-1 items-center">
           <PaginationItem>
             <PaginationPrevious
@@ -201,7 +197,7 @@ const GhDiscussionsPreviewInternal = ({
   };
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full mt-4", className)}>
       <Tabs
         defaultValue={filterCategory || categories[0]}
         onValueChange={(value) => setCurrentPage(1)}
