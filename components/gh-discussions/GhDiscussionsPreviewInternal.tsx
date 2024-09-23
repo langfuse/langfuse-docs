@@ -294,7 +294,7 @@ const GhDiscussionsPreviewInternal = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button asChild size="sm">
+            <Button variant="secondary" asChild size="sm">
               <Link
                 href="https://github.com/orgs/langfuse/discussions/new/choose"
                 target="_blank"
