@@ -564,12 +564,15 @@ chat_chain = langchain_chat_prompt | chat_llm
 chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
 ```
 
-<Callout type='info'>
-If you use the `with_config` method on the PromptTemplate to create a new Langchain Runnable with updated config, please make sure to pass the `langfuse_prompt` in the `metadata` key as well.
+<Callout type="info">
+  If you use the `with_config` method on the PromptTemplate to create a new
+  Langchain Runnable with updated config, please make sure to pass the
+  `langfuse_prompt` in the `metadata` key as well.
 </Callout>
 
-<Callout type='info'>
-Set the `langfuse_prompt` metadata key only on PromptTemplates and not additionally on the LLM calls or elsewhere in your chains.
+<Callout type="info">
+  Set the `langfuse_prompt` metadata key only on PromptTemplates and not
+  additionally on the LLM calls or elsewhere in your chains.
 </Callout>
 
 </Tab>
@@ -588,20 +591,24 @@ const langfuseTextPrompt = await langfuse.getPrompt("movie-critic"); // Fetch a 
 
 // Pass the langfuseTextPrompt to the PromptTemplate as metadata to link it to generations that use it
 const langchainTextPrompt = PromptTemplate.fromTemplate(
-  langfuseTextPrompt.getLangchainPrompt(),
+  langfuseTextPrompt.getLangchainPrompt()
 ).withConfig({
   metadata: { langfusePrompt: langfuseTextPrompt },
 });
 
 const model = new OpenAI();
-const chain = langchainTextPrompt.pipe(model)
+const chain = langchainTextPrompt.pipe(model);
 
 await chain.invoke({ movie: "Dune 2", criticlevel: "expert" });
 
 // Chat prompts
-const langfuseChatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
-  type: "chat",
-}); // type option infers the prompt type as chat (default is 'text')
+const langfuseChatPrompt = await langfuse.getPrompt(
+  "movie-critic-chat",
+  undefined,
+  {
+    type: "chat",
+  }
+); // type option infers the prompt type as chat (default is 'text')
 
 const langchainChatPrompt = ChatPromptTemplate.fromMessages(
   langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
@@ -610,7 +617,7 @@ const langchainChatPrompt = ChatPromptTemplate.fromMessages(
 });
 
 const chatModel = new ChatOpenAI();
-const chatChain = langchainChatPrompt.pipe(chatModel)
+const chatChain = langchainChatPrompt.pipe(chatModel);
 
 await chatChain.invoke({ movie: "Dune 2", criticlevel: "expert" });
 ```
@@ -943,3 +950,9 @@ prompt.isFallback;
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
 <FaqPreview tags={["prompt-management"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-prompt-management"]} />
