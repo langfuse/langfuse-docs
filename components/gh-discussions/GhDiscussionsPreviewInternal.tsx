@@ -128,24 +128,30 @@ const GhDiscussionsPreviewInternal = ({
                 >
                   {discussion.title}
                 </Link>
-                <div className="text-xs text-primary/70 mt-0.5">
-                  <span>by {discussion.author.login}</span>
+                <div className="text-xs text-primary/70 mt-1.5">
+                  <span>{discussion.author.login}</span>
                   <span className="mx-2">•</span>
                   <span>
                     {new Date(discussion.created_at).toLocaleDateString()}
                   </span>
                   {category === "Ideas" &&
                     discussion.labels.includes("✅ Done") && (
-                      <span className="ml-2 bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full text-xs">
-                        Done
-                      </span>
+                      <>
+                        <span className="mx-2">•</span>
+                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1 py-0.5 rounded-full text-xs">
+                          Done
+                        </span>
+                      </>
                     )}
                   {category === "Support" && discussion.resolved && (
-                    <span
-                      className={`ml-2 px-1 py-0.5 rounded-full text-xs bg-green-100 text-green-800`}
-                    >
-                      Resolved
-                    </span>
+                    <>
+                      <span className="mx-2">•</span>
+                      <span
+                        className={`px-1 py-0.5 rounded-full text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200`}
+                      >
+                        Resolved
+                      </span>
+                    </>
                   )}
                 </div>
               </div>
