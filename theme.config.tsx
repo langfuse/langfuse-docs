@@ -237,10 +237,12 @@ const config: DocsThemeConfig = {
     text: (
       <Link href="/careers">
         {/* mobile */}
-        <span className="sm:hidden">Join us in Engineering & DevRel →</span>
+        <span className="sm:hidden">
+          Join us in Product Engineering and DevRel →
+        </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          We're hiring. Join us in Product Eng, Backend Eng, and DevRel →
+          We're hiring. Join us in Product Engineering and DevRel →
         </span>
       </Link>
     ),
