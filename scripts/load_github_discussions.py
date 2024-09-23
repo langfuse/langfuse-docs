@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+from datetime import datetime, timezone
 
 def run_query(query, variables):
     url = 'https://api.github.com/graphql'
@@ -96,12 +97,15 @@ def load_github_discussions():
             categories[category] = []
         categories[category].append(discussion)
     
-    result = [
-        {
-            "category": category,
-            "discussions": discussions
-        } for category, discussions in categories.items()
-    ]
+    result = {
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "categories": [
+            {
+                "category": category,
+                "discussions": discussions
+            } for category, discussions in categories.items()
+        ]
+    }
     
     return result
 

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import discussionCategories from "../../src/langfuse_github_discussions.json";
+import discussionsCached from "../../src/langfuse_github_discussions.json";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +44,7 @@ const GhDiscussionsPreviewInternal = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredDiscussionCategories = useMemo(() => {
-    return discussionCategories.map((category) => ({
+    return discussionsCached.categories.map((category) => ({
       category: category.category,
       discussions: category.discussions.filter(
         (discussion) =>
@@ -213,6 +213,18 @@ const GhDiscussionsPreviewInternal = ({
     );
   };
 
+  const timeDiff = (() => {
+    const timeDiff =
+      new Date().getTime() - new Date(discussionsCached.updated_at).getTime();
+    const minutes = Math.floor(timeDiff / 60000);
+    if (minutes < 60) {
+      return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+    }
+  })();
+
   return (
     <div className={cn("w-full mt-4", className)}>
       <Tabs
@@ -290,6 +302,12 @@ const GhDiscussionsPreviewInternal = ({
           <TabsContent value="Ideas">{renderDiscussions("Ideas")}</TabsContent>
         </div>
       </Tabs>
+      <div className="text-xs text-primary/70 mt-2">
+        <span>
+          Discussions last updated:{" "}
+          {new Date(discussionsCached.updated_at).toLocaleString()} ({timeDiff})
+        </span>
+      </div>
     </div>
   );
 };
