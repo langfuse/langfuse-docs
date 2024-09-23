@@ -20,6 +20,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import IconGithub from "../icons/github";
+import IconSort from "../icons/sort";
+import IconSearch from "../icons/search";
 import { cn } from "@/lib/utils";
 import IconMessage from "../icons/message";
 
@@ -276,16 +278,19 @@ const GhDiscussionsPreviewInternal = ({
             </TabsList>
           )}
           <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <Input
-              type="text"
-              placeholder="Search discussions..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-36 sm:w-48 h-9"
-            />
+            <div className="relative w-36 sm:w-48 h-9">
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full h-full pl-8"
+              />
+              <IconSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-primary/70" />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -293,7 +298,8 @@ const GhDiscussionsPreviewInternal = ({
                   size="sm"
                   className="whitespace-nowrap"
                 >
-                  Sort: {sortType === "upvotes" ? "Upvotes" : "Recent"}
+                  <IconSort className="mr-2 h-4 w-4" />
+                  {sortType.charAt(0).toUpperCase() + sortType.slice(1)}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
