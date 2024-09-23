@@ -191,6 +191,7 @@ const GhDiscussionsPreviewInternal = ({
             <PaginationPrevious
               size="xs"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              className="cursor-pointer select-none"
             />
           </PaginationItem>
           <div className="hidden sm:flex gap-1 items-center">
@@ -205,6 +206,7 @@ const GhDiscussionsPreviewInternal = ({
                     onClick={() => setCurrentPage(pageNumber)}
                     isActive={currentPage === pageNumber}
                     size="xs"
+                    className="cursor-pointer select-none"
                   >
                     {pageNumber}
                   </PaginationLink>
@@ -218,6 +220,7 @@ const GhDiscussionsPreviewInternal = ({
               onClick={() =>
                 setCurrentPage((prev) => Math.min(totalPages, prev + 1))
               }
+              className="cursor-pointer select-none"
             />
           </PaginationItem>
         </PaginationContent>
