@@ -30,14 +30,16 @@ const GhDiscussionsPreviewInternal = ({
   labels,
   className,
   itemsPerPage = 7,
+  defaultSort = "upvotes",
   filterCategory,
 }: {
   labels?: string[];
   className?: string;
   itemsPerPage?: number;
   filterCategory?: (typeof categories)[number];
+  defaultSort?: SortType;
 }) => {
-  const [sortType, setSortType] = useState<SortType>("upvotes");
+  const [sortType, setSortType] = useState<SortType>(defaultSort);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
