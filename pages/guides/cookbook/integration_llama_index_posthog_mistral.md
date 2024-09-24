@@ -1,12 +1,12 @@
 ---
 title: Monitoring LlamaIndex applications with PostHog and Langfuse
-description: Run Open Source LLMs locally on your machine with Ollama and trace ouputs with Langfuse for Open Source LLM Observability  
+description: Learn how to build and monitor a RAG application using LlamaIndex with Mistral, Langfuse, and PostHog. This step-by-step guide covers setup, integration, and analytics for optimizing LLM performance.
 category: Integrations
 ---
 
 # Monitoring LlamaIndex applications with PostHog and Langfuse
 
-In this cookbook, we show you how to build a RAG application with [LlamaIndex](https://www.llamaindex.ai/), observe the steps with [Langfuse](https://langfuse.com/), and analyze the data in [PostHog](https://posthog.com/).
+In this cookbook, we show you how to build a RAG application with [LlamaIndex](https://www.llamaindex.ai/), observe the steps with [Langfuse](https://langfuse.com/) and analyze the data in [PostHog](https://posthog.com/).
 
 ## What is LlamaIndex?
 
@@ -18,14 +18,14 @@ Langfuse is an open-source LLM engineering platform. It includes features such a
 
 ## What is PostHog?
 
-[PostHog](https://posthog.com/) is a popular choice for product analytics. Combining Langfuse's LLM analytics with PostHog's product analytics makes it easy to answer questions about your app like:
+[PostHog](https://posthog.com/) is a popular choice for product analytics. Combining Langfuse's LLM analytics with PostHog's product analytics makes it easy to:
 
-*   "What are my LLM costs by customer, model, and in total?"
-*   "Does interacting with LLM features correlate with other metrics (retention, usage, revenue, etc.)?"
-*   "How does the user feedback that I capture in Langfuse correlate with user behavior in PostHog?"
+- **Analyze User Engagement**: Determine how often users interact with specific LLM features and understand their overall activity patterns.
+- **Correlate Feedback with Behavior**: See how user feedback captured in Langfuse correlates with user behavior in PostHog.
+- **Monitor LLM Performance**: Track and analyze metrics such as model cost, latency, and user feedback to optimize LLM performance.
 
 
-## **How to build a Simple RAG app with LlamaIndex and Mistral**
+## How to build a Simple RAG app with LlamaIndex and Mistral
 
 In this example, we create a chat app that answers questions about how to care for hedgehogs. LlamaIndex vectorizes a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) using the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). Then, all model generations are traced using Langfuse's [LLamaIndex integration](https://langfuse.com/docs/integrations/llama-index/get-started).
 
@@ -166,7 +166,7 @@ All steps of the LLM chain are now tracked in Langfuse.
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/367db23d-5b03-446b-bc73-36e289596c00
 
-![Example trace](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/trace-posthog-llamaindex-miostral.png)
+![Example trace in the Langfuse UI](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/trace-posthog-llamaindex-miostral.png)
 
 ### Step 5: (Optional) Implement user feedback to see how your application is performing
 
@@ -213,7 +213,7 @@ langfuse.score(
 
 
 
-### **Step 6:** See your data in PostHog
+### Step 6: See your data in PostHog
 
 Finally, we connect PostHog to our Langfuse account. Below is a summary of the steps to take (or see the [docs](https://posthog.com/docs/ai-engineering/langfuse-posthog) for full details):
 
@@ -237,9 +237,9 @@ To create your own dashboard from a template:
 2. Click the **New dashboard** button in the top right.
 3. Select **LLM metrics – Langfuse** from the list of templates.
 
-![Posthog Dashboard 1](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-1.png)
+![Posthog Dashboard with user feedback and number of generations](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-1.png)
 
-![Posthog Dashboard 1](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-2.png)
+![Posthog Dashboard with latency and cost of AI application](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-2.png)
 
 # Feedback
 ---
