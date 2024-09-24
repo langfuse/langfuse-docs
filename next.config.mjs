@@ -130,17 +130,19 @@ const nonPermanentRedirects = [
   ["/ph", "https://www.producthunt.com/posts/langfuse-2-0-llm-engineering-platform"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
-  ["/new-issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
+  ["/new-issue", "/issue"],
   ["/issues", "https://github.com/langfuse/langfuse/issues"],
   ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
   ["/sticker", "/stickers"],
 
+
   ["/security", "/docs/data-security-privacy"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
-  ["/new-idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
+  ["/new-idea", "/idea"],
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
   ["/gh-support", "https://github.com/orgs/langfuse/discussions/categories/support"],
-  ["/gh-discussions", "https://github.com/orgs/langfuse/discussions"],
+  ["/discussions", "https://github.com/orgs/langfuse/discussions"],
+  ["/gh-discussions", "/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
 
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
