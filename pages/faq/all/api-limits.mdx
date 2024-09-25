@@ -5,7 +5,7 @@ tags: [api]
 
 # Are there any limits to the Langfuse API?
 
-While the [Langfuse API](https://api.reference.langfuse.com) is extremely open and flexible, there are some limits to ensure the stability and performance of the platform.
+While the [Langfuse API](https://api.reference.langfuse.com) is extremely open and flexible, there are some limits to ensure the stability and performance of the platform. If you run into unexpected limits, please reach out to us via the chat widget.
 
 ## Langfuse Cloud
 
@@ -15,10 +15,27 @@ While the [Langfuse API](https://api.reference.langfuse.com) is extremely open a
 
 ### Rate Limits
 
-| Plan                | Rate Limit               |
-| ------------------- | ------------------------ |
-| Hobby and Pro plans | 1000 requests per minute |
-| Team plan           | custom limits            |
+### Resource Types
+
+- **ingestion:** This endpoint is used by SDKs to ingest traces.
+- **prompts:** This is the API for SDKs to fetch prompts.
+- **public-api:** These are all other APIs used by SDKs to fetch data.
+- **public-api-metrics**: These are APIs used to fetch traces analytics data.
+- **legacy-ingestion:** These are deprecated APIs used by V1 version SDKs. They will be removed with Langfuse V3. For more details, refer to the [GitHub discussion](https://github.com/orgs/langfuse/discussions/1902).
+
+
+| Plan        | Resource            | Rate Limit (req/min)|
+| ----------- | ------------------- | ------------------------ |
+| hobby/pro   | ingestion           | 1000         |
+| hobby/pro   | legacy-ingestion    | 400          |
+| hobby/pro   | prompts             | No limit     |
+| hobby/pro   | public-api          | 1000         |
+| hobby/pro   | public-api-metrics  | 10           |
+| team        | ingestion           | 5000         |
+| team        | legacy-ingestion    | 400          |
+| team        | prompts             | No limit     |
+| team        | public-api          | 1000         |
+| team        | public-api-metrics  | 10           |
 
 Rate limit response
 
