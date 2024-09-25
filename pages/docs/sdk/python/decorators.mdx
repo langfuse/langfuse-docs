@@ -338,11 +338,14 @@ If you'd like to nest the the observations created from the decoratored function
 This is useful for distributed tracing use-cases, where decorated function executions are running in parallel or in the background and should be associated to single existing trace.
 
 <Callout type="info">
-The desired parent ID must be passed to the **top-level** decorated function as a keyword argument, otherwise the parent ID setting will be ignored and the node remains inside the trace in the execution context.
+  The desired parent ID must be passed to the **top-level** decorated function
+  as a keyword argument, otherwise the parent ID setting will be ignored and the
+  node remains inside the trace in the execution context.
 </Callout>
 
 <Callout type="info">
-Passing `langfuse_parent_trace_id` is required whenever a `langfuse_parent_observation_id` is requested.
+  Passing `langfuse_parent_trace_id` is required whenever a
+  `langfuse_parent_observation_id` is requested.
 </Callout>
 
 ```python /langfuse_parent_trace_id/ /lanfuse_parent_observation_id/
@@ -363,15 +366,15 @@ def main():
 
 # Set a parent trace id
 main(
-    langfuse_observation_id="my-custom-request-id", 
+    langfuse_observation_id="my-custom-request-id",
     langfuse_parent_trace_id="some_existing_trace_id"
 )
 
 # Set a parent span id. Note that parent_trace_id must also be passed.
 main(
     langfuse_observation_id="my-custom-request-id",
-    langfuse_parent_trace_id="some_existing_trace_id", 
-    lanfuse_parent_observation_id="some_existing_span_id", 
+    langfuse_parent_trace_id="some_existing_trace_id",
+    lanfuse_parent_observation_id="some_existing_span_id",
 )
 ```
 
@@ -573,7 +576,6 @@ For example when a @observe-decorated function uses a ThreadPoolExecutor to make
   used. The decorator works as intended in this case.
 </Callout>
 
-
 There are 2 possible workarounds:
 
 #### 1. Pass the parent observation ID (recommended)
@@ -666,3 +668,9 @@ Large input/output data can lead to performance issues. We recommend disabling c
 ## API reference
 
 See the [Python SDK API reference](https://python.reference.langfuse.com/langfuse/decorators) for more details.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-python-decorator"]} />

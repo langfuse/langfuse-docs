@@ -275,8 +275,23 @@ await langfuseHandler.flushAsync();
 </Tab>
 </Tabs>
 
+### Serverless environments (JS/TS)
+
+Since Langchain version > 0.3.0, the callbacks on which Langfuse relies have been backgrounded. This means that execution will not wait for the callback to either return before continuing. Prior to 0.3.0, this behavior was the opposite. If you are running code in serverless environments such as Google Cloud Functions, AWS Lambda or Cloudflare Workers you should set your callbacks to be blocking to allow them time to finish or timeout. This can be done either by
+
+- setting the `LANGCHAIN_CALLBACKS_BACKGROUND` environment variable to "false" 
+- importing the global `awaitAllCallbacks` method to ensure all callbacks finish if necessary
+
+Read more about awaiting callbacks here in the [Langchain docs](https://js.langchain.com/docs/how_to/callbacks_serverless).
+
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
 <FaqPreview tags={["integration-langchain"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-langchain"]} />
