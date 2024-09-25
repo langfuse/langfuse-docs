@@ -114,6 +114,66 @@ When initializing the Langfuse handler, you can pass the following **optional** 
 | `enabled`     | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
 | `sample_rate` | `-`         | float   | [Sample rate](/docs/tracing-features/sampling) for tracing.                                     |
 
+### Dynamic Trace Attributes in Chain Invocation
+
+You can also set the `trace_name`, `user_id`, `session_id`, and `tags` for a trace that corresponds to a LangChain execution through the runnable configuration of the chain without instantiating a new `CallbackHandler` each time. This allows you to dynamically set these attributes for each specific execution. Here's an example:
+
+<Tabs items={["Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tab>
+```python
+from langfuse.callback import CallbackHandler
+
+langfuse_handler = CallbackHandler()
+
+trace_name = "langchain_trace_name"
+session_id = "random-session"
+user_id = "random-user"
+tags = ["random-tag-1", "random-tag-2"]
+
+# Your existing Langchain code to create the chain
+...
+
+# Pass config to the chain invocation to be parsed as Langfuse trace attributes 
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [langfuse_handler],
+        "run_name": trace_name,
+        "tags": tags,
+        "metadata": {
+            "langfuse_session_id": session_id,
+            "langfuse_user_id": user_id,
+        },
+    },
+)
+```
+</Tab>
+
+<Tab>
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler()
+
+const traceName = "langchain_trace_name";
+const sessionId = "random-session";
+const userId = "random-user";
+const tags = ["random-tag-1", "random-tag-2"];
+
+await chain.invoke(
+  { animal: "dog" },
+  {
+    callbacks: [langfuseHandler],
+    runName: traceName,
+    tags,
+    metadata: { langfuseUserId: userId, langfuseSessionId: sessionId },
+  }
+);
+```
+</Tab>
+
+</Tabs>
+
 ### Interoperability with Langfuse SDKs [#interoperability]
 
 Use the Langchain integration in combination with the regular Langfuse SDKs if you want to:
