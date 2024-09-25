@@ -106,6 +106,28 @@ handler = CallbackHandler(
 )
 ```
 
+You can also set the `user_id` dynamically via the runnable configuration in the chain invocation:
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler()
+
+# Your existing Langchain code to create the chain
+...
+
+# Pass user_id as metadata to the chain invocation to be parsed as the Langfuse user_id
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_user_id": "user-id",
+        },
+    },
+)
+```
+
 When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `user_id` via the `langfuse_context`:
 
 ```python
@@ -134,6 +156,23 @@ When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can 
 const handler = new CallbackHandler({
   userId: "user-id",
 });
+```
+
+You can also set the `userId` dynamically via the runnable configuration in the chain invocation:
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+// Your existing Langchain code to create the chain
+...
+
+// Pass langfuseUserId as metadata to the chain invocation to be parsed as the Langfuse user_id
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandler], metadata: { langfuseUserId: "user-id" } }
+);
 ```
 
 When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `userId` via `langfuse.trace()`:
