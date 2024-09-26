@@ -1,0 +1,18 @@
+# Continuous technical documentation of Langfuse V3
+
+Langfuse V3 is currently in development. We want to ask users of us for feedback on what we are working on. This is a working document to describe the future technical setup and deployment options. This is a working document. We will updated this as we progress and this will contain breaking changes.
+
+### Event Backups in Cloud Storage
+
+In addition to storing events in the database, you may want to store a backup of all raw incoming events in a cloud storage bucket.
+Use the `LANGFUSE_S3_EVENT_UPLOAD_*` environment variables to configure this.
+
+| Environment Variable               | Description                            | Example            |
+| ---------------------------------- | -------------------------------------- | ------------------ |
+| `LANGFUSE_S3_EVENT_UPLOAD_ENABLED`           | Enable raw event uploads to cloud storage                                     | `true`           |
+| `LANGFUSE_S3_EVENT_UPLOAD_BUCKET`            | The bucket that should store raw events                                       | `my-bucket`           |
+| `LANGFUSE_S3_EVENT_UPLOAD_PREFIX`            | (optional) Prefix to use within the bucket. Must end with `/` if provided.    | `events/`       |
+| `LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`          | (optional) API endpoint to use. Must be S3 compatible.                        | `s3.us-east-1.amazonaws.com` |
+| `LANGFUSE_S3_EVENT_UPLOAD_REGION`            | (optional) Region to use.                                                     | `us-east-1` |
+| `LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`     | (optional) Access key id to use. Falls back to standard credential chain.     | `AKIAIOSFODNN7EXAMPLE` |
+| `LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY` | (optional) Access key secret to use. Falls back to standard credential chain. | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
