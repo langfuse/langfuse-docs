@@ -126,9 +126,12 @@ const config: DocsThemeConfig = {
     const cookbook = COOKBOOK_ROUTE_MAPPING.find(
       (cookbook) => cookbook.path === asPath
     );
+    const { frontMatter } = useConfig();
     const canonical: string | undefined = cookbook?.canonicalPath
       ? "https://langfuse.com" + cookbook.canonicalPath
       : undefined;
+
+    const noindex = frontMatter.noindex === true;
 
     return {
       titleTemplate:
@@ -140,6 +143,7 @@ const config: DocsThemeConfig = {
           ? "%s - Langfuse Guides"
           : "%s - Langfuse",
       canonical,
+      noindex,
     };
   },
   head: () => {
