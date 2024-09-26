@@ -207,6 +207,8 @@ const res = await observeOpenAI(new OpenAI(), {
 
 Resulting generations are now linked to the prompt in Langfuse, allowing you to track prompt usage and performance.
 
+When worknig with chat prompts, you must typecast the `messages` as `OpenAI.ChatCompletionMessageParam[]` or use a type-guard utility function as Langfuse message roles can be arbitrary strings whereas the OpenAI type definition is more restrictive.
+
 ### Nested traces
 
 [Langfuse Tracing](/docs/tracing) groups multiple observations (can be any LLM or non-LLM calls) into a single trace. This integration by default creates a single trace for each OpenAI call.
