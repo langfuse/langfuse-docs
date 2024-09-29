@@ -39,7 +39,7 @@ _Full Demo_
 
 While telemetry is experimental ([docs](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry#enabling-telemetry)), you can enable it by setting `experimental_telemetry` on each request that you want to trace.
 
-```typescript {4}
+```ts {4}
 const result = await generateText({
   model: openai("gpt-4-turbo"),
   prompt: "Write a short story about a cat.",
@@ -63,7 +63,7 @@ You can set the Langfuse credentials via environment variables or directly to th
 
 <Tab>
 
-```typescript
+```ts
 import { LangfuseExporter } from "langfuse-vercel";
 
 new LangfuseExporter({
@@ -92,7 +92,7 @@ npm install @vercel/otel langfuse-vercel @opentelemetry/api-logs @opentelemetry/
 
 Enable the `instrumentationHook` in your `next.config.js`:
 
-```typescript filename="next.config.js" {4}
+```ts filename="next.config.js" {4}
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -105,7 +105,7 @@ module.exports = nextConfig;
 
 Add `LangfuseExporter` to your instrumentation:
 
-```typescript filename="instrumentation.ts" {7}
+```ts filename="instrumentation.ts" {7}
 import { registerOTel } from "@vercel/otel";
 import { LangfuseExporter } from "langfuse-vercel";
 
@@ -120,7 +120,7 @@ export function register() {
 </Tab>
 <Tab>
 
-```typescript {5, 8, 31}
+```ts {5, 8, 31}
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -181,7 +181,7 @@ By default, the exporter captures the input and output of each request. You can 
 
 All of the `metadata` fields are automatically captured by the exporter. You can also pass custom trace attributes to e.g. track users or sessions.
 
-```typescript showLineNumbers {6-12}
+```ts showLineNumbers {6-12}
 const result = await generateText({
   model: openai("gpt-4-turbo"),
   prompt: "Write a short story about a cat.",
@@ -203,7 +203,7 @@ const result = await generateText({
 
 Enable the `debug` option to see the logs of the exporter.
 
-```typescript
+```ts
 new LangfuseExporter({ debug: true });
 ```
 

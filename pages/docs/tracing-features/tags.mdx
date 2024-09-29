@@ -37,7 +37,7 @@ trace = langfuse.trace(
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
@@ -145,7 +145,7 @@ fn()
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` to the constructor:
 
-```typescript
+```ts
 const handler = new CallbackHandler({
   tags: ["tag-1", "tag-2"],
 });
@@ -153,20 +153,20 @@ const handler = new CallbackHandler({
 
 You can also set tags dynamically via the runnable configuration in the chain invocation:
 
-```typescript
+```ts
 const langfuseHandler = new CallbackHandler()
 const tags = ["tag-1", "tag-2"];
 
 // Your existing Langchain code to create the chain
-... 
+...
 
-// Pass config to the chain invocation to be parsed as Langfuse trace attributes 
+// Pass config to the chain invocation to be parsed as Langfuse trace attributes
 await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], tags: tags });
 ```
 
 When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via `langfuse.trace()`:
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 
