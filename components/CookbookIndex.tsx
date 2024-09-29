@@ -45,7 +45,13 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
               <Cards.Card
                 href={page.route}
                 key={page.route}
-                title={page.meta?.title || page.frontMatter?.title || page.name}
+                title={
+                  page.frontMatter?.title ||
+                  page.name
+                    .split("_")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")
+                }
                 icon={<FileCode />}
                 arrow
               >

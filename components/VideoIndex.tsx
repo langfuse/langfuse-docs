@@ -5,14 +5,20 @@ import { Video } from "lucide-react";
 import Image from "next/image";
 
 export const VideoIndex = () => (
-  <Cards num={3}>
+  <Cards num={2}>
     {(
       getPagesUnderRoute("/guides/videos") as Array<Page & { frontMatter: any }>
     ).map((page, i) => (
       <Cards.Card
         href={page.route}
         key={page.route}
-        title={page.meta?.title || page.frontMatter?.title || page.name}
+        title={
+          page.frontMatter?.title ||
+          page.name
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")
+        }
         // image={Boolean(page.frontMatter.ogImage)}
         icon={<Video />}
         arrow
@@ -21,7 +27,13 @@ export const VideoIndex = () => (
           <div className="relative aspect-video">
             <Image
               src={page.frontMatter.ogImage}
-              alt={page.meta?.title || page.frontMatter?.title || page.name}
+              alt={
+                page.frontMatter?.title ||
+                page.name
+                  .split("_")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")
+              }
               objectFit="cover"
               fill
               sizes="(max-width: 560px) 100vw, (max-width: 1350px) 50vw, 33vw"
