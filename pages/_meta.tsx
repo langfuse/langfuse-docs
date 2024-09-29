@@ -32,10 +32,12 @@ export default {
   guides: {
     type: "page",
     title: "Guides",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
   faq: {
     type: "page",
     title: "FAQ",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
   pricing: {
     title: "Pricing",
