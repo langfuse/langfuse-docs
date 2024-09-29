@@ -131,26 +131,29 @@ user_id = "random-user"
 tags = ["random-tag-1", "random-tag-2"]
 
 # Your existing Langchain code to create the chain
+
 ...
 
-# Pass config to the chain invocation to be parsed as Langfuse trace attributes 
+# Pass config to the chain invocation to be parsed as Langfuse trace attributes
+
 chain.invoke(
-    {"animal": "dog"},
-    config={
-        "callbacks": [langfuse_handler],
-        "run_name": trace_name,
-        "tags": tags,
-        "metadata": {
-            "langfuse_session_id": session_id,
-            "langfuse_user_id": user_id,
-        },
-    },
+{"animal": "dog"},
+config={
+"callbacks": [langfuse_handler],
+"run_name": trace_name,
+"tags": tags,
+"metadata": {
+"langfuse_session_id": session_id,
+"langfuse_user_id": user_id,
+},
+},
 )
-```
+
+````
 </Tab>
 
 <Tab>
-```typescript
+```ts
 import { CallbackHandler } from "langfuse-langchain";
 
 const langfuseHandler = new CallbackHandler()
@@ -169,7 +172,8 @@ await chain.invoke(
     metadata: { langfuseUserId: userId, langfuseSessionId: sessionId },
   }
 );
-```
+````
+
 </Tab>
 
 </Tabs>
@@ -216,7 +220,7 @@ Limitation (decorator + langchain): The input/output of the Langchain code will 
 <Tab>
 {/* JS */}
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 
@@ -243,7 +247,7 @@ await chain.invoke(
 
 If you want to add the input/output of the Langchain run to the trace or span itself, use the `updateRoot` flag in the `CallbackHandler` constructor.
 
-```typescript
+```ts
 const langfuseHandlerTrace = new CallbackHandler({
   root: trace,
   updateRoot: true,
@@ -306,7 +310,7 @@ langfuse_handler.shutdown()
 
 {/* JS */}
 
-```typescript
+```ts
 await langfuseHandler.shutdownAsync();
 ```
 
@@ -328,7 +332,7 @@ langfuse_handler.flush()
 
 {/* JS */}
 
-```typescript
+```ts
 await langfuseHandler.flushAsync();
 ```
 
@@ -339,7 +343,7 @@ await langfuseHandler.flushAsync();
 
 Since Langchain version > 0.3.0, the callbacks on which Langfuse relies have been backgrounded. This means that execution will not wait for the callback to either return before continuing. Prior to 0.3.0, this behavior was the opposite. If you are running code in serverless environments such as Google Cloud Functions, AWS Lambda or Cloudflare Workers you should set your callbacks to be blocking to allow them time to finish or timeout. This can be done either by
 
-- setting the `LANGCHAIN_CALLBACKS_BACKGROUND` environment variable to "false" 
+- setting the `LANGCHAIN_CALLBACKS_BACKGROUND` environment variable to "false"
 - importing the global `awaitAllCallbacks` method to ensure all callbacks finish if necessary
 
 Read more about awaiting callbacks here in the [Langchain docs](https://js.langchain.com/docs/how_to/callbacks_serverless).

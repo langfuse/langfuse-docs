@@ -27,7 +27,10 @@ export default function Changelog({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn("rounded border p-5 max-w-lg mx-5 sm:mx-auto", className)}
+      className={cn(
+        "rounded border p-5 max-w-lg mx-5 sm:mx-auto bg-card",
+        className
+      )}
       role="region" // Added role for the container
       aria-labelledby="changelog-heading" // Added aria-labelledby to reference the heading
     >
@@ -52,7 +55,7 @@ export default function Changelog({ className }: { className?: string }) {
               <div className="w-px bg-secondary" />
             </div>
 
-            <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-background">
+            <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-card">
               <div className="h-1.5 w-1.5 rounded-full bg-secondary ring-1 ring-primary/80 opacity-60 group-hover:opacity-100" />
             </div>
             <p className="flex-auto py-0.5 text-sm leading-5 text-primary/70 opacity-80 group-hover:opacity-100">
@@ -84,7 +87,7 @@ export default function Changelog({ className }: { className?: string }) {
           <div className="w-px bg-secondary" />
         </div>
 
-        <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-background">
+        <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-card">
           <div className="h-1.5 w-1.5 rounded-full bg-secondary ring-1 ring-primary/80 opacity-60 group-hover:opacity-100" />
         </div>
         <p className="flex-auto py-0.5 text-sm leading-5 text-primary/60 opacity-80 group-hover:opacity-100">

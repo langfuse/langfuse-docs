@@ -1,7 +1,7 @@
 ---
 date: 2024-07-11
-title: Create Non-Numeric Scores via SDKs  
-description: The Langfuse API, Python and JS SDKs now support creating categorical, boolean and numeric scores. 
+title: Create Non-Numeric Scores via SDKs
+description: The Langfuse API, Python and JS SDKs now support creating categorical, boolean and numeric scores.
 author: Marlies
 ---
 
@@ -12,7 +12,7 @@ import { BookOpen } from "lucide-react";
 
 Our improved API allows you to create categorical and boolean scores, in addition to the previously supported numeric scores. If you need your scores to follow a specific format (e.g. data type, range or name), you can now define a score configuration using the API or UI and validate scores against it.
 
-Check out our [scores documentation](/docs/scores/custom) for score ingestion examples and code snippets. 
+Check out our [scores documentation](/docs/scores/custom) for score ingestion examples and code snippets.
 
 ### New API routes
 
@@ -20,7 +20,7 @@ Check out our [scores documentation](/docs/scores/custom) for score ingestion ex
 - `GET /api/public/score-configs/{configId}`
 - `POST /api/public/score-configs`
 
-### Existing API Routes with new parameters 
+### Existing API Routes with new parameters
 
 - `GET /api/public/scores` can now retrieve scores by `dataType` and/or `configId`
 - `POST /api/public/scores` now supports defining `dataType` and/or `configId`
@@ -54,16 +54,16 @@ langfuse.score(
 npm install langfuse
 ```
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
 // Create a single numeric, categorical or boolean score
 await langfuse.score({
-    scoreName: "accuracy",
-    scoreValue: 0.95,
-    dataType: "NUMERIC",
-    traceId: "traceId"
+  scoreName: "accuracy",
+  scoreValue: 0.95,
+  dataType: "NUMERIC",
+  traceId: "traceId",
 });
 ```
 
@@ -73,13 +73,10 @@ await langfuse.score({
 ## Learn more
 
 <Cards num={3}>
-<Card title="Score Docs" href="/docs/scores/custom" icon={<BookOpen />} />
+  <Card title="Score Docs" href="/docs/scores/custom" icon={<BookOpen />} />
   <Card
     title="API Reference"
     href="https://api.reference.langfuse.com"
     icon={<BookOpen />}
   />
 </Cards>
-
-
-
