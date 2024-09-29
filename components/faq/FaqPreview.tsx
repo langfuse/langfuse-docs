@@ -1,6 +1,6 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
-import { Card, Cards } from "nextra-theme-docs";
+import { Cards } from "nextra/components";
 import { MessageCircleQuestion } from "lucide-react";
 import Link from "next/link";
 
@@ -46,7 +46,7 @@ export const FaqList = ({
     return (
       <Cards num={1}>
         {pages.map((page) => (
-          <Card
+          <Cards.Card
             href={page.route}
             key={page.route}
             title={page.meta?.title || page.frontMatter?.title || page.name}
@@ -54,7 +54,7 @@ export const FaqList = ({
             arrow
           >
             {""}
-          </Card>
+          </Cards.Card>
         ))}
       </Cards>
     );
@@ -71,7 +71,7 @@ export const FaqList = ({
             <Link
               key={page.route}
               href={page.route}
-              className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:from-font]"
+              className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
             >
               <span className="">
                 {page.meta?.title || page.frontMatter?.title || page.name}

@@ -1,7 +1,7 @@
-{
+export default {
   "get-started": "Get Started",
   "track-errors": "Track Errors",
-  "examples": "Example Notebook",
+  examples: "Example Notebook",
   "assistants-api": "Assistants API",
-  "structured-outputs": "Structured Outputs"
-}
+  "structured-outputs": "Structured Outputs",
+};

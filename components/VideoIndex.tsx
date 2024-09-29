@@ -1,6 +1,6 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
-import { Card, Cards } from "nextra-theme-docs";
+import { Cards } from "nextra/components";
 import { Video } from "lucide-react";
 import Image from "next/image";
 
@@ -9,11 +9,11 @@ export const VideoIndex = () => (
     {(
       getPagesUnderRoute("/guides/videos") as Array<Page & { frontMatter: any }>
     ).map((page, i) => (
-      <Card
+      <Cards.Card
         href={page.route}
         key={page.route}
         title={page.meta?.title || page.frontMatter?.title || page.name}
-        image={Boolean(page.frontMatter.ogImage)}
+        // image={Boolean(page.frontMatter.ogImage)}
         icon={<Video />}
         arrow
       >
@@ -30,7 +30,7 @@ export const VideoIndex = () => (
         ) : (
           ""
         )}
-      </Card>
+      </Cards.Card>
     ))}
   </Cards>
 );
