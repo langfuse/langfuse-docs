@@ -32,17 +32,10 @@ export default {
   guides: {
     type: "page",
     title: "Guides",
-    display: "hidden",
   },
   faq: {
     type: "page",
     title: "FAQ",
-    display: "hidden",
-  },
-  cookbook: {
-    type: "page",
-    title: "Cookbook",
-    display: "hidden",
   },
   pricing: {
     title: "Pricing",
