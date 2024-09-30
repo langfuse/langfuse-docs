@@ -9,18 +9,20 @@ Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version
 
 This example demonstrates how to use Langfuse Prompt Management together with Langchain JS.
 
-```ts
+
+```typescript
 const langfuseParams = {
-  publicKey: "",
-  secretKey: "",
-  baseUrl: "https://cloud.langfuse.com",
-  flushAt: 1, // cookbook-only, send all events immediately
-};
+    publicKey: "",
+    secretKey: "",
+    baseUrl: "https://cloud.langfuse.com",
+    flushAt: 1 // cookbook-only, send all events immediately
+}
 ```
 
-```ts
-import { Langfuse } from "npm:langfuse";
-const langfuse = new Langfuse(langfuseParams);
+
+```typescript
+import { Langfuse } from "npm:langfuse"
+const langfuse = new Langfuse(langfuseParams)
 ```
 
 ## Simple example
@@ -36,15 +38,16 @@ We add the prompt used in this example via the SDK. Alternatively, you can also 
 
 For the sake of this notebook, we will add the prompt in Langfuse and use it right away. Usually, you'd update the prompt from time to time in Langfuse and your application fetches the current production version.
 
-```ts
-const prompt = await langfuse.createPrompt({
-  name: "jokes",
-  prompt: "Tell me a joke about {{topic}}",
-  config: {
-    modelName: "gpt-4",
-    temperature: 1,
-  }, // optionally, add configs (e.g. model parameters or model tools)
-  labels: ["production"], // directly promote to production
+
+```typescript
+const prompt =  await langfuse.createPrompt({
+    name: "jokes",
+    prompt: "Tell me a joke about {{topic}}",
+    config: {
+      modelName: "gpt-4",
+      temperature: 1,
+    }, // optionally, add configs (e.g. model parameters or model tools)
+    labels: ["production"] // directly promote to production
 });
 ```
 
@@ -56,27 +59,34 @@ Prompt in Langfuse
 
 #### Get current prompt version from Langfuse
 
-```ts
-const prompt = await langfuse.getPrompt("jokes");
+
+```typescript
+const prompt = await langfuse.getPrompt("jokes")
 ```
 
 The prompt includes the prompt string
 
-```ts
-prompt.prompt;
+
+```typescript
+prompt.prompt
 ```
+
+
+
 
     [32m"Tell me a joke about {{topic}}"[39m
 
+
+
 and the config object
 
-```ts
-prompt.config;
+```typescript
+prompt.config
 ```
 
 ```
 { modelName: [32m"gpt-4"[39m, temperature: [33m1[39m }
-```
+ ```
 
 #### Transform prompt into Langchain PromptTemplate
 
@@ -86,46 +96,50 @@ Context: Langfuse declares input variables in prompt templates using double brac
 
 Also, pass the Langfuse prompt as metadata to the PromptTemplate to automatically link generations that use the prompt.
 
-```ts
-import { PromptTemplate } from "npm:@langchain/core/prompts";
+
+```typescript
+import { PromptTemplate } from "npm:@langchain/core/prompts"
 
 const promptTemplate = PromptTemplate.fromTemplate(
-  prompt.getLangchainPrompt()
-).withConfig({
-  metadata: { langfusePrompt: prompt },
-});
+    prompt.getLangchainPrompt()
+  ).withConfig({
+    metadata: { langfusePrompt: prompt }
+  });
 ```
 
 #### Setup Langfuse Tracing for Langchain JS
 
 We'll use the native [Langfuse Tracing for Langchain JS](https://langfuse.com/docs/integrations/langchain) when executing this chain. This is fully optional and can be used independently from Prompt Management.
 
-```ts
-import { CallbackHandler } from "npm:langfuse-langchain";
-const langfuseLangchainHandler = new CallbackHandler(langfuseParams);
+
+```typescript
+import { CallbackHandler } from "npm:langfuse-langchain"
+const langfuseLangchainHandler = new CallbackHandler(langfuseParams)
 ```
 
 #### Create chain
 
 We use the `modelName` and `temperature` stored in `prompt.config`.
 
-```ts
-import { ChatOpenAI } from "npm:@langchain/openai";
+
+```typescript
+import { ChatOpenAI } from "npm:@langchain/openai"
 import { RunnableSequence } from "npm:@langchain/core/runnables";
 
 const model = new ChatOpenAI({
-  modelName: prompt.config.modelName,
-  temperature: prompt.config.temperature,
+    modelName: prompt.config.modelName,
+    temperature: prompt.config.temperature
 });
 const chain = RunnableSequence.from([promptTemplate, model]);
 ```
 
 #### Invoke chain
 
-```ts
+
+```typescript
 const res = await chain.invoke(
-  { topic: "Europe and the Americas" },
-  { callbacks: [langfuseLangchainHandler] }
+    { topic: "Europe and the Americas" },
+    { callbacks: [langfuseLangchainHandler] }
 );
 ```
 
@@ -139,34 +153,35 @@ As we passed the langfuse callback handler, we can explore the execution trace i
 
 ### Add prompt to Langfuse
 
-```ts
-const prompt = await langfuse.createPrompt({
-  name: "extractor",
-  prompt: "Extracts fields from the input.",
-  config: {
-    modelName: "gpt-4",
-    temperature: 0,
-    schema: {
-      type: "object",
-      properties: {
-        tone: {
-          type: "string",
-          enum: ["positive", "negative"],
-          description: "The overall tone of the input",
+
+```typescript
+const prompt =  await langfuse.createPrompt({
+    name: "extractor",
+    prompt: "Extracts fields from the input.",
+    config: {
+      modelName: "gpt-4",
+      temperature: 0,
+      schema: {
+        type: "object",
+        properties: {
+          tone: {
+            type: "string",
+            enum: ["positive", "negative"],
+            description: "The overall tone of the input",
+          },
+          word_count: {
+            type: "number",
+            description: "The number of words in the input",
+          },
+          chat_response: {
+            type: "string",
+            description: "A response to the human's input",
+          },
         },
-        word_count: {
-          type: "number",
-          description: "The number of words in the input",
-        },
-        chat_response: {
-          type: "string",
-          description: "A response to the human's input",
-        },
-      },
-      required: ["tone", "word_count", "chat_response"],
-    },
-  }, // optionally, add configs (e.g. model parameters or model tools)
-  labels: ["production"], // directly promote to production
+        required: ["tone", "word_count", "chat_response"],
+      }
+    }, // optionally, add configs (e.g. model parameters or model tools)
+    labels: ["production"] // directly promote to production
 });
 ```
 
@@ -176,23 +191,26 @@ Prompt in Langfuse
 
 ### Fetch prompt
 
-```ts
-const extractorPrompt = await langfuse.getPrompt("extractor");
+
+```typescript
+const extractorPrompt = await langfuse.getPrompt("extractor")
 ```
 
 Transform into schema
 
-```ts
+
+```typescript
 const extractionFunctionSchema = {
-  name: "extractor",
-  description: prompt.prompt,
-  parameters: prompt.config.schema,
-};
+    name: "extractor",
+    description: prompt.prompt,
+    parameters: prompt.config.schema,
+}
 ```
 
 ### Build chain
 
-```ts
+
+```typescript
 import { ChatOpenAI } from "npm:@langchain/openai";
 import { JsonOutputFunctionsParser } from "npm:langchain/output_parsers";
 
@@ -200,9 +218,9 @@ import { JsonOutputFunctionsParser } from "npm:langchain/output_parsers";
 const parser = new JsonOutputFunctionsParser();
 
 // Instantiate the ChatOpenAI class
-const model = new ChatOpenAI({
-  modelName: prompt.config.modelName,
-  temperature: prompt.config.temperature,
+const model = new ChatOpenAI({ 
+    modelName: prompt.config.modelName,
+    temperature: prompt.config.temperature
 });
 
 // Create a new runnable, bind the function to the model, and pipe the output through the parser
@@ -216,13 +234,14 @@ const runnable = model
 
 ### Invoke chain
 
-```ts
+
+```typescript
 import { HumanMessage } from "npm:@langchain/core/messages";
 
 // Invoke the runnable with an input
 const result = await runnable.invoke(
-  [new HumanMessage("What a beautiful day!")],
-  { callbacks: [langfuseLangchainHandler] }
+    [new HumanMessage("What a beautiful day!")],
+    { callbacks: [langfuseLangchainHandler] }
 );
 ```
 

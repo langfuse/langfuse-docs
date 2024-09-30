@@ -18,11 +18,13 @@ Want to learn more? Check out our [documentation on LLM Security](https://langfu
 
 ## Installation and Setup
 
-```ts
+
+```python
 %pip install llm-guard langfuse openai
 ```
 
-```ts
+
+```python
 import os
 
 # Get keys for your project from the project settings page
@@ -48,7 +50,8 @@ The following example walks through an example of kid-friendly storytelling appl
 
 Without security measures, it is possible to generate stories for inappropriate topics, such as those that include violence.
 
-```ts
+
+```python
 from langfuse.decorators import observe
 from langfuse.openai import openai # OpenAI integration
 
@@ -80,7 +83,8 @@ LLM Guard uses the following [models](https://huggingface.co/collections/MoritzL
 
 The example below adds the detected "violence" score to the trace in Langfuse. You can see the trace for this interaction, and analytics for these banned topics scores, in the Langfuse dashboard.
 
-```ts
+
+```python
 from langfuse.decorators import observe, langfuse_context
 from langfuse.openai import openai # OpenAI integration
 from llm_guard.input_scanners import BanTopics
@@ -118,11 +122,12 @@ main()
 
 > This is not child safe, please request another topic
 
-```ts
-sanitized_prompt, is_valid, (risk_score = violence_scanner.scan("war crimes"));
-print(sanitized_prompt);
-print(is_valid);
-print(risk_score);
+
+```python
+sanitized_prompt, is_valid, risk_score = violence_scanner.scan("war crimes")
+print(sanitized_prompt)
+print(is_valid)
+print(risk_score)
 ```
 
 > Topics detected for the prompt scores={'violence': 0.9283769726753235}
@@ -141,13 +146,15 @@ Use LLM Guard's [Anonymize scanner](https://llm-guard.com/input_scanners/anonymi
 
 In the example below Langfuse is used to track each of these steps separately to measure the accuracy and latency.
 
-```ts
+
+```python
 from llm_guard.vault import Vault
 
 vault = Vault()
 ```
 
-```ts
+
+```python
 from llm_guard.input_scanners import Anonymize
 from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
 from langfuse.openai import openai # OpenAI integration
@@ -200,7 +207,8 @@ main()
 
 You can stack multiple scanners if you want to filter for multiple security risks.
 
-```ts
+
+```python
 from langfuse.decorators import observe, langfuse_context
 from langfuse.openai import openai # OpenAI integration
 
@@ -252,7 +260,8 @@ main()
 
 And you can also use the same methond to scan the model's output to ensure the quality of the response:
 
-```ts
+
+```python
 from llm_guard import scan_output
 from llm_guard.output_scanners import NoRefusal, Relevance, Sensitive
 
@@ -295,14 +304,15 @@ Prompt injection allows malicious actors to extract sensitive information, gener
 
 There are two types of prompt injection:
 
-- **Direct**: attacker includes malicious content in the prompt, such as through invisible text or jailbreaks.
-- **Indirect**: attacker indirectly influences a model by embedding malicious content in the data the model processes, rather than altering the prompt directly
+*   **Direct**: attacker includes malicious content in the prompt, such as through invisible text or jailbreaks.
+*   **Indirect**: attacker indirectly influences a model by embedding malicious content in the data the model processes, rather than altering the prompt directly
 
 Below is an example of the infamous "Grandma trick", which allows users to trick ChatGPT into outputting sensitive information by prompting the system to role-play as the user's grandmother.
 
 We use the LLM Guard [Prompt Injection scanner](https://llm-guard.com/input_scanners/prompt_injection/) to try to detect and block these types of prompts.
 
-```ts
+
+```python
 from llm_guard.input_scanners import PromptInjection
 from llm_guard.input_scanners.prompt_injection import MatchType
 from langfuse.decorators import observe, langfuse_context
@@ -340,11 +350,13 @@ main()
 
 As you can see, LLM Guard fails to catch the injected Grandma Trick prompt. Let's see how another security library, Lakera, performs:
 
-```ts
-os.environ["LAKERA_GUARD_API_KEY"] = "";
+
+```python
+os.environ["LAKERA_GUARD_API_KEY"] = ""
 ```
 
-```ts
+
+```python
 import os
 # requests library must be available in current Python environment
 import requests
@@ -396,7 +408,8 @@ Luckily, Lakera Guard is able to catch and block the prompt injection. Langfuse 
 
 Here is another example which directly inject a malicious link into the prompt.
 
-```ts
+
+```python
 @observe()
 def answer_question(question: str, context: str):
   scanner = PromptInjection(threshold=0.5, match_type=MatchType.FULL)
@@ -442,7 +455,7 @@ def main():
 main()
 ```
 
-> No prompt injection detected highest_score=0.0
+> No prompt injection detected   highest_score=0.0
 >
 > Lakera Guard identified a prompt injection. No user was harmed by this LLM.
 
