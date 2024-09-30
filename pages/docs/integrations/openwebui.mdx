@@ -32,7 +32,7 @@ To trace your application data with Langfuse, you can use the [Langfuse pipeline
 2. Launch [Pipelines](https://github.com/open-webui/pipelines/): The easiest method is to use Docker. Use the following command to start Pipelines:
 
 ```bash
-$ docker run -p 9099:9099 --add-host=host.docker.internal:host-gateway -v pipelines:/app/pipelines --name pipelines --restart always ghcr.io/open-webui/pipelines:main
+docker run -p 9099:9099 --add-host=host.docker.internal:host-gateway -v pipelines:/app/pipelines --name pipelines --restart always ghcr.io/open-webui/pipelines:main
 ```
 
 ### Step 2: Connecting OpenWebUI with Pipelines
@@ -56,11 +56,17 @@ Now, add your Langfuse API keys below. If you haven't signed up to Langfuse yet,
 
 ![OpenWebUI add Langfuse Pipeline](/images/docs/openwebui-add-pipeline.png)
 
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  Capture usage (token counts) for OpenAi models while streaming is enabled, you have to navigate to the model settings in OpenWebUI and check the "Usage" [box](https://github.com/open-webui/open-webui/discussions/5770#discussioncomment-10778586) below *Capabilities*.
+</Callout>
+
 ### Step 4: See your traces in Langfuse
 
 You can now interact with your OpenWebUI application and see the traces in Langfuse.
 
-[Example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/417170a8-df35-4820-b637-556700d4f628?observation=cc3ffb91-05fc-437b-98f7-4f1c57c64035) in the Langfuse UI:
+[Example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/904a8c1f-4974-4f8f-8a2f-129ae78d99c5?observation=fe5b127b-e71c-45ab-8ee5-439d4c0edc28) in the Langfuse UI:
 
 ![OpenWebUI Example Trace in Langfuse](/images/docs/openwebui-example-trace.png)
 
