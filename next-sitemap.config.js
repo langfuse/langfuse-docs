@@ -15,5 +15,9 @@ module.exports = {
         // Exclude non-canonical pages from sitemap which are also part of the docs
         ...cookbookRoutes
             .filter(({ docsPath }) => !!docsPath)
-            .map(({ notebook }) => `/guides/cookbook/${notebook.replace(".ipynb", "")}`)],
+            .map(({ notebook }) => `/guides/cookbook/${notebook.replace(".ipynb", "")}`),
+        // Exclude _meta files
+        '*/_meta'
+    ],
+
 }

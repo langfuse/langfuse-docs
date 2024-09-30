@@ -67,7 +67,7 @@ LANGFUSE_BASEURL="https://cloud.langfuse.com"; # 🇪🇺 EU region
 # LANGFUSE_BASEURL="https://us.cloud.langfuse.com"; # 🇺🇸 US region
 ```
 
-```typescript
+```ts
 import { Langfuse } from "langfuse"; // or "langfuse-node"
 
 // without additional options
@@ -83,7 +83,7 @@ const langfuse = new Langfuse({
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse"; // or "langfuse-node"
 
 const langfuse = new Langfuse({
@@ -142,7 +142,7 @@ import { FileCode } from "lucide-react";
 
 Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
 
-```typescript
+```ts
 // Example trace creation
 const trace = langfuse.trace({
   name: "chat-app-session",
@@ -196,7 +196,7 @@ trace.score({});
 
 Events are used to track discrete events in a trace.
 
-```typescript
+```ts
 // Example event
 const event = trace.event({
   name: "get-user-profile",
@@ -246,7 +246,7 @@ event.score({});
 
 Spans represent durations of units of work in a trace. We generated convenient SDK functions for generic spans as well as LLM spans.
 
-```typescript
+```ts
 // Example span creation
 const span = trace.span({
   name: "embedding-retrieval",
@@ -306,7 +306,7 @@ span.score({});
 
 Generations are used to log generations of AI model. They contain additional attributes about the model and the prompt/completion and are specifically rendered in the Langfuse UI.
 
-```typescript
+```ts
 // Example generation creation
 const generation = trace.generation({
   name: "chat-completion",
@@ -382,7 +382,7 @@ There are two options to nest observations:
 <Tabs items={["Default", "Manual nesting via ids (distributed traces)"]}>
 <Tab>
 
-```typescript
+```ts
 const trace = langfuse.trace({ name: "chat-app-session" });
 
 const span = trace.span({ name: "chat-interaction" });
@@ -396,7 +396,7 @@ span.generation({ name: "chat-completion" });
 
 Especially in distributed applications it is often not possible to nest observations via the SDK. In this case, you can use the `traceId` and `parentObservationId` properties to manually nest observations.
 
-```typescript
+```ts
 const trace = langfuse.trace({
   name: "chat-app-session",
 });
@@ -432,7 +432,7 @@ Links
 - Learn more about [Scores in Langfuse](/docs/scores)
 - Report scores from the browser (e.g. user feedback) using the [Web SDK](/docs/sdk/typescript/guide-web)
 
-```typescript
+```ts
 await langfuse.score({
   traceId: message.traceId,
   observationId: message.generationId,
@@ -460,7 +460,7 @@ generation.score({});
 
 The Langfuse SDKs sends events asynchronously to the Langfuse server. You should call shutdown to exit cleanly before your application exits.
 
-```typescript
+```ts
 langfuse.shutdown();
 // or
 await langfuse.shutdownAsync();
@@ -472,7 +472,7 @@ Issues with the SDKs can be caused by various reasons ranging from incorrectly c
 
 The SDK does not throw errors to protect your application process. Instead, you can optionally listen to errors:
 
-```typescript
+```ts
 langfuse.on("error", (error) => {
   // Whatever you want to do with the error
   console.error(error);
@@ -481,7 +481,7 @@ langfuse.on("error", (error) => {
 
 Alternatively, you can enable debugging to get detailed logs of what's happening in the SDK.
 
-```typescript
+```ts
 langfuse.debug();
 ```
 
@@ -502,7 +502,7 @@ Note: Most of these execution environments have a timeout after which the proces
   npm i @vercel/functions
   ```
 
-  ```typescript
+  ```ts
   import { waitUntil } from "@vercel/functions";
   // within the api handler
   waitUntil(langfuse.flushAsync());
@@ -514,7 +514,7 @@ When the process exits use `await langfuse.shutdownAsync()` to make sure all req
 
 Example:
 
-```typescript
+```ts
 const langfuse = new Langfuse({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
@@ -564,7 +564,7 @@ We improved the flexibility of the SDK by allowing you to ingest any type of usa
 
 **v1.x.x**
 
-```typescript
+```ts
 langfuse.generation({
   name: "chat-completion",
   usage = {
@@ -579,7 +579,7 @@ langfuse.generation({
 
 The usage object supports the OpenAi structure with `{'promptTokens', 'completionTokens', 'totalTokens'}` and a more generic version `{'input', 'output', 'total', 'unit'}` where unit can be of value `"TOKENS"`, `"CHARACTERS"`, `"MILLISECONDS"`, `"SECONDS"`, `"IMAGES"`. For some models the token counts are [automatically calculated](https://langfuse.com/docs/model-usage-and-cost) by Langfuse. Create an issue to request support for other units and models.
 
-```typescript
+```ts
 // Generic style
 langfuse.generation({
   name = "my-claude-generation",
@@ -610,7 +610,7 @@ langfuse.generation({
 
 We deprecated the external trace id to simplify the API. Instead, you can now (optionally) directly set the trace id when creating the trace. Traces are still upserted in case a trace with this id already exists in your project.
 
-```typescript
+```ts
 // v0.x
 const trace = langfuse.trace({ externalId: "123" });
 // When manually linking observations and scores to the trace
@@ -637,7 +637,7 @@ With v1.0.0 we introduced the `shutdownAsync` method to make sure all requests a
 
 This is especially important for short-lived execution environments such as [lambdas and serverless functions](#lambda).
 
-```typescript
+```ts
 export const handler() {
   // Lambda / serverless function
 

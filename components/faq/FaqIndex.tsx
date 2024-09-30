@@ -1,6 +1,6 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
-import { Card, Cards } from "nextra-theme-docs";
+import { Cards } from "nextra/components";
 import { MessageCircleQuestion } from "lucide-react";
 import Link from "next/link";
 
@@ -50,7 +50,7 @@ export const FaqIndex = () => {
             </h3>
             <Cards num={1}>
               {pages.slice(0, PREVIEW_PAGES_PER_TAG).map((page) => (
-                <Card
+                <Cards.Card
                   href={page.route}
                   key={page.route}
                   title={
@@ -60,7 +60,7 @@ export const FaqIndex = () => {
                   arrow
                 >
                   {""}
-                </Card>
+                </Cards.Card>
               ))}
             </Cards>
             <p className="mt-4">

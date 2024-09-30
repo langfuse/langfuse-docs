@@ -39,7 +39,7 @@ trace = langfuse.trace(
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
@@ -152,7 +152,7 @@ fn()
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `userId` to the constructor:
 
-```typescript
+```ts
 const handler = new CallbackHandler({
   userId: "user-id",
 });
@@ -160,7 +160,7 @@ const handler = new CallbackHandler({
 
 You can also set the `userId` dynamically via the runnable configuration in the chain invocation:
 
-```typescript
+```ts
 import { CallbackHandler } from "langfuse-langchain";
 
 const langfuseHandler = new CallbackHandler();
@@ -177,7 +177,7 @@ await chain.invoke(
 
 When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `userId` via `langfuse.trace()`:
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 

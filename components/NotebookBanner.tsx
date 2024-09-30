@@ -1,4 +1,4 @@
-import { Callout } from "nextra-theme-docs";
+import { Callout } from "nextra/components";
 import { Button } from "./ui/button";
 
 export const NotebookBanner: React.FC<{ src: string; className?: string }> = ({
