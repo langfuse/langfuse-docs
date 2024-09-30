@@ -13,7 +13,7 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/langchain)
 
 
 ```python
-%pip install langfuse langchain langchain_openai --upgrade
+%pip install langfuse langchain langchain_openai langchain_community --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
@@ -22,14 +22,15 @@ Initialize the Langfuse client with your API keys from the project settings in t
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = "***"
+# Your openai key
+os.environ["OPENAI_API_KEY"] = ""
 ```
 
 
@@ -199,6 +200,11 @@ chain.invoke(query, config={"callbacks":[langfuse_handler]})
 
 
 ```python
+%pip install google-search-results
+```
+
+
+```python
 from langchain.agents import AgentExecutor, load_tools, create_openai_functions_agent
 from langchain_openai import ChatOpenAI
 from langchain import hub
@@ -274,54 +280,55 @@ review = overall_chain.invoke("Tragedy at sunset on the beach", {"callbacks":[la
 review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler])# add the handler to the run method
 ```
 
-## Adding scores to traces
+## Customize trace names via run_name
 
-In addition to the attributes automatically captured by the decorator, you can add others to use the full features of Langfuse.
+By default, Langfuse uses the Langchain run_name as trace/observation names. For more complex/custom chains, it can be useful to customize the names via own run_names.
 
-Two utility methods:
-*   `langfuse_context.update_current_observation`: Update the trace/span of the current function scope
-*   `langfuse_context.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
+![Custom LangChain Run Names](https://langfuse.com/images/cookbook/integration-langchain/custom_langchain_run_names.png)
 
-For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation).
-
-Below is an example demonstrating how to enrich traces and observations with custom parameters:
+**Example without custom run names**
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
- 
-@observe(as_type="generation")
-def deeply_nested_llm_call():
-    # Enrich the current observation with a custom name, input, and output
-    langfuse_context.update_current_observation(
-        name="Deeply nested LLM call", input="Ping?", output="Pong!"
-    )
-    # Set the parent trace's name from within a nested observation
-    langfuse_context.update_current_trace(
-        name="Trace name set from deeply_nested_llm_call",
-        session_id="1234",
-        user_id="5678",
-        tags=["tag1", "tag2"],
-        public=True
-    )
- 
-@observe()
-def nested_span():
-    # Update the current span with a custom name and level
-    langfuse_context.update_current_observation(name="Nested Span", level="WARNING")
-    deeply_nested_llm_call()
- 
-@observe()
-def main():
-    nested_span()
- 
-# Execute the main function to generate the enriched trace
-main()
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
+model = ChatOpenAI()
+chain = prompt1 | model | StrOutputParser()
+chain.invoke({"person": "Grace Hopper"}, config={
+      "callbacks":[langfuse_handler]
+  })
 ```
 
-On the Langfuse platform the trace now shows with the updated name from the `deeply_nested_llm_call`, and the observations will be enriched with the appropriate data points.
+### Via Runnable Config
 
-**Example trace:** https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f16e0151-cca8-4d90-bccf-1d9ea0958afb
+
+```python
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?").with_config(run_name="Famous Person Prompt")
+model = ChatOpenAI().with_config(run_name="Famous Person LLM")
+output_parser = StrOutputParser().with_config(run_name="Famous Person Output Parser")
+chain = (prompt1 | model | output_parser).with_config(run_name="Famous Person Locator")
+
+chain.invoke({"person": "Grace Hopper"}, config={
+    "callbacks":[langfuse_handler]
+})
+```
+
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ec9fcc46-ca38-4bdb-9482-eb06a5f90944
+
+### Via Run Config
+
+
+```python
+
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
+model = ChatOpenAI()
+chain = prompt1 | model | StrOutputParser()
+chain.invoke({"person": "Grace Hopper"}, config={
+    "run_name": "Famous Person Locator",
+    "callbacks":[langfuse_handler]
+  })
+```
+
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b48204e2-fd48-487b-8f66-015e3f10613d
 
 ## Interoperability with Langfuse Python SDK
 
@@ -429,3 +436,106 @@ main()
 View it in Langfuse
 
 ![Trace of Nested Langchain Runs in Langfuse](https://langfuse.com/images/docs/langchain_python_trace_interoperability.png)
+
+## Adding evaluation/feedback scores to traces
+
+Evaluation results and user feedback are recorded as [scores](https://langfuse.com/docs/scores) in Langfuse.
+
+To add a score to a trace, you need to know the trace_id. There are two options to achieve this when using LangChain:
+
+1. Provide a predefined LangChain run_id
+2. Use the Langfuse Decorator to get the trace_id
+
+![Langchain Trace in Langfuse with Score](https://langfuse.com/images/cookbook/integration-langchain/langchain_trace_with_score.png)
+
+### Predefined LangChain `run_id`
+
+Langfuse uses the LangChain run_id as a trace_id. Thus you can provide a custom run_id to the runnable config in order to later add scores to the trace.
+
+
+```python
+from operator import itemgetter
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema import StrOutputParser
+import uuid
+
+predefined_run_id = str(uuid.uuid4())
+
+langfuse_handler = CallbackHandler()
+
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
+model = ChatOpenAI()
+chain = prompt1 | model | StrOutputParser()
+
+chain.invoke({"person": "Ada Lovelace"}, config={
+    "run_id": predefined_run_id,
+    "callbacks":[langfuse_handler]
+})
+```
+
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+langfuse.score(
+    trace_id=predefined_run_id,
+    name="user-feedback",
+    value=1,
+    comment="This was correct, thank you"
+);
+```
+
+Example Trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9860fffa-02ed-4278-bcf7-c856c569cead
+
+### Via Langfuse Decorator
+
+Alternatively, you can use the LangChain integration together with the [Langfuse @observe-decorator](https://langfuse.com/docs/sdk/python/decorators) for Python.
+
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from operator import itemgetter
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.schema import StrOutputParser
+import uuid
+
+prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
+model = ChatOpenAI()
+chain = prompt1 | model | StrOutputParser()
+
+@observe()
+def main(person):
+
+  langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+  response = chain.invoke({"person": person}, config={
+      "callbacks":[langfuse_handler]
+  })
+
+  trace_id = langfuse_context.get_current_trace_id()
+
+  return trace_id, response
+
+
+trace_id, response = main("Ada Lovelace")
+```
+
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+langfuse.score(
+    trace_id=trace_id,
+    name="user-feedback",
+    value=1,
+    comment="This was correct, thank you"
+);
+```
+
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/08bb7cf3-87c6-4a78-a3fc-72af8959a106
