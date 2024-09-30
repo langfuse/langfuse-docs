@@ -134,6 +134,10 @@ export default {
     title: "OSS Friends",
     type: "page",
     display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
   },
   about: {
     title: "About us",
