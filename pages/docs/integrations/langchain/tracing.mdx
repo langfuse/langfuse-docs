@@ -120,6 +120,7 @@ You can also set the `trace_name`, `user_id`, `session_id`, and `tags` for a tra
 
 <Tabs items={["Langchain (Python)", "Langchain (JS/TS)"]}>
 <Tab>
+
 ```python
 from langfuse.callback import CallbackHandler
 
@@ -132,31 +133,30 @@ tags = ["random-tag-1", "random-tag-2"]
 
 # Your existing Langchain code to create the chain
 
-...
-
 # Pass config to the chain invocation to be parsed as Langfuse trace attributes
 
 chain.invoke(
-{"animal": "dog"},
-config={
-"callbacks": [langfuse_handler],
-"run_name": trace_name,
-"tags": tags,
-"metadata": {
-"langfuse_session_id": session_id,
-"langfuse_user_id": user_id,
-},
-},
+    {"animal": "dog"},
+    config={
+        "callbacks": [langfuse_handler],
+        "run_name": trace_name,
+        "tags": tags,
+        "metadata": {
+            "langfuse_session_id": session_id,
+            "langfuse_user_id": user_id,
+        },
+    },
 )
+```
 
-````
 </Tab>
 
 <Tab>
+
 ```ts
 import { CallbackHandler } from "langfuse-langchain";
 
-const langfuseHandler = new CallbackHandler()
+const langfuseHandler = new CallbackHandler();
 
 const traceName = "langchain_trace_name";
 const sessionId = "random-session";
@@ -172,10 +172,99 @@ await chain.invoke(
     metadata: { langfuseUserId: userId, langfuseSessionId: sessionId },
   }
 );
-````
+```
 
 </Tab>
 
+</Tabs>
+
+### Predefined Trace ID + Add Evaluation or User Feedback Score
+
+**Predefined Trace ID**
+
+To query traces or add evaluation and feedback scores, you need to know the ID of a trace. The LangChain integration automatically assigns the `trace_id` to the `run_id` of the LangChain run. You can set a predefined `run_id` through the run configuration.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+import uuid
+
+predefined_run_id = str(uuid.uuid4())
+
+langfuse_handler = CallbackHandler()
+
+# Your existing Langchain code to create the chain
+
+# Pass run_id to the chain invocation
+chain.invoke({"person": "Ada Lovelace"}, config={
+    "run_id": predefined_run_id,
+    "callbacks": [langfuse_handler],
+  }
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+import { v4 as uuidv4 } from "uuid";
+
+const langfuseHandler = new CallbackHandler();
+
+const predefinedRunId = uuid4();
+
+await chain.invoke(
+  { animal: "dog" },
+  {
+    callbacks: [langfuseHandler],
+    runId: predefinedRunId,
+  }
+);
+```
+
+</Tab>
+</Tabs>
+
+**Add Score to Trace**
+
+Evaluation results and user feedback are recorded as [scores](https://langfuse.com/docs/scores) in Langfuse. You can add them to a trace via the `trace_id`.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+langfuse.score(
+    trace_id=predefined_run_id,
+    name="user-feedback",
+    value=1,
+    comment="This was correct, thank you"
+)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+await langfuse.score({
+  traceId: predefinedRunId,
+  name: "user-feedback",
+  value: 1,
+  comment: "This was correct, thank you",
+});
+```
+
+</Tab>
 </Tabs>
 
 ### Interoperability with Langfuse SDKs [#interoperability]
