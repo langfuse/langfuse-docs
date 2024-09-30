@@ -37,7 +37,7 @@ const config: DocsThemeConfig = {
         </a>
 
         <a
-          className="p-1 hidden sm:inline-block hover:opacity-80"
+          className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
           href="https://x.com/langfuse"
           aria-label="Langfuse X formerly known as Twitter"
