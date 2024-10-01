@@ -3,112 +3,100 @@ title: OSS Observability for Mirascope
 description: Open source observability for Mirascope applications. Automatically capture detailed traces of how users interact with your application.
 ---
 
-# Mirascope Integration
+# Monitor Mirascope applications with Langfuse
 
-**Mirascope** ([GitHub](https://github.com/mirascope/mirascope)) is a Python toolkit for building LLM applications.
+This guide shows you how to use Langfuse to track and debug Mirascope applications.
+
+## What is Mirascope?
+
+Mirascope ([GitHub](https://github.com/mirascope/mirascope)) is a Python toolkit for building LLM applications.
 
 > Developing LLM-applications with Mirascope feels just like writing the Python code you’re already used to.
 > Python Toolkit for LLMs: Mirascope simplifies the development of applications using Large Language Models (LLMs) by providing an intuitive interface similar to standard Python coding practices.
 
-The Mirascope team recorded a video with a short demo of how to use Mirascope with Langfuse.
+## What is Langfuse?
 
-<CloudflareVideo
-  videoId="acae80bc740ec33aeb9a5176fd68b988"
-  aspectRatio={16 / 9}
-  title="Mirascope Integration Demo"
-/>
+Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source platform for LLM engineering. It provides tracing, evaluation, prompt management, and metrics to help debug and enhance your LLM application.
 
 ## How to use Mirascope with Langfuse
 
-```python
-from mirascope.langfuse import with_langfuse
+With this integration, you can automatically capture detailed traces of how users interact with your application.
+You can install the necessary packages directly or using the `langfuse` extras flag:
+
+```bash
+pip install "mirascope[langfuse]"
 ```
 
 Mirascope automatically passes the Langfuse [`observe()` decorator](/docs/sdk/python/decorators) to all relevant functions within Mirascope via its `with_langfuse` decorator.
 
-## Example
+```python
+from mirascope.integrations.langfuse import with_langfuse
+```
 
-### Call
+### Getting Started
 
-This is a basic call example but will work with all of Mirascope's call functions, `call`, `stream`, `call_async`, `stream_async`.
+#### 1. Calls
 
-```python /@with_langfuse/ /from mirascope.langfuse import with_langfuse/
-import os
-from mirascope.langfuse import with_langfuse
-from mirascope.anthropic import AnthropicCall
+The `with_langfuse` decorator can be used on all Mirascope functions to automatically log calls across all of Mirascope's [supported LLM providers](https://docs.mirascope.io/latest/learn/calls/#supported-providers).
 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+Here is a simple example using tools:
 
-
-@with_langfuse
-class BookRecommender(AnthropicCall):
-    prompt_template = "Please recommend some {genre} books"
-
-    genre: str
+```python
+from mirascope.core import anthropic, prompt_template
+from mirascope.integrations.langfuse import with_langfuse
 
 
-recommender = BookRecommender(genre="fantasy")
-response = recommender.call()  # this will automatically get logged with langfuse
-print(response.content)
-#> Here are some recommendations for great fantasy book series: ...
+def format_book(title: str, author: str):
+    return f"{title} by {author}"
+
+
+@with_langfuse()
+@anthropic.call(model="claude-3-5-sonnet-20240620", tools=[format_book])
+@prompt_template("Recommend a {genre} book.")
+def recommend_book(genre: str):
+    ...
+
+
+print(recommend_book("fantasy"))
+# > Certainly! I'd be happy to recommend a fantasy book...
 ```
 
 This will give you:
 
-- A trace around the AnthropicCall.call() that captures items like the prompt template, and input/output attributes and more.
-- Human-readable display of the conversation with the agent
-- Details of the response, including the number of tokens used
+* A trace around the `recommend_book` function that captures items like the prompt template, and input/output attributes and more.
+* Human-readable display of the conversation with the agent
+* Details of the response, including the number of tokens used
 
-<Frame border fullWidth>
-  ![Mirascope Trace call](/images/docs/miracope-trace-call.png)
-</Frame>
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/794523f3-fb98-47fa-96f6-04f99dae862a?observation=0be07a39-40e7-46e8-9b85-84d9fbc73e2c)
 
-### Extract
+![Example trace in Langfuse](/images/cookbook/integration_mirascope_simple.png)
 
-> Mirascope's extraction functionality is built on top of Pydantic and offers a convenient `extract` method on extractor classes to extract structured information from LLM outputs. This method leverages tools (function calling) to reliably extract the required structured data. ([Docs](https://docs.mirascope.io/0.12/concepts/extracting_structured_information_using_llms/))
+#### 2. Streams
 
-```python /@with_langfuse/ /from mirascope.langfuse import with_langfuse/
-import os
-from mirascope.langfuse import with_langfuse
-from mirascope.openai import OpenAIExtractor
+You can capture streams exactly the same way:
 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
-
-class TaskDetails(BaseModel):
-    description: str
-    due_date: str
-    priority: Literal["low", "normal", "high"]
+```python
+from mirascope.core import openai, prompt_template
+from mirascope.integrations.langfuse import with_langfuse
 
 
-@with_langfuse
-class TaskExtractor(OpenAIExtractor[TaskDetails]):
-    extract_schema: Type[TaskDetails] = TaskDetails
-    prompt_template = """
-    Extract the task details from the following task:
-    {task}
-    """
+@with_langfuse()
+@openai.call(
+    model="gpt-4o-mini",
+    stream=True,
+    call_params={"stream_options": {"include_usage": True}},
+)
+@prompt_template("Recommend a {genre} book.")
+def recommend_book(genre: str):
+    ...
 
-    task: str
 
-
-task = "Submit quarterly report by next Friday. Task is high priority."
-task_details = TaskExtractor(
-    task=task
-).extract()  # this will be logged automatically with langfuse
-assert isinstance(task_details, TaskDetails)
-print(task_details)
-# > description='Submit quarterly report' due_date='next Friday' priority='high'
+for chunk, _ in recommend_book("fantasy"):
+    print(chunk.content, end="", flush=True)
+# > I recommend **"The Name of the Wind"** by Patrick Rothfuss. It's the first book...
 ```
 
-This will give you the same view as you would get from using the [OpenAI integration](/docs/integrations/openai). We will be adding more extraction support for other providers soon.
-
-<Frame border fullWidth>
-  ![Mirascope Trace extract](/images/docs/miracope-trace-extract.png)
-</Frame>
+For some providers, certain `call_params` will need to be set in order for usage to be tracked.
 
 ## Learn more
 
@@ -122,7 +110,7 @@ import { BookOpen, FileCode } from "lucide-react";
   />
   <Card
     title="Mirascope Docs"
-    href="https://docs.mirascope.io/"
+    href="https://docs.mirascope.io/latest/integrations/langfuse/"
     icon={<BookOpen />}
   />
 </Cards>
