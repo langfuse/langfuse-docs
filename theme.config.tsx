@@ -1,14 +1,6 @@
 import React from "react";
-import {
-  DocsThemeConfig,
-  Tabs,
-  Tab,
-  useConfig,
-  Steps,
-  Card,
-  Cards,
-  Callout,
-} from "nextra-theme-docs";
+import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
+import { Cards, Steps, Tabs, Callout } from "nextra/components";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import { MainContentWrapper } from "./components/MainContentWrapper";
@@ -20,7 +12,6 @@ import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
-import { FileCode, LibraryBig, CircleHelp } from "lucide-react";
 import {
   AvailabilityBanner,
   AvailabilitySidebar,
@@ -46,7 +37,7 @@ const config: DocsThemeConfig = {
         </a>
 
         <a
-          className="p-1 hidden sm:inline-block hover:opacity-80"
+          className="p-1 hidden lg:inline-block hover:opacity-80"
           target="_blank"
           href="https://x.com/langfuse"
           aria-label="Langfuse X formerly known as Twitter"
@@ -72,43 +63,9 @@ const config: DocsThemeConfig = {
   sidebar: {
     defaultMenuCollapseLevel: 1,
     toggleButton: true,
-    titleComponent: ({ type, title, route }) => {
-      const { asPath } = useRouter();
-      if (type === "separator" && title === "Switcher") {
-        return (
-          <div className="-mx-2 hidden md:block">
-            {[
-              { title: "Docs", path: "/docs", Icon: LibraryBig },
-              { title: "Guides", path: "/guides", Icon: FileCode },
-              { title: "FAQ", path: "/faq", Icon: CircleHelp },
-            ].map((item) =>
-              asPath.startsWith(item.path) ? (
-                <div
-                  key={item.path}
-                  className="group mb-3 flex flex-row items-center gap-3 nx-text-primary-800 dark:nx-text-primary-600"
-                >
-                  <item.Icon className="w-7 h-7 p-1 border rounded nx-bg-primary-100 dark:nx-bg-primary-400/10" />
-                  {item.title}
-                </div>
-              ) : (
-                <Link
-                  href={item.path}
-                  key={item.path}
-                  className="group mb-3 flex flex-row items-center gap-3 text-gray-500 hover:text-primary/100"
-                >
-                  <item.Icon className="w-7 h-7 p-1 border rounded group-hover:bg-border/30" />
-                  {item.title}
-                </Link>
-              )
-            )}
-          </div>
-        );
-      }
-      return title;
-    },
   },
   editLink: {
-    text: "Edit this page on GitHub",
+    content: "Edit this page on GitHub",
   },
   toc: {
     backToTop: true,
@@ -119,28 +76,7 @@ const config: DocsThemeConfig = {
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
-    text: <FooterMenu />,
-  },
-  useNextSeoProps() {
-    const { asPath } = useRouter();
-    const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-      (cookbook) => cookbook.path === asPath
-    );
-    const canonical: string | undefined = cookbook?.canonicalPath
-      ? "https://langfuse.com" + cookbook.canonicalPath
-      : undefined;
-
-    return {
-      titleTemplate:
-        asPath === "/"
-          ? "Langfuse"
-          : asPath.startsWith("/blog/")
-          ? "%s - Langfuse Blog"
-          : asPath.startsWith("/docs/guides/")
-          ? "%s - Langfuse Guides"
-          : "%s - Langfuse",
-      canonical,
-    };
+    content: <FooterMenu />,
   },
   head: () => {
     const { asPath, defaultLocale, locale } = useRouter();
@@ -174,6 +110,24 @@ const config: DocsThemeConfig = {
     const video = frontMatter.ogVideo
       ? "https://langfuse.com" + frontMatter.ogVideo
       : null;
+
+    const cookbook = COOKBOOK_ROUTE_MAPPING.find(
+      (cookbook) => cookbook.path === asPath
+    );
+    const canonical: string | undefined = cookbook?.canonicalPath
+      ? "https://langfuse.com" + cookbook.canonicalPath
+      : undefined;
+
+    const noindex = frontMatter.noindex === true;
+
+    const titleTemplate =
+      asPath === "/"
+        ? "Langfuse"
+        : asPath.startsWith("/blog/")
+        ? "%s - Langfuse Blog"
+        : asPath.startsWith("/docs/guides/")
+        ? "%s - Langfuse Guides"
+        : "%s - Langfuse";
 
     return (
       <>
@@ -216,15 +170,19 @@ const config: DocsThemeConfig = {
           sizes="16x16"
           href="/favicon-16x16.png"
         />
+
+        {canonical && <link rel="canonical" href={canonical} />}
+        {noindex && <meta name="robots" content="noindex" />}
+        <title>{titleTemplate.replace("%s", title)}</title>
       </>
     );
   },
   components: {
     Frame,
     Tabs,
-    Tab,
+    Tab: Tabs.Tab,
     Steps,
-    Card,
+    Card: Cards.Card,
     Cards,
     AvailabilityBanner,
     Callout,
@@ -234,7 +192,7 @@ const config: DocsThemeConfig = {
   banner: {
     key: "banner-hiring",
     dismissible: true,
-    text: (
+    content: (
       <Link href="/careers">
         {/* mobile */}
         <span className="sm:hidden">

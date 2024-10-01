@@ -334,7 +334,7 @@ const GhDiscussionsPreviewInternal = ({
             </Button>
           </div>
         </div>
-        <div className="border rounded">
+        <div className="border rounded bg-card">
           <TabsContent value="Support">
             {renderDiscussions("Support")}
           </TabsContent>
