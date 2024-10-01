@@ -330,9 +330,11 @@ langfuse.flush()
 <Tab>
 
 ```typescript /createDatasetItemHandler/
+import { Langfuse } from "langfuse";
 import { createDatasetItemHandler } from "langfuse-langchain";
 ...
 
+const langfuse = new Langfuse()
 const dataset = await langfuse.getDataset("my-dataset");
 const runName = "my-dataset-run";
 
