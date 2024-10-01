@@ -209,7 +209,7 @@ Optionally, the output of the application can be evaluated to compare different 
 - Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
 - Set up [model-based evaluation](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs.
 
-<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "LlamaIndex (Python)"]}>
+<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)"]}>
 <Tab>
 
 ```python
@@ -323,6 +323,34 @@ for item in dataset.items:
 
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 langfuse.flush()
+```
+
+</Tab>
+
+<Tab>
+
+```typescript /createDatasetItemHandler/
+import { createDatasetItemHandler } from "langfuse-langchain";
+...
+
+const dataset = await langfuse.getDataset("my-dataset");
+const runName = "my-dataset-run";
+
+for (const item of dataset.items) {
+  // Create langchain handler that automatically links the execution trace to the dataset item run
+  const { handler, trace } = await createDatasetItemHandler({ item, runName, langfuseClient: langfuse });
+
+  // Pass the callback handler when invoking the chain
+  await chain.invoke({ country: item.input }, { callbacks: [handler] });
+
+  // Add score to the linked trace depending on the chain output and expected output
+  trace.score({
+    name: "test-score",
+    value: 0.5,
+  });
+}
+
+await langfuse.flushAsync();
 ```
 
 </Tab>
