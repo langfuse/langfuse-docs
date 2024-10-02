@@ -2,7 +2,7 @@
 description: "We are proud to collaborate with a diverse group of partners to promote open-source software and the values of transparency, collaboration, and community that it represents."
 ---
 
-import { useData } from "nextra/data";
+import { useData } from "nextra/hooks";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -25,7 +25,7 @@ export function OSSFriendsPage() {
       {OSSFriends.map((friend, index) => (
         <div
           key={index}
-          className="flex flex-col gap-2 overflow-hidden rounded p-4 ring-primary/30 ring-1"
+          className="flex flex-col gap-2 overflow-hidden rounded p-4 border bg-card"
         >
           <Link href={friend.href} className="text-xl font-bold">
             {friend.name}

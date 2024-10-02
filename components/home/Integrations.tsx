@@ -95,7 +95,7 @@ export default function Integrations() {
         ]}
       />
       <div
-        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background py-4 px-2 md:p-12"
+        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-card py-4 px-2 md:p-12"
         ref={containerRef}
       >
         <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-4">
