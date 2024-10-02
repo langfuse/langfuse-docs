@@ -78,7 +78,7 @@ def random_fact(name: str):
 @observe()
 def generate_facts(number_of_facts: int):
     for i in range(number_of_facts):
-        response = random_facts(f"frogs")
+        response = random_fact(f"frogs")
         print(response.content)
 
 generate_facts(3)
