@@ -4,7 +4,7 @@ description: Tags help to filter and organize traces in Langfuse based on use ca
 
 # Tagging traces
 
-Tags allow you to categorize and filter traces. You can tag traces only from the [Langfuse SDKs](/docs/sdk) or from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
+Tags allow you to categorize and filter traces. You can tag traces (1) when they are created using the Langfuse SDKs and integrations or (2) from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex"]}>
 <Tab>
@@ -37,7 +37,7 @@ trace = langfuse.trace(
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
@@ -104,6 +104,23 @@ handler = CallbackHandler(
 )
 ```
 
+You can also set tags dynamically via the runnable configuration in the chain invocation:
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler()
+tags = ["tag-1", "tag-2"]
+
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "tags": tags,
+    },
+)
+```
+
 When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via the `langfuse_context`:
 
 ```python
@@ -128,15 +145,28 @@ fn()
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` to the constructor:
 
-```typescript
+```ts
 const handler = new CallbackHandler({
   tags: ["tag-1", "tag-2"],
 });
 ```
 
+You can also set tags dynamically via the runnable configuration in the chain invocation:
+
+```ts
+const langfuseHandler = new CallbackHandler()
+const tags = ["tag-1", "tag-2"];
+
+// Your existing Langchain code to create the chain
+...
+
+// Pass config to the chain invocation to be parsed as Langfuse trace attributes
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], tags: tags });
+```
+
 When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via `langfuse.trace()`:
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 

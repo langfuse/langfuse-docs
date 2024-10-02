@@ -4,12 +4,15 @@ description: Configure sampling to control the volume of traces collected by the
 
 # Sampling
 
-Sampling can be used to control the volume of traces collected by the Langfuse server. 
+Sampling can be used to control the volume of traces collected by the Langfuse server.
 
+<Callout type="info">
+  Sampling is not yet supported by the JS SDK and integrations. Please upvote
+  [this feature request](https://github.com/orgs/langfuse/discussions/3529) if
+  you are interested in this.
+</Callout>
 
 You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1. The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
-
-Support for the JS SDK is coming soon.
 
 <Tabs items={["Python", "OpenAI (Python)",  "Langchain (Python)", "LlamaIndex"]}>
 <Tab>
@@ -77,6 +80,7 @@ handler = CallbackHandler(
   sample_rate=0.5
 )
 ```
+
 </Tab>
 
 <Tab>
@@ -99,3 +103,9 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 </Tab>
 
 </Tabs>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-sampling"]} />

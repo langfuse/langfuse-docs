@@ -114,6 +114,159 @@ When initializing the Langfuse handler, you can pass the following **optional** 
 | `enabled`     | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
 | `sample_rate` | `-`         | float   | [Sample rate](/docs/tracing-features/sampling) for tracing.                                     |
 
+### Dynamic Trace Attributes in Chain Invocation
+
+You can also set the `trace_name`, [`user_id`](/docs/tracing-features/users), [`session_id`](/docs/tracing-features/sessions), and [`tags`](/docs/tracing-features/tags) for a trace that corresponds to a LangChain execution through the runnable configuration of the chain without instantiating a new `CallbackHandler` each time. This allows you to dynamically set these attributes for each specific execution. Here's an example:
+
+<Tabs items={["Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tab>
+
+```python
+from langfuse.callback import CallbackHandler
+
+langfuse_handler = CallbackHandler()
+
+trace_name = "langchain_trace_name"
+session_id = "random-session"
+user_id = "random-user"
+tags = ["random-tag-1", "random-tag-2"]
+
+# Your existing Langchain code to create the chain
+
+# Pass config to the chain invocation to be parsed as Langfuse trace attributes
+
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [langfuse_handler],
+        "run_name": trace_name,
+        "tags": tags,
+        "metadata": {
+            "langfuse_session_id": session_id,
+            "langfuse_user_id": user_id,
+        },
+    },
+)
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+const traceName = "langchain_trace_name";
+const sessionId = "random-session";
+const userId = "random-user";
+const tags = ["random-tag-1", "random-tag-2"];
+
+await chain.invoke(
+  { animal: "dog" },
+  {
+    callbacks: [langfuseHandler],
+    runName: traceName,
+    tags,
+    metadata: { langfuseUserId: userId, langfuseSessionId: sessionId },
+  }
+);
+```
+
+</Tab>
+
+</Tabs>
+
+### Predefined Trace ID + Add Evaluation or User Feedback Score
+
+**Predefined Trace ID**
+
+To query traces or add evaluation and feedback scores, you need to know the ID of a trace. The LangChain integration automatically assigns the `trace_id` to the `run_id` of the LangChain run. You can set a predefined `run_id` through the run configuration.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+import uuid
+
+predefined_run_id = str(uuid.uuid4())
+
+langfuse_handler = CallbackHandler()
+
+# Your existing Langchain code to create the chain
+
+# Pass run_id to the chain invocation
+chain.invoke({"person": "Ada Lovelace"}, config={
+    "run_id": predefined_run_id,
+    "callbacks": [langfuse_handler],
+  }
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+import { v4 as uuidv4 } from "uuid";
+
+const langfuseHandler = new CallbackHandler();
+
+const predefinedRunId = uuid4();
+
+await chain.invoke(
+  { animal: "dog" },
+  {
+    callbacks: [langfuseHandler],
+    runId: predefinedRunId,
+  }
+);
+```
+
+</Tab>
+</Tabs>
+
+**Add Score to Trace**
+
+Evaluation results and user feedback are recorded as [scores](https://langfuse.com/docs/scores) in Langfuse. You can add them to a trace via the `trace_id`. Scores do not need to be numeric, see scores documentation for more details.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+langfuse.score(
+    trace_id=predefined_run_id,
+    name="user-feedback",
+    value=1,
+    comment="This was correct, thank you"
+)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+await langfuse.score({
+  traceId: predefinedRunId,
+  name: "user-feedback",
+  value: 1,
+  comment: "This was correct, thank you",
+});
+```
+
+</Tab>
+</Tabs>
+
 ### Interoperability with Langfuse SDKs [#interoperability]
 
 Use the Langchain integration in combination with the regular Langfuse SDKs if you want to:
@@ -156,7 +309,7 @@ Limitation (decorator + langchain): The input/output of the Langchain code will 
 <Tab>
 {/* JS */}
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 
@@ -183,7 +336,7 @@ await chain.invoke(
 
 If you want to add the input/output of the Langchain run to the trace or span itself, use the `updateRoot` flag in the `CallbackHandler` constructor.
 
-```typescript
+```ts
 const langfuseHandlerTrace = new CallbackHandler({
   root: trace,
   updateRoot: true,
@@ -246,7 +399,7 @@ langfuse_handler.shutdown()
 
 {/* JS */}
 
-```typescript
+```ts
 await langfuseHandler.shutdownAsync();
 ```
 
@@ -268,7 +421,7 @@ langfuse_handler.flush()
 
 {/* JS */}
 
-```typescript
+```ts
 await langfuseHandler.flushAsync();
 ```
 
@@ -279,10 +432,37 @@ await langfuseHandler.flushAsync();
 
 Since Langchain version > 0.3.0, the callbacks on which Langfuse relies have been backgrounded. This means that execution will not wait for the callback to either return before continuing. Prior to 0.3.0, this behavior was the opposite. If you are running code in serverless environments such as Google Cloud Functions, AWS Lambda or Cloudflare Workers you should set your callbacks to be blocking to allow them time to finish or timeout. This can be done either by
 
-- setting the `LANGCHAIN_CALLBACKS_BACKGROUND` environment variable to "false" 
+- setting the `LANGCHAIN_CALLBACKS_BACKGROUND` environment variable to "false"
 - importing the global `awaitAllCallbacks` method to ensure all callbacks finish if necessary
 
 Read more about awaiting callbacks here in the [Langchain docs](https://js.langchain.com/docs/how_to/callbacks_serverless).
+
+### Azure OpenAI model names
+
+Please add the `model` keyword argument to the `AzureOpenAI` or `AzureChatOpenAI` class to have the model name parsed correctly in Langfuse.
+
+<Tabs items={["Python", "JS/TS"]}> 
+<Tab>
+```python
+from langchain_openai import AzureChatOpenAI
+
+llm = AzureChatOpenAI(
+    azure_deployment="my-gpt-4o-deployment",
+    model="gpt-4o",
+)
+```
+</Tab>
+<Tab>
+```typescript
+import { AzureChatOpenAI } from "@langchain/openai";
+
+const llm = new AzureChatOpenAI({
+  azureOpenAIApiDeploymentName: "my-gpt-4o-deployment",
+  model: "gpt-4o",
+});
+```
+</Tab>
+</Tabs>
 
 ## FAQ
 
