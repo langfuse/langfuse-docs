@@ -9,11 +9,9 @@ Langfuse is [open source](/docs/open-source) and we want to be fully transparent
 import { Callout } from "nextra/components";
 
 <Callout type="info">
-
-**Your feedback is highly appreciated** Feel like something is missing? Add new [ideas on GitHub](/ideas) or
-vote on existing ones. Both are a great way to contribute to Langfuse and help
-us understand what is important to you.
-
+  **Your feedback is highly appreciated**. Feel like something is missing? Add
+  new [ideas on GitHub](/ideas) or vote on existing ones. Both are a great way
+  to contribute to Langfuse and help us understand what is important to you.
 </Callout>
 
 ## 🚀 Released
@@ -39,7 +37,7 @@ export const ChangelogList = () => (
           <Link
             key={page.route}
             href={page.route}
-            className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:from-font]"
+            className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
           >
             <span className="">
               {page.meta?.title || page.frontMatter?.title || page.name}
@@ -105,14 +103,16 @@ Subscribe to our mailing list to get occasional email updates about new features
 
 The best way to support Langfuse is to share your feedback, report bugs, and upvote on ideas suggested by others.
 
-import { Lightbulb, Bug } from "lucide-react";
+### Feature requests
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview filterCategory="Ideas" itemsPerPage={10} />
+
+### Bug reports
+
+import { Bug } from "lucide-react";
 
 <Cards num={2}>
-  <Card
-    href="/ideas"
-    title="Ideas (GitHub Discussions)"
-    arrow
-    icon={<Lightbulb />}
-  />
   <Card href="/issues" title="Bugs (GitHub Issues)" arrow icon={<Bug />} />
 </Cards>

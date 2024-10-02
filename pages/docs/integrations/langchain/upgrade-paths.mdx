@@ -100,7 +100,7 @@ Requires [`langchain ^0.1.10`](https://github.com/langchain-ai/langchainjs/relea
 
 The `CallbackHandler` can be used in multiple invocations of a Langchain chain as shown below.
 
-```typescript
+```ts
 import { CallbackHandler } from "langfuse-langchain";
 
 // create a handler
@@ -168,7 +168,7 @@ TRACE_2
 
 If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
 
-```typescript
+```ts
 const trace = langfuse.trace({ id: "special-id" });
 // CallbackHandler will use the trace with the id "special-id" for all invocations
 const langfuseHandler = new CallbackHandler({ root: trace });

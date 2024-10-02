@@ -1,0 +1,36 @@
+---
+title: Observability and Metrics for AWS Bedrock
+description: Open source observability for AWS Bedrock applications and the Bedrock SDK.
+---
+
+# AWS Bedrock Integration
+
+**AWS Bedrock** ([AWS](https://aws.amazon.com/bedrock/)) is a fully managed AWS service that lets you use foundation models and custom models to generate text, images, and audio.
+
+When **using Langfuse with AWS Bedrock**, you can easily capture [detailed traces](/docs/tracing) and metrics for every request, giving you insights into the performance and behavior of your application.
+
+## Integration Options
+
+There are a few ways through which you can capture traces and metrics for AWS Bedrock:
+
+1. via an application framework that is integrated with Langfuse:
+
+   - [Langchain](/docs/integrations/langchain)
+   - [Llama Index](/docs/integrations/llama-index)
+   - [Haystack](/docs/integrations/haystack)
+
+2. via a Proxy such as [LiteLLM](/docs/integrations/litellm)
+3. via wrapping the Bedrock SDK with the [Langfuse Decorator](/docs/sdk/python/decorators) (_We are currently working on adding more documentation and a cookbook for this._)
+4. via the [low-level Python SDK](/docs/sdk/python/low-level-sdk) to have full control over what is captured
+
+## Can I monitor AWS Bedrock cost and token usage in Langfuse?
+
+Yes, you can monitor cost and token usage of your Bedrock calls in Langfuse. The native integrations with LLM application frameworks and the LiteLLM proxy will automatically report token usage to Langfuse.
+
+If you use the Langfuse decorator or the low-level Python SDK, you can [report](/docs/model-usage-and-cost) token usage and (optionally) also cost information directly.
+
+You can define custom price information via the Langfuse dashboard or UI ([see docs](/docs/model-usage-and-cost)) to adjust to the exact pricing of your models on AWS Bedrock.
+
+## Resources
+
+- Metadocs, [Monitoring your Langchain app's cost using Bedrock with Langfuse](https://www.metadocs.co/2024/07/03/monitor-your-langchain-app-cost-using-bedrock-with-langfuse/), featuring Langchain integration and custom model price definitions for Bedrock models.

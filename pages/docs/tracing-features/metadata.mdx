@@ -37,7 +37,7 @@ trace = langfuse.trace(
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
@@ -98,7 +98,7 @@ fn()
 
 When using the [OpenAI SDK Integration (JS)](/docs/integrations/openai/js), pass `metadata` as an additional argument:
 
-```typescript
+```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "langfuse";
 
@@ -146,7 +146,7 @@ fn()
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `metadata` to the constructor:
 
-```typescript
+```ts
 const handler = new CallbackHandler({
   metadata: { key: "value" },
 });
@@ -154,7 +154,7 @@ const handler = new CallbackHandler({
 
 When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `metadata` via `langfuse.trace()`:
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 
@@ -219,3 +219,9 @@ You can set the `metadata` via the override configs, see the [Flowise Integratio
 </Tab>
 
 </Tabs>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-metadata"]} />

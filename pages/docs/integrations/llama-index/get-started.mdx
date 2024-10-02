@@ -195,16 +195,18 @@ def my_func():
 </Tab>
 </Tabs>
 
-### 🛠️ Beta: Observability based on LlamaIndex instrumentation module
+## Beta: Observability based on LlamaIndex instrumentation module
 
-***⚠️ For production use cases, we recommend using the callback-based LlamaIndex integration with Langfuse as described above until this integration is stable.***
+<Callout type="warning">
+  For production use cases, we recommend using the callback-based LlamaIndex
+  integration with Langfuse as described above until this integration is stable.
+</Callout>
 
 The new [LlamaIndex instrumentation module](https://docs.llamaindex.ai/en/stable/module_guides/observability/instrumentation/) allows for seamless instrumentation of LlamaIndex applications. In particular, one can handle events and track spans using both custom logic as well as those offered in the module. Users can also define their own events and specify where and when in the code logic that they should be emitted.
 
-Langfuse offers an **experimental** integration with the LlamaIndex instrumentation module. This integration allows for the automatic capture of traces and metrics generated in LlamaIndex applications. To enable this integration, add the following code snippet to your LlamaIndex application. 
+Langfuse offers an **experimental** integration with the LlamaIndex instrumentation module. This integration allows for the automatic capture of traces and metrics generated in LlamaIndex applications. To enable this integration, add the following code snippet to your LlamaIndex application.
 
 **NOTE**: This integration is in beta and under active development. Behavior and APIs may change in future releases.
-
 
 ```python
 import llama_index.core.instrumentation as instrument
@@ -215,3 +217,9 @@ instrument.get_dispatcher().add_span_handler(langfuse_span_handler)
 ```
 
 Please report issues and feedback to us on [GitHub](https://github.com/langfuse/langfuse/issues/1931).
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integraton-llamaindex"]} />

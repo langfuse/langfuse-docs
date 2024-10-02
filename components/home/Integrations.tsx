@@ -95,7 +95,7 @@ export default function Integrations() {
         ]}
       />
       <div
-        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-background py-4 px-2 md:p-12"
+        className="relative flex w-full mx-auto max-w-3xl items-center justify-center overflow-hidden rounded border bg-card py-4 px-2 md:p-12"
         ref={containerRef}
       >
         <div className="flex h-full w-full flex-col items-stretch justify-between gap-2 md:gap-4">
@@ -202,7 +202,7 @@ export default function Integrations() {
           <div className="flex flex-row items-center justify-between">
             <Circle
               ref={inMoreRef}
-              title="Dify, Flowise, Langflow, Instructor, Vercel AI SDK, Mirascope, ..."
+              title="DSPy, Dify, Flowise, Langflow, Instructor, Vercel AI SDK, Mirascope, ..."
               href="/docs/integrations/overview"
             >
               <MoreHorizontal className="h-5 w-5" />

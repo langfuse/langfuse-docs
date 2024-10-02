@@ -44,7 +44,7 @@ trace = langfuse.trace(
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 
@@ -111,6 +111,28 @@ handler = CallbackHandler(
 )
 ```
 
+You can also set the `session_id` dynamically via the runnable configuration in the chain invocation:
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler()
+
+# Your existing Langchain code to create the chain
+...
+
+# Pass langfuse_session_id as metadata to the chain invocation to be parsed as the Langfuse session_id
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_session_id": "your-session-id",
+        },
+    },
+)
+```
+
 When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set the session_id via the `langfuse_context`:
 
 ```python
@@ -135,15 +157,32 @@ fn()
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass the `sessionId` to the constructor:
 
-```typescript
+```ts
 const handler = new CallbackHandler({
   sessionId: "your-session-id",
 });
 ```
 
+You can also set the `session_id` dynamically via the runnable configuration in the chain invocation:
+
+```ts
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+// Your existing Langchain code to create the chain
+...
+
+// Pass langfuseSessionId as metadata to the chain invocation to be parsed as the Langfuse session_id
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandler], metadata: { langfuseSessionId: "your-session-id" } }
+);
+```
+
 When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set the sessionId via `langfuse.trace()`:
 
-```typescript
+```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
 const langfuse = new Langfuse();
 
@@ -224,3 +263,9 @@ _Example session spanning multiple traces_
 - Publish a session to share with others as a public link ([example](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/sessions/lf.docs.conversation.TL4KDlo))
 - Bookmark a session to easily find it later
 - Annotate sessions by adding `scores` via the Langfuse UI to record human-in-the-loop evaluations
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-sessions"]} />

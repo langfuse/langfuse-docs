@@ -135,7 +135,7 @@ def get_response(thread_id, run_id):
 
     # log internal generation within the openai assistant as a separate child generation to langfuse
     # get langfuse client used by the decorator, uses the low-level Python SDK
-    langfuse_client = langfuse_context._get_langfuse()
+    langfuse_client = langfuse_context.client_instance
     # pass trace_id and current observation ids to the newly created child generation
     langfuse_client.generation(
         trace_id=langfuse_context.get_current_trace_id(),

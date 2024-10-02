@@ -99,11 +99,16 @@ Use the utility method `.get_langchain_prompt()` to transform the Langfuse promp
 
 Context: Langfuse declares input variables in prompt templates using double brackets (`{{input variable}}`). Langchain uses single brackets for declaring input variables in PromptTemplates (`{input variable}`). The utility method `.get_langchain_prompt()` replaces the double brackets with single brackets.
 
+Also, pass the Langfuse prompt as metadata to the PromptTemplate to automatically link generations that use the prompt.
+
 
 ```python
 from langchain_core.prompts import ChatPromptTemplate
 
-langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+langchain_prompt = ChatPromptTemplate.from_template(
+        langfuse_prompt.get_langchain_prompt(),
+        metadata={"langfuse_prompt": langfuse_prompt},
+    )
 ```
 
 Extract the configuration options from `prompt.config`

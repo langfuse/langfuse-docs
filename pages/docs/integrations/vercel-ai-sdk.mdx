@@ -15,12 +15,15 @@ The [Vercel AI SDK](https://sdk.vercel.ai/docs/introduction) is the TypeScript t
 
 The SDK supports tracing via OpenTelemetry. With the `LangfuseExporter` you can collect these traces in Langfuse.
 
-_Example Trace in Langfuse_
+_Full Demo_
 
-<Frame border fullWidth>
-  ![Vercel AI SDK Example Trace in
-  Langfuse](/images/docs/vercel-ai-sdk-example-trace.png)
-</Frame>
+<CloudflareVideo
+  videoId="b96948a6c378dbd66b0d44292d3524d2"
+  title="Langfuse integration with Vercel AI SDK"
+  aspectRatio={16 / 9}
+  className="mt-6"
+  posterStartTime={112}
+/>
 
 ## Get Started
 
@@ -36,7 +39,7 @@ _Example Trace in Langfuse_
 
 While telemetry is experimental ([docs](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry#enabling-telemetry)), you can enable it by setting `experimental_telemetry` on each request that you want to trace.
 
-```typescript {4}
+```ts {4}
 const result = await generateText({
   model: openai("gpt-4-turbo"),
   prompt: "Write a short story about a cat.",
@@ -60,7 +63,7 @@ You can set the Langfuse credentials via environment variables or directly to th
 
 <Tab>
 
-```typescript
+```ts
 import { LangfuseExporter } from "langfuse-vercel";
 
 new LangfuseExporter({
@@ -89,7 +92,7 @@ npm install @vercel/otel langfuse-vercel @opentelemetry/api-logs @opentelemetry/
 
 Enable the `instrumentationHook` in your `next.config.js`:
 
-```typescript filename="next.config.js" {4}
+```ts filename="next.config.js" {4}
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -102,7 +105,7 @@ module.exports = nextConfig;
 
 Add `LangfuseExporter` to your instrumentation:
 
-```typescript filename="instrumentation.ts" {7}
+```ts filename="instrumentation.ts" {7}
 import { registerOTel } from "@vercel/otel";
 import { LangfuseExporter } from "langfuse-vercel";
 
@@ -117,7 +120,7 @@ export function register() {
 </Tab>
 <Tab>
 
-```typescript {5, 8, 31}
+```ts {5, 8, 31}
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -178,7 +181,7 @@ By default, the exporter captures the input and output of each request. You can 
 
 All of the `metadata` fields are automatically captured by the exporter. You can also pass custom trace attributes to e.g. track users or sessions.
 
-```typescript showLineNumbers {6-12}
+```ts showLineNumbers {6-12}
 const result = await generateText({
   model: openai("gpt-4-turbo"),
   prompt: "Write a short story about a cat.",
@@ -200,7 +203,7 @@ const result = await generateText({
 
 Enable the `debug` option to see the logs of the exporter.
 
-```typescript
+```ts
 new LangfuseExporter({ debug: true });
 ```
 
@@ -208,7 +211,14 @@ new LangfuseExporter({ debug: true });
 
 - If you deploy on Vercel, Vercel's OpenTelemetry Collector is only available on Pro and Enterprise Plans ([docs](https://vercel.com/docs/observability/otel-overview)).
 - You need to be on `"ai": "^3.3.0"` to use the telemetry feature as it was recently added. In case of any issues, please update to the latest version as this feature is under active development.
+- On NextJS, make sure that you only have a single instrumentation file.
 
 ## Learn more
 
 See the [telemetry documentation](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry) of the Vercel AI SDK for more information.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-vercel-ai-sdk"]} />
