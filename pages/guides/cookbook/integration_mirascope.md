@@ -16,7 +16,7 @@ Let's dive right in with some examples:
 
 ```python
 # Install Mirascope and Langfuse
-%pip install mirascope[all] langfuse
+%pip install "mirascope[langfuse]"
 ```
 
 
@@ -25,96 +25,73 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "sk-..."
 ```
 
 ## Log a first simple call
 
 
 ```python
-from mirascope.langfuse import with_langfuse
-from mirascope.openai import OpenAICall, OpenAICallParams
+from mirascope.integrations.langfuse import with_langfuse
+from mirascope.core import openai, prompt_template
 
-@with_langfuse
-class GeographyGenius(OpenAICall):
-    prompt_template = "What's the capital of {country}?"
-    country: str
-    call_params = OpenAICallParams(model="gpt-4o", temperature=1)
+@with_langfuse()
+@openai.call("gpt-4o-mini")
+@prompt_template("Recommend a {genre} book")
+def recommend_book(genre: str):
+    ...
 
-genius = GeographyGenius(country="Japan")
-response = genius.call()  # logs to langfuse
+response = recommend_book("fantasy")
 print(response.content)
 ```
 
-[**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4df31bf6-5960-470d-8b2b-5deb6a5fe020?observation=90de9754-c5df-4c3d-8e38-87d507392495)
+    I recommend **"The House in the Cerulean Sea" by TJ Klune**. It's a heartwarming fantasy that follows Linus Baker, a caseworker for magical children, who is sent on a special assignment to a mysterious orphanage. There, he discovers unique and lovable characters and confronts themes of acceptance, found family, and the importance of love and kindness. The book combines whimsy, humor, and poignant moments, making it a delightful read for fantasy lovers.
+
+
+[**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/84bbb50e-aebc-424a-ae8a-e1012914d46b)
 
 ![Trace of simple Mirascope execution in Langfuse](https://langfuse.com/images/cookbook/integration_mirascope_simple.png)
 
-## Let's make this more complex
+## Let's use it together with the Langfuse decorator
 
 We'll use
-- Mirascope's `@with_langfuse` decorator to log the call to Langfuse within the Mirascope classes
-- and Langfuse default [`@observe` decorator](https://langfuse.com/docs/sdk/python/decorators) which works with any Python function
-
-to create and trace a fun rap battle and group everything into a single trace.
+- Mirascope's `@with_langfuse()` decorator to log the generation
+- and Langfuse default [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) which works with any Python function to observe the `generate_facts` function and group the generations into a single trace.
 
 
 ```python
-from openai.types.chat import ChatCompletionMessageParam
-from mirascope.openai import OpenAICall
-from langfuse.decorators import observe
+from mirascope.integrations.langfuse import with_langfuse
+from mirascope.core import openai, prompt_template
 
-@with_langfuse
-class Rapper(OpenAICall):
-    prompt_template = """
-    SYSTEM: This is a rap battle. You are {person}. Make sure to defend you {position}. Only drop two lines at a time, make them rhyme.
-    MESSAGES: {history}
-    """
-    history: list[ChatCompletionMessageParam] = []
-    person: str
-    position: str
+@with_langfuse()
+@openai.call("gpt-4o")
+@prompt_template("Give me one short random fact about {name}")
+def random_fact(name: str):
+    ...
 
-zuck = Rapper(person="Mark Zuckerberg", position="Open source will win in VR/AR/Visual Computing", history=[])
-timapple = Rapper(person="Tim Cook", position="Apple builds the best headsets as we are integrated in software and hardware", history=[])
-
-# utility function to update the history of both rappers
-def add_to_history(new_line: str, rapper: str):
-    zuck.history += [
-        {"role": "assistant" if rapper == "zuck" else "user", "content": new_line},
-    ]
-    timapple.history += [
-        {"role": "assistant" if rapper == "timapple" else "user", "content": new_line},
-    ]
-
-## use the langfuse @observe decorator to log any Python function and wrap all logs within it into a single trace
 @observe()
-def rap_battle(lines: int):
+def generate_facts(number_of_facts: int):
+    for i in range(number_of_facts):
+        response = random_fact(f"frogs")
+        print(response.content)
 
-  # Make sure that the battle starts of juicy
-  add_to_history("Yo wassup Zuck, I hate OSS", "timapple")
-
-  for i in range(lines):
-      zuck_line = zuck.call()
-      print(f"(Zuck): {zuck_line.content}")
-      add_to_history(zuck_line.content, "zuck")
-
-      timapple_line = timapple.call()
-      print(f"(Tim Apple): {timapple_line.content}")
-      add_to_history(timapple_line.content, "timapple")
-  return [item["content"] for item in timapple.history]
-
-rap_battle(4);
+generate_facts(3)
 ```
+
+    Sure! Frogs can breathe through their skin, allowing them to absorb oxygen and release carbon dioxide directly into and out of their bloodstream. This process is known as cutaneous respiration.
+    Some species of frogs can absorb water through their skin, meaning they don't need to drink water with their mouths.
+    Frogs can breathe through their skin! This adaptation allows them to absorb oxygen directly from water, which is especially useful when they're submerged.
+
 
 Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfuse.com ) to see the entire chat history, token counts, cost, model, latencies and more
 
-[**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8b12f6aa-a7a4-4c12-82fc-f25c27a30f41)
+[**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/71eba8c4-3088-4af2-8d35-5b19d668d6aa)
 
 ![Trace of complex Mirascope execution in Langfuse](https://langfuse.com/images/cookbook/integration_mirascope_complex.png)
 
