@@ -2,7 +2,7 @@
 description: Self-host Langfuse in your infrastructure using Docker.
 ---
 
-# Self-Hosting Langfuse
+# Self-Hosting Langfuse - Open Source LLM Observability
 
 [![Docker Image](https://img.shields.io/badge/docker-langfuse-blue?logo=Docker&logoColor=white&style=flat-square)](https://github.com/langfuse/langfuse/pkgs/container/langfuse)
 
@@ -302,16 +302,6 @@ If you encounter issues, ensure the following:
 
 ## Updating the Application [#update]
 
-Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
-
-<Frame className="max-w-md block" border>
-  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
-</Frame>
-
-<span>_Watch the repository on GitHub to get notified about new releases_</span>
-
-### How to update
-
 <Callout type="info">
   We recommend enabling automated updates within the current major version to
   benefit from the latest features, bug fixes, and security patches.
@@ -325,7 +315,21 @@ To update the application:
 
 During container startup, any necessary database migrations will be applied automatically if the database schema has changed. This can be optionally disabled via environment variables.
 
-### (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
+Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+
+<Frame className="max-w-md block" border>
+  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
+</Frame>
+
+<span>_Watch the repository on GitHub to get notified about new releases_</span>
+
+## (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
+
+<Callout type="info">
+  This is only necessary if you want new model prices to be applied to existing
+  traces/generations. Most users will not need to do this as applying prices to
+  new traces only is totally fine when updating regularly.
+</Callout>
 
 Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
 
