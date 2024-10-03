@@ -2,7 +2,7 @@
 description: Get started with LLM observability with Langfuse in minutes before diving into all platform features.
 ---
 
-# Quickstart
+# Get Started with Langfuse
 
 This quickstart helps you to integrate your LLM application with Langfuse. It will log a single LLM call to get started.
 
@@ -105,17 +105,21 @@ generation.end({
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}
-The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously.
+The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
 
 ```bash
 pip install langfuse
 ```
+
 
 <EnvPython />
 
 ```diff filename=".py"
 - import openai
 + from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
 Use the OpenAI SDK as you would normally. Example:
