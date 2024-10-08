@@ -3,7 +3,7 @@ description: Cookbook with examples of the Langfuse Integration for Mirascope (P
 category: Integrations
 ---
 
-# Cookbook: Mirascope x Langfuse integration
+# Cookbook: Mirascope x Langfuse Observability
 
 [Mirascope](https://www.mirascope.io/) is a Python toolkit for building with LLMs. It allows devs to write Pythonic code while profiting from its abstractions to common LLM use cases and models.
 

@@ -4,6 +4,7 @@ description: Open-source observability for Instructor, a popular library to get 
 category: Integrations
 ---
 
+
 # Instructor - Observability & Tracing
 
 [Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.
