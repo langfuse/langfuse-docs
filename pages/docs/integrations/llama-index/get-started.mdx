@@ -209,11 +209,21 @@ Langfuse offers an **experimental** integration with the LlamaIndex instrumentat
 **NOTE**: This integration is in beta and under active development. Behavior and APIs may change in future releases.
 
 ```python
-import llama_index.core.instrumentation as instrument
-from langfuse.llama_index import LlamaIndexSpanHandler
+from langfuse.llama_index import LlamaIndexInstrumentor
 
-langfuse_span_handler = LlamaIndexSpanHandler()
-instrument.get_dispatcher().add_span_handler(langfuse_span_handler)
+instrumentor = LlamaIndexInstrumentor()
+
+# Automatically trace all LlamaIndex operations
+instrumentor.start()
+
+# Trace only a specific execution and/or pass trace params
+with instrumentor.observe(trace_id='custom-trace-id', session_id="my-session", user_id='my-user'):
+    # ... your LlamaIndex index creation ...
+
+    index.as_query_engine().query("What is the capital of France?")
+
+# Flush events to langfuse
+instrumentor.flush()
 ```
 
 Please report issues and feedback to us on [GitHub](https://github.com/langfuse/langfuse/issues/1931).
