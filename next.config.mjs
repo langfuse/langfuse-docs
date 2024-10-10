@@ -181,6 +181,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/openai/python", "/docs/integrations/openai/python/get-started"],
   ["/docs/integrations/openai/js", "/docs/integrations/openai/js/get-started"],
   ["/docs/integrations/mirascope", "/docs/integrations/mirascope/tracing"],
+  ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/integrations/litellm", "/docs/integrations/litellm/tracing"],
