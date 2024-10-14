@@ -1008,11 +1008,11 @@ plt.tight_layout()
 
 
     
-![png](public/images/cookbook/example_usage_of_fetch_scores_files)
+![png](/public/images/cookbook/example_usage_of_fetch_scores_files)
     
 
 
-![%7B283F9496-4034-464B-9F93-DEA587D37A5B%7D.png](public/images/cookbook/example_usage_of_fetch_scores_files/example_fetch_scores_langfuse.png)
+![%7B283F9496-4034-464B-9F93-DEA587D37A5B%7D.png](/public/images/cookbook/example_usage_of_fetch_scores_files/example_fetch_scores_langfuse.png)
 
 
 ```python
