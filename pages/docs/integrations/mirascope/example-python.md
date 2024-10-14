@@ -3,13 +3,13 @@ description: Cookbook with examples of the Langfuse Integration for Mirascope (P
 category: Integrations
 ---
 
-# Cookbook: Mirascope x Langfuse integration
+# Cookbook: Mirascope x Langfuse Observability
 
 [Mirascope](https://www.mirascope.io/) is a Python toolkit for building with LLMs. It allows devs to write Pythonic code while profiting from its abstractions to common LLM use cases and models.
 
-[Langfuse](/docs) is an open source LLM engineering platform. Traces, evals, prompt management and metrics to debug and improve your LLM application.
+[Langfuse](https://langfuse.com/docs) is an open source LLM engineering platform. Traces, evals, prompt management and metrics to debug and improve your LLM application.
 
-With the [Langfuse <-> Mirascope integration](/docs/integrations/mirascope), you can log your application to Langfuse by adding the `@with_langfuse` decorator.
+With the [Langfuse <-> Mirascope integration](https://langfuse.com/docs/integrations/mirascope), you can log your application to Langfuse by adding the `@with_langfuse` decorator.
 
 Let's dive right in with some examples:
 
@@ -78,7 +78,7 @@ def random_fact(name: str):
 @observe()
 def generate_facts(number_of_facts: int):
     for i in range(number_of_facts):
-        response = random_facts(f"frogs")
+        response = random_fact(f"frogs")
         print(response.content)
 
 generate_facts(3)
@@ -100,4 +100,4 @@ Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfus
 There's a lot more you can do:
 
 - **Mirascope**: Head over to [their docs](https://docs.mirascope.io/latest/) to learn more about what you can do with the framework.
-- **Langfuse**: Have a look at Evals, Datasets, Prompt Management to start exploring [all that Langfuse can do](/docs).
+- **Langfuse**: Have a look at Evals, Datasets, Prompt Management to start exploring [all that Langfuse can do](https://langfuse.com/docs).
