@@ -15,4 +15,8 @@ export default {
   langflow: "Langflow",
   "amazon-bedrock": "Amazon Bedrock",
   "mistral-sdk": "Mistral SDK",
+  "lamatic": "Lamatic",
+  "promptfoo": "Promptfoo",
+  "openwebui": "OpenWebUI",
+  other: "More Ways to Integrate",
 };
