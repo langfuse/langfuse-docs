@@ -1008,7 +1008,7 @@ plt.tight_layout()
 
 
     
-![png](/public/images/cookbook/example_usage_of_fetch_scores_files)
+![png](/public/images/cookbook/example_usage_of_fetch_scores_files/example_usage_of_fetch_scores_23_0.png)
     
 
 
