@@ -216,7 +216,7 @@ print(f"Traces in first batch: {len(traces_batch)}")
 ```
 
     Traces in first batch: 10
-
+    
 
 ## 2. Run your evaluations
 

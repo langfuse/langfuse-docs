@@ -245,7 +245,7 @@ console.log(data);
 ```
 
     Love is a complex and deep emotion that can manifest in various forms such as romantic love, platonic love, familial love, and love for oneself. It often involves feelings of care, affection, empathy, and a strong bond with another person. Love can bring joy, happiness, and fulfillment to our lives, but it can also be challenging and require effort, communication, and understanding to maintain healthy relationships. Overall, love is a fundamental aspect of human experience that can bring meaning and purpose to our lives.
-
+    
 
 ### Explore the trace in the UI
 
@@ -257,7 +257,7 @@ console.log(response.headers.get("X-Langfuse-Trace-Url"))
 ```
 
     https://cloud.langfuse.com/trace/14cd44b6-1a56-46af-ba85-3fd91bbf9739
-
+    
 
 ![Trace in Langfuse UI](https://langfuse.com/images/cookbook/js_tracing_example_vercel_ai_sdk_trace.png)
 

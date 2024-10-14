@@ -136,7 +136,7 @@ print(result.content)
 ```
 
     {"steps":[{"explanation":"We need to isolate the term with the variable, 8x. So, we start by subtracting 7 from both sides to remove the constant term on the left side.","output":"8x + 7 - 7 = -23 - 7"},{"explanation":"The +7 and -7 on the left side cancel each other out, leaving us with 8x. The right side simplifies to -30.","output":"8x = -30"},{"explanation":"To solve for x, divide both sides of the equation by 8, which is the coefficient of x.","output":"x = -30 / 8"},{"explanation":"Simplify the fraction -30/8 by finding the greatest common divisor, which is 2.","output":"x = -15 / 4"}],"final_answer":"x = -15/4"}
-
+    
 
 
 ```python
@@ -178,7 +178,7 @@ print(final_answer)
     
     
     x = -15/4
-
+    
 
 ## Step 3: See your trace in Langfuse
 
@@ -229,7 +229,7 @@ print(result.final_answer)
     [Step(explanation='To isolate the term with the variable on one side of the equation, start by subtracting 7 from both sides.', output='8x = -23 - 7'), Step(explanation='Combine like terms on the right side to simplify the equation.', output='8x = -30'), Step(explanation='Divide both sides by 8 to solve for x.', output='x = -30 / 8'), Step(explanation='Simplify the fraction by dividing both the numerator and the denominator by their greatest common divisor, which is 2.', output='x = -15 / 4')]
     Final answer:
     x = -15/4
-
+    
 
 ## See your trace in Langfuse
 

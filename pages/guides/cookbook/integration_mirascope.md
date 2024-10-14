@@ -3,7 +3,7 @@ description: Cookbook with examples of the Langfuse Integration for Mirascope (P
 category: Integrations
 ---
 
-# Cookbook: Mirascope x Langfuse integration
+# Cookbook: Mirascope x Langfuse Observability
 
 [Mirascope](https://www.mirascope.io/) is a Python toolkit for building with LLMs. It allows devs to write Pythonic code while profiting from its abstractions to common LLM use cases and models.
 
@@ -52,7 +52,7 @@ print(response.content)
 ```
 
     I recommend **"The House in the Cerulean Sea" by TJ Klune**. It's a heartwarming fantasy that follows Linus Baker, a caseworker for magical children, who is sent on a special assignment to a mysterious orphanage. There, he discovers unique and lovable characters and confronts themes of acceptance, found family, and the importance of love and kindness. The book combines whimsy, humor, and poignant moments, making it a delightful read for fantasy lovers.
-
+    
 
 [**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/84bbb50e-aebc-424a-ae8a-e1012914d46b)
 
@@ -87,7 +87,7 @@ generate_facts(3)
     Sure! Frogs can breathe through their skin, allowing them to absorb oxygen and release carbon dioxide directly into and out of their bloodstream. This process is known as cutaneous respiration.
     Some species of frogs can absorb water through their skin, meaning they don't need to drink water with their mouths.
     Frogs can breathe through their skin! This adaptation allows them to absorb oxygen directly from water, which is especially useful when they're submerged.
-
+    
 
 Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfuse.com ) to see the entire chat history, token counts, cost, model, latencies and more
 
