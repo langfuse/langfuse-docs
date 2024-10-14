@@ -63,16 +63,22 @@ Upon completing annotation click on the `Scores` tab to view a table of all the 
 
 ## Annotation Queues [#annotation-queues]
 
+Annotation queues allow you to manage and prioritize your annotation tasks in a structured way. This feature is particularly useful for large-scale projects that benefit of human-in-the-loop evaluation at some scale. Queues streamline this process by allowing for specifying which traces/observations you'd like to annotate on which dimensions. 
+
 <AvailabilityBanner
   availability={{
-    hobby: "public-beta",
+    hobby: "public-beta-(limited)",
     pro: "public-beta",
     team: "public-beta",
     selfHosted: "ee",
   }}
 />
 
-Annotation queues allow you to manage and prioritize your annotation tasks in a structured way. This feature is particularly useful for large-scale projects that benefit of human-in-the-loop evaluation at some scale. Queues streamline this process by allowing for specifying which traces/observations you'd like to annotate on which dimensions. 
+<CloudflareVideo
+  videoId="e8d737729ba1c64823e3e86138f4e63f"
+  aspectRatio={16 / 9}
+  title="Annotation Queues"
+/>
 
 <Steps>
 
@@ -84,11 +90,5 @@ Once you have created annotation queues, you can assign traces or observations t
 
 ### Process annotation tasks
 Navigate to the `Annotate` tab to view all the annotation queues that have been created. Select the queue you'd like to process. You will see all annotation tasks sequentially in the queue. Our queues are designed to be first-in-first-out (FIFO) and are fully concurrency safe. After adding scores on the defined dimensions, click on `Complete + next` to move to the next annotation task. If you'd like to view an overview of all annotation tasks of a given queue, you can click on the queue name in the queue table. This overview shows the status of each tasks.
-
-<CloudflareVideo
-  videoId="e8d737729ba1c64823e3e86138f4e63f"
-  aspectRatio={16 / 9}
-  title="Annotation Queues"
-/>
 
 </Steps>
