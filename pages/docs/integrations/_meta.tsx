@@ -13,6 +13,6 @@ export default {
   mirascope: "Mirascope",
   flowise: "Flowise",
   langflow: "Langflow",
-  "aws-bedrock": "AWS Bedrock",
+  "amazon-bedrock": "Amazon Bedrock",
   "mistral-sdk": "Mistral SDK",
 };
