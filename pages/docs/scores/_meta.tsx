@@ -1,7 +1,7 @@
 export default {
   overview: "Overview",
   "getting-started": "Getting Started",
-  annotation: "Annotation in UI",
+  annotation: "Human Annotation",
   "user-feedback": "User Feedback",
   "model-based-evals": "Model-based Evaluation",
   "external-evaluation-pipelines": "External Evaluation Pipelines",
