@@ -35,15 +35,14 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
-Add `LlamaIndexSpanHandler` via the instrumentation module of LlamaIndex:
+Register the Langfuse `LlamaIndexInstrumentor`:
 
 
 ```python
-import llama_index.core.instrumentation as instrument
-from langfuse.llama_index import LlamaIndexSpanHandler
+from langfuse.llama_index import LlamaIndexInstrumentor
 
-langfuse_span_handler = LlamaIndexSpanHandler()
-instrument.get_dispatcher().add_span_handler(langfuse_span_handler)
+instrumentor = LlamaIndexInstrumentor()
+instrumentor.start()
 ```
 
 ## Index
@@ -81,7 +80,7 @@ print(response)
     He made home movies using a Super 8 camera.
     
 
-Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5c6f2b7f-4ae5-41da-b320-24b493532657
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d933c7cc-20bf-4db3-810d-bab1c8d9a2a1
 
 
 ```python
@@ -93,6 +92,21 @@ print(response)
     He made home movies using a Super 8 camera growing up.
     
 
-Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f63aa1f7-8110-4a18-815c-c02d7131b984
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4e285b8f-9789-4cf0-a8b4-45473ac420f1
 
 ![LlamaIndex Chat Engine Trace in Langfuse (via instrumentation module)](https://langfuse.com/images/cookbook/integration_llama-index_instrumentation_chatengine_trace.png)
+
+## Custom trace properties
+
+You can use the `instrumentor.observe` context manager to manage trace IDs, set custom trace properties, and access the trace client for later scoring.
+
+
+```python
+with instrumentor.observe(user_id='my-user', session_id='my-session') as trace:
+    response = index.as_query_engine().query("What did he do growing up?")
+
+# Use the trace client yielded by the context manager for e.g. scoring:
+trace.score(name="my-score", value=0.5)
+```
+
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6f554d6b-a2bc-4fba-904f-aa54de2897ca
