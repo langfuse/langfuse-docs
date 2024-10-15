@@ -239,6 +239,6 @@ print(f"Retrieved Contexts (truncated): {[c[:200] + '...' for c in pred.context]
     Question: Who conducts the draft in which Marc-Andre Fleury was drafted to the Vegas Golden Knights for the 2017-18 season????????
     Predicted Answer: National Hockey League
     Retrieved Contexts (truncated): ['2017–18 Pittsburgh Penguins season | The 2017–18 Pittsburgh Penguins season will be the 51st season for the National Hockey League ice hockey team that was established on June 5, 1967. They will enter...', 'Marc-André Fleury | Marc-André Fleury (born November 28, 1984) is a French-Canadian professional ice hockey goaltender playing for the Vegas Golden Knights of the National Hockey League (NHL). Drafted...', "2017 NHL Expansion Draft | The 2017 NHL Expansion Draft was an expansion draft conducted by the National Hockey League on June 18–20, 2017 to fill the roster of the league's expansion team for the 201..."]
-
+    
 
 Example query trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/baf30bf5-0741-493c-aba3-2a66290d4d1d

@@ -113,7 +113,7 @@ print(response.choices[0].message.content)
 ```
 
     A famous moment in history! When Neil Armstrong took his historic first steps on the moon, his first words were: "That's one small step for man, one giant leap for mankind." (Note: The word was actually "man", not "men" - it's often been reported as "one small step for men", but Armstrong himself said he meant to say "man")
-
+    
 
 ### **Step 4:** See Traces in Langfuse 
 
@@ -200,7 +200,7 @@ print(response.choices[0].message.content)
 ```
 
      The most recently confirmed element is oganesson (Og), with symbol Og and atomic number 118. It was officially recognized by IUPAC (International Union of Pure and Applied Chemistry) in 2016, following the synthesis of several atoms at laboratories in Russia and Germany. The latest unofficially-recognized element is ununsextium (Uus), with atomic number 138. However, its synthesis is still under investigation, and IUPAC has yet to officially confirm its existence.
-
+    
 
 ### Step 4: See Traces in Langfuse 
 

@@ -128,7 +128,7 @@ We download the file we want to use for RAG. In this example, we use a [hedgehog
     
     2024-09-20 13:16:40 (2.03 MB/s) - ‘./hedgehog.pdf’ saved [1160174/1160174]
     
-
+    
 
 Next, we load the pdf using the LlamaIndex [`SimpleDirectoryReader`](https://docs.llamaindex.ai/en/stable/module_guides/loading/simpledirectoryreader/).
 
@@ -160,7 +160,7 @@ print(response)
 ```
 
     Hedgehogs that require help are those that are sick, injured, and helpless, such as orphaned hoglets. These hedgehogs in need may be temporarily taken into human care and must be released into the wild as soon as they can survive there independently.
-
+    
 
 All steps of the LLM chain are now tracked in Langfuse.
 
@@ -204,7 +204,7 @@ langfuse.score(
 ```
 
     Based on the provided context, it is not recommended to keep wild hedgehogs as pets. The Federal Nature Conservation Act protects hedgehogs as a native mammal species, making it illegal to chase, catch, injure, kill, or take their nesting and refuge places. Exceptions apply only to sick, injured, and helpless hedgehogs, which may be temporarily taken into human care and released into the wild as soon as they can survive independently. It is important to respect the natural habitats and behaviors of wild animals, including hedgehogs.
-
+    
 
 
 

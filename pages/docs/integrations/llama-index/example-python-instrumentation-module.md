@@ -78,7 +78,7 @@ print(response)
 ```
 
     He made home movies using a Super 8 camera.
-
+    
 
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d933c7cc-20bf-4db3-810d-bab1c8d9a2a1
 
@@ -90,7 +90,7 @@ print(response)
 ```
 
     He made home movies using a Super 8 camera growing up.
-
+    
 
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4e285b8f-9789-4cf0-a8b4-45473ac420f1
 

@@ -117,7 +117,7 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
 ```
 
     {'chatbot': {'messages': [AIMessage(content='Langfuse is a tool designed to help developers monitor and observe the performance of their Large Language Model (LLM) applications. It provides detailed insights into how these applications are functioning, allowing for better debugging, optimization, and overall management. Langfuse offers features such as tracking key metrics, visualizing data, and identifying potential issues in real-time, making it easier for developers to maintain and improve their LLM-based solutions.', response_metadata={'token_usage': {'completion_tokens': 86, 'prompt_tokens': 13, 'total_tokens': 99}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-9a0c97cb-ccfe-463e-902c-5a5900b796b4-0', usage_metadata={'input_tokens': 13, 'output_tokens': 86, 'total_tokens': 99})]}}
-
+    
 
 ### View traces in Langfuse
 
@@ -353,7 +353,7 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "How does photosynt
     ----
     {'supervisor': {'next': 'FINISH'}}
     ----
-
+    
 
 
 ```python
@@ -370,7 +370,7 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "What time is it?")
     ----
     {'supervisor': {'next': 'FINISH'}}
     ----
-
+    
 
 ### See traces in Langfuse
 
@@ -516,7 +516,7 @@ print(langchain_system_prompt)
 ```
 
     You are a translator that translates every input text into Spanish. 
-
+    
 
 Now we can use the new system prompt string to update our assistant.
 
@@ -566,7 +566,7 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
 ```
 
     {'chatbot': {'messages': [AIMessage(content='¿Qué es Langfuse?', response_metadata={'token_usage': {'completion_tokens': 6, 'prompt_tokens': 30, 'total_tokens': 36}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-1f419fe3-73e2-4413-aa6c-96560bbd09c8-0', usage_metadata={'input_tokens': 30, 'output_tokens': 6, 'total_tokens': 36})]}}
-
+    
 
 ## Feedback
 

@@ -301,7 +301,7 @@ stream_find_best_five_painter_from("Spain")
     ó
     .
     
-
+    
 
 
 
@@ -500,7 +500,7 @@ await async_stream_find_best_five_musician_from("Spain")
     ía
     .
     
-
+    
 
 
 

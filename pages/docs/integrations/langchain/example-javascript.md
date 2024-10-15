@@ -62,7 +62,7 @@ console.log(res.content)
 
     Why did the bear wear a fur coat to the BBQ?
     Because it was grizzly cold outside!
-
+    
 
 ### `stream`
 
@@ -107,7 +107,7 @@ for await (const chunk of stream) {
      light
     !
     
-
+    
 
 ## Explore the trace in Langfuse
 
