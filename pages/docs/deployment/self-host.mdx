@@ -2,7 +2,7 @@
 description: Self-host Langfuse in your infrastructure using Docker.
 ---
 
-# Self-Hosting Langfuse
+# Self-Hosting Langfuse - Open Source LLM Observability
 
 [![Docker Image](https://img.shields.io/badge/docker-langfuse-blue?logo=Docker&logoColor=white&style=flat-square)](https://github.com/langfuse/langfuse/pkgs/container/langfuse)
 
@@ -96,7 +96,7 @@ Langfuse can be configured using environment variables ([.env.prod.example](http
 | `LANGFUSE_DEFAULT_PROJECT_ROLE`                                                                      | `VIEWER`           | Role of the user in the default project (if set). Possible values are `OWNER`, `ADMIN`, `MEMBER`, `VIEWER`. See [roles](/docs/rbac) for details.                                                                                                                                                                                                                                                      |
 | `SMTP_CONNECTION_URL`                                                                                |                    | Configure optional SMTP server connection for transactional email. Connection URL is passed to Nodemailer ([docs](https://nodemailer.com/smtp)).                                                                                                                                                                                                                                                      |
 | `EMAIL_FROM_ADDRESS`                                                                                 |                    | Configure from address for transactional email. Required if `SMTP_CONNECTION_URL` is set.                                                                                                                                                                                                                                                                                                             |
-| `S3_ENDPOINT`<br/>`S3_ACCESS_KEY_ID`<br/>`S3_SECRET_ACCESS_KEY`<br/>`S3_BUCKET_NAME`<br/>`S3_REGION` |                    | Optional S3 configuration to enable large exports from the UI.                                                                                                                                                                                                                                                                                                                                        |
+| `S3_ENDPOINT`<br/>`S3_ACCESS_KEY_ID`<br/>`S3_SECRET_ACCESS_KEY`<br/>`S3_BUCKET_NAME`<br/>`S3_REGION` |                    | Optional S3 configuration for enabling large exports from the UI. `S3_BUCKET_NAME` is required to enable exports. The other variables are optional and will use the default provider credential chain if not specified.                                                                                                                                                                               |
 | `DB_EXPORT_PAGE_SIZE`                                                                                | `1000`             | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                               |
 | `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED`                                                          | `false`            | Set to `true` to disable automatic database migrations on docker startup.                                                                                                                                                                                                                                                                                                                             |
 | `LANGFUSE_LOG_LEVEL`                                                                                 | `info`             | Set the log level for the application. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                                                                                                                                                                                                                                                                                        |
@@ -131,6 +131,7 @@ To enable OAuth/SSO provider sign-in for Langfuse, add the following environment
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | [Google](https://next-auth.js.org/providers/google)                                                                                                                                              | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`<br/><br/>`AUTH_GOOGLE_ALLOW_ACCOUNT_LINKING=true` (optional)<br/>`AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com`(optional, list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload)) | `/api/auth/callback/google`   |
 | [GitHub](https://next-auth.js.org/providers/github)                                                                                                                                              | `AUTH_GITHUB_CLIENT_ID`<br/>`AUTH_GITHUB_CLIENT_SECRET`<br/><br/>`AUTH_GITHUB_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                                                     | `/api/auth/callback/github`   |
+| [GitLab](https://next-auth.js.org/providers/gitlab)                                                                                                                                              | `AUTH_GITLAB_CLIENT_ID`<br/>`AUTH_GITLAB_CLIENT_SECRET`<br/><br/>`AUTH_GITLAB_ISSUER` (optional)<br/>`AUTH_GITLAB_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                 | `/api/auth/callback/gitlab`   |
 | [AzureAD/Entra ID](https://next-auth.js.org/providers/azure-ad)                                                                                                                                  | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID`<br/><br/>`AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                    | `/api/auth/callback/azure-ad` |
 | [Okta](https://next-auth.js.org/providers/okta)                                                                                                                                                  | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER`<br/><br/>`AUTH_OKTA_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                                    | `/api/auth/callback/okta`     |
 | [Auth0](https://next-auth.js.org/providers/auth0)                                                                                                                                                | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER`<br/><br/>`AUTH_AUTH0_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                                | `/api/auth/callback/auth0`    |
@@ -179,6 +180,7 @@ Organization
 Troubleshooting:
 
 - If you use `LANGFUSE_INIT_*` in Docker Compose, do not double-quote the values ([GitHub issue](https://github.com/langfuse/langfuse/issues/3398)).
+- The resources depend on one another (see note above). For example, you must create an organization to initialize a project.
 
 ### Configuring the Enterprise Edition [#ee]
 
@@ -192,6 +194,10 @@ The Enterprise Edition ([compare versions](/docs/deployment/feature-overview)) o
 | `LANGFUSE_UI_SUPPORT_HREF`                                               | Customize the support link reference in the menu and settings.                                                                                                                                                                                                                                               |
 | `LANGFUSE_UI_FEEDBACK_HREF`                                              | Replace the default feedback widget with your own feedback link.                                                                                                                                                                                                                                             |
 | `LANGFUSE_UI_LOGO_DARK_MODE_HREF`<br/>`LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | Co-brand the Langfuse interface with your own logo. Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower ratios (e.g., 2:3, 1:1) also work. The logo is fitted into a bounding box, so there are no specific pixel constraints. For reference, the example logo is 160px x 400px. |
+| `LANGFUSE_UI_DEFAULT_MODEL_ADAPTER`                                      | Set the default model adapter for the LLM playground and evals. Options: `OpenAI`, `Anthropic`, `Azure`. Example: `Anthropic`                                                                                                                                                                                |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_OPENAI`                                    | Set the default base URL for OpenAI API in the LLM playground and evals. Example: `https://api.openai.com/v1`                                                                                                                                                                                                |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_ANTHROPIC`                                 | Set the default base URL for Anthropic API in the LLM playground and evals. Example: `https://api.anthropic.com`                                                                                                                                                                                             |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_AZURE_OPENAI`                              | Set the default base URL for Azure OpenAI API in the LLM playground and evals. Example: `https://{instanceName}.openai.azure.com/openai/deployments`                                                                                                                                                         |
 
 ### Health and Readiness Check Endpoint
 
@@ -297,16 +303,6 @@ If you encounter issues, ensure the following:
 
 ## Updating the Application [#update]
 
-Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
-
-<Frame className="max-w-md block" border>
-  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
-</Frame>
-
-<span>_Watch the repository on GitHub to get notified about new releases_</span>
-
-### How to update
-
 <Callout type="info">
   We recommend enabling automated updates within the current major version to
   benefit from the latest features, bug fixes, and security patches.
@@ -320,7 +316,21 @@ To update the application:
 
 During container startup, any necessary database migrations will be applied automatically if the database schema has changed. This can be optionally disabled via environment variables.
 
-### (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
+Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+
+<Frame className="max-w-md block" border>
+  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
+</Frame>
+
+<span>_Watch the repository on GitHub to get notified about new releases_</span>
+
+## (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
+
+<Callout type="info">
+  This is only necessary if you want new model prices to be applied to existing
+  traces/generations. Most users will not need to do this as applying prices to
+  new traces only is totally fine when updating regularly.
+</Callout>
 
 Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
 

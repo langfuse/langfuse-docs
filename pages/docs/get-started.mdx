@@ -2,9 +2,11 @@
 description: Get started with LLM observability with Langfuse in minutes before diving into all platform features.
 ---
 
-# Quickstart
+# Get Started with Langfuse Tracing
 
-This quickstart helps you to integrate your LLM application with Langfuse. It will log a single LLM call to get started.
+This quickstart helps you to integrate your LLM application with [Langfuse Tracing](/docs/tracing). It will log a single LLM call to get you started.
+
+If you are looking for other features, see the [overview](/docs).
 
 ## Create new project in Langfuse
 
@@ -73,7 +75,7 @@ import { Langfuse } from "https://esm.sh/langfuse"
 
 Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript/guide).
 
-```typescript filename="server.ts"
+```ts filename="server.ts"
 import { Langfuse } from "langfuse";
 
 const langfuse = new Langfuse();
@@ -105,7 +107,7 @@ generation.end({
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}
-The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously.
+The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
 
 ```bash
 pip install langfuse
@@ -116,6 +118,9 @@ pip install langfuse
 ```diff filename=".py"
 - import openai
 + from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
 Use the OpenAI SDK as you would normally. Example:
@@ -137,7 +142,7 @@ completion = openai.chat.completions.create(
 
 With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
 
-```typescript
+```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "langfuse";
 
@@ -274,7 +279,7 @@ This was a very brief introduction to get started with Langfuse. Explore all Lan
 <Cards num={3}>
   <Card title="Analytics" href="/docs/analytics" arrow />
   <Card title="Model Usage & Cost" href="/docs/model-usage-and-cost" arrow />
-  <Card title="Scores & Evaluation" href="/docs/scores/overview" arrow />
+  <Card title="Evaluation" href="/docs/scores/overview" arrow />
 </Cards>
 
 **Test**
@@ -353,7 +358,6 @@ import IconOpenai from "@/components/icons/openai";
     arrow
   />
 </Cards>
-
 
 ## FAQ
 

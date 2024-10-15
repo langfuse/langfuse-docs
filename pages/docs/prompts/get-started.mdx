@@ -30,6 +30,56 @@ Performance benefits compared to other implementations:
 - Support for text and chat prompts.
 - Edit/manage via UI, SDKs, or API.
 
+## Prompt Engineering FAQ
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+
+<Accordion>
+<AccordionItem value="what-is-prompt-engineering">
+<AccordionTrigger>What is prompt engineering?</AccordionTrigger>
+<AccordionContent>
+
+Prompt engineering is the practice of designing and refining prompts to effectively communicate with and guide AI models, particularly large language models (LLMs), to produce desired outputs.
+
+Prompt engineering involves:
+
+1. Crafting clear and specific instructions for AI models
+2. Utilizing techniques like role assignment, few-shot prompting, and chain-of-thought reasoning
+3. Optimizing prompts for different applications such as text generation, summarization, and problem-solving
+4. Understanding the capabilities and limitations of AI models
+5. Iteratively refining prompts to improve output quality and reliability
+6. Applying various advanced techniques like self-consistency, generated knowledge, and least-to-most prompting
+7. Considering ethical implications and potential biases in prompt design
+
+By using Langfuse prompt management, you can version and manage your prompts collaboratively to execute on the steps above.
+
+Recommended readings:
+
+- [Learn Prompting Documentation](https://learnprompting.org/docs)
+- [The Prompt Report](https://arxiv.org/abs/2406.06608)
+- [Prompting Fundamentals and How to Apply them Effectively](https://eugeneyan.com/writing/prompting/)
+
+</AccordionContent>
+</AccordionItem>
+<AccordionItem value="how-to-measure-prompt-performance">
+<AccordionTrigger>How to measure prompt performance?</AccordionTrigger>
+<AccordionContent>
+
+Depending on the scale of your experiments, there are different approaches you can take:
+
+1. [Playground](/docs/playground) for single prompt experiments in UI.
+2. [Experiments](/docs/experimentation) for A/B testing and structured experiments in production.
+3. [Datasets](/docs/datasets) for offline/dev benchmarking prompts or applications on a set of reference inputs.
+
+</AccordionContent>
+</AccordionItem>
+</Accordion>
+
 ## Langfuse prompt object
 
 ```json filename="Example prompt in Langfuse with custom config"
@@ -116,7 +166,7 @@ If you already have a prompt with the same name, the prompt will be added as a n
 
 <Tab>
 
-```typescript
+```ts
 // Create a text prompt
 await langfuse.createPrompt({
   name: "movie-critic",
@@ -221,7 +271,7 @@ prompt.config
 
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 
 // Iniitialize the Langfuse client
@@ -240,7 +290,7 @@ const compiledPrompt = prompt.compile({
 
 Chat prompts
 
-```typescript
+```ts
 // Get current `production` version of a chat prompt
 const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
   type: "chat",
@@ -256,7 +306,7 @@ const compiledChatPrompt = chatPrompt.compile({
 
 Optional parameters
 
-```typescript
+```ts
 // Get specific version of a prompt (here version 1)
 const prompt = await langfuse.getPrompt("movie-critic", 1);
 
@@ -296,7 +346,7 @@ const promptWithFetchTimeout = await langfuse.getPrompt(
 
 Attributes
 
-```typescript
+```ts
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
 prompt.prompt;
 
@@ -369,7 +419,7 @@ prompt.config
 
 As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.getLangchainPrompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate.
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
@@ -386,7 +436,7 @@ const promptTemplate = PromptTemplate.fromTemplate(
 
 Chat prompts
 
-```typescript
+```ts
 // Get current `production` version of a chat prompt
 const langfusePrompt = await langfuse.getPrompt(
   "movie-critic-chat",
@@ -402,7 +452,7 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 
 Optional parameters
 
-```typescript
+```ts
 // Get specific version of a prompt (here version 1)
 const prompt = await langfuse.getPrompt("movie-critic", 1);
 
@@ -424,7 +474,7 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 
 Attributes
 
-```typescript
+```ts
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
 prompt.prompt;
 
@@ -507,7 +557,7 @@ openai.chat.completions.create(
 
 <Tab>
 
-```typescript /langfusePrompt,/
+```ts /langfusePrompt,/
 import { observeOpenAI } from "langfuse";
 import OpenAI from "openai";
 
@@ -579,7 +629,7 @@ chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
 
 <Tab>
 
-```typescript /metadata: { langfusePrompt:/
+```ts /metadata: { langfusePrompt:/
 import { Langfuse } from "langfuse";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI, OpenAI } from "@langchain/openai";
@@ -699,7 +749,7 @@ if __name__ == '__main__':
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import express from "express";
 import { Langfuse } from "langfuse";
 
@@ -746,7 +796,7 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 
 <Tab>
 
-```typescript
+```ts
 // Get current `production` version and cache prompt for 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
@@ -775,7 +825,7 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0, label="latest"
 
 <Tab>
 
-```typescript
+```ts
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 0,
 });
@@ -869,7 +919,7 @@ fetch_prompts_on_startup()
 </Tab>
 <Tab>
 
-```typescript
+```ts
 import { Langfuse } from "langfuse";
 
 // Initialize Langfuse client
@@ -923,7 +973,7 @@ prompt.is_fallback
 </Tab>
 <Tab>
 
-```typescript /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
+```ts /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
 import { Langfuse } from "langfuse";
 const langfuse = new Langfuse();
 

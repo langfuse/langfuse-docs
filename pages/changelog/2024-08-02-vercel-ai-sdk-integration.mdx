@@ -11,7 +11,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-```typescript filename="instrumentation.ts" {7}
+```ts filename="instrumentation.ts" {7}
 import { registerOTel } from "@vercel/otel";
 import { LangfuseExporter } from "langfuse-vercel";
 
@@ -23,7 +23,7 @@ export function register() {
 }
 ```
 
-```typescript {4}
+```ts {4}
 const result = await generateText({
   model: openai("gpt-4-turbo"),
   prompt: "Write a short story about a cat.",

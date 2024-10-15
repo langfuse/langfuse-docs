@@ -122,7 +122,7 @@ const nextraConfig = withNextra({
 
 const nonPermanentRedirects = [
   ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
-  ["/discord", "https://discord.langfuse.com"],
+  ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/guides/videos/introducing-langfuse-2.0"],
   ["/docs/video", "/guides/videos/introducing-langfuse-2.0"],
@@ -181,6 +181,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/openai/python", "/docs/integrations/openai/python/get-started"],
   ["/docs/integrations/openai/js", "/docs/integrations/openai/js/get-started"],
   ["/docs/integrations/mirascope", "/docs/integrations/mirascope/tracing"],
+  ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/integrations/litellm", "/docs/integrations/litellm/tracing"],

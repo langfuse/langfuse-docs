@@ -195,9 +195,12 @@ def my_func():
 </Tab>
 </Tabs>
 
-### 🛠️ Beta: Observability based on LlamaIndex instrumentation module
+## Beta: Observability based on LlamaIndex instrumentation module
 
-**_⚠️ For production use cases, we recommend using the callback-based LlamaIndex integration with Langfuse as described above until this integration is stable._**
+<Callout type="warning">
+  For production use cases, we recommend using the callback-based LlamaIndex
+  integration with Langfuse as described above until this integration is stable.
+</Callout>
 
 The new [LlamaIndex instrumentation module](https://docs.llamaindex.ai/en/stable/module_guides/observability/instrumentation/) allows for seamless instrumentation of LlamaIndex applications. In particular, one can handle events and track spans using both custom logic as well as those offered in the module. Users can also define their own events and specify where and when in the code logic that they should be emitted.
 
@@ -205,13 +208,45 @@ Langfuse offers an **experimental** integration with the LlamaIndex instrumentat
 
 **NOTE**: This integration is in beta and under active development. Behavior and APIs may change in future releases.
 
+<Tabs items={["Trace all executions", "Trace specific executions / with params"]} >
+<Tab>
 ```python
-import llama_index.core.instrumentation as instrument
-from langfuse.llama_index import LlamaIndexSpanHandler
+from langfuse.llama_index import LlamaIndexInstrumentor
 
-langfuse_span_handler = LlamaIndexSpanHandler()
-instrument.get_dispatcher().add_span_handler(langfuse_span_handler)
+instrumentor = LlamaIndexInstrumentor()
+
+# Automatically trace all LlamaIndex operations
+instrumentor.start()
+
+# ... your LlamaIndex index creation ...
+index.as_query_engine().query("What is the capital of France?")
+
+# Flush events to langfuse
+instrumentor.flush()
 ```
+</Tab>
+<Tab>
+```python
+from langfuse.llama_index import LlamaIndexInstrumentor
+
+instrumentor = LlamaIndexInstrumentor()
+
+# Trace only a specific execution and/or pass trace params
+with instrumentor.observe(trace_id='custom-trace-id', session_id="my-session", user_id='my-user') as trace:
+    # ... your LlamaIndex index creation ...
+
+    index.as_query_engine().query("What is the capital of France?")
+
+# Use the trace client yielded by the context manager for e.g. scoring:
+trace.score(name="my-score", value=0.5)
+
+# Flush events to langfuse
+instrumentor.flush()
+```
+</Tab>
+
+
+</Tabs>
 
 Please report issues and feedback to us on [GitHub](https://github.com/langfuse/langfuse/issues/1931).
 

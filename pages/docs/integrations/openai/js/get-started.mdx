@@ -12,7 +12,7 @@ description: Simple wrapper around OpenAI SDK (JS/TS) to get full observability 
 
 The Langfuse JS/TS SDK offers a wrapper function around the OpenAI SDK, enabling you to easily add observability to your OpenAI calls. This includes tracking latencies, time-to-first-token on stream responses, errors, and model usage.
 
-```typescript {2, 4}
+```ts {2, 4}
 import OpenAI from "openai";
 import { observeOpenAI } from "langfuse";
 
@@ -66,7 +66,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
 
     With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
 
-    ```typescript
+    ```ts
     import OpenAI from "openai";
     import { observeOpenAI } from "langfuse";
 
@@ -83,7 +83,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
   <Tab>
     Pass your Langfuse credentials directly as `clientInitParams` to the `observeOpenAI` function. You can find your credentials in your project settings in the Langfuse UI.
 
-    ```typescript
+    ```ts
     import OpenAI from "openai";
     import { observeOpenAI } from "langfuse";
 
@@ -130,7 +130,7 @@ The Langfuse SDKs queue and batches events in the background to reduce the numbe
 
 If you are running a short-lived application, you need to flush Langfuse to ensure that all events are flushed before the application exits.
 
-```typescript
+```ts
 await openai.flushAsync(); // method added by Langfuse wrapper
 
 // If you have previously passed a parent span or trace for nesting, use that client for the flush call
@@ -162,7 +162,7 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 
 Example:
 
-```typescript
+```ts
 const res = await observeOpenAI(new OpenAI(), {
   generationName: "Traced generation",
   metadata: { someMetadataKey: "someValue" },
@@ -190,7 +190,7 @@ const res = await observeOpenAI(new OpenAI(), {
 
 With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
 
-```typescript
+```ts
 import { observeOpenAI } from "langfuse";
 import OpenAI from "openai";
 
@@ -206,6 +206,8 @@ const res = await observeOpenAI(new OpenAI(), {
 ```
 
 Resulting generations are now linked to the prompt in Langfuse, allowing you to track prompt usage and performance.
+
+When working with chat prompts, you must typecast the compiled prompt messages as `OpenAI.ChatCompletionMessageParam[]` or use a type-guard utility function as Langfuse message roles can be arbitrary strings whereas the OpenAI type definition is more restrictive.
 
 ### Nested traces
 
@@ -241,7 +243,7 @@ TRACE: capital-poem-generator
 
 **Implementation**
 
-```typescript {12, 17, 30}
+```ts {12, 17, 30}
 import Langfuse, { observeOpenAI } from "langfuse";
 
 // Initialize SDKs
