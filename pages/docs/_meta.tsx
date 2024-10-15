@@ -33,7 +33,7 @@ export default {
   },
   analytics: "Analytics",
   "model-usage-and-cost": "Model Usage & Cost",
-  scores: "Scores & Evaluation",
+  scores: "Evaluation",
   security: "LLM Security",
 
   "-- Test": {
