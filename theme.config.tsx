@@ -193,14 +193,14 @@ const config: DocsThemeConfig = {
     key: "banner-hiring",
     dismissible: true,
     content: (
-      <Link href="https://lu.ma/xvmbxigl">
+      <Link href="/careers">
         {/* mobile */}
         <span className="sm:hidden">
-        Thursday: Langfuse Meetup in SF →
+        We're hiring. Join us in Product Eng, Backend Eng, and DevRel →
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Thursday: Langfuse User Meetup in San Francisco →
+        We're hiring. Join us in Product Eng, Backend Eng, and DevRel →
         </span>
       </Link>
     ),
