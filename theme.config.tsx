@@ -193,14 +193,14 @@ const config: DocsThemeConfig = {
     key: "banner-hiring",
     dismissible: true,
     content: (
-      <Link href="https://lu.ma/xvmbxigl">
+      <Link href="https://discord.gg/eawpkJgV?event=1295445401561731165">
         {/* mobile */}
         <span className="sm:hidden">
-        Thursday: Langfuse Meetup in SF →
+        Office Hour on Discord: Thursday
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Thursday: Langfuse User Meetup in San Francisco →
+          Office Hour on Discord: Thursday
         </span>
       </Link>
     ),
