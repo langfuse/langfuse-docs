@@ -200,7 +200,7 @@ const GhDiscussionsPreviewInternal = ({
             {pageNumbers.map((pageNumber, index) =>
               pageNumber === null ? (
                 <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis size="xs" />
+                  <PaginationEllipsis />
                 </PaginationItem>
               ) : (
                 <PaginationItem key={pageNumber}>

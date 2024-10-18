@@ -97,7 +97,7 @@ export const ChangelogIndex = ({
             {pageNumbers.map((pageNumber, index) =>
               pageNumber === null ? (
                 <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis size="sm" />
+                  <PaginationEllipsis />
                 </PaginationItem>
               ) : (
                 <PaginationItem key={pageNumber}>
