@@ -33,7 +33,6 @@ export function Logo() {
         />
         <style jsx>{`
           div {
-            padding: 0.5rem 0.5rem 0.5rem 0;
             mask-image: linear-gradient(
               60deg,
               #bba0ff 25%,
