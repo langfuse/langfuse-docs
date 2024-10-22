@@ -112,7 +112,7 @@ const GhDiscussionsPreviewInternal = ({
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center space-x-1 pb-3 border-b last:border-none overflow-auto px-1.5"
+              className="flex items-center space-x-1 pb-3 border-b last:border-none px-1"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">
@@ -125,20 +125,20 @@ const GhDiscussionsPreviewInternal = ({
               <div className="flex flex-col items-start">
                 <Link
                   href={discussion.href}
-                  className="text-primary hover:underline font-medium text-sm leading-none"
+                  className="text-primary hover:underline font-medium text-sm leading-none text-balance"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {discussion.title}
                 </Link>
-                <div className="text-xs text-primary/70 mt-1.5 flex items-center">
+                <div className="text-xs text-primary/70 mt-1.5 flex items-center flex-wrap gap-1">
                   <span>{discussion.author.login}</span>
-                  <span className="mx-1.5">•</span>
+                  <span>•</span>
                   <span>
                     {new Date(discussion.created_at).toLocaleDateString()}
                   </span>
 
-                  <span className="mx-1.5">•</span>
+                  <span>•</span>
                   <div className="inline-flex items-center gap-1">
                     <span
                       className={`h-4 inline-flex items-center gap-1 px-1.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-primary/70 dark:text-gray-200`}
