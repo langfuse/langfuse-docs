@@ -112,7 +112,7 @@ const GhDiscussionsPreviewInternal = ({
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
-              className="flex items-center space-x-1 pb-3 border-b last:border-none"
+              className="flex items-center space-x-1 pb-3 border-b last:border-none overflow-auto px-1.5"
             >
               <div className="flex flex-col items-center min-w-[60px] gap-0.5">
                 <span className="text-lg font-semibold leading-none">
