@@ -22,9 +22,9 @@ const tiers = [
     price: "Free",
     mainFeatures: [
       "No credit card required",
-      "All platform features",
-      "50k observations / month included",
-      "Community support (Discord & GitHub)",
+      "Try all platform features",
+      "Up to 50k events / month",
+      "Up to 2 users",
     ],
     cta: "Sign up",
   },
@@ -35,28 +35,29 @@ const tiers = [
     featured: true,
     description:
       "For serious projects. Includes access to full history and higher usage.",
-    price: "$59",
+    price: "$30",
     mainFeatures: [
-      "100k observations / month included, additional: $10 / 100k observations",
+      "100k events / month included, additional: $10 / 100k events",
+      "Includes all platform features",
       "Unlimited data access",
-      "Unlimited users",
-      "Dedicated support",
+      "Support via Email/Chat",
     ],
     cta: "Sign up",
   },
   {
-    name: "Team",
-    id: "tier-team",
+    name: "Enterprise",
+    id: "tier-enterprise",
     href: "/schedule-demo",
     featured: false,
-    price: "Starts at $499",
+    price: "Custom",
     description:
       "Dedicated solutions and support for your team. Contact us for pricing.",
     mainFeatures: [
-      "Unlimited ingestion throughput",
-      "Support SLAs",
-      "SSO enforcement and custom roles",
-      "Additional security and compliance features",
+      "Unlimited tracing throughput",
+      "SSO and fine-grained RBAC",
+      "SOC2, ISO27001, and InfoSec reviews",
+      "Dedicated support engineer, and SLAs",
+      "Deployment in your environment",
     ],
     cta: "Talk to founders",
   },
@@ -248,7 +249,7 @@ export default function Pricing({
                                 tier.featured ? "text-gray-900" : "text-white"
                               }
                             >
-                              USD
+                              USD / user
                             </p>
                             <p
                               className={
@@ -260,6 +261,14 @@ export default function Pricing({
                           </div>
                         )}
                       </div>
+                      <p
+                        className={classNames(
+                          tier.featured ? "text-gray-600" : "text-gray-300",
+                          "text-sm leading-6"
+                        )}
+                      >
+                        {tier.description}
+                      </p>
                       <Button
                         asChild
                         className="z-10"
@@ -631,9 +640,9 @@ const faqs = [
       "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
   },
   {
-    question: "What is an observation?",
+    question: "What is an event?",
     answer:
-      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
+      "Events are the sum of all traces, observations and evaluation scores logged to Langfuse. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
   },
   {
     question: "Can I self-host Langfuse?",
