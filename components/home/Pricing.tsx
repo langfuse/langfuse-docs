@@ -1,4 +1,4 @@
-import { Check, Plus, Minus, X } from "lucide-react";
+import { Check, Plus, Minus, X, ExternalLink } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import { BorderBeam } from "../magicui/border-beam";
 import Link from "next/link";
@@ -65,21 +65,40 @@ const tiers = [
 const sections = [
   {
     name: "Tracing",
+    href: "/docs/tracing",
     features: [
+      {
+        name: "Framework integrations & SDKs",
+        href: "/docs/integrations/overview",
+        tiers: {
+          Hobby: true,
+          Pro: true,
+          Enterprise: true,
+        },
+      },
+      {
+        name: "Custom integration via API",
+        href: "https://api.reference.langfuse.com/#post-/api/public/ingestion",
+        tiers: {
+          Hobby: true,
+          Pro: true,
+          Enterprise: true,
+        },
+      },
       {
         name: "Included usage",
         tiers: {
-          Hobby: "50k observations",
-          Pro: "100k observations",
-          Team: "Custom",
+          Hobby: "50k events",
+          Pro: "100k events",
+          Enterprise: "Custom",
         },
       },
       {
         name: "Additional usage",
         tiers: {
           Hobby: false,
-          Pro: "$10 / 100k observations",
-          Team: "Custom",
+          Pro: "$10 / 100k events",
+          Enterprise: "Custom",
         },
       },
       {
@@ -87,7 +106,7 @@ const sections = [
         tiers: {
           Hobby: "30 days",
           Pro: "Unlimited",
-          Team: "Unlimited",
+          Enterprise: "Unlimited",
         },
       },
       {
@@ -95,7 +114,50 @@ const sections = [
         tiers: {
           Hobby: "1000 requests / min",
           Pro: "1000 requests / min",
-          Team: "Custom",
+          Enterprise: "Custom",
+        },
+      },
+    ],
+  },
+  {
+    name: "Platform Features",
+    features: [
+      {
+        name: "Datasets",
+        href: "/docs/datasets",
+        tiers: { Hobby: true, Pro: true, Enterprise: true },
+      },
+      {
+        name: "Playground",
+        href: "/docs/playground",
+        tiers: { Hobby: true, Pro: true, Enterprise: true },
+      },
+      {
+        name: "Evaluation / User-feedback",
+        href: "/docs/scores",
+        tiers: { Hobby: true, Pro: true, Enterprise: true },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        href: "/docs/scores/model-based-evals",
+        tiers: {
+          Hobby: "1 evaluator",
+          Pro: true,
+          Enterprise: true,
+        },
+      },
+      {
+        name: "Prompt Management",
+        href: "/docs/prompts",
+        tiers: { Hobby: "10 prompts", Pro: true, Enterprise: true },
+      },
+      {
+        name: "Annotation Queues",
+        href: "/docs/scores/annotation#annotation-queues",
+        tiers: {
+          Hobby: "1 queue",
+          Pro: "3 queues",
+          Enterprise: true,
         },
       },
     ],
@@ -105,11 +167,45 @@ const sections = [
     features: [
       {
         name: "Projects",
-        tiers: { Hobby: "3", Pro: "Unlimited", Team: "Unlimited" },
+        tiers: {
+          Hobby: "Unlimited",
+          Pro: "Unlimited",
+          Enterprise: "Unlimited",
+        },
       },
       {
-        name: "Members / project",
-        tiers: { Hobby: "3", Pro: "Unlimited", Team: "Unlimited" },
+        name: "Users",
+        tiers: { Hobby: "2", Pro: "Unlimited", Enterprise: "Unlimited" },
+      },
+    ],
+  },
+  {
+    name: "API",
+    href: "/docs/api",
+    features: [
+      {
+        name: "Extensive GET API",
+        tiers: {
+          Hobby: true,
+          Pro: true,
+          Enterprise: true,
+        },
+      },
+      {
+        name: "Rate limit",
+        tiers: {
+          Hobby: "100 requests / min",
+          Pro: "1000 requests / min",
+          Enterprise: "Custom",
+        },
+      },
+      {
+        name: "Metrics API",
+        tiers: {
+          Hobby: "10 requests / day",
+          Pro: "100 requests / day",
+          Enterprise: "Custom",
+        },
       },
     ],
   },
@@ -118,73 +214,93 @@ const sections = [
     features: [
       {
         name: "Community (GitHub, Discord)",
-        tiers: { Hobby: true, Pro: true, Team: true },
+        tiers: { Hobby: true, Pro: true, Enterprise: true },
       },
       {
-        name: "Dedicated (Slack, Discord, Email)",
-        tiers: { Hobby: false, Pro: true, Team: true },
+        name: "Chat & Email",
+        tiers: { Hobby: false, Pro: true, Enterprise: true },
       },
       {
-        name: "Phone",
-        tiers: { Hobby: false, Pro: false, Team: true },
+        name: "Private Slack/Discord channel",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
+      },
+      {
+        name: "Dedicated Support Engineer",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
       },
       {
         name: "SLAs",
-        tiers: { Hobby: false, Pro: false, Team: "Available" },
+        tiers: { Hobby: false, Pro: false, Enterprise: "Available" },
       },
     ],
   },
   {
     name: "Security",
+    href: "/docs/security",
     features: [
-      {
-        name: "SSO",
-        tiers: { Hobby: true, Pro: true, Team: true },
-      },
-      {
-        name: "SSO enforcement",
-        tiers: { Hobby: false, Pro: false, Team: true },
-      },
-      {
-        name: "Role-based access control",
-        tiers: {
-          Hobby: "Standard roles",
-          Pro: "Standard roles",
-          Team: "Custom roles",
-        },
-      },
-      {
-        name: "Data retention",
-        tiers: {
-          Hobby: false,
-          Pro: false,
-          Team: true,
-        },
-      },
       {
         name: "Data region",
         tiers: {
           Hobby: "US or EU",
           Pro: "US or EU",
-          Team: "US or EU",
+          Enterprise: "US or EU",
+        },
+      },
+      {
+        name: "SSO via Google, AzureAD, GitHub",
+        tiers: {
+          Hobby: true,
+          Pro: true,
+          Enterprise: true,
+        },
+      },
+      {
+        name: "Organization-level RBAC",
+        href: "/docs/rbac",
+        tiers: {
+          Hobby: true,
+          Pro: true,
+          Enterprise: true,
+        },
+      },
+      {
+        name: "Enterprise SSO (e.g. Okta, Auth0)",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
+      },
+      {
+        name: "SSO enforcement",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
+      },
+      {
+        name: "Project-level RBAC",
+        href: "/docs/rbac",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
+      },
+      {
+        name: "Data retention management",
+        tiers: {
+          Hobby: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
     ],
   },
   {
     name: "Compliance",
+    href: "/docs/security",
     features: [
       {
         name: "Data processing agreement (GDPR)",
-        tiers: { Hobby: false, Pro: true, Team: true },
+        tiers: { Hobby: false, Pro: true, Enterprise: true },
       },
       {
-        name: "SOC2 Type II and ISO27001 reports",
-        tiers: { Hobby: false, Pro: false, Team: true },
+        name: "SOC2 Type II & ISO27001 reports",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
       },
       {
-        name: "Security reviews",
-        tiers: { Hobby: false, Pro: false, Team: true },
+        name: "InfoSec reviews",
+        tiers: { Hobby: false, Pro: false, Enterprise: true },
       },
     ],
   },
@@ -195,6 +311,11 @@ export default function Pricing({
 }: {
   isPricingPage?: boolean;
 }) {
+  const InfoLink = ({ href }: { href: string }) => (
+    <Link href={href} className="inline-block" target="_blank">
+      <ExternalLink className="size-4 ml-2 pt-0.5" />
+    </Link>
+  );
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
       <div className="isolate overflow-hidden">
@@ -261,14 +382,6 @@ export default function Pricing({
                           </div>
                         )}
                       </div>
-                      <p
-                        className={classNames(
-                          tier.featured ? "text-gray-600" : "text-gray-300",
-                          "text-sm leading-6"
-                        )}
-                      >
-                        {tier.description}
-                      </p>
                       <Button
                         asChild
                         className="z-10"
@@ -277,6 +390,14 @@ export default function Pricing({
                         <Link href={tier.href}>{tier.cta}</Link>
                       </Button>
                     </div>
+                    <p
+                      className={classNames(
+                        tier.featured ? "text-gray-600" : "text-gray-300",
+                        "text-sm leading-6 mt-6"
+                      )}
+                    >
+                      {tier.description}
+                    </p>
                     <div className="mt-8 flow-root sm:mt-10">
                       <ul
                         role="list"
@@ -355,9 +476,14 @@ export default function Pricing({
                         <div className="mt-10 space-y-10">
                           {sections.map((section) => (
                             <div key={section.name}>
-                              <h4 className="text-sm font-semibold leading-6 text-primary">
-                                {section.name}
-                              </h4>
+                              <div>
+                                <h4 className="text-sm font-semibold leading-6 text-primary inline">
+                                  {section.name}
+                                </h4>
+                                {section.href && (
+                                  <InfoLink href={section.href} />
+                                )}
+                              </div>
                               <div className="relative mt-6">
                                 {/* Fake card background */}
                                 <div
@@ -381,6 +507,9 @@ export default function Pricing({
                                       >
                                         <dt className="pr-4 text-primary/60">
                                           {feature.name}
+                                          {feature.href && (
+                                            <InfoLink href={feature.href} />
+                                          )}
                                         </dt>
                                         <dd className="flex items-center justify-end sm:justify-center sm:px-4">
                                           {typeof feature.tiers[tier.name] ===
@@ -483,9 +612,12 @@ export default function Pricing({
                   <div className="-mt-6 space-y-16">
                     {sections.map((section) => (
                       <div key={section.name}>
-                        <h3 className="text-sm font-semibold leading-6 text-primary">
-                          {section.name}
-                        </h3>
+                        <div>
+                          <h3 className="text-sm font-semibold leading-6 text-primary inline">
+                            {section.name}
+                          </h3>
+                          {section.href && <InfoLink href={section.href} />}
+                        </div>
                         <div className="relative -mx-8 mt-10">
                           {/* Fake card backgrounds */}
                           <div
@@ -519,7 +651,12 @@ export default function Pricing({
                                     scope="row"
                                     className="w-1/4 py-3 pr-4 text-left text-sm font-normal leading-6 text-primary"
                                   >
-                                    {feature.name}
+                                    <div>
+                                      {feature.name}
+                                      {feature.href && (
+                                        <InfoLink href={feature.href} />
+                                      )}
+                                    </div>
                                     {featureIdx !==
                                     section.features.length - 1 ? (
                                       <div className="absolute inset-x-8 mt-3 h-px bg-gray-200" />
@@ -597,6 +734,7 @@ export default function Pricing({
                 </section>
               </div>
             </div>
+            <DiscountOverview className="mt-10" />
             <PricingFAQ />
           </>
         ) : (
@@ -615,6 +753,56 @@ export default function Pricing({
     </HomeSection>
   );
 }
+
+const discounts = [
+  {
+    name: "Early-stage startups",
+    description: "50% off, first year",
+  },
+  {
+    name: "Education / Non-profits",
+    description: "Free depending on org-size",
+  },
+  {
+    name: "Open-source projects",
+    description: "Free depending on org-size",
+  },
+];
+
+const DiscountOverview = ({ className }: { className?: string }) => (
+  <div className={cn("mx-auto max-w-7xl px-6 lg:px-8", className)}>
+    <div className="mx-auto max-w-4xl">
+      <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
+        Discounts
+      </h2>
+      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {discounts.map((discount) => (
+          <div
+            key={discount.name}
+            className="rounded-lg border border-gray-200 p-4 shadow-sm"
+          >
+            <dt className="text-base font-semibold leading-7 text-primary">
+              {discount.name}
+            </dt>
+            <dd className="mt-2 text-sm leading-7 text-primary/60">
+              {discount.description}
+            </dd>
+          </div>
+        ))}
+      </div>
+      <p className="mt-6 leading-8 text-primary/60">
+        Reach out to{" "}
+        <Link href="mailto:support@langfuse.com" className="underline">
+          support@langfuse.com
+        </Link>{" "}
+        to apply for a discount. We want all startups, educational users, and
+        non-profits to build with Langfuse and are happy to work with you to
+        make that happen.
+      </p>
+    </div>
+  </div>
+);
+
 const CallOutSelfhostEnterprise = ({ className }: { className?: string }) => (
   <div className={cn("text-center", className)}>
     Langfuse is also easy to{" "}
@@ -664,7 +852,7 @@ const faqs = [
 export function PricingFAQ() {
   return (
     <div id="faq">
-      <div className="mx-auto max-w-7xl px-6 pb-24 lg:pt-16 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 lg:px-8">
         <div className="mx-auto max-w-4xl divide-y divide-primary/10">
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
             Frequently asked questions
