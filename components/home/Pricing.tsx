@@ -34,12 +34,12 @@ const tiers = [
     href: "https://cloud.langfuse.com",
     featured: true,
     description:
-      "For serious projects. Includes access to full history and higher usage.",
+      "For production projects. Includes access to full history and higher usage.",
     price: "$30",
     mainFeatures: [
       "100k events / month included, additional: $10 / 100k events",
       "Includes all platform features",
-      "Unlimited data access",
+      "Unlimited data history",
       "Support via Email/Chat",
     ],
     cta: "Sign up",
@@ -56,8 +56,8 @@ const tiers = [
       "Unlimited tracing throughput",
       "SSO and fine-grained RBAC",
       "SOC2, ISO27001, and InfoSec reviews",
-      "Dedicated support engineer, and SLAs",
-      "Deployment in your environment",
+      "Dedicated support engineer and SLAs",
+      "Self-hosting available",
     ],
     cta: "Talk to founders",
   },
@@ -102,7 +102,7 @@ const sections = [
         },
       },
       {
-        name: "Data access",
+        name: "Data history",
         tiers: {
           Hobby: "30 days",
           Pro: "Unlimited",
@@ -761,11 +761,11 @@ const discounts = [
   },
   {
     name: "Education / Non-profits",
-    description: "Free depending on org-size",
+    description: "Free (limits apply)",
   },
   {
     name: "Open-source projects",
-    description: "Free depending on org-size",
+    description: "USD 300 in credits, first year",
   },
 ];
 
@@ -845,7 +845,7 @@ const faqs = [
   {
     question: "Do you offer discounts?",
     answer:
-      "Yes, we offer discounts for students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at sales@langfuse.com with details about your project.",
+      "Yes, we offer discounts for startups, students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
 ];
 
