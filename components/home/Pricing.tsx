@@ -168,7 +168,7 @@ const sections = [
       {
         name: "Projects",
         tiers: {
-          Hobby: "Unlimited",
+          Hobby: "3",
           Pro: "Unlimited",
           Enterprise: "Unlimited",
         },
