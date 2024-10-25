@@ -192,7 +192,17 @@ fn()
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `mask` to the constructor:
 
-```ts
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+
+function maskingFunction(params: { data: any }) {
+  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
+    return "REDACTED";
+  }
+
+  return params.data;
+}
+
 const handler = new CallbackHandler({
   mask: maskingFunction,
 });
