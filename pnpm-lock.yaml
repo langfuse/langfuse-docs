@@ -78,8 +78,8 @@ importers:
         specifier: ^1.1.5
         version: 1.1.5
       langfuse:
-        specifier: ^3.27.2
-        version: 3.27.2
+        specifier: ^3.28.0
+        version: 3.28.0
       lucide-react:
         specifier: ^0.451.0
         version: 0.451.0(react@18.3.1)
@@ -102,8 +102,8 @@ importers:
         specifier: ^8.4.47
         version: 8.4.47
       posthog-js:
-        specifier: ^1.167.0
-        version: 1.167.0
+        specifier: ^1.176.0
+        version: 1.176.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -1421,6 +1421,9 @@ packages:
   confbox@0.1.8:
     resolution: {integrity: sha512-RMtmw0iFkeR4YV+fUOSucriAQNb9g8zFR52MWCtl+cCZOFRNL6zeB395vPzFhEjjn4fMxXudmELnl/KF/WrK6w==}
 
+  core-js@3.38.1:
+    resolution: {integrity: sha512-OP35aUorbU3Zvlx7pjsFdu1rGNnD4pgw/CWoYzRY3t2EzoVT7shKHY1dlAy3f41cGIO7ZDPQimhGFTlEYkG/Hw==}
+
   cose-base@1.0.3:
     resolution: {integrity: sha512-s9whTXInMSgAp/NVXVNuVxVKzGH2qck3aQlVHxDCdAEPgtMKwc4Wq6/QKhgdEdgbLSi9rBTAcPoRa6JpiG4ksg==}
 
@@ -2087,12 +2090,12 @@ packages:
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
-  langfuse-core@3.27.2:
-    resolution: {integrity: sha512-k4ZMxMRi6ldp8iOa500ld0So6mIp7MrPbUcLlbNoMpd1OnGlBc9QnebWpU3fRW6CReRyyiIORfkbK3ygkaP6Ig==}
+  langfuse-core@3.28.0:
+    resolution: {integrity: sha512-RLx7Bkd9nSGiCLQYDLknGfTljKNUr9R7h4w2Y6+k6ryK26QSA7Te3hJEvyEuvDyopRk+8rvUuqF5I2N9ama9Xw==}
     engines: {node: '>=18'}
 
-  langfuse@3.27.2:
-    resolution: {integrity: sha512-JFu5H+Fq/gVGqX1tw7vZn4DClCKwsP/6zqP3Ir45TwKSii43JckEMQK8X+/2Dhxct+XXbZeB+7/M+XmoObhKvA==}
+  langfuse@3.28.0:
+    resolution: {integrity: sha512-4iHbZ7sfSPKrDM+A0O2ISskmRapDSsHLBwtXyOAIM9OEQrcPb9CwlTI6D/ojbbvb0wYeY4DUIRD6nFzQrA/A3g==}
     engines: {node: '>=18'}
 
   langium@3.0.0:
@@ -2631,8 +2634,8 @@ packages:
     resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.167.0:
-    resolution: {integrity: sha512-/zXQ6tuJgiF1d4mgg3UsAi/uoyg7UnfFNQtikuALmaE53xFExpcAKbMfHPG/f54QgTvLxSHyGL1kFl/1uspkGg==}
+  posthog-js@1.176.0:
+    resolution: {integrity: sha512-T5XKNtRzp7q6CGb7Vc7wAI76rWap9fiuDUPxPsyPBPDkreKya91x9RIsSapAVFafwD1AEin1QMczCmt9Le9BWw==}
 
   preact@10.22.0:
     resolution: {integrity: sha512-RRurnSjJPj4rp5K6XoP45Ui33ncb7e4H7WiOHVpjbkvqvA3U+N8Z6Qbo0AE6leGYBV66n8EhEaFixvIu3SkxFw==}
@@ -4557,6 +4560,8 @@ snapshots:
 
   confbox@0.1.8: {}
 
+  core-js@3.38.1: {}
+
   cose-base@1.0.3:
     dependencies:
       layout-base: 1.0.2
@@ -5306,13 +5311,13 @@ snapshots:
 
   kolorist@1.8.0: {}
 
-  langfuse-core@3.27.2:
+  langfuse-core@3.28.0:
     dependencies:
       mustache: 4.2.0
 
-  langfuse@3.27.2:
+  langfuse@3.28.0:
     dependencies:
-      langfuse-core: 3.27.2
+      langfuse-core: 3.28.0
 
   langium@3.0.0:
     dependencies:
@@ -6226,8 +6231,9 @@ snapshots:
       picocolors: 1.1.0
       source-map-js: 1.2.1
 
-  posthog-js@1.167.0:
+  posthog-js@1.176.0:
     dependencies:
+      core-js: 3.38.1
       fflate: 0.4.8
       preact: 10.22.0
       web-vitals: 4.2.3
