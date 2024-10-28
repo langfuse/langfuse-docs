@@ -68,7 +68,7 @@ const sections = [
     href: "/docs/tracing",
     features: [
       {
-        name: "Framework integrations & SDKs",
+        name: "Integrations/SDKs",
         href: "/docs/integrations/overview",
         tiers: {
           Hobby: true,
@@ -77,7 +77,7 @@ const sections = [
         },
       },
       {
-        name: "Custom integration via API",
+        name: "Custom via API",
         href: "https://api.reference.langfuse.com/#post-/api/public/ingestion",
         tiers: {
           Hobby: true,
@@ -102,7 +102,7 @@ const sections = [
         },
       },
       {
-        name: "Data history",
+        name: "Access to historical data",
         tiers: {
           Hobby: "30 days",
           Pro: "Unlimited",
@@ -168,7 +168,7 @@ const sections = [
       {
         name: "Projects",
         tiers: {
-          Hobby: "3",
+          Hobby: "Unlimited",
           Pro: "Unlimited",
           Enterprise: "Unlimited",
         },
