@@ -53,7 +53,7 @@ Follow the [quickstart guide](/docs/get-started) to get up and running with Lang
 
 ## Updating Langfuse
 
-Docker has robust caching functionalities. To fetch the latest Langfuse container, you need to run `docker compose pull`. Otherwise, Docker will use the cached version of the Langfuse container.
+Docker has robust caching functionalities. To fetch the latest Langfuse container, you need to run `docker compose pull langfuse-server`. Otherwise, Docker will use the cached version of the Langfuse container.
 
 ```bash
 # Navigate to the Langfuse directory
@@ -62,9 +62,11 @@ cd langfuse
 # Stop the server and database
 docker compose down
 
-# Fetch the latest changes
+# Pull the latest changes to the docker compose file
 git pull
-docker compose pull
+
+# Pull the latest Langfuse container
+docker compose pull langfuse-server
 
 # Restart the server and database
 docker compose up
