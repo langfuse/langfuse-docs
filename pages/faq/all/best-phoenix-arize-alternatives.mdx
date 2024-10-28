@@ -1,0 +1,96 @@
+---
+title: Phoenix Arize Alternative? Langfuse vs. Phoenix Arize
+tags: [product]
+---
+
+# Phoenix Arize Alternatives? Langfuse vs. Phoenix Arize
+
+This article compares [Phoenix Arize](https://docs.arize.com/phoenix) and [Langfuse](https://www.langfuse.com), two **open source** LLM observability platforms.
+
+## High Level Comparison
+
+Phoenix Arize and Langfuse are both open-source tools for LLM observability, analytics, evaluation, testing, and annotation. However, they differ in focus areas, adoption, and suitability for different stages of LLM application development.
+
+- **Use For:**
+  - **Phoenix Arize**: Focused on the experimental and development stages of LLM applications. It provides tools for evaluation and troubleshooting within a notebook-centric workflow. However, it **lacks prompt management** and **comprehensive LLM usage monitoring** features, which may limit its effectiveness in production environments.
+  - **Langfuse**: Best in class for core LLM engineering features (tracing, evaluations, prompt management, and open, stable APIs), prompt management, and usage analytics for LLM applications.
+
+- **Adoption and Production Readiness**: Langfuse has a larger open source adoption compared to Phoenix Arize and is considered battle-tested for production use cases. This makes Langfuse an good choice for companies seeking a reliable tool for live production environments.
+
+- **Integration with Arize**: Phoenix Arize is a good solution if your company already uses [Arize AI's](https://arize.com) enterprise platform. Phoenix works hand-in-hand with Arize, ensuring a smooth data transfer between the two tools.
+
+- **Self-Hosting**: Langfuse offers extensive [self-hosting documentation](/docs/deployment/feature-overview) for data security or compliance requirements.
+
+## Download and Usage Statistics
+
+| | Phoenix Arize | Langfuse |
+| :--- | :--- | :--- |
+| **GitHub Stars**   | [![Phoenix Arize](https://img.shields.io/github/stars/Arize-ai/phoenix?style=flat-square&logo=github&labelColor=%230D1117&color=%23161B22)](https://github.com/Arize-ai/phoenix)  | [![Langfuse](https://img.shields.io/github/stars/langfuse/langfuse?style=flat-square&logo=github&labelColor=%230D1117&color=%23161B22)](https://github.com/langfuse/langfuse) |
+| **Last Commit** | [![Phoenix Arize](https://img.shields.io/github/last-commit/Arize-ai/phoenix?style=flat-square&logo=github&labelColor=%230D1117&color=%23161B22)](https://github.com/Arize-ai/phoenix)  | [![Langfuse](https://img.shields.io/github/last-commit/langfuse/langfuse?style=flat-square&logo=github&labelColor=%230D1117&color=%23161B22)](https://github.com/langfuse/langfuse)                                                             |
+| **PyPI Downloads** | [![Phoenix Arize](https://img.shields.io/pypi/dw/arize-phoenix?style=flat-square&logo=pypi&labelColor=%230D1117&color=%23161B22)](https://pypi.org/project/arize-phoenix) | [![Langfuse](https://img.shields.io/pypi/dw/langfuse?style=flat-square&logo=pypi&labelColor=%230D1117&color=%23161B22)](https://pypi.org/project/langfuse)|
+
+## Phoenix Arize
+
+![Phoenix Arize UI](/images/blog/faq/phoenix-arize/phoenix-arize-screen.png)
+
+### What is Phoenix Arize?
+
+Phoenix Arize is an open-source observability tool designed for experimentation, evaluation, and troubleshooting of LLM apps. Built by [Arize AI](https://arize.com), Phoenix enables AI engineers and data scientists to visualize data, evaluate performance, track down issues, and export data for improvements.
+
+### What is Phoenix Arize used for?
+
+- **Integration with Arize AI**: Share data when discovering insights to the Arize platform so the data science team can perform further investigation or kickoff retraining workflows.
+- **Development and Experimentation**: Phoenix Arize is focused on the experimental and development stages of LLM applications, providing tools for model evaluation and troubleshooting within a notebook-centric workflow.
+
+## Langfuse
+
+<CloudflareVideo
+  videoId="be2a8276c589a0de39ab846d505cf731"
+  aspectRatio={1.516}
+  gifStyle
+  className="block dark:hidden"
+/>
+<CloudflareVideo
+  videoId="835959b1fbe097cd396e7b20cd5cf91e"
+  aspectRatio={1.516}
+  gifStyle
+  className="hidden dark:block"
+/>
+_Example trace in our [public demo](/docs/demo)_
+
+### What is Langfuse?
+
+Langfuse is an LLM observability platform that provides a comprehensive tracing and logging solution for LLM applications. Langfuse helps teams to understand and debug complex LLM applications and evaluate and iterate them in production.
+
+### What is Langfuse used for?
+
+- **Holistic Tracing and Debugging**: Effective tracking of both LLM and non-LLM actions, delivering complete context for applications.
+- **Production Environments**: Best in class for core LLM engineering features, emphasizing production-grade monitoring, debugging, and performance analytics.
+- **Prompt Management**: Provides robust [prompt management](/docs/prompt-management) solutions through client SDKs, ensuring minimal impact on application latency and uptime during prompt retrieval.
+- **Integration Options**: Supports asynchronous logging and tracing SDKs with integrations for frameworks like [LangChain](/docs/integrations/langchain/tracing), [LlamaIndex](/docs/integrations/llama-index/get-started), [OpenAI SDK](/docs/integrations/openai/python/get-started), and [others](/docs/integrations/overview).
+- **Deep Evaluation**: Facilitates user feedback collection, manual reviews, automated annotations, and [custom evaluation](/docs/scores/overview) functions.
+- **Self-Hosting**: Extensive [self-hosting documentation](/docs/deployment/feature-overview) for data security or compliance requirements.
+
+
+## Core Feature Comparison
+
+This table compares the core features of LLM observability tools: Logging model calls, managing and testing prompts in production, and evaluating model outputs.
+
+| | Phoenix Arize | Langfuse |
+| :--- | :--- | :---- |
+| **Tracing and Logging** | Offers basic tracing capabilities within a notebook environment, primarily for development and experimentation. **Lacks comprehensive tracing for LLM usage monitoring in production environments.**                                                                  | Specializes in **comprehensive tracing**, enabling detailed tracking of both LLM and other activities within the system. Langfuse captures the **complete context** of applications and supports asynchronous logging with tracing SDKs, ideal for production environments.       |
+| **Prompt Management**            | **Does not provide prompt management features.** Limited capabilities for managing prompts, which may hinder prompt testing and optimization in production environments.                                                                                             | Delivers robust prompt management solutions through client SDKs, ensuring **minimal impact on application latency** and uptime during prompt retrieval. Optimized for production use cases, allowing teams to manage and test prompts effectively in live environments.         |
+| **Evaluation Capabilities**      | Offers tools for evaluation and troubleshooting during development stages within notebooks. Supports custom metrics and integration with Arize AI for production monitoring when using Arize's platform.                                                             | Provides a wide array of evaluation tools, including mechanisms for **user feedback**, both **manual and automated annotations**, and the ability to define **custom evaluation functions**, enabling thorough assessment of LLM performance in production environments.          |
+| **Integration and Ecosystem**    | Integrates tightly with Arize AI's enterprise platform. Best suited for organizations already utilizing Arize's ecosystem or those prioritizing integration with existing Arize infrastructure.                                                                     | Operates independently and offers integrations with popular frameworks such as LangChain and LlamaIndex. Suitable for teams looking for broad compatibility with various tools and platforms without being tied to a specific ecosystem.                                        |
+| **Adoption and Community Support** | Smaller adoption compared to Langfuse, with a potentially smaller community and fewer real-world use cases.                                                                                                                                                         | Larger user base and community, making it more battle-tested for production use cases. The widespread adoption ensures robust community support and continuous improvements driven by real-world feedback.                                                                    |
+
+
+## Conclusion
+
+Langfuse is a good choice for most **production use cases**, particularly when comprehensive **tracing**, **prompt management**, deep **evaluation** capabilities, and robust **LLM usage monitoring** are critical. Its ability to provide detailed insights into both **LLM and non-LLM activities**, along with support for asynchronous logging and various framework integrations, makes it ideal for complex applications requiring thorough observability.
+
+Phoenix Arize is a strong option if your company already uses **Arize AI's enterprise platform** and is focused on the **experimental and development stages** of LLM applications. It offers powerful tools for evaluation and troubleshooting within a notebook-centric workflow. However, its **lack of prompt management** and **comprehensive LLM usage monitoring** features may limit its effectiveness in production environments, making it less suitable for teams requiring these capabilities.
+
+## This comparison is out of date?
+
+Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
