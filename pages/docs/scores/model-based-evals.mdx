@@ -4,7 +4,7 @@ description: Langfuse (open source) helps run model-based evaluations (llm-as-a-
 
 # LLM-as-a-judge in Langfuse
 
-Using LLM-as-a-judge (aka model-based evaluations) has proven as a powerful evaluation tool next to human annotation. Via Langfuse, we support setting up LLM-evaluators to evaluate your LLM applications integrated with Langfuse. These evaluators are used to score a specific session/trace/LLM-call in Langfuse on criteria such as correctness, toxicity, or hallucinations.
+Using LLM-as-a-judge (model-based evaluations) has proven as a powerful evaluation tool next to human annotation. Via Langfuse, we support setting up LLM-evaluators to evaluate your LLM applications integrated with Langfuse. These evaluators are used to score a specific session/trace/LLM-call in Langfuse on criteria such as correctness, toxicity, or hallucinations.
 
 There are two ways to run LLM-as-a-judge in Langfuse:
 
@@ -52,7 +52,7 @@ Second, we need to specify on which `traces` Langfuse should run the evaluator.
 
 - Specify the name of the `scores` which will be created as a result of the evaluation.
 - Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
-- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. You can choose to take `Input`, `Output` or `metadata` form each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
+- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. You can choose to take `Input`, `Output` or `metadata` from each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
 - Reduce the sampling to not run evaluations on each trace. This helps to save LLM API cost.
 - Add a delay to the evaluation execution. This is how you can ensure all data arrived at Langfuse servers before evaluation is executed.
 
@@ -101,7 +101,7 @@ Pipeline ->> Langfuse: Add score to trace via SDK/API
 Langfuse ->> User: Analyze evaluation scores via UI & API
 ```
 
-You can run your own automatic evaluations on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
+You can run your own model-based evals on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
 
 The example notebook is a good template to get started with building your own evaluation pipeline.
 
