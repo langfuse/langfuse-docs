@@ -224,7 +224,9 @@ The potential responses from the readiness check endpoint are:
 
 Applications and monitoring services can call this endpoint periodically for health updates.
 
-### HTTPS
+### Encryption
+
+#### Encryption in transit (HTTPS) [#https]
 
 For encryption in transit, HTTPS is strongly recommended. Langfuse itself does not handle HTTPS directly. Instead, HTTPS is typically managed at the infrastructure level. There are two main approaches to handle HTTPS for Langfuse:
 
@@ -241,6 +243,24 @@ For encryption in transit, HTTPS is strongly recommended. Langfuse itself does n
    - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
 
 Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
+
+#### Encryption at rest (database) [#encryption-at-rest]
+
+All Langfuse data is stored in your Postgres database. Database-level encryption is recommended for a secure production deployment and available across cloud providers.
+
+The Langfuse team has implemented this for Langfuse Cloud and it is fully ISO27001, SOC2 Type 2 and GDPR compliant ([security page](/docs/security)).
+
+#### Additional application-level encryption [#application-level-encryption]
+
+In addition to in-transit and at-rest encryption, sensitive data is also encrypted or hashed at the application level.
+
+| Data                                      | Encryption                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| API keys                                  | Hashed using `SALT`                                                                  |
+| Langfuse Console JWTs                     | Encrypted via `NEXTAUTH_SECRET`                                                      |
+| LLM API credentials stored in Langfuse    | Encrypted using `ENCRYPTION_KEY`                                                     |
+| Integration credentials (e.g. PostHog)    | Encrypted using `ENCRYPTION_KEY`                                                     |
+| Input/Outputs of LLM Calls, Traces, Spans | Work in progress, reach out to enterprise@langfuse.com if you are interested in this |
 
 ### Build Langfuse from source [#build-from-source]
 
