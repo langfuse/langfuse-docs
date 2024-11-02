@@ -59,18 +59,24 @@ For going to measure the following aspects of a RAG system. These metric are fro
 1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/faithfulness.html): This measures the factual consistency of the generated answer against the given context.
 2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/answer_relevance.html): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
 3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
-4. [aspect_critique](https://docs.ragas.io/en/latest/concepts/metrics/critique.html): This is designed to assess submissions based on predefined aspects such as harmlessness and correctness. Additionally, users have the flexibility to define their own aspects for evaluating submissions according to their specific criteria.
 
 Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metrics/index.html) to know more about these metrics and how they work.
 
 
 ```python
 # import metrics
-from ragas.metrics import faithfulness, answer_relevancy, context_precision
-from ragas.metrics.critique import harmfulness
+from ragas.metrics import (
+    Faithfulness,
+    ResponseRelevancy,
+    LLMContextPrecisionWithoutReference,
+)
 
 # metrics you chose
-metrics = [faithfulness, answer_relevancy, context_precision, harmfulness]    
+metrics = [
+    Faithfulness(),
+    ResponseRelevancy(),
+    LLMContextPrecisionWithoutReference(),
+] 
 ```
 
 Now you have to initialize the metrics with LLMs and Embeddings of your choice. In this example we are going to use OpenAI.
@@ -146,13 +152,18 @@ Here we are defining a utility function to score your trace with the metrics you
 
 
 ```python
+from ragas.dataset_schema import SingleTurnSample
+
 async def score_with_ragas(query, chunks, answer):
     scores = {}
     for m in metrics:
-        print(f"calculating {m.name}")
-        scores[m.name] = await m.ascore(
-            row={"question": query, "contexts": chunks, "answer": answer}
+        sample = SingleTurnSample(
+            user_input=query,
+            retrieved_contexts=chunks,
+            response=answer,
         )
+        print(f"calculating {m.name}")
+        scores[m.name] = await m.single_turn_ascore(sample)
     return scores
 ```
 
@@ -298,10 +309,9 @@ for t in traces_sample:
 # run ragas evaluate
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy
+from ragas.metrics import Faithfulness, ResponseRelevancy
 
-ds = Dataset.from_dict(evaluation_batch)
-r = evaluate(ds, metrics=[faithfulness, answer_relevancy])
+r = evaluate(ds, metrics=[Faithfulness(), ResponseRelevancy()])
 ```
 
 And that is it! You can see the scores over a time period.
