@@ -1,5 +1,6 @@
 ---
-description: Open source observability for Vercel AI SDK using its native OpenTelemetry support.
+title: Observability and Tracing for the Vercel AI SDK
+description: Open source observability for Vercel AI SDK applications using its native OpenTelemetry support.
 ---
 
 import EnvJS from "@/components-mdx/env-js.mdx";
@@ -211,6 +212,10 @@ new LangfuseExporter({ debug: true });
 
 - If you deploy on Vercel, Vercel's OpenTelemetry Collector is only available on Pro and Enterprise Plans ([docs](https://vercel.com/docs/observability/otel-overview)).
 - You need to be on `"ai": "^3.3.0"` to use the telemetry feature as it was recently added. In case of any issues, please update to the latest version as this feature is under active development.
+- On NextJS, make sure that you only have a single instrumentation file.
+- If you use Sentry, make sure to either:
+  - set `skipOpenTelemetrySetup: true` in Sentry.init
+  - follow Sentry's docs on how to manually set up Sentry with OTEL
 
 ## Learn more
 

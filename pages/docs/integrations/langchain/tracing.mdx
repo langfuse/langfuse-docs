@@ -1,5 +1,5 @@
 ---
-title: Open Source Observability for LangChain
+title: Open Source Observability & Tracing for LangChain
 description: Open source tracing and monitoring for your LangChain application. Python and JS/TS. Automatically capture rich traces and metrics and evaluate outputs.
 ogImage: /images/docs/langchain_og.png
 ---
@@ -436,6 +436,33 @@ Since Langchain version > 0.3.0, the callbacks on which Langfuse relies have bee
 - importing the global `awaitAllCallbacks` method to ensure all callbacks finish if necessary
 
 Read more about awaiting callbacks here in the [Langchain docs](https://js.langchain.com/docs/how_to/callbacks_serverless).
+
+### Azure OpenAI model names
+
+Please add the `model` keyword argument to the `AzureOpenAI` or `AzureChatOpenAI` class to have the model name parsed correctly in Langfuse.
+
+<Tabs items={["Python", "JS/TS"]}> 
+<Tab>
+```python
+from langchain_openai import AzureChatOpenAI
+
+llm = AzureChatOpenAI(
+    azure_deployment="my-gpt-4o-deployment",
+    model="gpt-4o",
+)
+```
+</Tab>
+<Tab>
+```typescript
+import { AzureChatOpenAI } from "@langchain/openai";
+
+const llm = new AzureChatOpenAI({
+  azureOpenAIApiDeploymentName: "my-gpt-4o-deployment",
+  model: "gpt-4o",
+});
+```
+</Tab>
+</Tabs>
 
 ## FAQ
 

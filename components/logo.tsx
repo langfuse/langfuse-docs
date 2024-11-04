@@ -11,7 +11,7 @@ export function Logo() {
   return (
     <>
       <div
-        className="flex gap-2 items-center cursor-pointer"
+        className="flex gap-2 items-center cursor-pointer -mr-4 md:-mr-0"
         onContextMenu={(e) => {
           e.preventDefault();
           setMenuOpen(true);
@@ -33,7 +33,6 @@ export function Logo() {
         />
         <style jsx>{`
           div {
-            padding: 0.5rem 0.5rem 0.5rem 0;
             mask-image: linear-gradient(
               60deg,
               #bba0ff 25%,

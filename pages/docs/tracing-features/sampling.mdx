@@ -14,7 +14,7 @@ Sampling can be used to control the volume of traces collected by the Langfuse s
 
 You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1. The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 
-<Tabs items={["Python", "OpenAI (Python)",  "Langchain (Python)", "LlamaIndex"]}>
+<Tabs items={["Python", "OpenAI (Python)",  "Langchain (Python)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)"]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -85,7 +85,22 @@ handler = CallbackHandler(
 
 <Tab>
 
-When using the [LlamaIndex Integration](/docs/integrations/llama-index)
+When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started)
+
+```python
+import os
+from langfuse.llama_index import LlamaIndexInstrumentor
+
+# Either set the environment variable or the constructor parameter. The latter takes precedence.
+os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
+instrumentor = LlamaIndexInstrumentor(sample_rate=0.5)
+```
+
+</Tab>
+
+<Tab>
+
+When using the deprecated [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated-llama-index-callback)
 
 ```python
 from llama_index.core import Settings
