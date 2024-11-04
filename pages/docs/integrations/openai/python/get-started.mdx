@@ -471,6 +471,10 @@ _Note that you need to provide `trace_id` and `parent_observation_id` to each ge
 
 OpenAI returns the token usage on streamed responses only when in `stream_options` the `include_usage` parameter is set to `True`. This integration automatically sets this parameter to `True` when streaming is detected to track accurate token usage. If you would like to disable this for any reason (not recommended), you can set `include_usage=False` in the `stream_options` parameter.
 
+<Callout type="info">
+  When using streaming responses with `include_usage=True`, OpenAI returns token usage information in a final chunk that has an empty `choices` list. Make sure your application properly handles these empty `choices` chunks to ensure accurate token usage tracking by not trying to access some index in the `choices` list without checking if it is non-empty.
+</Callout>
+
 ### OpenAI Beta APIs
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
