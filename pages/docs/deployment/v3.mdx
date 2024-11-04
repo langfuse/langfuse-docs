@@ -24,10 +24,10 @@ Langfuse V3 is not completely backwards compatible with our SDKs on versions bel
 
 **Upgrade options**:
 - Default SDK upgrade: We wrote documentation on how to upgrade from 1.x.x to 2.x.x ([Python](https://langfuse.com/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JS](https://langfuse.com/docs/sdk/typescript/guide#upgrade1to2)). For the JS SDK, we also have an upgrade path [from 2.x.x to 3.x.x](https://langfuse.com/docs/sdk/typescript/guide#upgrade2to3). The upgrade is straightforward and should not take much time.
-- Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](https://langfuse.com/docs/sdk/python/decorators) for Python. I would recommend to check out our [quickstart](https://langfuse.com/docs/get-started) to see whether there is a more convenient integration available for you.
+- Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](https://langfuse.com/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](https://langfuse.com/docs/get-started) to see whether there is a more convenient integration available for you.
 
 
-**Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SKDs, queue the HTTP bodies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests without overloading the database. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data, your SDK will break as of Nov. 11th, 2024.
+**Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SKDs, queue the HTTP bodies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests without overloading the database. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data and access it in the code, your SDK will break as of Nov. 11th, 2024.
 
 ## Event Backups in Cloud Storage
 
