@@ -8,7 +8,7 @@ Langfuse V3 is currently in development, see this [GitHub Discussion thread](htt
 
 This document summarizes changes compared to v2 with regards to self-hosted deployments. While v3 is not released, these changes are unstable and can change.
 
-## Reasonging
+## Reasoning
 
 Langfuse has gained traction over the last months and so we are working on scaling the backend to handle more requests. On Langfuse Cloud, we gradually move to the more scalable backend and want to release it to self-hosters by the end of November. The new version contains two Docker containers, Postgres, Redis, S3, and Clickhouse.
 
@@ -27,7 +27,7 @@ Langfuse V3 is not completely backwards compatible with our SDKs on versions bel
 - Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](https://langfuse.com/docs/sdk/python/decorators) for Python. I would recommend to check out our [quickstart](https://langfuse.com/docs/get-started) to see whether there is a more convenient integration available for you.
 
 
-**Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SKDs, queue the HTTP boedies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data, your SDK will break as of Nov. 11th, 2024.
+**Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SKDs, queue the HTTP bodies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests without overloading the database. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data, your SDK will break as of Nov. 11th, 2024.
 
 ## Event Backups in Cloud Storage
 
