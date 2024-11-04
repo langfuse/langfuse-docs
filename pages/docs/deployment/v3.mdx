@@ -27,7 +27,7 @@ Langfuse V3 is not completely backwards compatible with our SDKs on versions bel
 - Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](https://langfuse.com/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](https://langfuse.com/docs/get-started) to see whether there is a more convenient integration available for you.
 
 
-**Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SKDs, queue the HTTP bodies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests without overloading the database. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data and access it in the code, your SDK will break as of Nov. 11th, 2024.
+**Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SDKs, queue the HTTP bodies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests without overloading the database. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data and access it in the code, your SDK will break as of Nov. 11th, 2024.
 
 ## Event Backups in Cloud Storage
 
