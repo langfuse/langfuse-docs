@@ -9,7 +9,7 @@ This cookbook demonstrates how to use [DSPy](https://github.com/stanfordnlp/dspy
 
 Langfuse can help with running DSPy projects by providing a centralized observability platform for debugging and monitoring.
 
-**Note**: This is a community contributed integration ([initial PR](https://github.com/stanfordnlp/dspy/pull/1186) by [@xucailiang](https://github.com/xucailiang)). DSPy documentation covering the integration can be found [here](https://dspy-docs.vercel.app/api/language_model_clients/langfuse). If you encounter issues or want to contribute to the integration, please open an issue or PR.
+**Note**: This is a community contributed integration ([initial PR](https://github.com/stanfordnlp/dspy/pull/1186) by [@xucailiang](https://github.com/xucailiang)). DSPy documentation can be found [here](https://dspy-docs.vercel.app/intro/). If you encounter issues or want to contribute to the integration, please open an issue or PR.
 
 ---
 
