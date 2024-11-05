@@ -6,7 +6,7 @@ description: Tags help to filter and organize traces in Langfuse based on use ca
 
 Tags allow you to categorize and filter traces. You can tag traces (1) when they are created using the Langfuse SDKs and integrations or (2) from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", ]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -183,7 +183,61 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 <Tab>
 
-When using the [LlamaIndex Integration](/docs/integrations/llama-index), set `tags` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/get-started#set-trace-params).
+When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `tags` via the `instrumentor.observe()` context manager:
+
+```python
+from langfuse.llama_index import LlamaIndexInstrumentor
+
+instrumentor = LlamaIndexInstrumentor()
+
+with instrumentor.observe(tags=["tag-1", "tag-2"]):
+    # ... your LlamaIndex index creation ...
+
+    index.as_query_engine().query("What is the capital of France?")
+
+instrumentor.flush()
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the tags via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.llama_index import LlamaIndexInstrumentor
+
+instrumentor = LlamaIndexInstrumentor()
+
+@observe()
+def llama_index_fn(question: str):s
+    # Update context
+    langfuse_context.update_current_trace(tags=["tag-1", "tag-2"])
+
+    # Get IDs
+    current_trace_id = langfuse_context.get_current_trace_id()
+    current_observation_id = langfuse_context.get_current_observation_id()
+
+    # Pass to instrumentor
+    with instrumentor.observe(
+        trace_id=current_trace_id,
+        parent_observation_id=current_observation_id,
+        update_parent=False
+    ) as trace:
+        # ... your LlamaIndex index creation ...
+
+        index.as_query_engine().query("What is the capital of France?")
+
+        # Run application
+        index = VectorStoreIndex.from_documents([doc1, doc2])
+        response = index.as_query_engine().query(question)
+
+        return response
+```
+
+
+</Tab>
+
+<Tab>
+
+When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated-llama-index-callback), set the `tags` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated-llama-index-callback#set-trace-params).
 
 ```python
 from llama_index.core import Settings
@@ -199,7 +253,7 @@ langfuse_callback_handler.set_trace_params(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated-llama-index-callback#interoperability-with-langfuse-sdk)), set the tags via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe

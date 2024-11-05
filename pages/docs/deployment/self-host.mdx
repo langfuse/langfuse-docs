@@ -224,7 +224,9 @@ The potential responses from the readiness check endpoint are:
 
 Applications and monitoring services can call this endpoint periodically for health updates.
 
-### HTTPS
+### Encryption
+
+#### Encryption in transit (HTTPS) [#https]
 
 For encryption in transit, HTTPS is strongly recommended. Langfuse itself does not handle HTTPS directly. Instead, HTTPS is typically managed at the infrastructure level. There are two main approaches to handle HTTPS for Langfuse:
 
@@ -241,6 +243,24 @@ For encryption in transit, HTTPS is strongly recommended. Langfuse itself does n
    - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
 
 Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
+
+#### Encryption at rest (database) [#encryption-at-rest]
+
+All Langfuse data is stored in your Postgres database. Database-level encryption is recommended for a secure production deployment and available across cloud providers.
+
+The Langfuse team has implemented this for Langfuse Cloud and it is fully ISO27001, SOC2 Type 2 and GDPR compliant ([security page](/docs/security)).
+
+#### Additional application-level encryption [#application-level-encryption]
+
+In addition to in-transit and at-rest encryption, sensitive data is also encrypted or hashed at the application level.
+
+| Data                                      | Encryption                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| API keys                                  | Hashed using `SALT`                                                                  |
+| Langfuse Console JWTs                     | Encrypted via `NEXTAUTH_SECRET`                                                      |
+| LLM API credentials stored in Langfuse    | Encrypted using `ENCRYPTION_KEY`                                                     |
+| Integration credentials (e.g. PostHog)    | Encrypted using `ENCRYPTION_KEY`                                                     |
+| Input/Outputs of LLM Calls, Traces, Spans | Work in progress, reach out to enterprise@langfuse.com if you are interested in this |
 
 ### Build Langfuse from source [#build-from-source]
 
@@ -295,11 +315,14 @@ If you encounter issues, ensure the following:
 
 - `NEXTAUTH_URL` exactly matches the URL you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g., 3000 if you do not expose Langfuse on port 80).
 - Set `HOSTNAME` to `0.0.0.0` if you cannot access Langfuse.
-- SSO: Ensure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL`, and the OAuth client needs to be configured with the correct callback URL.
 - Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
 - If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
 - Make sure you are at least on Postgres 12.
 - When using Docker Compose / Kubernetes, your application needs to connect to the Langfuse container at the docker internal network address that you specified, e.g. `http://langfuse:3000`/`http://langfuse.docker.internal:3000`. Learn more: [docker compose networking documentation](https://docs.docker.com/compose/how-tos/networking/), [kubernetes networking documentation](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
+- SSO
+  - Ensure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL`, and the OAuth client needs to be configured with the correct callback URL.
+  - Langfuse uses NextAuth.js. Please refer to the [NextAuth.js documentation](https://next-auth.js.org) for more information.
+  - If you encounter issues with your custom SSO setup, please raise an issue and submit a PR to improve Langfuse. Alternatively, the Langfuse team provides support for setting up custom SSO configurations under a commercial agreement. For more information, please reach out to support@langfuse.com.
 
 ## Updating the Application [#update]
 
@@ -509,7 +532,7 @@ steps:
            --min-instances 0 \
            --max-instances 3 \
            --set-env-vars HOSTNAME=0.0.0.0 \
-           --add-cloudsql-instances=_PROJECT_ID:_REGION:_SQL_INSTANCE_ID \
+           --add-cloudsql-instances=${_PROJECT_ID}:${_REGION}:${_SQL_INSTANCE_ID} \
            --update-secrets AUTH_GOOGLE_CLIENT_ID=AUTH_GOOGLE_CLIENT_ID:latest,AUTH_GOOGLE_CLIENT_SECRET=AUTH_GOOGLE_CLIENT_SECRET:latest,SALT=SALT:latest,NEXTAUTH_URL=NEXTAUTH_URL:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest
 ```
 
