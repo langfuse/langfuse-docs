@@ -11,7 +11,7 @@ const features = [
   {
     name: "Quality.",
     description:
-      "Add scores to each trace. Can be model-based evaluation, user feedback, or manual labeling in the Langfuse UI.",
+      "Add scores to each trace. Langfuse supports LLM-as-a-judge evaluators, user feedback, or human annotation in the Langfuse UI.",
     icon: Check,
   },
   {

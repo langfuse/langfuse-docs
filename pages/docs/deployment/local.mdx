@@ -4,7 +4,7 @@ description: Step-by-step guide to run Langfuse on your local machine using dock
 
 import { Callout } from "nextra/components";
 
-# Local Deployment
+# Local Deployment - Open Source LLM Observability
 
 <Callout type="warning">
   This setup is **not suitable for production use** as the database is not
@@ -21,27 +21,39 @@ for Mac or Windows users.
 
 ## Getting Started
 
+<Steps>
+
+### Start the Langfuse Server
+
 ```bash
 # Clone the Langfuse repository
 git clone https://github.com/langfuse/langfuse.git
 cd langfuse
 
-# Start the server and database
+# Start the database and langfuse server
 docker compose up
 ```
 
-<Callout type="info">
-
-Langfuse is now running on your local machine.
+Langfuse is now running on your local machine:
 
 - The server is accessible at: `http://localhost:3000`
 - Integrations: set the `HOST`/`BASEURL` of the SDKs to `http://localhost:3000`
 
-</Callout>
+Langfuse is very configurable, see [self-hosting (docker) guide](/docs/deployment/self-host) for more details on configuration options.
+
+### Create an Account
+
+Create a new account at `http://localhost:3000/auth/sign-up`.
+
+### Follow the Quickstart Guide
+
+Follow the [quickstart guide](/docs/get-started) to get up and running with Langfuse Tracing or explore the rest of the [documentation](/docs).
+
+</Steps>
 
 ## Updating Langfuse
 
-Docker has robust caching functionalities. To fetch the latest Langfuse container, you need to run `docker compose pull`. Otherwise, Docker will use the cached version of the Langfuse container.
+Docker has robust caching functionalities. To fetch the latest Langfuse container, you need to run `docker compose pull langfuse-server`. Otherwise, Docker will use the cached version of the Langfuse container.
 
 ```bash
 # Navigate to the Langfuse directory
@@ -50,9 +62,11 @@ cd langfuse
 # Stop the server and database
 docker compose down
 
-# Fetch the latest changes
+# Pull the latest changes to the docker compose file
 git pull
-docker compose pull
+
+# Pull the latest Langfuse container
+docker compose pull langfuse-server
 
 # Restart the server and database
 docker compose up

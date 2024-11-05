@@ -1,5 +1,6 @@
 ---
-description: Open source observability for Vercel AI SDK using its native OpenTelemetry support.
+title: Observability and Tracing for the Vercel AI SDK
+description: Open source observability for Vercel AI SDK applications using its native OpenTelemetry support.
 ---
 
 import EnvJS from "@/components-mdx/env-js.mdx";
@@ -177,6 +178,32 @@ We created a sample repository ([langfuse/langfuse-vercel-ai-nextjs-example](htt
 
 By default, the exporter captures the input and output of each request. You can disable this behavior by setting the `recordInputs` and `recordOutputs` options to `false`.
 
+### Link Langfuse prompts to traces
+
+You can link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field: 
+
+```typescript
+import { generateText } from "ai"
+import { Langfuse } from "langfuse"
+
+const langfuse = new Langfuse()
+
+const fetchedPrompt = await langfuse.getPrompt('my-prompt')
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt,
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(),
+    },
+  },
+});
+```
+
+The resulting generation will have the prompt linked to the trace in Langfuse. Learn more about prompts in the [here](/docs/prompts/get-started).
+
 ### Pass Custom Attributes
 
 All of the `metadata` fields are automatically captured by the exporter. You can also pass custom trace attributes to e.g. track users or sessions.
@@ -211,6 +238,10 @@ new LangfuseExporter({ debug: true });
 
 - If you deploy on Vercel, Vercel's OpenTelemetry Collector is only available on Pro and Enterprise Plans ([docs](https://vercel.com/docs/observability/otel-overview)).
 - You need to be on `"ai": "^3.3.0"` to use the telemetry feature as it was recently added. In case of any issues, please update to the latest version as this feature is under active development.
+- On NextJS, make sure that you only have a single instrumentation file.
+- If you use Sentry, make sure to either:
+  - set `skipOpenTelemetrySetup: true` in Sentry.init
+  - follow Sentry's docs on how to manually set up Sentry with OTEL
 
 ## Learn more
 

@@ -3,7 +3,7 @@ description: Open-source observability for DSPy, a framework that systematically
 category: Integrations
 ---
 
-# DSPy Integration
+# DSPy - Observability & Tracing
 
 This cookbook demonstrates how to use [DSPy](https://github.com/stanfordnlp/dspy) with Langfuse. DSPy is a framework that systematically optimizes language model prompts and weights, making it easier to build and refine complex systems with LMs by automating the tuning process and improving reliability. For further information on DSPy, please visit the [documentation](https://dspy-docs.vercel.app/docs/intro).
 

@@ -12,6 +12,11 @@ This document summarizes changes compared to v2 with regards to self-hosted depl
 
 Langfuse has gained traction over the last months and so we are working on scaling the backend to handle more requests. On Langfuse Cloud, we gradually move to the more scalable backend and want to release it to self-hosters by the end of November. The new version contains two Docker containers, Postgres, Redis, S3, and Clickhouse.
 
+
+## Reasoning
+
+Langfuse has gained traction over the last months and so we are working on scaling the backend to handle more requests. On Langfuse Cloud, we gradually move to the more scalable backend and want to release it to self-hosters by the end of November. The new version contains two Docker containers, Postgres, Redis, S3, and Clickhouse.
+
 ### Why Clickhouse
 
 In Langfuse v2, we stored all tracing data in Postgres. Initially, Postgres was an excellent choice due to its robustness, flexibility, and the extensive tooling available. However, we encountered challenges with Postgres as it struggled to handle high insert rates while simultaneously running low-latency analytical queries. Our users need to analyze trends, such as changes in the cost of their LLM calls over time, and drill down into specific traces with particular attributes. Additionally, we required a database that is free and easy to use for self-hosting users of different kinds. Some want to quickly try out Langfuse on their local machine, others have very high scalability requirements. Lastly, we want to do a database migration once as this is a very complex, time consuming, and risky project for everyone involved.

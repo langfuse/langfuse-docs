@@ -189,22 +189,22 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  banner: {
-    key: "banner-hiring",
-    dismissible: true,
-    content: (
-      <Link href="/careers">
-        {/* mobile */}
-        <span className="sm:hidden">
-          Join us in Product Engineering and DevRel →
-        </span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          We're hiring. Join us in Product Engineering and DevRel →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "banner-hiring",
+  //   dismissible: true,
+  //   content: (
+  //     <Link href="https://lu.ma/bin976cv">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">
+  //       Office Hour on Discord: Thursday
+  //       </span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         Office Hour on Discord: Thursday
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;
