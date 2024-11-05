@@ -532,7 +532,7 @@ steps:
            --min-instances 0 \
            --max-instances 3 \
            --set-env-vars HOSTNAME=0.0.0.0 \
-           --add-cloudsql-instances=_PROJECT_ID:_REGION:_SQL_INSTANCE_ID \
+           --add-cloudsql-instances=${_PROJECT_ID}:${_REGION}:${_SQL_INSTANCE_ID} \
            --update-secrets AUTH_GOOGLE_CLIENT_ID=AUTH_GOOGLE_CLIENT_ID:latest,AUTH_GOOGLE_CLIENT_SECRET=AUTH_GOOGLE_CLIENT_SECRET:latest,SALT=SALT:latest,NEXTAUTH_URL=NEXTAUTH_URL:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest
 ```
 
