@@ -12,12 +12,11 @@ import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
 import juiceboxLight from "./img/juicebox_light.svg";
 import juiceboxDark from "./img/juicebox_dark.svg";
-import sumupLight from "./img/sumup_light.svg";
-import sumupDark from "./img/sumup_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
 import khanacademyDark from "./img/khanacademy_dark.png";
-import Link from "next/link";
 import NumberTicker from "@/components/ui/number-ticker";
+import twilioLight from "./img/twilio_light.svg";
+import twilioDark from "./img/twilio_dark.svg";
 
 type User = {
   name: string;
@@ -71,10 +70,10 @@ const users: User[] = [
     href: "https://juicebox.ai/",
   },
   {
-    name: "Sumup",
-    lightImage: sumupLight,
-    darkImage: sumupDark,
-    href: "https://sumup.com",
+    name: "Twilio",
+    lightImage: twilioLight,
+    darkImage: twilioDark,
+    href: "https://www.twilio.com",
   },
 ];
 
