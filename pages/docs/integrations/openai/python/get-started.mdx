@@ -467,6 +467,36 @@ _Note that you need to provide `trace_id` and `parent_observation_id` to each ge
 </Tab>
 </Tabs>
 
+### OpenAI token usage on streamed responses
+
+OpenAI returns the token usage on streamed responses only when in `stream_options` the `include_usage` parameter is set to `True`. If you would like to benefit from OpenAI's directly provided token usage, you can set `{"include_usage": True} in the `stream_options` argument.
+
+<Callout type="info">
+  When using streaming responses with `include_usage=True`, OpenAI returns token usage information in a final chunk that has an empty `choices` list. Make sure your application properly handles these empty `choices` chunks to ensure accurate token usage tracking by not trying to access some index in the `choices` list without checking if it is non-empty.
+</Callout>
+
+```python /stream_options={"include_usage": True}/
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+stream = client.chat.completions.create(
+  model="gpt-4o",
+  messages=[{"role": "user", "content": "How are you?"}],
+  stream=True,
+  stream_options={"include_usage": True},
+)
+
+result = ""
+
+for chunk in stream:
+  # Check if chunk choices are not empty. OpenAI returns token usage in a final chunk with an empty choices list.
+  if chunk.choices:
+    result += chunk.choices[0].delta.content or ""
+
+openai.flush_langfuse()
+```
+
 ### OpenAI Beta APIs
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
