@@ -13,22 +13,37 @@ This document summarizes changes compared to v2 with regards to self-hosted depl
 Langfuse has gained traction over the last months and so we are working on scaling the backend to handle more requests. On Langfuse Cloud, we gradually move to the more scalable backend and want to release it to self-hosters by the end of November. The new version contains two Docker containers, Postgres, Redis, S3, and Clickhouse.
 
 
-## Reasoning
-
-Langfuse has gained traction over the last months and so we are working on scaling the backend to handle more requests. On Langfuse Cloud, we gradually move to the more scalable backend and want to release it to self-hosters by the end of November. The new version contains two Docker containers, Postgres, Redis, S3, and Clickhouse.
-
 ### Why Clickhouse
 
-In Langfuse v2, we stored all tracing data in Postgres. Initially, Postgres was an excellent choice due to its robustness, flexibility, and the extensive tooling available. However, we encountered challenges with Postgres as it struggled to handle high insert rates while simultaneously running low-latency analytical queries. Our users need to analyze trends, such as changes in the cost of their LLM calls over time, and drill down into specific traces with particular attributes. Additionally, we required a database that is free and easy to use for self-hosting users of different kinds. Some want to quickly try out Langfuse on their local machine, others have very high scalability requirements. Lastly, we want to do a database migration once as this is a very complex, time consuming, and risky project for everyone involved.
+At Langfuse, we've made a strategic decision to migrate our database tables containing tracing data from PostgreSQL to ClickHouse, driven by the need for superior performance and scalability for read and write queries. Our core requirement was a database that could handle massive volumes of trace and event data with exceptional query speed and efficiency which is also free to use for self-hosters.
 
-We ended up with the following options:
-- **Extend the Postgres runway**: With tools such as TimescaleDB, we could have extended the time we could remain on Postgres. Also, many self-hosters would have appreciated this option as many do not have the scale requirements we have on the Cloud product. However, this comes with trade offs: First, not all of the Postgres extensions are available on AWS RDS which means that self-hosters would have to deploy the database themselves on an EC2 instance. Hence, self hosting would have become more difficult already. Second, we wanted to move to a database where we are certain it can handle large amounts of data in the long run. This is beneficial for the Cloud Product as well as self-hosters with high scalability requirements.
-- **Move to an OLAP database**: Looking at the requirements, it becomes apparent that we need an OLAP database in the long run. We evaluated only databases, which are free to use for self-hosters as we did not want to make a requirement to deokoy to a specific cloud provider. When looking at the options, there is mostly Clickhouse, Druid and Pinot. 
+**Limitations of Postgres**
+Initially, Postgres was an excellent choice due to its robustness, flexibility, and the extensive tooling available. As our platform grew, we encountered performance bottlenecks with complex aggregations and time-series data. The row-based storage model of PostgreSQL becomes increasingly inefficient when dealing with billions of rows of tracing data, leading to slow query times and high resource consumption.
 
 
-**Decision for Clickhouse**
+**Our requirements**
+- Ablity to handle high insert rates while running low-latency read queries. We mainly have three types of queries: 
+  - **Analytical queries**: for example sum of LLM tokens consumed over time to power our dashboards.
+  - **Table queries**: Find tracing data based on rich filtering and ordering selected via tables in our UI.
+  - **Select by Id**: We need to be able to find a specific trace by its ID.
+- Self-hosting: we needed to select a database which is free to use for self-hosters. We did not want to make a requirement to deploy to a specific cloud provider.
+- Low operational effort: we are a small team and need to focus on building features for our users. We wanted to avoid complex database setups and migrations in the future.
+
+
+
+**Why Clickhouse is great**
+- Clickhouse is a modern OLAP db which is able to ingest data at a high rate and query it with low latency. It is optimized for analytical queries and can handle billions of rows of data.
+- Rich featureset: Clickhouse offers different Table Engines, Materialized views, different types of indices, and many integrations which helps us to build fast and achiev low latency read queries.
+- Our self-hosters can use the official Clickhouse Helm Charts and Docker Images for deploying in the cloud infrastructure of their choice.
+- Clickhouse Cloud: Clickhouse Cloud is a database as a SaaS service which allows us to reduce operational efforts on our side.
+
 When talking to other companies and looking at their code bases, we learned that Clickhouse is a popular choice these days for analytical workloads. Many modern observability tools, such as [Signoz](https://signoz.io/) or [Posthog](https://posthog.com/), as well as established companies like [Cloudflare](https://blog.cloudflare.com/http-analytics-for-6m-requests-per-second-using-clickhouse/), use Clickhouse for their analytical workloads.
-There are many blog articles by large tech companies using one of the three. We eventually decided to go with Clickhouse mostly because it fits our requirements and we successfully made our POCs work with it. Additionally, we figured that there are many different deploymet options in Clickhouse Cloud, via official Helm charts in Kubernetes, or using Docker. On top, we know many fellow founders and engineers who work with Clickhouse and advised us to go with it.
+
+
+**Clickhouse vs. others**
+- Druid: Unlike Druid's [complex architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. This reduces the operational burden especially for our self-hosters.
+- StarRocks: We think StarRocks is great but early. We have many different ways of querying data from our data store and need flexibility in the future. Clickhouse helps us achieve all of this.
+
 
 Implications of adding Clickhouse for self-hosting users:
 - We will provide clear guidelines and tooling to migrate from Postgres to Clickhouse.
