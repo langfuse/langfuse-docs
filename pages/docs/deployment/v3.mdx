@@ -43,7 +43,7 @@ When talking to other companies and looking at their code bases, we learned that
 - StarRocks: We think StarRocks is great but early. The vast amount of features in Clickhouse help us to remain flexible with our requirements while benefiting from the performance of an OLAP database.
 
 #### Building an adapter and support multiple databases
-We thought about building an adapter and supporting multiple databases. This would be great for self-hosters with low data volume, as they would continue to benefit from very easy self-hosting with Postgres. However, when talking to experienced engineers around that, we learned that this will result in a lot of complexity and maintenance overhead. We read through some of the Clickhouse related code in the Posthog [code base](https://github.com/PostHog/posthog) and figured that there is a lot of work done to make Clickhouse work for their use case. We decided to not go down this path to keep our focus on building features for our users.
+We explored building a multi-database adapter to support Postgres for smaller self-hosted deployments. After talking to engineers and reviewing some of PostHog's [Clickhouse implementation](https://github.com/PostHog/posthog), we decided against this path due to its complexity and maintenance overhead. This allows us to focus our resources on building user features instead.
 
 
 Implications of adding Clickhouse for self-hosting users:
