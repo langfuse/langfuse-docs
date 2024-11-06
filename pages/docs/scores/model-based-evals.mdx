@@ -40,9 +40,9 @@ To use Langfuse LLM-as-a-judge, you have to bring your own LLM API keys. To do s
 
 To set up an evaluator, we first need to configure the following:
 
-- Select the model and its parameters.
+- Select the model and its parameters. All tool-calling / structured-output enabled models from supported providers are available.
 - Select the evaluation prompt. Langfuse offers a set of managed prompts, but you can also write your own.
-- We use function calling to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`. This is how you can direct the LLM to score on a specific range and provide specific reasoning for the score.
+- We use tool calling / structured output to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`. This is how you can direct the LLM to score on a specific range and provide specific reasoning for the score.
 
 We store this information in an so-called evaluator template, so you can reuse it for multiple evaluators.
 
