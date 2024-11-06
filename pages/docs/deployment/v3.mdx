@@ -13,7 +13,46 @@ This document summarizes changes compared to v2 with regards to self-hosted depl
 Langfuse has gained traction over the last months and so we are working on scaling the backend to handle more requests. On Langfuse Cloud, we gradually move to the more scalable backend and want to release it to self-hosters by the end of November. The new version contains two Docker containers, Postgres, Redis, S3, and Clickhouse.
 
 
-## SDK compatibility
+### Why Clickhouse
+
+At Langfuse, we've made a strategic decision to migrate our database tables containing tracing data from PostgreSQL to ClickHouse, driven by the need for superior performance and scalability for read and write queries. Our core requirement was a database that could handle massive volumes of trace and event data with exceptional query speed and efficiency which is also free to use for self-hosters.
+
+#### Limitations of Postgres
+Initially, Postgres was an excellent choice due to its robustness, flexibility, and the extensive tooling available. As our platform grew, we encountered performance bottlenecks with complex aggregations and time-series data. The row-based storage model of PostgreSQL becomes increasingly inefficient when dealing with billions of rows of tracing data, leading to slow query times and high resource consumption.
+
+#### Our requirements
+- Analytical queries: all queries for our dashboards (e.g. sum of LLM tokens consumed over time)
+- Table queries: Finding tracing data based on filtering and ordering selected via tables in our UI.
+- Select by ID: Quickly locating a specific trace by its ID.
+- High write throughput while allowing for updates. Our tracing data can be updated from the SKDs. Hence, we need an option to update rows in the database.
+- Self-hosting: We needed a database that is free to use for self-hosters, avoiding dependencies on specific cloud providers.
+- Low operational effort: As a small team, we focus on building features for our users. We try to keep operational efforts as low as possible.
+
+
+#### Why Clickhouse is great
+-	Optimized for Analytical Queries: ClickHouse is a modern OLAP database capable of ingesting data at high rates and querying it with low latency. It handles billions of rows efficiently.
+- Rich feature-set: Clickhouse offers different Table Engines, Materialized views, different types of Indices, and many integrations which helps us to build fast and achieve low latency read queries.
+- Our self-hosters can use the official Clickhouse Helm Charts and Docker Images for deploying in the cloud infrastructure of their choice.
+- Clickhouse Cloud: Clickhouse Cloud is a database as a SaaS service which allows us to reduce operational efforts on our side.
+
+When talking to other companies and looking at their code bases, we learned that Clickhouse is a popular choice these days for analytical workloads. Many modern observability tools, such as [Signoz](https://signoz.io/) or [Posthog](https://posthog.com/), as well as established companies like [Cloudflare](https://blog.cloudflare.com/http-analytics-for-6m-requests-per-second-using-clickhouse/), use Clickhouse for their analytical workloads.
+
+
+#### Clickhouse vs. others
+- Druid: Unlike Druid's [modular architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. Hence, it is easier for teams to manage Clickhouse in production as there are fewer moving parts. This reduces the operational burden especially for our self-hosters.
+- StarRocks: We think StarRocks is great but early. The vast amount of features in Clickhouse help us to remain flexible with our requirements while benefiting from the performance of an OLAP database.
+
+#### Building an adapter and support multiple databases
+We explored building a multi-database adapter to support Postgres for smaller self-hosted deployments. After talking to engineers and reviewing some of PostHog's [Clickhouse implementation](https://github.com/PostHog/posthog), we decided against this path due to its complexity and maintenance overhead. This allows us to focus our resources on building user features instead.
+
+
+Implications of adding Clickhouse for self-hosting users:
+- We will provide clear guidelines and tooling to migrate from Postgres to Clickhouse.
+- We will provide guidelines on when to use which Clickhouse deployment option.
+- For all deployment options, we will automate as much as possible (e.g. upgrades, backups).
+
+## Technical details
+### SDK compatibility
 
 <Callout type="warning">
   Cloud users: SDK versions below 2.0.0 need to be upgraded by Nov. 10th, 2024.
@@ -29,7 +68,7 @@ Langfuse V3 is not completely backwards compatible with our SDKs on versions bel
 
 **Background**: Langfuse V3 relies on an event driven backend architecture. This means, that we acknowledge HTTP requests from the SDKs, queue the HTTP bodies in the backend, and process them asynchronously. This allows us to scale the backend more easily and handle more requests without overloading the database. The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event. If you rely on this data and access it in the code, your SDK will break as of Nov. 11th, 2024.
 
-## Event Backups in Cloud Storage
+### Event Backups in Cloud Storage
 
 In addition to storing events in the database, you may want to store a backup of all raw incoming events in a cloud storage bucket.
 Use the `LANGFUSE_S3_EVENT_UPLOAD_*` environment variables to configure this.
