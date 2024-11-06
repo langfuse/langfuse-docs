@@ -42,6 +42,9 @@ When talking to other companies and looking at their code bases, we learned that
 - Druid: Unlike Druid's [modular architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. Hence, it is easier for teams to manage Clickhouse in production as there are fewer moving parts. This reduces the operational burden especially for our self-hosters.
 - StarRocks: We think StarRocks is great but early. The vast amount of features in Clickhouse help us to remain flexible with our requirements while benefiting from the performance of an OLAP database.
 
+#### Building an adapter and support multiple databases
+We thought about building an adapter and supporting multiple databases. This would be great for self-hosters with low data volume, as they would continue to benefit from very easy self-hosting with Postgres. However, when talking to experienced engineers around that, we learned that this will result in a lot of complexity and maintenance overhead. We read through some of the Clickhouse related code in the Posthog [code base](https://github.com/PostHog/posthog) and figured that there is a lot of work done to make Clickhouse work for their use case. We decided to not go down this path to keep our focus on building features for our users.
+
 
 Implications of adding Clickhouse for self-hosting users:
 - We will provide clear guidelines and tooling to migrate from Postgres to Clickhouse.
