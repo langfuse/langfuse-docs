@@ -20,20 +20,17 @@ At Langfuse, we've made a strategic decision to migrate our database tables cont
 **Limitations of Postgres**
 Initially, Postgres was an excellent choice due to its robustness, flexibility, and the extensive tooling available. As our platform grew, we encountered performance bottlenecks with complex aggregations and time-series data. The row-based storage model of PostgreSQL becomes increasingly inefficient when dealing with billions of rows of tracing data, leading to slow query times and high resource consumption.
 
-
 **Our requirements**
-- Ablity to handle high insert rates while running low-latency read queries. We mainly have three types of queries: 
-  - **Analytical queries**: for example sum of LLM tokens consumed over time to power our dashboards.
-  - **Table queries**: Find tracing data based on rich filtering and ordering selected via tables in our UI.
-  - **Select by Id**: We need to be able to find a specific trace by its ID.
-- Self-hosting: we needed to select a database which is free to use for self-hosters. We did not want to make a requirement to deploy to a specific cloud provider.
-- Low operational effort: we are a small team and need to focus on building features for our users. We wanted to avoid complex database setups and migrations in the future.
-
+- Analytical queries: all queries for our dashboards (e.g. sum of LLM tokens consumed over time)
+- Table queries: Finding tracing data based on filtering and ordering selected via tables in our UI.
+- Select by ID: Quickly locating a specific trace by its ID.
+- Self-hosting: We needed a database that is free to use for self-hosters, avoiding dependencies on specific cloud providers.
+- Low operational effort: As a small team, we focus on building features for our users. We try to keep operational efforts as low as possible.
 
 
 **Why Clickhouse is great**
-- Clickhouse is a modern OLAP db which is able to ingest data at a high rate and query it with low latency. It is optimized for analytical queries and can handle billions of rows of data.
-- Rich feature-set: Clickhouse offers different Table Engines, Materialized views, different types of indices, and many integrations which helps us to build fast and achieve low latency read queries.
+-	Optimized for Analytical Queries: ClickHouse is a modern OLAP database capable of ingesting data at high rates and querying it with low latency. It handles billions of rows efficiently.
+- Rich feature-set: Clickhouse offers different Table Engines, Materialized views, different types of Indices, and many integrations which helps us to build fast and achieve low latency read queries.
 - Our self-hosters can use the official Clickhouse Helm Charts and Docker Images for deploying in the cloud infrastructure of their choice.
 - Clickhouse Cloud: Clickhouse Cloud is a database as a SaaS service which allows us to reduce operational efforts on our side.
 
@@ -41,8 +38,8 @@ When talking to other companies and looking at their code bases, we learned that
 
 
 **Clickhouse vs. others**
-- Druid: Unlike Druid's [complex architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. This reduces the operational burden especially for our self-hosters.
-- StarRocks: We think StarRocks is great but early. We have many different ways of querying data from our data store and need flexibility in the future. Clickhouse helps us achieve all of this.
+- Druid: Unlike Druid's [complex architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. Hence, it is easier for teams to manage Clickhouse in production as there are fewer moving parts. This reduces the operational burden especially for our self-hosters.
+- StarRocks: We think StarRocks is great but early. The vast amount of features in Clickhouse help us to remain flexible with our queries while benefiting from the performance of an OLAP database.
 
 
 Implications of adding Clickhouse for self-hosting users:
