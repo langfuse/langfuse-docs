@@ -12,12 +12,11 @@ import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
 import juiceboxLight from "./img/juicebox_light.svg";
 import juiceboxDark from "./img/juicebox_dark.svg";
-import sumupLight from "./img/sumup_light.svg";
-import sumupDark from "./img/sumup_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
 import khanacademyDark from "./img/khanacademy_dark.png";
-import Link from "next/link";
 import NumberTicker from "@/components/ui/number-ticker";
+import twilioLight from "./img/twilio_light.svg";
+import twilioDark from "./img/twilio_dark.svg";
 
 type User = {
   name: string;
@@ -71,17 +70,17 @@ const users: User[] = [
     href: "https://juicebox.ai/",
   },
   {
-    name: "Sumup",
-    lightImage: sumupLight,
-    darkImage: sumupDark,
-    href: "https://sumup.com",
+    name: "Twilio",
+    lightImage: twilioLight,
+    darkImage: twilioDark,
+    href: "https://www.twilio.com",
   },
 ];
 
 const stats = [
-  { name: "SDK installs / month", value: 2000000 },
-  { name: "GitHub stars", value: 5000 },
-  { name: "Docker pulls", value: 500000 },
+  { name: "SDK installs / month", value: 3_000_000 },
+  { name: "GitHub stars", value: 6_000 },
+  { name: "Docker pulls", value: 1_800_000 },
 ];
 
 export const Usage = () => (
@@ -97,7 +96,7 @@ export const Usage = () => (
               <a
                 key={user.name}
                 href={user.href}
-                className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-100 opacity-80 transition py-4 px-3"
+                className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-80 transition py-4 px-3"
                 target="_blank"
                 rel="noopener noreferrer"
               >

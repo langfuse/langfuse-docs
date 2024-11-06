@@ -2,16 +2,16 @@
 description: Langfuse (open source) helps run model-based evaluations (llm-as-a-judge) on production data to monitor and improve LLMs applications.
 ---
 
-# Model-based Evaluations in Langfuse
+# LLM-as-a-judge in Langfuse
 
-Model-based evaluations (_LLM-as-a-judge_) are a powerful tool to automate the evaluation of LLM applications integrated with Langfuse. With model-based evalutions, LLMs are used to score a specific session/trace/LLM-call in Langfuse on criteria such as correctness, toxicity, or hallucinations.
+Using LLM-as-a-judge (model-based evaluations) has proven as a powerful evaluation tool next to human annotation. Via Langfuse, we support setting up LLM-evaluators to evaluate your LLM applications integrated with Langfuse. These evaluators are used to score a specific session/trace/LLM-call in Langfuse on criteria such as correctness, toxicity, or hallucinations.
 
-There are two ways to run model-based evaluations in Langfuse:
+Langfuse supports two types of model-based evaluations:
 
-1. [Via the Langfuse UI (beta)](#ui)
-1. [Via external evaluation pipeline](#evaluation-pipeline)
+1. [LLM-as-a-judge via the Langfuse UI (beta)](#ui)
+1. [Custom evaluators via external evaluation pipeline](#evaluation-pipeline)
 
-## Via Langfuse UI (beta) [#ui]
+## LLM-as-a-judge via the Langfuse UI (beta) [#ui]
 
 <AvailabilityBanner
   availability={{
@@ -34,34 +34,33 @@ There are two ways to run model-based evaluations in Langfuse:
 
 ### Store an API key
 
-To use evals, you have to bring your own LLM API keys. To do so, navigate to the settings page and insert your API key. We store them encrypted on our servers.
+To use Langfuse LLM-as-a-judge, you have to bring your own LLM API keys. To do so, navigate to the settings page and insert your API key. We store them encrypted on our servers.
 
-### Create an eval template
+### Create an evaluator
 
-First, we need to specify the evaluation template:
+To set up an evaluator, we first need to configure the following:
 
-- Select the model and its parameters.
-- Customise one of the Langfuse managed prompt templates or write your own.
-- We use function calling to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`. This is how you can direct the LLM to score on a specific range and provide specific reasoning for the score.
+- Select the model and its parameters. All tool-calling / structured-output enabled models from supported providers are available.
+- Select the evaluation prompt. Langfuse offers a set of managed prompts, but you can also write your own.
+- We use tool calling / structured output to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`. This is how you can direct the LLM to score on a specific range and provide specific reasoning for the score.
+
+We store this information in an so-called evaluator template, so you can reuse it for multiple evaluators.
 
 <Frame border>![Langfuse](/images/docs/eval-hallucination-template.png)</Frame>
 
-### Create an eval config
+Second, we need to specify on which `traces` Langfuse should run the evaluator.
 
-Second, we need to specify on which `traces` Langfuse should run the template we created above.
-
-- Select the evaluation template to run.
 - Specify the name of the `scores` which will be created as a result of the evaluation.
 - Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
-- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. You can choose to take `Input`, `Output` or `metadata` form each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
-- Reduce the sampling to not run evals on each trace. This helps to save LLM API cost.
-- Add a delay to the evaluation execution. This is how you can ensure all data arrived at Langfuse servers before evaluation is exeucted.
+- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. You can choose to take `Input`, `Output` or `metadata` from each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
+- Reduce the sampling to not run evaluations on each trace. This helps to save LLM API cost.
+- Add a delay to the evaluation execution. This is how you can ensure all data arrived at Langfuse servers before evaluation is executed.
 
 <Frame border>![Langfuse](/images/docs/eval-config.png)</Frame>
 
 ### See the progress
 
-Once the configuration is saved, Langfuse will start running the evals on the traces that match the filter. You can see the progress on the config page or the log table.
+Once the evaluator is saved, Langfuse will start running evaluations on the traces that match the filter. You can view logs on the log page, or view each evaluator to see configuration and logs.
 
 <Frame border className="max-w-lg">
   ![Langfuse](/images/docs/evals-log.png)
@@ -77,7 +76,7 @@ Upon receiving new traces, navigate to the trace detail view to see the associat
 
 </Steps>
 
-## Via External Evaluation Pipeline [#evaluation-pipeline]
+## Custom evaluators via external evaluation pipeline [#evaluation-pipeline]
 
 <AvailabilityBanner
   availability={{
