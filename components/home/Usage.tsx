@@ -96,7 +96,7 @@ export const Usage = () => (
               <a
                 key={user.name}
                 href={user.href}
-                className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-100 opacity-80 transition py-4 px-3"
+                className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-80 transition py-4 px-3"
                 target="_blank"
                 rel="noopener noreferrer"
               >
