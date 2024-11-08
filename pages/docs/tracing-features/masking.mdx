@@ -2,21 +2,21 @@
 description: Configure masking to redact sensitive information from inputs and outputs sent to the Langfuse server.
 ---
 
-# Masking
+# Masking of sensitive LLM data
 
-Masking is a feature that allows precise control over the data sent to the Langfuse server. It enables you to:
+Masking is a feature that allows precise control over the [tracing](/docs/tracing/overview) data sent to the Langfuse server. It enables you to:
 
 1. Redact sensitive information from trace or observation inputs and outputs.
 2. Customize the content of events before transmission.
 3. Implement fine-grained data filtering based on your specific requirements.
 
 The process works as follows:
+
 1. You define a custom masking function and pass it to the Langfuse client constructor.
 2. All event inputs and outputs are processed through this function.
 3. The masked data is then sent to the Langfuse server.
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
-
 
 <Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
 <Tab>
@@ -69,23 +69,24 @@ langfuse.flush()
 import { Langfuse } from "langfuse";
 
 function maskingFunction(params: { data: any }) {
-  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
-    return "REDACTED";
-  }
+if (typeof params.data === "string" && params.data.startsWith("SECRET\_")) {
+return "REDACTED";
+}
 
-  return params.data;
+return params.data;
 }
 
 const langfuse = new Langfuse({ mask: maskingFunction });
 
 const trace = langfuse.trace({
-  output: "SECRET_DATA",
+output: "SECRET_DATA",
 });
 
 await langfuse.flushAsync();
 
 // The trace output in Langfuse will have the output masked as "REDACTED".
-```
+
+````
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
@@ -115,7 +116,7 @@ completion = openai.chat.completions.create(
 )
 
 openai.flush_langfuse()
-```
+````
 
 When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set masking function via the `langfuse_context`:
 
@@ -173,7 +174,7 @@ def masking_function(data):
   if isinstance(data, str) and data.startswith("SECRET_"):
     return "REDACTED"
 
-  return data 
+  return data
 
 langfuse_context.configure(mask=masking_function)
 
@@ -207,6 +208,7 @@ const handler = new CallbackHandler({
   mask: maskingFunction,
 });
 ```
+
 </Tab>
 
 <Tab>
@@ -269,7 +271,12 @@ def llama_index_fn(question: str):
         return response
 ```
 
-
 </Tab>
 
 </Tabs>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-data-masking"]} />
