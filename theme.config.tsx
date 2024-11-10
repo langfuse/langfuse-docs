@@ -196,11 +196,11 @@ const config: DocsThemeConfig = {
       <Link href="https://www.thoughtworks.com/en-de/radar/platforms/summary/langfuse">
         {/* mobile */}
         <span className="sm:hidden">
-          Langfuse on Thoughtworks Technology Radar
+          Langfuse on Thoughtworks Technology Radar →
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse featured on Thoughtworks Technology Radar
+          Langfuse featured on Thoughtworks Technology Radar →
         </span>
       </Link>
     ),
