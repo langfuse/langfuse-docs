@@ -236,6 +236,31 @@ trace.update(metadata={"my-key": "my-value"})
 instrumentor.flush()
 ```
 
+## Troubleshooting
+
+### Streamed OpenAI responses and token usage
+
+OpenAI returns token usage only if `stream_options={"include_usage": True}` is passed in the streamed completion query. LlamaIndex does not pass this option by default. If you miss the token usage on your streamed responses, please instantiate the OpenAI client as follows:
+
+```python
+from llama_index.llms.openai import OpenAI
+from langfuse.llama_index import LlamaIndexInstrumentor
+
+instrumentor = LlamaIndexInstrumentor()
+
+llm = OpenAI(additional_kwargs={"stream_options": {"include_usage": True}})
+
+with instrumentor.observe():
+    # ... your LlamaIndex index creation ...
+
+    index.as_query_engine(llm=llm).query("What is the capital of France?")
+
+# Flush events to langfuse
+instrumentor.flush()
+```
+
+The streamed token usage should now be captured on the generation.
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";

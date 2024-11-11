@@ -135,6 +135,18 @@ const menuItems: {
         name: "Status",
         href: "https://status.langfuse.com",
       },
+      {
+        name: "🇯🇵 Japanese",
+        href: "/jp",
+      },
+      {
+        name: "🇰🇷 Korean",
+        href: "/kr",
+      },
+      {
+        name: "🇨🇳 Chinese",
+        href: "/cn",
+      },
     ],
   },
   {

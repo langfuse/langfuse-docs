@@ -190,17 +190,17 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "banner-hiring",
+    key: "thoughtworks-radar",
     dismissible: true,
     content: (
-      <Link href="https://lu.ma/bin976cv">
+      <Link href="https://www.thoughtworks.com/en-de/radar/platforms/summary/langfuse">
         {/* mobile */}
         <span className="sm:hidden">
-        Office Hour on Discord: Thursday
+          Langfuse on Thoughtworks Technology Radar →
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Office Hour on Discord: Thursday
+          Langfuse featured on Thoughtworks Technology Radar →
         </span>
       </Link>
     ),
