@@ -395,7 +395,11 @@ const sections = [
         name: "Private Slack/Discord channel",
         tiers: {
           cloud: { Hobby: false, Pro: false, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: {
+            "Open Source": false,
+            Pro: "Add-on, included at >10 users",
+            Enterprise: true,
+          },
         },
       },
       {
@@ -1093,7 +1097,7 @@ const faqs = [
   {
     question: "What is an event?",
     answer:
-      "Events are the sum of all traces, observations and evaluation scores logged to Langfuse. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
+      "Events are the sum of all traces, observations and evaluation scores logged to Langfuse. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.<br/>For example, a trace that includes 1 LLM call (generation), 2 spans (non-LLM logic), and 2 scores (user feedback and an evaluation results) would consist of 6 events.",
   },
   {
     question: "Can I self-host Langfuse?",
