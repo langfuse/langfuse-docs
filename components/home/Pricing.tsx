@@ -761,7 +761,7 @@ const discounts = [
   },
   {
     name: "Education / Non-profits",
-    description: "Free (limits apply)",
+    description: "Up to 100% off, limits apply",
   },
   {
     name: "Open-source projects",
@@ -795,9 +795,9 @@ const DiscountOverview = ({ className }: { className?: string }) => (
         <Link href="mailto:support@langfuse.com" className="underline">
           support@langfuse.com
         </Link>{" "}
-        to apply for a discount. We want all startups, educational users, and
-        non-profits to build with Langfuse and are happy to work with you to
-        make that happen.
+        to apply for a discount. We want all startups, educational users,
+        non-profits and open source projects to build with Langfuse and are
+        happy to work with you to make that happen.
       </p>
     </div>
   </div>
