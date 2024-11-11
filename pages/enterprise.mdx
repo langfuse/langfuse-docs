@@ -121,20 +121,10 @@ Langfuse is often deployed alongside a central LLM Gateway that provides schema 
 
 ```mermaid
 graph LR
-  LLM["<strong>LLM</strong>
-  API or service"]
+  LLM["<strong>LLM</strong><br/>API or service"]
   App["<strong>Application</strong>"]
-  LF["<strong>Langfuse</strong>
-  - Tracing/Observability
-  - Evaluation
-  - Prompt Management
-  - Cost Tracking
-  - ... (see documentation)"]
-  Gateway["<strong>LLM Gateway (optional)</strong>
-  Internal or Open-source (e.g. LiteLLM)
-  - Schema translation
-  - Rate limiting
-  - PII redaction"]
+  LF["<strong>Langfuse</strong><br/>Tracing/Observability<br/>Evaluation<br/>Prompt Management<br/>Cost Tracking<br/>Security Monitoring<br/>Experiments<br/>... (see docs)"]
+  Gateway["<strong>LLM Gateway (optional)</strong><br/>Internal or Open-source (e.g. LiteLLM)<br/>Schema translation<br/>Rate limiting<br/>PII redaction"]
 
   App -->|async tracing|LF
   LF -->|prompt management| App
