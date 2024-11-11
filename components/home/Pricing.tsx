@@ -6,62 +6,136 @@ import { Header } from "../Header";
 import { Button } from "../ui/button";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { useState } from "react";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const tiers = [
-  {
-    name: "Hobby",
-    id: "tier-hobby",
-    href: "https://cloud.langfuse.com",
-    featured: false,
-    description:
-      "Get started, no credit card required. Great for hobby projects and POCs.",
-    price: "Free",
-    mainFeatures: [
-      "No credit card required",
-      "Try all platform features",
-      "Up to 50k events / month",
-      "Up to 2 users",
-    ],
-    cta: "Sign up",
+const deploymentOptions = {
+  cloud: {
+    switch: "Langfuse Cloud (we host)",
+    title: "Simple pricing that scales with you",
+    subtitle:
+      "Get started on the Hobby plan for free. No credit card required.",
+    href: "/pricing",
   },
-  {
-    name: "Pro",
-    id: "tier-pro",
-    href: "https://cloud.langfuse.com",
-    featured: true,
-    description:
-      "For production projects. Includes access to full history and higher usage.",
-    price: "$30",
-    mainFeatures: [
-      "100k events / month included, additional: $10 / 100k events",
-      "Includes all platform features",
-      "Unlimited data history",
-      "Support via Email/Chat",
-    ],
-    cta: "Sign up",
+  selfHosted: {
+    switch: "Self-hosted (you host)",
+    title: "Self-hosted Langfuse",
+    subtitle:
+      "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise for additional features and support at any time.",
+    href: "/pricing-self-host",
   },
-  {
-    name: "Enterprise",
-    id: "tier-enterprise",
-    href: "/schedule-demo",
-    featured: false,
-    price: "Custom",
-    description:
-      "Dedicated solutions and support for your team. Contact us for pricing.",
-    mainFeatures: [
-      "Unlimited tracing throughput",
-      "SSO and fine-grained RBAC",
-      "SOC2, ISO27001, and InfoSec reviews",
-      "Dedicated support engineer and SLAs",
-      "Self-hosting available",
-    ],
-    cta: "Talk to founders",
-  },
-] as const;
+};
+
+const tiers = {
+  cloud: [
+    {
+      name: "Hobby",
+      id: "tier-hobby",
+      href: "https://cloud.langfuse.com",
+      featured: false,
+      description:
+        "Get started, no credit card required. Great for hobby projects and POCs.",
+      price: "Free",
+      mainFeatures: [
+        "No credit card required",
+        "Try all platform features",
+        "Up to 50k events / month",
+        "Up to 2 users",
+      ],
+      cta: "Sign up",
+    },
+    {
+      name: "Pro",
+      id: "tier-pro",
+      href: "https://cloud.langfuse.com",
+      featured: true,
+      description:
+        "For production projects. Includes access to full history and higher usage. Discounts available.",
+      price: "$30",
+      mainFeatures: [
+        "100k events / month included, additional: $10 / 100k events",
+        "Includes all platform features",
+        "Unlimited data history",
+        "Support via Email/Chat",
+      ],
+      cta: "Sign up",
+    },
+    {
+      name: "Enterprise",
+      id: "tier-enterprise",
+      href: "/schedule-demo",
+      featured: false,
+      price: "Custom",
+      description:
+        "Dedicated solutions and support for your team. Contact us for pricing.",
+      mainFeatures: [
+        "Unlimited tracing throughput",
+        "SSO and fine-grained RBAC",
+        "SOC2, ISO27001, and InfoSec reviews",
+        "Dedicated support engineer and SLAs",
+        "Self-hosting available",
+      ],
+      cta: "Talk to founders",
+    },
+  ],
+  selfHosted: [
+    {
+      name: "Open Source",
+      id: "tier-self-hosted-oss",
+      href: "/docs/deployment/self-host",
+      featured: true,
+      description:
+        "Self-host all core Langfuse features for free without any limitations.",
+      price: "Free",
+      mainFeatures: [
+        "MIT License",
+        "All core platform features and APIs (observability, evaluation, prompt management, datasets/experiments, etc.)",
+        "Unlimited usage",
+        "Extensive deployment docs & Helm chart",
+        "Community support",
+      ],
+      cta: "Deployment guide",
+    },
+    {
+      name: "Pro",
+      id: "tier-self-hosted-pro",
+      href: "/schedule-demo",
+      featured: false,
+      description:
+        "Get access to all additional Langfuse platform features for your team.",
+      price: "$100",
+      mainFeatures: [
+        "All Open Source features",
+        "LLM Playground",
+        "Human annotation queues",
+        "LLM as a judge evaluators (soon)",
+        "Chat & Email support",
+      ],
+      cta: "Talk to founders",
+    },
+    {
+      name: "Enterprise",
+      id: "tier-self-hosted-enterprise",
+      href: "/schedule-demo",
+      featured: false,
+      price: "Custom",
+      description:
+        "Enterprise-grade support and features for your team. Contact us for pricing.",
+      mainFeatures: [
+        "All Open Source / Pro features",
+        "SSO and fine-grained RBAC",
+        "SOC2, ISO27001, and InfoSec reviews",
+        "Dedicated support engineer and SLAs",
+      ],
+      cta: "Talk to founders",
+    },
+  ],
+} as const;
+
 const sections = [
   {
     name: "Tracing",
@@ -71,50 +145,76 @@ const sections = [
         name: "Integrations/SDKs",
         href: "/docs/integrations/overview",
         tiers: {
-          Hobby: true,
-          Pro: true,
-          Enterprise: true,
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Custom via API",
         href: "https://api.reference.langfuse.com/#post-/api/public/ingestion",
         tiers: {
-          Hobby: true,
-          Pro: true,
-          Enterprise: true,
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Included usage",
         tiers: {
-          Hobby: "50k events",
-          Pro: "100k events",
-          Enterprise: "Custom",
+          cloud: {
+            Hobby: "50k events",
+            Pro: "100k events",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
         },
       },
       {
         name: "Additional usage",
         tiers: {
-          Hobby: false,
-          Pro: "$10 / 100k events",
-          Enterprise: "Custom",
+          cloud: {
+            Hobby: false,
+            Pro: "$10 / 100k events",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
         },
       },
       {
         name: "Access to historical data",
         tiers: {
-          Hobby: "30 days",
-          Pro: "Unlimited",
-          Enterprise: "Unlimited",
+          cloud: {
+            Hobby: "30 days",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
         },
       },
       {
         name: "Ingestion throughput",
         tiers: {
-          Hobby: "1000 requests / min",
-          Pro: "1000 requests / min",
-          Enterprise: "Custom",
+          cloud: {
+            Hobby: "1000 requests / min",
+            Pro: "1000 requests / min",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
         },
       },
     ],
@@ -125,39 +225,69 @@ const sections = [
       {
         name: "Datasets",
         href: "/docs/datasets",
-        tiers: { Hobby: true, Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
       },
       {
         name: "Playground",
         href: "/docs/playground",
-        tiers: { Hobby: true, Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
       },
       {
         name: "Evaluation / User-feedback",
         href: "/docs/scores",
-        tiers: { Hobby: true, Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
       },
       {
         name: "LLM-as-judge evaluators",
         href: "/docs/scores/model-based-evals",
         tiers: {
-          Hobby: "1 evaluator",
-          Pro: true,
-          Enterprise: true,
+          cloud: {
+            Hobby: "1 evaluator",
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: true,
+            Enterprise: true,
+          },
         },
       },
       {
         name: "Prompt Management",
         href: "/docs/prompts",
-        tiers: { Hobby: "10 prompts", Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: "10 prompts", Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": false,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
       },
       {
-        name: "Annotation Queues",
+        name: "Human Annotation Queues",
         href: "/docs/scores/annotation#annotation-queues",
         tiers: {
-          Hobby: "1 queue",
-          Pro: "3 queues",
-          Enterprise: true,
+          cloud: {
+            Hobby: "1 queue",
+            Pro: "3 queues",
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: true,
+            Enterprise: true,
+          },
         },
       },
     ],
@@ -168,14 +298,28 @@ const sections = [
       {
         name: "Projects",
         tiers: {
-          Hobby: "Unlimited",
-          Pro: "Unlimited",
-          Enterprise: "Unlimited",
+          cloud: {
+            Hobby: "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
         },
       },
       {
         name: "Users",
-        tiers: { Hobby: "2", Pro: "Unlimited", Enterprise: "Unlimited" },
+        tiers: {
+          cloud: { Hobby: "2", Pro: "Unlimited", Enterprise: "Unlimited" },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+        },
       },
     ],
   },
@@ -186,25 +330,46 @@ const sections = [
       {
         name: "Extensive GET API",
         tiers: {
-          Hobby: true,
-          Pro: true,
-          Enterprise: true,
+          cloud: {
+            Hobby: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
         },
       },
       {
         name: "Rate limit",
         tiers: {
-          Hobby: "100 requests / min",
-          Pro: "1000 requests / min",
-          Enterprise: "Custom",
+          cloud: {
+            Hobby: "100 requests / min",
+            Pro: "1000 requests / min",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
         },
       },
       {
         name: "Metrics API",
         tiers: {
-          Hobby: "10 requests / day",
-          Pro: "100 requests / day",
-          Enterprise: "Custom",
+          cloud: {
+            Hobby: "10 requests / day",
+            Pro: "100 requests / day",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
         },
       },
     ],
@@ -214,23 +379,42 @@ const sections = [
     features: [
       {
         name: "Community (GitHub, Discord)",
-        tiers: { Hobby: true, Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
       },
       {
         name: "Chat & Email",
-        tiers: { Hobby: false, Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
       },
       {
         name: "Private Slack/Discord channel",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "Dedicated Support Engineer",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "SLAs",
-        tiers: { Hobby: false, Pro: false, Enterprise: "Available" },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: "Available" },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "Available",
+          },
+        },
       },
     ],
   },
@@ -241,47 +425,84 @@ const sections = [
       {
         name: "Data region",
         tiers: {
-          Hobby: "US or EU",
-          Pro: "US or EU",
-          Enterprise: "US or EU",
+          cloud: {
+            Hobby: "US or EU",
+            Pro: "US or EU",
+            Enterprise: "US or EU",
+          },
+          selfHosted: {
+            "Open Source": "Own infrastructure",
+            Pro: "Own infrastructure",
+            Enterprise: "Own infrastructure",
+          },
         },
       },
       {
         name: "SSO via Google, AzureAD, GitHub",
         tiers: {
-          Hobby: true,
-          Pro: true,
-          Enterprise: true,
+          cloud: {
+            Hobby: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
         },
       },
       {
         name: "Organization-level RBAC",
         href: "/docs/rbac",
         tiers: {
-          Hobby: true,
-          Pro: true,
-          Enterprise: true,
+          cloud: {
+            Hobby: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
         },
       },
       {
         name: "Enterprise SSO (e.g. Okta, Auth0)",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "SSO enforcement",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "Project-level RBAC",
         href: "/docs/rbac",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "Data retention management",
         tiers: {
-          Hobby: false,
-          Pro: false,
-          Enterprise: true,
+          cloud: {
+            Hobby: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "soon",
+          },
         },
       },
     ],
@@ -292,15 +513,24 @@ const sections = [
     features: [
       {
         name: "Data processing agreement (GDPR)",
-        tiers: { Hobby: false, Pro: true, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "InfoSec reviews",
-        tiers: { Hobby: false, Pro: false, Enterprise: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
     ],
   },
@@ -308,9 +538,16 @@ const sections = [
 
 export default function Pricing({
   isPricingPage = false,
+  initialVariant = "cloud",
 }: {
   isPricingPage?: boolean;
+  initialVariant?: "cloud" | "selfHosted";
 }) {
+  const [localVariant, setLocalVariant] = useState(initialVariant);
+
+  const variant = isPricingPage ? initialVariant : localVariant;
+  const selectedTiers = tiers[variant];
+
   const InfoLink = ({ href }: { href: string }) => (
     <Link href={href} className="inline-block" target="_blank">
       <ExternalLink className="size-4 ml-2 pt-0.5" />
@@ -322,17 +559,47 @@ export default function Pricing({
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
             <Header
-              title="Simple pricing for projects of all sizes"
-              description="Get started on the Hobby plan for free. No credit card required."
+              title={deploymentOptions[variant].title}
+              description={deploymentOptions[variant].subtitle}
               h="h1"
             />
+
+            {/* Pricing page (different href), landingpage (local state) */}
+            <Tabs
+              defaultValue={variant}
+              value={variant}
+              className="mt-4 flex justify-center"
+              onValueChange={(value) => {
+                if (!isPricingPage) {
+                  setLocalVariant(value as "cloud" | "selfHosted");
+                }
+              }}
+            >
+              <TabsList>
+                {Object.keys(deploymentOptions).map((key) => (
+                  <TabsTrigger
+                    key={key}
+                    value={key}
+                    asChild={isPricingPage} // Only use asChild on pricing page
+                  >
+                    {isPricingPage ? (
+                      <Link href={deploymentOptions[key].href}>
+                        {deploymentOptions[key].switch}
+                      </Link>
+                    ) : (
+                      deploymentOptions[key].switch
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
             <div className="relative mx-auto mt-10 grid max-w-md grid-cols-1 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               <div
                 className="hidden lg:absolute lg:inset-x-px lg:bottom-4 lg:top-4 lg:block lg:rounded lg:bg-gray-800/80 lg:ring-1 lg:ring-white/10"
                 aria-hidden="true"
               />
-              {tiers.map((tier) => (
+              {selectedTiers.map((tier) => (
                 <div
                   key={tier.id}
                   className={classNames(
@@ -445,7 +712,7 @@ export default function Pricing({
                   </h2>
 
                   <div className="mx-auto max-w-2xl space-y-16">
-                    {tiers.map((tier) => (
+                    {selectedTiers.map((tier) => (
                       <div
                         key={tier.id}
                         className="border-t border-gray-900/10"
@@ -512,23 +779,30 @@ export default function Pricing({
                                           )}
                                         </dt>
                                         <dd className="flex items-center justify-end sm:justify-center sm:px-4">
-                                          {typeof feature.tiers[tier.name] ===
-                                          "string" ? (
+                                          {typeof feature.tiers[variant][
+                                            tier.name
+                                          ] === "string" ? (
                                             <span
-                                              className={
+                                              className={classNames(
                                                 tier.featured
                                                   ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                                                  : "text-primary"
-                                              }
+                                                  : "text-primary",
+                                                "text-sm leading-6"
+                                              )}
                                             >
-                                              {feature.tiers[tier.name]}
+                                              {
+                                                feature.tiers[variant][
+                                                  tier.name
+                                                ]
+                                              }
                                             </span>
                                           ) : (
                                             <>
-                                              {feature.tiers[tier.name] ===
-                                              true ? (
+                                              {feature.tiers[variant][
+                                                tier.name
+                                              ] === true ? (
                                                 <Check
-                                                  className="mx-auto h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                                                  className="mx-auto h-5 w-5 text-indigo-600"
                                                   aria-hidden="true"
                                                 />
                                               ) : (
@@ -537,13 +811,6 @@ export default function Pricing({
                                                   aria-hidden="true"
                                                 />
                                               )}
-
-                                              <span className="sr-only">
-                                                {feature.tiers[tier.name] ===
-                                                true
-                                                  ? "Yes"
-                                                  : "No"}
-                                              </span>
                                             </>
                                           )}
                                         </dd>
@@ -581,7 +848,7 @@ export default function Pricing({
                   </h2>
 
                   <div className="grid grid-cols-4 gap-x-8 border-t border-gray-900/10 before:block">
-                    {tiers.map((tier) => (
+                    {selectedTiers.map((tier) => (
                       <div key={tier.id} aria-hidden="true" className="-mt-px">
                         <div
                           className={classNames(
@@ -635,7 +902,7 @@ export default function Pricing({
                                 <th scope="col">
                                   <span className="sr-only">Feature</span>
                                 </th>
-                                {tiers.map((tier) => (
+                                {selectedTiers.map((tier) => (
                                   <th key={tier.id} scope="col">
                                     <span className="sr-only">
                                       {tier.name} tier
@@ -662,14 +929,15 @@ export default function Pricing({
                                       <div className="absolute inset-x-8 mt-3 h-px bg-gray-200" />
                                     ) : null}
                                   </th>
-                                  {tiers.map((tier) => (
+                                  {selectedTiers.map((tier) => (
                                     <td
                                       key={tier.id}
                                       className="relative w-1/4 px-4 py-0 text-center"
                                     >
                                       <span className="relative h-full w-full py-3">
-                                        {typeof feature.tiers[tier.name] ===
-                                        "string" ? (
+                                        {typeof feature.tiers[variant][
+                                          tier.name
+                                        ] === "string" ? (
                                           <span
                                             className={classNames(
                                               tier.featured
@@ -678,14 +946,15 @@ export default function Pricing({
                                               "text-sm leading-6"
                                             )}
                                           >
-                                            {feature.tiers[tier.name]}
+                                            {feature.tiers[variant][tier.name]}
                                           </span>
                                         ) : (
                                           <>
-                                            {feature.tiers[tier.name] ===
-                                            true ? (
+                                            {feature.tiers[variant][
+                                              tier.name
+                                            ] === true ? (
                                               <Check
-                                                className="mx-auto h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                                                className="mx-auto h-5 w-5 text-indigo-600"
                                                 aria-hidden="true"
                                               />
                                             ) : (
@@ -694,12 +963,6 @@ export default function Pricing({
                                                 aria-hidden="true"
                                               />
                                             )}
-
-                                            <span className="sr-only">
-                                              {feature.tiers[tier.name] === true
-                                                ? "Yes"
-                                                : "No"}
-                                            </span>
                                           </>
                                         )}
                                       </span>
@@ -715,7 +978,7 @@ export default function Pricing({
                             className="pointer-events-none absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
                             aria-hidden="true"
                           >
-                            {tiers.map((tier) => (
+                            {selectedTiers.map((tier) => (
                               <div
                                 key={tier.id}
                                 className={classNames(
@@ -846,6 +1109,11 @@ const faqs = [
     question: "Do you offer discounts?",
     answer:
       "Yes, we offer discounts for startups, students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
+  },
+  {
+    question: "How do I activate my self-hosted Pro or Enterprise plan?",
+    answer:
+      "Once you've deployed Langfuse OSS, you can activate your Pro or Enterprise plan by adding the license key you received from the Langfuse team to your deployment.",
   },
 ];
 
