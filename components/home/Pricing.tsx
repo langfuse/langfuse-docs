@@ -103,7 +103,7 @@ const tiers = {
     {
       name: "Pro",
       id: "tier-self-hosted-pro",
-      href: "/schedule-demo",
+      href: "https://buy.stripe.com/aEU6qufIwfJy0CYbIR",
       featured: false,
       description:
         "Get access to all additional Langfuse platform features for your team.",
@@ -115,7 +115,7 @@ const tiers = {
         "LLM as a judge evaluators (soon)",
         "Chat & Email support",
       ],
-      cta: "Talk to founders",
+      cta: "Subscribe",
     },
     {
       name: "Enterprise",
@@ -1118,6 +1118,11 @@ const faqs = [
     question: "How do I activate my self-hosted Pro or Enterprise plan?",
     answer:
       "Once you've deployed Langfuse OSS, you can activate your Pro or Enterprise plan by adding the license key you received from the Langfuse team to your deployment.",
+  },
+  {
+    question: "How can I manage my subscription?",
+    answer:
+      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
   },
 ];
 
