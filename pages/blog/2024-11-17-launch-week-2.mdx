@@ -1,0 +1,134 @@
+---
+title: "Langfuse Launch Week"
+date: 2024/11/17
+description: "A week dedicated to unlocking all models and model capabilities, and integrating Langfuse into your development loop"
+tag: launchweek
+ogImage: /images/blog/2024-11-17-launch-week-2/launch-week-2-blog-header.png
+author: Clemens, Marc, Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse Launch Week"
+  description="A week dedicated to unlocking all models and model capabilities, and integrating Langfuse into your development loop"
+  authors={["clemensrawert", "marcklingen", "maxdeichmann"]}
+/>
+
+## Join us for Fall Launch Week
+
+We are thrilled to announce **Langfuse's Fall Launch Week**! Starting on **Sunday, November 17, 2024**, we'll unveil a major upgrade to the Langfuse platform **every day until Friday**.
+
+We're focusing on expanding support for new model capabilities and enhancing how Langfuse seamlessly integrates into your development workflow, empowering you to build more robust and versatile AI applications.
+
+- ⭐️ [Star us](https://github.com/langfuse/langfuse/) on GitHub & see _all_ of our releases!
+- [Twitter](https://x.com/langfuse) and [LinkedIn](https://www.linkedin.com/company/langfuse/) will be our main channels for all of Launch Week.
+- Join our [virtual community session](https://lu.ma/c7zsbc3b) on Wednesday.
+
+## Launches
+
+### Day 0: Vercel AI SDK Integration
+
+```ts /import { observeVercelAI } from "langfuse"/ /observeVercelAI/
+import { AI } from "@vercel/sdk";
+import { observeVercelAI } from "langfuse";
+
+// Wrap the Vercel AI SDK
+const ai = observeVercelAI(new AI());
+
+// Use the Vercel AI SDK as you normally would
+const response = await ai.generate({
+  messages: [{ role: "system", content: "Tell me a story." }],
+});
+```
+
+We are excited to announce the integration of the **Vercel AI SDK** with Langfuse. This integration enables developers to easily monitor and observe applications built with the Vercel AI SDK, bringing enhanced capabilities to your development loop and supporting a wider range of models and frameworks.
+
+*Details to be filled in later.*
+
+### Day 1: Datasets Comparisons View
+
+<CloudflareVideo
+  videoId="placeholder_video_id"
+  aspectRatio={16 / 9.53}
+  title="Datasets Comparisons View"
+/>
+
+Introducing the **Datasets Comparisons View**, a powerful new feature that allows you to compare datasets side-by-side directly within Langfuse. Analyze and contrast different model outputs or versions to better understand your models' capabilities, all within your development workflow.
+
+*Details to be filled in later.*
+
+### Day 2: Evaluators on Datasets
+
+<CloudflareVideo
+  videoId="placeholder_video_id"
+  aspectRatio={16 / 9.53}
+  title="Evaluators on Datasets"
+/>
+
+We are launching **Evaluators on Datasets**, empowering you to run model evaluations directly on your datasets within Langfuse. This feature streamlines the evaluation process, integrating it into your development loop, and supports a variety of models and capabilities.
+
+*Details to be filled in later.*
+
+### Day 3: Multi-modal Support
+
+<CloudflareVideo
+  videoId="placeholder_video_id"
+  aspectRatio={16 / 9.53}
+  title="Multi-modal Support"
+/>
+
+Langfuse now supports **Multi-modal Models**! We're expanding our platform to accommodate models that process and generate multiple types of data—such as text, images, and audio—unlocking new model capabilities for your applications.
+
+*Details to be filled in later.*
+
+### Day 4: Enhanced Cost Tracking
+
+<CloudflareVideo
+  videoId="placeholder_video_id"
+  aspectRatio={16 / 9.53}
+  title="Enhanced Cost Tracking"
+/>
+
+Introducing **New Cost Tracking** for cached, multi-modal, and reasoning tokens. With improved cost analysis, you can gain deeper insights into your application's token usage across all models and optimize costs effectively, directly within your development workflow.
+
+*Details to be filled in later.*
+
+### Day 5: Prompt Experiments
+
+<CloudflareVideo
+  videoId="placeholder_video_id"
+  aspectRatio={16 / 9.53}
+  title="Prompt Experiments"
+/>
+
+We're unveiling **Prompt Experiments**, a feature that allows you to experiment with different prompts and track their performance within Langfuse. This tool integrates seamlessly into your development loop, enabling you to harness the full capabilities of various models through effective prompt engineering.
+
+*Details to be filled in later.*
+
+## Launch Week Events
+
+### Wednesday: Virtual Town Hall [#townhall]
+
+You're invited to our [virtual town hall](https://lu.ma/c7zsbc3b) where we'll demo the new features and discuss how they integrate into your development workflow. We will also answer your questions and talk about the future of Langfuse.
+
+- **When:** Wednesday, November 20, 2024, at 10 am PT / 7pm CET
+- **Where:** https://lu.ma/c7zsbc3b
+
+## Learn More About Langfuse
+
+import { FileCode, BookOpen, Video } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Docs"
+    href="/docs"
+    icon={<BookOpen />}
+  />
+  <Card title="Quickstart" href="/docs/get-started" icon={<BookOpen />} />
+  <Card
+    title="Cookbooks"
+    href="/docs/cookbooks"
+    icon={<FileCode />}
+  />
+</Cards>
