@@ -221,6 +221,7 @@ const nonPermanentRedirects = [
   ["/tos", "/terms"],
   ["/docs/export-and-fine-tuning", "/docs/query-traces"],
   ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
+  ["/docs/deployment/v3", "/docs/deployment/self-host-v3"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
