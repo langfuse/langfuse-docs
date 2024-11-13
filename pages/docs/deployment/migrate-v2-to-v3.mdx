@@ -96,11 +96,11 @@ It accepts events from a Redis queue and ensures that they are eventually being 
 
 While we aim to keep our SDKs and APIs fully backwards compatible, we have to introduce backwards incompatible changes with our update to V3.
 Certain APIs in SDK versions below version 2.0.0 are not compatible with our new backend architecture.
-Please upgrade and benefit from many performance improvements or features such as [prompt caching](https://langfuse.com/changelog/2024-02-05-sdk-level-prompt-caching).
+Please upgrade and benefit from many performance improvements or features such as [prompt caching](/changelog/2024-02-05-sdk-level-prompt-caching).
 
 **Upgrade options**:
-- Default SDK upgrade: We wrote documentation on how to upgrade from 1.x.x to 2.x.x ([Python](https://langfuse.com/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JS](https://langfuse.com/docs/sdk/typescript/guide#upgrade1to2)). For the JS SDK, we also have an upgrade path [from 2.x.x to 3.x.x](https://langfuse.com/docs/sdk/typescript/guide#upgrade2to3). The upgrade is straightforward and should not take much time.
-- Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](https://langfuse.com/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](https://langfuse.com/docs/get-started) to see whether there is a more convenient integration available for you.
+- Default SDK upgrade: We wrote documentation on how to upgrade from 1.x.x to 2.x.x ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JS](/docs/sdk/typescript/guide#upgrade1to2)). For the JS SDK, we also have an upgrade path [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3). The upgrade is straightforward and should not take much time.
+- Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
 
 **Background**: Langfuse V3 relies on an event driven backend architecture.
 This means, that we acknowledge HTTP requests from the SDKs, queue the HTTP bodies in the backend, and process them asynchronously.
