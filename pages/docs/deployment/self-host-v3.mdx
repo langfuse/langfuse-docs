@@ -28,8 +28,54 @@ Langfuse consists of multiple storage components and two Docker containers:
 - **S3/Blob Store**: Object storage to persist all incoming events, multi-modal inputs, and large exports.
 - **Clickhouse**: High-performance OLAP database which stores traces, observations, and scores.
 
-[//]: # (TODO: Update architecture diagram to include all components above)
-For a detailed component and architecture diagram, refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md#architecture-overview).
+See the chart below for an overview of the components and their interactions:
+
+```mermaid
+flowchart TB
+    subgraph clients["Clients"]
+        Browser["Browser"]
+        JS["JavaScript SDK"]
+        Python["Python SDK"]
+    end
+
+    subgraph storage["Storage"]
+        DB[Postgres Database]
+        Redis[Redis Cache/Queue]
+        Clickhouse[Clickhouse Database]
+        S3[S3/Blob Store]
+    end
+
+    subgraph app["Langfuse Containers"]
+        subgraph web["Langfuse Web"]
+            TRPC["TRPC API"]
+            REST["Public API"]
+            Frontend["React Frontend"]
+            Backend["Backend"]
+        end
+
+        subgraph worker["Langfuse Worker"]
+            QueueProcessor["Queue Processor"]
+        end
+    end
+
+    Browser --> Frontend
+    Frontend --> TRPC
+    JS --> REST
+    Python --> REST
+
+    TRPC --> Backend
+    REST --> Backend
+
+    Backend --> S3
+    Backend --> DB
+    Backend --> Redis
+    Backend --> Clickhouse
+
+    Redis --> QueueProcessor
+    QueueProcessor --> Clickhouse
+    QueueProcessor --> DB
+    QueueProcessor --> S3
+```
 
 ### Postgres Database
 
