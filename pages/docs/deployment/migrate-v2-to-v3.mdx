@@ -143,9 +143,6 @@ Their API behavior changes to be asynchronous and the endpoints will only return
 - PATCH /api/public/spans
 - POST /api/public/traces
 
-
-
-
 ## Migration Steps
 
 We tried to make the version upgrade as seamless as possible.
@@ -185,7 +182,7 @@ All new events will be stored in Clickhouse and should appear within the UI with
 #### 4. Wait for historic data migration to complete
 
 We have introduced background migrations as part of the migration to V3.
-Those allow the Langfuse team to schedule longer-running migrations without impacting the availability of the service.
+Those allow Langfuse to schedule longer-running migrations without impacting the availability of the service.
 As part of the V3 release, we have introduced four migrations that will run once you deploy the new stack.
 
 1. **Cost backfill**: We calculate costs for all events and store them in the Postgres database. Before, those were calculated on read which had a negative impact on read performance.
