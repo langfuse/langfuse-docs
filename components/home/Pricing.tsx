@@ -703,7 +703,6 @@ export default function Pricing({
         </div>
         {isPricingPage ? (
           <>
-            <CallOutSelfhostEnterprise className="mt-10" />
             <div className="relative">
               <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                 {/* Feature comparison (up to lg) */}
@@ -1008,12 +1007,14 @@ export default function Pricing({
           <>
             <div className="text-center mt-10">
               For a detailed comparison and FAQ, see our{" "}
-              <Link href="/pricing" className="underline">
+              <Link
+                href={deploymentOptions[variant].href}
+                className="underline"
+              >
                 pricing page
               </Link>
               .
             </div>
-            <CallOutSelfhostEnterprise className="mt-3" />
           </>
         )}
       </div>
@@ -1067,24 +1068,6 @@ const DiscountOverview = ({ className }: { className?: string }) => (
         happy to work with you to make that happen.
       </p>
     </div>
-  </div>
-);
-
-const CallOutSelfhostEnterprise = ({ className }: { className?: string }) => (
-  <div className={cn("text-center", className)}>
-    Langfuse is also easy to{" "}
-    <Link href="/docs/deployment/local" className="underline">
-      run locally
-    </Link>{" "}
-    and{" "}
-    <Link href="/docs/deployment/self-host" className="underline">
-      self-host
-    </Link>
-    . Find out more about{" "}
-    <Link href="/enterprise" className="underline">
-      Langfuse for Enterprise
-    </Link>{" "}
-    (cloud and on-premise).
   </div>
 );
 
