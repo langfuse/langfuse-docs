@@ -10,7 +10,7 @@ For the purposes of this guide, we will use a local minikube instance, but each 
 
 <Callout type="warning">
   This guide covers a developer preview which is **not suitable for production use**.
-  V3 is under active development and we plan to ship a production-ready version by the end of November 2024.
+  v3 is under active development and we plan to ship a production-ready version by the end of November 2024.
   We share this information to gather feedback from our awesome developer community.
 
   If you are interested in contributing to our Kubernetes deployment guide or Helm chart, please reach out to us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
@@ -18,19 +18,17 @@ For the purposes of this guide, we will use a local minikube instance, but each 
 
 ## Fetch the Helm chart and customize values
 
-Fetch the `langfuse-k8s` GitHub repository to your local machine to install the V3 preview using Helm.
+Fetch the `langfuse-k8s` GitHub repository to your local machine to install the v3 preview using Helm.
 ```bash
 git clone https://github.com/langfuse/langfuse-k8s.git
 
 cd langfuse-k8s/charts/langfuse
 ```
 
-Checkout the `lfe-1348-v3-chart` branch that we use to develop the chart for V3.
+Checkout the `lfe-1348-v3-chart` branch that we use to develop the chart for v3.
 ```bash
 git checkout lfe-1348-v3-chart
 ```
-
-## Deploy the helm chart
 
 For local experimentation, the pre-configured variables in the values.yaml file are usually sufficient.
 If you send _any_ kind of sensitive data to the application or intend to keep it up for longer, we recommend that
@@ -40,6 +38,8 @@ you modify the values.yaml file and overwrite the following environment variable
 - **ENCRYPTION_KEY**: Generate this via `openssl rand -base64 32`.
 - **NEXTAUTH_SECRET**: A random string used to sign JWT tokens.
 - **NEXTAUTH_URL**: The URL where the application is hosted. Used for redirects after signup.
+
+## Deploy the helm chart
 
 Create a new namespace for the Langfuse deployment, e.g.:
 ```bash

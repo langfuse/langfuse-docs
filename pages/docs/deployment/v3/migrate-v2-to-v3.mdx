@@ -1,27 +1,25 @@
 ---
-description: A guide to upgrade a Langfuse V2 setup to V3.
+description: A guide to upgrade a Langfuse v2 setup to v3.
 ---
 
-import { Callout } from "nextra/components";
-
-# Migrate Langfuse V2 to V3
+# Migrate Langfuse v2 to v3
 
 <Callout type="warning">
   This guide covers a developer preview which is **not suitable for production use**.
-  V3 is under active development and we plan to ship a production-ready version by the end of November 2024.
+  v3 is under active development and we plan to ship a production-ready version by the end of November 2024.
   We share this information to gather feedback from our awesome developer community.
 
   For a production-ready setup, follow the [self-hosting guide](/docs/deployment/self-host)
   or consider using [Langfuse Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
 
-  If you want to get started on V3, please follow our [V3 Self-Host Guide](/docs/deployment/self-host-v3).
+  If you want to get started on v3, please follow our [v3 Self-Host Guide](/docs/deployment/self-host-v3).
 </Callout>
 
 To learn more about our reasons for the architectural changes, jump to the [Reasoning](#reasoning) section.
 
 ## SDK compatibility and API changes
 
-While we aim to keep our SDKs and APIs fully backwards compatible, we have to introduce backwards incompatible changes with our update to V3.
+While we aim to keep our SDKs and APIs fully backwards compatible, we have to introduce backwards incompatible changes with our update to v3.
 Certain APIs in SDK versions below version 2.0.0 are not compatible with our new backend architecture.
 Please upgrade and benefit from many performance improvements or features such as [prompt caching](/changelog/2024-02-05-sdk-level-prompt-caching).
 
@@ -29,7 +27,7 @@ Please upgrade and benefit from many performance improvements or features such a
 - Default SDK upgrade: We wrote documentation on how to upgrade from 1.x.x to 2.x.x ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JS](/docs/sdk/typescript/guide#upgrade1to2)). For the JS SDK, we also have an upgrade path [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3). The upgrade is straightforward and should not take much time.
 - Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
 
-**Background**: Langfuse V3 relies on an event driven backend architecture.
+**Background**: Langfuse v3 relies on an event driven backend architecture.
 This means, that we acknowledge HTTP requests from the SDKs, queue the HTTP bodies in the backend, and process them asynchronously.
 This allows us to scale the backend more easily and handle more requests without overloading the database.
 The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event.
@@ -59,7 +57,7 @@ This change is inline with our [API reference](https://api.reference.langfuse.co
 
 #### Deprecated endpoints
 
-The following endpoints are deprecated since our V2 release.
+The following endpoints are deprecated since our v2 release.
 We continue to accept requests to these endpoints and will remove them in a future release.
 Their API behavior changes to be asynchronous and the endpoints will only return the id of the created object instead of the full updated record.
 
@@ -77,7 +75,7 @@ If you encounter any issues please reach out to our support team or open an issu
 
 ### Before you start the upgrade
 
-Before starting your upgrade, make sure you are familiar with the contents of [our V3 hosting guide](/docs/deployment/self-host-v3).
+Before starting your upgrade, make sure you are familiar with the contents of [our v3 hosting guide](/docs/deployment/self-host-v3).
 In addition, we recommend that you perform a backup of your Postgres database before you start the upgrade.
 Also, ensure that you run a recent version of Langfuse, ideally a version later than v2.80.0.
 
@@ -101,16 +99,16 @@ At this point, you can start to test the new Langfuse instance.
 The UI should load as expected, but there should not be any traces, observations, or scores.
 This is expected, as data is being read from Clickhouse while those elements still reside in Postgres.
 
-#### 3. Shift traffic from V2 to V3
+#### 3. Shift traffic from v2 to v3
 
 Point the traffic to the new Langfuse instance by updating your DNS records or your Loadbalancer configuration.
 All new events will be stored in Clickhouse and should appear within the UI within a few seconds of being ingested.
 
 #### 4. Wait for historic data migration to complete
 
-We have introduced background migrations as part of the migration to V3.
+We have introduced background migrations as part of the migration to v3.
 Those allow Langfuse to schedule longer-running migrations without impacting the availability of the service.
-As part of the V3 release, we have introduced four migrations that will run once you deploy the new stack.
+As part of the v3 release, we have introduced four migrations that will run once you deploy the new stack.
 
 1. **Cost backfill**: We calculate costs for all events and store them in the Postgres database. Before, those were calculated on read which had a negative impact on read performance.
 2. **Traces migration**: We migrate all traces in batches from Postgres to Clickhouse. We start with most recent traces, i.e. those should show within your dashboard soon after starting the migration.
@@ -129,7 +127,7 @@ After you have verified that new events are being stored in Clickhouse and are s
 ## Reasoning
 
 Langfuse has gained significant traction over the last month, both in our Cloud environment and in self-hosted setups.
-With V3 we introduce changes that allow our backend to handle hundreds of events per second with higher reliability.
+With v3 we introduce changes that allow our backend to handle hundreds of events per second with higher reliability.
 To achieve this scale, we introduce a second Langfuse container and additional storage services like S3/Blob store, Clickhouse, and Redis.
 We explain why we chose each element of the stack and why we believe that they help us achieve best in class scale.
 
