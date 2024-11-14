@@ -148,7 +148,7 @@ const nonPermanentRedirects = [
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
 
-  ["/launch", "/blog/launch-week-1"],
+  ["/launch", "/blog/2024-11-17-launch-week-2"],
 
   // Redirect to overview pages
   ...[
@@ -221,6 +221,7 @@ const nonPermanentRedirects = [
   ["/tos", "/terms"],
   ["/docs/export-and-fine-tuning", "/docs/query-traces"],
   ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
+  ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
