@@ -80,6 +80,7 @@ const tiers = {
         "Self-hosting available",
       ],
       cta: "Talk to founders",
+      learnMore: "/enterprise",
     },
   ],
   selfHosted: [
@@ -132,6 +133,7 @@ const tiers = {
         "Dedicated support engineer and SLAs",
       ],
       cta: "Talk to founders",
+      learnMore: "/enterprise",
     },
   ],
 } as const;
@@ -673,6 +675,15 @@ export default function Pricing({
                       )}
                     >
                       {tier.description}
+                      {tier.learnMore && (
+                        <>
+                          {" "}
+                          <Link href={tier.learnMore} className="underline">
+                            Learn more
+                          </Link>
+                          .
+                        </>
+                      )}
                     </p>
                     <div className="mt-8 flow-root sm:mt-10">
                       <ul
