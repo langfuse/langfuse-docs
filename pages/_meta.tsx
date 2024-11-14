@@ -125,6 +125,21 @@ export default {
     type: "page",
     display: "hidden",
   },
+  jp: {
+    title: "Japanese Overview",
+    type: "page",
+    display: "hidden",
+  },
+  kr: {
+    title: "Korean Overview",
+    type: "page",
+    display: "hidden",
+  },
+  cn: {
+    title: "Chinese Overview",
+    type: "page",
+    display: "hidden",
+  },
   "cookie-policy": {
     title: "Cookie Policy",
     type: "page",
