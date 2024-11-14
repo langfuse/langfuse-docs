@@ -16,16 +16,16 @@ function classNames(...classes) {
 const deploymentOptions = {
   cloud: {
     switch: "Langfuse Cloud (we host)",
-    title: "Simple pricing that scales with you",
+    title: "Pricing",
     subtitle:
       "Get started on the Hobby plan for free. No credit card required.",
     href: "/pricing",
   },
   selfHosted: {
     switch: "Self-hosted (you host)",
-    title: "Self-hosted Langfuse",
+    title: "Pricing",
     subtitle:
-      "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise for additional features and support at any time.",
+      "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise at any time.",
     href: "/pricing-self-host",
   },
 };
@@ -93,9 +93,9 @@ const tiers = {
       price: "Free",
       mainFeatures: [
         "MIT License",
-        "All core platform features and APIs (observability, evaluation, prompt management, datasets/experiments, etc.)",
+        "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
         "Unlimited usage",
-        "Extensive deployment docs & Helm chart",
+        "Deployment docs & Helm chart",
         "Community support",
       ],
       cta: "Deployment guide",
@@ -106,7 +106,7 @@ const tiers = {
       href: "https://buy.stripe.com/aEU6qufIwfJy0CYbIR",
       featured: false,
       description:
-        "Get access to all additional Langfuse platform features for your team.",
+        "Get access to additional workflow features to accelerate your team.",
       price: "$100",
       mainFeatures: [
         "All Open Source features",
@@ -124,7 +124,7 @@ const tiers = {
       featured: false,
       price: "Custom",
       description:
-        "Enterprise-grade support and features for your team. Contact us for pricing.",
+        "Enterprise-grade support and security features. Contact us for pricing.",
       mainFeatures: [
         "All Open Source / Pro features",
         "SSO and fine-grained RBAC",
@@ -211,28 +211,20 @@ const sections = [
             Enterprise: "Custom",
           },
           selfHosted: {
-            "Open Source": "n/a",
-            Pro: "n/a",
-            Enterprise: "n/a",
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
           },
         },
       },
     ],
   },
   {
-    name: "Platform Features",
+    name: "Core Platform Features",
     features: [
       {
         name: "Datasets",
         href: "/docs/datasets",
-        tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
-        },
-      },
-      {
-        name: "Playground",
-        href: "/docs/playground",
         tiers: {
           cloud: { Hobby: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
@@ -247,6 +239,31 @@ const sections = [
         },
       },
       {
+        name: "Prompt Management",
+        href: "/docs/prompts",
+        tiers: {
+          cloud: { Hobby: "10 prompts", Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+    ],
+  },
+  {
+    name: "Add-on Features",
+    features: [
+      {
+        name: "Playground",
+        href: "/docs/playground",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
+      },
+      {
         name: "LLM-as-judge evaluators",
         href: "/docs/scores/model-based-evals",
         tiers: {
@@ -255,18 +272,6 @@ const sections = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": false,
-            Pro: true,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "Prompt Management",
-        href: "/docs/prompts",
-        tiers: {
-          cloud: { Hobby: "10 prompts", Pro: true, Enterprise: true },
           selfHosted: {
             "Open Source": false,
             Pro: true,
