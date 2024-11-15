@@ -337,6 +337,10 @@ The potential responses from the readiness check endpoint are:
 
 Applications and monitoring services can call this endpoint periodically for health updates.
 
+Per default, the Langfuse web healthcheck endpoint does not validate if the database is reachable, as there are cases where the
+database is unavailable, but the application still serves traffic.
+If you want to run database healthchecks, you can add `?failIfDatabaseUnavailable=true` to the healthcheck endpoint.
+
 ### Encryption
 
 #### Encryption in transit (HTTPS) [#https]

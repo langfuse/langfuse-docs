@@ -200,7 +200,7 @@ The Enterprise Edition ([compare versions](/docs/deployment/feature-overview)) o
 ### Health and Readiness Check Endpoint
 
 Langfuse includes a health check endpoint at `/api/public/health` and a readiness check endpoint at `/api/public/ready`.
-The health check endpoint checks both API functionality and database connectivity and indicates if the application is alive.
+The health check endpoint checks the API functionality and indicates if the application is alive.
 The readiness check endpoint indicates if the application is ready to serve traffic.
 
 Access the health and readiness check endpoints:
@@ -221,6 +221,10 @@ The potential responses from the readiness check endpoint are:
 - `500 Internal Server Error`: The application received a SIGTERM or SIGINT and should not receive traffic.
 
 Applications and monitoring services can call this endpoint periodically for health updates.
+
+Per default, the healthcheck endpoint does not validate if the database is reachable, as there are cases where the
+database is unavailable, but the application still serves traffic.
+If you want to run database healthchecks, you can add `?failIfDatabaseUnavailable=true` to the healthcheck endpoint.
 
 ### Encryption
 
