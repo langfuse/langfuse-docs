@@ -69,7 +69,7 @@ python -m langflow run
 Alternatively, you can run the Langflow CLI command with the environment variables set:
 
 ```
-LANGFLOW_LANGFUSE_SECRET_KEY=secret_key LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key LANGFUSE_HOST="http://localhost:3000" langflow
+LANGFUSE_SECRET_KEY=secret_key LANGFUSE_PUBLIC_KEY=public_key LANGFUSE_HOST="http://localhost:3000" langflow
 ```
 
 </Tab>
@@ -177,7 +177,7 @@ volumes:
 To test the connectivity between Langflow and Langfuse, run the following command:
 
 ```sh
-docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFLOW_LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
+docker compose exec langflow python -c "import requests, os; addr = os.environ.get('LANGFUSE_HOST'); print(addr); res = requests.get(addr, timeout=5); print(res.status_code)"
 
 # which should output the following:
 # http://langfuse-server:3000
