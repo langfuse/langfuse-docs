@@ -19,7 +19,6 @@ export const VideoIndex = () => (
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ")
         }
-        // image={Boolean(page.frontMatter.ogImage)}
         icon={<Video />}
         arrow
       >
