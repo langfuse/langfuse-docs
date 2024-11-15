@@ -1,21 +1,33 @@
 ---
 title: Observability and Tracing for Langflow
-description: Open source observability for Langflow applications. Automatically capture detailed traces and metrics for every request.
+description: Enhance your Langflow applications with open-source observability and tracing using Langfuse. Automatically capture detailed traces and metrics for every request to optimize and debug your Langchain application flows.
 ---
 
 # ⛓️ Langflow Integration
 
-**Langflow** ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
+**[Langflow](https://www.langflow.org/)** ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
 
 With the native integration (since langflow v1.0.17), you can use Langflow to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
 
 ## Integration
 
+<iframe
+  width="100%"
+  className="aspect-video rounded mt-10"
+  src="https://www.youtube.com/embed/SA9gGbzwNGU?si=J_J85tcrlCsdUwo_"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+_[Video](https://www.youtube.com/watch?v=SA9gGbzwNGU) guide on how to integrate Langflow with Langfuse (published by Langflow)_
+
 <Steps>
 
-### Obtain Langfuse API keys
+### Get Langfuse API keys
 
-<Tabs items={["Langfuse Cloud", "local or self-hosted"]}>
+<Tabs items={["Langfuse Cloud", "Local or self-hosted"]}>
 <Tab>
 
 1. Create account and project on
@@ -40,23 +52,24 @@ With the native integration (since langflow v1.0.17), you can use Langflow to qu
 
 ```sh
 # API keys from project settings in Langfuse
-export LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
-export LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
+export LANGFUSE_SECRET_KEY=sk-lf...
+export LANGFUSE_PUBLIC_KEY=pk-lf...
 
-# Optionally, set the host, defaults to Langfuse Cloud
-# LANGFLOW_LANGFUSE_HOST=http://localhost:3000
+export LANGFUSE_HOST="https://cloud.langfuse.com"  # 🇪🇺 for EU data region
+# export LANGFUSE_HOST="https://cloud.langfuse.com" # 🇺🇸 for US data region
+# export LANGFUSE_HOST="http://localhost:3000" # 🏠 for self-hosters
 
 # Install Langflow
 pip install langflow
 
-# Run Langflow
-langflow run
+# Start Langflow in the same terminal or environment where you set the environment variables:
+python -m langflow run
 ```
 
 Alternatively, you can run the Langflow CLI command with the environment variables set:
 
 ```
-LANGFLOW_LANGFUSE_SECRET_KEY=secret_key LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key langflow
+LANGFLOW_LANGFUSE_SECRET_KEY=secret_key LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key LANGFUSE_HOST="http://localhost:3000" langflow
 ```
 
 </Tab>
@@ -82,8 +95,9 @@ services:
     ports:
       - "7860:7860"
     environment:
-+     - LANGFLOW_LANGFUSE_SECRET_KEY=secret_key
-+     - LANGFLOW_LANGFUSE_PUBLIC_KEY=public_key
++     - LANGFUSE_SECRET_KEY=secret_key
++     - LANGFUSE_PUBLIC_KEY=public_key
++     - LANGFUSE_HOST="https://cloud.langfuse.com"
     command: langflow run --host 0.0.0.0
 ```
 
@@ -97,9 +111,13 @@ docker-compose up --build
 </Tab>
 </Tabs>
 
-### Monitoring in Langfuse
+### See your traces in Langfuse
 
 Now, when you use Langflow's chat or API, you can view the trace of your conversations in Langfuse.
+<Frame border fullWidth>
+![Langflow traces in Langfuse](/images/blog/langflow-langfuse/langflow-example-trace.png)
+</Frame> 
+_[Example Langflow trace in the Langfuse UI](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/f016ae6d-4527-43f5-93ba-9d78388cd3d9?timestamp=2024-11-15T10%3A22%3A56.378Z&observation=c3680212-31f0-46e2-9310-add4352e4cc7)_
 
 </Steps>
 
@@ -120,9 +138,9 @@ services:
       - "7860:7860"
     environment:
 +     # Tokens are to be created in Langfuse, then copy-pasted here. Then restart docker-compose.
-+     - LANGFLOW_LANGFUSE_SECRET_KEY=sk-lf-...
-+     - LANGFLOW_LANGFUSE_PUBLIC_KEY=pk-lf-...
-+     - LANGFLOW_LANGFUSE_HOST=http://langfuse-server:3000
++     - LANGFUSE_SECRET_KEY=sk-lf-...
++     - LANGFUSE_PUBLIC_KEY=pk-lf-...
++     - LANGFUSE_HOST="http://langfuse-server:3000"
     command: langflow run --host 0.0.0.0
 
   # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
