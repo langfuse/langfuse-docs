@@ -1,5 +1,6 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
+import { IntegrationsGrid } from "./IntegrationsGrid";
 import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
@@ -24,6 +25,7 @@ export const Home = () => (
       <Usage />
       <FeatureBento />
       <Integrations />
+      <IntegrationsGrid />
       <OpenSource />
       <Security />
       <Pricing />
