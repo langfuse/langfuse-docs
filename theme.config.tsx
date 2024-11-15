@@ -196,11 +196,11 @@ const config: DocsThemeConfig = {
       <Link href="/launch">
         {/* mobile */}
         <span className="sm:hidden">
-          Launch Week #2 – Vercel AI SDK →
+          Launch Week #2 - Vercel AI SDK →
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Launch Week #2 – Vercel AI SDK →
+        Launch Week #2 - Day 0: Vercel AI SDK →
         </span>
       </Link>
     ),
