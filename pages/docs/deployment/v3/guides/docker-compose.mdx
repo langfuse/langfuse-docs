@@ -75,7 +75,7 @@ In addition, you should change any database or storage credential.
 
 Run the docker compose file for Langfuse v3 (preview):
 ```bash
-docker compose -f docker-compose.v3beta.yml up
+docker compose -f docker-compose.v3preview.yml up
 ```
 
 Watch the containers being started and the logs flowing in.
@@ -92,7 +92,7 @@ Go ahead and register, create a new organization, project, and explore Langfuse.
 You can stop the containers by hitting `Ctrl+C` in the terminal.
 If you started docker-compose in the background (`-d` flag), you can stop all instance using:
 ```bash
-docker compose -f docker-compose.v3beta.yml down
+docker compose -f docker-compose.v3preview.yml down
 ```
 Adding the `-v` flag will also remove the volumes.
 
@@ -100,4 +100,4 @@ Ensure to stop the VM instance in your cloud provider interface to avoid unneces
 
 ## How to Upgrade
 
-To upgrade Langfuse, you can stop all instances and run `docker compose -f docker-compose.v3beta.yml up --pull always`.
+To upgrade Langfuse, you can stop all instances and run `docker compose -f docker-compose.v3preview.yml up --pull always`.
