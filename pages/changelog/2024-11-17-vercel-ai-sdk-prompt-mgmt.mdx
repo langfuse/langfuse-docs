@@ -9,3 +9,79 @@ author: Hassieb
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
+
+It's Day 0 of [Launch Week 2](/blog/2024-11-17-launch-week-2), and this is the first of 6 announcements this week.
+
+## Background
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+
+<Accordion>
+<AccordionItem value="vercel-ai-sdk">
+<AccordionTrigger>What is the Vercel AI SDK?</AccordionTrigger>
+<AccordionContent>
+
+The Vercel AI SDK provides a robust foundation for building AI applications in JavaScript/TypeScript. It offers **type-safe structured outputs**, **React hooks for state management**, and native streaming support while remaining model-agnostic. This makes it an ideal choice for developers looking to build production-grade AI applications.
+
+</AccordionContent>
+</AccordionItem>
+<AccordionItem value="langfuse-tracing-for-vercel-ai-sdk">
+<AccordionTrigger>Langfuse Tracing for Vercel AI SDK</AccordionTrigger>
+<AccordionContent>
+
+Langfuse Tracing seamlessly integrates with your application through OpenTelemetry, providing **comprehensive visibility into your LLM requests**. Track essential metrics like **quality, cost, and latency** while gaining detailed insights through LLM application traces. This deep observability ensures you can monitor and optimize your AI application's performance.
+
+</AccordionContent>
+</AccordionItem>
+</Accordion>
+
+## What's new?
+
+Langfuse Prompt Management enables **prompt deployment without code changes** and ensures optimal performance through **client-side caching with async refreshing**. Prompts can be managed through multiple interfaces (UI, SDK, or API), and you can conduct development experiments with different versions.
+
+You can now link a trace created via the Vercel AI SDK with a prompt version in Langfuse. Thereby you'll see which prompt version was used in any given trace which helps answer questions like:
+
+- _Which prompt version caused a particular bug?_
+- _What is the average latency and cost impact of a prompt version?_
+- _Which prompt version is the most used?_
+
+All while using a simple prompt management UI that is accessible for everyone on the team.
+
+## How to link a trace with a prompt version?
+
+Prerequisites:
+
+- Vercel AI SDK installed in your application ([guide](https://sdk.vercel.ai/getting-started)).
+- Langfuse Tracing enabled for Vercel AI SDK ([guide](/docs/integrations/vercel-ai-sdk)).
+- Create a prompt in Langfuse ([guide](/docs/prompts/get-started)).
+
+Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field:
+
+```typescript /langfusePrompt: fetchedPrompt.toJSON()/
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt,
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(),
+    },
+  },
+});
+```
+
+The resulting generation will have the prompt linked to the trace in Langfuse.
+
+< TODO ADD IMAGE OR VIDEO HERE >
