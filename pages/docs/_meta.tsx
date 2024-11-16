@@ -75,12 +75,4 @@ export default {
     href: "/support",
     newWindow: true,
   },
-  video: {
-    title: "Video (2 min)",
-    type: "page",
-    display: "hidden",
-    theme: {
-      typesetting: "article",
-    },
-  },
 };
