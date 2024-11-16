@@ -190,17 +190,29 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "thoughtworks-radar",
+    // key: "thoughtworks-radar",
+    // dismissible: true,
+    // content: (
+    //   <Link href="https://www.thoughtworks.com/en-de/radar/platforms/summary/langfuse">
+    //     {/* mobile */}
+    //     <span className="sm:hidden">
+    //       Langfuse on Thoughtworks Technology Radar →
+    //     </span>
+    //     {/* desktop */}
+    //     <span className="hidden sm:inline">
+    //       Langfuse featured on Thoughtworks Technology Radar →
+    //     </span>
+    //   </Link>
+    // ),
+    key: "launch-week-upcoming",
     dismissible: true,
     content: (
-      <Link href="https://www.thoughtworks.com/en-de/radar/platforms/summary/langfuse">
+      <Link href="/blog/2024-11-17-launch-week-2">
         {/* mobile */}
-        <span className="sm:hidden">
-          Langfuse on Thoughtworks Technology Radar →
-        </span>
+        <span className="sm:hidden">Upcoming: Langfuse Launch Week 2 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse featured on Thoughtworks Technology Radar →
+          Upcoming: Langfuse Launch Week 2 →
         </span>
       </Link>
     ),
