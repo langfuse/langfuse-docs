@@ -8,10 +8,21 @@ import IconTypescript from "../icons/typescript";
 import IconOpenai from "../icons/openai";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
 import LangchainIcon from "./img/langchain_icon.png";
+import LanggraphIcon from "./img/langgraph_icon.png";
 import HaystackIcon from "./img/haystack_icon.png";
 import LitellmIcon from "./img/litellm_icon.png";
+import InstructorIcon from "./img/instructor_icon.svg";
+import OllamaIcon from "./img/ollama_icon.png";
+import BedrockIcon from "./img/bedrock_icon.png";
+import FlowiseLogo from "./img/flowise_logo.png";
+import LangflowIcon from "./img/langflow_icon.svg";
+import DifyIcon from "./img/dify_icon.png";
+import OpenwebUiIcon from "./img/openwebui_icon.png";
+import MirascopeIcon from "./img/mirascope_icon.svg";
+import DSPyIcon from "./img/dspy_icon.png";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
+import React from "react";
 
 interface IntegrationTileProps {
   title: string;
@@ -44,7 +55,26 @@ const integrations: IntegrationTileProps[] = [
     title: "LangChain",
     href: "/docs/integrations/langchain/tracing",
     icon: (
-      <Image src={LangchainIcon} alt="Langchain Icon" width={40} height={40} />
+      <Image
+        src={LangchainIcon}
+        alt="Langchain Icon"
+        width={40}
+        height={40}
+        className="dark:invert dark:saturate-0 dark:brightness-0"
+      />
+    ),
+  },
+  {
+    title: "LangGraph",
+    href: "/docs/integrations/langchain/example-python-langgraph",
+    icon: (
+      <Image
+        src={LanggraphIcon}
+        alt="LangGraph Icon"
+        width={40}
+        height={40}
+        className="dark:invert dark:saturate-0 dark:brightness-0"
+      />
     ),
   },
   {
@@ -65,10 +95,98 @@ const integrations: IntegrationTileProps[] = [
     icon: <Image src={LitellmIcon} alt="LiteLLM Icon" width={40} height={40} />,
   },
   {
+    title: "AI SDK",
+    href: "/docs/integrations/vercel-ai-sdk",
+    icon: (
+      <span className="text-sm font-medium whitespace-nowrap font-mono">
+        npm i ai
+      </span>
+    ),
+  },
+  {
     title: "Haystack",
     href: "/docs/integrations/haystack",
     icon: (
       <Image src={HaystackIcon} alt="Haystack Icon" width={28} height={28} />
+    ),
+  },
+  {
+    title: "Instructor",
+    href: "/docs/integrations/instructor",
+    icon: (
+      <Image
+        src={InstructorIcon}
+        alt="Instructor Icon"
+        width={36}
+        height={36}
+        className="dark:invert"
+      />
+    ),
+  },
+  {
+    title: "DSPy",
+    href: "/docs/integrations/dspy",
+    icon: <Image src={DSPyIcon} alt="DSPy Icon" width={36} height={36} />,
+  },
+  {
+    title: "Mirascope",
+    href: "/docs/integrations/mirascope",
+    icon: (
+      <Image src={MirascopeIcon} alt="Mirascope Icon" width={36} height={36} />
+    ),
+  },
+  {
+    title: "Ollama",
+    href: "/docs/integrations/ollama",
+    icon: (
+      <Image
+        src={OllamaIcon}
+        alt="Ollama Icon"
+        width={30}
+        height={30}
+        className="dark:invert"
+      />
+    ),
+  },
+  {
+    title: "Bedrock",
+    href: "/docs/integrations/amazon-bedrock",
+    icon: <Image src={BedrockIcon} alt="Bedrock Icon" width={36} height={36} />,
+  },
+  {
+    title: "Flowise",
+    href: "/docs/integrations/flowise",
+    icon: <Image src={FlowiseLogo} alt="Flowise Logo" width={50} height={36} />,
+  },
+  {
+    title: "Langflow",
+    href: "/docs/integrations/langflow",
+    icon: (
+      <Image
+        src={LangflowIcon}
+        alt="Langflow Icon"
+        width={36}
+        height={36}
+        className="dark:invert"
+      />
+    ),
+  },
+  {
+    title: "Dify",
+    href: "/docs/integrations/dify",
+    icon: <Image src={DifyIcon} alt="Dify Icon" width={36} height={36} />,
+  },
+  {
+    title: "OpenWeb UI",
+    href: "/docs/integrations/openwebui",
+    icon: (
+      <Image
+        src={OpenwebUiIcon}
+        alt="OpenWeb UI Icon"
+        width={36}
+        height={36}
+        className="dark:invert"
+      />
     ),
   },
   {
@@ -86,24 +204,47 @@ function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
     >
       <div className="relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
         {/* Front */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 [backface-visibility:hidden]">
+        <div className="p-1 absolute inset-0 flex flex-col items-center justify-center gap-1 md:gap-4 [backface-visibility:hidden]">
           <div className="size-9 flex items-center justify-center">{icon}</div>
-          <span className="text-sm font-medium text-center">{title}</span>
+          <span className="text-xs md:text-sm font-medium text-center">
+            {title}
+          </span>
         </div>
 
         {/* Back */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 [transform:rotateY(180deg)] [backface-visibility:hidden]">
+        <div className="p-1 absolute inset-0 flex flex-col items-center justify-center gap-1 md:gap-4 [transform:rotateY(180deg)] [backface-visibility:hidden]">
           <div className="size-9 flex items-center justify-center">
             <ArrowUpRightFromSquare className="size-6" />
           </div>
-          <span className="text-sm font-medium text-center">Learn More</span>
+          <span className="text-xs md:text-sm font-medium text-center">
+            Learn More
+          </span>
         </div>
       </div>
     </Link>
   );
 }
 
-export function IntegrationsGrid() {
+export default function IntegrationsGrid() {
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = React.useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
+
   return (
     <HomeSection>
       <Header
@@ -116,13 +257,28 @@ export function IntegrationsGrid() {
           },
         ]}
       />
-      <div className="relative w-full mx-auto max-w-3xl rounded border bg-card">
-        <div className="absolute inset-0 bg-grid-slate-200 [mask-image:radial-gradient(white,transparent_85%)] dark:bg-grid-slate-700/25" />
-        <div className="relative grid grid-cols-4 divide-x divide-y divide-dashed">
+      <div
+        className="relative w-full mx-auto max-w-2xl rounded border bg-card overflow-hidden"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="absolute inset-0 bg-grid-slate-200 [mask-image:radial-gradient(white,transparent_85%)] dark:bg-grid-slate-700/50" />
+
+        {/* Animated background gradient */}
+        <div
+          className="absolute inset-0 opacity-0 transition-opacity duration-300 ease-out"
+          style={{
+            opacity: isHovering ? 0.5 : 0,
+            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(100,100,255,0.15), transparent 40%)`,
+          }}
+        />
+
+        <div className="relative grid grid-cols-4 md:grid-cols-5">
           {integrations.map((integration) => (
             <div
               key={integration.title}
-              className="aspect-square w-full flex items-center justify-center"
+              className="aspect-square w-full flex items-center justify-center border border-dashed"
             >
               <IntegrationTile {...integration} />
             </div>

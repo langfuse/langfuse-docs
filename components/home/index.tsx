@@ -1,6 +1,5 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import { IntegrationsGrid } from "./IntegrationsGrid";
 import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
@@ -8,7 +7,7 @@ import dynamic from "next/dynamic";
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
 });
-const Integrations = dynamic(() => import("./Integrations"), {
+const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
 const OpenSource = dynamic(() => import("./OpenSource"), {
@@ -24,7 +23,6 @@ export const Home = () => (
       <Hero />
       <Usage />
       <FeatureBento />
-      <Integrations />
       <IntegrationsGrid />
       <OpenSource />
       <Security />
