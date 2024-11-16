@@ -43,9 +43,38 @@ This week, we're focusing on **supporting the next generation of models**. As AI
 
 ## Launches
 
-### 🆚&nbsp;&nbsp;&nbsp;Day 1
+### 🚀&nbsp;&nbsp;&nbsp;Day 0: Prompt Management for Vercel AI SDK
 
-???
+```typescript {11,13,15}
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// fetch prompt from Langfuse Prompt Management
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt, // use prompt
+  experimental_telemetry: {
+    isEnabled: true, // enable tracing
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(), // link trace to prompt version
+    },
+  },
+});
+```
+
+Langfuse Prompt Management now integrates natively with the Vercel AI SDK. Version and release prompts in Langfuse, use them via Vercel AI SDK, monitor metrics in Langfuse.
+
+This helps you answer questions like:
+
+- _Which prompt version caused a particular bug?_
+- _What is the average latency and cost impact of a prompt version?_
+- _Which prompt version is the most used?_
+
+See the [changelog](/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt) for more details.
 
 ### ⚖️&nbsp;&nbsp;&nbsp;Day 2
 
