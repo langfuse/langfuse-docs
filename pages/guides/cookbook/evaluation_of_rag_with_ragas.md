@@ -76,7 +76,7 @@ metrics = [
     Faithfulness(),
     ResponseRelevancy(),
     LLMContextPrecisionWithoutReference(),
-] 
+]
 ```
 
 Now you have to initialize the metrics with LLMs and Embeddings of your choice. In this example we are going to use OpenAI.
@@ -311,6 +311,7 @@ from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import Faithfulness, ResponseRelevancy
 
+ds = Dataset.from_dict(evaluation_batch)
 r = evaluate(ds, metrics=[Faithfulness(), ResponseRelevancy()])
 ```
 
