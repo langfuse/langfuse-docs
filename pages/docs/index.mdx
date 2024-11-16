@@ -8,19 +8,104 @@ import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
 # What is Langfuse?
 
-> Langfuse is an open-source LLM engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications.
+> Langfuse is an **open-source LLM engineering platform** that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.
 
-## Overview: Core platform features
+<details>
+<summary>Why Langfuse?</summary>
+
+- Most used open-source LLMOps platform ([blog post](/blog/2024-11-most-used-oss-llmops))
+- Model and framework agnostic
+- Built for production
+- Incrementally adoptable, start with one feature and expand to the full platform over time
+- API-first, all features are available via API for custom integrations
+
+[Learn more](/why) about why teams chose Langfuse.
+
+</details>
+
+## Core platform features [#features]
+
+### LLM Application Observability
+
+Instrument your app and start ingesting traces to Langfuse, thereby tracking LLM calls and other relevant logic in your app such as retrieval, embedding, or agent actions. Inspect and debug complex logs and user sessions.
+
+<details>
+<summary>Key benefits</summary>
+  
+- **Full context:** Capture the complete execution flow including API calls, context, prompts, parallelism and more
+- **Conversation/session view:** In multi-turn conversations, group interactions into sessions
+- **User tracking:** Add your own identifiers to inspect traces from specific users
+- **Cost tracking:** Monitor model usage and costs across your application
+- **Quality insights:** Collect user feedback and identify low-quality outputs
+- **Low overhead:** Designed for production with minimal performance impact
+- **Best-in-class SDKs:** We offer best-in-class SDKs for Python, JS/TS for easy integration
+- **Framework support:** Integrated with popular frameworks like OpenAI SDK, LangChain, and LlamaIndex
+- **Multi-modal:** Support for tracing text, images and other modalities
+- **Open source:** Fully open source with public API for custom integrations
+
+</details>
+
+[Learn more](/docs/tracing) about tracing in Langfuse or play with the [interactive demo](/docs/demo).
+
+<CloudflareVideo
+  videoId="78696d97787e29fe12508ffac93dc7b5"
+  aspectRatio={1776 / 1080}
+  gifStyle
+/>
+
+### Prompt Management
+
+[Langfuse Prompt Management](/docs/prompts) helps you centrally manage, version control, and collaboratively iterate on your prompts.
+
+<details>
+<summary>Key benefits</summary>
+
+- **Decoupled from code:** Deploy new prompts without application redeployment
+- **Version control:** Track changes and quickly rollback when needed
+- **Performance optimized:** Client-side caching prevents latency or availability issues
+- **Multi-format support:** Works with both text and chat prompts
+- **Flexible access:** Edit via UI, SDKs, or API
+- **Non-technical friendly:** Business users can update prompts via Console
+
+</details>
+
+### Evaluations
+
+[Evaluations](/docs/scores) are the most important part of the LLM Application development workflow. Langfuse adapts to your needs and supports:
+
+- **LLM-as-a-judge:** Fully managed evaluators run on production or development traces within Langfuse
+- **User feedback:** Collect feedback from your users and add it to traces in Langfuse
+- **Manual labeling:** Annotate traces with human feedback in managed workflows
+- **Custom:** Build your own evaluation pipelines via Langfuse APIs/SDKs for full flexibility
+
+### Playground
+
+The [LLM Playground](/docs/playground) is a tool for testing and iterating on your prompts and model configurations, shortening the feedback loop and accelerating development.
+
+<details>
+<summary>Key features</summary>
+
+- **Integrated:** Jump to the playground from prompt management and observability
+- **Supports variables:** Use variables in your prompts to dynamically change the input
+- **Broad model support:** OpenAI, Anthropic, Azure OpenAI, and Amazon Bedrock
+- **Custom model configurations:** You can configure custom model endpoints and credentials
+
+</details>
+
+<CloudflareVideo
+  videoId="3cfab665df39518f15fc18813cf82e3f"
+  aspectRatio={16 / 10.47}
+  title="LLM Playground"
+/>
+
+### Experimentation / benchmarking
+
+Via [Langfuse Datasets](/docs/datasets) you can create test sets and benchmarks to evaluate the performance of your LLM application.
+
+---
 
 ### Develop
 
-- **Observability:** Instrument your app and start ingesting traces to Langfuse ([Quickstart](/docs/get-started), [Tracing](/docs/tracing))
-  - Track all LLM calls and all other relevant logics in your app
-  - [Async SDKs](/docs/sdk) for Python and JS/TS
-  - [`@observe()` decorator](/docs/sdk/python/decorators) for Python
-  - [Integrations](/docs/integrations/overview) for OpenAI SDK, Langchain, LlamaIndex, LiteLLM, Flowise and Langflow
-  - [API](https://api.reference.langfuse.com)
-- **Langfuse UI:** Inspect and debug complex logs and user sessions ([Demo](/docs/demo), [Tracing](/docs/tracing), [Sessions](/docs/tracing-features/sessions))
 - **Prompt Management:** Manage, version and deploy prompts from within Langfuse ([Prompt Management](/docs/prompts/get-started))
 - **Prompt Engineering:** Test and iterate on your prompts with the [LLM Playground](/docs/playground)
 
