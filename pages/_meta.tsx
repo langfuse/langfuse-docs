@@ -7,11 +7,6 @@ export default {
       layout: "raw",
     },
   },
-  experimentation: {
-    title: "Experimentation",
-    type: "page",
-    display: "hidden",
-  },
   imprint: {
     title: "Imprint",
     type: "page",
