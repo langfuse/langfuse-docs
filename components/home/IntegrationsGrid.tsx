@@ -198,28 +198,21 @@ const integrations: IntegrationTileProps[] = [
 
 function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
   return (
-    <Link
-      href={href}
-      className="group relative aspect-square w-full perspective-1000"
-    >
-      <div className="relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-        {/* Front */}
-        <div className="p-1 absolute inset-0 flex flex-col items-center justify-center gap-1 md:gap-4 [backface-visibility:hidden]">
-          <div className="size-9 flex items-center justify-center">{icon}</div>
-          <span className="text-xs md:text-sm font-medium text-center">
-            {title}
-          </span>
-        </div>
-
-        {/* Back */}
-        <div className="p-1 absolute inset-0 flex flex-col items-center justify-center gap-1 md:gap-4 [transform:rotateY(180deg)] [backface-visibility:hidden]">
-          <div className="size-9 flex items-center justify-center">
-            <ArrowUpRightFromSquare className="size-6" />
+    <Link href={href} className="group relative aspect-square w-full">
+      <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
+        <div className="size-12 flex items-center justify-center perspective-1000">
+          <div className="relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+            {/* Front */}
+            <div className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden]">
+              {icon}
+            </div>
+            {/* Back */}
+            <div className="absolute inset-0 flex items-center justify-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+              <ArrowUpRightFromSquare className="size-6" />
+            </div>
           </div>
-          <span className="text-xs md:text-sm font-medium text-center">
-            Learn More
-          </span>
         </div>
+        <span className="text-center text-sm font-medium">{title}</span>
       </div>
     </Link>
   );
