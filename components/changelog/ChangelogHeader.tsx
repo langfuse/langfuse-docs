@@ -5,6 +5,7 @@ import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { Author } from "../Authors";
 import { CloudflareVideo, Video } from "../Video";
+import { useConfig } from "nextra-theme-docs";
 
 export const ChangelogHeader = () => {
   const router = useRouter();
@@ -13,6 +14,7 @@ export const ChangelogHeader = () => {
     (page) => page.route === router.pathname
   ) as Page & { frontMatter: any };
 
+  const { frontMatter } = useConfig();
   const {
     title,
     description,
@@ -24,7 +26,7 @@ export const ChangelogHeader = () => {
     author,
     showOgInHeader,
     badge,
-  } = page.frontMatter;
+  } = frontMatter;
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">

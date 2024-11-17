@@ -190,17 +190,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "thoughtworks-radar",
+    key: "launch-week-2-day-0",
     dismissible: true,
     content: (
-      <Link href="https://www.thoughtworks.com/en-de/radar/platforms/summary/langfuse">
+      <Link href="/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt">
         {/* mobile */}
-        <span className="sm:hidden">
-          Langfuse on Thoughtworks Technology Radar →
-        </span>
+        <span className="sm:hidden">LW2 - Prompt Management for AI SDK →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse featured on Thoughtworks Technology Radar →
+          Launch Week #2 - Day 0: Prompt Management for Vercel AI SDK →
         </span>
       </Link>
     ),
