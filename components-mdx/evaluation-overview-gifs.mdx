@@ -1,0 +1,69 @@
+import { CloudflareVideo } from "@/components/Video";
+
+<div className="mt-10">
+<Tabs items={["Analytics", "User Feedback", "LLM-as-a-Judge", "Annotation Queue", "Custom"]}>
+<Tab>
+
+Plot evaluation results in the Langfuse Dashboard.
+
+<CloudflareVideo
+  videoId="3c331720f6c3a90c83cbaaa5d81b29af"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Collect feedback from your users. Can be captured in the frontend via our Browser SDK. Video includes example application.
+
+<CloudflareVideo
+  videoId="e36f0a43d27bf733122d639128677f82"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Run fully managed LLM-as-a-judge evaluations on production or development traces. Can be applied to any step within your application for step-wise evaluations.
+
+<CloudflareVideo
+  videoId="0c3797a6042c29dbcd01e6abbcd3bbe6"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Baseline your evaluation workflow with human annotations via Annotation Queues.
+
+<CloudflareVideo
+  videoId="0154084df3c8ae0de290c60720dd1fb2"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Add custom evaluation results, supports numeric, boolean and categorical values.
+
+```bash
+POST /api/public/scores
+```
+
+Add scores via Python or JS SDK.
+
+```python filename="Example (Python)"
+langfuse.score(
+  trace_id="123",
+  name="my_custom_evaluator",
+  value=0.5,
+)
+```
+
+</Tab>
+</Tabs>
+</div>
