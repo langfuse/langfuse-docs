@@ -110,6 +110,7 @@ const tiers = {
       description:
         "Get access to additional workflow features to accelerate your team.",
       price: "$100",
+      priceUnit: "user",
       mainFeatures: [
         "All Open Source features",
         "LLM Playground",
@@ -405,11 +406,22 @@ const sections = [
       {
         name: "SLAs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Available" },
+          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
-            Enterprise: "Available",
+            Enterprise: "Add-on",
+          },
+        },
+      },
+      {
+        name: "Architectural guidance",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "Add-on",
           },
         },
       },
@@ -627,14 +639,14 @@ export default function Pricing({
                         >
                           {tier.price}
                         </p>
-                        {tier.name === "Pro" && (
+                        {tier.price.includes("$") && (
                           <div className="text-sm leading-5">
                             <p
                               className={
                                 tier.featured ? "text-gray-900" : "text-white"
                               }
                             >
-                              USD
+                              USD {tier.priceUnit ? `/ ${tier.priceUnit}` : ""}
                             </p>
                             <p
                               className={
