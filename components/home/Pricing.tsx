@@ -15,14 +15,24 @@ function classNames(...classes) {
 
 const deploymentOptions = {
   cloud: {
-    switch: "Langfuse Cloud (we host)",
+    switch: (
+      <span className="flex flex-row items-center gap-x-1">
+        Langfuse Cloud
+        <span className="hidden md:block"> (we host)</span>
+      </span>
+    ),
     title: "Pricing",
     subtitle:
       "Get started on the Hobby plan for free. No credit card required.",
     href: "/pricing",
   },
   selfHosted: {
-    switch: "Self-hosted (you host)",
+    switch: (
+      <span className="flex flex-row items-center gap-x-1">
+        Self-hosted
+        <span className="hidden md:block"> (you host)</span>
+      </span>
+    ),
     title: "Pricing",
     subtitle:
       "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise at any time.",

@@ -199,7 +199,7 @@ const integrations: IntegrationTileProps[] = [
 function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
   return (
     <Link href={href} className="group relative aspect-square w-full">
-      <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
+      <div className="flex h-full flex-col items-center justify-center gap-y-0.5 md:gap-2 p-1 md:p-4">
         <div className="size-12 flex items-center justify-center perspective-1000">
           <div className="relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
             {/* Front */}
@@ -212,7 +212,9 @@ function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
             </div>
           </div>
         </div>
-        <span className="text-center text-sm font-medium">{title}</span>
+        <span className="text-center text-xs md:text-md font-medium">
+          {title}
+        </span>
       </div>
     </Link>
   );
