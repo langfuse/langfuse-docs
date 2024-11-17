@@ -41,10 +41,11 @@ const tiers = {
         "Get started, no credit card required. Great for hobby projects and POCs.",
       price: "Free",
       mainFeatures: [
-        "No credit card required",
-        "Try all platform features",
-        "Up to 50k events / month",
-        "Up to 2 users",
+        "All platform features (with limits)",
+        "50k observations / month included",
+        "30 days data access",
+        "2 users included",
+        "Community support (Discord & GitHub)",
       ],
       cta: "Sign up",
     },
@@ -54,32 +55,32 @@ const tiers = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Includes access to full history and higher usage. Discounts available.",
-      price: "$30",
+        "For production projects. Includes access to full history and higher usage.",
+      price: "$59",
       mainFeatures: [
-        "100k events / month included, additional: $10 / 100k events",
-        "Includes all platform features",
-        "Unlimited data history",
+        "100k observations / month included, additional: $10 / 100k observations",
+        "Unlimited data access",
+        "Unlimited users",
         "Support via Email/Chat",
       ],
       cta: "Sign up",
     },
     {
-      name: "Enterprise",
-      id: "tier-enterprise",
-      href: "/schedule-demo",
+      name: "Team",
+      id: "tier-team",
+      href: "https://cloud.langfuse.com",
       featured: false,
-      price: "Custom",
+      price: "$499",
       description:
-        "Dedicated solutions and support for your team. Contact us for pricing.",
+        "Dedicated support, and security controls for larger teams. Enterprise:",
       mainFeatures: [
-        "Unlimited tracing throughput",
-        "SSO and fine-grained RBAC",
+        "100k observations / month included, additional: $10 / 100k observations",
+        "SSO enforcement and fine-grained RBAC",
         "SOC2, ISO27001, and InfoSec reviews",
-        "Dedicated support engineer and SLAs",
-        "Self-hosting available",
+        "Dedicated support channel",
+        "Add-on: Enterprise support & SLAs",
       ],
-      cta: "Talk to founders",
+      cta: "Sign up",
       learnMore: "/enterprise",
     },
   ],
@@ -147,7 +148,7 @@ const sections = [
         name: "Integrations/SDKs",
         href: "/docs/integrations/overview",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -155,7 +156,7 @@ const sections = [
         name: "Custom via API",
         href: "https://api.reference.langfuse.com/#post-/api/public/ingestion",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -163,9 +164,9 @@ const sections = [
         name: "Included usage",
         tiers: {
           cloud: {
-            Hobby: "50k events",
-            Pro: "100k events",
-            Enterprise: "Custom",
+            Hobby: "50k observations",
+            Pro: "100k observations",
+            Team: "100k observations",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -179,8 +180,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: false,
-            Pro: "$10 / 100k events",
-            Enterprise: "Custom",
+            Pro: "$10 / 100k observations",
+            Team: "$10 / 100k observations",
           },
           selfHosted: {
             "Open Source": "n/a",
@@ -195,7 +196,7 @@ const sections = [
           cloud: {
             Hobby: "30 days",
             Pro: "Unlimited",
-            Enterprise: "Unlimited",
+            Team: "Unlimited",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -210,7 +211,7 @@ const sections = [
           cloud: {
             Hobby: "1000 requests / min",
             Pro: "1000 requests / min",
-            Enterprise: "Custom",
+            Team: "5000 requests / min",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -228,7 +229,7 @@ const sections = [
         name: "Datasets",
         href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -236,7 +237,7 @@ const sections = [
         name: "Evaluation / User-feedback",
         href: "/docs/scores",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -244,7 +245,7 @@ const sections = [
         name: "Prompt Management",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: "10 prompts", Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: {
             "Open Source": true,
             Pro: true,
@@ -261,7 +262,7 @@ const sections = [
         name: "Playground",
         href: "/docs/playground",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
@@ -272,7 +273,7 @@ const sections = [
           cloud: {
             Hobby: "1 evaluator",
             Pro: true,
-            Enterprise: true,
+            Team: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -288,7 +289,7 @@ const sections = [
           cloud: {
             Hobby: "1 queue",
             Pro: "3 queues",
-            Enterprise: true,
+            Team: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -308,7 +309,7 @@ const sections = [
           cloud: {
             Hobby: "Unlimited",
             Pro: "Unlimited",
-            Enterprise: "Unlimited",
+            Team: "Unlimited",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -320,7 +321,7 @@ const sections = [
       {
         name: "Users",
         tiers: {
-          cloud: { Hobby: "2", Pro: "Unlimited", Enterprise: "Unlimited" },
+          cloud: { Hobby: "2", Pro: "Unlimited", Team: "Unlimited" },
           selfHosted: {
             "Open Source": "Unlimited",
             Pro: "Unlimited",
@@ -340,7 +341,7 @@ const sections = [
           cloud: {
             Hobby: true,
             Pro: true,
-            Enterprise: true,
+            Team: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -355,22 +356,7 @@ const sections = [
           cloud: {
             Hobby: "100 requests / min",
             Pro: "1000 requests / min",
-            Enterprise: "Custom",
-          },
-          selfHosted: {
-            "Open Source": "n/a",
-            Pro: "n/a",
-            Enterprise: "n/a",
-          },
-        },
-      },
-      {
-        name: "Metrics API",
-        tiers: {
-          cloud: {
-            Hobby: "10 requests / day",
-            Pro: "100 requests / day",
-            Enterprise: "Custom",
+            Team: "Custom",
           },
           selfHosted: {
             "Open Source": "n/a",
@@ -387,21 +373,21 @@ const sections = [
       {
         name: "Community (GitHub, Discord)",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Chat & Email",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Enterprise: true },
+          cloud: { Hobby: false, Pro: true, Team: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Private Slack/Discord channel",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: {
             "Open Source": false,
             Pro: "Add-on, included at >10 users",
@@ -412,14 +398,14 @@ const sections = [
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SLAs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: "Available" },
+          cloud: { Hobby: false, Pro: false, Team: "Available" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -439,7 +425,7 @@ const sections = [
           cloud: {
             Hobby: "US or EU",
             Pro: "US or EU",
-            Enterprise: "US or EU",
+            Team: "US or EU",
           },
           selfHosted: {
             "Open Source": "Own infrastructure",
@@ -454,7 +440,7 @@ const sections = [
           cloud: {
             Hobby: true,
             Pro: true,
-            Enterprise: true,
+            Team: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -470,7 +456,7 @@ const sections = [
           cloud: {
             Hobby: true,
             Pro: true,
-            Enterprise: true,
+            Team: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -482,14 +468,14 @@ const sections = [
       {
         name: "Enterprise SSO (e.g. Okta, Auth0)",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SSO enforcement",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -497,7 +483,7 @@ const sections = [
         name: "Project-level RBAC",
         href: "/docs/rbac",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -507,7 +493,7 @@ const sections = [
           cloud: {
             Hobby: false,
             Pro: false,
-            Enterprise: true,
+            Team: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -525,21 +511,21 @@ const sections = [
       {
         name: "Data processing agreement (GDPR)",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Enterprise: true },
+          cloud: { Hobby: false, Pro: true, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "InfoSec reviews",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -648,7 +634,7 @@ export default function Pricing({
                                 tier.featured ? "text-gray-900" : "text-white"
                               }
                             >
-                              USD / user
+                              USD
                             </p>
                             <p
                               className={
