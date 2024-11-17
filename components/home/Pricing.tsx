@@ -1080,9 +1080,9 @@ const faqs = [
       "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
   },
   {
-    question: "What is an event?",
+    question: "What is an observation?",
     answer:
-      "Events are the sum of all traces, observations and evaluation scores logged to Langfuse. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.<br/>For example, a trace that includes 1 LLM call (generation), 2 spans (non-LLM logic), and 2 scores (user feedback and an evaluation results) would consist of 6 events.",
+      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
   },
   {
     question: "Can I self-host Langfuse?",
