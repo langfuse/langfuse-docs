@@ -1,6 +1,5 @@
 import { Background } from "./Background";
-import Cal, { getCalApi } from "@calcom/embed-react";
-import { useEffect } from "react";
+import { ScheduleDemo } from "./CalComScheduleDemo";
 import { Header } from "./Header";
 
 export function ScheduleDemoPage() {
@@ -28,25 +27,5 @@ export function ScheduleDemoPage() {
       <ScheduleDemo />
       <Background />
     </section>
-  );
-}
-
-export function ScheduleDemo() {
-  useEffect(() => {
-    (async function () {
-      const cal = await getCalApi();
-      cal("ui", {
-        styles: { branding: { brandColor: "#000000" } },
-        hideEventTypeDetails: false,
-        layout: "month_view",
-      });
-    })();
-  }, []);
-  return (
-    <Cal
-      calLink="marc-kl/demo"
-      style={{ width: "100%", height: "100%", overflow: "scroll" }}
-      config={{ layout: "month_view" }}
-    />
   );
 }
