@@ -491,7 +491,7 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 
 This is currently unavailable when using the LlamaIndex integration.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
 Decorators
@@ -669,6 +669,32 @@ const chatModel = new ChatOpenAI();
 const chatChain = langchainChatPrompt.pipe(chatModel);
 
 await chatChain.invoke({ movie: "Dune 2", criticlevel: "expert" });
+```
+
+</Tab>
+
+<Tab>
+
+Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field:
+
+```typescript /langfusePrompt: fetchedPrompt.toJSON()/
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt,
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(),
+    },
+  },
+});
 ```
 
 </Tab>
