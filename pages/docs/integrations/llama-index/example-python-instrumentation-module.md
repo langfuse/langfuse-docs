@@ -13,11 +13,13 @@ This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse 
 
 Make sure you have both `llama-index` and `langfuse` installed.
 
+
 ```python
 %pip install langfuse llama_index --upgrade
 ```
 
 Initialize the integration. Get your API keys from the Langfuse project settings. This example uses OpenAI for embeddings and chat completions. You can also use any other model supported by LlamaIndex.
+
 
 ```python
 import os
@@ -35,6 +37,7 @@ os.environ["OPENAI_API_KEY"] = ""
 
 Register the Langfuse `LlamaIndexInstrumentor`:
 
+
 ```python
 from langfuse.llama_index import LlamaIndexInstrumentor
 
@@ -43,6 +46,7 @@ instrumentor.start()
 ```
 
 ## Index
+
 
 ```python
 # Example context, thx ChatGPT
@@ -56,6 +60,7 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 """)
 ```
 
+
 ```python
 # Example index construction + LLM query
 from llama_index.core import VectorStoreIndex
@@ -65,6 +70,7 @@ index = VectorStoreIndex.from_documents([doc1,doc2])
 
 ## Query
 
+
 ```python
 # Query
 response = index.as_query_engine().query("What did he do growing up?")
@@ -73,7 +79,9 @@ print(response)
 
     He made home movies using a Super 8 camera.
 
+
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d933c7cc-20bf-4db3-810d-bab1c8d9a2a1
+
 
 ```python
 # Chat
@@ -83,6 +91,7 @@ print(response)
 
     He made home movies using a Super 8 camera growing up.
 
+
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4e285b8f-9789-4cf0-a8b4-45473ac420f1
 
 ![LlamaIndex Chat Engine Trace in Langfuse (via instrumentation module)](https://langfuse.com/images/cookbook/integration_llama-index_instrumentation_chatengine_trace.png)
@@ -90,6 +99,7 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 ## Custom trace properties
 
 You can use the `instrumentor.observe` context manager to manage trace IDs, set custom trace properties, and access the trace client for later scoring.
+
 
 ```python
 with instrumentor.observe(user_id='my-user', session_id='my-session') as trace:
