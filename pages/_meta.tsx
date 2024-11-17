@@ -41,6 +41,14 @@ export default {
       layout: "full",
     },
   },
+  "pricing-self-host": {
+    title: "Pricing (self-hosted)",
+    type: "page",
+    theme: {
+      layout: "full",
+    },
+    display: "hidden",
+  },
   changelog: {
     type: "page",
     title: "Changelog",

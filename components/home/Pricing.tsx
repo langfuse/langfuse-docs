@@ -1,4 +1,4 @@
-import { Check, Plus, Minus, X } from "lucide-react";
+import { Check, Plus, Minus, X, ExternalLink } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import { BorderBeam } from "../magicui/border-beam";
 import Link from "next/link";
@@ -6,95 +6,297 @@ import { Header } from "../Header";
 import { Button } from "../ui/button";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { useState } from "react";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const tiers = [
-  {
-    name: "Hobby",
-    id: "tier-hobby",
-    href: "https://cloud.langfuse.com",
-    featured: false,
-    description:
-      "Get started, no credit card required. Great for hobby projects and POCs.",
-    price: "Free",
-    mainFeatures: [
-      "No credit card required",
-      "All platform features",
-      "50k observations / month included",
-      "Community support (Discord & GitHub)",
-    ],
-    cta: "Sign up",
+const deploymentOptions = {
+  cloud: {
+    switch: "Langfuse Cloud (we host)",
+    title: "Pricing",
+    subtitle:
+      "Get started on the Hobby plan for free. No credit card required.",
+    href: "/pricing",
   },
-  {
-    name: "Pro",
-    id: "tier-pro",
-    href: "https://cloud.langfuse.com",
-    featured: true,
-    description:
-      "For serious projects. Includes access to full history and higher usage.",
-    price: "$59",
-    mainFeatures: [
-      "100k observations / month included, additional: $10 / 100k observations",
-      "Unlimited data access",
-      "Unlimited users",
-      "Dedicated support",
-    ],
-    cta: "Sign up",
+  selfHosted: {
+    switch: "Self-hosted (you host)",
+    title: "Pricing",
+    subtitle:
+      "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise at any time.",
+    href: "/pricing-self-host",
   },
-  {
-    name: "Team",
-    id: "tier-team",
-    href: "/schedule-demo",
-    featured: false,
-    price: "Starts at $499",
-    description:
-      "Dedicated solutions and support for your team. Contact us for pricing.",
-    mainFeatures: [
-      "Unlimited ingestion throughput",
-      "Support SLAs",
-      "SSO enforcement and custom roles",
-      "Additional security and compliance features",
-    ],
-    cta: "Talk to founders",
-  },
-] as const;
+};
+
+const tiers = {
+  cloud: [
+    {
+      name: "Hobby",
+      id: "tier-hobby",
+      href: "https://cloud.langfuse.com",
+      featured: false,
+      description:
+        "Get started, no credit card required. Great for hobby projects and POCs.",
+      price: "Free",
+      mainFeatures: [
+        "All platform features (with limits)",
+        "50k observations / month included",
+        "30 days data access",
+        "2 users included",
+        "Community support (Discord & GitHub)",
+      ],
+      cta: "Sign up",
+    },
+    {
+      name: "Pro",
+      id: "tier-pro",
+      href: "https://cloud.langfuse.com",
+      featured: true,
+      description:
+        "For production projects. Includes access to full history and higher usage.",
+      price: "$59",
+      mainFeatures: [
+        "100k observations / month included, additional: $10 / 100k observations",
+        "Unlimited data access",
+        "Unlimited users",
+        "Support via Email/Chat",
+      ],
+      cta: "Sign up",
+    },
+    {
+      name: "Team",
+      id: "tier-team",
+      href: "https://cloud.langfuse.com",
+      featured: false,
+      price: "$499",
+      description:
+        "Dedicated support, and security controls for larger teams. Enterprise:",
+      mainFeatures: [
+        "100k observations / month included, additional: $10 / 100k observations",
+        "SSO enforcement and fine-grained RBAC",
+        "SOC2, ISO27001, and InfoSec reviews",
+        "Dedicated support channel",
+        "Add-on: Enterprise support & SLAs",
+      ],
+      cta: "Sign up",
+      learnMore: "/enterprise",
+    },
+  ],
+  selfHosted: [
+    {
+      name: "Open Source",
+      id: "tier-self-hosted-oss",
+      href: "/docs/deployment/self-host",
+      featured: true,
+      description:
+        "Self-host all core Langfuse features for free without any limitations.",
+      price: "Free",
+      mainFeatures: [
+        "MIT License",
+        "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
+        "Unlimited usage",
+        "Deployment docs & Helm chart",
+        "Community support",
+      ],
+      cta: "Deployment guide",
+    },
+    {
+      name: "Pro",
+      id: "tier-self-hosted-pro",
+      href: "https://buy.stripe.com/aEU6qufIwfJy0CYbIR",
+      featured: false,
+      description:
+        "Get access to additional workflow features to accelerate your team.",
+      price: "$100",
+      priceUnit: "user",
+      mainFeatures: [
+        "All Open Source features",
+        "LLM Playground",
+        "Human annotation queues",
+        "LLM as a judge evaluators (soon)",
+        "Chat & Email support",
+      ],
+      cta: "Subscribe",
+    },
+    {
+      name: "Enterprise",
+      id: "tier-self-hosted-enterprise",
+      href: "/schedule-demo",
+      featured: false,
+      price: "Custom",
+      description:
+        "Enterprise-grade support and security features. Contact us for pricing.",
+      mainFeatures: [
+        "All Open Source / Pro features",
+        "SSO and fine-grained RBAC",
+        "SOC2, ISO27001, and InfoSec reviews",
+        "Dedicated support engineer and SLAs",
+      ],
+      cta: "Talk to founders",
+      learnMore: "/enterprise",
+    },
+  ],
+} as const;
+
 const sections = [
   {
     name: "Tracing",
+    href: "/docs/tracing",
     features: [
+      {
+        name: "Integrations/SDKs",
+        href: "/docs/integrations/overview",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Custom via API",
+        href: "https://api.reference.langfuse.com/#post-/api/public/ingestion",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
       {
         name: "Included usage",
         tiers: {
-          Hobby: "50k observations",
-          Pro: "100k observations",
-          Team: "Custom",
+          cloud: {
+            Hobby: "50k observations",
+            Pro: "100k observations",
+            Team: "100k observations",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
         },
       },
       {
         name: "Additional usage",
         tiers: {
-          Hobby: false,
-          Pro: "$10 / 100k observations",
-          Team: "Custom",
+          cloud: {
+            Hobby: false,
+            Pro: "$10 / 100k observations",
+            Team: "$10 / 100k observations",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
         },
       },
       {
-        name: "Data access",
+        name: "Access to historical data",
         tiers: {
-          Hobby: "30 days",
-          Pro: "Unlimited",
-          Team: "Unlimited",
+          cloud: {
+            Hobby: "30 days",
+            Pro: "Unlimited",
+            Team: "Unlimited",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
         },
       },
       {
         name: "Ingestion throughput",
         tiers: {
-          Hobby: "1000 requests / min",
-          Pro: "1000 requests / min",
-          Team: "Custom",
+          cloud: {
+            Hobby: "1000 requests / min",
+            Pro: "1000 requests / min",
+            Team: "5000 requests / min",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+        },
+      },
+    ],
+  },
+  {
+    name: "Core Platform Features",
+    features: [
+      {
+        name: "Datasets",
+        href: "/docs/datasets",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Evaluation / User-feedback",
+        href: "/docs/scores",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Management",
+        href: "/docs/prompts",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+    ],
+  },
+  {
+    name: "Add-on Features",
+    features: [
+      {
+        name: "Playground",
+        href: "/docs/playground",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        href: "/docs/scores/model-based-evals",
+        tiers: {
+          cloud: {
+            Hobby: "1 evaluator",
+            Pro: true,
+            Team: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Human Annotation Queues",
+        href: "/docs/scores/annotation#annotation-queues",
+        tiers: {
+          cloud: {
+            Hobby: "1 queue",
+            Pro: "3 queues",
+            Team: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: true,
+            Enterprise: true,
+          },
         },
       },
     ],
@@ -104,11 +306,65 @@ const sections = [
     features: [
       {
         name: "Projects",
-        tiers: { Hobby: "3", Pro: "Unlimited", Team: "Unlimited" },
+        tiers: {
+          cloud: {
+            Hobby: "Unlimited",
+            Pro: "Unlimited",
+            Team: "Unlimited",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+        },
       },
       {
-        name: "Members / project",
-        tiers: { Hobby: "3", Pro: "Unlimited", Team: "Unlimited" },
+        name: "Users",
+        tiers: {
+          cloud: { Hobby: "2", Pro: "Unlimited", Team: "Unlimited" },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+        },
+      },
+    ],
+  },
+  {
+    name: "API",
+    href: "/docs/api",
+    features: [
+      {
+        name: "Extensive GET API",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Pro: true,
+            Team: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Rate limit",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / min",
+            Pro: "1000 requests / min",
+            Team: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
+        },
       },
     ],
   },
@@ -117,73 +373,173 @@ const sections = [
     features: [
       {
         name: "Community (GitHub, Discord)",
-        tiers: { Hobby: true, Pro: true, Team: true },
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
       },
       {
-        name: "Dedicated (Slack, Discord, Email)",
-        tiers: { Hobby: false, Pro: true, Team: true },
+        name: "Chat & Email",
+        tiers: {
+          cloud: { Hobby: false, Pro: true, Team: true },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
       },
       {
-        name: "Phone",
-        tiers: { Hobby: false, Pro: false, Team: true },
+        name: "Private Slack/Discord channel",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: {
+            "Open Source": false,
+            Pro: "Add-on, included at >10 users",
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Dedicated Support Engineer",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
         name: "SLAs",
-        tiers: { Hobby: false, Pro: false, Team: "Available" },
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "Add-on",
+          },
+        },
+      },
+      {
+        name: "Architectural guidance",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "Add-on",
+          },
+        },
       },
     ],
   },
   {
     name: "Security",
+    href: "/docs/security",
     features: [
-      {
-        name: "SSO",
-        tiers: { Hobby: true, Pro: true, Team: true },
-      },
-      {
-        name: "SSO enforcement",
-        tiers: { Hobby: false, Pro: false, Team: true },
-      },
-      {
-        name: "Role-based access control",
-        tiers: {
-          Hobby: "Standard roles",
-          Pro: "Standard roles",
-          Team: "Custom roles",
-        },
-      },
-      {
-        name: "Data retention",
-        tiers: {
-          Hobby: false,
-          Pro: false,
-          Team: true,
-        },
-      },
       {
         name: "Data region",
         tiers: {
-          Hobby: "US or EU",
-          Pro: "US or EU",
-          Team: "US or EU",
+          cloud: {
+            Hobby: "US or EU",
+            Pro: "US or EU",
+            Team: "US or EU",
+          },
+          selfHosted: {
+            "Open Source": "Own infrastructure",
+            Pro: "Own infrastructure",
+            Enterprise: "Own infrastructure",
+          },
+        },
+      },
+      {
+        name: "SSO via Google, AzureAD, GitHub",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Pro: true,
+            Team: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Organization-level RBAC",
+        href: "/docs/rbac",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Pro: true,
+            Team: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Enterprise SSO (e.g. Okta, Auth0)",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
+        name: "SSO enforcement",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
+        name: "Project-level RBAC",
+        href: "/docs/rbac",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
+        name: "Data retention management",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Pro: false,
+            Team: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "soon",
+          },
         },
       },
     ],
   },
   {
     name: "Compliance",
+    href: "/docs/security",
     features: [
       {
         name: "Data processing agreement (GDPR)",
-        tiers: { Hobby: false, Pro: true, Team: true },
+        tiers: {
+          cloud: { Hobby: false, Pro: true, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
-        name: "SOC2 Type II and ISO27001 reports",
-        tiers: { Hobby: false, Pro: false, Team: true },
+        name: "SOC2 Type II & ISO27001 reports",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
       {
-        name: "Security reviews",
-        tiers: { Hobby: false, Pro: false, Team: true },
+        name: "InfoSec reviews",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
       },
     ],
   },
@@ -191,26 +547,68 @@ const sections = [
 
 export default function Pricing({
   isPricingPage = false,
+  initialVariant = "cloud",
 }: {
   isPricingPage?: boolean;
+  initialVariant?: "cloud" | "selfHosted";
 }) {
+  const [localVariant, setLocalVariant] = useState(initialVariant);
+
+  const variant = isPricingPage ? initialVariant : localVariant;
+  const selectedTiers = tiers[variant];
+
+  const InfoLink = ({ href }: { href: string }) => (
+    <Link href={href} className="inline-block" target="_blank">
+      <ExternalLink className="size-4 ml-2 pt-0.5" />
+    </Link>
+  );
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
       <div className="isolate overflow-hidden">
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
             <Header
-              title="Simple pricing for projects of all sizes"
-              description="Get started on the Hobby plan for free. No credit card required."
+              title={deploymentOptions[variant].title}
+              description={deploymentOptions[variant].subtitle}
               h="h1"
             />
+
+            {/* Pricing page (different href), landingpage (local state) */}
+            <Tabs
+              defaultValue={variant}
+              value={variant}
+              className="mt-4 flex justify-center"
+              onValueChange={(value) => {
+                if (!isPricingPage) {
+                  setLocalVariant(value as "cloud" | "selfHosted");
+                }
+              }}
+            >
+              <TabsList>
+                {Object.keys(deploymentOptions).map((key) => (
+                  <TabsTrigger
+                    key={key}
+                    value={key}
+                    asChild={isPricingPage} // Only use asChild on pricing page
+                  >
+                    {isPricingPage ? (
+                      <Link href={deploymentOptions[key].href}>
+                        {deploymentOptions[key].switch}
+                      </Link>
+                    ) : (
+                      deploymentOptions[key].switch
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
             <div className="relative mx-auto mt-10 grid max-w-md grid-cols-1 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               <div
                 className="hidden lg:absolute lg:inset-x-px lg:bottom-4 lg:top-4 lg:block lg:rounded lg:bg-gray-800/80 lg:ring-1 lg:ring-white/10"
                 aria-hidden="true"
               />
-              {tiers.map((tier) => (
+              {selectedTiers.map((tier) => (
                 <div
                   key={tier.id}
                   className={classNames(
@@ -241,14 +639,14 @@ export default function Pricing({
                         >
                           {tier.price}
                         </p>
-                        {tier.name === "Pro" && (
+                        {tier.price.includes("$") && (
                           <div className="text-sm leading-5">
                             <p
                               className={
                                 tier.featured ? "text-gray-900" : "text-white"
                               }
                             >
-                              USD
+                              USD {tier.priceUnit ? `/ ${tier.priceUnit}` : ""}
                             </p>
                             <p
                               className={
@@ -268,6 +666,23 @@ export default function Pricing({
                         <Link href={tier.href}>{tier.cta}</Link>
                       </Button>
                     </div>
+                    <p
+                      className={classNames(
+                        tier.featured ? "text-gray-600" : "text-gray-300",
+                        "text-sm leading-6 mt-6"
+                      )}
+                    >
+                      {tier.description}
+                      {tier.learnMore && (
+                        <>
+                          {" "}
+                          <Link href={tier.learnMore} className="underline">
+                            Learn more
+                          </Link>
+                          .
+                        </>
+                      )}
+                    </p>
                     <div className="mt-8 flow-root sm:mt-10">
                       <ul
                         role="list"
@@ -302,7 +717,6 @@ export default function Pricing({
         </div>
         {isPricingPage ? (
           <>
-            <CallOutSelfhostEnterprise className="mt-10" />
             <div className="relative">
               <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                 {/* Feature comparison (up to lg) */}
@@ -315,7 +729,7 @@ export default function Pricing({
                   </h2>
 
                   <div className="mx-auto max-w-2xl space-y-16">
-                    {tiers.map((tier) => (
+                    {selectedTiers.map((tier) => (
                       <div
                         key={tier.id}
                         className="border-t border-gray-900/10"
@@ -346,9 +760,14 @@ export default function Pricing({
                         <div className="mt-10 space-y-10">
                           {sections.map((section) => (
                             <div key={section.name}>
-                              <h4 className="text-sm font-semibold leading-6 text-primary">
-                                {section.name}
-                              </h4>
+                              <div>
+                                <h4 className="text-sm font-semibold leading-6 text-primary inline">
+                                  {section.name}
+                                </h4>
+                                {section.href && (
+                                  <InfoLink href={section.href} />
+                                )}
+                              </div>
                               <div className="relative mt-6">
                                 {/* Fake card background */}
                                 <div
@@ -372,25 +791,35 @@ export default function Pricing({
                                       >
                                         <dt className="pr-4 text-primary/60">
                                           {feature.name}
+                                          {feature.href && (
+                                            <InfoLink href={feature.href} />
+                                          )}
                                         </dt>
                                         <dd className="flex items-center justify-end sm:justify-center sm:px-4">
-                                          {typeof feature.tiers[tier.name] ===
-                                          "string" ? (
+                                          {typeof feature.tiers[variant][
+                                            tier.name
+                                          ] === "string" ? (
                                             <span
-                                              className={
+                                              className={classNames(
                                                 tier.featured
                                                   ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                                                  : "text-primary"
-                                              }
+                                                  : "text-primary",
+                                                "text-sm leading-6"
+                                              )}
                                             >
-                                              {feature.tiers[tier.name]}
+                                              {
+                                                feature.tiers[variant][
+                                                  tier.name
+                                                ]
+                                              }
                                             </span>
                                           ) : (
                                             <>
-                                              {feature.tiers[tier.name] ===
-                                              true ? (
+                                              {feature.tiers[variant][
+                                                tier.name
+                                              ] === true ? (
                                                 <Check
-                                                  className="mx-auto h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                                                  className="mx-auto h-5 w-5 text-indigo-600"
                                                   aria-hidden="true"
                                                 />
                                               ) : (
@@ -399,13 +828,6 @@ export default function Pricing({
                                                   aria-hidden="true"
                                                 />
                                               )}
-
-                                              <span className="sr-only">
-                                                {feature.tiers[tier.name] ===
-                                                true
-                                                  ? "Yes"
-                                                  : "No"}
-                                              </span>
                                             </>
                                           )}
                                         </dd>
@@ -443,7 +865,7 @@ export default function Pricing({
                   </h2>
 
                   <div className="grid grid-cols-4 gap-x-8 border-t border-gray-900/10 before:block">
-                    {tiers.map((tier) => (
+                    {selectedTiers.map((tier) => (
                       <div key={tier.id} aria-hidden="true" className="-mt-px">
                         <div
                           className={classNames(
@@ -474,9 +896,12 @@ export default function Pricing({
                   <div className="-mt-6 space-y-16">
                     {sections.map((section) => (
                       <div key={section.name}>
-                        <h3 className="text-sm font-semibold leading-6 text-primary">
-                          {section.name}
-                        </h3>
+                        <div>
+                          <h3 className="text-sm font-semibold leading-6 text-primary inline">
+                            {section.name}
+                          </h3>
+                          {section.href && <InfoLink href={section.href} />}
+                        </div>
                         <div className="relative -mx-8 mt-10">
                           {/* Fake card backgrounds */}
                           <div
@@ -494,7 +919,7 @@ export default function Pricing({
                                 <th scope="col">
                                   <span className="sr-only">Feature</span>
                                 </th>
-                                {tiers.map((tier) => (
+                                {selectedTiers.map((tier) => (
                                   <th key={tier.id} scope="col">
                                     <span className="sr-only">
                                       {tier.name} tier
@@ -510,20 +935,26 @@ export default function Pricing({
                                     scope="row"
                                     className="w-1/4 py-3 pr-4 text-left text-sm font-normal leading-6 text-primary"
                                   >
-                                    {feature.name}
+                                    <div>
+                                      {feature.name}
+                                      {feature.href && (
+                                        <InfoLink href={feature.href} />
+                                      )}
+                                    </div>
                                     {featureIdx !==
                                     section.features.length - 1 ? (
                                       <div className="absolute inset-x-8 mt-3 h-px bg-gray-200" />
                                     ) : null}
                                   </th>
-                                  {tiers.map((tier) => (
+                                  {selectedTiers.map((tier) => (
                                     <td
                                       key={tier.id}
                                       className="relative w-1/4 px-4 py-0 text-center"
                                     >
                                       <span className="relative h-full w-full py-3">
-                                        {typeof feature.tiers[tier.name] ===
-                                        "string" ? (
+                                        {typeof feature.tiers[variant][
+                                          tier.name
+                                        ] === "string" ? (
                                           <span
                                             className={classNames(
                                               tier.featured
@@ -532,14 +963,15 @@ export default function Pricing({
                                               "text-sm leading-6"
                                             )}
                                           >
-                                            {feature.tiers[tier.name]}
+                                            {feature.tiers[variant][tier.name]}
                                           </span>
                                         ) : (
                                           <>
-                                            {feature.tiers[tier.name] ===
-                                            true ? (
+                                            {feature.tiers[variant][
+                                              tier.name
+                                            ] === true ? (
                                               <Check
-                                                className="mx-auto h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                                                className="mx-auto h-5 w-5 text-indigo-600"
                                                 aria-hidden="true"
                                               />
                                             ) : (
@@ -548,12 +980,6 @@ export default function Pricing({
                                                 aria-hidden="true"
                                               />
                                             )}
-
-                                            <span className="sr-only">
-                                              {feature.tiers[tier.name] === true
-                                                ? "Yes"
-                                                : "No"}
-                                            </span>
                                           </>
                                         )}
                                       </span>
@@ -569,7 +995,7 @@ export default function Pricing({
                             className="pointer-events-none absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
                             aria-hidden="true"
                           >
-                            {tiers.map((tier) => (
+                            {selectedTiers.map((tier) => (
                               <div
                                 key={tier.id}
                                 className={classNames(
@@ -588,39 +1014,74 @@ export default function Pricing({
                 </section>
               </div>
             </div>
+            <DiscountOverview className="mt-10" />
             <PricingFAQ />
           </>
         ) : (
           <>
             <div className="text-center mt-10">
               For a detailed comparison and FAQ, see our{" "}
-              <Link href="/pricing" className="underline">
+              <Link
+                href={deploymentOptions[variant].href}
+                className="underline"
+              >
                 pricing page
               </Link>
               .
             </div>
-            <CallOutSelfhostEnterprise className="mt-3" />
           </>
         )}
       </div>
     </HomeSection>
   );
 }
-const CallOutSelfhostEnterprise = ({ className }: { className?: string }) => (
-  <div className={cn("text-center", className)}>
-    Langfuse is also easy to{" "}
-    <Link href="/docs/deployment/local" className="underline">
-      run locally
-    </Link>{" "}
-    and{" "}
-    <Link href="/docs/deployment/self-host" className="underline">
-      self-host
-    </Link>
-    . Find out more about{" "}
-    <Link href="/enterprise" className="underline">
-      Langfuse for Enterprise
-    </Link>{" "}
-    (cloud and on-premise).
+
+const discounts = [
+  {
+    name: "Early-stage startups",
+    description: "50% off, first year",
+  },
+  {
+    name: "Education / Non-profits",
+    description: "Up to 100% off, limits apply",
+  },
+  {
+    name: "Open-source projects",
+    description: "USD 300 in credits, first year",
+  },
+];
+
+const DiscountOverview = ({ className }: { className?: string }) => (
+  <div className={cn("mx-auto max-w-7xl px-6 lg:px-8", className)}>
+    <div className="mx-auto max-w-4xl">
+      <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
+        Discounts
+      </h2>
+      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {discounts.map((discount) => (
+          <div
+            key={discount.name}
+            className="rounded-lg border border-gray-200 p-4 shadow-sm"
+          >
+            <dt className="text-base font-semibold leading-7 text-primary">
+              {discount.name}
+            </dt>
+            <dd className="mt-2 text-sm leading-7 text-primary/60">
+              {discount.description}
+            </dd>
+          </div>
+        ))}
+      </div>
+      <p className="mt-6 leading-8 text-primary/60">
+        Reach out to{" "}
+        <Link href="mailto:support@langfuse.com" className="underline">
+          support@langfuse.com
+        </Link>{" "}
+        to apply for a discount. We want all startups, educational users,
+        non-profits and open source projects to build with Langfuse and are
+        happy to work with you to make that happen.
+      </p>
+    </div>
   </div>
 );
 
@@ -648,14 +1109,24 @@ const faqs = [
   {
     question: "Do you offer discounts?",
     answer:
-      "Yes, we offer discounts for students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at sales@langfuse.com with details about your project.",
+      "Yes, we offer discounts for startups, students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
+  },
+  {
+    question: "How do I activate my self-hosted Pro or Enterprise plan?",
+    answer:
+      "Once you've deployed Langfuse OSS, you can activate your Pro or Enterprise plan by adding the license key you received from the Langfuse team to your deployment.",
+  },
+  {
+    question: "How can I manage my subscription?",
+    answer:
+      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
   },
 ];
 
 export function PricingFAQ() {
   return (
     <div id="faq">
-      <div className="mx-auto max-w-7xl px-6 pb-24 lg:pt-16 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 lg:px-8">
         <div className="mx-auto max-w-4xl divide-y divide-primary/10">
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
             Frequently asked questions
