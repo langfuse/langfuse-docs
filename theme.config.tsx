@@ -190,29 +190,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    // key: "thoughtworks-radar",
-    // dismissible: true,
-    // content: (
-    //   <Link href="https://www.thoughtworks.com/en-de/radar/platforms/summary/langfuse">
-    //     {/* mobile */}
-    //     <span className="sm:hidden">
-    //       Langfuse on Thoughtworks Technology Radar →
-    //     </span>
-    //     {/* desktop */}
-    //     <span className="hidden sm:inline">
-    //       Langfuse featured on Thoughtworks Technology Radar →
-    //     </span>
-    //   </Link>
-    // ),
-    key: "launch-week-upcoming",
+    key: "launch-week-2-day-0",
     dismissible: true,
     content: (
-      <Link href="/blog/2024-11-17-launch-week-2">
+      <Link href="/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt">
         {/* mobile */}
-        <span className="sm:hidden">Upcoming: Langfuse Launch Week 2 →</span>
+        <span className="sm:hidden">LW2 - Prompt Management for AI SDK →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Upcoming: Langfuse Launch Week 2 →
+          Launch Week #2 - Day 0: Prompt Management for Vercel AI SDK →
         </span>
       </Link>
     ),
