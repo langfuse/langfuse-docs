@@ -288,8 +288,8 @@ const sections = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: true,
-            Enterprise: true,
+            Pro: "soon",
+            Enterprise: "soon",
           },
         },
       },
