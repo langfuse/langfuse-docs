@@ -101,7 +101,15 @@ As there is no redundancy, this is **not suitable for production workloads**.
 
 Start the container with
 ```bash
-docker run -e CLICKHOUSE_DB=default -e CLICKHOUSE_USER=clickhouse -e CLICKHOUSE_PASSWORD=clickhouse --name clickhouse-server -d --ulimit nofile=262144:262144 -p 8123:8123 -p 9000:9000 -p 9009:9009 clickhouse/clickhouse-server
+docker run --name clickhouse-server \
+  -e CLICKHOUSE_DB=default \
+  -e CLICKHOUSE_USER=clickhouse \
+  -e CLICKHOUSE_PASSWORD=clickhouse \
+  -d --ulimit nofile=262144:262144 \
+  -p 8123:8123 \
+  -p 9000:9000 \
+  -p 9009:9009 \
+  clickhouse/clickhouse-server
 ```
 
 Set the following environment variables to connect to your ClickHouse instance:
