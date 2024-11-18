@@ -25,6 +25,14 @@
   display: none !important;
 }
 
+/* Less gap in desktop menu */
+.nextra-menu-desktop {
+  gap: 0.1rem;
+}
+.nextra-menu-desktop > li:not(:has(*)) {
+  /* only those that have no children */
+  margin-bottom: 0.1rem;
+}
 /* smaller search bar */
 .nextra-nav-container input[type="search"] {
   width: 8rem;
@@ -56,7 +64,10 @@ media-outlet {
   background-color: transparent !important;
 }
 
-/* More gap between h2 in articles */
+/* More gap between h2 across docs and articles */
+article.nextra-content h2 {
+  margin-top: 4rem;
+}
 article.nextra-body-typesetting-article h2 {
   margin-top: 6rem;
 }
