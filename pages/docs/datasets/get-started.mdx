@@ -2,6 +2,12 @@
 description: Get started with Langfuse Datasets. Follow the step by step guide.
 ---
 
+# Dataset Getting Started
+
+This is a step by step guide on how to create your first dataset and run your first experiment. Please refer to the [overview](/docs/datasets/overview) for more conceptual introduction.
+
+<Steps>
+
 ## Creating a dataset
 
 Datasets have a name which is unique within a project.
@@ -106,7 +112,13 @@ Datasets > Items: `+ New item`
 </Tab>
 </Tabs>
 
-**Create items from production data**
+<details>
+<summary>Edit/archive items</summary>
+
+</details>
+
+<details>
+<summary>Create items from production data</summary>
 
 <Tabs items={["UI", "Python", "JS/TS"]}>
 <Tab>
@@ -143,8 +155,10 @@ langfuse.createDatasetItem({
 
 </Tab>
 </Tabs>
+</details>
 
-**Edit/archive items**
+<details>
+<summary>Edit/archive items</summary>
 
 Archiving items will remove them from future experiment runs.
 
@@ -179,6 +193,7 @@ langfuse.createDatasetItem({
 
 </Tab>
 </Tabs>
+</details>
 
 ## Run experiment on a dataset
 
@@ -357,71 +372,11 @@ langfuse.flush()
 
 ## Analyze dataset runs
 
-After each experiment run on a dataset, you can check the aggregated score in the dataset runs table.
+After each experiment run on a dataset, you can check the aggregated score in the dataset runs table and compare results side-by-side.
 
-<Frame border>![Dataset runs](/images/docs/dataset_runs_table.png)</Frame>
-
-## Conceptually
-
-```mermaid
-classDiagram
-direction LR
-    class Dataset {
-        name
-        description
-        metadata
-    }
-
-    class DatasetItem {
-        input
-        expected_output
-        metadata
-    }
-
-    Dataset "1" --> "n" DatasetItem
-
-
-
-    class DatasetRun {
-        name
-        description
-        metadata
-    }
-
-    Dataset "1" --> "n" DatasetRun
-    DatasetRun "1" --> "n" DatasetRunItem
-
-    class DatasetRunItem {
-    }
-
-    class Trace {
-        input
-        output
-        metadata
-    }
-
-    class Observation {
-        input
-        output
-        metadata
-    }
-
-
-    DatasetRunItem "1" --> "1" DatasetItem
-
-    Trace "1" --> "n" Observation
-    DatasetRunItem "1" --> "1" Trace
-    DatasetRunItem "1" --> "0..1" Observation
-
-
-
-    Observation "1" --> "n" Score
-
-    Trace "1" --> "n" Score
-
-    class Score {
-        name
-        value
-        comment
-    }
-```
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+</Steps>
