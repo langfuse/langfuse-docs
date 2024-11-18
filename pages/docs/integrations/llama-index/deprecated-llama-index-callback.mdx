@@ -6,8 +6,9 @@ description: Open source observability for LlamaIndex. Automatically capture det
 # (Deprecated) Callback-based LlamaIndex Integration
 
 <Callout type="warning">
-  This integration is deprecated. We recommend using the new instrumentation-based
-  integration with Langfuse as described [here](/docs/integrations/llama-index/get-started).
+  This integration is deprecated. We recommend using the new
+  instrumentation-based integration with Langfuse as described
+  [here](/docs/integrations/llama-index/get-started).
 </Callout>
 
 ## Add Langfuse to your LlamaIndex application
@@ -69,16 +70,16 @@ Learn more about queuing and batching of events [here](/docs/tracing).
 
 You can update trace parameters at any time to add additional context to a trace, such as a user ID, session ID, or tags. See the [Python SDK Trace documentation](/docs/sdk/python#traces) for more information. All _subsequent_ traces will include these set parameters.
 
-| Property      | Description                                                               |
-| ------------- | ------------------------------------------------------------------------- |
-| `name`        | Identify a specific type of trace, e.g. a use case or functionality.      |
-| `metadata`    | Additional information that you want to see in Langfuse. Can be any JSON. |
-| `session_id`  | The current [session](/docs/tracing-features/sessions).                   |
-| `user_id`     | The current [user_id](/docs/tracing-features/users).                      |
-| `tags`        | [Tags](/docs/tracing-features/tags) to categorize and filter traces.      |
-| `version`     | The specified version to trace [experiments](/docs/experimentation).      |
-| `release`     | The specified release to trace [experiments](/docs/experimentation).      |
-| `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing.               |
+| Property      | Description                                                                            |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `name`        | Identify a specific type of trace, e.g. a use case or functionality.                   |
+| `metadata`    | Additional information that you want to see in Langfuse. Can be any JSON.              |
+| `session_id`  | The current [session](/docs/tracing-features/sessions).                                |
+| `user_id`     | The current [user_id](/docs/tracing-features/users).                                   |
+| `tags`        | [Tags](/docs/tracing-features/tags) to categorize and filter traces.                   |
+| `release`     | The [release](/docs/tracing-features/releases-and-versioning) tag of your application. |
+| `version`     | The [version](/docs/tracing-features/releases-and-versioning) of your application.     |
+| `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing.                            |
 
 ```python {11-15}
 from llama_index.core import Settings
