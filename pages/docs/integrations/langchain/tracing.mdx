@@ -104,15 +104,15 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 
 When initializing the Langfuse handler, you can pass the following **optional** arguments to use more advanced features.
 
-| Python        | JS/TS       | Type    | Description                                                                                     |
-| ------------- | ----------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `user_id`     | `userId`    | string  | The current [user](/docs/tracing-features/users).                                               |
-| `session_id`  | `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                         |
-| `release`     | `release`   | string  | The release of your application. See [experimentation docs](/docs/experimentation) for details. |
-| `version`     | `version`   | string  | The version of your application. See [experimentation docs](/docs/experimentation) for details. |
-| `trace_name`  |             | string  | Customize the name of the created traces. Defaults to name of chain.                            |
-| `enabled`     | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                                 |
-| `sample_rate` | `-`         | float   | [Sample rate](/docs/tracing-features/sampling) for tracing.                                     |
+| Python        | JS/TS       | Type    | Description                                                                            |
+| ------------- | ----------- | ------- | -------------------------------------------------------------------------------------- |
+| `user_id`     | `userId`    | string  | The current [user](/docs/tracing-features/users).                                      |
+| `session_id`  | `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                |
+| `release`     | `release`   | string  | The [release](/docs/tracing-features/releases-and-versioning) tag of your application. |
+| `version`     | `version`   | string  | The [version](/docs/tracing-features/releases-and-versioning) of your application.     |
+| `trace_name`  |             | string  | Customize the name of the created traces. Defaults to name of chain.                   |
+| `enabled`     | `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                        |
+| `sample_rate` | `-`         | float   | [Sample rate](/docs/tracing-features/sampling) for tracing.                            |
 
 ### Dynamic Trace Attributes in Chain Invocation
 
@@ -447,10 +447,11 @@ Please add the `model` keyword argument to the `AzureOpenAI` or `AzureChatOpenAI
 from langchain_openai import AzureChatOpenAI
 
 llm = AzureChatOpenAI(
-    azure_deployment="my-gpt-4o-deployment",
-    model="gpt-4o",
+azure_deployment="my-gpt-4o-deployment",
+model="gpt-4o",
 )
-```
+
+````
 </Tab>
 <Tab>
 ```typescript
@@ -460,7 +461,8 @@ const llm = new AzureChatOpenAI({
   azureOpenAIApiDeploymentName: "my-gpt-4o-deployment",
   model: "gpt-4o",
 });
-```
+````
+
 </Tab>
 </Tabs>
 

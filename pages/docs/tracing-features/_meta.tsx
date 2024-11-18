@@ -4,4 +4,5 @@ export default {
   metadata: "Metadata",
   tags: "Tags",
   url: "Trace URL",
+  "releases-and-versioning": "Releases & Versioning",
 };
