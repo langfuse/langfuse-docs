@@ -1,8 +1,8 @@
 ---
-description: Langfuse Datasets help to test and benchmark LLM applications on collections of application inputs and expected outputs.
+description: Use Langfuse Datasets to create structured experiments to test and benchmark LLM applications.
 ---
 
-# Datasets & Testing for LLM Applications
+# Datasets & Experiments
 
 Via Langfuse Datasets you can create test sets and benchmarks to evaluate the performance of your LLM application.
 
@@ -52,6 +52,14 @@ _Process diagram:_
 <Frame fullWidth>![Datasets](/images/docs/dataset-example-workflow.png)</Frame>
 
 ## Data model
+
+- `Dataset` is a collection of `DatasetItem`s
+  - `DatasetItem` contains `input`, `expected_output`, and `metadata`
+- `DatasetRun` is an experiment run on a `Dataset`, it is identified by a unique `name`
+  - `DatasetRunItem` links a `DatasetItem` to a `Trace` created during an experiment
+  - Evaluation metrics of a `DatasetRun` are based on `Scores` associated with the `Traces` linked to run
+
+<div className="border rounded p-2">
 
 ```mermaid
 classDiagram
@@ -115,6 +123,8 @@ direction LR
         comment
     }
 ```
+
+</div>
 
 ## FAQ
 
