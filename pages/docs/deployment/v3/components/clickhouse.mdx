@@ -85,6 +85,27 @@ clickhouse:
 - **auth**: The username and password for the ClickHouse database. Overwrite those values according to your preferences, or mount them from a secret.
 - **disk**: The ClickHouse Helm chart uses the default storage class to create volumes for each replica. Ensure that the storage class has `allowVolumeExpansion = true` as observability workloads tend to be very disk heavy. For cloud providers like AWS, GCP, and Azure this should be the default.
 
+Langfuse assumes that certain parameters are set in the ClickHouse configurations.
+To perform our database migrations, the following values must be provided:
+```xml
+<!--
+    Substitutions for parameters of replicated tables.
+     Optional. If you don't use replicated tables, you could omit that.
+     See https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication/#creating-replicated-tables
+-->
+<!--
+    <macros>
+        <shard>01</shard>
+        <replica>example01-01-1</replica>
+    </macros>
+-->
+<!--
+    <default_replica_path>/clickhouse/tables/{database}/{table}</default_replica_path>
+    <default_replica_name>{replica}</default_replica_name>
+-->
+```
+`marcos` and `default_replica_*` configuration should be covered by the Helm chart without any further configuration.
+
 Set the following environment variables to connect to your ClickHouse instance assuming that Langfuse runs within the same Cluster and Namespace:
 
 ```yaml
