@@ -1,11 +1,11 @@
 ---
 date: 2024-11-18
-title: Dataset Experiment Runs Comparison View
+title: Dataset Run Comparison View
 badge: Launch Week 2 🚀
 badgeHref: /blog/2024-11-17-launch-week-2
-description: Langfuse now offers a comparison view for dataset experiment runs. Compare your application runs on the same test dataset, view metrics, and peek into details of each dataset item across runs.
+description: After running experiments on datasets, you can now compare results side-by-side, view metrics, and peek into details of each dataset item across runs.
 ogImage: /images/changelog/2024-11-18-dataset-runs-comparison-view/og.png
-showOgInHeader: true
+showOgInHeader: false
 author: Marlies
 ---
 
@@ -13,28 +13,36 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-And the fun continues, [Launch Week 2](/blog/2024-11-17-launch-week-2) day 1 is here. 
+## Introduction
 
-## Context
+**What is a dataset in Langfuse?** [Datasets](/docs/datasets/overview) in Langfuse allow you to create test sets and benchmarks to evaluate the performance of your LLM application. A dataset is a collection of dataset items, where each item contains inputs, expected outputs, and metadata. You can create datasets from production edge cases, synthetic test cases, or manual test cases. This enables continuous improvement through structured testing, pre-deployment benchmarking, and flexible evaluation using custom metrics or LLM-as-a-judge approaches.
 
-**What is a dataset in Langfuse?** In Machine Learning, one of our most essential tools are datasets to run tests on our applications. Datasets are collections of dataset items that are used to train, evaluate, and test machine learning models. In Langfuse, we provide a way to manage your datasets. 
-
-**What is a dataset experiment run?** A dataset experiment run is a test of your application against the test dataset. Typically, you would run your application multiple times against the same test dataset for a given use case. Across runs, you might work with same prompt different model, different prompts same model, etc. Using these configurations, your application will run against all items in the dataset. Each item will yield a trace in Langfuse, which can be used to further analyze the dataset item.
+**What is a dataset experiment run?** A dataset experiment run lets you test changes to your application - like trying different models, prompts, or parameters - by running each version against your test dataset and comparing the results through traces in Langfuse to evaluate which changes work best.
 
 ## What's new?
 
+And the fun continues, **Day 1 of [Launch Week 2](/blog/2024-11-17-launch-week-2)** is here.
+
 [Langfuse Datasets](/docs/datasets/overview) now enables intuitive comparison of dataset experiment runs for technical and non-technical users. The view features an overview of each item in the dataset, and a summary of each selected experiment run. The latter includes metrics on latency, cost, scores and the application's output response for each dataset item.
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
 
 ## How to use the comparison view?
 
 Prerequisites:
 
-- Set up a dataset in Langfuse ([guide](/docs/datasets/overview#creating-a-dataset)).
-- Populate the dataset with items, typically users combine sanitized prod data and synthetic data ([guide](/docs/datasets/overview#creating-dataset-items)).
-- Chose a uniquely identifiable experiment run name, e.g. `llama3-8b-prod-vs-llama3-8b-synthetic`. Run your application multiple times against the test dataset, typically with varying prompts, models, or model parameters. Each experiment run should be executed against each item in the dataset([guide](/docs/datasets/overview#running-dataset-experiment-runs)) and be linked to a trace in Langfuse.
+- Follow the [getting started guide](/docs/datasets/get-started) to set up a dataset, populate it with items, and run experiments.
+- Alternatively, execute an end-to-end example ([Python notebook](/docs/datasets/python-cookbook)).
 
-See cookbook for code snippets and step-by-step guides on how to run experiments on datasets ([link](/docs/datasets/python-cookbook)).
+Open comparison view:
 
-## Try it out
+1. Select multiple dataset runs
+2. `Actions`, select `Compare`
 
-View the comparison view by navigating to the **Datasets** page and selecting a dataset. From there, use table multi-actions to select the **Experiment Runs** you'd like to compare and click **Compare** to view the comparison view in Langfuse UI.
+## Learn more
+
+For a conceptual introduction to datasets and offline experiments, see the [dataset documentation](/docs/datasets/overview).
