@@ -40,8 +40,7 @@ export default {
     type: "separator",
     title: "Test",
   },
-  experimentation: "Experimentation",
-  datasets: "Datasets",
+  datasets: "Datasets & Experiments",
 
   "-- References": {
     type: "separator",
