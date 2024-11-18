@@ -193,12 +193,12 @@ const config: DocsThemeConfig = {
     key: "launch-week-2-day-0",
     dismissible: true,
     content: (
-      <Link href="/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt">
+      <Link href="/changelog/2024-11-18-dataset-runs-comparison-view">
         {/* mobile */}
-        <span className="sm:hidden">LW2 - Prompt Management for AI SDK →</span>
+        <span className="sm:hidden">LW2 - Day 1: Dataset Comparison →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Launch Week #2 - Day 0: Prompt Management for Vercel AI SDK →
+          Launch Week #2 - Day 1: Dataset Experiment Runs Comparison View →
         </span>
       </Link>
     ),
