@@ -13,13 +13,15 @@ This guide covers how to configure ClickHouse within Langfuse and what to keep i
 Langfuse accepts the following environment variables to fine-tune your ClickHouse usage.
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
-| Variable                    | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| --------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CLICKHOUSE_MIGRATION_URL`  | Required           | Migration URL (TCP protocol) for the ClickHouse instance. Pattern: `clickhouse://<hostname>:(9000/9440)` |
-| `CLICKHOUSE_MIGRATION_SSL`  | `false`            | Set to true to establish an SSL connection to ClickHouse for the database migration. |
-| `CLICKHOUSE_URL`            | Required           | Hostname of the ClickHouse instance. Pattern: `http(s)://<hostname>:(8123/8443)` |
-| `CLICKHOUSE_USER`           | Required           | Username of the ClickHouse database. Needs SELECT, INSERT, CREATE, DELETE grants.   |
-| `CLICKHOUSE_PASSWORD`       | Required           | Password of the ClickHouse user. |
+| Variable                                      | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLICKHOUSE_MIGRATION_URL`                    | Required           | Migration URL (TCP protocol) for the ClickHouse instance. Pattern: `clickhouse://<hostname>:(9000/9440)` |
+| `CLICKHOUSE_MIGRATION_SSL`                    | `false`            | Set to true to establish an SSL connection to ClickHouse for the database migration. |
+| `CLICKHOUSE_URL`                              | Required           | Hostname of the ClickHouse instance. Pattern: `http(s)://<hostname>:(8123/8443)` |
+| `CLICKHOUSE_USER`                             | Required           | Username of the ClickHouse database. Needs SELECT, INSERT, CREATE, DELETE grants.   |
+| `CLICKHOUSE_PASSWORD`                         | Required           | Password of the ClickHouse user. |
+| `CLICKHOUSE_MIGRATION_CLUSTER_DISABLED`       | `false`            | Whether to disable the automatic ClickHouse migrations during server start. |
+| `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable the cluster mode in ClickHouse migrations. |
 
 Please note, that Langfuse uses the `default` schema and `default` cluster.
 Get in touch with us on [Discord](/discord) or contact the maintainers at support@langfuse.com if this limitation is blocking.
@@ -119,4 +121,5 @@ CLICKHOUSE_URL=http://localhost:8123
 CLICKHOUSE_MIGRATION_URL=clickhouse://localhost:9000
 CLICKHOUSE_USER=clickhouse
 CLICKHOUSE_PASSWORD=clickhouse
+CLICKHOUSE_MIGRATION_CLUSTER_DISABLED=true
 ```
