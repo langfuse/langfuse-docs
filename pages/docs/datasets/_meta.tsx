@@ -1,5 +1,5 @@
 export default {
   overview: "Overview",
   "get-started": "Get Started",
-  "python-cookbook": "Example Notebook",
+  "python-cookbook": "Example (Python)",
 };
