@@ -118,6 +118,8 @@ As part of the v3 release, we have introduced four migrations that will run once
 Each migration has to finish, before the next one starts.
 Depending on the size of your event tables, this process may take multiple hours.
 
+You need to set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=true` to enable background migrations and start the migration of data from Postgres to ClickHouse.
+
 [//]: # (TODO: Reference to new UI to monitor background migrations)
 
 #### 5. Stop the old Langfuse containers
