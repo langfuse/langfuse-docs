@@ -1,0 +1,64 @@
+---
+date: 2024-11-19
+title: LLM-as-a-judge Evaluators for Dataset Experiments
+badge: Launch Week 2 🚀
+badgeHref: /blog/2024-11-17-launch-week-2
+description: Introducing support for managed LLM-as-a-judge evaluators for your dataset experiments. 
+# ogImage: /images/changelog/2024-11-18-dataset-runs-comparison-view/og.png
+showOgInHeader: false
+author: Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+## Introduction
+
+Building reliable AI applications is challenging because it's hard to understand how changes impact performance. Without proper evaluation, teams end up playing whack-a-mole with bugs and regressions. Langfuse's new offline LLM-as-a-judge evaluators help transform this uncertainty into a structured engineering process.
+
+## What's new?
+
+Day 2 of [Launch Week 2](/blog/2024-11-17-launch-week-2) brings comprehensive offline evaluation capabilities to Langfuse. This feature helps you:
+- Measure the impact of changes before deployment
+- Identify regressions early
+- Compare specific dataset items across different runs using reliable scores 
+- Build stronger conviction in your test datasets by identifying gaps between test and production evaluations
+- Create reliable feedback loops for development
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+## How it works
+
+<Steps>
+
+### 1. Set up your LLM-as-a-judge evaluator
+
+Evaluators in Langfuse consist of three key components:
+- **Dataset**: Select which test examples (production cases, synthetic data, or manual tests) your evaluator should run on 
+- **Prompt**: The prompt you want to use for evaluation including mapping variables from your dataset items to prompt variables
+- **Scoring**: A custom score name and comment format you'd like the LLM evaluator to produce 
+- **Metadata**: Sampling rates to control costs, and delay to steer delay after running your experiment 
+
+### 2. Run evaluations
+
+
+
+### 3. Analyze results
+
+Use the Langfuse UI to:
+1. Compare metrics across experiment runs
+2. Drill down into specific examples
+3. Identify patterns in successes/failures
+4. Track performance over time
+5. Identify when to add more test cases to your dataset, as evaluation on test dataset is strong but production evaluation is weak
+
+</Steps>
+
+## Learn more
+
+Check out our [evaluation documentation](/docs/eval/overview) for detailed guides on:
