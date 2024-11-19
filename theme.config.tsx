@@ -190,7 +190,7 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "launch-week-2-day-0",
+    key: "launch-week-2-day-2",
     dismissible: true,
     content: (
       <Link href="/changelog/2024-11-19-llm-as-a-judge-for-datasets">
@@ -198,7 +198,8 @@ const config: DocsThemeConfig = {
         <span className="sm:hidden">LW2 - Day 2: Dataset Evaluators →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Launch Week #2 - Day 2: LLM-as-a-Judge Evaluators for Dataset Experiments →
+          Launch Week #2 - Day 2: LLM-as-a-Judge Evaluators for Dataset
+          Experiments →
         </span>
       </Link>
     ),

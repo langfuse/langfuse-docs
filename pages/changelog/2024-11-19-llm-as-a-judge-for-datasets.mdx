@@ -3,9 +3,7 @@ date: 2024-11-19
 title: LLM-as-a-judge Evaluators for Dataset Experiments
 badge: Launch Week 2 🚀
 badgeHref: /blog/2024-11-17-launch-week-2
-description: Introducing support for managed LLM-as-a-judge evaluators for your dataset experiments. 
-# ogImage: /images/changelog/2024-11-18-dataset-runs-comparison-view/og.png
-showOgInHeader: false
+description: Introducing support for managed LLM-as-a-judge evaluators for your dataset experiments.
 author: Marlies
 ---
 
@@ -20,17 +18,12 @@ Building reliable AI applications is challenging because it's hard to understand
 ## What's new?
 
 Day 2 of [Launch Week 2](/blog/2024-11-17-launch-week-2) brings comprehensive offline evaluation capabilities to Langfuse. This feature helps you:
+
 - Measure the impact of changes before deployment
 - Identify regressions early
-- Compare specific dataset items across different runs using reliable scores 
+- Compare specific dataset items across different runs using reliable scores
 - Build stronger conviction in your test datasets by identifying gaps between test and production evaluations
 - Create reliable feedback loops for development
-
-{/* <CloudflareVideo
-  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
-  aspectRatio={16 / 9}
-  gifStyle
-/> */}
 
 ## How it works
 
@@ -39,18 +32,20 @@ Day 2 of [Launch Week 2](/blog/2024-11-17-launch-week-2) brings comprehensive of
 ### 1. Set up your LLM-as-a-judge evaluator
 
 Evaluators in Langfuse consist of four key components:
-- **Dataset**: Select which test examples (production cases, synthetic data, or manual tests) your evaluator should run on 
+
+- **Dataset**: Select which test examples (production cases, synthetic data, or manual tests) your evaluator should run on
 - **Prompt**: The prompt you want to use for evaluation including mapping variables from your dataset items to prompt variables
-- **Scoring**: A custom score name and comment format you'd like the LLM evaluator to produce 
-- **Metadata**: Sampling rates to control costs, and delay to steer delay after running your experiment 
+- **Scoring**: A custom score name and comment format you'd like the LLM evaluator to produce
+- **Metadata**: Sampling rates to control costs, and delay to steer delay after running your experiment
 
 ### 2. Run evaluations
 
-View our [dataset experiment run cookbook](/docs/datasets/python-cookbook) for a detailed step-by-step guide on how to run evaluations. 
+View our [dataset experiment run cookbook](/docs/datasets/python-cookbook) for a detailed step-by-step guide on how to run evaluations.
 
 ### 3. Analyze results
 
 After successfully running your experiments, analyze results and scores produced by your evaluator in the Langfuse UI, using the [dataset experiment run comparison view](/changelog/2024-11-18-dataset-runs-comparison-view). Use the Langfuse UI to:
+
 1. Compare metrics across experiment runs
 2. Drill down into specific examples
 3. Identify patterns in successes/failures
@@ -62,6 +57,7 @@ After successfully running your experiments, analyze results and scores produced
 ## Learn more
 
 Check out our [evaluation documentation](/docs/eval/overview) for detailed guides on:
+
 - [**Set up LLM-as-a-judge evaluators**](/docs/scores/model-based-evals): How to set up your evaluator for production or test with the right dataset, prompt, scoring, and metadata
 - [**Manage datasets**](/docs/datasets/overview): How to create and manage your test datasets
-- **Analyze results**: How to analyze results in our dashboard in the scores analysis view or using the dataset experiment run comparison view 
+- **Analyze results**: How to analyze results in our dashboard in the scores analysis view or using the dataset experiment run comparison view
