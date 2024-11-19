@@ -1,9 +1,9 @@
 export default {
   overview: "Overview",
-  "getting-started": "Getting Started",
+  "data-model": "Data Model",
   annotation: "Human Annotation",
-  "user-feedback": "User Feedback",
   "model-based-evals": "LLM-as-a-judge",
-  "external-evaluation-pipelines": "External Evaluation Pipelines",
   custom: "Custom via SDKs/API",
+  "user-feedback": "SDKs/API: User Feedback",
+  "external-evaluation-pipelines": "SDKs/API: Evaluation Pipelines",
 };
