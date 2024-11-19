@@ -3,7 +3,7 @@ export default {
   "getting-started": "Getting Started",
   annotation: "Human Annotation",
   "user-feedback": "User Feedback",
-  "model-based-evals": "Model-based Evaluation",
+  "model-based-evals": "LLM-as-a-judge",
   "external-evaluation-pipelines": "External Evaluation Pipelines",
   custom: "Custom via SDKs/API",
 };

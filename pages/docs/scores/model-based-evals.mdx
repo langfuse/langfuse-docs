@@ -1,17 +1,9 @@
 ---
+title: Fully managed LLM-as-a-judge evaluation
 description: Langfuse (open source) helps run model-based evaluations (llm-as-a-judge) on production data to monitor and improve LLMs applications.
 ---
 
-# LLM-as-a-judge in Langfuse
-
-Using LLM-as-a-judge (model-based evaluations) has proven as a powerful evaluation tool next to human annotation. Via Langfuse, we support setting up LLM-evaluators to evaluate your LLM applications integrated with Langfuse. These evaluators are used to score a specific session/trace/LLM-call in Langfuse on criteria such as correctness, toxicity, or hallucinations.
-
-Langfuse supports two types of model-based evaluations:
-
-1. [LLM-as-a-judge via the Langfuse UI (beta)](#ui)
-1. [Custom evaluators via external evaluation pipeline](#evaluation-pipeline)
-
-## LLM-as-a-judge via the Langfuse UI (beta) [#ui]
+# LLM-as-a-Judge
 
 <AvailabilityBanner
   availability={{
@@ -21,6 +13,37 @@ Langfuse supports two types of model-based evaluations:
     selfHosted: "not-available",
   }}
 />
+
+LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The scores and reasoning are stored as [scores](/docs/scores) in Langfuse.
+
+<details>
+<summary>What are common evaluation tasks?</summary>
+
+LLM-as-a-judge evaluation tasks can be very use-case-specific. Common tasks for which Langfuse provides prebuilt prompts are:
+
+- Hallucination
+- Helpfulness
+- Relevance
+- Toxicity
+- Correctness
+- Contextrelevance
+- Contextcorrectness
+- Conciseness
+
+</details>
+
+LLM-as-a-judge evaluators in Langfuse help to evaluate:
+
+1. Production/development [traces](/docs/tracing)
+2. Experiments that you run on [datasets](/docs/datasets)
+
+<Callout type="info">
+
+Alternatively, you can run any custom evaluation functions or packages on Langfuse data via the API/SDKs. See this [end-to-end example](/docs/scores/external-evaluation-pipelines) of an external evaluation pipeline to get started.
+
+</Callout>
+
+## Get Started
 
 <CloudflareVideo
   videoId="c2debc8ad9e9df71d56f813510ffdf80"
@@ -32,88 +55,64 @@ Langfuse supports two types of model-based evaluations:
 
 <Steps>
 
-### Store an API key
+### Configure LLM provider
 
-To use Langfuse LLM-as-a-judge, you have to bring your own LLM API keys. To do so, navigate to the settings page and insert your API key. We store them encrypted on our servers.
+Langfuse supports a variety of LLM providers including OpenAI, Anthropic, Azure OpenAI, and AWS Bedrock.
 
-### Create an evaluator
+To use LLM-as-a-judge, you have to configure your LLM provider in the Langfuse project settings.
 
-To set up an evaluator, we first need to configure the following:
+**Note:** tool/function calling needs to be supported by the model for LLM-as-a-judge to work.
 
-- Select the model and its parameters. All tool-calling / structured-output enabled models from supported providers are available.
-- Select the evaluation prompt. Langfuse offers a set of managed prompts, but you can also write your own.
-- We use tool calling / structured output to extract the evaluation output. Specify the descriptions for the function parameters `score` and `reasoning`. This is how you can direct the LLM to score on a specific range and provide specific reasoning for the score.
+### Create an LLM-as-a-judge template
 
-We store this information in an so-called evaluator template, so you can reuse it for multiple evaluators.
+LLM-as-a-judge uses a prompt template and model configuration to evaluate traces. In Langfuse this configuration is stored in an `Evaluator Template` as it can be reused across multiple evaluators.
+
+To help get you started, Langfuse includes a set of **predefined prompts** for common evaluation tasks, but you can also write your own or customize the Langfuse-provided prompts.
+
+Prompt templates contain **`{{variables}}`** that are substituted with actual data when an evaluator is run. You can create an arbitrary number of custom variables that can later be referenced when creating the evaluator. Common variables are `input`, `output`, `context`, `ground_truth`, etc.
+
+Langfuse uses function/tool calling to extract the evaluation output. At the bottom of the form, you can configure `score` and `reasoning` variables which will be used to instruct the LLM on how to score and reason about the evaluation.
 
 <Frame border>![Langfuse](/images/docs/eval-hallucination-template.png)</Frame>
 
-Second, we need to specify on which `traces` Langfuse should run the evaluator.
+### Set up an evaluator
 
-- Specify the name of the `scores` which will be created as a result of the evaluation.
-- Filter which newly ingested traces should be evaluated. (Coming soon: select existing traces)
-- Specify how Langfuse should fill the variables in the template. Langfuse can extract data from `trace`, `generations`, `spans`, or `event` objects which belong to a trace. You can choose to take `Input`, `Output` or `metadata` from each of these objects. For `generations`, `spans`, or `events`, you also have to specify the name of the object. We will always take the latest object that matches the name.
-- Reduce the sampling to not run evaluations on each trace. This helps to save LLM API cost.
-- Add a delay to the evaluation execution. This is how you can ensure all data arrived at Langfuse servers before evaluation is executed.
+Now that you have created an evaluator template, you can configure on what data it should be applied by Langfuse.
+
+Here we need to configure the following aspects:
+
+- Which **Evaluator Template** to use
+- **Trigger**: On what incoming data should the evaluator be executed?
+  - [**Traces**](/docs/tracing): On new traces that are ingested into Langfuse. You can configure filters to select a subset of traces.
+  - [**Datasets**](/docs/datasets): On all experiments run on a specific dataset in offline development.
+- **Name of the `scores`** which will be created as a result of the evaluation.
+- Specify how Langfuse should fill the **`{{variables}}`** in the template.
+  - Langfuse traces can be deeply nested (see [conceptual overview](/docs/tracing)). You can query from the trace directly, or from any nested observation via its name.
+  - Select whether to use the `Input`, `Output`, or `metadata` value.
+- Optional: Add **sampling** to reduce costs when running evaluations on a large volume of production data.
+- Optional: Configure **custom delay**. This is how you can ensure all data arrived at Langfuse servers before evaluation is executed. The time starts when the trace is first added to Langfuse while it might be still in progress. This is especially important for long-running agent executions.
 
 <Frame border>![Langfuse](/images/docs/eval-config.png)</Frame>
 
-### See the progress
+</Steps>
 
-Once the evaluator is saved, Langfuse will start running evaluations on the traces that match the filter. You can view logs on the log page, or view each evaluator to see configuration and logs.
+<Callout type="info">
 
-<Frame border className="max-w-lg">
-  ![Langfuse](/images/docs/evals-log.png)
-</Frame>
-
-### See scores
-
-Upon receiving new traces, navigate to the trace detail view to see the associated scores.
+✨ Done! You have created an evaluator which will now automatically be executed on all data that matches the selected trigger.
 
 <Frame border className="max-w-lg">
   ![Langfuse](/images/docs/eval-score.png)
 </Frame>
 
-</Steps>
+</Callout>
 
-## Custom evaluators via external evaluation pipeline [#evaluation-pipeline]
+## Monitoring of Evaluators
 
-<AvailabilityBanner
-  availability={{
-    hobby: "full",
-    pro: "full",
-    team: "full",
-    selfHosted: "full",
-  }}
-/>
+Each evaluator has its own log page where you can view the progress and logs to potentially debug any issues.
 
-```mermaid
-sequenceDiagram
-participant Application
-participant Langfuse
-participant Pipeline
-actor User
-
-Application ->> Langfuse: Ingest new traces
-Langfuse ->> Pipeline: Fetch traces via SDK/API
-Pipeline->>Pipeline: Run custom evaluation function/package
-Pipeline ->> Langfuse: Add score to trace via SDK/API
-Langfuse ->> User: Analyze evaluation scores via UI & API
-```
-
-You can run your own model-based evals on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse. This gives you full flexibility to run various eval libraries on your production data and discover which work well for your use case.
-
-The example notebook is a good template to get started with building your own evaluation pipeline.
-
-import { FileCode, BookOpen } from "lucide-react";
-
-<Cards num={2}>
-  <Card
-    title="Example: External Evaluation Pipeline"
-    href="/docs/scores/external-evaluation-pipelines"
-    icon={<FileCode />}
-  />
-</Cards>
+<Frame border className="max-w-lg">
+  ![Langfuse](/images/docs/evals-log.png)
+</Frame>
 
 ## GitHub Discussions
 
