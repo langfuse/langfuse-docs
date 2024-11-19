@@ -4,13 +4,24 @@ description: Ingest custom scores via the Langfuse SDKs or API.
 
 # Custom Scores via API/SDKs
 
-Langfuse gives you full flexibility to ingest custom [`scores`](/docs/scores) via the Langfuse SDKs or API. The scoring workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    pro: "full",
+    team: "full",
+    selfHosted: "full",
+  }}
+/>
 
-Exemplary use cases:
+Langfuse gives you full flexibility to ingest custom [`scores`](/docs/scores/data-model) via the Langfuse SDKs or API. The scoring workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
 
+Common use cases:
+
+- **Collecting user feedback** ([example](/docs/scores/user-feedback)): collect feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
+- **Custom evaluation data pipeline** ([example](/docs/scores/external-evaluation-pipelines)): continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+- **Guardrails and security checks** ([example](/docs/security/overview)): check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
-- **Deterministic rules at runtime**: e.g. check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
-- **Automated data pipeline**: continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+- **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.
 
 ## How to add scores
 

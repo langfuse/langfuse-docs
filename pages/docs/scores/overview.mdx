@@ -20,7 +20,13 @@ import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
 
 Langfuse provides a flexible [scoring system](/docs/scores/getting-started) to capture all your evaluations in one place and make them actionable.
 
-## Evaluation Methods
+## Data Model
+
+Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. Learn more about the [data model](/docs/scores/data-model).
+
+This data model is utilized across all evaluation methods, both UI and API. It can also be accessed programmatically through the SDKs or API for custom workflows.
+
+## Common Evaluation Methods
 
 ### 1. Model-based Evaluation (_LLM-as-a-Judge_)
 
@@ -29,7 +35,7 @@ Langfuse provides a flexible [scoring system](/docs/scores/getting-started) to c
 There are two ways to run model-based evaluations in Langfuse:
 
 - [Via the Langfuse UI (beta)](/docs/scores/model-based-evals)
-- [Via external evaluation pipelines](/docs/scores/external-evaluation-pipelines)
+- [Via external evaluation pipelines](/docs/scores/external-evaluation-pipelines) using the API/SDKs
 
 ### 2. Manual Annotation / Data Labeling (in UI)
 
@@ -41,21 +47,7 @@ Capturing [user feedback](/docs/scores/user-feedback) in your AI application can
 
 ### 4. Custom Evaluation via SDKs/API
 
-Langfuse gives you full flexibility to ingest [custom scores via the Langfuse SDKs or API](/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom external evaluation workflows.
-
-## Getting Started
-
-Learn how to configure and utilize `scores` in Langfuse to assess quality, accuracy, style, and security metrics in your LLM applications.
-
-import { FileCode, BookOpen } from "lucide-react";
-
-<Cards num={2}>
-  <Card
-    title="Getting Started with Langfuse Evaluation"
-    href="/docs/scores/getting-started"
-    icon={<FileCode />}
-  />
-</Cards>
+Langfuse gives you full flexibility to ingest [custom evaluation scores via the Langfuse SDKs or API](/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom external evaluation workflows.
 
 ## GitHub Discussions
 
