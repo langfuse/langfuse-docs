@@ -190,16 +190,16 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "launch-week-2-day-2",
+    key: "launch-week-2-day-3",
     dismissible: true,
     content: (
-      <Link href="/changelog/2024-11-19-llm-as-a-judge-for-datasets">
+      <Link href="/changelog/2024-11-20-multi-modal-custom-attachments">
         {/* mobile */}
-        <span className="sm:hidden">LW2 - Day 2: Dataset Evaluators →</span>
+        <span className="sm:hidden">LW2 - Day 3: Multi-Modal Traces →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Launch Week #2 - Day 2: LLM-as-a-Judge Evaluators for Dataset
-          Experiments →
+          Launch Week #2 - Day 3: Multi-Modal Traces (audio, video, images,
+          arbitrary attachments) →
         </span>
       </Link>
     ),
