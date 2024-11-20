@@ -1,6 +1,7 @@
 ---
 title: Observability and Metrics for Amazon Bedrock
 description: Open source observability for Amazon Bedrock applications and the Bedrock SDK.
+category: Integrations
 ---
 
 # Amazon Bedrock Integration

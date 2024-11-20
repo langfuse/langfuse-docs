@@ -202,6 +202,21 @@ const sections = [
         },
       },
       {
+        name: "Multi-modal",
+        tiers: {
+          cloud: {
+            Hobby: "Pricing tba, free while in beta",
+            Pro: "Pricing tba, free while in beta",
+            Team: "Pricing tba, free while in beta",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "n/a",
+            Enterprise: "n/a",
+          },
+        },
+      },
+      {
         name: "Access to historical data",
         tiers: {
           cloud: {

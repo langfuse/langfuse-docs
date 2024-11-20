@@ -1,6 +1,6 @@
 ---
 description: LLM Rap Battle traced using the Langfuse Decorator, OpenAI & Langchain Integration
-category: Examples
+category: Integrations
 ---
 
 # Example: Langfuse Decorator + OpenAI Integration + Langchain Integration

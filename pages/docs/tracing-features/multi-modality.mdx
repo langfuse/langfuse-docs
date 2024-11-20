@@ -1,42 +1,79 @@
 ---
-description: Add multiple modalities to a single trace
+description: Langfuse fully supports multi-modal LLM traces, including text, images, audio, and attachments.
 ---
 
-# Multi-Modality
-
-Langfuse supports rendering Multi-Modal traces, including both text and image formats. We follow OpenAI's format convention.
-
-## How to trace Multi-Modal content in Langfuse?
-
-To utilize our Multi-Modal Trace support, your trace or observation `input`/`output` should include a list of messages comprising the conversation so far. Each message should contain a `role` (system, user, assistant) and `content`. To display multi-modal content, you can pass a combination of text and image URLs. The `content` property of the messages follows the [OpenAI convention](/docs/tracing-features/multi-modality#content-format).
+# Multi-Modality and Attachments
 
 <Callout type="info">
-  We plan to extend support to base64 images, file attachments (e.g., PDFs), and
-  audio soon. Please add your upvote and any thoughts to this
-  [thread](https://github.com/orgs/langfuse/discussions/3004).
+
+Support for media attachments to traces is currently in beta. Please report any [issues](/issues) and add feature requests to this ongoing [discussion thread](https://github.com/orgs/langfuse/discussions/3004).
+
 </Callout>
 
-### Visual Representation in Langfuse
+Langfuse supports multi-modal traces including **text, images, audio, and other attachments**.
 
-When the "Markdown" option is enabled in the Langfuse UI, you can click on the image icon to preview the image inline.
+By default, **base64 encoded files are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
 
-<Frame border>
-  ![Trace in Langfuse UI](/images/docs/multi-modal-trace.png)
-</Frame>
+This also works if you:
 
-### Content Format
+1. Reference media files via external URLs.
+2. Customize the handling of media files in the SDKs via the `LangfuseMedia` class.
+3. Integrate via the Langfuse API directly.
 
-| Content                             | Type   | Description                                                                                                                                                        |
-| ----------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Default: Text content               | string | The text contents of the message.                                                                                                                                  |
-| Multi-Modal: Array of content parts | array  | An array of content parts with a defined type, each can be of type `text` or `image_url`. You can pass multiple images by adding multiple image_url content parts. |
+Learn more on how to get started and how this works under the hood below.
 
-#### Content Examples
+_Examples_
 
-<Tabs items={["Multi-Modal content","Text content"]}>
+import MultiModalImageGallery from "@/components-mdx/multi-modal-image-gallery.mdx";
 
+<MultiModalImageGallery />
+
+## Availability
+
+### Langfuse Cloud
+
+Multi-modal attachments on Langfuse Cloud are free while in beta. We will be rolling out a new pricing metric to account for the additional storage and compute costs associated with large multi-modal traces in the coming weeks.
+
+### Self-hosting
+
+Multi-modal attachments are available today. You need to configure your own object storage bucket via the Langfuse environment variables (`LANGFUSE_S3_MEDIA_UPLOAD_*`). See self-hosting documentation for details on these environment variables. S3-compatible APIs are supported across all major cloud providers and can be self-hosted via minio.
+
+## Supported media formats
+
+Langfuse supports:
+
+- **Images**: .png, .jpg, .webp
+- **Audio files**: .mpeg, .mp3, .wav
+- **Other attachments**: .pdf, plain text
+
+If you require support for additional file types, please let us know in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/3004) where we're actively gathering feedback on multi-modal support.
+
+## Get Started
+
+### Base64 encoded media
+
+If you use base64 encoded images, audio, or other files in your LLM applications, upgrade to the latest version of the Langfuse SDKs. The Langfuse SDKs automatically detect and handle base64 encoded media by extracting it, uploading it separately as a Langfuse Media file, and including a reference in the trace.
+
+This works with standard Data URI ([MDN](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax)) formatted media (like those used by OpenAI and other LLMs).
+
+This [notebook](/guides/cookbook/example_multi_modal_traces) includes a couple of examples using the OpenAI SDK and LangChain.
+
+### External media (URLs)
+
+Langfuse supports in-line rendering of media files via URLs if they follow common formats. In this case, the media file is not uploaded to Langfuse's object storage but simply rendered in the UI directly from the source.
+
+Supported formats:
+
+<Tabs items={["Markdown images", "OpenAI content parts"]}>
 <Tab>
-{/* Multi-modal: Image input */}
+
+```md
+![Alt text](https://example.com/image.jpg)
+```
+
+</Tab>
+<Tab>
+
 ```json
 {
   "content": [
@@ -47,11 +84,11 @@ When the "Markdown" option is enabled in the Langfuse UI, you can click on the i
     {
       "role": "user",
       "content": [
-        { 
+        {
           "type": "text",
           "text": "What's happening in this image?"
         },
-        { 
+        {
           "type": "image_url",
           "image_url": {
             "url": "https://example.com/image.jpg"
@@ -63,43 +100,119 @@ When the "Markdown" option is enabled in the Langfuse UI, you can click on the i
 }
 ```
 
-##### Content Part Types
-
-<Tabs items={["Text content part", "Image content part"]}>
-<Tab>
-
-| Property | Type   | Description                 |
-| -------- | ------ | --------------------------- |
-| type     | `text` | Type of content part        |
-| text     | string | Text content of the message |
-
-</Tab>
-<Tab>
-
-| Property         | Type        | Description                                       |
-| ---------------- | ----------- | ------------------------------------------------- |
-| type             | `image_url` | Type of content part                              |
-| image_url        | object      | Object containing url and detail properties       |
-| image_url.url    | string      | URL of the image                                  |
-| image_url.detail | string?     | Optional: Detail level of image (low, high, auto) |
-
 </Tab>
 </Tabs>
 
-</Tab>
+### Custom attachments
+
+If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
+
+<Tabs items={["Python", "JS/TS"]}>
 <Tab>
-```json
-{
-  "content": [
-    {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
-    {"role": "user", "content": "1 + 1 = "}
-  ]
-}
+
+```python
+from langfuse.decorators import observe, langfuse_context
+from langfuse.media import LangfuseMedia
+
+with open("static/bitcoin.pdf", "rb") as pdf_file:
+        pdf_bytes = pdf_file.read()
+
+# Wrap media in LangfuseMedia class
+wrapped_obj = LangfuseMedia(
+    obj=pdf_bytes, content_bytes=pdf_bytes, content_type="application/pdf"
+)
+
+# Optionally, access media via wrapped_obj.obj
+wrapped_obj.obj
+
+@observe()
+def main():
+    langfuse_context.update_current_trace(
+      input=wrapped_obj,
+      metadata={
+          "context": wrapped_obj
+      },
+    )
+
+    return # Limitation: LangfuseMedia object does not work in decorated function IO, needs to be set via update_current_trace or update_current_observation
+
+main()
 ```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse, LangfuseMedia } from "langfuse";
+import fs from "fs";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse();
+
+// Wrap media in LangfuseMedia class
+const wrappedMedia = new LangfuseMedia({
+  contentBytes: fs.readFileSync("./static/bitcoin.pdf"),
+  contentType: "application/pdf",
+});
+
+// Optionally, access media via wrappedMedia.obj
+console.log(wrappedMedia.obj);
+
+// Include media in any trace or observation
+const trace = langfuse.trace({
+  name: "test-trace-10",
+  metadata: {
+    context: wrappedMedia,
+  },
+});
+```
+
 </Tab>
 </Tabs>
 
-For more details and examples, refer to our [OpenAI cookbook](/docs/integrations/openai/python/examples).
+### API
+
+If you use the API directly to log traces to Langfuse, you need to follow these steps:
+
+<Steps>
+
+### Upload media to Langfuse
+
+1. If you use base64 encoded media: you need to extract it from the trace payloads similar to how the Langfuse SDKs do it.
+2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#post-/api/public/media).
+3. Upload media file: `PUT [presignedURL]`.
+
+See this [end-to-end example](/guides/cookbook/example_multi_modal_traces#custom-via-api) (Python) on how to use the API directly to upload media files.
+
+### Add reference to mediaId in trace/observation
+
+Use the [Langfuse Media Token](#media-token) to reference the `mediaId` in the trace or observation `input`, `output`, or `metadata`.
+
+</Steps>
+
+## How does it work?
+
+When using media files (that are not referenced via external URLs), Langfuse handles them in the following way:
+
+### 1. Media file management
+
+On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side and directly uploaded to object storage (AWS S3 or compatible).
+
+Across integrations, media attachments are extracted from tracing data and uploaded to object storage separately. They can also be uploaded directly via the API as outlined above.
+
+### 2. Langfuse Media Token [#media-token]
+
+Langfuse traces then only include references to the `mediaId` in the following format, which helps reconstruct the original payload if needed:
+
+```
+@@@langfuseMedia:type={MIME_TYPE}|id={LANGFUSE_MEDIA_ID}|source={SOURCE_TYPE}@@@
+```
+
+- `MIME_TYPE`: MIME type of the media file, e.g., `image/jpeg`
+- `LANGFUSE_MEDIA_ID`: ID of the media file in Langfuse's object storage
+- `SOURCE_TYPE`: Source type of the media file, can be `base64_data_uri`, `bytes`, or `file`
+
+Based on this token, the Langfuse UI can automatically detect the `mediaId` and render the media file inline.
 
 ## GitHub Discussions
 
