@@ -5,7 +5,7 @@ import { Video } from "lucide-react";
 import Image from "next/image";
 
 export const VideoIndex = () => (
-  <Cards num={2}>
+  <Cards num={3}>
     {(
       getPagesUnderRoute("/guides/videos") as Array<Page & { frontMatter: any }>
     ).map((page, i) => (

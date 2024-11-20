@@ -6,18 +6,53 @@ description: Annotate traces and observations with scores in the Langfuse UI to 
 
 Collaborate with your team and add [`scores`](/docs/scores) via the Langfuse UI. You can add scores to both traces and observations within a trace.
 
-<Frame border fullWidth>
-  ![Annotate](/images/docs/annotation.gif)
-</Frame>
-
-## Common use cases
+<details>
+<summary>Why label data manually?</summary>
 
 - **Collaboration**: Enable team collaboration by inviting other internal members to annotate a subset of traces and observations. This manual evaluation can enhance the overall accuracy and reliability of your results by incorporating diverse perspectives and expertise. See [Annotation queues](/docs/scores/annotation#annotation-queues) to manage and prioritize the annotation tasks effectively.
 - **Annotation data consistency**: Create score configurations for annotation workflows to ensure that all team members are using standardized scoring criteria. Hereby configure categorical, numerical or binary score types to capture different aspects of your data.
 - **Evaluation of new product features**: This feature can be useful for new use cases where no other scores have been allocated yet.
 - **Benchmarking of other scores**: Establish a human baseline score that can be used as a benchmark to compare and evaluate other scores. This can provide a clear standard of reference and enhance the objectivity of your performance evaluations.
 
-## Get started
+</details>
+
+Langfuse supports:
+
+<Tabs items={["1. Annotation of single traces", "2. Annotation Queues to manage annotation tasks"]}>
+<Tab>
+
+From any [trace](/docs/tracing), you can annotate scores on different dimensions. See [step-by-step guide](#single-trace) below for details.
+
+![Annotate](/images/docs/annotation.gif)
+
+</Tab>
+<Tab>
+
+Use [annotation queues](#annotation-queues) to manage and prioritize annotation tasks by:
+
+1. Creating annotation queues
+2. Assigning traces or observations to them
+3. Processing the annotation tasks one-by-one
+
+<CloudflareVideo
+  videoId="0154084df3c8ae0de290c60720dd1fb2"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+</Tabs>
+
+## 1. Annotation of single traces [#single-trace]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    pro: "full",
+    team: "full",
+    selfHosted: "full",
+  }}
+/>
 
 <Steps>
 
@@ -61,9 +96,7 @@ Upon completing annotation click on the `Scores` tab to view a table of all the 
 
 </Steps>
 
-## Annotation Queues [#annotation-queues]
-
-Annotation queues allow you to manage and prioritize your annotation tasks in a structured way. This feature is particularly useful for large-scale projects that benefit of human-in-the-loop evaluation at some scale. Queues streamline this process by allowing for specifying which traces/observations you'd like to annotate on which dimensions.
+## 2. Annotation Queues [#annotation-queues]
 
 <AvailabilityBanner
   availability={{
@@ -73,6 +106,8 @@ Annotation queues allow you to manage and prioritize your annotation tasks in a 
     selfHosted: "ee",
   }}
 />
+
+Annotation queues allow you to manage and prioritize your annotation tasks in a structured way. This feature is particularly useful for large-scale projects that benefit of human-in-the-loop evaluation at some scale. Queues streamline this process by allowing for specifying which traces/observations you'd like to annotate on which dimensions.
 
 <CloudflareVideo
   videoId="e8d737729ba1c64823e3e86138f4e63f"

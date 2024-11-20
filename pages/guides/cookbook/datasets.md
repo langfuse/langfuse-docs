@@ -91,50 +91,43 @@ for item in local_items:
 )
 ```
 
-## Define application and run experiments
+## Example using Langfuse `@observe()` decorator
 
-We implement the application in two ways to demonstrate how it's done
+### Application
 
-1. Custom LLM app using e.g. OpenAI SDK, traced with Langfuse Python SDK
-2. Langchain Application, traced via native Langfuse integration
-
-
-```python
-# we use a very simple eval here, you can use any eval library
-# see https://langfuse.com/docs/scores/model-based-evals for details
-def simple_evaluation(output, expected_output):
-  return output == expected_output
-```
-
-### Custom app
+This an example production application that we want to evaluate. It is instrumented with the Langfuse Decorator. We do not need to change the application code to evaluate it subsequently.
 
 
 ```python
-from datetime import datetime
+from langfuse.openai import openai
+from langfuse.decorators import observe, langfuse_context
 
+@observe()
 def run_my_custom_llm_app(input, system_prompt):
   messages = [
       {"role":"system", "content": system_prompt},
       {"role":"user", "content": input["country"]}
   ]
 
-  generationStartTime = datetime.now()
-
-  openai_completion = openai.chat.completions.create(
+  completion = openai.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=messages
   ).choices[0].message.content
 
-  langfuse_generation = langfuse.generation(
-    name="guess-countries",
-    input=messages,
-    output=openai_completion,
-    model="gpt-3.5-turbo",
-    start_time=generationStartTime,
-    end_time=datetime.now()
-  )
+  return completion
+```
 
-  return openai_completion, langfuse_generation
+### Experiment runner
+
+This is a simple experiment runner that runs the application on each item in the dataset and evaluates the output.
+
+
+```python
+# we use a very simple eval here, you can use any eval library
+# see https://langfuse.com/docs/scores/model-based-evals for details
+# you can also use LLM-as-a-judge managed within Langfuse to evaluate the outputs
+def simple_evaluation(output, expected_output):
+  return output == expected_output
 ```
 
 
@@ -143,18 +136,30 @@ def run_experiment(experiment_name, system_prompt):
   dataset = langfuse.get_dataset("capital_cities")
 
   for item in dataset.items:
-    completion, langfuse_generation = run_my_custom_llm_app(item.input, system_prompt)
+    # item.observe() returns a trace_id that can be used to add custom evaluations later
+    # it also automatically links the trace to the experiment run
+    with item.observe(run_name=experiment_name) as trace_id:
 
-    item.link(langfuse_generation, experiment_name) # pass the observation/generation object or the id
+      # run application, pass input and system prompt
+      output = run_my_custom_llm_app(item.input, system_prompt)
 
-    langfuse_generation.score(
-      name="exact_match",
-      value=simple_evaluation(completion, item.expected_output)
-    )
+      # optional: add custom evaluation results to the experiment trace
+      # we use the previously created example evaluation function
+      langfuse.score(
+        trace_id=trace_id,
+        name="exact_match",
+        value=simple_evaluation(output, item.expected_output)
+      )
 ```
+
+### Run experiments
+
+Now we can easily run experiments with different configurations to explore which yields the best results.
 
 
 ```python
+from langfuse.decorators import langfuse_context
+
 run_experiment(
     "famous_city",
     "The user will input countries, respond with the most famous city in this country"
@@ -171,9 +176,13 @@ run_experiment(
     "asking_specifically_2nd_try",
     "The user will input countries, respond with only the name of the capital. State only the name of the city."
 )
+
+# Assert that all events were sent to the Langfuse API
+langfuse_context.flush()
+langfuse.flush()
 ```
 
-### Langchain application
+## Example using Langchain
 
 
 ```python
@@ -244,5 +253,3 @@ run_langchain_experiment(
 - Average scores per experiment run
 - Browse each run for an individual item
 - Look at traces to debug issues
-
-![Experiment runs in Langfuse](https://langfuse.com/images/docs/dataset-runs-cookbook.jpg)

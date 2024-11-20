@@ -202,6 +202,7 @@ const nonPermanentRedirects = [
   ["/docs/scores/model-based-evals/overview", "/docs/scores/model-based-evals"],
   ["/docs/scores/model-based-evals/ragas", "/cookbook/evaluation_of_rag_with_ragas"],
   ["/docs/scores/model-based-evals/langchain", "/cookbook/evaluation_with_langchain"],
+  ["/docs/scores/getting-started", "/docs/scores/overview"],
   ["/experimentation", "/docs/datasets/overview"],
   ["/docs/experimentation", "/docs/datasets/overview"],
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
