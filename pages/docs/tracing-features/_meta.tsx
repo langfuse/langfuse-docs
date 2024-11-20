@@ -5,4 +5,5 @@ export default {
   tags: "Tags",
   url: "Trace URL",
   "releases-and-versioning": "Releases & Versioning",
+  "multi-modality": "Multi-modal & Attachments",
 };
