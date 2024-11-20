@@ -12,7 +12,7 @@ Support for media attachments to traces is currently in beta. Please report any 
 
 Langfuse supports multi-modal traces including **text, images, audio, and other attachments**.
 
-By default, **base64 encoded files are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
+By default, **[base64 encoded data URIs](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax) are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
 
 This also works if you:
 
@@ -50,7 +50,7 @@ If you require support for additional file types, please let us know in our [Git
 
 ## Get Started
 
-### Base64 encoded media
+### Base64 data URI encoded media
 
 If you use base64 encoded images, audio, or other files in your LLM applications, upgrade to the latest version of the Langfuse SDKs. The Langfuse SDKs automatically detect and handle base64 encoded media by extracting it, uploading it separately as a Langfuse Media file, and including a reference in the trace.
 
@@ -194,15 +194,30 @@ Use the [Langfuse Media Token](#media-token) to reference the `mediaId` in the t
 
 When using media files (that are not referenced via external URLs), Langfuse handles them in the following way:
 
-### 1. Media file management
+### 1. Media Upload Process
 
-On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side and directly uploaded to object storage (AWS S3 or compatible).
+#### Detection and Extraction
 
-Across integrations, media attachments are extracted from tracing data and uploaded to object storage separately. They can also be uploaded directly via the API as outlined above.
+- Langfuse supports media files in traces and observations on `input`, `output`, and `metadata` fields
+- SDKs separate media from tracing data client-side for performance optimization
+- Media files are uploaded directly to object storage (AWS S3 or compatible)
+- Original media content is replaced with a reference string
 
-### 2. Langfuse Media Token [#media-token]
+#### Security and Optimization
 
-Langfuse traces then only include references to the `mediaId` in the following format, which helps reconstruct the original payload if needed:
+- Uploads use presigned URLs with content validation (content length, content type, content SHA256 hash)
+- Deduplication: Files are simply replaced by their `mediaId` reference string if already uploaded
+- File uniqueness determined by project, content type, and content SHA256 hash
+
+#### Implementation Details
+
+- Python SDK: Background thread handling for non-blocking execution
+- JS/TS SDKs: Asynchronous, non-blocking implementation
+- API support for direct uploads (see [guide](/guides/cookbook/example_multi_modal_traces#custom-via-api))
+
+### 2. Media Reference System [#media-reference]
+
+The base64 data URIs and the wrapped `LangfuseMedia` objects in Langfuse traces are replaced by references to the `mediaId` in the following standardized token format, which helps reconstruct the original payload if needed:
 
 ```
 @@@langfuseMedia:type={MIME_TYPE}|id={LANGFUSE_MEDIA_ID}|source={SOURCE_TYPE}@@@
@@ -212,7 +227,7 @@ Langfuse traces then only include references to the `mediaId` in the following f
 - `LANGFUSE_MEDIA_ID`: ID of the media file in Langfuse's object storage
 - `SOURCE_TYPE`: Source type of the media file, can be `base64_data_uri`, `bytes`, or `file`
 
-Based on this token, the Langfuse UI can automatically detect the `mediaId` and render the media file inline.
+Based on this token, the Langfuse UI can automatically detect the `mediaId` and render the media file inline. The `LangfuseMedia` class provides utility functions to extract the `mediaId` from the reference string.
 
 ## GitHub Discussions
 
