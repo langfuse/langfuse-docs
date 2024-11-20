@@ -134,19 +134,11 @@ export const ChangelogIndex = ({
                     timeZone: "UTC",
                   })
                 : null}
-              {page.frontMatter?.badge &&
-                (page.frontMatter?.badgeHref ? (
-                  <Link
-                    href={page.frontMatter.badgeHref}
-                    className="hidden md:inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm mb-5 hover:bg-primary/20"
-                  >
-                    {page.frontMatter.badge}
-                  </Link>
-                ) : (
-                  <div className="hidden md:inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm mb-5">
-                    {page.frontMatter.badge}
-                  </div>
-                ))}
+              {page.frontMatter?.badge && (
+                <div className="hidden md:inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm mb-5">
+                  {page.frontMatter.badge}
+                </div>
+              )}
             </div>
             <div className="md:col-span-3">
               <Link key={page.route} href={page.route} className="block group">
@@ -191,19 +183,11 @@ export const ChangelogIndex = ({
                         }
                       )
                     : null}
-                  {page.frontMatter?.badge &&
-                    (page.frontMatter?.badgeHref ? (
-                      <Link
-                        href={page.frontMatter.badgeHref}
-                        className="inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm ml-3 hover:bg-primary/20"
-                      >
-                        {page.frontMatter.badge}
-                      </Link>
-                    ) : (
-                      <div className="inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm ml-3">
-                        {page.frontMatter.badge}
-                      </div>
-                    ))}
+                  {page.frontMatter?.badge && (
+                    <div className="inline-block px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-sm ml-3">
+                      {page.frontMatter.badge}
+                    </div>
+                  )}
                 </div>
                 <h2 className="block font-mono text-2xl md:text-3xl opacity-90 group-hover:opacity-100">
                   {page.meta?.title || page.frontMatter?.title || page.name}
