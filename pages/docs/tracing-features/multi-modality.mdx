@@ -1,28 +1,121 @@
 ---
-description: Langfuse fully supports multi-modal LLM traces, including text, images, videos, audio, and any other arbitrary attachments.
+description: Langfuse fully supports multi-modal LLM traces, including text, images, audio, and attachments.
 ---
 
 # Multi-Modality and Attachments
 
-Langfuse supports rendering Multi-Modal traces, including both text and image formats. We follow OpenAI's format convention.
+Langfuse supports multi-modal traces including **text, images, audio, and other attachments**.
+
+By default, **base64 encoded files are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
+
+This also works if you
+
+1. reference media files via external URLs,
+2. customize the handling of media files in the SDKs via the `LangfuseMedia` class, or
+3. integrate via the Langfuse API directly.
+
+Learn more on how to get started and how this works under the hood below.
+
+_Examples_
+
+<Tabs items={["In-line images", "In-line audio", "Attachments"]}>
+<Tab>
+<Frame border className="mt-0">
+  ![Trace in Langfuse UI](/images/docs/multi-modal-trace-image.jpg)
+</Frame>
+</Tab>
+<Tab>
+<Frame border className="mt-0">
+  ![Trace in Langfuse UI](/images/docs/multi-modal-trace-audio.png)
+</Frame>
+</Tab>
+<Tab>
+<Frame border className="mt-0">
+  ![Trace in Langfuse UI](/images/docs/multi-modal-trace-attachment.png)
+</Frame>
+</Tab>
+<Tab>
+
+Any attachment is rendered below the message in the Langfuse UI.
+
+</Tab>
+</Tabs>
+
+## Supported media formats
+
+Langfuse supports:
+
+- **Images**: png, jpg, webp
+- **Audio files**: mpeg, mp3, wav
+- **Other attachments**: pdf, plain text
+
+If you require support for additional file types, please let us know in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/3004) where we're actively gathering feedback on multi-modal support.
+
+## Get Started
+
+### Base64 encoded media
+
+If you use base64 encoded images, audio, or other files in your LLM applications, upgrade to the latest version of the Langfuse SDK.
+
+The Langfuse SDKs automatically detect and handle base64 encoded media by extracting it, uploading it separately as a Langfuse Media file, and including a reference in the trace. This works with standard Data URI ([MDN](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data)) formatted media (like those used by OpenAI and other LLMs).
+
+### Custom attachments
+
+If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse, LangfuseMedia } from "langfuse";
+import fs from "fs";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse();
+
+// Wrap media in LangfuseMedia class
+const wrappedMedia = new LangfuseMedia({
+  contentBytes: fs.readFileSync("./static/bitcoin.pdf"),
+  contentType: "application/pdf",
+});
+
+// Optionally, access media via wrappedMedia.obj
+console.log(wrappedMedia.obj);
+
+// Include media in any trace or observation
+const trace = langfuse.trace({
+  name: "test-trace-10",
+  metadata: {
+    context: wrappedMedia,
+  },
+});
+```
+
+</Tab>
+</Tabs>
+
+### API
+
+If you use the API directly to log traces to Langfuse, you can use the following APIs to make use of the new multi-modal features.
+
+1. Initialize the upload and get a `mediaId` and `presignedURL` for the media upload via [`POST /api/public/media`](https://api.reference.langfuse.com/#post-/api/public/media)
+2. Upload media file via `PUT [presignedURL]`
+3. Reference the `mediaId` in the traces or observations via the Langfuse Media Token (see docs for more details)
 
 ## How to trace Multi-Modal content in Langfuse?
 
 To utilize our Multi-Modal Trace support, your trace or observation `input`/`output` should include a list of messages comprising the conversation so far. Each message should contain a `role` (system, user, assistant) and `content`. To display multi-modal content, you can pass a combination of text and image URLs. The `content` property of the messages follows the [OpenAI convention](/docs/tracing-features/multi-modality#content-format).
 
-<Callout type="info">
-  We plan to extend support to base64 images, file attachments (e.g., PDFs), and
-  audio soon. Please add your upvote and any thoughts to this
-  [thread](https://github.com/orgs/langfuse/discussions/3004).
-</Callout>
-
 ### Visual Representation in Langfuse
 
 When the "Markdown" option is enabled in the Langfuse UI, you can click on the image icon to preview the image inline.
-
-<Frame border>
-  ![Trace in Langfuse UI](/images/docs/multi-modal-trace.png)
-</Frame>
 
 ### Content Format
 
@@ -100,6 +193,34 @@ When the "Markdown" option is enabled in the Langfuse UI, you can click on the i
 </Tabs>
 
 For more details and examples, refer to our [OpenAI cookbook](/docs/integrations/openai/python/examples).
+
+## How does it work?
+
+Multi-modal traces contain media files. These can either be:
+
+1. Most common: Stored in Langfuse's object storage, necessary for base64 encoded media, custom attachments
+2. Less common: Referenced via external URLs
+
+### Langfuse-managed media (base64, custom attachments)
+
+On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side, and directly uploaded to object storage (AWS S3 or compatible). Langfuse traces then only include references to the `mediaId` in the following format, which helps reconstruct the original payload if needed:
+
+```
+@@@langfuseMedia:type=image/jpeg|id=xxx|source=base64_data_uri@@@
+```
+
+- base64_data_uri
+- file
+- bytes
+
+The UI will automatically detect the `mediaId` and render the media file inline.
+
+### External media (URLs)
+
+Langfuse supports in-line rendering of media files via URLs if they follow common formats.
+
+- OpenAI Content Parts
+- Markdown image
 
 ## GitHub Discussions
 
