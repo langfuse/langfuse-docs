@@ -1,5 +1,5 @@
 export default {
   "clickhouse": "Clickhouse",
-  "redis": "Redis / Valkey (Coming soon)",
+  "redis": "Redis / Valkey",
   "blobstorage": "S3 / Blob Storage (Coming soon)",
 };
