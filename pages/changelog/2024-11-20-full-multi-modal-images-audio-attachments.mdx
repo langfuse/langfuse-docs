@@ -4,7 +4,7 @@ title: Full multi-modal support, including audio, images, and attachments
 badge: Launch Week 2 🚀
 description: Add multi-modal attachments to LLM traces in Langfuse to observe, and view them within the Langfuse UI.
 author: Hassieb
-ogImage: /images/changelog/2024-11-20-multi-modal-custom-attachments.png
+ogImage: /images/changelog/2024-11-20-full-multi-modal-images-audio-attachments.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -65,15 +65,9 @@ Multi-modal attachments are available today. You need to configure your own obje
 
 ## How does it work?
 
-On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side, and directly uploaded to object storage (AWS S3 or compatible). Langfuse traces then only include references to the `mediaId` in the following format, which helps reconstruct the original payload if needed:
+On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side, and directly uploaded to object storage (AWS S3 or compatible). Langfuse traces only include the `Langfuse Media Token` ([docs](/docs/tracing-features/multi-modality)) referencing the `mediaId`, which helps reconstruct the original payload if needed.
 
-```
-@@@langfuseMedia:type=image/jpeg|id=xxx|source=base64_data_uri@@@
-```
-
-The UI will automatically detect the `mediaId` and render the media file inline.
-
-See the [multi-modal documentation](/docs/tracing-features/multi-modality) for more details.
+The UI then automatically detects the `mediaId` from the `Langfuse Media Token` and renders the media file inline.
 
 ## Learn more
 
@@ -82,3 +76,5 @@ Please refer to the [Multi-modality documentation](/docs/tracing-features/multi-
 ## Any questions or feedback?
 
 GitHub discussions is where the Langfuse community collaborates, and we'd love to hear from you in [this thread](https://github.com/orgs/langfuse/discussions/3004) if you have any questions, suggestions or feedback on the new feature.
+
+Please open a [GitHub issue](/issues) if you run into any issues.

@@ -193,7 +193,7 @@ const config: DocsThemeConfig = {
     key: "launch-week-2-day-3",
     dismissible: true,
     content: (
-      <Link href="/changelog/2024-11-20-multi-modal-custom-attachments">
+      <Link href="/changelog/2024-11-20-full-multi-modal-images-audio-attachments">
         {/* mobile */}
         <span className="sm:hidden">LW2 - Day 3: Multi-Modal Traces →</span>
         {/* desktop */}
