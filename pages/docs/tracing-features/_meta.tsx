@@ -1,9 +1,12 @@
 export default {
-  sessions: "Sessions",
-  users: "Users",
+  "log-levels": "Log Levels",
+  masking: "Masking",
   metadata: "Metadata",
+  "multi-modality": "Multi-modality & Attachments",
+  "releases-and-versioning": "Releases & Versioning",
+  sampling: "Sampling",
+  sessions: "Sessions",
   tags: "Tags",
   url: "Trace URL",
-  "releases-and-versioning": "Releases & Versioning",
-  "multi-modality": "Multi-modal & Attachments",
+  users: "Users",
 };
