@@ -10,6 +10,60 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
+[Back in August](/changelog/2024-08-21-openai-multi-modal-traces), we added support for rendering multi-modal traces in Langfuse if they reference external files. Since then, extending multi-modal support to base64 encoded images and arbitrary attachments has been one a top requests from the community ([GitHub Discussion thread](https://github.com/orgs/langfuse/discussions/3004) with 45 upvotes).
+
+Today, on **Day 3 of [Langfuse Launch Week 2](/blog/2024-11-17-launch-week-2)**, we are excited to share that full multi-modal support is now available in Langfuse Tracing. Read on to learn more about the scope and how it works.
+
+## What is supported?
+
+- Files: Images, audio, video, and any other arbitrary files
+- UI
+  - Audio is playable in-line; if transcripts are included, they are shown right next to the audio player
+  - Images are rendered in-line
+  - Other media types open in a new tab
+- Use in traces
+  - In-line in trace/observation inputs, outputs, and metadata
+  - As attachments to the trace or observation
+- Limits
+  - ???
+  - Note yet supported in Playground and Dataset Items
+
+## Getting started
+
+### Base64 encoded media
+
+If you use base64 encoded images, audio, or other files in your LLM applications, upgrade to the latest version of the Langfuse SDK. The Langfuse SDKs have been updated to automatically extract base64 encoded media, upload them independently from the tracing data, and include a reference to the `mediaId` in the trace. We have tested this across different integrations and LLM providers.
+
+This works across all SDKs, integrations and LLM providers as it is implemented at a very low level in the SDKs.
+
+### Custom attachments
+
+If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
+
+### API
+
+If you use the API directly to log traces to Langfuse, you can use the following APIs to make use of the new multi-modal features.
+
+1. Get `uploadURL` from `POST /media/upload-url`
+2. Upload media via `PUT {uploadURL}`
+3. Reference the `mediaId` in the traces or observations via the Langfuse Media Token.
+
+## Pricing
+
+Multi-modal attachments on Langfuse Cloud are free while in beta. We will be rolling out a new pricing metric to account for the additional storage and compute costs associated with large multi-modal traces in the coming weeks.
+
+## How does it work?
+
+On the infrastructure level, Langfuse now supports arbitrary `media` attachments in traces. To optimize for performance and efficiency, they are separated from tracing data client-side, and directly uploaded to object storage (AWS S3 or compatible). Langfuse traces than only include references to the `mediaId` in the following format, which helps reconstruct the original payload if needed in the future:
+
+```
+@@@langfuseMedia:type=image/jpeg|id=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx|source=base64_data_uri@@@
+```
+
 ## Learn more
 
 - [Multi-modality documentation](/docs/tracing-features/multi-modality)
+
+## Any questions or feedback?
+
+We'd love to hear from you if you have any suggestions or feedback on the new feature. GitHub discussions is where the Langfuse community collabortes, and we'd love to hear from you in [this thread](https://github.com/orgs/langfuse/discussions/3004).
