@@ -14,11 +14,11 @@ Langfuse supports multi-modal traces including **text, images, audio, and other 
 
 By default, **base64 encoded files are handled automatically by the Langfuse SDKs**. They are extracted from the payloads commonly used in multi-modal LLMs, uploaded to Langfuse's object storage, and linked to the trace.
 
-This also works if you
+This also works if you:
 
-1. reference media files via external URLs,
-2. customize the handling of media files in the SDKs via the `LangfuseMedia` class, or
-3. integrate via the Langfuse API directly.
+1. Reference media files via external URLs.
+2. Customize the handling of media files in the SDKs via the `LangfuseMedia` class.
+3. Integrate via the Langfuse API directly.
 
 Learn more on how to get started and how this works under the hood below.
 
@@ -36,15 +36,15 @@ Multi-modal attachments on Langfuse Cloud are free while in beta. We will be rol
 
 ### Self-hosting
 
-Multi-modal attachments are available today. You need to configure your own object storage bucket via the Langfuse environment variables (`LANGFUSE_S3_MEDIA_UPLOAD_*`). See self-hosting documentation for details on these environment variables. S3 APIs are supported across all major cloud providers and can be self-hosted via minio.
+Multi-modal attachments are available today. You need to configure your own object storage bucket via the Langfuse environment variables (`LANGFUSE_S3_MEDIA_UPLOAD_*`). See self-hosting documentation for details on these environment variables. S3-compatible APIs are supported across all major cloud providers and can be self-hosted via minio.
 
 ## Supported media formats
 
 Langfuse supports:
 
-- **Images**: png, jpg, webp
-- **Audio files**: mpeg, mp3, wav
-- **Other attachments**: pdf, plain text
+- **Images**: .png, .jpg, .webp
+- **Audio files**: .mpeg, .mp3, .wav
+- **Other attachments**: .pdf, plain text
 
 If you require support for additional file types, please let us know in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/3004) where we're actively gathering feedback on multi-modal support.
 
@@ -56,7 +56,7 @@ If you use base64 encoded images, audio, or other files in your LLM applications
 
 This works with standard Data URI ([MDN](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax)) formatted media (like those used by OpenAI and other LLMs).
 
-This [notebook](/guides/cookbook/example_multi_modal_traces) includes a couple of examples using the OpenAI SDK and Langchain.
+This [notebook](/guides/cookbook/example_multi_modal_traces) includes a couple of examples using the OpenAI SDK and LangChain.
 
 ### External media (URLs)
 
@@ -179,8 +179,8 @@ If you use the API directly to log traces to Langfuse, you need to follow these 
 ### Upload media to Langfuse
 
 1. If you use base64 encoded media: you need to extract it from the trace payloads similar to how the Langfuse SDKs do it.
-2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#post-/api/public/media)
-3. Upload media file: `PUT [presignedURL]`
+2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#post-/api/public/media).
+3. Upload media file: `PUT [presignedURL]`.
 
 See this [end-to-end example](/guides/cookbook/example_multi_modal_traces#custom-via-api) (Python) on how to use the API directly to upload media files.
 
@@ -196,7 +196,7 @@ When using media files (that are not referenced via external URLs), Langfuse han
 
 ### 1. Media file management
 
-On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side, and directly uploaded to object storage (AWS S3 or compatible).
+On the infrastructure level, Langfuse now supports `media` files in traces. To optimize for performance and efficiency, they are separated from tracing data client-side and directly uploaded to object storage (AWS S3 or compatible).
 
 Across integrations, media attachments are extracted from tracing data and uploaded to object storage separately. They can also be uploaded directly via the API as outlined above.
 
@@ -208,7 +208,7 @@ Langfuse traces then only include references to the `mediaId` in the following f
 @@@langfuseMedia:type={MIME_TYPE}|id={LANGFUSE_MEDIA_ID}|source={SOURCE_TYPE}@@@
 ```
 
-- `MIME_TYPE`: MIME type of the media file, e.g. `image/jpeg`
+- `MIME_TYPE`: MIME type of the media file, e.g., `image/jpeg`
 - `LANGFUSE_MEDIA_ID`: ID of the media file in Langfuse's object storage
 - `SOURCE_TYPE`: Source type of the media file, can be `base64_data_uri`, `bytes`, or `file`
 
