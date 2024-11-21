@@ -193,7 +193,7 @@ const config: DocsThemeConfig = {
   },
   banner: {
     key: "ph-prompt-experiments",
-    // dismissible: true,
+    dismissible: false,
     content: (
       <Link href="/ph">
         {/* mobile */}
