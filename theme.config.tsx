@@ -190,16 +190,17 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "launch-week-2-day-3",
+    key: "launch-week-2-day-4",
     dismissible: true,
     content: (
-      <Link href="/changelog/2024-11-20-full-multi-modal-images-audio-attachments">
+      <Link href="/changelog/2024-11-21-all-new-datasets-and-evals-documentation">
         {/* mobile */}
-        <span className="sm:hidden">LW2 - Day 3: Multi-Modal Traces →</span>
+        <span className="sm:hidden">
+          LW2 - Day 4: New Datasets & Evaluations docs →
+        </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Launch Week #2 - Day 3: Multi-Modal Traces (images, audio,
-          attachments) →
+          Launch Week #2 - Day 4: All new Datasets & Evaluations documentation →
         </span>
       </Link>
     ),
