@@ -190,17 +190,17 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "launch-week-2-day-4",
-    dismissible: true,
+    key: "ph-prompt-experiments",
+    // dismissible: true,
     content: (
-      <Link href="/changelog/2024-11-21-all-new-datasets-and-evals-documentation">
+      <Link href="/ph">
         {/* mobile */}
         <span className="sm:hidden">
-          LW2 - Day 4: New Datasets & Evaluations docs →
+          ✨ Support us on Product Hunt today → ✨
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Launch Week #2 - Day 4: All new Datasets & Evaluations documentation →
+          ✨ Support us on Product Hunt: Prompt Experimentation → ✨
         </span>
       </Link>
     ),
