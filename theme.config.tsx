@@ -193,7 +193,7 @@ const config: DocsThemeConfig = {
     key: "launch-week-2-day-4",
     dismissible: true,
     content: (
-      <Link href="/changelog/2024-11-21-new-datastes-and-evals-documentation">
+      <Link href="/changelog/2024-11-21-all-new-datasets-and-evals-documentation">
         {/* mobile */}
         <span className="sm:hidden">
           LW2 - Day 4: New Datasets & Evaluations docs →
