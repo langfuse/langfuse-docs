@@ -167,6 +167,14 @@ const menuItems: {
         name: "OSS Friends",
         href: "/oss-friends",
       },
+      {
+        name: "Twitter",
+        href: "https://x.com/langfuse",
+      },
+      {
+        name: "LinkedIn",
+        href: "https://www.linkedin.com/company/langfuse/",
+      },
     ],
   },
 
