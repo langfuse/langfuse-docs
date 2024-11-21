@@ -12,6 +12,8 @@ import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
+import Image from "next/image";
+import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 import {
   AvailabilityBanner,
   AvailabilitySidebar,
@@ -196,11 +198,26 @@ const config: DocsThemeConfig = {
       <Link href="/ph">
         {/* mobile */}
         <span className="sm:hidden">
-          ✨ Support us on Product Hunt today → ✨
+          ✨ Today: Support us on{" "}
+          <Image
+            src={ProductHuntWhiteImage}
+            alt="Product Hunt"
+            height={25}
+            className="inline mx-1"
+          />{" "}
+          ✨
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          ✨ Support us on Product Hunt: Prompt Experimentation → ✨
+          ✨ Today: Support{" "}
+          <span className="font-bold">Langfuse Prompt Experimentation</span> on{" "}
+          <Image
+            src={ProductHuntWhiteImage}
+            alt="Product Hunt"
+            height={25}
+            className="inline mx-1"
+          />{" "}
+          ✨
         </span>
       </Link>
     ),
