@@ -1,0 +1,138 @@
+---
+title: Prompt Experiments
+description: Run prompt experiments on datasets with LLM-as-a-Judge evaluations.
+---
+
+# Prompt Experiments
+
+<AvailabilityBanner
+  availability={{
+    hobby: "public-beta",
+    pro: "public-beta",
+    team: "public-beta",
+    selfHosted: "not-available",
+  }}
+/>
+
+Prompt Experiments allows you to test a prompt version from [Prompt Management](/docs/prompts) on a [Dataset](/docs/datasets) of inputs and expected outputs. Thereby, you can verify that the change yields the expected outputs and does not cause regressions. You can directly analyze the results of different prompt experiments side-by-side.
+
+Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/scores/model-based-evals) to automatically evaluate the responses based on the expected outputs to further analyze the results on an aggregate level.
+
+<Callout type="info">
+
+This is a no-code feature within Langfuse. You can run more complex experiments via the Langfuse SDKs/API. Follow [this guide](/docs/datasets/get-started) to get started.
+
+</Callout>
+
+<details>
+<summary>Key benefits</summary>
+
+- **Feedback loop**: Quickly iterate on prompts by running experiments and directly comparing evaluation results side-by-side.
+- **Regression prevention**: When making prompt changes, run an experiment to make sure that the new version does not cause bad outputs.
+
+</details>
+
+<details>
+<summary>Availability</summary>
+
+Prompt Experiments is currently in public beta on Langfuse Cloud. It will be released for self-hosted users in Langfuse v3 (Pro plan) as it depends on parts of the new v3 infrastructure.
+
+</details>
+
+## Setup
+
+<Callout type="info">
+
+If you already have a dataset and a prompt, you can skip the following steps.
+
+</Callout>
+
+In Prompt Experiments, the items of a dataset are mapped to the variables of the prompt. In the following example, the variables (`documentation` and `question`) are mapped to the `input` of the dataset which is a JSON object. The `expected output` contains a reference answer for the given dataset item.
+
+<Steps>
+
+### Configure LLM connection
+
+Prompt Experiments runs LLM calls within Langfuse. Thus, you need to configure an LLM connection in the project settings.
+
+<details>
+<summary>Supported LLM providers</summary>
+
+- OpenAI, or OpenAI-compatible providers (e.g. LiteLLM, Google Vertex AI)
+- Anthropic
+- Azure OpenAI
+- AWS Bedrock
+
+</details>
+
+### Create a dataset
+
+Create a dataset with the inputs and expected outputs that you want to test your prompt on.
+
+import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
+
+<CreateDataset />
+
+### Create dataset items with test cases
+
+Dataset items include the input variables that should be inserted into the prompt.
+
+<details>
+<summary>Example Dataset Item with variables</summary>
+
+```json filename="input"
+{
+  "question": "What is Langfuse?",
+  "documentation": "Langfuse - the LLM Engineering Platform"
+}
+```
+
+```text filename="expected_output"
+Langfuse is the LLM Engineering Platform.
+```
+
+</details>
+
+import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
+
+<CreateDatasetItem />
+
+### Create a prompt with variables
+
+Use `{{variables}}` to insert the dataset variables into the prompt during experiments.
+
+<details>
+<summary>Example Prompt</summary>
+
+```text filename="system"
+You are a Langfuse expert. Please answer questions based on the following documentation:
+
+DOCUMENTATION
+{{documentation}}
+```
+
+```text filename="user"
+{{question}}
+```
+
+</details>
+
+import PromptCreate from "@/components-mdx/prompt-create.mdx";
+
+<PromptCreate />
+
+</Steps>
+
+## Run a prompt experiment
+
+Now that we have set up a prompt version and a dataset, we can run a prompt experiment in Langfuse for each prompt version that we want to test.
+
+When viewing the prompt details or a dataset, use the following button to run a prompt experiment:
+
+<Frame className="w-36" border>
+
+![New Experiment Button](/images/docs/prompt-experiments-new-experiment.png)
+
+</Frame>
+
+Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.

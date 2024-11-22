@@ -120,91 +120,9 @@ Depending on the scale of your experiments, there are different approaches you c
 
 If you already have a prompt with the same `name`, the prompt will be added as a new version.
 
-<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
-<Tab>
+import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
-<CloudflareVideo
-  videoId="a7f111d588feb35b347e05557bfcf46d"
-  aspectRatio={1392 / 1080}
-  gifStyle
-/>
-
-</Tab>
-<Tab>
-
-```python
-# Create a text prompt
-langfuse.create_prompt(
-    name="movie-critic",
-    type="text",
-    prompt="As a {{criticlevel}} movie critic, do you like {{movie}}?",
-    labels=["production"],  # directly promote to production
-    config={
-        "model": "gpt-3.5-turbo",
-        "temperature": 0.7,
-        "supported_languages": ["en", "fr"],
-    },  # optionally, add configs (e.g. model parameters or model tools) or tags
-)
-
-# Create a chat prompt
-langfuse.create_prompt(
-    name="movie-critic-chat",
-    type="chat",
-    prompt=[
-      { "role": "system", "content": "You are an {{criticlevel}} movie critic" },
-      { "role": "user", "content": "Do you like {{movie}}?" },
-    ],
-    labels=["production"],  # directly promote to production
-    config={
-        "model": "gpt-3.5-turbo",
-        "temperature": 0.7,
-        "supported_languages": ["en", "fr"],
-    },  # optionally, add configs (e.g. model parameters or model tools) or tags
-)
-```
-
-If you already have a prompt with the same name, the prompt will be added as a new version.
-
-</Tab>
-
-<Tab>
-
-```ts
-// Create a text prompt
-await langfuse.createPrompt({
-  name: "movie-critic",
-  type: "text",
-  prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
-  labels: ["production"], // directly promote to production
-  config: {
-    model: "gpt-3.5-turbo",
-    temperature: 0.7,
-    supported_languages: ["en", "fr"],
-  }, // optionally, add configs (e.g. model parameters or model tools) or tags
-});
-
-// Create a chat prompt
-await langfuse.createPrompt({
-  name: "movie-critic-chat",
-  type: "chat",
-  prompt: [
-    { role: "system", content: "You are an {{criticlevel}} movie critic" },
-    { role: "user", content: "Do you like {{movie}}?" },
-  ],
-  labels: ["production"], // directly promote to production
-  config: {
-    model: "gpt-3.5-turbo",
-    temperature: 0.7,
-    supported_languages: ["en", "fr"],
-  }, // optionally, add configs (e.g. model parameters or model tools) or tags
-});
-```
-
-If you already have a prompt with the same name, the prompt will be added as a new version.
-
-</Tab>
-
-</Tabs>
+<PromptCreate />
 
 ### Use prompt
 

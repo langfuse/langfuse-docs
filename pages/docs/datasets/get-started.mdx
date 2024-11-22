@@ -12,105 +12,17 @@ This is a step by step guide on how to create your first dataset and run your fi
 
 Datasets have a name which is unique within a project.
 
-<Tabs items={["Python", "JS/TS", "UI"]}>
-<Tab>
+import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
 
-```python
-langfuse.create_dataset(
-    name="<dataset_name>",
-    # optional description
-    description="My first dataset",
-    # optional metadata
-    metadata={
-        "author": "Alice",
-        "date": "2022-01-01",
-        "type": "benchmark"
-    }
-)
-```
-
-_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
-
-</Tab>
-<Tab>
-
-```ts
-langfuse.createDataset({
-  name: "<dataset_name>",
-  // optional description
-  description: "My first dataset",
-  // optional metadata
-  metadata: {
-    author: "Alice",
-    date: "2022-01-01",
-    type: "benchmark",
-  },
-});
-```
-
-</Tab>
-<Tab>
-
-Datasets: `+ New dataset`
-
-</Tab>
-</Tabs>
+<CreateDataset />
 
 ### Create new dataset items
 
 Individual items can be added to a dataset by providing the input and optionally the expected output.
 
-<Tabs items={["Python", "JS/TS", "UI"]}>
-<Tab>
+import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
 
-```python
-langfuse.create_dataset_item(
-    dataset_name="<dataset_name>",
-    # any python object or value, optional
-    input={
-        "text": "hello world"
-    },
-    # any python object or value, optional
-    expected_output={
-        "text": "hello world"
-    },
-    # metadata, optional
-    metadata={
-        "model": "llama3",
-    }
-)
-```
-
-_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
-
-</Tab>
-<Tab>
-
-```ts
-langfuse.createDatasetItem({
-  datasetName: "<dataset_name>",
-  // any JS object or value
-  input: {
-    text: "hello world",
-  },
-  // any JS object or value, optional
-  expectedOutput: {
-    text: "hello world",
-  },
-  // metadata, optional
-  metadata: {
-    model: "llama3",
-  },
-});
-```
-
-</Tab>
-<Tab>
-
-Datasets > Items: `+ New item`
-
-</Tab>
-</Tabs>
+<CreateDatasetItem />
 
 <details>
 <summary>Create synthetic examples</summary>
