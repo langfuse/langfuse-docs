@@ -3,4 +3,8 @@ export default {
   "example-openai-functions": "Example OpenAI Functions",
   "example-langchain": "Example Langchain (Py)",
   "example-langchain-js": "Example Langchain (JS)",
+  "prompt-experiments": {
+    title: "Prompt Experiments ↗",
+    href: "/docs/datasets/prompt-experiments",
+  },
 };

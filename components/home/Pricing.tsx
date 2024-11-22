@@ -293,6 +293,13 @@ const sections = [
         },
       },
       {
+        name: "Prompt Experiments",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true },
+          selfHosted: { "Open Source": false, Pro: "soon", Enterprise: "soon" },
+        },
+      },
+      {
         name: "LLM-as-judge evaluators",
         href: "/docs/scores/model-based-evals",
         tiers: {
