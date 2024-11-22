@@ -50,8 +50,8 @@ export default async function handler(req: Request, res: Response) {
     role: role,
   }));
 
-  // get last message
-  const sanitizedQuery = messages[messages.length - 1].content.trim();
+  // get the last user message and remove it from the array
+  const sanitizedQuery = openAiMessageHistory.pop().content.trim();
 
   trace.update({
     input: sanitizedQuery,
@@ -168,14 +168,16 @@ export default async function handler(req: Request, res: Response) {
   });
   const compiledLangfuseMessages = langfusePrompt.compile({
     context: contextText,
+    question: sanitizedQuery,
   });
   promptSpan.end({
     output: { compiledLangfuseMessages, version: langfusePrompt.version },
   });
 
   const assembledMessages = [
-    ...compiledLangfuseMessages,
-    ...openAiMessageHistory,
+    ...compiledLangfuseMessages.slice(0, -1), // all system messages
+    ...openAiMessageHistory, // history
+    compiledLangfuseMessages[compiledLangfuseMessages.length - 1], // last user message
   ];
 
   const generation = trace.generation({
