@@ -12,6 +12,8 @@ import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
+import Image from "next/image";
+import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 import {
   AvailabilityBanner,
   AvailabilitySidebar,
@@ -190,17 +192,32 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "launch-week-2-day-4",
-    dismissible: true,
+    key: "ph-prompt-experiments",
+    dismissible: false,
     content: (
-      <Link href="/changelog/2024-11-21-all-new-datasets-and-evals-documentation">
+      <Link href="/ph">
         {/* mobile */}
         <span className="sm:hidden">
-          LW2 - Day 4: New Datasets & Evaluations docs →
+          ✨ Today: Support us on{" "}
+          <Image
+            src={ProductHuntWhiteImage}
+            alt="Product Hunt"
+            height={25}
+            className="inline mx-1"
+          />{" "}
+          ✨
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Launch Week #2 - Day 4: All new Datasets & Evaluations documentation →
+          ✨ Today: Support{" "}
+          <span className="font-bold">Langfuse Prompt Experimentation</span> on{" "}
+          <Image
+            src={ProductHuntWhiteImage}
+            alt="Product Hunt"
+            height={25}
+            className="inline mx-1"
+          />{" "}
+          ✨
         </span>
       </Link>
     ),
