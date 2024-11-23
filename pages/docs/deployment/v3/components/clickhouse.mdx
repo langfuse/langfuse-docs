@@ -13,15 +13,15 @@ This guide covers how to configure ClickHouse within Langfuse and what to keep i
 Langfuse accepts the following environment variables to fine-tune your ClickHouse usage.
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
-| Variable                                      | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| --------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Variable                                      | Required / Default | Description                                                                                              |
+| --------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
 | `CLICKHOUSE_MIGRATION_URL`                    | Required           | Migration URL (TCP protocol) for the ClickHouse instance. Pattern: `clickhouse://<hostname>:(9000/9440)` |
-| `CLICKHOUSE_MIGRATION_SSL`                    | `false`            | Set to true to establish an SSL connection to ClickHouse for the database migration. |
-| `CLICKHOUSE_URL`                              | Required           | Hostname of the ClickHouse instance. Pattern: `http(s)://<hostname>:(8123/8443)` |
-| `CLICKHOUSE_USER`                             | Required           | Username of the ClickHouse database. Needs SELECT, ALTER, INSERT, CREATE, DELETE grants.   |
-| `CLICKHOUSE_PASSWORD`                         | Required           | Password of the ClickHouse user. |
-| `CLICKHOUSE_MIGRATION_CLUSTER_DISABLED`       | `false`            | Whether to disable the automatic ClickHouse migrations during server start. |
-| `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable automatic ClickHouse migrations. |
+| `CLICKHOUSE_MIGRATION_SSL`                    | `false`            | Set to true to establish an SSL connection to ClickHouse for the database migration.                     |
+| `CLICKHOUSE_URL`                              | Required           | Hostname of the ClickHouse instance. Pattern: `http(s)://<hostname>:(8123/8443)`                         |
+| `CLICKHOUSE_USER`                             | Required           | Username of the ClickHouse database. Needs SELECT, ALTER, INSERT, CREATE, DELETE grants.                 |
+| `CLICKHOUSE_PASSWORD`                         | Required           | Password of the ClickHouse user.                                                                         |
+| `CLICKHOUSE_CLUSTER_ENABLED`                  | `true`             | Whether to disable the automatic ClickHouse migrations during server start.                              |
+| `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable automatic ClickHouse migrations.                                                      |
 
 Please note, that Langfuse uses the `default` schema and `default` cluster.
 Get in touch with us on [Discord](/discord) or contact the maintainers at support@langfuse.com if this limitation is blocking.
@@ -36,6 +36,7 @@ This section covers different deployment options and provides example environmen
 
 ClickHouse Cloud is a scalable and fully managed deployment option for ClickHouse.
 You can provision it directly from [ClickHouse](https://clickhouse.cloud/) or through one of the cloud provider marketplaces:
+
 - [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-jettukeanwrfc)
 - [Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/clickhouse-public/clickhouse-cloud)
 - [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/clickhouse.clickhouse_cloud?tab=Overview)
@@ -87,6 +88,7 @@ clickhouse:
 
 Langfuse assumes that certain parameters are set in the ClickHouse configurations.
 To perform our database migrations, the following values must be provided:
+
 ```xml
 <!--
     Substitutions for parameters of replicated tables.
@@ -104,6 +106,7 @@ To perform our database migrations, the following values must be provided:
     <default_replica_name>{replica}</default_replica_name>
 -->
 ```
+
 `macros` and `default_replica_*` configuration should be covered by the Helm chart without any further configuration.
 
 Set the following environment variables to connect to your ClickHouse instance assuming that Langfuse runs within the same Cluster and Namespace:
@@ -123,6 +126,7 @@ As there is no redundancy, this is **not recommended for production workloads**.
 #### Example Configuration
 
 Start the container with
+
 ```bash
 docker run --name clickhouse-server \
   -e CLICKHOUSE_DB=default \
@@ -142,5 +146,5 @@ CLICKHOUSE_URL=http://localhost:8123
 CLICKHOUSE_MIGRATION_URL=clickhouse://localhost:9000
 CLICKHOUSE_USER=clickhouse
 CLICKHOUSE_PASSWORD=clickhouse
-CLICKHOUSE_MIGRATION_CLUSTER_DISABLED=true
+CLICKHOUSE_CLUSTER_ENABLED=false
 ```
