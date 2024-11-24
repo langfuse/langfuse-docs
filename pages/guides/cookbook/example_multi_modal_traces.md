@@ -206,6 +206,8 @@ handler.flush()
 
 ## Custom via API
 
+[Link to API docs](https://api.reference.langfuse.com/#tag--Media)
+
 ### Setup
 
 
@@ -296,6 +298,27 @@ if (
     )
 
     print("File uploaded")
+```
+
+### Update upload status
+
+
+```python
+from datetime import datetime, timezone
+
+if upload_response is not None:
+    requests.patch(
+        f"{base_URL}/api/public/media/{upload_url_response['mediaId']}",
+        auth=(public_key or "", secret_key or ""),
+        headers={"Content-Type": "application/json"},
+        json={
+            "uploadedAt": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'), # ISO 8601
+            "uploadHttpStatus": upload_response.status_code,
+            "uploadHttpError": upload_response.text if upload_response.status_code != 200 else None,
+        },
+    )
+
+    print("Upload status updated")
 ```
 
 ### Fetch media link
