@@ -191,37 +191,37 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  banner: {
-    key: "ph-prompt-experiments",
-    dismissible: false,
-    content: (
-      <Link href="/ph">
-        {/* mobile */}
-        <span className="sm:hidden">
-          ✨ Today: Support us on{" "}
-          <Image
-            src={ProductHuntWhiteImage}
-            alt="Product Hunt"
-            height={25}
-            className="inline mx-1"
-          />{" "}
-          ✨
-        </span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          ✨ Today: Support{" "}
-          <span className="font-bold">Langfuse Prompt Experimentation</span> on{" "}
-          <Image
-            src={ProductHuntWhiteImage}
-            alt="Product Hunt"
-            height={25}
-            className="inline mx-1"
-          />{" "}
-          ✨
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "ph-prompt-experiments",
+  //   dismissible: true,
+  //   content: (
+  //     <Link href="/ph">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">
+  //         ✨ Today: Support us on{" "}
+  //         <Image
+  //           src={ProductHuntWhiteImage}
+  //           alt="Product Hunt"
+  //           height={25}
+  //           className="inline mx-1"
+  //         />{" "}
+  //         ✨
+  //       </span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         ✨ Today: Support{" "}
+  //         <span className="font-bold">Langfuse Prompt Experimentation</span> on{" "}
+  //         <Image
+  //           src={ProductHuntWhiteImage}
+  //           alt="Product Hunt"
+  //           height={25}
+  //           className="inline mx-1"
+  //         />{" "}
+  //         ✨
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;
