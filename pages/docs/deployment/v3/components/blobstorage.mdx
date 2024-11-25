@@ -192,6 +192,34 @@ LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
 LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 ```
 
+### Azure Blob Storage (Beta)
+
+[Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/) is a globally available object storage by Microsoft Azure.
+It does not offer an S3-compatible API and requires slightly different configurations.
+We implemented a dedicated storage interface for experimental Azure Blob Storage support.
+
+#### Example Configuration
+
+You will need an Azure Blob Storage container and a static account key with the necessary permissions.
+
+Set the following environment variables to connect Langfuse with your Azure Blob Storage container.
+This example uses sample credentials from [Azurite](https://github.com/Azure/Azurite).
+
+```yaml
+# Special flag to enable the Azure Blob Storage interface
+LANGFUSE_USE_AZURE_BLOB=true
+
+LANGFUSE_S3_EVENT_UPLOAD_ENABLED=true
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Container name - If it does not exists, Langfuse will attempt to create it
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=devstoreaccount1 # ABS Account
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw== # ABS Account Key
+LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=http://localhost:10000/devstoreaccount1 # URL, e.g. `https://${account}.blob.core.windows.net`
+## Necessary for minio compatibility
+LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
+LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
+```
+
 ### Other Providers
 
 Langfuse supports any S3-compatible storage provider.
