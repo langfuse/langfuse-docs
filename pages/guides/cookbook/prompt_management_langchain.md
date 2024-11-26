@@ -123,7 +123,7 @@ print(f"Prompt model configurations\nModel: {model}\nTemperature: {temperature}"
     Prompt model configurations
     Model: gpt-3.5-turbo-1106
     Temperature: 0
-
+    
 
 ### Create Langchain chain based on prompt
 
@@ -191,7 +191,7 @@ print(response.content)
     - Transportation: Eco-friendly shuttle service
     
     Overall, the wedding will be a beautiful blend of art and nature, with a focus on sustainability and creativity. The event will showcase the couple's love for each other and their shared passions, creating a memorable and unique experience for all in attendance.
-
+    
 
 ## View Trace in Langfuse
 
