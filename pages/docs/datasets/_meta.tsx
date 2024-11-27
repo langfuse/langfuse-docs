@@ -1,4 +1,6 @@
 export default {
   overview: "Overview",
-  "python-cookbook": "Cookbook",
+  "get-started": "Get Started",
+  "prompt-experiments": "Prompt Experiments",
+  "python-cookbook": "Example (Python)",
 };

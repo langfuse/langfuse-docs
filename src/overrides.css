@@ -1,75 +1,105 @@
 /* make nav more blurry */
 .nextra-nav-container-blur {
-    background: transparent !important;
+  background: transparent !important;
 }
 
-:is(html[class~=dark] .nextra-nav-container-blur, html[class~=dark] .nextra-nav-container-blur) {
-    background: transparent !important;
+:is(
+    html[class~="dark"] .nextra-nav-container-blur,
+    html[class~="dark"] .nextra-nav-container-blur
+  ) {
+  background: transparent !important;
 }
 
-.nextra-toc>div> :last-child {
-    fill-opacity: 50;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+.nextra-toc > div > :last-child {
+  fill-opacity: 50;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 /* Hide guides and faq from main menu */
-.nextra-nav-container>nav>div>a[href="/guides"] {
-    display: none !important;
+.nextra-nav-container > nav > div > a[href="/guides"] {
+  display: none !important;
 }
 
-.nextra-nav-container>nav>div>a[href="/faq"] {
-    display: none !important;
+.nextra-nav-container > nav > div > a[href="/faq"] {
+  display: none !important;
 }
 
+/* Less gap in desktop menu */
+.nextra-menu-desktop {
+  gap: 0.1rem;
+}
+.nextra-menu-desktop > li:not(:has(*)) {
+  /* only those that have no children */
+  margin-bottom: 0.1rem;
+}
 /* smaller search bar */
 .nextra-nav-container input[type="search"] {
-    width: 8rem;
+  width: 8rem;
 
-    @media (min-width: 1024px) {
-        width: 10rem;
-    }
+  @media (min-width: 1024px) {
+    width: 10rem;
+  }
 
-    @media (min-width: 1280px) {
-        width: 16rem;
-    }
+  @media (min-width: 1280px) {
+    width: 16rem;
+  }
 
-    border-radius: 0.25rem;
+  border-radius: 0.25rem;
 }
 
 /* Fix logo overflowing */
-.nextra-nav-container>nav>a:first-child {
-    flex-shrink: 0;
+.nextra-nav-container > nav > a:first-child {
+  flex-shrink: 0;
 }
 
 /* Fix nested lists */
-li>ol,
-li>ul {
-    margin-top: 0 !important;
+li > ol,
+li > ul {
+  margin-top: 0 !important;
 }
 
 /* No dark background of videos */
 media-outlet {
-    background-color: transparent !important;
+  background-color: transparent !important;
 }
 
-/* More gap between h2 in articles */
+/* More gap between h2 across docs and articles */
+article.nextra-content h2._border-b {
+  /* h2 with border-bottom as this is how h2 is on default docs mode, we do not want to target custom/raw h2 on landingpage, changelog, blog etc. */
+  margin-top: 4rem;
+}
 article.nextra-body-typesetting-article h2 {
-    margin-top: 6rem;
+  margin-top: 6rem;
 }
 
 svg .nodeLabel,
 svg .edgeLabel {
-    font-family: monospace;
+  font-family: monospace;
 }
 
 /* Fix callout list */
 .nextra-callout ul {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 /* Overflowing nextra tabs should wrap */
 [role="tablist"] {
-    flex-wrap: wrap;
-    row-gap: 0.2rem;
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+}
+
+/* Subsequent details should have less of a gap */
+details + details {
+  margin-top: 0.5rem !important;
+}
+
+/* Fix detail padding */
+details > div {
+  padding: 0.25rem;
+}
+
+/* Details header should be bold */
+details > summary {
+  font-weight: 700;
 }

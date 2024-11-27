@@ -12,15 +12,15 @@ Please refer to our [feature overview](/docs/deployment/feature-overview) and th
 
 **Select Resources**
 
-- Overview: [Slide Deck Langfuse](https://static.langfuse.com/langfuse_overview_02_07_2024.pdf) (July 2024)
+- Overview: [Slide Deck Langfuse](https://static.langfuse.com/langfuse_overview_oct_25_24.pdf) (October 2024)
 - [Why Langfuse?](/why)
-- [Langfuse has been included in the Thoughtsworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse)
+- [Langfuse has twice been included in the Thoughtworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse)
 - [Enterprise Edition (EE) FAQ](/docs/open-source#enterprise-edition-ee-faq)
 - Langfuse can be procured through the [AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=seller-nmyz7ju7oafxu).
 
 ## Talk to us
 
-Schedule an [introduction call](/schedule-demo) to discuss your specific needs and requirements.
+Reach out via email ([enterprise@langfuse.com](mailto:enterprise@langfuse.com)) or [schedule a demo](#demo) call to discuss your specific needs and requirements.
 
 ## Introduction to Langfuse
 
@@ -70,7 +70,7 @@ _Langfuse features along the development lifecycle_
 
 - Self-hosting
   - Open Source [Licensing](/docs/open-source)
-  - [Feature availability](/docs/deployment/feature-overview) in Enterprise Edition vs Open Source
+  - [Comparison](/pricing-self-host) of Open Source, Pro, and Enterprise version
   - Architecture and component diagram: [Contributing.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md). Note that the architecture will change with [Langfuse v3](https://github.com/orgs/langfuse/discussions/1902).
   - Langfuse Self-Hosting: EE [Terms and Conditions](/terms)
 
@@ -120,20 +120,10 @@ Langfuse is often deployed alongside a central LLM Gateway that provides schema 
 
 ```mermaid
 graph LR
-  LLM["<strong>LLM</strong>
-  API or service"]
+  LLM["<strong>LLM</strong><br/>API or service"]
   App["<strong>Application</strong>"]
-  LF["<strong>Langfuse</strong>
-  - Tracing/Observability
-  - Evaluation
-  - Prompt Management
-  - Cost Tracking
-  - ... (see documentation)"]
-  Gateway["<strong>LLM Gateway (optional)</strong>
-  Internal or Open-source (e.g. LiteLLM)
-  - Schema translation
-  - Rate limiting
-  - PII redaction"]
+  LF["<strong>Langfuse</strong><br/>Tracing/Observability<br/>Evaluation<br/>Prompt Management<br/>Cost Tracking<br/>Security Monitoring<br/>Experiments<br/>... (see docs)"]
+  Gateway["<strong>LLM Gateway (optional)</strong><br/>Internal or Open-source (e.g. LiteLLM)<br/>Schema translation<br/>Rate limiting<br/>PII redaction"]
 
   App -->|async tracing|LF
   LF -->|prompt management| App
@@ -142,6 +132,10 @@ graph LR
   Gateway -->|"optional: forward llm calls"| LF
 ```
 
-## Talk to us
+## Talk to us [#demo]
 
-Schedule an [introduction call](/schedule-demo) to discuss your specific needs and requirements.
+import { ScheduleDemo } from "@/components/CalComScheduleDemo";
+
+Reach out via email ([enterprise@langfuse.com](mailto:enterprise@langfuse.com)) or schedule a demo to discuss your specific needs and requirements.
+
+<ScheduleDemo className="mt-6" />

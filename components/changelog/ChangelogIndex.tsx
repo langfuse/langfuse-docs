@@ -66,15 +66,6 @@ export const ChangelogIndex = ({
       return `/changelog?page=${page}`;
     };
 
-    const changePage = (page: number) => {
-      if (page === currentPage) return;
-      if (page === 1) {
-        router.push(pageHref(page));
-      } else {
-        router.push(pageHref(page));
-      }
-    };
-
     return (
       <Pagination className="mt-8">
         <Head>
@@ -97,7 +88,7 @@ export const ChangelogIndex = ({
             {pageNumbers.map((pageNumber, index) =>
               pageNumber === null ? (
                 <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis size="sm" />
+                  <PaginationEllipsis />
                 </PaginationItem>
               ) : (
                 <PaginationItem key={pageNumber}>

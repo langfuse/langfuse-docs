@@ -11,7 +11,6 @@ import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
-import Link from "next/link";
 import {
   AvailabilityBanner,
   AvailabilitySidebar,
@@ -189,22 +188,37 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  banner: {
-    key: "banner-hiring",
-    dismissible: true,
-    content: (
-      <Link href="https://lu.ma/xvmbxigl">
-        {/* mobile */}
-        <span className="sm:hidden">
-        Thursday: Langfuse Meetup in SF →
-        </span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-          Thursday: Langfuse User Meetup in San Francisco →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "ph-prompt-experiments",
+  //   dismissible: false,
+  //   content: (
+  //     <Link href="/ph">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">
+  //         ✨ Today: Support us on{" "}
+  //         <Image
+  //           src={ProductHuntWhiteImage}
+  //           alt="Product Hunt"
+  //           height={25}
+  //           className="inline mx-1"
+  //         />{" "}
+  //         ✨
+  //       </span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         ✨ Today: Support{" "}
+  //         <span className="font-bold">Langfuse Prompt Experimentation</span> on{" "}
+  //         <Image
+  //           src={ProductHuntWhiteImage}
+  //           alt="Product Hunt"
+  //           height={25}
+  //           className="inline mx-1"
+  //         />{" "}
+  //         ✨
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;

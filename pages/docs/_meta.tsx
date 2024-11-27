@@ -14,9 +14,11 @@ export default {
   },
   tracing: "Introduction",
   "get-started": "Quickstart",
-  "tracing-features": "Features",
+  "tracing-features": "Tracing Features",
   sdk: "SDKs",
   integrations: "Integrations",
+  "model-usage-and-cost": "LLM Usage & Cost Tracking",
+  analytics: "Production Analytics",
   "query-traces": "Query Traces",
 
   "-- Develop": {
@@ -25,23 +27,15 @@ export default {
   },
   prompts: "Prompt Management",
   playground: "Playground",
+  security: "LLM Security",
   "fine-tuning": "Fine-tuning",
 
-  "-- Monitor": {
+  "-- Evaluation": {
     type: "separator",
-    title: "Monitor",
+    title: "Evaluation",
   },
-  analytics: "Analytics",
-  "model-usage-and-cost": "Model Usage & Cost",
   scores: "Evaluation",
-  security: "LLM Security",
-
-  "-- Test": {
-    type: "separator",
-    title: "Test",
-  },
-  experimentation: "Experimentation",
-  datasets: "Datasets",
+  datasets: "Datasets & Experiments",
 
   "-- References": {
     type: "separator",
@@ -74,13 +68,5 @@ export default {
     title: "Support ↗",
     href: "/support",
     newWindow: true,
-  },
-  video: {
-    title: "Video (2 min)",
-    type: "page",
-    display: "hidden",
-    theme: {
-      typesetting: "article",
-    },
   },
 };

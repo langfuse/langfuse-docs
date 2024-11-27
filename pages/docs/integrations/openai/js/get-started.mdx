@@ -209,6 +209,33 @@ Resulting generations are now linked to the prompt in Langfuse, allowing you to 
 
 When working with chat prompts, you must typecast the compiled prompt messages as `OpenAI.ChatCompletionMessageParam[]` or use a type-guard utility function as Langfuse message roles can be arbitrary strings whereas the OpenAI type definition is more restrictive.
 
+### OpenAI token usage on streamed responses
+
+OpenAI returns the token usage on streamed responses only when in `stream_options` the `include_usage` parameter is set to `true`. If you would like to benefit from OpenAI's directly provided token usage, you can set `{ include_usage: true }` in the `stream_options` argument.
+
+```typescript /{"include_usage": True}/
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const openai = observeOpenAI(new OpenAI());
+
+const stream = await openai.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "How are you?" }],
+  stream: true,
+  stream_options: { include_usage: true }
+});
+
+let result = "";
+
+for await (const chunk of stream) {
+  // Check if chunk choices are not empty. OpenAI returns token usage in a final chunk with an empty choices list.
+  result += chunk.choices[0]?.delta?.content || "";
+}
+
+await openai.flushAsync();
+```
+
 ### Nested traces
 
 [Langfuse Tracing](/docs/tracing) groups multiple observations (can be any LLM or non-LLM calls) into a single trace. This integration by default creates a single trace for each OpenAI call.

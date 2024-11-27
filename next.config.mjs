@@ -127,7 +127,7 @@ const nonPermanentRedirects = [
   ["/video", "/guides/videos/introducing-langfuse-2.0"],
   ["/docs/video", "/guides/videos/introducing-langfuse-2.0"],
   ["/roadmap", "/docs/roadmap"],
-  ["/ph", "https://www.producthunt.com/posts/langfuse-2-0-llm-engineering-platform"],
+  ["/ph", "https://www.producthunt.com/posts/langfuse-prompt-experiments"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/new-issue", "/issue"],
@@ -148,7 +148,7 @@ const nonPermanentRedirects = [
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
 
-  ["/launch", "/blog/launch-week-1"],
+  ["/launch", "/blog/2024-11-17-launch-week-2"],
 
   // Redirect to overview pages
   ...[
@@ -202,7 +202,9 @@ const nonPermanentRedirects = [
   ["/docs/scores/model-based-evals/overview", "/docs/scores/model-based-evals"],
   ["/docs/scores/model-based-evals/ragas", "/cookbook/evaluation_of_rag_with_ragas"],
   ["/docs/scores/model-based-evals/langchain", "/cookbook/evaluation_with_langchain"],
-  ["/experimentation", "/docs/experimentation"],
+  ["/docs/scores/getting-started", "/docs/scores/overview"],
+  ["/experimentation", "/docs/datasets/overview"],
+  ["/docs/experimentation", "/docs/datasets/overview"],
   ["/docs/token-usage", "/docs/model-usage-and-cost"],
   ["/docs/debugging-ui", "/docs/tracing"],
   ["/observability", "/docs/tracing"],
@@ -221,6 +223,7 @@ const nonPermanentRedirects = [
   ["/tos", "/terms"],
   ["/docs/export-and-fine-tuning", "/docs/query-traces"],
   ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
+  ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],

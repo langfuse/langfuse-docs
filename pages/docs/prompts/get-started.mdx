@@ -1,10 +1,15 @@
 ---
+title: Open Source Prompt Management
 description: Manage and version your prompts in Langfuse (open source). When retrieved, they are cached by the Langfuse SDKs for low latency.
 ---
 
 # Prompt Management
 
 Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is a **Prompt CMS** (Content Management System).
+
+import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
+
+<PromptOverview />
 
 ## What is prompt management?
 
@@ -73,8 +78,8 @@ Recommended readings:
 Depending on the scale of your experiments, there are different approaches you can take:
 
 1. [Playground](/docs/playground) for single prompt experiments in UI.
-2. [Experiments](/docs/experimentation) for A/B testing and structured experiments in production.
-3. [Datasets](/docs/datasets) for offline/dev benchmarking prompts or applications on a set of reference inputs.
+2. [Releases and Versioning](/docs/tracing-features/releases-and-versioning) for A/B testing and structured experiments in production.
+3. [Datasets](/docs/datasets/overview) for offline/dev benchmarking prompts or applications on a set of reference inputs.
 
 </AccordionContent>
 </AccordionItem>
@@ -116,92 +121,9 @@ Depending on the scale of your experiments, there are different approaches you c
 
 If you already have a prompt with the same `name`, the prompt will be added as a new version.
 
-<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
-<Tab>
+import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
-<CloudflareVideo
-  videoId="3c9bf36417e79dd2d68c3bba2a8f0a98"
-  aspectRatio={1.24}
-  gifStyle
-  className="max-w-xl"
-/>
-
-</Tab>
-<Tab>
-
-```python
-# Create a text prompt
-langfuse.create_prompt(
-    name="movie-critic",
-    type="text",
-    prompt="As a {{criticlevel}} movie critic, do you like {{movie}}?",
-    labels=["production"],  # directly promote to production
-    config={
-        "model": "gpt-3.5-turbo",
-        "temperature": 0.7,
-        "supported_languages": ["en", "fr"],
-    },  # optionally, add configs (e.g. model parameters or model tools) or tags
-)
-
-# Create a chat prompt
-langfuse.create_prompt(
-    name="movie-critic-chat",
-    type="chat",
-    prompt=[
-      { role: "system", content: "You are an {{criticlevel}} movie critic" },
-      { role: "user", content: "Do you like {{movie}}?" },
-    ],
-    labels=["production"],  # directly promote to production
-    config={
-        "model": "gpt-3.5-turbo",
-        "temperature": 0.7,
-        "supported_languages": ["en", "fr"],
-    },  # optionally, add configs (e.g. model parameters or model tools) or tags
-)
-```
-
-If you already have a prompt with the same name, the prompt will be added as a new version.
-
-</Tab>
-
-<Tab>
-
-```ts
-// Create a text prompt
-await langfuse.createPrompt({
-  name: "movie-critic",
-  type: "text",
-  prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
-  labels: ["production"], // directly promote to production
-  config: {
-    model: "gpt-3.5-turbo",
-    temperature: 0.7,
-    supported_languages: ["en", "fr"],
-  }, // optionally, add configs (e.g. model parameters or model tools) or tags
-});
-
-// Create a chat prompt
-await langfuse.createPrompt({
-  name: "movie-critic-chat",
-  type: "chat",
-  prompt: [
-    { role: "system", content: "You are an {{criticlevel}} movie critic" },
-    { role: "user", content: "Do you like {{movie}}?" },
-  ],
-  labels: ["production"], // directly promote to production
-  config: {
-    model: "gpt-3.5-turbo",
-    temperature: 0.7,
-    supported_languages: ["en", "fr"],
-  }, // optionally, add configs (e.g. model parameters or model tools) or tags
-});
-```
-
-If you already have a prompt with the same name, the prompt will be added as a new version.
-
-</Tab>
-
-</Tabs>
+<PromptCreate />
 
 ### Use prompt
 
@@ -492,7 +414,7 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 
 This is currently unavailable when using the LlamaIndex integration.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
 Decorators
@@ -670,6 +592,32 @@ const chatModel = new ChatOpenAI();
 const chatChain = langchainChatPrompt.pipe(chatModel);
 
 await chatChain.invoke({ movie: "Dune 2", criticlevel: "expert" });
+```
+
+</Tab>
+
+<Tab>
+
+Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field:
+
+```typescript /langfusePrompt: fetchedPrompt.toJSON()/
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt,
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(),
+    },
+  },
+});
 ```
 
 </Tab>

@@ -7,11 +7,6 @@ export default {
       layout: "raw",
     },
   },
-  experimentation: {
-    title: "Experimentation",
-    type: "page",
-    display: "hidden",
-  },
   imprint: {
     title: "Imprint",
     type: "page",
@@ -45,6 +40,14 @@ export default {
     theme: {
       layout: "full",
     },
+  },
+  "pricing-self-host": {
+    title: "Pricing (self-hosted)",
+    type: "page",
+    theme: {
+      layout: "full",
+    },
+    display: "hidden",
   },
   changelog: {
     type: "page",
@@ -122,6 +125,21 @@ export default {
   },
   privacy: {
     title: "Privacy Policy",
+    type: "page",
+    display: "hidden",
+  },
+  jp: {
+    title: "Japanese Overview",
+    type: "page",
+    display: "hidden",
+  },
+  kr: {
+    title: "Korean Overview",
+    type: "page",
+    display: "hidden",
+  },
+  cn: {
+    title: "Chinese Overview",
     type: "page",
     display: "hidden",
   },
