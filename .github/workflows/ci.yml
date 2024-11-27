@@ -1,0 +1,27 @@
+name: "CI"
+
+on:
+  pull_request:
+  merge_group:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v4
+        id: pnpm-install
+        with:
+          version: 9.5.0
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: pnpm install
+
+      - name: Build next.js app
+        # change this if your site requires a custom build command
+        run: pnpm build
