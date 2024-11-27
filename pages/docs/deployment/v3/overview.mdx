@@ -92,11 +92,13 @@ Langfuse uses Redis for caching and queue operations.
 You can use a managed service on AWS, Azure, or GCP, or host it yourself.
 At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured.
 You may use Valkey instead of Redis, but there is no active support from the Langfuse team as of now.
+See [Redis](/docs/deployment/v3/components/redis) for more details on how to connect Redis to Langfuse.
 
 ### S3/Blob Store
 
 Langfuse requires an S3-compatible blob store to persist all incoming events, multi-modal inputs, and large exports.
 You can use a managed service on AWS, Azure, or GCP, or host it yourself using MinIO.
+See [S3/Blob Store](/docs/deployment/v3/components/blobstorage) for more details on how to connect a blob store to Langfuse.
 
 ### Clickhouse
 
@@ -111,6 +113,11 @@ You can use managed services like AWS ECS, Azure Container Instances, or GCP Clo
 
 During the container startup, all database migrations will be applied automatically.
 This can be optionally disabled via environment variables.
+
+<Callout type="info">
+  We recommend that you test V3 using the latest release candidate.
+  You can find the newest tag in our [GitHub Releases](https://github.com/langfuse/langfuse/releases?q=v3.0.0-rc&expanded=true).
+</Callout>
 
 ### Run Langfuse Web
 
@@ -142,7 +149,7 @@ docker run --name langfuse-web \
   -e LANGFUSE_RETURN_FROM_CLICKHOUSE=true \
   -p 3000:3000 \
   -a STDOUT \
-langfuse/langfuse:latest # TODO: Update to tagged version
+langfuse/langfuse:3.0.0-rc.1
 ```
 
 ### Run Langfuse Worker
@@ -169,7 +176,7 @@ docker run --name langfuse-worker \
   -e LANGFUSE_ASYNC_CLICKHOUSE_INGESTION_PROCESSING=true \
   -p 3030:3030 \
   -a STDOUT \
-langfuse/langfuse-worker:latest # TODO: Update to tagged version
+langfuse/langfuse-worker:3.0.0-rc.1
 ```
 
 ### Recommended sizing
@@ -193,7 +200,7 @@ You can use the same environment variables for the Langfuse Web and Langfuse Wor
 | `CLICKHOUSE_URL`                                                                                     | Required           | Hostname of the clickhouse instance. Pattern: `http(s)://<hostname>:8123` |
 | `CLICKHOUSE_USER`                                                                                    | Required           | Username of the clickhouse database. Needs SELECT, ALTER, INSERT, CREATE, DELETE grants.   |
 | `CLICKHOUSE_PASSWORD`                                                                                | Required           | Password of the clickhouse user. |
-| `CLICKHOUSE_CLUSTER_ENABLED`                                                              | `true`            | Whether to disable the automatic ClickHouse migrations during server start. |
+| `CLICKHOUSE_CLUSTER_ENABLED`                                                                         | `true`             | Whether to run ClickHouse commands `ON CLUSTER`. Set to `false` for single-container setups. |
 | `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED`                                                        | `false`            | Whether to disable the cluster mode in ClickHouse migrations. |
 | `REDIS_CONNECTION_STRING`                                                                            | Required           | Connection string of your redis instance. Instead of `REDIS_CONNECTION_STRING`, you can also use `REDIS_HOST`, `REDIS_PORT`, and `REDIS_AUTH`.  |
 | `LANGFUSE_S3_EVENT_UPLOAD_ENABLED`<br/>`LANGFUSE_S3_EVENT_UPLOAD_BUCKET`<br/>`LANGFUSE_S3_EVENT_UPLOAD_REGION`<br/>`LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`<br/>`LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY`<br/>`LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`<br/>`LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE` | Required                   | S3 configuration to upload incoming events into S3. `LANGFUSE_S3_EVENT_UPLOAD_BUCKET` is required for Langfuse to accept events. The other variables are optional if you use the default credentials on AWS instances and must be supplied in other cloud environments.                                                                                                                                                                              |
