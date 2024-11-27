@@ -17,5 +17,6 @@ export default {
   "mistral-sdk": "Mistral SDK",
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
+  lobechat: "LobeChat",
   other: "More Ways to Integrate",
 };
