@@ -11,7 +11,6 @@ import { Hubspot, hsPageView } from "@/components/analytics/hubspot";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import InkeepChatButton from "@/components/inkeep/InkeepChatButton";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -46,7 +45,6 @@ export default function App({ Component, pageProps }) {
       </PostHogProvider>
       <Hubspot />
       <SpeedInsights />
-      <InkeepChatButton />
       <Script
         src="https://app.termly.io/resource-blocker/488cc3b0-ed5a-4e9d-81f2-76014dcae784?autoBlock=on"
         strategy="beforeInteractive"

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import InkeepChatButton from "./inkeep/InkeepChatButton";
 
 const menuItems: {
   heading: string;
@@ -229,6 +230,7 @@ const FooterMenu = () => {
         © 2022-{new Date().getFullYear()} Langfuse GmbH / Finto Technologies
         Inc.
       </div>
+      <InkeepChatButton />
     </div>
   );
 };
