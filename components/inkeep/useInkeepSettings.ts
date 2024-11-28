@@ -96,9 +96,8 @@ const useInkeepSettings = (): InkeepSharedSettings => {
       },
     ],
     quickQuestions: [
-      "How to use the Python decorator to trace my LLM app?",
-      "How to use Langfuse with Vercel AI SDK?",
-      "How to mask sensitive LLM data?",
+      "How can Langfuse help me?",
+      "How to use the Python decorator for tracing?",
       "How to set up LLM-as-a-judge evals?",
     ],
   };
