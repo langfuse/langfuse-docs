@@ -9,7 +9,9 @@ const CrispChat = () => {
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID) {
-      Crisp.configure(process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID);
+      Crisp.configure(process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID, {
+        autoload: false,
+      });
       Crisp.chat.onChatInitiated(() => {
         posthog.capture("support_chat:initiated");
       });
@@ -36,4 +38,11 @@ export const openChat = () => {
   if (process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID) {
     Crisp.chat.open();
   }
+};
+
+export const isChatOpen = () => {
+  if (process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID) {
+    return Crisp.chat.isChatOpened();
+  }
+  return false;
 };

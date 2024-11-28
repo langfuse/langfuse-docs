@@ -16,12 +16,15 @@ import {
   AvailabilitySidebar,
 } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
+// import InkeepCustomTrigger from "./components/inkeep/InkeepCustomTrigger";
+import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
   main: MainContentWrapper,
   search: {
-    placeholder: "Search...",
+    // placeholder: "Search...",
+    component: <InkeepSearchBar />,
   },
   navbar: {
     extraContent: (

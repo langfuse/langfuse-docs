@@ -22,14 +22,14 @@ export function Logo() {
           alt="Langfuse Logo"
           width={120}
           height={20}
-          className="hidden dark:block"
+          className="hidden dark:block max-w-28 sm:max-w-none"
         />
         <Image
           src="/langfuse_logo.svg"
           alt="Langfuse Logo"
           width={120}
           height={20}
-          className="block dark:hidden"
+          className="block dark:hidden max-w-28 sm:max-w-none"
         />
         <style jsx>{`
           div {
