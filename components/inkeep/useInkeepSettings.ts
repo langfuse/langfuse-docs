@@ -6,7 +6,18 @@ import type {
 } from "@inkeep/uikit";
 import { useTheme } from "nextra-theme-docs";
 import { openChat } from "../supportChat";
-import { MessageCircle } from "lucide-react";
+import { InkeepCallbackEvent } from "@inkeep/uikit";
+import { type PostHog, usePostHog } from "posthog-js/react";
+
+const customAnalyticsCallback = (
+  event: InkeepCallbackEvent,
+  posthog: PostHog
+): void => {
+  const { interactionType } = event.commonProperties;
+  posthog.capture(`inkeep:${event.eventName}`, {
+    interactionType,
+  });
+};
 
 type InkeepSharedSettings = {
   baseSettings: InkeepBaseSettings;
@@ -17,6 +28,7 @@ type InkeepSharedSettings = {
 
 const useInkeepSettings = (): InkeepSharedSettings => {
   const { resolvedTheme } = useTheme();
+  const posthog = usePostHog();
 
   const baseSettings: InkeepBaseSettings = {
     apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY!,
@@ -28,6 +40,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
     colorMode: {
       forcedColorMode: resolvedTheme, // to sync dark mode with the widget
     },
+    logEventCallback: (event) => customAnalyticsCallback(event, posthog),
     theme: {
       components: {
         SearchBarTrigger: {
@@ -53,25 +66,25 @@ const useInkeepSettings = (): InkeepSharedSettings => {
     // optional settings
     chatSubjectName: "Langfuse",
     botAvatarSrcUrl: "/icon256.png", // use your own bot avatar
-    // includeAIAnnotations: {
-    //   shouldEscalateToSupport: true,
-    // },
-    // aiAnnotationPolicies: {
-    //   shouldEscalateToSupport: [
-    //     {
-    //       threshold: "STANDARD", // "STRICT" or "STANDARD"
-    //       action: {
-    //         type: "SHOW_SUPPORT_BUTTON",
-    //         label: "Contact Support",
-    //         icon: { builtIn: "LuUsers" },
-    //         action: {
-    //           type: "INVOKE_CALLBACK",
-    //           callback: () => openChat(),
-    //         },
-    //       },
-    //     },
-    //   ],
-    // },
+    includeAIAnnotations: {
+      shouldEscalateToSupport: true,
+    },
+    aiAnnotationPolicies: {
+      shouldEscalateToSupport: [
+        {
+          threshold: "STANDARD", // "STRICT" or "STANDARD"
+          action: {
+            type: "SHOW_SUPPORT_BUTTON",
+            label: "Contact Support",
+            icon: { builtIn: "LuUsers" },
+            action: {
+              type: "INVOKE_CALLBACK",
+              callback: () => openChat(),
+            },
+          },
+        },
+      ],
+    },
     getHelpCallToActions: [
       {
         name: "Chat with us",
