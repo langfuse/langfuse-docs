@@ -52,15 +52,18 @@ const getLatestReleases = async (): Promise<ApiResponse[]> => {
   }
 
   const langfuseReleases = await Promise.all(
-    responses.map(async (response, index) => {
+    responses.flatMap(async (response, index) => {
       const data = await response.json();
-      const latestRelease = data[0];
-      return {
+      const latestRelease = data.find((release) => !release.prerelease);
+      if (!latestRelease) {
+        return [];
+      }
+      return [{
         repo: REPOS[index],
         latestRelease: latestRelease ? latestRelease.tag_name : undefined,
         publishedAt: latestRelease ? latestRelease.published_at : undefined,
         url: latestRelease ? latestRelease.html_url : undefined,
-      };
+      }];
     })
   );
 
