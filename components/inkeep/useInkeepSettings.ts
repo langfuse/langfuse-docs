@@ -42,6 +42,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
 
   const modalSettings: InkeepModalSettings = {
     // optional settings
+    defaultView: "AI_CHAT", // chat should also be the default for the regular search
   };
 
   const searchSettings: InkeepSearchSettings = {
