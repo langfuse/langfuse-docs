@@ -44,7 +44,7 @@ You can either start from scratch or jump into the playground from an existing p
 
 ## Supported Models
 
-Currently the playground supports the following models:
+Currently the playground supports the following models by default. You may configure additional custom model names when adding your LLM API Key in the Langfuse project settings.
 
 export function ModelList() {
   const openAIModels = [
@@ -77,6 +77,11 @@ export function ModelList() {
     "claude-2.0",
     "claude-instant-1.2",
   ];
+  const vertexAIModels = [
+    "gemini-1.5-pro",
+    "gemini-1.5-flash",
+    "gemini-1.0-pro",
+  ];
   return (
     <div>
       <ul>
@@ -85,6 +90,9 @@ export function ModelList() {
         </li>
         <li>
           <strong>Anthropic:</strong> {anthropicModels.join(", ")}
+        </li>
+        <li>
+          <strong>Google Vertex AI:</strong> {vertexAIModels.join(", ")}
         </li>
       </ul>
     </div>
