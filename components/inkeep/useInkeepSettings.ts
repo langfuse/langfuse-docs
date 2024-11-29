@@ -80,6 +80,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
             action: {
               type: "INVOKE_CALLBACK",
               callback: () => openChat(),
+              shouldCloseModal: false,
             },
           },
         },
