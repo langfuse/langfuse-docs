@@ -85,10 +85,10 @@ const tiers = {
         "Dedicated support, and security controls for larger teams. Enterprise:",
       mainFeatures: [
         "100k observations / month included, additional: $10 / 100k observations",
-        "SSO enforcement and fine-grained RBAC",
-        "SOC2, ISO27001, and InfoSec reviews",
+        "SSO enforcement, fine-grained RBAC",
+        "SOC2, ISO27001, InfoSec reviews",
         "Dedicated support channel",
-        "Add-on: Enterprise support & SLAs",
+        "Add-ons: Enterprise support & SLAs, Billing via AWS Marketplace",
       ],
       cta: "Sign up",
       learnMore: "/enterprise",
