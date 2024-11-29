@@ -78,6 +78,8 @@ const useInkeepSettings = (): InkeepSharedSettings => {
       "Hi! I'm Langfuse's AI assistant trained on documentation, help articles, and other content. How can I help you today?",
     shouldShowCopyChatButton: true,
     disclaimerSettings,
+    isChatSharingEnabled: true,
+    shareChatUrlBasePath: "https://langfuse.com/docs/ask-ai",
     includeAIAnnotations: {
       shouldEscalateToSupport: true,
     },
