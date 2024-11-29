@@ -64,6 +64,7 @@ export default {
   "data-security-privacy": "Data Security & Privacy",
   "open-source": "Open Source",
   roadmap: "Roadmap",
+  "ask-ai": "Ask AI",
   support: {
     title: "Support ↗",
     href: "/support",

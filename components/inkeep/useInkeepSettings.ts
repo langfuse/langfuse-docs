@@ -66,6 +66,8 @@ const useInkeepSettings = (): InkeepSharedSettings => {
     // optional settings
     chatSubjectName: "Langfuse",
     botAvatarSrcUrl: "/icon256.png", // use your own bot avatar
+    isChatSharingEnabled: true,
+    shareChatUrlBasePath: "https://langfuse.com/docs/ask-ai",
     includeAIAnnotations: {
       shouldEscalateToSupport: true,
     },

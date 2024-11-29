@@ -1,28 +1,17 @@
-import React, { useEffect, useState } from "react";
-import useInkeepSettings from "./useInkeepSettings";
+import dynamic from "next/dynamic";
 import type { InkeepChatButtonProps } from "@inkeep/uikit";
-import { isChatOpen } from "../supportChat/chat";
+import useInkeepSettings from "./useInkeepSettings";
+
+const ChatButton = dynamic(
+  () => import("@inkeep/uikit").then((mod) => mod.InkeepChatButton),
+  {
+    ssr: false,
+  }
+);
 
 export default function InkeepChatButton() {
-  const [ChatButton, setChatButton] =
-    useState<(e: InkeepChatButtonProps) => JSX.Element>();
-
   const { baseSettings, aiChatSettings, searchSettings, modalSettings } =
     useInkeepSettings();
-
-  // load the library asynchronously
-  useEffect(() => {
-    const loadChatButton = async () => {
-      try {
-        const { InkeepChatButton } = await import("@inkeep/uikit");
-        setChatButton(() => InkeepChatButton);
-      } catch (error) {
-        console.error("Failed to load ChatButton:", error);
-      }
-    };
-
-    loadChatButton();
-  }, []);
 
   const chatButtonProps: InkeepChatButtonProps = {
     baseSettings,
@@ -32,10 +21,8 @@ export default function InkeepChatButton() {
   };
 
   return (
-    ChatButton && (
-      <div className="w-20">
-        <ChatButton {...chatButtonProps} />
-      </div>
-    )
+    <div className="w-20">
+      <ChatButton {...chatButtonProps} />
+    </div>
   );
 }
