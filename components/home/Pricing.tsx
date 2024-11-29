@@ -297,7 +297,11 @@ const sections = [
         name: "Prompt Experiments",
         tiers: {
           cloud: { Hobby: true, Pro: true, Team: true },
-          selfHosted: { "Open Source": false, Pro: "soon", Enterprise: "soon" },
+          selfHosted: {
+            "Open Source": false,
+            Pro: "soon (v3)",
+            Enterprise: "soon (v3)",
+          },
         },
       },
       {
@@ -311,8 +315,8 @@ const sections = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "soon",
-            Enterprise: "soon",
+            Pro: "soon (v3)",
+            Enterprise: "soon (v3)",
           },
         },
       },
