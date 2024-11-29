@@ -143,6 +143,7 @@ const tiers = {
         "SSO and fine-grained RBAC",
         "SOC2, ISO27001, and InfoSec reviews",
         "Dedicated support engineer and SLAs",
+        "Billing via AWS Marketplace",
       ],
       cta: "Talk to founders",
       learnMore: "/enterprise",
@@ -543,6 +544,37 @@ const sections = [
             "Open Source": false,
             Pro: false,
             Enterprise: "soon",
+          },
+        },
+      },
+    ],
+  },
+  {
+    name: "Billing",
+    features: [
+      {
+        name: "Payment methods",
+        tiers: {
+          cloud: {
+            Hobby: "n/a",
+            Pro: "credit card",
+            Team: "credit card, invoice",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "credit card",
+            Enterprise: "credit card, invoice",
+          },
+        },
+      },
+      {
+        name: "Billing via AWS Marketplace",
+        tiers: {
+          cloud: { Hobby: "n/a", Pro: false, Team: "Add-on" },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: ">10 users",
+            Enterprise: true,
           },
         },
       },
@@ -1152,6 +1184,11 @@ const faqs = [
     question: "How can I manage my subscription?",
     answer:
       "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
+  },
+  {
+    question: "Do you offer billing via AWS Marketplace?",
+    answer:
+      "Yes, all Langfuse Enterprise plans are available via AWS Marketplace (private offer). This applies to both Langfuse Cloud and Self-Hosted deployments. Please contact us at enterprise@langfuse.com for more details.",
   },
 ];
 
