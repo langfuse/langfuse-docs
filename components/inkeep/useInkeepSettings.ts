@@ -18,6 +18,10 @@ const customAnalyticsCallback = (
   const { interactionType } = event.commonProperties;
   posthog.capture(`inkeep:${event.eventName}`, {
     interactionType,
+    content:
+      event.eventName === "chat_message_submitted"
+        ? event.properties.content
+        : undefined,
   });
 };
 
