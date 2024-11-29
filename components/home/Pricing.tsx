@@ -586,7 +586,7 @@ const sections = [
   },
   {
     name: "Compliance",
-    href: "/docs/security",
+    href: "/security",
     features: [
       {
         name: "Data processing agreement (GDPR)",
