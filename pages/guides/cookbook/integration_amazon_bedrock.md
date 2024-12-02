@@ -10,6 +10,8 @@ category: Integrations
 
 When **using Langfuse with Amazon Bedrock**, you can easily capture [detailed traces](https://langfuse.com/docs/tracing) and metrics for every request, giving you insights into the performance and behavior of your application.
 
+All in-ui Langfuse features next to tracing (playground, llm-as-a-judge evaluation, prompt experiments) are fully compatible with Amazon Bedrock – just add your Bedrock configuration in the project settings.
+
 ## Integration Options
 
 There are a few ways through which you can capture traces and metrics for Amazon Bedrock:
@@ -19,6 +21,7 @@ There are a few ways through which you can capture traces and metrics for Amazon
    - [Langchain](https://langfuse.com/docs/integrations/langchain)
    - [Llama Index](https://langfuse.com/docs/integrations/llama-index)
    - [Haystack](https://langfuse.com/docs/integrations/haystack)
+   - [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk)
 
 2. via a Proxy such as [LiteLLM](https://langfuse.com/docs/integrations/litellm)
 3. via wrapping the Bedrock SDK with the [Langfuse Decorator](https://langfuse.com/docs/sdk/python/decorators) (_see example below_)
@@ -210,7 +213,7 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 Yes, you can monitor cost and token usage of your Bedrock calls in Langfuse. The native integrations with LLM application frameworks and the LiteLLM proxy will automatically report token usage to Langfuse.
 
-If you use the Langfuse decorator or the low-level Python SDK, you can [report](https://langfuse.com/docs/model-usage-and-cost) token usage and (optionally) also cost information directly.
+If you use the Langfuse decorator or the low-level Python SDK, you can [report](https://langfuse.com/docs/model-usage-and-cost) token usage and (optionally) also cost information directly. See example above for details.
 
 You can define custom price information via the Langfuse dashboard or UI ([see docs](https://langfuse.com/docs/model-usage-and-cost)) to adjust to the exact pricing of your models on Amazon Bedrock.
 
