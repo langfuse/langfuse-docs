@@ -7,13 +7,13 @@ export const config = {
 
 export default async function handler(request: NextRequest) {
   const imageData = (await fetch(
-    new URL("../../public/icon256.png", import.meta.url)
+    new URL("https://langfuse.com/icon256.png")
   ).then((res) => res.arrayBuffer())) as string;
   const fontGeistMono = await fetch(
-    new URL("../../lib/fonts/GeistMono-Medium.ttf", import.meta.url)
+    new URL("https://langfuse.com/fonts/GeistMono-Medium.ttf")
   ).then((res) => res.arrayBuffer());
   const fontGeistSans = await fetch(
-    new URL("../../lib/fonts/Geist-Regular.ttf", import.meta.url)
+    new URL("https://langfuse.com/fonts/Geist-Regular.ttf")
   ).then((res) => res.arrayBuffer());
 
   const { searchParams } = new URL(request.url);
