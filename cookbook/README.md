@@ -13,7 +13,7 @@ The JS cookbooks are written in TypeScript and run using Deno. To install Deno a
 ```bash
 brew install deno
 poetry shell
-deno jupyter --unstable
+deno jupyter --install
 ```
 
 Start the notebook server with the following command:
