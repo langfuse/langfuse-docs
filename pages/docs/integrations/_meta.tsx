@@ -14,6 +14,7 @@ export default {
   flowise: "Flowise",
   langflow: "Langflow",
   "amazon-bedrock": "Amazon Bedrock",
+  "google-vertex-ai": "Google Vertex AI",
   "mistral-sdk": "Mistral SDK",
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
