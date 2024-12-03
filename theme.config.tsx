@@ -1,5 +1,5 @@
 import React from "react";
-import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
+import { DocsThemeConfig, Link, useConfig } from "nextra-theme-docs";
 import { Cards, Steps, Tabs, Callout } from "nextra/components";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
@@ -191,37 +191,22 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "ph-prompt-experiments",
-  //   dismissible: false,
-  //   content: (
-  //     <Link href="/ph">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">
-  //         ✨ Today: Support us on{" "}
-  //         <Image
-  //           src={ProductHuntWhiteImage}
-  //           alt="Product Hunt"
-  //           height={25}
-  //           className="inline mx-1"
-  //         />{" "}
-  //         ✨
-  //       </span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         ✨ Today: Support{" "}
-  //         <span className="font-bold">Langfuse Prompt Experimentation</span> on{" "}
-  //         <Image
-  //           src={ProductHuntWhiteImage}
-  //           alt="Product Hunt"
-  //           height={25}
-  //           className="inline mx-1"
-  //         />{" "}
-  //         ✨
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+   banner: {
+     key: "community-hour",
+     dismissible: true,
+     content: (
+       <Link href="https://lu.ma/5szapn5d">
+         {/* mobile */}
+         <span className="sm:hidden">
+            Today: Langfuse Community Hour →
+         </span>
+         {/* desktop */}
+         <span className="hidden sm:inline">
+           Today: Langfuse Community Hour, 9-10am PT, 6-7pm CEST →
+         </span>
+       </Link>
+     ),
+   },
 };
 
 export default config;
