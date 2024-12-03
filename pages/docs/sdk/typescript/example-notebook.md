@@ -3,11 +3,13 @@ description: Learn how to use the Langfuse JS/TS SDK to log any LLM.
 category: Integrations
 ---
 
-# Cookbook: Use the Langfuse JS/TS SDK to log any LLM.
+# Cookbook: Langfuse JS/TS SDK
 
 JS/TS applications can either be traces via the [Langfuse SDK](https://langfuse.com/docs/sdk/typescript/guide) by wrapping any LLM model, or by using one of our native integrations such as [OpenAI](https://langfuse.com/docs/integrations/openai/js/get-started), [LangChain](https://langfuse.com/docs/integrations/langchain/example-javascript) or [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk). In this cookbook, we show you both methods to get you started.
 
-## Step 1: Environment Variables
+For this guide, we assume, that you are already familiar with the Langfuse data model (traces, spans, generations, etc.). If not, have a look [here](https://langfuse.com/docs/tracing#introduction-to-observability--traces-in-langfuse). 
+
+## Step 1: Setup
 
 *Note: This cookbook uses Deno.js, which requires different syntax for importing packages and setting environment variables.*
 
@@ -44,7 +46,7 @@ To log an LLM call, we will first create a trace. In this step, we can also assi
 
 
 ```typescript
-// Creation of a unique trace id.
+// Creation of a unique trace id. It is optional, but this makes it easier for us to score the trace (add user feedback, etc.) afterwards. 
 import { v4 as uuidv4 } from "npm:uuid";
 
 const traceId = uuidv4();
@@ -55,7 +57,7 @@ const traceId = uuidv4();
 // Creation of the trace and assignment of metadata
 const trace = langfuse.trace({
   id: traceId,
-  name: "anthropic-trace",
+  name: "JS-SDK-Trace",
   userId: "user_123456789",
   metadata: { user: "user@langfuse.com" },
   tags: ["production"],
@@ -73,22 +75,31 @@ trace.update({
 
 This part shows how to log an LLM call by passing the model in and outputs via the [Langfuse SDK](https://langfuse.com/docs/sdk/typescript/guide).
 
-We first create a observation of the type `Generation` which will be assigned to the trace we created earlier. In the second step, we use the Anthropic SDK to call the Clause 3.5 Sonnet model. This step can be replaced with any other LLM SDK.
+We first create an observation of the type `Span` to which we assign the `Generation` observation. This setp is optional but lets us structure the trace.
 
-Lastly, we pass the model output, the mode name and usage metrics to the generation. We can now see this trace in the Langfuse UI.
+We then create a observation of the type `Generation` which will be assigned to the `Span` we created earlier. In the second step, we use the Anthropic SDK to call the Clause 3.5 Sonnet model. This step can be replaced with any other LLM SDK.
+
+Lastly, we pass the model output, the mode name and usage metrics to the `Generation`. We can now see this trace in the Langfuse UI.
 
 
 ```typescript
 const msg = "Hello, Claude";
 
+// Create span
+const span_name = "Anthropic-Span";
+const span = trace.span({ name: span_name });
+
 // Example generation creation
-const generation = trace.generation({
+const generation = span.generation({
   name: "anthropic-generation01",
+  model: "claude-3-5-sonnet-20241022",
   input: msg,
 });
  
 // Application code
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import Anthropic from "npm:@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({ apiKey: Deno.env.get("ANTHROPIC_API_KEY") });
 
 const chatCompletion = await anthropic.messages.create({
   model: "claude-3-5-sonnet-20241022",
@@ -101,43 +112,34 @@ const chatCompletion = await anthropic.messages.create({
 generation.end({
   output: chatCompletion.content[0].text,
   usage: {
-    promptTokens: chatCompletion.usage.input_tokens,
-    completionTokens: chatCompletion.usage.output_tokens,
+    input: chatCompletion.usage.input_tokens,
+    output: chatCompletion.usage.output_tokens,
   },
-  model: chatCompletion.model,
-
 });
 
-console.log(chatCompletion);
+// End span to get span-level latencies
+span.end();
+
+console.log(chatCompletion.content[0].text);
 
 ```
 
-    {
-      id: "msg_01JaTqrfP1V93nxUKrCRgJo1",
-      type: "message",
-      role: "assistant",
-      model: "claude-3-5-sonnet-20241022",
-      content: [
-        { type: "text", text: "Hi! I'm Claude. How can I help you today?" }
-      ],
-      stop_reason: "end_turn",
-      stop_sequence: null,
-      usage: { input_tokens: 10, output_tokens: 16 }
-    }
+    Hello! How can I help you today?
 
-
-![Example Trace](/images/docs/js-any-llm-cookbook.png)
-
-Example trace in the Langfuse UI.
 
 ## Option 2: Using LangChain
 
-This step shows how to trace Langchain applications using the [Langchain integration](https://langfuse.com/docs/integrations/langchain/example-javascript). Since this is a native integration, the model parameters and outputs are automatically captured.
+This step shows how to trace Langchain applications using the [Langchain integration](https://langfuse.com/docs/integrations/langchain/example-javascript). Since this is a native integration, the model parameters and outputs are automatically captured. We create a new span in our trace and assign the Langchain generation to it by passing `root: span` in the `CallbackHandler`.
 
 
 ```typescript
+// Create span
+const span_name = "Langchain-Span";
+const span = trace.span({ name: span_name });
+
 import { CallbackHandler } from "npm:langfuse-langchain"
 const langfuseLangchainHandler = new CallbackHandler({
+    root: span,
     publicKey: Deno.env.get("LANGFUSE_PUBLIC_KEY"),
     secretKey: Deno.env.get("LANGFUSE_SECRET_KEY"),
     baseUrl: Deno.env.get("LANGFUSE_HOST"),
@@ -160,42 +162,51 @@ const res = await chain.invoke(
     { topic: "bears" },
     { callbacks: [langfuseLangchainHandler] }
 );
+
+// End span to get span-level latencies
+span.end();
  
 console.log(res.content)
 ```
 
-    Why don't bears wear shoes?
+    Why did the bear break up with his girlfriend?
     
-    Because they have bear feet!
+    Because she was too grizzly for him!
 
 
 ## Option 3: Using OpenAI
 
-This step shows how to trace OpenAI applications using the [OpenAI integration](https://langfuse.com/docs/integrations/openai/js/get-started). Since this is a native integration, the model parameters and outputs are automatically captured.
+This step shows how to trace OpenAI applications using the [OpenAI integration](https://langfuse.com/docs/integrations/openai/js/get-started). Since this is a native integration, the model parameters and outputs are automatically captured. To add the OpenAI generation to our trace as well, we first create a span and then pass `parent: span` in the `observeOpenAI` function.
 
 
 
 ```typescript
-import OpenAI from "npm:openai";
-import { observeOpenAI } from "npm:langfuse";
+// Initialize SDKs
+const openai = new OpenAI();
  
-// Configured via environment variables, see above
-const openai = observeOpenAI(new OpenAI());
+// Create span
+const span_name = "OpenAI-Span";
+const span = trace.span({ name: span_name });
  
-const completion = await openai.chat.completions.create({
-  model: 'gpt-3.5-turbo',
-  messages: [{ role: "system", content: "Tell me a joke." }],
-  max_tokens: 100,
-});
+// Call OpenAI
+const joke = (
+  await observeOpenAI(openai, {
+    parent: span,
+    generationName: "OpenAI-Generation",
+  }).chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: "Tell me a joke." },
+    ],
+  })
+).choices[0].message.content;
  
-// notebook only: await events being flushed to Langfuse
-await openai.flushAsync();
+// End span to get span-level latencies
+span.end();
  
-console.log(completion.choices[0]?.message.content);
+// Flush the Langfuse client belonging to the parent span
+await langfuse.flushAsync();
 ```
-
-    Why couldn't the bicycle stand up by itself? Because it was two tired!
-
 
 ## Step 3: Score the Trace (Optional)
 
@@ -212,3 +223,9 @@ langfuse.score({
   comment: "This was a good interaction",
 });
 ```
+
+## Step 4: View the Trace in Langfuse
+
+![Example trace with the three generations](https://static.langfuse.com/cookbooks/js-sdk-example/js-sdk-example.gif)
+
+[Example trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8d580443-519e-4713-9859-eff4a7193f87?timestamp=2024-12-03T17%3A45%3A16.787Z&observation=26ff69ed-8ba8-4bfe-9029-14a179828044&display=details).
