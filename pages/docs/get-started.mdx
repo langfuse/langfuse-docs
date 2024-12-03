@@ -18,6 +18,7 @@ If you are looking for other features, see the [overview](/docs).
 
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedJsSdk from "@/components-mdx/get-started-js-sdk.mdx";
 import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
 import EnvPython from "@/components-mdx/env-python.mdx";
 import EnvJs from "@/components-mdx/env-js.mdx";
@@ -73,36 +74,9 @@ import { Langfuse } from "https://esm.sh/langfuse"
 
 <EnvJs />
 
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [typescript SDK docs](/docs/sdk/typescript/guide).
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [JS/TS SDK docs](/docs/sdk/typescript/guide) or [end-to-end example notebook](/docs/sdk/typescript/example-notebook).
 
-```ts filename="server.ts"
-import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-const trace = langfuse.trace({
-  name: "my-AI-application-endpoint",
-});
-
-// Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-3.5-turbo",
-  modelParameters: {
-    temperature: 0.9,
-    maxTokens: 2000,
-  },
-  input: messages,
-});
-
-// Application code
-const chatCompletion = await llm.respond(prompt);
-
-// End generation - sets endTime
-generation.end({
-  output: chatCompletion,
-});
-```
+<GetStartedJsSdk />
 
 </Tab>
 <Tab>
