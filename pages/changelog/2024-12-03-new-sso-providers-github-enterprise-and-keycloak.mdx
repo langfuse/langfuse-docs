@@ -1,0 +1,33 @@
+---
+date: 2024-12-03
+title: SSO with GitHub Enterprise and Keycloak
+description: Langfuse now supports GitHub Enterprise and Keycloak as SSO providers on Langfuse Cloud and self-hosted instances
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Thank you to [@RTae](https://github.com/RTae) and [@jay0129](https://github.com/jay0129) for adding support for **Keycloak** and **GitHub Enterprise**!
+
+Current list of supported identity providers:
+
+- Google (with optional domain restrictions)
+- GitHub
+- GitHub Enterprise
+- GitLab
+- Azure AD/Entra ID
+- Okta
+- Auth0
+- AWS Cognito
+- Keycloak
+- Custom OAuth providers
+
+If you need a specific additional identity provider, please let us know by [creating an issue on GitHub](/issues). Langfuse uses Next-Auth.js, which integrates with [many providers](https://next-auth.js.org/providers/).
+
+## Get Started
+
+On Langfuse Cloud, please reach out to [support](/support) to configure a custom SSO identity provider for your domain.
+
+When self-hosting Langfuse, see our [self-hosting documentation](/docs/deployment/self-host#sso) for setup instructions.
