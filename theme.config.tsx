@@ -1,5 +1,5 @@
 import React from "react";
-import { DocsThemeConfig, Link, useConfig } from "nextra-theme-docs";
+import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Cards, Steps, Tabs, Callout } from "nextra/components";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
@@ -11,6 +11,7 @@ import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
+import Link from "next/link";
 import {
   AvailabilityBanner,
   AvailabilitySidebar,
