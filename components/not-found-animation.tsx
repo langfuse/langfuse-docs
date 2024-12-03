@@ -1,8 +1,15 @@
+import dynamic from "next/dynamic";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 import { useTheme } from "nextra-theme-docs";
+
+const CANVAS_STYLES = {
+  width: "100%",
+  height: "50vh",
+  minHeight: "400px",
+} as const;
 
 function MetallicKnot() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -35,7 +42,7 @@ function MetallicKnot() {
   );
 }
 
-export function NotFoundAnimation() {
+function NotFoundAnimationComponent() {
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 45 }}
@@ -44,11 +51,7 @@ export function NotFoundAnimation() {
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.5,
       }}
-      style={{
-        width: "100%",
-        height: "50vh",
-        minHeight: "400px",
-      }}
+      style={CANVAS_STYLES}
     >
       <ambientLight intensity={0.2} />
       <ambientLight intensity={0.1} color="#E01211" />
@@ -77,3 +80,11 @@ export function NotFoundAnimation() {
     </Canvas>
   );
 }
+
+export const NotFoundAnimation = dynamic(
+  () => Promise.resolve(NotFoundAnimationComponent),
+  {
+    ssr: false,
+    loading: () => <div style={CANVAS_STYLES} />,
+  }
+);
