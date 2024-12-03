@@ -299,8 +299,8 @@ const sections = [
           cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: {
             "Open Source": false,
-            Pro: "soon (v3)",
-            Enterprise: "soon (v3)",
+            Pro: "yes (v3)",
+            Enterprise: "yes (v3)",
           },
         },
       },
@@ -315,8 +315,8 @@ const sections = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "soon (v3)",
-            Enterprise: "soon (v3)",
+            Pro: "yes (v3)",
+            Enterprise: "yes (v3)",
           },
         },
       },
