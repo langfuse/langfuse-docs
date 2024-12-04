@@ -8,7 +8,6 @@ import IconTypescript from "../icons/typescript";
 import IconOpenai from "../icons/openai";
 import LlamaindexIcon from "./img/llamaindex_icon.png";
 import LangchainIcon from "./img/langchain_icon.png";
-import LanggraphIcon from "./img/langgraph_icon.png";
 import HaystackIcon from "./img/haystack_icon.png";
 import LitellmIcon from "./img/litellm_icon.png";
 import InstructorIcon from "./img/instructor_icon.svg";
@@ -53,7 +52,7 @@ const integrations: IntegrationTileProps[] = [
     icon: <IconOpenai className="h-7 w-7" />,
   },
   {
-    title: "LangChain/Graph",
+    title: "LangChain, LangGraph",
     href: "/docs/integrations/langchain/tracing",
     icon: (
       <Image
