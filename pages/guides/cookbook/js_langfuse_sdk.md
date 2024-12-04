@@ -12,7 +12,7 @@ In this notebook, we will walk you through a **simple end-to-end example** that:
 - Uses the core features of the Langfuse JS/TS SDK
 - Shows how to log any LLM call via the low-level SDK
 - Uses integrations that are interoperable with low-level SDK
-    - Langchain integration 
+    - LangChain integration 
     - OpenAI integration
 
 For this guide, we assume that you are already familiar with the Langfuse data model (traces, spans, generations, etc.). If not, please read the [conceptual introduction](https://langfuse.com/docs/tracing) to tracing.
@@ -90,7 +90,7 @@ trace.update({
 
 You can use the low-level Langfuse SDK to log any LLM call or any of the [integrations](https://langfuse.com/docs/integrations) that are interoperable with it.
 
-In the following, we will demonstrate how to log LLM calls using the low-level SDK, Langchain, and OpenAI integrations.
+In the following, we will demonstrate how to log LLM calls using the low-level SDK, LangChain, and OpenAI integrations.
 
 ### Option 1: Log Any LLM with low-level Langfuse SDK
 
@@ -150,15 +150,15 @@ console.log(chatCompletion.content[0].text);
 
 ### Option 2: Using LangChain
 
-This step shows how to trace Langchain applications using the [Langchain integration](https://langfuse.com/docs/integrations/langchain/tracing) which is fully interoperable with the Langfuse SDK.
+This step shows how to trace LangChain applications using the [LangChain integration](https://langfuse.com/docs/integrations/langchain/tracing) which is fully interoperable with the Langfuse SDK.
 
 Since this is a native integration, the model parameters and outputs are automatically captured.
 
 Steps:
 
 1. Create wrapper span to contain this section within the trace
-2. Create Langchain handler scoped to this span by passing `root`
-3. Pass handler to Langchain to natively capture Langchain traces
+2. Create LangChain handler scoped to this span by passing `root`
+3. Pass handler to LangChain to natively capture LangChain traces
 4. End wrapper span to get span-level latencies
 
 
