@@ -20,6 +20,7 @@ import DifyIcon from "./img/dify_icon.png";
 import OpenwebUiIcon from "./img/openwebui_icon.png";
 import MirascopeIcon from "./img/mirascope_icon.svg";
 import DSPyIcon from "./img/dspy_icon.png";
+import GoogleGeminiIcon from "./img/google_gemini.svg";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import React from "react";
@@ -52,25 +53,12 @@ const integrations: IntegrationTileProps[] = [
     icon: <IconOpenai className="h-7 w-7" />,
   },
   {
-    title: "LangChain",
+    title: "LangChain/Graph",
     href: "/docs/integrations/langchain/tracing",
     icon: (
       <Image
         src={LangchainIcon}
         alt="Langchain Icon"
-        width={40}
-        height={40}
-        className="dark:invert dark:saturate-0 dark:brightness-0"
-      />
-    ),
-  },
-  {
-    title: "LangGraph",
-    href: "/docs/integrations/langchain/example-python-langgraph",
-    icon: (
-      <Image
-        src={LanggraphIcon}
-        alt="LangGraph Icon"
         width={40}
         height={40}
         className="dark:invert dark:saturate-0 dark:brightness-0"
@@ -136,6 +124,23 @@ const integrations: IntegrationTileProps[] = [
     ),
   },
   {
+    title: "Amazon Bedrock",
+    href: "/docs/integrations/amazon-bedrock",
+    icon: <Image src={BedrockIcon} alt="Bedrock Icon" width={36} height={36} />,
+  },
+  {
+    title: "Google Vertex/Gemini",
+    href: "/docs/integrations/google-vertex-ai",
+    icon: (
+      <Image
+        src={GoogleGeminiIcon}
+        alt="Google Gemini Icon"
+        width={36}
+        height={36}
+      />
+    ),
+  },
+  {
     title: "Ollama",
     href: "/docs/integrations/ollama",
     icon: (
@@ -147,11 +152,6 @@ const integrations: IntegrationTileProps[] = [
         className="dark:invert"
       />
     ),
-  },
-  {
-    title: "Bedrock",
-    href: "/docs/integrations/amazon-bedrock",
-    icon: <Image src={BedrockIcon} alt="Bedrock Icon" width={36} height={36} />,
   },
   {
     title: "Flowise",
