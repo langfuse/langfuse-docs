@@ -150,7 +150,7 @@ console.log(chatCompletion.content[0].text);
 
 ### Option 2: Using LangChain
 
-This step shows how to trace Langchain applications using the [Langchain integration](https://langfuse.com/docs/integrations/langchain/example-javascript) which is fully interoperable with the Langfuse SDK.
+This step shows how to trace Langchain applications using the [Langchain integration](https://langfuse.com/docs/integrations/langchain/tracing) which is fully interoperable with the Langfuse SDK.
 
 Since this is a native integration, the model parameters and outputs are automatically captured.
 
