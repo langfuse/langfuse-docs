@@ -1,5 +1,5 @@
 ---
-description: Learn how to use the Langfuse JS/TS SDK to log any LLM.
+description: End-to-end example of how to use the Langfuse Open Source Tracing via the low-level Langfuse JS/TS SDK. Includes examples for Anthropic, OpenAI and LangChain.
 category: Integrations
 ---
 
