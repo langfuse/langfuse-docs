@@ -15,7 +15,7 @@ export default function InkeepSearchBar() {
     baseSettings,
     aiChatSettings,
     searchSettings,
-    modalSettings,
+    modalSettings: { ...modalSettings, isShortcutKeyEnabled: true },
   };
 
   return (
