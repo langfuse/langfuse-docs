@@ -1,4 +1,5 @@
 ---
+title: Langfuse JS/TS SDK
 description: End-to-end example of how to use the Langfuse Open Source Tracing via the low-level Langfuse JS/TS SDK. Includes examples for Anthropic, OpenAI and LangChain.
 category: Integrations
 ---
@@ -260,3 +261,4 @@ langfuse.score({
 
 - [Langfuse JS/TS SDK Guide](https://langfuse.com/docs/sdk/typescript/guide)
 - [Langfuse Integrations](https://langfuse.com/docs/integrations)
+- [Support](/support)
