@@ -24,6 +24,11 @@ export default {
     type: "page",
     title: "Docs",
   },
+  "self-hosting": {
+    type: "page",
+    title: "Self Hosting",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
+  },
   guides: {
     type: "page",
     title: "Guides",
