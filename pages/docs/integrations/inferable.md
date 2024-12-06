@@ -5,7 +5,7 @@ description: Open source observability for Inferable applications. Automatically
 
 # Langfuse Integration for Inferable
 
-[**Inferable**](https://www.inferable.ai) ([GitHub](https://github.com/inferablehq/inferable)) is an open-source platform that helps you build reliable LLM-powered agentic automations at scale.
+[**Inferable**](https://www.inferable.ai) ([GitHub](https://github.com/inferablehq/inferable)) is an open-source platform that helps you build reliable agentic automations at scale.
 
 With the native integration, you can use Inferable to quickly create distributed agentic automations and then use Langfuse to monitor and improve them. No code changes required.
 
@@ -24,7 +24,7 @@ With the native integration, you can use Inferable to quickly create distributed
 </Tab>
 <Tab>
 
-1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+1. Follow [instructions](/docs/get-started/) for self-hosting or local setups
 2. Copy API keys for your project
 
 </Tab>
@@ -44,7 +44,7 @@ With the native integration, you can use Inferable to quickly create distributed
      </Tab>
 
 <Tab>
-If you're self-hosting in the headless mode, simply insert the Langfuse credentials into the `integrations` table.
+If you're self-hosting Inferable in the headless mode, simply insert the Langfuse credentials into the `integrations` table.
 
 ```sql
 INSERT INTO integrations (cluster_id, langfuse) VALUES
