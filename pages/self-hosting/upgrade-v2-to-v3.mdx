@@ -4,17 +4,6 @@ description: A guide to upgrade a Langfuse v2 setup to v3.
 
 # Migrate Langfuse v2 to v3
 
-<Callout type="warning">
-  This guide covers a developer preview which is **not suitable for production use**.
-  v3 is under active development and we plan to ship a production-ready version by the end of November 2024.
-  We share this information to gather feedback from our awesome developer community.
-
-  For a production-ready setup, follow the [self-hosting guide](/docs/deployment/self-host)
-  or consider using [Langfuse Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
-
-  If you want to get started on v3, please follow our [v3 Self-Host Guide](/docs/deployment/v3/overview).
-</Callout>
-
 To learn more about our reasons for the architectural changes, jump to the [Reasoning](#reasoning) section.
 
 ## SDK compatibility and API changes
@@ -24,7 +13,7 @@ Certain APIs in SDK versions below version 2.0.0 are not compatible with our new
 Please upgrade and benefit from many performance improvements or features such as [prompt caching](/changelog/2024-02-05-sdk-level-prompt-caching).
 
 **Upgrade options**:
-- Default SDK upgrade: Follow the 1.x.x to 2.x.x upgrade path ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JavaScript](/docs/sdk/typescript/guide#upgrade1to2)). For the JavaScrupt SDK, consider an upgrade [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3) as well. The upgrade is straightforward and should not take much time.
+- Default SDK upgrade: Follow the 1.x.x to 2.x.x upgrade path ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JavaScript](/docs/sdk/typescript/guide#upgrade1to2)). For the JavaScript SDK, consider an upgrade [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3) as well. The upgrade is straightforward and should not take much time.
 - Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
 
 **Background**: Langfuse v3 relies on an event driven backend architecture.
