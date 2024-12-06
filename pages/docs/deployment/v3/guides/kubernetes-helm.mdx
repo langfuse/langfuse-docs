@@ -8,11 +8,7 @@ This guide will walk you through the steps to deploy Langfuse on Kubernetes usin
 You will need access to a Kubernetes cluster and Helm installed on your local machine.
 For the purposes of this guide, we will use a local minikube instance, but each step should extend to a managed Kubernetes service like GKE, EKS, or AKS.
 
-<Callout type="warning">
-  This guide covers a developer preview which is **not suitable for production use**.
-  v3 is under active development and we plan to ship a production-ready version by the end of November 2024.
-  We share this information to gather feedback from our awesome developer community.
-
+<Callout type="info">
   If you are interested in contributing to our Kubernetes deployment guide or Helm chart,
   please reach out to us on [Discord](/discord), contact the maintainers at support@langfuse.com,
   or join the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/1902).
@@ -62,7 +58,8 @@ If you want to install it with a different name, you will have to adjust the Red
 
 At this point, Kubernetes will start to deploy the Langfuse application and its dependencies.
 This can take up to 5 minutes.
-You can monitor the progress by checking `kubectl get pods -n langfuse-v3-preview` - we expect all pods to be Running.
+You can monitor the progress by checking `kubectl get pods -n langfuse-v3-preview` - we expect all pods to be Running eventually.
+The langfuse-web and langfuse-worker container will restart a couple of times while the databases are being provisioned.
 
 ## Smoke test UI
 

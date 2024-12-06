@@ -100,8 +100,10 @@ See [Redis](/docs/deployment/v3/components/redis) for more details on how to con
 ### S3/Blob Store
 
 Langfuse requires an S3-compatible blob store to persist all incoming events, multi-modal inputs, and large exports.
-You can use a managed service on AWS, Azure, or GCP, or host it yourself using MinIO.
-See [S3/Blob Store](/docs/deployment/v3/components/blobstorage) for more details on how to connect a blob store to Langfuse.
+You can use a managed service on AWS, or GCP, or host it yourself using MinIO.
+Langfuse also has experimental support for Azure Blob Storage.
+See [S3/Blob Store](/docs/deployment/v3/components/blobstorage) for more details on how to connect a blob store to Langfuse
+and more details on Azure Blob Storage.
 
 ### Clickhouse
 
@@ -118,7 +120,7 @@ During the container startup, all database migrations will be applied automatica
 This can be optionally disabled via environment variables.
 
 <Callout type="info">
-  We recommend that you test V3 using the latest release candidate. You can find
+  We recommend that you test v3 using the latest release candidate. You can find
   the newest tag in our [GitHub
   Releases](https://github.com/langfuse/langfuse/releases?q=v3.0.0-rc&expanded=true).
 </Callout>
@@ -145,7 +147,7 @@ docker run --name langfuse-web \
   -e LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=bPxRfiCYEXAMPLEKEY \
   -p 3000:3000 \
   -a STDOUT \
-langfuse/langfuse:3.0.0-rc.2
+langfuse/langfuse:3.0.0-rc.3
 ```
 
 ### Run Langfuse Worker
@@ -167,7 +169,7 @@ docker run --name langfuse-worker \
   -e LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=bPxRfiCYEXAMPLEKEY \
   -p 3030:3030 \
   -a STDOUT \
-langfuse/langfuse-worker:3.0.0-rc.2
+langfuse/langfuse-worker:3.0.0-rc.3
 ```
 
 ### Recommended sizing
@@ -188,11 +190,11 @@ You can use the same environment variables for the Langfuse Web and Langfuse Wor
 | `SHADOW_DATABASE_URL`                         |                    | If your database user lacks the `CREATE DATABASE` permission, you must create a shadow database and configure the "SHADOW_DATABASE_URL". This is often the case if you use a Cloud database. Refer to the [Prisma docs](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/shadow-database#cloud-hosted-shadow-databases-must-be-created-manually) for detailed instructions. |
 | `CLICKHOUSE_MIGRATION_URL`                    | Required           | Migration URL (TCP protocol) for the clickhouse instance. Pattern: `clickhouse://<hostname>:(9000/9440)`                                                                                                                                                                                                                                                                                              |
 | `CLICKHOUSE_MIGRATION_SSL`                    | `false`            | Set to true to establish an SSL connection to Clickhouse for the database migration.                                                                                                                                                                                                                                                                                                                  |
-| `CLICKHOUSE_URL`                              | Required           | Hostname of the clickhouse instance. Pattern: `http(s)://<hostname>:8123`                                                                                                                                                                                                                                                                                                                             |
+| `CLICKHOUSE_URL`                              | Required           | Hostname of the clickhouse instance. Pattern: `http(s)://<hostname>:(8123/8443)`                                                                                                                                                                                                                                                                                                                             |
 | `CLICKHOUSE_USER`                             | Required           | Username of the clickhouse database. Needs SELECT, ALTER, INSERT, CREATE, DELETE grants.                                                                                                                                                                                                                                                                                                              |
 | `CLICKHOUSE_PASSWORD`                         | Required           | Password of the clickhouse user.                                                                                                                                                                                                                                                                                                                                                                      |
 | `CLICKHOUSE_CLUSTER_ENABLED`                  | `true`             | Whether to run ClickHouse commands `ON CLUSTER`. Set to `false` for single-container setups.                                                                                                                                                                                                                                                                                                          |
-| `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable the cluster mode in ClickHouse migrations.                                                                                                                                                                                                                                                                                                                                         |
+| `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable automatic ClickHouse migrations on startup.                                                                                                                                                                                                                                                                                                                                         |
 | `REDIS_CONNECTION_STRING`                     | Required           | Connection string of your redis instance. Instead of `REDIS_CONNECTION_STRING`, you can also use `REDIS_HOST`, `REDIS_PORT`, and `REDIS_AUTH`.                                                                                                                                                                                                                                                        |
 | `NEXTAUTH_URL`                                | Required           | URL of your Langfuse web deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`. Required for successful authentication via OAUTH.                                                                                                                                                                                                                                                      |
 | `NEXTAUTH_SECRET`                             | Required           | Used to validate login session cookies, generate secret with at least 256 entropy using `openssl rand -base64 32`.                                                                                                                                                                                                                                                                                    |
@@ -222,6 +224,7 @@ You can use the same environment variables for the Langfuse Web and Langfuse Wor
 | `LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID`      |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                                                                                                                                                                                                                                                                                                  |
 | `LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY`  |                    | Secret access key for the bucket.                                                                                                                                                                                                                                                                                                                                                                     |
 | `LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE`   |                    | Whether to force path style on requests. Required for MinIO.                                                                                                                                                                                                                                                                                                                                          |
+| `DB_EXPORT_PAGE_SIZE`                         | `1000`             | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                               |
 | `LANGFUSE_S3_MEDIA_UPLOAD_ENABLED`            | `false`            | Whether to enable Langfuse S3 media uploads. This must be set to `true` to use multi-modal tracing.                                                                                                                                                                                                                                                                                                   |
 | `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`             | Required           | Name of the bucket in which media files should be uploaded.                                                                                                                                                                                                                                                                                                                                           |
 | `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`             | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`.                                                                                                                                                                                                                                                                                  |
@@ -230,7 +233,6 @@ You can use the same environment variables for the Langfuse Web and Langfuse Wor
 | `LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`      |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                                                                                                                                                                                                                                                                                                  |
 | `LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY`  |                    | Secret access key for the bucket.                                                                                                                                                                                                                                                                                                                                                                     |
 | `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`   |                    | Whether to force path style on requests. Required for MinIO.                                                                                                                                                                                                                                                                                                                                          |
-| `DB_EXPORT_PAGE_SIZE`                         | `1000`             | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                               |
 | `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED`   | `false`            | Set to `true` to disable automatic database migrations on docker startup.                                                                                                                                                                                                                                                                                                                             |
 | `LANGFUSE_LOG_LEVEL`                          | `info`             | Set the log level for the application. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                                                                                                                                                                                                                                                                                        |
 | `LANGFUSE_LOG_FORMAT`                         | `text`             | Set the log format for the application. Possible values are `text`, `json`.                                                                                                                                                                                                                                                                                                                           |
@@ -304,7 +306,7 @@ If you want to automatically initialize these resources, you can optionally use 
 | `LANGFUSE_INIT_USER_NAME`          | Name of the initial user               | No                          | `John Doe`         |
 | `LANGFUSE_INIT_USER_PASSWORD`      | Password for the initial user          | Yes                         | `password123`      |
 
-The different resources depend on each other in the following way. You can e.g. intialize an organization and a user wihtout having to also initialize a project and API keys, but you cannot initialize a project without also initializing an organization.
+The different resources depend on each other in the following way. You can e.g. intialize an organization and a user without having to also initialize a project and API keys, but you cannot initialize a project without also initializing an organization.
 
 ```
 Organization
