@@ -59,13 +59,15 @@ flowchart TB
 
 Langfuse consists of multiple storage components and two Docker containers:
 
-- **Langfuse Web**: The main web application serving the Langfuse UI and APIs.
-- **Langfuse Worker**: A worker that asynchronously processes events.
-- **Postgres**: The main database for transactional workloads.
-- **Redis**: A fast in-memory data structure store. Used for queue and cache operations.
-- **S3/Blob Store**: Object storage to persist all incoming events, multi-modal inputs, and large exports.
-- **Clickhouse**: High-performance OLAP database which stores traces, observations, and scores.
-- **LLM API / Gateway**: Some features depend on an external LLM API or gateway.
+- [**Application Containers**](/self-hosting/infrastructure/containers)
+  - Langfuse Web: The main web application serving the Langfuse UI and APIs.
+  - Langfuse Worker: A worker that asynchronously processes events.
+- **Storage Components**:
+  - [Postgres](/self-hosting/infrastructure/postgres): The main database for transactional workloads.
+  - [Redis](/self-hosting/infrastructure/redis): A fast in-memory data structure store. Used for queue and cache operations.
+  - [S3/Blob Store](/self-hosting/infrastructure/blobstorage): Object storage to persist all incoming events, multi-modal inputs, and large exports.
+  - [Clickhouse](/self-hosting/infrastructure/clickhouse): High-performance OLAP database which stores traces, observations, and scores.
+- [**LLM API / Gateway**](/self-hosting/infrastructure/llm-api): Some features depend on an external LLM API or gateway.
 
 ### Postgres Database
 
@@ -94,10 +96,6 @@ and more details on Azure Blob Storage.
 Langfuse uses Clickhouse as an OLAP database to store traces, observations, and scores.
 You can use the managed service by Clickhouse Cloud, or host it yourself.
 See [ClickHouse](/docs/deployment/v3/components/clickhouse) for more details on how to connect ClickHouse to Langfuse.
-
-### LLM API / Gateway
-
-Optionally, you can configure Langfuse to use an external LLM API or gateway for add-on features. Langfuse tracing does not need access to the LLM API as traces are captured client-side. Langfuse supports: OpenAI, Azure OpenAI, Anthropic, Google Vertex, and Amazon Bedrock. Via the OpenAI API, many other LLM services and proxies can be used.
 
 ## Support
 

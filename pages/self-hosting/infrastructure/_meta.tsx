@@ -8,4 +8,5 @@ export default {
   redis: "Redis / Valkey",
   blobstorage: "S3 / Blob Storage",
   postgres: "PostgreSQL",
+  "llm-api": "LLM API / Gateway",
 };
