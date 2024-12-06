@@ -2,63 +2,81 @@
 description: Step-by-step guide to run Langfuse on Kubernetes via Helm.
 ---
 
-# Self-hosted deployment - Kubernetes (Helm)
+# Kubernetes (Helm)
 
 This guide will walk you through the steps to deploy Langfuse on Kubernetes using the Helm package manager.
 You will need access to a Kubernetes cluster and Helm installed on your local machine.
 For the purposes of this guide, we will use a local minikube instance, but each step should extend to a managed Kubernetes service like GKE, EKS, or AKS.
 
+By default, the chart will deploy the Langfuse application containers and data stores ([architecture overview](/self-hosting#architecture)). You can optionally point to an existing PostgreSQL, Clickhouse and Redis instance. See [Readme](https://github.com/langfuse/langfuse-k8s/blob/lfe-1348-v3-chart/README.md) for more details.
+
 <Callout type="info">
-  If you are interested in contributing to our Kubernetes deployment guide or Helm chart,
-  please reach out to us on [Discord](/discord), contact the maintainers at support@langfuse.com,
-  or join the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/1902).
+  If you are interested in contributing to our Kubernetes deployment guide or
+  Helm chart, please reach out to us on [Discord](/discord), contact the
+  maintainers at support@langfuse.com, or join the [GitHub
+  Discussion](https://github.com/orgs/langfuse/discussions/1902).
+</Callout>
+
+<Callout type="info">
+
+This guide references the `lfe-1348-v3-chart` branch and v3-preview. It will be updated to `v3.0.0` on Dec 9, 2024.
+
 </Callout>
 
 ## Fetch the Helm chart and customize values
 
-Fetch the `langfuse-k8s` GitHub repository to your local machine to install the v3 preview using Helm.
+Fetch the `langfuse-k8s` GitHub repository to your local machine to install using Helm.
+
 ```bash
 git clone https://github.com/langfuse/langfuse-k8s.git
 
 cd langfuse-k8s/charts/langfuse
 ```
 
-Checkout the `lfe-1348-v3-chart` branch that we use to develop the chart for v3.
+Checkout the `lfe-1348-v3-chart` branch. This will be merged on Dec 9, 2024.
+
 ```bash
 git checkout lfe-1348-v3-chart
 ```
 
 For local experimentation, the pre-configured variables in the values.yaml file are usually sufficient.
+
 If you send _any_ kind of sensitive data to the application or intend to keep it up for longer, we recommend that
 you modify the values.yaml file and overwrite the following environment variables using the `additionalEnv` field:
 
-- **SALT**: A random string used to hash passwords. It should be at least 32 characters long.
-- **ENCRYPTION_KEY**: Generate this via `openssl rand -base64 32`.
-- **NEXTAUTH_SECRET**: A random string used to sign JWT tokens.
-- **NEXTAUTH_URL**: The URL where the application is hosted. Used for redirects after signup.
+- `SALT`: A random string used to hash passwords. It should be at least 32 characters long.
+- `ENCRYPTION_KEY`: Generate this via `openssl rand -base64 32`.
+- `NEXTAUTH_SECRET`: A random string used to sign JWT tokens.
+- `NEXTAUTH_URL`: The URL where the application is hosted. Used for redirects after signup.
+
+In addition, you can change the database and storage credentials to be more secure.
 
 ## Deploy the helm chart
 
 Create a new namespace for the Langfuse deployment, e.g.:
+
 ```bash
 kubectl create namespace langfuse-v3-preview
 ```
 
 Download the Helm chart dependencies:
+
 ```bash
 helm dependency update
 ```
 
 Install the Helm chart to our demo namespace:
+
 ```bash
 helm install langfuse . -n langfuse-v3-preview
 ```
+
 Our chart assumes that it's installed as `langfuse`.
 If you want to install it with a different name, you will have to adjust the Redis hostname in the `values.yaml` accordingly.
 
 At this point, Kubernetes will start to deploy the Langfuse application and its dependencies.
 This can take up to 5 minutes.
-You can monitor the progress by checking `kubectl get pods -n langfuse-v3-preview` - we expect all pods to be Running eventually.
+You can monitor the progress by checking `kubectl get pods -n langfuse-v3-preview` - we expect all pods to be running eventually.
 The langfuse-web and langfuse-worker container will restart a couple of times while the databases are being provisioned.
 
 ## Smoke test UI
@@ -68,9 +86,16 @@ Use `kubectl get services -n langfuse-v3-preview` and search for `langfuse-web` 
 You can access the Langfuse UI by visiting `http://<minikube-ip>:<nodeport>` in your browser.
 Go ahead and register, create a new organization, project, and explore Langfuse.
 
+## Features
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />
+
 ## Shutdown
 
 You can delete the Helm release and the namespace to clean up the resources:
+
 ```bash
 helm uninstall langfuse -n langfuse-v3-preview
 kubectl delete namespace langfuse-v3-preview
@@ -79,7 +104,10 @@ kubectl delete namespace langfuse-v3-preview
 ## How to Upgrade
 
 Run the following commands to upgrade the Helm chart to the latest version:
+
 ```bash
 helm dependency update
 helm upgrade langfuse . -n langfuse-v3-preview
 ```
+
+For more details on upgrading, please refer to the [upgrade guide](/self-hosting/upgrade).
