@@ -24,6 +24,7 @@ export default {
   },
   "authentication-and-sso": "Authentication and SSO",
   encryption: "Encryption",
+  networking: "Networking",
   "-- Features": {
     type: "separator",
     title: "Features",
