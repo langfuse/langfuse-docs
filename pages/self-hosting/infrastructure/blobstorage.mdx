@@ -4,7 +4,14 @@ description: How Langfuse uses S3 / Blob Storage
 
 # S3 / Blob Storage
 
-Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, user media, batch expors, and other files.
+<Callout type="info">
+
+This is a deep dive into the configuration of S3. Follow one of the [deployment guides](/self-hosting#deployment-options) to get started.
+
+</Callout>
+
+Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, multi-modal inputs, batch expors, and other files.
+You can use a managed service on AWS, or GCP, or host it yourself using MinIO.
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
 

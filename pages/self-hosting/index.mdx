@@ -13,7 +13,7 @@ import { Callout } from "nextra/components";
 
 Langfuse is open source and can be self-hosted using Docker. This section contains guides for different deployment scenarios.
 
-## Deployment Options
+## Deployment Options [#deployment-options]
 
 The following options are available:
 
@@ -28,74 +28,25 @@ The following options are available:
 
 Langfuse only depends on open source components and can be deployed locally, on cloud infrastructure, or on-premises.
 
-Please find below an overview of the architecture and the services that Langfuse consists of.
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram.mdx";
 
-```mermaid
-flowchart TB
-    User["User/API/SDKs"]
-    subgraph vpc["VPC"]
-        Web["Web Server (langfuse/langfuse)"]
-        Worker["Worker (langfuse/worker)"]
-        DB[Postgres Database]
-        Redis[Redis Cache/Queue]
-        Clickhouse["Clickhouse Database (observability data)"]
-        S3[S3/Blob Store]
-    end
-    LLM["LLM API / Gateway"]
+<ArchitectureDiagram />
 
-    User --> Web
-    Web --> S3
-    Web --> DB
-    Web --> Redis
-    Web --> Clickhouse
-    Web -.->|"optional for playground"| LLM
-
-    Redis --> Worker
-    Worker --> Clickhouse
-    Worker --> DB
-    Worker --> S3
-    Worker -.->|"optional for evals"| LLM
-```
-
-Langfuse consists of multiple storage components and two Docker containers:
+Langfuse consists of two application containers, storage components, and an optional LLM API/Gateway.
 
 - [**Application Containers**](/self-hosting/infrastructure/containers)
   - Langfuse Web: The main web application serving the Langfuse UI and APIs.
   - Langfuse Worker: A worker that asynchronously processes events.
 - **Storage Components**:
   - [Postgres](/self-hosting/infrastructure/postgres): The main database for transactional workloads.
-  - [Redis](/self-hosting/infrastructure/redis): A fast in-memory data structure store. Used for queue and cache operations.
+  - [Redis/Valkey cache](/self-hosting/infrastructure/cache): A fast in-memory data structure store. Used for queue and cache operations.
   - [S3/Blob Store](/self-hosting/infrastructure/blobstorage): Object storage to persist all incoming events, multi-modal inputs, and large exports.
   - [Clickhouse](/self-hosting/infrastructure/clickhouse): High-performance OLAP database which stores traces, observations, and scores.
 - [**LLM API / Gateway**](/self-hosting/infrastructure/llm-api): Some features depend on an external LLM API or gateway.
 
-### Postgres Database
-
-Langfuse requires a persistent Postgres database to store its state.
-You can use a managed service on AWS, Azure, or GCP, or host it yourself.
-At least version 12 is required.
-
-### Redis
-
-Langfuse uses Redis for caching and queue operations.
-You can use a managed service on AWS, Azure, or GCP, or host it yourself.
-At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured.
-You may use Valkey instead of Redis, but there is no active support from the Langfuse team as of now.
-See [Redis](/docs/deployment/v3/components/redis) for more details on how to connect Redis to Langfuse.
-
-### S3/Blob Store
-
-Langfuse requires an S3-compatible blob store to persist all incoming events, multi-modal inputs, and large exports.
-You can use a managed service on AWS, or GCP, or host it yourself using MinIO.
-Langfuse also has experimental support for Azure Blob Storage.
-See [S3/Blob Store](/docs/deployment/v3/components/blobstorage) for more details on how to connect a blob store to Langfuse
-and more details on Azure Blob Storage.
-
-### Clickhouse
-
-Langfuse uses Clickhouse as an OLAP database to store traces, observations, and scores.
-You can use the managed service by Clickhouse Cloud, or host it yourself.
-See [ClickHouse](/docs/deployment/v3/components/clickhouse) for more details on how to connect ClickHouse to Langfuse.
+Langfuse can be deployed within a VPC or on-premises in high-security environments.
+Internet access is optional.
+See [networking](/self-hosting/networking) documentation for more details.
 
 ## Support
 

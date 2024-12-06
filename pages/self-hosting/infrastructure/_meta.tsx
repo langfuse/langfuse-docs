@@ -3,10 +3,10 @@ export default {
     title: "Architecture Overview ↗",
     href: "/self-hosting#architecture",
   },
-  containers: "Containers",
+  containers: "Application Containers",
   clickhouse: "Clickhouse",
-  redis: "Redis / Valkey",
-  blobstorage: "S3 / Blob Storage",
+  cache: "Redis / Valkey",
+  blobstorage: "Blob Storage (S3)",
   postgres: "PostgreSQL",
   "llm-api": "LLM API / Gateway",
 };
