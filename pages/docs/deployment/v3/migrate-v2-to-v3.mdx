@@ -24,7 +24,7 @@ Certain APIs in SDK versions below version 2.0.0 are not compatible with our new
 Please upgrade and benefit from many performance improvements or features such as [prompt caching](/changelog/2024-02-05-sdk-level-prompt-caching).
 
 **Upgrade options**:
-- Default SDK upgrade: We wrote documentation on how to upgrade from 1.x.x to 2.x.x ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JS](/docs/sdk/typescript/guide#upgrade1to2)). For the JS SDK, we also have an upgrade path [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3). The upgrade is straightforward and should not take much time.
+- Default SDK upgrade: Follow the 1.x.x to 2.x.x upgrade path ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JavaScript](/docs/sdk/typescript/guide#upgrade1to2)). For the JavaScrupt SDK, consider an upgrade [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3) as well. The upgrade is straightforward and should not take much time.
 - Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
 
 **Background**: Langfuse v3 relies on an event driven backend architecture.
@@ -68,6 +68,22 @@ Their API behavior changes to be asynchronous and the endpoints will only return
 - PATCH /api/public/spans
 - POST /api/public/traces
 
+
+### Behavioral Changes
+
+#### Trace Deletion
+
+Deleting traces within the Langfuse UI was a synchronous operation and traces got removed immediately.
+Going forward, all traces will be scheduled for deletion, but may still be visible in the UI for a short period of time.
+
+#### Project Deletion
+
+Deleting projects within Langfuse was a synchronous operation and projects got removed immediately.
+Projects will be marked as deleted within Langfuse v3 and will not be accessible using the standard UI navigation options.
+We immediately revoke access keys for projects, but all remaining data will be removed in the background.
+Information will not be deleted from the [S3/Blob Store](/docs/deployment/v3/components/s3-blob-store).
+This action needs to be performed manually by an administrator.
+
 ## Migration Steps
 
 We tried to make the version upgrade as seamless as possible.
@@ -77,7 +93,7 @@ If you encounter any issues please reach out to our support team or open an issu
 
 Before starting your upgrade, make sure you are familiar with the contents of [our v3 hosting guide](/docs/deployment/v3/overview).
 In addition, we recommend that you perform a backup of your Postgres database before you start the upgrade.
-Also, ensure that you run a recent version of Langfuse, ideally a version later than v2.80.0.
+Also, ensure that you run a recent version of Langfuse, ideally a version later than v2.92.0.
 
 For a zero-downtime upgrade, we recommend that you provision new instances of the Langfuse web and worker containers
 and move your traffic after validating that the new instances are working as expected.
@@ -86,9 +102,19 @@ and move your traffic after validating that the new instances are working as exp
 
 #### 1. Provision new infrastructure
 
-Ensure that you deploy all required storage components ([Clickhouse](/docs/deployment/v3/components/clickhouse), Redis, S3/Blob Store) and have the connection information handy.
+Ensure that you deploy all required storage components ([Clickhouse](/docs/deployment/v3/components/clickhouse), [Redis](/docs/deployment/v3/components/redis), [S3/Blob Store](/docs/deployment/v3/components/blobstorage)) and have the connection information handy.
 You can reuse your existing Postgres instance for the new deployment.
 Ensure that you also have your Postgres connection details ready.
+
+The following new environment variables are required for the new Langfuse web and worker containers.
+If you do not provide them, the deployment will fail.
+
+- `CLICKHOUSE_URL`
+- `CLICKHOUSE_USER`
+- `CLICKHOUSE_PASSWORD`
+- `CLICKHOUSE_MIGRATION_URL`
+- `REDIS_CONNECTION_STRING` (or its alternatives)
+- `LANGFUSE_S3_EVENT_UPLOAD_BUCKET`
 
 #### 2. Start new Langfuse containers.
 
@@ -128,8 +154,8 @@ After you have verified that new events are being stored in Clickhouse and are s
 
 ## Reasoning
 
-Langfuse has gained significant traction over the last month, both in our Cloud environment and in self-hosted setups.
-With v3 we introduce changes that allow our backend to handle hundreds of events per second with higher reliability.
+Langfuse has gained significant traction over the last months, both in our Cloud environment and in self-hosted setups.
+With Langfuse v3 we introduce changes that allow our backend to handle hundreds of events per second with higher reliability.
 To achieve this scale, we introduce a second Langfuse container and additional storage services like S3/Blob store, Clickhouse, and Redis.
 We explain why we chose each element of the stack and why we believe that they help us achieve best in class scale.
 

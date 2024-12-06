@@ -80,7 +80,7 @@ clickhouse:
     password: changeme
 ```
 
-- **shards**: Shards are used for horizontally scaling ClickHouse. A single ClickHouse shared can handle multiple Terabytes of data. Today, Langfuse does not support a multi-shard cluster, i.e. this value _must_ be set to 1. Please get in touch with us if you hit scaling limits of a single shard cluster.
+- **shards**: Shards are used for horizontally scaling ClickHouse. A single ClickHouse shard can handle multiple Terabytes of data. Today, Langfuse does not support a multi-shard cluster, i.e. this value _must_ be set to 1. Please get in touch with us if you hit scaling limits of a single shard cluster.
 - **replicaCount**: The number of replicas for each shard. ClickHouse counts the all instances towards the number of replicas, i.e. a replica count of 1 means no redundancy at all. We recommend a minimum of 3 replicas for production setups. The number of replicas cannot be increased at runtime without manual intervention or downtime.
 - **resourcesPreset**: ClickHouse is CPU and memory intensive for analytical and highly concurrent requests. We recommend at least the `large` resourcesPreset and more for larger deployments.
 - **auth**: The username and password for the ClickHouse database. Overwrite those values according to your preferences, or mount them from a secret.
