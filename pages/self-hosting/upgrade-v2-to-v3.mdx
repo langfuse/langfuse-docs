@@ -13,6 +13,7 @@ Certain APIs in SDK versions below version 2.0.0 are not compatible with our new
 Please upgrade and benefit from many performance improvements or features such as [prompt caching](/changelog/2024-02-05-sdk-level-prompt-caching).
 
 **Upgrade options**:
+
 - Default SDK upgrade: Follow the 1.x.x to 2.x.x upgrade path ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JavaScript](/docs/sdk/typescript/guide#upgrade1to2)). For the JavaScript SDK, consider an upgrade [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3) as well. The upgrade is straightforward and should not take much time.
 - Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
 
@@ -56,7 +57,6 @@ Their API behavior changes to be asynchronous and the endpoints will only return
 - POST /api/public/spans
 - PATCH /api/public/spans
 - POST /api/public/traces
-
 
 ### Behavioral Changes
 
@@ -135,7 +135,7 @@ Depending on the size of your event tables, this process may take multiple hours
 
 You need to set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=true` to enable background migrations and start the migration of data from Postgres to ClickHouse.
 
-[//]: # (TODO: Reference to new UI to monitor background migrations)
+[//]: # "TODO: Reference to new UI to monitor background migrations"
 
 #### 5. Stop the old Langfuse containers
 
@@ -174,7 +174,7 @@ leading to slow query times and high resource consumption.
 
 #### Why Clickhouse is great
 
--	Optimized for Analytical Queries: ClickHouse is a modern OLAP database capable of ingesting data at high rates and querying it with low latency. It handles billions of rows efficiently.
+- Optimized for Analytical Queries: ClickHouse is a modern OLAP database capable of ingesting data at high rates and querying it with low latency. It handles billions of rows efficiently.
 - Rich feature-set: Clickhouse offers different Table Engines, Materialized views, different types of Indices, and many integrations which helps us to build fast and achieve low latency read queries.
 - Our self-hosters can use the official Clickhouse Helm Charts and Docker Images for deploying in the cloud infrastructure of their choice.
 - Clickhouse Cloud: Clickhouse Cloud is a database as a SaaS service which allows us to reduce operational efforts on our side.
@@ -185,6 +185,7 @@ Many modern observability tools, such as [Signoz](https://signoz.io/) or [Postho
 #### Clickhouse vs. others
 
 We think there are many great OLAP databases out there and are sure that we could have chosen an alternative and would also succeed with it. However, here are some thoughts on alternatives:
+
 - Druid: Unlike Druid's [modular architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. Hence, it is easier for teams to manage Clickhouse in production as there are fewer moving parts. This reduces the operational burden especially for our self-hosters.
 - StarRocks: We think StarRocks is great but early. The vast amount of features in Clickhouse help us to remain flexible with our requirements while benefiting from the performance of an OLAP database.
 
