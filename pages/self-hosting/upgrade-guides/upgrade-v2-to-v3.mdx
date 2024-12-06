@@ -4,24 +4,69 @@ description: A guide to upgrade a Langfuse v2 setup to v3.
 
 # Migrate Langfuse v2 to v3
 
-To learn more about our reasons for the architectural changes, jump to the [Reasoning](#reasoning) section.
+<Callout type="info">
 
-## SDK compatibility and API changes
+This is a big upgrade and we tried to make it as seamless as possible. Please create a [GitHub Issue](/issues) or contact [support](/support) in case you have any questions while upgrading to v3.
 
-While we aim to keep our SDKs and APIs fully backwards compatible, we have to introduce backwards incompatible changes with our update to v3.
-Certain APIs in SDK versions below version 2.0.0 are not compatible with our new backend architecture.
-Please upgrade and benefit from many performance improvements or features such as [prompt caching](/changelog/2024-02-05-sdk-level-prompt-caching).
+</Callout>
 
-**Upgrade options**:
+Langfuse v3 (released on Dec. 6th, 2024) introduces a new backend architecture that unlocks many new features and performance improvements.
+
+Watch the following video for a quick walkthrough of the migration:
+
+## Changes
+
+### Architecture Changes
+
+Langfuse v3 adds:
+
+- A new worker container that processes events asynchronously.
+- A new S3/Blob store for storing large objects.
+- A new Clickhouse instance for storing traces, observations, and scores.
+- Redis/Valkey for queuing events and caching data.
+
+To learn more about our reasons for the architectural changes, jump to the [reasoning](#reasoning) section.
+
+Architecture diagram (from [architecture overview](/self-hosting#architecture-overview)):
+
+import ArchitectureDiagramV2 from "@/components-mdx/architecture-diagram-v2.mdx";
+import ArchitectureDiagramV3 from "@/components-mdx/architecture-diagram-v3.mdx";
+
+<Tabs items={["Langfuse v3", "Langfuse v2"]}>
+<Tab>
+
+<ArchitectureDiagramV3 />
+
+</Tab>
+
+<Tab>
+
+<ArchitectureDiagramV2 />
+
+</Tab>
+</Tabs>
+
+### SDK Requirements
+
+**SDK v1.x.x is no longer supported**. While we aim to keep our SDKs and APIs fully backwards compatible, we have to introduce backwards incompatible changes with our update to Langfuse Server v3. Certain APIs in SDK versions below version 2.0.0 are not compatible with our new backend architecture.
+
+#### Release dates of SDK v2
+
+- Langfuse Python SDK v2 was [released](https://github.com/langfuse/langfuse-python/releases/tag/v2.0.1) on Dec 17, 2023,
+- Langfuse JavaScript SDK v2 was [released](https://github.com/langfuse/langfuse-js/releases/tag/v2.0.0) on Dec 18, 2024.
+
+#### Upgrade options if you are on SDK version 1.x.x
 
 - Default SDK upgrade: Follow the 1.x.x to 2.x.x upgrade path ([Python](/docs/sdk/python/low-level-sdk#upgrading-from-v1xx-to-v2xx), [JavaScript](/docs/sdk/typescript/guide#upgrade1to2)). For the JavaScript SDK, consider an upgrade [from 2.x.x to 3.x.x](/docs/sdk/typescript/guide#upgrade2to3) as well. The upgrade is straightforward and should not take much time.
-- Improved integrations: Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
+- Optionally switch to our [new integrations](/docs/get-started): Since the first major version, we built many new ways to integrate your code with Langfuse such as [Decorators](/docs/sdk/python/decorators) for Python. We would recommend to check out our [quickstart](/docs/get-started) to see whether there is a more convenient integration available for you.
 
-**Background**: Langfuse v3 relies on an event driven backend architecture.
+#### Background of this change
+
+Langfuse v3 relies on an event driven backend architecture.
 This means, that we acknowledge HTTP requests from the SDKs, queue the HTTP bodies in the backend, and process them asynchronously.
 This allows us to scale the backend more easily and handle more requests without overloading the database.
 The SDKs below 2.0.0 send the events to our server and expect a synchronous response containing the database representation of the event.
-If you rely on this data and access it in the code, your SDK will break as of Nov. 11th, 2024 for the cloud version and post-upgrade for self-hosted versions.
+If you rely on this data and access it in the code, your SDK will break as of Nov. 11th, 2024 for the cloud version and post-upgrade to Langfuse v3 when self-hosting.
 
 ### API Changes
 
@@ -47,9 +92,10 @@ This change is inline with our [API reference](https://api.reference.langfuse.co
 
 #### Deprecated endpoints
 
-The following endpoints are deprecated since our v2 release.
-We continue to accept requests to these endpoints and will remove them in a future release.
+The following endpoints are deprecated since our v2 release and thereby have not been used by the Langfuse SDKs since Feb 2024.
+Langfuse v3 continues to accept requests to these endpoints.
 Their API behavior changes to be asynchronous and the endpoints will only return the id of the created object instead of the full updated record.
+Please note that these endpoints will be removed in a future release.
 
 - POST /api/public/events
 - POST /api/public/generations
@@ -58,7 +104,7 @@ Their API behavior changes to be asynchronous and the endpoints will only return
 - PATCH /api/public/spans
 - POST /api/public/traces
 
-### Behavioral Changes
+### UI Behavioral Changes
 
 #### Trace Deletion
 
@@ -70,13 +116,19 @@ Going forward, all traces will be scheduled for deletion, but may still be visib
 Deleting projects within Langfuse was a synchronous operation and projects got removed immediately.
 Projects will be marked as deleted within Langfuse v3 and will not be accessible using the standard UI navigation options.
 We immediately revoke access keys for projects, but all remaining data will be removed in the background.
+
 Information will not be deleted from the [S3/Blob Store](/docs/deployment/v3/components/s3-blob-store).
 This action needs to be performed manually by an administrator.
+This process will be automated in a future release.
 
 ## Migration Steps
 
+<Callout type="info">
+
 We tried to make the version upgrade as seamless as possible.
-If you encounter any issues please reach out to our support team or open an issue on our GitHub repository.
+If you encounter any issues please reach out to [support](/support) or open an [issue on GitHub](/issues).
+
+</Callout>
 
 ### Before you start the upgrade
 
@@ -88,6 +140,8 @@ For a zero-downtime upgrade, we recommend that you provision new instances of th
 and move your traffic after validating that the new instances are working as expected.
 
 ### Upgrade Steps
+
+<Steps>
 
 #### 1. Provision new infrastructure
 
@@ -121,7 +175,7 @@ All new events will be stored in Clickhouse and should appear within the UI with
 
 #### 4. Wait for historic data migration to complete
 
-We have introduced background migrations as part of the migration to v3.
+We have introduced [background migrations](/self-hosting/background-migrations) as part of the migration to v3.
 Those allow Langfuse to schedule longer-running migrations without impacting the availability of the service.
 As part of the v3 release, we have introduced four migrations that will run once you deploy the new stack.
 
@@ -141,7 +195,16 @@ You need to set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=true` to enable backgroun
 
 After you have verified that new events are being stored in Clickhouse and are shown in the UI, you can stop the old Langfuse containers.
 
+</Steps>
+
 ## Reasoning
+
+<Callout type="info">
+
+This section dives into the reasoning behind the architectural changes we made for Langfuse v3.
+To learn more about the architecture of Langfuse v3, jump to the [architecture overview](/self-hosting#architecture-overview).
+
+</Callout>
 
 Langfuse has gained significant traction over the last months, both in our Cloud environment and in self-hosted setups.
 With Langfuse v3 we introduce changes that allow our backend to handle hundreds of events per second with higher reliability.
@@ -217,20 +280,8 @@ It accepts events from a Redis queue and ensures that they are eventually being 
 
 ## Support
 
-If you experience any issues, please join us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
+If you experience any issues, please create an [issue on GitHub](/issues) or contact the maintainers ([support](/support)).
 
 For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
 
 Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
-
-## FAQ
-
-import { FaqPreview } from "@/components/faq/FaqPreview";
-
-<FaqPreview tags={["self-hosting"]} />
-
-## GitHub Discussions
-
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
-
-<GhDiscussionsPreview labels={["self-hosting"]} />

@@ -3,9 +3,15 @@ description: Self-host Langfuse in your infrastructure using Docker.
 label: "Version: v2"
 ---
 
-# Self-Hosting Langfuse - Open Source LLM Observability
+# Deployment Guide (v2)
 
-[![Docker Image](https://img.shields.io/badge/docker-langfuse-blue?logo=Docker&logoColor=white&style=flat-square)](https://github.com/langfuse/langfuse/pkgs/container/langfuse)
+<Callout type="info">
+  This guide covers Langfuse v2. For Langfuse v3, see the [v3
+  documentation](/self-hosting). Langfuse v2 receives security updates until end
+  of Q1 2025. If you have any questions while upgrading, please refer to the [v3
+  upgrade guide](/self-hosting/upgrade-v2-to-v3) or open a thread on [GitHub
+  Discussions](/gh-support).
+</Callout>
 
 Langfuse Server, which includes the API and Web UI, is open-source and can be self-hosted using Docker.
 
@@ -26,24 +32,9 @@ Deploy the application container to your infrastructure. You can use managed ser
 
 During the container startup, all database migrations will be applied automatically. This can be optionally disabled via environment variables.
 
-<Tabs items={["Pin major version", "Use latest version"]}>
-
-<Tab>
-
 ```bash
 docker pull langfuse/langfuse:2
 ```
-
-</Tab>
-<Tab>
-
-```bash
-docker pull langfuse/langfuse:latest
-```
-
-</Tab>
-
-</Tabs>
 
 ```bash
 docker run --name langfuse \
@@ -338,6 +329,10 @@ If you encounter issues, ensure the following:
   We recommend enabling automated updates within the current major version to
   benefit from the latest features, bug fixes, and security patches.
 </Callout>
+<Callout type="warning">
+  Coming from Langfuse v1? Please refer to the [upgrade
+  guide](/self-hosting/upgrade-guides/upgrade-v1-to-v2) for more details.
+</Callout>
 
 To update the application:
 
@@ -354,51 +349,6 @@ Langfuse is released through tagged semver releases. Check [GitHub releases](htt
 </Frame>
 
 <span>_Watch the repository on GitHub to get notified about new releases_</span>
-
-## (Optional) Apply newly supported models to existing data in Langfuse [#migrate-models]
-
-<Callout type="info">
-  This is only necessary if you want new model prices to be applied to existing
-  traces/generations. Most users will not need to do this as applying prices to
-  new traces only is totally fine when updating regularly.
-</Callout>
-
-Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
-
-Optionally, you can apply the new model definitions to existing data using the following steps. During the migration, the database remains available (non-blocking).
-
-1. Clone the repository and create an `.env` file:
-
-   ```bash
-   # Clone the Langfuse repository
-   git clone https://github.com/langfuse/langfuse.git
-
-   # Navigate to the Langfuse directory
-   cd langfuse
-
-   # Install all dependencies
-   pnpm i
-
-   # Create an .env file
-   cp .env.dev.example .env
-   ```
-
-2. Edit the `.env` to connect to your database from your machine:
-
-   ```bash filename=".env"
-   NODE_ENV=production
-
-   # Replace with your database connection string
-   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
-   ```
-
-3. Execute the migration. Depending on the size of your database, this might take a while.
-
-   ```bash
-   pnpm run models:migrate
-   ```
-
-4. Clean up: remove the `.env` file to avoid connecting to the production database from your local machine.
 
 ## Kubernetes deployments
 

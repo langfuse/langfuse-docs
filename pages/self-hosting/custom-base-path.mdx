@@ -1,0 +1,57 @@
+# Custom Base Path
+
+By default, Langfuse is served on the root path of a domain, e.g. `https://langfuse.yourdomain.com`, `https://yourdomain.com`.
+
+In some circumstances, you might want to deploy Langfuse on a custom base path, e.g. `https://yourdomain.com/langfuse`, when integrating Langfuse into existing infrastructure.
+
+## Setup
+
+<Callout type="warning">
+  As this base path is inlined in static assets, you cannot use the prebuilt
+  docker image for the **web container** (langfuse/langfuse). **You need to
+  build the image from source** with the `NEXT_PUBLIC_BASE_PATH` environment
+  variable set at build time. The worker container (langfuse/langfuse-worker)
+  can be run with the prebuilt image.
+</Callout>
+
+<Steps>
+
+### Update environment variables
+
+When using a custom base path, `NEXTAUTH_URL` must be set to the full URL including the base path and `/api/auth`. For example, if you are deploying Langfuse at `https://yourdomain.com/langfuse-base-path`, you need to set:
+
+```bash filename=".env"
+NEXT_PUBLIC_BASE_PATH="/langfuse-base-path"
+NEXTAUTH_URL="https://yourdomain.com/langfuse-base-path/api/auth"
+```
+
+### Build Langfuse Web image from source
+
+Build image for the Langfuse Web container (`langfuse/langfuse`) from source with `NEXT_PUBLIC_BASE_PATH` as build argument:
+
+```bash /NEXT_PUBLIC_BASE_PATH/
+# clone repo
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+
+# checkout production branch
+# main branch includes unreleased changes that might be unstable
+git checkout production
+
+# build image with NEXT_PUBLIC_BASE_PATH
+docker build -t langfuse/langfuse --build-arg NEXT_PUBLIC_BASE_PATH=/langfuse-base-path -f ./web/Dockerfile .
+```
+
+### Run Langfuse
+
+When Deploying Langfuse according to one of the deployment guides, replace the prebuilt image for the web container (`langfuse/langfuse`) with the image you built from source.
+
+### Connect to Langfuse
+
+Once your Langfuse instance is running, you can access both the API and console through your configured custom base path. When connecting via SDKs, make sure to include the custom base path in the hostname.
+
+</Steps>
+
+import SelfHostHelpFooter from "@/components-mdx/self-host-help-footer.mdx";
+
+<SelfHostHelpFooter />

@@ -10,14 +10,43 @@ This is only available in the Enterprise Edition. Please add your [license key](
 
 </Callout>
 
-| Variable                                                                 | Description                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `LANGFUSE_UI_API_HOST`                                                   | Customize the hostname that is referenced in the settings. Defaults to `window.origin`.                                                                                                                                                                                                                      |
-| `LANGFUSE_UI_DOCUMENTATION_HREF`                                         | Customize the documentation link reference in the menu and settings.                                                                                                                                                                                                                                         |
-| `LANGFUSE_UI_SUPPORT_HREF`                                               | Customize the support link reference in the menu and settings.                                                                                                                                                                                                                                               |
-| `LANGFUSE_UI_FEEDBACK_HREF`                                              | Replace the default feedback widget with your own feedback link.                                                                                                                                                                                                                                             |
-| `LANGFUSE_UI_LOGO_DARK_MODE_HREF`<br/>`LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | Co-brand the Langfuse interface with your own logo. Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower ratios (e.g., 2:3, 1:1) also work. The logo is fitted into a bounding box, so there are no specific pixel constraints. For reference, the example logo is 160px x 400px. |
-| `LANGFUSE_UI_DEFAULT_MODEL_ADAPTER`                                      | Set the default model adapter for the LLM playground and evals. Options: `OpenAI`, `Anthropic`, `Azure`. Example: `Anthropic`                                                                                                                                                                                |
-| `LANGFUSE_UI_DEFAULT_BASE_URL_OPENAI`                                    | Set the default base URL for OpenAI API in the LLM playground and evals. Example: `https://api.openai.com/v1`                                                                                                                                                                                                |
-| `LANGFUSE_UI_DEFAULT_BASE_URL_ANTHROPIC`                                 | Set the default base URL for Anthropic API in the LLM playground and evals. Example: `https://api.anthropic.com`                                                                                                                                                                                             |
-| `LANGFUSE_UI_DEFAULT_BASE_URL_AZURE_OPENAI`                              | Set the default base URL for Azure OpenAI API in the LLM playground and evals. Example: `https://{instanceName}.openai.azure.com/openai/deployments`                                                                                                                                                         |
+To help with large-scale deployments, Langfuse allows to customize some key parts of the UI to fit an organization's environment.
+
+## Links
+
+You can customize the links highlighted in the screenshot below:
+
+<Frame fullWidth>
+  ![UI Customization Links](/images/docs/ui-customization-links.png)
+</Frame>
+
+| Number | Variable                         | Description                                                                                                                                                                      |
+| ------ | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1      | `LANGFUSE_UI_FEEDBACK_HREF`      | Replace the default feedback widget with your internal feedback link.                                                                                                            |
+| 2      | `LANGFUSE_UI_DOCUMENTATION_HREF` | Customize the documentation link reference in the menu and settings to point to your internal documentation.                                                                     |
+| 3      | `LANGFUSE_UI_SUPPORT_HREF`       | Customize the support link reference in the menu and settings to point to your internal support.                                                                                 |
+| 4      | `LANGFUSE_UI_API_HOST`           | Customize the hostname that is referenced in the Langfuse project settings. Defaults to `window.origin`. Useful if Langfuse is deployed behind a reverse proxy for API requests. |
+
+## Co-branding
+
+Co-brand the Langfuse interface with your own logo.
+
+<Frame>![UI Customization Logo](/images/docs/ui-customization-logo.png)</Frame>
+
+Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower ratios (e.g., 2:3, 1:1) also work. The logo is fitted into a bounding box, so there are no specific pixel constraints. For reference, the example logo shown above is 160px x 400px.
+
+| Variable                           | Description                    | Example                                                                |
+| ---------------------------------- | ------------------------------ | ---------------------------------------------------------------------- |
+| `LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | URL to the logo in light mode. | `https://static.langfuse.com/langfuse-dev/example-logo-light-mode.png` |
+| `LANGFUSE_UI_LOGO_DARK_MODE_HREF`  | URL to the logo in dark mode.  | `https://static.langfuse.com/langfuse-dev/example-logo-dark-mode.png`  |
+
+## LLM API/Gateway Connection defaults
+
+LLM connections are configured in the Langfuse project settings. You can customize the default values via the following environment variables.
+
+| Variable                                    | Description                                                                                                                                          |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_UI_DEFAULT_MODEL_ADAPTER`         | Set the default model adapter for the LLM playground and evals. Options: `OpenAI`, `Anthropic`, `Azure`. Example: `Anthropic`                        |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_OPENAI`       | Set the default base URL for OpenAI API in the LLM playground and evals. Example: `https://api.openai.com/v1`                                        |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_ANTHROPIC`    | Set the default base URL for Anthropic API in the LLM playground and evals. Example: `https://api.anthropic.com`                                     |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_AZURE_OPENAI` | Set the default base URL for Azure OpenAI API in the LLM playground and evals. Example: `https://{instanceName}.openai.azure.com/openai/deployments` |

@@ -8,7 +8,7 @@ Langfuse can be deployed in a VPC or on-premises in high-security environments. 
 
 Architecture diagram (from [architecture overview](/self-hosting#architecture)):
 
-import ArchitectureDiagram from "@/components-mdx/architecture-diagram.mdx";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 
 <ArchitectureDiagram />
 
@@ -29,3 +29,5 @@ Langfuse does not require internet access.
 
 Some optional components, like the LLM Playground and LLM-evals require access to an [LLM API/Gateway](/self-hosting/infrastructure/llm-api).
 This can be deployed in the same VPC or peered with the VPC.
+
+Langfuse pings a cached version of the GitHub API to check for updates to the Langfuse Server. If internet access is not available, this check will fail gracefully.

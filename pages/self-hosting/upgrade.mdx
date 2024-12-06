@@ -3,14 +3,25 @@ description: A guide on upgrading Langfuse
 label: "Version: v3"
 ---
 
-# Upgrade
+# Upgrading a Self-Hosted Langfuse Deployment
 
-Langfuse is compatible between all minor releases within the same major version.
+Langfuse evolves quickly ([changelog](/changelog)) and keeping your deployment up to date is key to benefit from security, performance, and feature updates.
+
+The Langfuse versioning and upgrade process is optimized for minimal complexity and disruption. If you ever experience any issues, please create an [issue on GitHub](/issues) or contact the maintainers ([support](/support)).
+
+## How to upgrade
+
+<Callout type="info">
+
+It is recommended to be familiar with our [versioning](/self-hosting/versioning) policy before upgrading existing deployments.
+
+</Callout>
+
+### Minor/Patch Versions
+
+Updates within a major version are designed to be non-disruptive and are automatically applied. On start of the application, all migrations are automatically applied to the databases.
+
 You can automatically use the latest version of a major release by using `langfuse/langfuse:3` and `langfuse/langfuse-worker:3` as the image tags in your deployment.
-
-If you upgrade between major versions, please follow our migration guide for
-
-- [v2.x.x to v3.x.x](/self-hosting/upgrade-v2-to-v3)
 
 To update deployments, follow the update section in our deployment guides:
 
@@ -19,9 +30,16 @@ To update deployments, follow the update section in our deployment guides:
 - [Docker](/self-hosting/docker#how-to-upgrade)
 - [Kubernetes (Helm)](/self-hosting/kubernetes-helm#how-to-upgrade)
 
+### Major Versions
+
+If you upgrade between major versions, please follow our migration guides:
+
+- [v2.x.x to v3.x.x](/self-hosting/upgrade-guides/upgrade-v2-to-v3)
+- [v1.x.x to v2.x.x](/self-hosting/upgrade-guides/upgrade-v1-to-v2)
+
 ## Support
 
-If you experience any issues, please join us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
+If you experience any issues, please create an [issue on GitHub](/issues) or contact the maintainers ([support](/support)).
 
 For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
 

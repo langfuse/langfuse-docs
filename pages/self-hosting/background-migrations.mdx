@@ -5,13 +5,11 @@ label: "Version: v3"
 
 # Background Migrations
 
-Langfuse uses background migrations to perform long-running changes within the storage components.
+Langfuse uses background migrations to perform long-running changes within the storage components when [upgrading](/self-hosting/upgrade) the application.
 These may include the addition and backfilling of new columns or the migration of data between storages.
 Background migrations are executed on startup of the worker container and run in the background until completion or failure.
 
-## Setup
-
-Background migrations are enabled by default and can be disabled by setting `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false`.
+Next to background migrations, fast migrations are applied directly to the database on startup of the web container.
 
 ## Monitoring
 
@@ -27,3 +25,7 @@ If migrations are running or have failed, we show a status indicator within the 
 Langfuse does not require deployment stops between minor releases as of now.
 However, we recommend that you monitor the progress of background migrations after each update to ensure that all migrations have completed successfully before attempting another update.
 We will highlight within the changelog if a deployment stop becomes required.
+
+## Configuration
+
+Background migrations are enabled by default and can be disabled by setting `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false`.
