@@ -6,7 +6,6 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
-  components: "Components",
   "license-key": "License Key",
   troubleshooting: "Troubleshooting",
   "-- Deployment": {
