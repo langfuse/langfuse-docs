@@ -15,7 +15,7 @@ Langfuse is open source and can be self-hosted using Docker. This section contai
 
 ## Deployment Options
 
-Langfuse only depends on open source components and can be deployed locally, on cloud infrastructure, or on-premises. The following options are available:
+The following options are available:
 
 - Langfuse Cloud: A fully managed version of Langfuse that is hosted and maintained by the Langfuse team.
 - Self-host Langfuse: Run Langfuse on your own infrastructure.
@@ -26,77 +26,36 @@ Langfuse only depends on open source components and can be deployed locally, on 
 
 ## Architecture
 
+Langfuse only depends on open source components and can be deployed locally, on cloud infrastructure, or on-premises.
+
+Please find below an overview of the architecture and the services that Langfuse consists of.
+
 ```mermaid
 flowchart TB
-    Web["Web Server (langfuse/langfuse)"]
-    Worker["Worker (langfuse/worker)"]
-    DB[Postgres Database]
-    Redis[Redis Cache/Queue]
-    Clickhouse["Clickhouse Database (observability data)"]
-    S3[S3/Blob Store]
+    User["User/API/SDKs"]
+    subgraph vpc["VPC"]
+        Web["Web Server (langfuse/langfuse)"]
+        Worker["Worker (langfuse/worker)"]
+        DB[Postgres Database]
+        Redis[Redis Cache/Queue]
+        Clickhouse["Clickhouse Database (observability data)"]
+        S3[S3/Blob Store]
+    end
+    LLM["LLM API / Gateway"]
 
+    User --> Web
     Web --> S3
     Web --> DB
     Web --> Redis
     Web --> Clickhouse
+    Web -.->|"optional for playground"| LLM
 
     Redis --> Worker
     Worker --> Clickhouse
     Worker --> DB
     Worker --> S3
+    Worker -.->|"optional for evals"| LLM
 ```
-
-<details>
-<summary>Services</summary>
-
-```mermaid
-flowchart TB
-    subgraph clients["Clients"]
-        Browser["Browser"]
-        JS["JavaScript SDK"]
-        Python["Python SDK"]
-    end
-
-    subgraph storage["Storage"]
-        DB[Postgres Database]
-        Redis[Redis Cache/Queue]
-        Clickhouse[Clickhouse Database]
-        S3[S3/Blob Store]
-    end
-
-    subgraph app["Langfuse Containers"]
-        subgraph web["Langfuse Web"]
-            TRPC["TRPC API"]
-            REST["Public API"]
-            Frontend["React Frontend"]
-            Backend["Backend"]
-        end
-
-        subgraph worker["Langfuse Worker"]
-            QueueProcessor["Queue Processor"]
-        end
-    end
-
-    Browser --> Frontend
-    Frontend --> TRPC
-    JS --> REST
-    Python --> REST
-
-    TRPC --> Backend
-    REST --> Backend
-
-    Backend --> S3
-    Backend --> DB
-    Backend --> Redis
-    Backend --> Clickhouse
-
-    Redis --> QueueProcessor
-    QueueProcessor --> Clickhouse
-    QueueProcessor --> DB
-    QueueProcessor --> S3
-```
-
-</details>
 
 Langfuse consists of multiple storage components and two Docker containers:
 
@@ -106,6 +65,7 @@ Langfuse consists of multiple storage components and two Docker containers:
 - **Redis**: A fast in-memory data structure store. Used for queue and cache operations.
 - **S3/Blob Store**: Object storage to persist all incoming events, multi-modal inputs, and large exports.
 - **Clickhouse**: High-performance OLAP database which stores traces, observations, and scores.
+- **LLM API / Gateway**: Some features depend on an external LLM API or gateway.
 
 ### Postgres Database
 
@@ -135,16 +95,9 @@ Langfuse uses Clickhouse as an OLAP database to store traces, observations, and 
 You can use the managed service by Clickhouse Cloud, or host it yourself.
 See [ClickHouse](/docs/deployment/v3/components/clickhouse) for more details on how to connect ClickHouse to Langfuse.
 
-## Deployment Guides
+### LLM API / Gateway
 
-The Langfuse team and our community maintain a collection of deployment guides to illustrate how you can run Langfuse in various environments.
-This section is work in progress and relies on community contributions.
-If you have successfully deployed Langfuse on a specific platform, consider contributing a guide either via a GitHub [PR/Issue](https://github.com/langfuse/langfuse-docs)
-or by [reaching out](#contact) to the maintainers.
-Please also let us know if one of these guides does not work anymore or if you have a better solution.
-
-- [Docker Compose](/docs/deployment/v3/guides/docker-compose)
-- [Kubernetes (Helm)](/docs/deployment/v3/guides/kubernetes-helm)
+Optionally, you can configure Langfuse to use an external LLM API or gateway for add-on features. Langfuse tracing does not need access to the LLM API as traces are captured client-side. Langfuse supports: OpenAI, Azure OpenAI, Anthropic, Google Vertex, and Amazon Bedrock. Via the OpenAI API, many other LLM services and proxies can be used.
 
 ## Support
 
