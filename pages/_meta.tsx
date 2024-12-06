@@ -143,6 +143,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  community: {
+    title: "Community",
+    type: "page",
+    display: "hidden",
+  },
   "cookie-policy": {
     title: "Cookie Policy",
     type: "page",
