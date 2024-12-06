@@ -19,15 +19,15 @@ Langfuse needs an S3 bucket to upload raw event information.
 The following environment variables are mandatory for every deployment.
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
-| Variable                                     | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_S3_EVENT_UPLOAD_BUCKET`            | Required           | Name of the bucket in which event information should be uploaded. |
+| Variable                                     | Required / Default | Description                                                                                                           |
+| -------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_S3_EVENT_UPLOAD_BUCKET`            | Required           | Name of the bucket in which event information should be uploaded.                                                     |
 | `LANGFUSE_S3_EVENT_UPLOAD_PREFIX`            | `""`               | Prefix to store events within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
-| `LANGFUSE_S3_EVENT_UPLOAD_REGION`            |                    | Region in which the bucket resides. |
-| `LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`          |                    | Endpoint to use to upload events. |
-| `LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions. |
-| `LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket. |
-| `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO. |
+| `LANGFUSE_S3_EVENT_UPLOAD_REGION`            |                    | Region in which the bucket resides.                                                                                   |
+| `LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`          |                    | Endpoint to use to upload events.                                                                                     |
+| `LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                  |
+| `LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket.                                                                                     |
+| `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO.                                                          |
 
 ### Optional Configuration
 
@@ -37,16 +37,17 @@ Use the following information to enable them.
 
 #### Multi-Modal Tracing
 
-| Variable                                     | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_S3_MEDIA_UPLOAD_ENABLED`           | `false`            | Whether to enable Langfuse S3 media uploads. This must be set to `true` to use multi-modal tracing. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`            | Required           | Name of the bucket in which media files should be uploaded. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`            | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_REGION`            |                    | Region in which the bucket resides. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`          |                    | Endpoint to use to upload media files. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket. |
-| `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO. |
+| Variable                                        | Required / Default | Description                                                                                                          |
+| ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`               | Required           | Name of the bucket in which media files should be uploaded.                                                          |
+| `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`               | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
+| `LANGFUSE_S3_MEDIA_UPLOAD_REGION`               |                    | Region in which the bucket resides.                                                                                  |
+| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Endpoint to use to upload media files.                                                                               |
+| `LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`        |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                 |
+| `LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY`    |                    | Secret access key for the bucket.                                                                                    |
+| `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`     |                    | Whether to force path style on requests. Required for MinIO.                                                         |
+| `LANGFUSE_S3_MEDIA_MAX_CONTENT_LENGTH`          | `1_000_000_000`    | Maximum file size in bytes that is allowed for upload. Default is 1GB.                                               |
+| `LANGFUSE_S3_MEDIA_DOWNLOAD_URL_EXPIRY_SECONDS` | `3600`             | Presigned download URL expiry in seconds. Defaults to 1h.                                                            |
 
 #### Batch Exports
 
@@ -54,16 +55,16 @@ Langfuse allows to export table data via batch exports.
 We upload intermediate results to S3 and provide a presigned URL for users to download their exports in CSV or JSON format.
 To configure batch exports in your environment, configure the following environment variables:
 
-| Variable                                     | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_S3_BATCH_EXPORT_ENABLED`           | `false`            | Whether to enable Langfuse S3 batch exports. This must be set to `true` to enable batch exports. |
-| `LANGFUSE_S3_BATCH_EXPORT_BUCKET`            | Required           | Name of the bucket in which batch exports should be uploaded. |
+| Variable                                     | Required / Default | Description                                                                                                                  |
+| -------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_S3_BATCH_EXPORT_ENABLED`           | `false`            | Whether to enable Langfuse S3 batch exports. This must be set to `true` to enable batch exports.                             |
+| `LANGFUSE_S3_BATCH_EXPORT_BUCKET`            | Required           | Name of the bucket in which batch exports should be uploaded.                                                                |
 | `LANGFUSE_S3_BATCH_EXPORT_PREFIX`            | `""`               | Prefix to store batch exports within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
-| `LANGFUSE_S3_BATCH_EXPORT_REGION`            |                    | Region in which the bucket resides. |
-| `LANGFUSE_S3_BATCH_EXPORT_ENDPOINT`          |                    | Endpoint to use to upload batch exports. |
-| `LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions. |
-| `LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket. |
-| `LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO. |
+| `LANGFUSE_S3_BATCH_EXPORT_REGION`            |                    | Region in which the bucket resides.                                                                                          |
+| `LANGFUSE_S3_BATCH_EXPORT_ENDPOINT`          |                    | Endpoint to use to upload batch exports.                                                                                     |
+| `LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                         |
+| `LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket.                                                                                            |
+| `LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO.                                                                 |
 
 ## Deployment Options
 
@@ -78,35 +79,34 @@ Langfuse uses the AWS SDK internally to connect to blob storages, as most provid
 If Langfuse is running on an AWS instance, we recommend to use an IAM role on the Langfuse container to access S3.
 Otherwise, create an IAM user and generate an Access Key pair for Langfuse.
 Ensure that both entities have the necessary permissions to access the bucket:
+
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "s3:PutObject",
-                "s3:ListBucket",
-                "s3:GetObject"
-            ],
-            "Effect": "Allow",
-            "Resource": [
-                "arn:aws:s3:::<my-bucket-name>/*",
-                "arn:aws:s3:::<my-bucket-name>"
-            ],
-            "Sid": "EventBucketAccess"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["s3:PutObject", "s3:ListBucket", "s3:GetObject"],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::<my-bucket-name>/*",
+        "arn:aws:s3:::<my-bucket-name>"
+      ],
+      "Sid": "EventBucketAccess"
+    }
+  ]
 }
 ```
 
 #### Example Configuration
 
 Set the following environment variables if you authenticate using an IAM role:
+
 ```yaml
 LANGFUSE_S3_EVENT_UPLOAD_BUCKET=my-bucket-name
 ```
 
 If you authenticate using an Access Key pair:
+
 ```yaml
 LANGFUSE_S3_EVENT_UPLOAD_BUCKET=my-bucket-name
 LANGFUSE_S3_EVENT_UPLOAD_REGION=my-bucket-region
@@ -123,6 +123,7 @@ Langfuse uses it for local development and as a default in our [Docker Compose](
 #### Example Configuration
 
 Start a local MinIO container with Docker using:
+
 ```bash
 docker run --name minio \
   -p 9000:9000 \
