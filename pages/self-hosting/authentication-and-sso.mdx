@@ -1,8 +1,8 @@
 # Authentication and SSO
 
-### Authentication
+Langfuse supports both email/password and SSO authentication.
 
-#### Email/Password [#auth-email-password]
+## Email/Password [#auth-email-password]
 
 Email/password authentication is enabled by default. Users can sign up and log in using their email and password.
 
@@ -21,7 +21,7 @@ If you want to provision a default user for your Langfuse instance, you can use 
 3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
 4.  Finally, remove the old user account from the `users` table in database.
 
-#### SSO
+## SSO
 
 To enable OAuth/SSO provider sign-in for Langfuse, add the following environment variables:
 
@@ -42,16 +42,10 @@ Use `*_ALLOW_ACCOUNT_LINKING` to allow merging accounts with the same email addr
 
 Need another provider? Langfuse uses Auth.js, which integrates with [many providers](https://next-auth.js.org/providers/). Add a [feature request on GitHub](/ideas) if you want us to add support for a specific provider.
 
-#### Additional configuration
+## Additional configuration
 
 | Variable                            | Description                                                                                                                                                                                              |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` | Comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                         |
 | `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet. |
 | `AUTH_SESSION_MAX_AGE`              | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.     |
-
-## Instance administration
-
-| Variable                                 | Description                                                                                                                                                                |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_ALLOWED_ORGANIZATION_CREATORS` | Comma-separated list of allowlisted users that can create new organizations. By default, all users can create organizations. E.g. `user1@langfuse.com,user2@langfuse.com`. |

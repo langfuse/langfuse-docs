@@ -30,6 +30,7 @@ export default {
   },
   "headless-initialization": "Headless Initialization",
   "ui-customization": "UI Customization (EE)",
+  "organization-creators": "Organization Creators (EE)",
   "-- Upgrade": {
     type: "separator",
     title: "Upgrade",
