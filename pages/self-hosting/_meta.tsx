@@ -8,16 +8,16 @@ export default {
   index: "Overview",
   components: "Components",
   "license-key": "License Key",
-  configuration: "Configuration",
   troubleshooting: "Troubleshooting",
-  "-- Deployment Guides": {
+  "-- Deployment": {
     type: "separator",
-    title: "Deployment Guides",
+    title: "Deployment",
   },
   local: "Local (Docker Compose)",
   "docker-compose": "VM (Docker Compose)",
   docker: "Docker",
   "kubernetes-helm": "Kubernetes (Helm)",
+  infrastructure: "Infrastructure",
   "-- Security": {
     type: "separator",
     title: "Security",

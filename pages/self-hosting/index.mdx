@@ -19,23 +19,35 @@ Langfuse only depends on open source components and can be deployed locally, on 
 
 - Langfuse Cloud: A fully managed version of Langfuse that is hosted and maintained by the Langfuse team.
 - Self-host Langfuse: Run Langfuse on your own infrastructure.
-  - [Local (Docker Compose)](/docs/deployment/v3/guides/docker-compose)
-  - [VM (Docker Compose)](/docs/deployment/v3/guides/docker-compose)
-  - [Docker](/docs/deployment/v3/guides/docker)
-  - [Kubernetes (Helm)](/docs/deployment/v3/guides/kubernetes-helm)
+  - [Local](/self-hosting/local): Run Langfuse on your own machine in 5 minutes using Docker Compose.
+  - [VM](/self-hosting/docker-compose): Run Langfuse on a single VM using Docker Compose.
+  - [Docker](/self-hosting/docker)
+  - [Kubernetes (Helm)](/self-hosting/kubernetes-helm): Run Langfuse on a Kubernetes cluster using Helm.
 
 ## Architecture
 
-Langfuse consists of multiple storage components and two Docker containers:
+```mermaid
+flowchart TB
+    Web["Web Server (langfuse/langfuse)"]
+    Worker["Worker (langfuse/worker)"]
+    DB[Postgres Database]
+    Redis[Redis Cache/Queue]
+    Clickhouse["Clickhouse Database (observability data)"]
+    S3[S3/Blob Store]
 
-- **Langfuse Web**: The main web application serving the Langfuse UI and APIs.
-- **Langfuse Worker**: A worker that asynchronously processes events.
-- **Postgres**: The main database for transactional workloads.
-- **Redis**: A fast in-memory data structure store. Used for queue and cache operations.
-- **S3/Blob Store**: Object storage to persist all incoming events, multi-modal inputs, and large exports.
-- **Clickhouse**: High-performance OLAP database which stores traces, observations, and scores.
+    Web --> S3
+    Web --> DB
+    Web --> Redis
+    Web --> Clickhouse
 
-See the chart below for an overview of the components and their interactions:
+    Redis --> Worker
+    Worker --> Clickhouse
+    Worker --> DB
+    Worker --> S3
+```
+
+<details>
+<summary>Services</summary>
 
 ```mermaid
 flowchart TB
@@ -83,6 +95,17 @@ flowchart TB
     QueueProcessor --> DB
     QueueProcessor --> S3
 ```
+
+</details>
+
+Langfuse consists of multiple storage components and two Docker containers:
+
+- **Langfuse Web**: The main web application serving the Langfuse UI and APIs.
+- **Langfuse Worker**: A worker that asynchronously processes events.
+- **Postgres**: The main database for transactional workloads.
+- **Redis**: A fast in-memory data structure store. Used for queue and cache operations.
+- **S3/Blob Store**: Object storage to persist all incoming events, multi-modal inputs, and large exports.
+- **Clickhouse**: High-performance OLAP database which stores traces, observations, and scores.
 
 ### Postgres Database
 
