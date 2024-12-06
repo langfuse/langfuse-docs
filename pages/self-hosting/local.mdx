@@ -1,0 +1,52 @@
+---
+description: Step-by-step guide to run Langfuse locally via docker compose.
+---
+
+# Local (Docker Compose)
+
+This guide will walk you through the steps to deploy Langfuse via Docker Compose on your local machine.
+We assume that you have git, docker, and docker compose installed.
+This setup is intended for development and **not recommended for production**.
+
+## Clone Langfuse Repository
+
+Get a copy of the latest Langfuse repository:
+
+```bash
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+```
+
+## Start the application
+
+Run the docker compose file for Langfuse v3:
+
+```bash
+docker compose up
+```
+
+Watch the containers being started and the logs flowing in.
+After about 2-3 minutes, the langfuse-web-1 container should log "Ready".
+At this point you can proceed to the next step.
+
+## Smoke test UI
+
+You should be able to load the Langfuse UI, by opening `http://<instance-ip>:3000/` in your browser.
+Go ahead and register, create a new organization, project, and explore Langfuse.
+
+## Shutdown
+
+You can stop the containers by hitting `Ctrl+C` in the terminal.
+If you started docker-compose in the background (`-d` flag), you can stop all instance using:
+
+```bash
+docker compose down
+```
+
+Adding the `-v` flag will also remove the volumes.
+
+Ensure to stop the VM instance in your cloud provider interface to avoid unnecessary costs.
+
+## How to Upgrade
+
+To upgrade Langfuse, you can stop all instances and run `docker compose up --pull always`.
