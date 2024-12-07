@@ -23,7 +23,17 @@ export default {
     title: "Security",
   },
   "authentication-and-sso": "Authentication and SSO",
+  "data-masking": {
+    title: "Data Masking ↗ (main docs)",
+    href: "/docs/tracing-features/masking",
+    newWindow: true,
+  },
   encryption: "Encryption",
+  rbac: {
+    title: "RBAC ↗ (main docs)",
+    href: "/docs/rbac",
+    newWindow: true,
+  },
   networking: "Networking",
   "-- Features": {
     type: "separator",

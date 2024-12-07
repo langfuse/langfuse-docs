@@ -4,8 +4,14 @@ label: "Version: v3"
 
 # Encryption
 
-Langfuse is designed to be secure by default.
+<Callout type="info">
+
+Security and privacy are core design objectives at Langfuse. The Langfuse Team runs Langfuse in production on Langfuse Cloud which is ISO27001, SOC2 Type 2 and GDPR compliant ([Langfuse Cloud security page](/docs/security)).
+
+</Callout>
+
 This guide covers the different encryption methods and considerations.
+It is assumed that you are familiar with the [architecture](/self-hosting#architecture) of Langfuse.
 
 ## Encryption in transit (HTTPS) [#https]
 
@@ -35,8 +41,6 @@ Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` t
 
 All Langfuse data is stored in your Postgres database, Clickhouse, Redis, or S3/Blob Store.
 Database-level encryption is recommended for a secure production deployment and available across cloud providers.
-
-The Langfuse team has implemented this for Langfuse Cloud and it is fully ISO27001, SOC2 Type 2 and GDPR compliant ([security page](/docs/security)).
 
 ## Additional application-level encryption [#application-level-encryption]
 
