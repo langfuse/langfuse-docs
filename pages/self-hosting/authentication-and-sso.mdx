@@ -8,20 +8,28 @@ Langfuse supports both email/password and SSO authentication.
 
 ## Email/Password [#auth-email-password]
 
-Email/password authentication is enabled by default. Users can sign up and log in using their email and password. To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. In this case, you need to set up [SSO](#sso) instead.
+Email/password authentication is enabled by default. Users can sign up and log in using their email and password.
 
 ### Password Reset
 
-- **If [transactional emails](/self-hosting/transactional-emails) are configured** on your instance, users can reset their password by using the "Forgot password" link on the login page.
-- **If transactional emails are not set up**, passwords can be reset by following these steps:
-  1.  Update the email associated with your user account in database, such as by adding a prefix.
-  2.  You can then sign up again with a new password.
-  3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
-  4.  Finally, remove the old user account from the `users` table in database.
+**If [transactional emails](/self-hosting/transactional-emails) are configured** on your instance, users can reset their password by using the "Forgot password" link on the login page.
+
+**If transactional emails are not set up**, passwords can be reset by following these steps:
+
+    1.  Update the email associated with your user account in database, such as by adding a prefix.
+    2.  You can then sign up again with a new password.
+    3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
+    4.  Finally, remove the old user account from the `users` table in database.
+
+### Disable email/password authentication to use SSO
+
+To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. In this case, you need to set up [SSO](#sso) instead.
+
+If you decide to switch from email/password to SSO on a running instance, you can enable `*_ALLOW_ACCOUNT_LINKING=true` on the SSO provider. This will automatically merge accounts with the same email address.
 
 ### Creation of default user
 
-If you want to programmatically create a default user, check out the [Headless Initialization](/self-hosting/headless-initialization) documentation.
+If you want to programmatically create a default user, check out the [Headless Initialization](/self-hosting/headless-initialization) documentation. This is useful if you want to initialize the instance without using the UI, e.g. when running Langfuse in a CI/CD pipeline or programmatically deploying Langfuse into many environments.
 
 ## SSO
 
