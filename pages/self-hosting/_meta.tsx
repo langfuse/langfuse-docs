@@ -42,8 +42,9 @@ export default {
   "automated-access-provisioning": "Automated Access Provisioning",
   "custom-base-path": "Custom Base Path",
   "headless-initialization": "Headless Initialization",
-  "ui-customization": "UI Customization (EE)",
   "organization-creators": "Organization Creators (EE)",
+  "transactional-emails": "Transactional Emails",
+  "ui-customization": "UI Customization (EE)",
   "-- Upgrade": {
     type: "separator",
     title: "Upgrade",
