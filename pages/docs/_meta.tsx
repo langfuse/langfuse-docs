@@ -7,7 +7,6 @@ export default {
   },
   index: "Overview",
   demo: "Interactive Demo",
-  deployment: "Self-host",
   "-- Tracing": {
     type: "separator",
     title: "Tracing",

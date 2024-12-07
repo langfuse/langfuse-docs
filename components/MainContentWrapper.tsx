@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useConfig } from "nextra-theme-docs";
 import { Button } from "./ui/button";
 import {
   Calendar,
@@ -20,15 +21,25 @@ const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
 export const MainContentWrapper = (props) => {
   const router = useRouter();
+  const { frontMatter } = useConfig();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
     (cookbook) => cookbook.path === router.pathname
   );
+
+  const versionLabel = frontMatter.label;
 
   return (
     <>
       {cookbook ? (
         <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
       ) : null}
+      {versionLabel && (
+        <div>
+          <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 mt-5 text-xs font-medium text-secondary-foreground">
+            {versionLabel}
+          </span>
+        </div>
+      )}
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div

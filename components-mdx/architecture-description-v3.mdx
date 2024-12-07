@@ -1,0 +1,15 @@
+Langfuse consists of two application containers, storage components, and an optional LLM API/Gateway.
+
+- [**Application Containers**](/self-hosting/infrastructure/containers)
+  - Langfuse Web: The main web application serving the Langfuse UI and APIs.
+  - Langfuse Worker: A worker that asynchronously processes events.
+- **Storage Components**:
+  - [Postgres](/self-hosting/infrastructure/postgres): The main database for transactional workloads.
+  - [Clickhouse](/self-hosting/infrastructure/clickhouse): High-performance OLAP database which stores traces, observations, and scores.
+  - [Redis/Valkey cache](/self-hosting/infrastructure/cache): A fast in-memory data structure store. Used for queue and cache operations.
+  - [S3/Blob Store](/self-hosting/infrastructure/blobstorage): Object storage to persist all incoming events, multi-modal inputs, and large exports.
+- [**LLM API / Gateway**](/self-hosting/infrastructure/llm-api): Some features depend on an external LLM API or gateway.
+
+Langfuse can be deployed within a VPC or on-premises in high-security environments.
+Internet access is optional.
+See [networking](/self-hosting/networking) documentation for more details.

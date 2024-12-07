@@ -1,4 +1,4 @@
-import { CircleHelp } from "lucide-react";
+import { CircleHelp, Server } from "lucide-react";
 import { FileCode } from "lucide-react";
 import { LibraryBig } from "lucide-react";
 import Link from "next/link";
@@ -11,6 +11,7 @@ export const MenuSwitcher = () => {
     <div className="-mx-2 hidden md:block">
       {[
         { title: "Docs", path: "/docs", Icon: LibraryBig },
+        { title: "Self Hosting", path: "/self-hosting", Icon: Server },
         { title: "Guides", path: "/guides", Icon: FileCode },
         { title: "FAQ", path: "/faq", Icon: CircleHelp },
       ].map((item) =>
