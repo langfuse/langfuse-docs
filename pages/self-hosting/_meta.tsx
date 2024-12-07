@@ -30,7 +30,7 @@ export default {
     newWindow: true,
   },
   encryption: "Encryption",
-  environments: "Environments",
+  "deployment-strategies": "Deployment Strategies",
   rbac: {
     title: "RBAC ↗ (main docs)",
     href: "/docs/rbac",
