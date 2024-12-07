@@ -8,6 +8,21 @@ By default, you need to create a user account, organization and project via the 
 
 If you want to automatically initialize these resources, you can optionally use the following `LANGFUSE_INIT_*` environment variables. When these variables are set, Langfuse will automatically create the specified resources on startup if they don't already exist. This allows for easy integration with infrastructure-as-code and automated deployment pipelines.
 
+## Resource Dependencies
+
+The different resources depend on each other.
+
+You can e.g. intialize an organization and a user without having to also initialize a project and API keys, but you cannot initialize a project or user without also initializing an organization.
+
+```
+Organization
+├── Project      (part of organization)
+│   └── API Keys (set for project)
+└── User         (owner of organization)
+```
+
+## Environment Variables
+
 | Environment Variable               | Description                            | Required to Create Resource | Example            |
 | ---------------------------------- | -------------------------------------- | --------------------------- | ------------------ |
 | `LANGFUSE_INIT_ORG_ID`             | Unique identifier for the organization | Yes                         | `my-org`           |
@@ -20,16 +35,7 @@ If you want to automatically initialize these resources, you can optionally use 
 | `LANGFUSE_INIT_USER_NAME`          | Name of the initial user               | No                          | `John Doe`         |
 | `LANGFUSE_INIT_USER_PASSWORD`      | Password for the initial user          | Yes                         | `password123`      |
 
-The different resources depend on each other in the following way. You can e.g. intialize an organization and a user without having to also initialize a project and API keys, but you cannot initialize a project without also initializing an organization.
-
-```
-Organization
-├── Project      (part of organization)
-│   └── API Keys (set for project)
-└── User         (owner of organization)
-```
-
-Troubleshooting:
+## Troubleshooting
 
 - If you use `LANGFUSE_INIT_*` in Docker Compose, do not double-quote the values ([GitHub issue](https://github.com/langfuse/langfuse/issues/3398)).
 - The resources depend on one another (see note above). For example, you must create an organization to initialize a project.
