@@ -9,7 +9,7 @@ description: Open source observability for Inferable applications. Automatically
 
 With the native integration, you can use Inferable to quickly create distributed agentic automations and then use Langfuse to monitor and improve them. No code changes required.
 
-## Integration
+## Get Started
 
 <Steps>
 
@@ -41,7 +41,8 @@ With the native integration, you can use Inferable to quickly create distributed
    - **Public API Key**: Your Langfuse Public API Key
    - **Base URL**: Your Langfuse Base URL (e.g. `https://cloud.langfuse.com`)
    - **Send Message Payloads**: Whether to send inputs and outputs of LLM calls and function calls to Langfuse
-     </Tab>
+
+</Tab>
 
 <Tab>
 If you're self-hosting Inferable in the headless mode, simply insert the Langfuse credentials into the `integrations` table.
@@ -55,6 +56,7 @@ INSERT INTO integrations (cluster_id, langfuse) VALUES
 ```
 
 If you're self-hosting the console, you can follow the same instructions as the managed mode.
+
 </Tab>
 </Tabs>
 
@@ -75,7 +77,7 @@ You will find two types of spans in the trace:
   - Agent loop reasoning
   - Utility calls (e.g. Summarization, Title generation)
 
-### Evaluation
+### Evaluations
 
 Whenever you submit an evaluation on a Run via the Playground or the API, Inferable will send a score to Langfuse on the trace for that Run.
 
