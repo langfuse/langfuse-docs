@@ -4,5 +4,46 @@ label: "Version: v3"
 
 # Versioning
 
-Langfuse is released under [semantic versioning](https://semver.org/).
-Semantic versioning covers infrastructure changes, API changes, and features. The database schema and frontend apis are not covered by semantic versioning and can change at any time.
+Versioning is key to ensure compatibility between Langfuse Server, SDKs, and custom integrations via the Public API. Thus, we take [semantic versioning](https://semver.org/) seriously.
+
+## Scope of semantic versioning
+
+The following changes **result in a major version bump** as they are considered breaking:
+
+- Infrastructure changes
+- Removal of existing Public APIs or removal/changes of existing parameters from Public APIs
+
+The following changes **do not result in a major version bump** as they are considered internal implementation details:
+
+- Database schemas
+- Frontend APIs
+
+## Compatibility between Langfuse Server and SDKs
+
+Langfuse Server and SDKs are versioned independently to allow for more flexibility in upgrading components:
+
+- **Server**: Can be upgraded independently of SDK versions, unless explicitly noted in release notes
+- **SDKs**: Can remain on older versions while running newer server versions
+- **Compatibility**: New SDK features may require recent server versions
+
+We recommend keeping the Langfuse Server up to date to ensure access to all features and security updates.
+
+## Release Notes
+
+Release notes are published on GitHub:
+
+- [Langfuse Server](https://github.com/langfuse/langfuse/releases)
+- [Langfuse Python SDK](https://github.com/langfuse/langfuse-python/releases)
+- [Langfuse JS/TS SDK](https://github.com/langfuse/langfuse-js/releases)
+
+You can watch the GitHub releases to get notified about new releases:
+
+<Frame className="max-w-md block" border>
+  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
+</Frame>
+
+Also, you can subscribe to our mailing list to get notified about new releases and new major versions:
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+<ProductUpdateSignup source="self-host versioning" className="my-3 max-w-sm" />
