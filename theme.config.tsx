@@ -183,7 +183,14 @@ const config: DocsThemeConfig = {
   components: {
     Frame,
     Tabs,
-    Tab: Tabs.Tab,
+    Tab: ({
+      children,
+      ...props
+    }: { children: React.ReactNode } & Parameters<typeof Tabs.Tab>) => (
+      <Tabs.Tab {...props} style={{ marginTop: "1rem" }}>
+        <div className="border rounded bg-background p-4">{children}</div>
+      </Tabs.Tab>
+    ),
     Steps,
     Card: Cards.Card,
     Cards,
