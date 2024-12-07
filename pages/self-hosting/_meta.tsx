@@ -17,6 +17,7 @@ export default {
   "docker-compose": "VM (Docker Compose)",
   docker: "Docker",
   "kubernetes-helm": "Kubernetes (Helm)",
+  railway: "Railway",
   infrastructure: "Infrastructure",
   "-- Security": {
     type: "separator",
