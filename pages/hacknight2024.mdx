@@ -1,0 +1,272 @@
+---
+title: "Langfuse Challenge for the AI Hack Night 2024 in Berlin"
+description:
+---
+
+# Hack Night Challenge
+
+[Langfuse](https://langfuse.com) is an open source LLM Engineering platform. It helps teams collaboratively develop, monitor, evaluate, and debug AI applications.
+
+Developers can trace any Large Language model or framework using our SDKs for Python and JS/TS, our open API or our native [integrations](https://langfuse.com/docs/integrations) (OpenAI, Langchain, Llama-Index, Vercel AI SDK). Beyond tracing, developers use Langfuse Prompt Management, its open APIs, and testing and evaluation pipelines to improve the quality of their applications.
+
+## 🧑‍💻 The Task
+
+**Monitor your AI application:** Whether you are building a RAG chat with Weaviate, build a voice application with AssemblyAI, or work on image generation with Mistral → Langfuse helps you to refine and debug your prototype and monitor its performance during testing and demo.
+
+The task is to build an application with one of the other Hack Night partners and use Langfuse to monitor the application.
+
+## 🏆 Price
+
+The winning team will receive EUR 500.00 in Langfuse credits and some Langfuse swag.
+
+## 🏎️ Get Started
+
+<Steps>
+
+### Sign up or self-host within seconds
+
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host](/self-hosting) (3 min)
+2.  Create a new project
+3.  Create new API credentials in the project settings
+
+### Instrument your Code
+
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedJsSdk from "@/components-mdx/get-started-js-sdk.mdx";
+import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
+import EnvPython from "@/components-mdx/env-python.mdx";
+import EnvJs from "@/components-mdx/env-js.mdx";
+import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
+import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
+
+<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
+
+<Tab>
+{/* Decorator + OpenAI */}
+
+The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. In this quickstart we also use the Langfuse [OpenAI integration](/docs/integrations/openai) to automatically capture all model parameters.
+
+Not using OpenAI? Switch to the _"Python Decorator + any LLM"_ tab.
+
+```bash
+pip install langfuse openai
+```
+
+<EnvPython />
+
+<GetStartedDecoratorOpenai />
+
+</Tab>
+<Tab>
+{/* Decorator + Any LLM */}
+
+The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. If you do not use any of our native integrations, you can trace any LLM call via `@observe(as_type="generation")`. Below find an example using the Anthropic SDK.
+
+```bash
+pip install langfuse anthropic
+```
+
+<EnvPython />
+
+<GetStartedDecoratorAnyLlm />
+
+</Tab>
+<Tab>
+{/* JS/TS */}
+
+```sh
+npm i langfuse
+# or
+yarn add langfuse
+
+# Node.js < 18
+npm i langfuse-node
+
+# Deno
+import { Langfuse } from "https://esm.sh/langfuse"
+```
+
+<EnvJs />
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [JS/TS SDK docs](/docs/sdk/typescript/guide) or [end-to-end example notebook](/docs/sdk/typescript/example-notebook).
+
+<GetStartedJsSdk />
+
+</Tab>
+<Tab>
+{/* OpenAI SDK (Python) */}
+The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
+
+```bash
+pip install langfuse
+```
+
+<EnvPython />
+
+```diff filename=".py"
+- import openai
++ from langfuse.openai import openai
+
+Alternative imports:
++ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
+```
+
+Use the OpenAI SDK as you would normally. Example:
+
+```python
+completion = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator."},
+      {"role": "user", "content": "1 + 1 = "}],
+)
+```
+
+</Tab>
+<Tab>
+{/* OpenAI (JS/TS) */}
+
+<EnvJs />
+
+With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
+
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const openai = observeOpenAI(new OpenAI());
+
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+  model: "gpt-3.5-turbo",
+  max_tokens: 300,
+});
+```
+
+</Tab>
+<Tab>
+{/* LangChain */}
+
+The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+
+<GetStartedLangchainPythonArgs />
+
+For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+
+</Tab>
+<Tab>
+{/* Langchain (JS) */}
+
+The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+
+<GetStartedLangchainJsArgs />
+
+For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+
+</Tab>
+<Tab>
+{/* LlamaIndex */}
+
+The [integration](/docs/integrations/llama-index) uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
+
+```bash
+pip install llama-index langfuse
+```
+
+<GetStartedLlamaindexPythonArgs />
+
+Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
+
+</Tab>
+<Tab>
+{/* Python low-level */}
+
+The [low-level SDK](/docs/sdk/python/low-level-sdk) gives you full control over the traces logged to Langfuse. For a less verbose integration, consider using the `@observe()` decorator.
+
+```bash
+pip install langfuse
+```
+
+<EnvPython />
+
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
+
+```python filename="server.py"
+from langfuse import Langfuse
+
+# Create Langfuse client
+langfuse = Langfuse()
+
+# Create generation in Langfuse
+generation = langfuse.generation(
+    name="summary-generation",
+    model="gpt-3.5-turbo",
+    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
+    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
+    metadata={"interface": "whatsapp"}
+)
+
+# Execute model, mocked here
+# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+chat_completion = "completion":"The Q3 OKRs contain goals for multiple teams..."
+
+# Update span and sets end_time
+generation.end(output=chat_completion)
+
+# The SDK executes network requests in the background.
+# To ensure that all requests are sent before the process exits, call flush()
+# Not necessary in long-running production code
+langfuse.flush()
+```
+
+</Tab>
+<Tab>
+{/* API */}
+
+All features are available via the public API. See documentation below:
+
+<Cards num={3}>
+  <Card title="API Reference" href="https://api.reference.langfuse.com" arrow />
+  <Card
+    title="OpenAPI Specification (download)"
+    href="https://cloud.langfuse.com/generated/api/openapi.yml"
+    arrow
+  />
+  <Card
+    title="Postman Collection (download)"
+    href="https://cloud.langfuse.com/generated/postman/collection.json"
+    arrow
+  />
+</Cards>
+
+</Tab>
+</Tabs>
+
+### Analyze your AI app in Langfuse
+
+import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
+
+<TracingOverview />
+
+
+### ⚡️ Bonus: Improve your app with Dataset Prompt Experiments
+
+Prompt Experiments allows you to test a prompt version from [Prompt Management](/docs/prompts) on a [Dataset](/docs/datasets) of inputs and expected outputs. Thereby, you can verify that the change yields the expected outputs and does not cause regressions. You can directly analyze the results of different prompt experiments side-by-side.
+
+Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/scores/model-based-evals) to automatically evaluate the responses based on the expected outputs to further analyze the results on an aggregate level.
+
+1. Create a dataset of **inputs** and **expected outputs**.
+2. Create a prompt experiment to **test prompt versions** on your dataset and evaluate the performance.
+
+import DatasetsOverview from "@/components-mdx/datasets-overview-gif.mdx";
+
+<DatasetsOverview />
+
+<Callout type="info">
+
+Follow the [**Get Started**](/docs/datasets/get-started) guide for step by step instructions on how to create your first dataset and run your first experiment.
+
+</Callout>
+
+</Steps>

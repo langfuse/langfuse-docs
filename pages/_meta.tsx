@@ -153,6 +153,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  hacknight2024: {
+    title: "AI Hack Night 2024",
+    type: "page",
+    display: "hidden",
+  },
   "cookie-policy": {
     title: "Cookie Policy",
     type: "page",
