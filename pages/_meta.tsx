@@ -153,8 +153,8 @@ export default {
     type: "page",
     display: "hidden",
   },
-  hacknight2024: {
-    title: "AI Hack Night 2024",
+  events: {
+    title: "Langfuse Events",
     type: "page",
     display: "hidden",
   },
