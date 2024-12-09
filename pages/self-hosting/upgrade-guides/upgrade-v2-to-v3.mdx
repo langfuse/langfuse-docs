@@ -224,7 +224,7 @@ Deleting projects within Langfuse was a synchronous operation and projects got r
 Projects will be marked as deleted within Langfuse v3 and will not be accessible using the standard UI navigation options.
 We immediately revoke access keys for projects, but all remaining data will be removed in the background.
 
-Information will not be deleted from the [S3/Blob Store](/docs/deployment/v3/components/s3-blob-store).
+Information will not be deleted from the [S3/Blob Store](/self-hosting/infrastructure/blobstorage).
 This action needs to be performed manually by an administrator.
 This process will be automated in a future release.
 
@@ -254,7 +254,7 @@ By following this guide, you can upgrade your Langfuse v2 deployment to v3 witho
 
 ### Before you start the upgrade
 
-Before starting your upgrade, make sure you are familiar with the contents of [our v3 hosting guide](/docs/deployment/v3/overview).
+Before starting your upgrade, make sure you are familiar with the contents of the respective [v3 deployment guide](/self-hosting).
 In addition, we recommend that you perform a backup of your Postgres database before you start the upgrade.
 Also, ensure that you run a recent version of Langfuse, ideally a version later than v2.92.0.
 
@@ -267,7 +267,7 @@ and move your traffic after validating that the new instances are working as exp
 
 #### 1. Provision new infrastructure
 
-Ensure that you deploy all required storage components ([Clickhouse](/docs/deployment/v3/components/clickhouse), [Redis](/docs/deployment/v3/components/redis), [S3/Blob Store](/docs/deployment/v3/components/blobstorage)) and have the connection information handy.
+Ensure that you deploy all required storage components ([Clickhouse](/self-hosting/infrastructure/clickhouse), [Redis](/self-hosting/infrastructure/cache), [S3/Blob Store](/self-hosting/infrastructure/blobstorage)) and have the connection information handy.
 You can reuse your existing Postgres instance for the new deployment.
 Ensure that you also have your Postgres connection details ready.
 
@@ -321,4 +321,4 @@ If you experience any issues, please create an [issue on GitHub](/issues) or con
 
 For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
 
-Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
+Alternatively, you may consider using Langfuse Cloud, which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
