@@ -220,4 +220,4 @@ You can define custom price information via the Langfuse dashboard or UI ([see d
 ## Additional Resources
 
 - Metadocs, [Monitoring your Langchain app's cost using Bedrock with Langfuse](https://www.metadocs.co/2024/07/03/monitor-your-langchain-app-cost-using-bedrock-with-langfuse/), featuring Langchain integration and custom model price definitions for Bedrock models.
-- [Self-hosting guide](https://langfuse.com/docs/deployment/self-host) to deploy Langfuse on AWS.
+- [Self-hosting guide](https://langfuse.com/self-hosting) to deploy Langfuse on AWS.

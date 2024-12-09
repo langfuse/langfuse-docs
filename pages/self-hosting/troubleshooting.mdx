@@ -1,11 +1,12 @@
 ---
+title: Troubleshooting a self-hosted Langfuse deployment
 description: Learn how to troubleshoot common issues with self-hosted Langfuse.
+label: "Version: v3"
 ---
 
 # Troubleshooting
 
-This guide covers common issues that Langfuse self-hosters observe and how to address them.
-If you encounter an issue that is not covered here, please [open an issue](https://github.com/langfuse/langfuse/issues) or start a [discussion](https://github.com/orgs/langfuse/discussions).
+This guide covers common issues that Langfuse self-hosters observe and how to address them. If you encounter an issue that is not covered here, please [open a GitHub issue](https://github.com/langfuse/langfuse/issues) or reach out to [support](/support).
 
 ## Missing Events After POST /api/public/ingestion
 
@@ -14,7 +15,7 @@ Events do not appear immediately in the UI, as they are being processed asynchro
 If your events are not shown after a few minutes, you can check the following:
 
 - **Check the Langfuse Web logs**: Look for any errors in the Langfuse Web container around the time that you ingested the events.
-  Any errors you observe indicate that the event is malformatted or that either [Redis](/docs/deployment/v3/components/redis) or [S3](/docs/deployment/v3/components/blobstorage) are not available.
+  Any errors you observe indicate that the event is malformatted or that either [Redis](/self-hosting/infrastructure/cache) or [S3](/self-hosting/infrastructure/blobstorage) are not available.
   In this case, you should also see non-207 status codes within your application.
 - **Check the S3/Blob Storage bucket**: Validate that the event was uploaded correctly into your blob storage.
   It should be available in a path like `/<projectId>/<type>/<eventId>/<randomId>.json`.
@@ -47,3 +48,15 @@ To address this issue, we recommend that you configure `NODE_OPTIONS=--max-old-s
 Use the available memory in MiB as the value for `var.memory`, e.g. 4096 for 4 GiB of memory.
 The value should be equal or above the memory limit of the container.
 This ensures that your container orchestrator kills the pod gracefully if the memory limit is exceeded, instead of the application terminating abruptly.
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["self-hosting"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["self-hosting"]} />

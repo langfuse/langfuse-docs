@@ -98,7 +98,7 @@ const tiers = {
     {
       name: "Open Source",
       id: "tier-self-hosted-oss",
-      href: "/docs/deployment/self-host",
+      href: "/self-hosting",
       featured: true,
       description:
         "Self-host all core Langfuse features for free without any limitations.",
@@ -1167,7 +1167,7 @@ const faqs = [
   {
     question: "Can I self-host Langfuse?",
     answer:
-      "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/docs/deployment/local'>locally using docker compose<a/> or for <a class='underline' href='/docs/deployment/self-host'>production use via docker<a/> and a standalone database.",
+      "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/local'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",
   },
   {
     question: "Where is the data stored?",

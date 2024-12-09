@@ -20,7 +20,7 @@ Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source LLM 
 
 ### Local Deployment of Langfuse
 
-Of course, you can also locally deploy Langfuse to run models and trace LLM outputs only on your own device. [Here](https://langfuse.com/docs/deployment/local) is a guide on how to run Langfuse on your local machine using Docker Compose. This method is ideal for testing Langfuse and troubleshooting integration issues.
+Of course, you can also locally deploy Langfuse to run models and trace LLM outputs only on your own device. [Here](https://langfuse.com/self-hosting/local) is a guide on how to run Langfuse on your local machine using Docker Compose. This method is ideal for testing Langfuse and troubleshooting integration issues.
 
 For this example, we will use the Langfuse cloud version.
 

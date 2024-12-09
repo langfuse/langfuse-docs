@@ -1,0 +1,54 @@
+---
+title: Application Containers (self-hosted)
+description: Langfuse uses Docker to containerize the application. The application is split into two containers (Langfuse Web and Langfuse Worker).
+label: "Version: v3"
+---
+
+# Application Containers
+
+<Callout type="info">
+
+This is a deep dive into the configuration of the application containers. Follow one of the [deployment guides](/self-hosting/deployment-options) to get started.
+
+</Callout>
+
+Langfuse uses Docker to containerize the application. The application is split into two containers:
+
+- **Langfuse Web**: The web server that serves the Langfuse Console and API.
+- **Langfuse Worker**: The worker that handles background tasks such as sending emails or processing events.
+
+## Recommended sizing
+
+For production environments, we recommend to use at least 2 CPUs and 4 GB of RAM for all containers.
+You should have at least two instances of the Langfuse Web container for high availability.
+For auto-scaling, we recommend to add instances once the CPU utilization exceeds 50% on either container.
+
+## Node.js memory settings
+
+The Node.js applications in Langfuse containers need to be configured with appropriate memory limits to operate efficiently. By default, Node.js uses a maximum heap size of 1.7 GiB, which may be less than the actual container memory allocation. For example, if your container has 4 GiB of memory allocated but Node.js is limited to 1.7 GiB, you may encounter memory issues.
+
+To properly configure memory limits, set the `max-old-space-size` via the `NODE_OPTIONS` environment variable on both the Langfuse Web and Worker containers:
+
+```bash filename=".env"
+NODE_OPTIONS=--max-old-space-size=${var.memory}
+```
+
+## Build container from source [#build-from-source]
+
+While we recommend using the prebuilt docker image, you can also build the image yourself from source.
+
+```bash
+# clone repo
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+
+# checkout production branch
+# main branch includes unreleased changes that might be unstable
+git checkout production
+
+# build web image
+docker build -t langfuse/langfuse -f ./web/Dockerfile .
+
+# build worker image
+docker build -t langfuse/langfuse-worker -f ./worker/Dockerfile .
+```

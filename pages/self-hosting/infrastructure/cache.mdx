@@ -1,12 +1,24 @@
 ---
-description: How Langfuse uses Redis or Valkey
+title: Cache (Redis/Valkey) (self-hosted)
+description: Langfuse uses Redis/Valkey as a caching layer and queue.
+label: "Version: v3"
 ---
 
-# Redis / Valkey
+# Cache (Redis/Valkey)
 
-Langfuse uses Redis/Valkey (referred to as Redis going forward) as a caching layer and as a queue.
+<Callout type="info">
+
+This is a deep dive into Redis/Valkey configuration. Follow one of the [deployment guides](/self-hosting#deployment-options) to get started.
+
+</Callout>
+
+Langfuse uses Redis/Valkey as a caching layer and queue.
 It is used to accept new events quickly on the API and defer their processing and insertion.
 This allows Langfuse to handle request peaks gracefully.
+
+You can use a managed service on AWS, Azure, or GCP, or host it yourself.
+At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured.
+
 This guide covers how to configure Redis within Langfuse and what to keep in mind when bringing your own Redis.
 
 ## Configuration
@@ -14,38 +26,40 @@ This guide covers how to configure Redis within Langfuse and what to keep in min
 Langfuse accepts the following environment variables to fine-tune your Redis usage.
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
-| Variable                   | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIS_CONNECTION_STRING`  | Required           | Redis connection string with format `redis[s]://[[username][:password]@][host][:port][/db-number]` |
+| Variable                  | Required / Default | Description                                                                                        |
+| ------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+| `REDIS_CONNECTION_STRING` | Required           | Redis connection string with format `redis[s]://[[username][:password]@][host][:port][/db-number]` |
 
 OR
 
-| Variable     | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIS_HOST` | Required           | Redis host name. |
-| `REDIS_PORT` | `6379`             | Port of the Redis instance. |
+| Variable     | Required / Default | Description                                   |
+| ------------ | ------------------ | --------------------------------------------- |
+| `REDIS_HOST` | Required           | Redis host name.                              |
+| `REDIS_PORT` | `6379`             | Port of the Redis instance.                   |
 | `REDIS_AUTH` |                    | Authentication string for the Redis instance. |
 
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.
 
-### Managed Redis by Cloud Providers
+### Managed Redis/Valkey by Cloud Providers
 
 [Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/de-de/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
 Langfuse handles failovers between read-replicas, but does not support Redis cluster mode for now, i.e. there is no sharding support.
 To connect your cloud provider manager Redis instance, set the environment variables as defined above.
 Ensure that your Langfuse container can reach your Redis instance within the VPC.
 
-#### Example Configuration
+<Callout type="warning">
 
 You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the queue jobs are not evicted from the cache.
+
+</Callout>
 
 ### Redis on Kubernetes (Helm)
 
 Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
 We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
-See [Langfuse on Kubernetes (Helm)](/docs/deployment/v3/guides/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+See [Langfuse on Kubernetes (Helm)](/self-hosting/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
 #### Example Configuration
 
@@ -76,6 +90,7 @@ As there is no redundancy, this is **not recommended for production workloads**.
 #### Example Configuration
 
 Start the container with
+
 ```bash
 docker run --name redis \
   -p 6379:6379 \
@@ -98,7 +113,7 @@ For every ~100000 events per minute we recommend about 1GB of memory for the Red
 
 ## Valkey vs Redis
 
-Valkey was created as an open source (BSD) alternative to Redis.
+[Valkey](https://github.com/valkey-io/valkey) was created as an open source (BSD) alternative to Redis.
 It is a drop-in replacement for Redis and is compatible with the Redis protocol.
 According to the maintainers their major version 8.0.0 retains compatibility to Redis v7 in most instances.
 We do not extensively test new Langfuse releases with Valkey, but have not encountered any issues in internal experiments using it.
