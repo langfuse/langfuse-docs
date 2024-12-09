@@ -10,6 +10,10 @@ You can use managed services like AWS ECS, Azure Container Instances, or GCP Clo
 During the container startup, all database migrations will be applied automatically.
 This can be optionally disabled via environment variables.
 
+Before running Langfuse, please familiarize yourself with the [architecture](/self-hosting#architecture).
+
+Please follow one of the deployment guides to run Langfuse [locally](/self-hosting/local), on a VM ([docker-compose](/self-hosting/docker-compose)), or in Kubernetes ([helm](/self-hosting/kubernetes-helm)).
+
 ## Run Langfuse Web
 
 ```bash
@@ -56,3 +60,12 @@ docker run --name langfuse-worker \
   -a STDOUT \
 langfuse/langfuse-worker:3
 ```
+
+## Features
+
+Langfuse supports many configuration options and self-hosted features.
+For more details, please refer to the [configuration guide](/self-hosting/configuration).
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />

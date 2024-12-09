@@ -13,7 +13,7 @@ export default {
     type: "separator",
     title: "Deployment",
   },
-  local: "Local (Docker Compose)",
+  local: "Local Machine",
   "docker-compose": "VM (Docker Compose)",
   docker: "Docker",
   "kubernetes-helm": "Kubernetes (Helm)",
