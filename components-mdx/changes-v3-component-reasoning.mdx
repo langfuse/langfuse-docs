@@ -1,0 +1,78 @@
+<details>
+<summary>1. Why Clickhouse</summary>
+
+We made the strategic decision to migrate our traces, observations, and scores table from Postgres to Clickhouse.
+Both us and our self-hosters observed bottlenecks in Postgres when dealing with millions of rows of tracing data,
+both on ingestion and retrieval of information.
+Our core requirement was a database that could handle massive volumes of trace and event data with exceptional query speed and efficiency
+while also being available for free to self-hosters.
+
+**Limitations of Postgres**
+
+Initially, Postgres was an excellent choice due to its robustness, flexibility, and the extensive tooling available.
+As our platform grew, we encountered performance bottlenecks with complex aggregations and time-series data.
+The row-based storage model of PostgreSQL becomes increasingly inefficient when dealing with billions of rows of tracing data,
+leading to slow query times and high resource consumption.
+
+**Our requirements**
+
+- Analytical queries: all queries for our dashboards (e.g. sum of LLM tokens consumed over time)
+- Table queries: Finding tracing data based on filtering and ordering selected via tables in our UI.
+- Select by ID: Quickly locating a specific trace by its ID.
+- High write throughput while allowing for updates. Our tracing data can be updated from the SKDs. Hence, we need an option to update rows in the database.
+- Self-hosting: We needed a database that is free to use for self-hosters, avoiding dependencies on specific cloud providers.
+- Low operational effort: As a small team, we focus on building features for our users. We try to keep operational efforts as low as possible.
+
+**Why Clickhouse is great**
+
+- Optimized for Analytical Queries: ClickHouse is a modern OLAP database capable of ingesting data at high rates and querying it with low latency. It handles billions of rows efficiently.
+- Rich feature-set: Clickhouse offers different Table Engines, Materialized views, different types of Indices, and many integrations which helps us to build fast and achieve low latency read queries.
+- Our self-hosters can use the official Clickhouse Helm Charts and Docker Images for deploying in the cloud infrastructure of their choice.
+- Clickhouse Cloud: Clickhouse Cloud is a database as a SaaS service which allows us to reduce operational efforts on our side.
+
+When talking to other companies and looking at their code bases, we learned that Clickhouse is a popular choice these days for analytical workloads.
+Many modern observability tools, such as [Signoz](https://signoz.io/) or [Posthog](https://posthog.com/), as well as established companies like [Cloudflare](https://blog.cloudflare.com/http-analytics-for-6m-requests-per-second-using-clickhouse/), use Clickhouse for their analytical workloads.
+
+**Clickhouse vs. others**
+
+We think there are many great OLAP databases out there and are sure that we could have chosen an alternative and would also succeed with it. However, here are some thoughts on alternatives:
+
+- Druid: Unlike Druid's [modular architecture](https://posthog.com/blog/clickhouse-vs-druid), ClickHouse provides a more straightforward, unified instance approach. Hence, it is easier for teams to manage Clickhouse in production as there are fewer moving parts. This reduces the operational burden especially for our self-hosters.
+- StarRocks: We think StarRocks is great but early. The vast amount of features in Clickhouse help us to remain flexible with our requirements while benefiting from the performance of an OLAP database.
+
+**Building an adapter and support multiple databases**
+
+We explored building a multi-database adapter to support Postgres for smaller self-hosted deployments.
+After talking to engineers and reviewing some of PostHog's [Clickhouse implementation](https://github.com/PostHog/posthog),
+we decided against this path due to its complexity and maintenance overhead.
+This allows us to focus our resources on building user features instead.
+
+</details>
+
+<details>
+<summary>2. Why Redis</summary>
+
+We added a Redis instance to serve cache and queue use-cases within our stack.
+With its open source license, broad native support my major cloud vendors, and ubiquity in the industry, Redis was a natural choice for us.
+
+</details>
+
+<details>
+<summary>3. Why S3/Blob Store</summary>
+
+Observability data for LLM application tends to contain large, semi-structured bodies of data to represent inputs and outputs.
+We chose S3/Blob Store as a scalable, secure, and cost-effective solution to store these large objects.
+It allows us to store all incoming events for further processing and acts as a native backup solution, as the full state
+can be restored based on the events stored there.
+
+</details>
+
+<details>
+<summary>4. Why Worker Container</summary>
+
+When processing observability data for LLM applications, there are many CPU-heavy operations which block the main loop in our Node.js backend,
+e.g. tokenization and other parsing of event bodies.
+To achieve high availability and low latencies across client applications, we decided to move the heavy processing into an asynchronous worker container.
+It accepts events from a Redis queue and ensures that they are eventually being upserted into Clickhouse.
+
+</details>
