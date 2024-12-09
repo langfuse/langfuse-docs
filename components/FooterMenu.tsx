@@ -125,7 +125,7 @@ const menuItems: {
       },
       {
         name: "Self-hosting",
-        href: "/docs/deployment/self-host",
+        href: "/self-hosting",
       },
       {
         name: "Open Source",

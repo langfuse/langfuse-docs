@@ -1,0 +1,35 @@
+---
+title: Networking (self-hosted)
+description: Learn how to configure networking for your self-hosted Langfuse deployment. Langfuse can be run without internet access.
+label: "Version: v3"
+---
+
+# Networking
+
+Langfuse can be deployed in a VPC or on-premises in high-security environments. This guide covers the networking requirements and considerations.
+
+Architecture diagram (from [architecture overview](/self-hosting#architecture)):
+
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+<ArchitectureDiagram />
+
+## Network Exposure & Service Configuration
+
+Only the `langfuse/langfuse` (web) container needs to be accessible by users, via API, and SDKs.
+Optionally, this can be behind a firewall, proxy, or VPN.
+
+By default `PORT=3000` is used for the Langfuse Web container. This can be configured using the `PORT` environment variable ([docs](/self-hosting/configuration)). Usually a network load balancer is used to expose the service and handle ssl termination ([docs](/self-hosting/encryption)).
+
+Langfuse is designed to be exposed publicly as a web service.
+This is penetration tested and secure by design as the Langfuse Team runs the same container for the managed Langfuse Cloud Offering.
+See [security documentation](/security) of Langfuse Cloud for more details.
+
+## Internet Access
+
+Langfuse does not require internet access.
+
+Some optional components, like the LLM Playground and LLM-evals require access to an [LLM API/Gateway](/self-hosting/infrastructure/llm-api).
+This can be deployed in the same VPC or peered with the VPC.
+
+Langfuse pings a cached version of the GitHub API to check for updates to the Langfuse Server. If internet access is not available, this check will fail gracefully.

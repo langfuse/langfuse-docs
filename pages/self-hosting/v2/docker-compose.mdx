@@ -1,16 +1,26 @@
 ---
+title: Local Deployment (v2, docker compose)
 description: Step-by-step guide to run Langfuse on your local machine using docker compose.
+label: "Version: v2"
 ---
 
 import { Callout } from "nextra/components";
 
-# Local Deployment - Open Source LLM Observability
+# Local Deployment (v2, docker compose)
+
+<Callout type="info">
+  This guide covers Langfuse v2. For Langfuse v3, see the [v3
+  documentation](/self-hosting). Langfuse v2 receives security updates until end
+  of Q1 2025. If you have any questions while upgrading, please refer to the [v3
+  upgrade guide](/self-hosting/upgrade-v2-to-v3) or open a thread on [GitHub
+  Discussions](/gh-support).
+</Callout>
 
 <Callout type="warning">
   This setup is **not suitable for production use** as the database is not
   persistent and environment variables are not kept secret. For a
-  production-ready setup, follow the [self-hosting
-  guide](/docs/deployment/self-host) or consider using [Langfuse
+  production-ready setup, follow the [deployment
+  guide](/self-hosting/v2/deployment-guide) or consider using [Langfuse
   Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
 </Callout>
 
@@ -42,7 +52,7 @@ Langfuse is now running on your local machine:
 - The server is accessible at: `http://localhost:3000`
 - Integrations: set the `HOST`/`BASEURL` of the SDKs to `http://localhost:3000`
 
-Langfuse is very configurable, see [self-hosting (docker) guide](/docs/deployment/self-host) for more details on configuration options.
+Langfuse is very configurable, see [deployment guide](/self-hosting/v2/deployment-guide) for more details on configuration options.
 Checkout the [docker-compose.yml](https://github.com/langfuse/langfuse/blob/v2/docker-compose.yml) file for more details.
 
 ### Create an Account
@@ -82,7 +92,7 @@ Refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRI
 
 ## Troubleshooting
 
-The [self-hosting guide](/docs/deployment/self-host) is more extensive and includes troubleshooting steps which are also applicable to local deployments using docker compose.
+The [deployment guide](/self-hosting/v2/deployment-guide) is more extensive and includes troubleshooting steps which are also applicable to local deployments using docker compose.
 
 ## GitHub Discussions
 

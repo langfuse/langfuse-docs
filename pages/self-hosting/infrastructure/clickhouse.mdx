@@ -1,12 +1,22 @@
 ---
-description: How Langfuse uses ClickHouse
+title: ClickHouse (self-hosted)
+description: Langfuse uses ClickHouse as the main OLAP storage solution for traces, observations, and scores.
+label: "Version: v3"
 ---
 
 # ClickHouse
 
-ClickHouse is the main storage solution within Langfuse for our Trace, Observation, and Score entities.
+<Callout type="info">
+
+This is a deep dive into ClickHouse configuration. Follow one of the [deployment guides](/self-hosting#deployment-options) to get started.
+
+</Callout>
+
+[ClickHouse](https://github.com/ClickHouse/ClickHouse) is the main OLAP storage solution within Langfuse for our Trace, Observation, and Score entities.
 It is optimized for high write throughput and fast analytical queries.
-This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when bringing your own ClickHouse.
+This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when (optionally) bringing your own ClickHouse.
+
+Langfuse supports ClickHouse versions >= 24.3.
 
 ## Configuration
 
@@ -25,8 +35,6 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 Please note, that Langfuse uses the `default` schema and `default` cluster.
 Get in touch with us on [Discord](/discord) or contact the maintainers at support@langfuse.com if this limitation is blocking.
-
-Langfuse only supports ClickHouse versions >= 24.3.
 
 ## Deployment Options
 
@@ -63,7 +71,7 @@ CLICKHOUSE_MIGRATION_SSL=true
 
 The [Bitnami ClickHouse Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse) provides a production ready deployment of ClickHouse using a given Kubernetes cluster.
 We use it as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
-See [Langfuse on Kubernetes (Helm)](/docs/deployment/v3/guides/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+See [Langfuse on Kubernetes (Helm)](/self-hosting/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
 #### Example Configuration
 

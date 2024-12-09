@@ -1,0 +1,106 @@
+---
+title: Self-host Langfuse (Open Source LLM Observability)
+description: Step-by-step guide to run Langfuse on your local machine using docker compose.
+label: "Version: v3"
+---
+
+import { Callout } from "nextra/components";
+
+# Self-host Langfuse
+
+<Callout type="info">
+  Looking for a managed solution? Consider [Langfuse
+  Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
+</Callout>
+
+<Callout type="info">
+  This guide covers Langfuse v3. For Langfuse v2, see the [v2
+  documentation](/self-hosting/v2).
+</Callout>
+
+Langfuse is open source and can be self-hosted using Docker. This section contains guides for different deployment scenarios.
+
+## Deployment Options [#deployment-options]
+
+The following options are available:
+
+- Langfuse Cloud: A fully managed version of Langfuse that is hosted and maintained by the Langfuse team.
+- Self-host Langfuse: Run Langfuse on your own infrastructure.
+  - [Local](/self-hosting/local): Run Langfuse on your own machine in 5 minutes using Docker Compose.
+  - [VM](/self-hosting/docker-compose): Run Langfuse on a single VM using Docker Compose.
+  - [Docker](/self-hosting/docker)
+  - [Kubernetes (Helm)](/self-hosting/kubernetes-helm): Run Langfuse on a Kubernetes cluster using Helm.
+  - Planned: Cloud-specific deployment guides, please upvote and comment on the following threads: [AWS](https://github.com/orgs/langfuse/discussions/4645), [Google Cloud](https://github.com/orgs/langfuse/discussions/4646), [Azure](https://github.com/orgs/langfuse/discussions/4647).
+
+## Architecture
+
+Langfuse only depends on open source components and can be deployed locally, on cloud infrastructure, or on-premises.
+
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+<ArchitectureDiagram />
+
+import ArchitectureDescription from "@/components-mdx/architecture-description-v3.mdx";
+
+<ArchitectureDescription />
+
+## Optimized for performance, reliability, and uptime
+
+Langfuse self-hosted is optimized for production environments. It is the exact same codebase as Langfuse Cloud, just deployed on your own infrastructure. The Langfuse teams serves thousands of teams with Langfuse Cloud with high availability ([status page](https://status.langfuse.com)) and performance.
+
+Some of the optimizations include:
+
+- **Queued trace ingestion**: All traces are received in batches by the Langfuse Web container and immediately written to S3. Only a reference is persisted in Redis for queueing. Afterwards, the Langfuse Worker will pick up the traces from S3 and ingest them into Clickhouse. This ensures that high spikes in request load do not lead to timeouts or errors constrained by the database.
+- **Caching of API keys**: API keys are cached in-memory in Redis. Thereby, the database is not hit on every API call and unauthorized requests can be rejected with very low resource usage.
+- **Caching of prompts (SDKs and API)**: Even though prompts are cached client-side by the Langfuse SDKs and only revalidated in the background ([docs](/docs/prompts)), they need to be fetched from the Langfuse on first use. Thus, API response times are very important. Prompts are cached in a read-through cache in Redis. Thereby, hot prompts can be fetched from Langfuse without hitting a database.
+- **OLAP database**: All read-heavy analytical operations are offloaded to an OLAP database (Clickhouse) for fast query performance.
+- **Multi-modal traces in S3**: Multi-modal traces can include large videos or arbitrary files. To enable support for these, they are directly uploaded to S3/Blob Storage from the client SDKs. Learn more [here](/docs/tracing-features/multi-modality).
+- **Recoverability of events**: All incoming tracing and evaluation events are persisted in S3/Blob Storage first. Only after successful processing, the events are written to the database. This ensures that even if the database is temporarily unavailable, the events are not lost and can be processed later.
+- **Background migrations**: Long-running migrations that are required by an upgrade but not blocking for regular operations are offloaded to a background job. This massively reduces the downtime during an upgrade. Learn more [here](/self-hosting/background-migrations).
+
+If you have any feedback or questions regarding the architecture, please reach out to us.
+
+## Features
+
+Langfuse supports many configuration options and self-hosted features.
+For more details, please refer to the [configuration guide](/self-hosting/configuration).
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />
+
+## Subscribe to updates
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Release notes are published on [GitHub](https://github.com/langfuse/langfuse/releases). Langfuse uses tagged semver releases ([versioning policy](/self-hosting/versioning)).
+
+You can subscribe to our mailing list to get notified about new releases and new major versions.
+
+<ProductUpdateSignup source="self-host" className="mt-3 mb-3 max-w-sm" />
+
+You can also watch the GitHub releases to get notified about new releases:
+
+<Frame className="max-w-md block" border>
+  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
+</Frame>
+
+## Support
+
+If you experience any issues, please join us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
+
+For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
+
+Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["self-hosting"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["self-hosting"]} />

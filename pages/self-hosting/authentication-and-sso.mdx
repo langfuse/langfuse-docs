@@ -1,0 +1,152 @@
+---
+title: Authentication and SSO (self-hosted)
+description: Langfuse supports both email/password and SSO authentication. Follow this guide to configure authentication for your self-hosted Langfuse deployment.
+label: "Version: v3"
+---
+
+# Authentication and SSO
+
+Langfuse supports both email/password and SSO authentication.
+
+## Email/Password [#auth-email-password]
+
+Email/password authentication is enabled by default. Users can sign up and log in using their email and password.
+
+### Password Reset
+
+**If [transactional emails](/self-hosting/transactional-emails) are configured** on your instance, users can reset their password by using the "Forgot password" link on the login page.
+
+**If transactional emails are not set up**, passwords can be reset by following these steps:
+
+    1.  Update the email associated with your user account in database, such as by adding a prefix.
+    2.  You can then sign up again with a new password.
+    3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
+    4.  Finally, remove the old user account from the `users` table in database.
+
+### Disable email/password authentication to use SSO
+
+To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. In this case, you need to set up [SSO](#sso) instead.
+
+If you decide to switch from email/password to SSO on a running instance, you can enable `*_ALLOW_ACCOUNT_LINKING=true` on the SSO provider. This will automatically merge accounts with the same email address.
+
+### Creation of default user
+
+If you want to programmatically create a default user, check out the [Headless Initialization](/self-hosting/headless-initialization) documentation. This is useful if you want to initialize the instance without using the UI, e.g. when running Langfuse in a CI/CD pipeline or programmatically deploying Langfuse into many environments.
+
+## SSO
+
+To enable OAuth/SSO provider sign-in for Langfuse, configure the required environment variables for the provider.
+
+Use `*_ALLOW_ACCOUNT_LINKING` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified.
+
+Need another provider? Langfuse uses Auth.js, which integrates with [many providers](https://next-auth.js.org/providers/). Add a [feature request on GitHub](/ideas) if you want us to add support for a specific provider.
+
+### Google
+
+[NextAuth Google Provider Docs](https://next-auth.js.org/providers/google)
+
+| Configuration      | Value                                                                                                                                                                                                                                               |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`                                                                                                                                                                                             |
+| Optional Variables | `AUTH_GOOGLE_ALLOW_ACCOUNT_LINKING=true`<br/>`AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com` (list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload)) |
+| OAuth Redirect URL | `/api/auth/callback/google`                                                                                                                                                                                                                         |
+
+### GitHub
+
+[NextAuth GitHub Provider Docs](https://next-auth.js.org/providers/github)
+
+| Configuration      | Value                                                   |
+| ------------------ | ------------------------------------------------------- |
+| Required Variables | `AUTH_GITHUB_CLIENT_ID`<br/>`AUTH_GITHUB_CLIENT_SECRET` |
+| Optional Variables | `AUTH_GITHUB_ALLOW_ACCOUNT_LINKING=true`                |
+| OAuth Redirect URL | `/api/auth/callback/github`                             |
+
+### GitHub Enterprise
+
+| Configuration      | Value                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_GITHUB_ENTERPRISE_CLIENT_ID`<br/>`AUTH_GITHUB_ENTERPRISE_CLIENT_SECRET`<br/>`AUTH_GITHUB_ENTERPRISE_BASE_URL` |
+| Optional Variables | `AUTH_GITHUB_ENTERPRISE_ALLOW_ACCOUNT_LINKING=false`                                                                |
+| OAuth Redirect URL | `/api/auth/callback/github-enterprise`                                                                              |
+
+Thanks to [@jay0129](https://github.com/jay0129) for the initial contribution of GitHub Enterprise support!
+
+### GitLab
+
+[NextAuth GitLab Provider Docs](https://next-auth.js.org/providers/gitlab)
+
+| Configuration      | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| Required Variables | `AUTH_GITLAB_CLIENT_ID`<br/>`AUTH_GITLAB_CLIENT_SECRET`           |
+| Optional Variables | `AUTH_GITLAB_ISSUER`<br/>`AUTH_GITLAB_ALLOW_ACCOUNT_LINKING=true` |
+| OAuth Redirect URL | `/api/auth/callback/gitlab`                                       |
+
+### Azure AD/Entra ID
+
+[NextAuth Azure AD Provider Docs](https://next-auth.js.org/providers/azure-ad)
+
+| Configuration      | Value                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID` |
+| Optional Variables | `AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true`                                                   |
+| OAuth Redirect URL | `/api/auth/callback/azure-ad`                                                             |
+
+### Okta
+
+[NextAuth Okta Provider Docs](https://next-auth.js.org/providers/okta)
+
+| Configuration      | Value                                                                      |
+| ------------------ | -------------------------------------------------------------------------- |
+| Required Variables | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER` |
+| Optional Variables | `AUTH_OKTA_ALLOW_ACCOUNT_LINKING=true`                                     |
+| OAuth Redirect URL | `/api/auth/callback/okta`                                                  |
+
+### Auth0
+
+[NextAuth Auth0 Provider Docs](https://next-auth.js.org/providers/auth0)
+
+| Configuration      | Value                                                                         |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER` |
+| Optional Variables | `AUTH_AUTH0_ALLOW_ACCOUNT_LINKING=true`                                       |
+| OAuth Redirect URL | `/api/auth/callback/auth0`                                                    |
+
+### AWS Cognito
+
+[NextAuth Cognito Provider Docs](https://next-auth.js.org/providers/cognito)
+
+| Configuration      | Value                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_COGNITO_CLIENT_ID`<br/>`AUTH_COGNITO_CLIENT_SECRET`<br/>`AUTH_COGNITO_ISSUER` |
+| Optional Variables | `AUTH_COGNITO_ALLOW_ACCOUNT_LINKING=true`                                           |
+| OAuth Redirect URL | `/api/auth/callback/cognito`                                                        |
+
+### Keycloak
+
+[NextAuth Keycloak Provider Docs](https://next-auth.js.org/providers/keycloak)
+
+| Configuration      | Value                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_KEYCLOAK_CLIENT_ID`<br/>`AUTH_KEYCLOAK_CLIENT_SECRET`<br/>`AUTH_KEYCLOAK_ISSUER` |
+| Optional Variables | `AUTH_KEYCLOAK_ALLOW_ACCOUNT_LINKING=true`                                             |
+| OAuth Redirect URL | `/api/auth/callback/keycloak`                                                          |
+
+Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycloak support!
+
+### Custom OAuth Provider
+
+[NextAuth Custom OAuth Provider Docs](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([source](https://github.com/langfuse/langfuse/blob/main/web/src/server/auth.ts))
+
+| Configuration      | Value                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Required Variables | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI) |
+| Optional Variables | `AUTH_CUSTOM_ALLOW_ACCOUNT_LINKING=true`<br/>`AUTH_CUSTOM_SCOPE` (defaults to `"openid email profile"`)                        |
+| OAuth Redirect URL | `/api/auth/callback/custom`                                                                                                    |
+
+## Additional configuration
+
+| Variable                            | Description                                                                                                                                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` | Comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                         |
+| `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet. |
+| `AUTH_SESSION_MAX_AGE`              | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.     |
