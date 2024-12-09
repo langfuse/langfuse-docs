@@ -186,7 +186,7 @@ const config: DocsThemeConfig = {
     Tab: ({
       children,
       ...props
-    }: { children: React.ReactNode } & Parameters<typeof Tabs.Tab>) => (
+    }: { children: React.ReactNode } & React.ComponentProps<typeof Tabs.Tab>) => (
       <Tabs.Tab {...props} style={{ marginTop: "1rem" }}>
         <div className="border rounded bg-background p-4">{children}</div>
       </Tabs.Tab>
