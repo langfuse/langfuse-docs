@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { TrackballControls, Environment } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 import { useTheme } from "nextra-theme-docs";
@@ -9,6 +9,7 @@ const CANVAS_STYLES = {
   width: "100%",
   height: "50vh",
   minHeight: "400px",
+  maxHeight: "600px",
 } as const;
 
 function MetallicKnot() {
@@ -17,12 +18,9 @@ function MetallicKnot() {
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x =
-        Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
-      meshRef.current.rotation.y =
-        Math.sin(state.clock.elapsedTime * 0.2) * 0.3;
-      meshRef.current.position.y =
-        Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.25;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      meshRef.current.rotation.z = state.clock.elapsedTime * 0.15;
     }
   });
 
@@ -70,12 +68,7 @@ function NotFoundAnimationComponent() {
         color="#E01211"
       />
       <MetallicKnot />
-      <OrbitControls
-        enableZoom={false}
-        enablePan={false}
-        autoRotate
-        autoRotateSpeed={1}
-      />
+      <TrackballControls noZoom={true} rotateSpeed={4} />
       <Environment preset="sunset" />
     </Canvas>
   );
