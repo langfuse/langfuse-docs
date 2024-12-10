@@ -1,0 +1,141 @@
+---
+date: 2024-12-09
+title: Langfuse v3 stable release
+description: Langfuse v3 is now stable and ready for production use when self-hosting Langfuse, including many scalability and architectural improvements.
+author: Max
+ogImage: /images/changelog/2024-12-09-Langfuse-v3-stable-release/og.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+This is the biggest Langfuse release since we initially launched early last year.
+Thank you to everyone who contributed to the release and provided feedback via GitHub Discussions ([v3 thread](https://github.com/orgs/langfuse/discussions/1902))!
+
+## What's changing?
+
+**If you use Langfuse Cloud**, nothing besides way better performance and reliability. However, you have been using large parts of v3 over the recent months already. At the core, the changes that we have made help Langfuse scale reliably and help unlock analytical product features that help learn from large volumes of production data.
+
+**If you self-host Langfuse**, a whole lot is changing. With Langfuse v3, Langfuse is getting a new architecture that is optimized for scalability, reliability, and performance. Read on to learn more about the new architecture and the new features.
+
+## Infrastructure changes
+
+import ChangesV3ArchitectureChangesShortDescription from "@/components-mdx/changes-v3-architecture-changes-short-description.mdx";
+
+<ChangesV3ArchitectureChangesShortDescription />
+
+import ArchitectureDiagramV2 from "@/components-mdx/architecture-diagram-v2.mdx";
+import ArchitectureDiagramV3 from "@/components-mdx/architecture-diagram-v3.mdx";
+import ArchitectureDescriptionV3 from "@/components-mdx/architecture-description-v3.mdx";
+
+<Tabs items={["Langfuse v3", "Langfuse v2"]}>
+<Tab>
+
+Architecture Diagram
+
+<ArchitectureDiagramV3 />
+
+<ArchitectureDescriptionV3 />
+
+</Tab>
+
+<Tab>
+
+Architecture Diagram
+
+<ArchitectureDiagramV2 />
+
+</Tab>
+</Tabs>
+
+### Benefits: improved scalability, reliability, and performance
+
+Since running this infrastructure on Langfuse Cloud, we have observed a significant improvement in reliability and performance. These are some of the largest benefits:
+
+- **Queued trace ingestion**: All traces are received in batches by the Langfuse Web container and immediately written to S3. Only a reference is persisted in Redis for queueing. Afterward, the Langfuse Worker will pick up the traces from S3 and ingest them into Clickhouse. This ensures that high spikes in request load do not lead to timeouts or errors constrained by the database.
+- **Caching of API keys**: API keys are cached in-memory in Redis. Thereby, the database is not hit on every API call and unauthorized requests can be rejected with very low resource usage.
+- **Caching of prompts (SDKs and API)**: Even though prompts are cached client-side by the Langfuse SDKs and only revalidated in the background ([docs](/docs/prompts)), they need to be fetched from Langfuse on first use. Thus, API response times are very important. Prompts are cached in a read-through cache in Redis. Thereby, hot prompts can be fetched from Langfuse without hitting a database.
+- **OLAP database**: All read-heavy analytical operations are offloaded to an OLAP database (Clickhouse) for fast query performance.
+- **Recoverability of events**: All incoming tracing and evaluation events are persisted in S3/Blob Storage first. Only after successful processing, the events are written to the database. This ensures that even if the database is temporarily unavailable, the events are not lost and can be processed later.
+- **Background migrations**: Long-running migrations that are required by an upgrade but not blocking for regular operations are offloaded to a background job. This massively reduces the downtime during an upgrade. Learn more [here](/self-hosting/background-migrations).
+
+### New capabilities
+
+Some of the more recent launches were dependent on the new architecture and thus only available on Langfuse Cloud for now. This changes today with v3.0.0. We do not plan to have a feature gap when self-hosting Langfuse (OSS, Pro, Enterprise).
+
+- **LLM-as-a-Judge Evaluators**: Using the new worker container, evaluators can be run in a scalable and reliable way.
+- **Prompt Experiments**: Run prompt experiments against datasets within Langfuse.
+- **Batch exports**: Export large amounts of data in a single request from the UI as CSV/JSON.
+
+### Reasoning for the architectural changes [#reasoning]
+
+import ChangesV3ComponentReasoning from "@/components-mdx/changes-v3-component-reasoning.mdx";
+
+<ChangesV3ComponentReasoning />
+
+## How to upgrade from v2 to v3 (self-hosted)?
+
+We have released an extensive [migration guide](/self-hosting/upgrade-guides/upgrade-v2-to-v3) for upgrading from Langfuse v2 to v3.
+
+High-level upgrade steps:
+
+1. If on SDKs v1: Upgrade to SDKs v2 or later
+1. Deploy production-ready Langfuse v3 using one of the deployment guides
+1. Migrate data from v2 to v3 using the fully managed background migrations
+1. Use v3
+
+Watch this video to get an understanding of the upgrade process:
+
+<iframe
+  width="100%"
+  className="aspect-[15.94/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube.com/embed/Bb24vYp5zkA?si=oCRGQUxemOhoUCwi"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+Please [reach out](/support) in case you have any questions while upgrading! We tried to make the upgrade as seamless as possible as there are thousands of teams who rely on Langfuse in production.
+
+## New self-hosting documentation
+
+<CloudflareVideo
+  videoId="4a92103aaf7d693633e9d04edb646310"
+  aspectRatio={1784 / 1080}
+  gifStyle
+  className="max-w-xl"
+/>
+
+We used the v3 release as an opportunity to overhaul the [self-hosting documentation](/self-hosting). It includes all the information you need to know when self-hosting Langfuse and answers to many questions that came up in the community.
+
+Feel free to add to the docs and share any feedback that you might have!
+
+## What's next?
+
+Over the next weeks, we will be adding more deployment templates for different cloud providers (tracking this here for [AWS](https://github.com/orgs/langfuse/discussions/4645), [Google Cloud](https://github.com/orgs/langfuse/discussions/4646), [Azure](https://github.com/orgs/langfuse/discussions/4647)). Let us know if any additional documentation would be helpful!
+
+## Thank you everyone for your feedback!
+
+<Frame>
+  ![Langfuse v3
+  thread](/images/changelog/2024-12-09-Langfuse-v3-stable-release/discussion-post.png)
+</Frame>
+
+The v3 thread is by far the most extensive Langfuse [discussion thread](https://github.com/orgs/langfuse/discussions/1902). Thanks to everyone who contributed to the thread and helped us shape this release.
+
+A special thank you to those who tested v3 ahead of the stable release (v3.0.0-rc\*) and provided detailed feedback on the documentation and upgrade process. Thanks for your help and making this process smoother for everyone else!
+
+We are super excited to see what you will build with Langfuse v3 and how it unlocks many new [roadmap](/roadmap) items that were constrained by Langfuse v2!
+
+👋 Greetings from the Langfuse HQ, big day here!
+
+---
+
+_Core team celebrating v3 release_
+
+import { Tweet } from "@/components/Tweet";
+
+<Tweet id="1866103654421315612" />

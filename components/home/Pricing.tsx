@@ -125,7 +125,7 @@ const tiers = {
         "All Open Source features",
         "LLM Playground",
         "Human annotation queues",
-        "LLM as a judge evaluators (soon)",
+        "LLM as a judge evaluators",
         "Chat & Email support",
       ],
       cta: "Subscribe",
@@ -299,8 +299,8 @@ const sections = [
           cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: {
             "Open Source": false,
-            Pro: "yes (v3)",
-            Enterprise: "yes (v3)",
+            Pro: "yes",
+            Enterprise: "yes",
           },
         },
       },
@@ -315,8 +315,8 @@ const sections = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "yes (v3)",
-            Enterprise: "yes (v3)",
+            Pro: "yes",
+            Enterprise: "yes",
           },
         },
       },
@@ -605,8 +605,19 @@ const sections = [
       {
         name: "InfoSec reviews",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
+        name: "Customized contracts",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: "Add-on",
+          },
         },
       },
     ],
@@ -1188,6 +1199,11 @@ const faqs = [
     question: "How can I manage my subscription?",
     answer:
       "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
+  },
+  {
+    question: "Can I redline the contracts?",
+    answer:
+      "Yes, we do offer customized contracts as an add-on on Langfuse Teams (cloud) and as a part of an Enterprise agreement (self-hosted). Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Do you offer billing via AWS Marketplace?",

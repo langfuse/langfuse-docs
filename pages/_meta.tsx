@@ -153,6 +153,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  events: {
+    title: "Langfuse Events",
+    type: "page",
+    display: "hidden",
+  },
   "cookie-policy": {
     title: "Cookie Policy",
     type: "page",
