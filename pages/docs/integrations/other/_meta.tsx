@@ -1,6 +1,6 @@
 export default {
-    "milvus": "Milvus",
-    "ragas": "Ragas",
-    "vapi": "Vapi",
-  };
-  
+  inferable: "Inferable",
+  milvus: "Milvus",
+  ragas: "Ragas",
+  vapi: "Vapi",
+};
