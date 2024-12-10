@@ -1,0 +1,132 @@
+---
+title: Docker Compose (self-hosted)
+description: Step-by-step guide to run Langfuse on a VM using docker compose.
+label: "Version: v3"
+---
+
+# Docker Compose
+
+This guide will walk you through deploying Langfuse on a VM using Docker Compose.
+We will use the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file.
+
+If you use a cloud provider like AWS, GCP, or Azure, you will need permissions to deploy virtual machines.
+
+For high-availability and high-throughput, we recommend using Kubernetes ([deployment guide](/self-hosting/kubernetes-helm)).
+The docker compose setup lacks high-availability, scaling capabilities, and backup functionality.
+
+## Get Started
+
+<Steps>
+
+### Start a new instance and SSH into it
+
+Enter your cloud provider interface and navigate to the VM instance section.
+This is EC2 on AWS, Compute Engine on GCP, and Virtual Machines on Azure.
+Create a new instance.
+
+We recommend that you use at least 4 cores and 16 GiB of memory, e.g. a t3.xlarge on AWS.
+Assign a public IP address in case you want to send traces from external sources.
+As observability data tends to be large in volume, choose a sufficient amount of storage, e.g. 100GiB.
+
+The rest of this guide will assume that you have an Ubuntu OS running on your VM and are connected via SSH.
+
+### Install Docker and Docker Compose
+
+Install docker (see [official guide](https://docs.docker.com/engine/install/ubuntu/) as well). Setup Docker's apt repository:
+
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+Install Docker packages:
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+Verify installlation:
+
+```bash
+sudo docker run hello-world
+```
+
+### Clone Langfuse Repository
+
+Get a copy of the latest Langfuse repository:
+
+```bash
+git clone https://github.com/langfuse/langfuse.git
+
+cd langfuse
+```
+
+### Update Secrets
+
+For testing purposes, the pre-configured variables in the docker-compose file are usually sufficient. Feel free to skip this step.
+
+If you send _any_ kind of sensitive data to the application or intend to keep it up for longer, we recommend that you modify the docker-compose file and overwrite the following environment variables:
+
+- `SALT`: A random string used to hash passwords. It should be at least 32 characters long.
+- `ENCRYPTION_KEY`: Generate this via `openssl rand -base64 32`.
+- `NEXTAUTH_SECRET`: A random string used to sign JWT tokens.
+- `NEXTAUTH_URL`: The URL where the application is hosted. Used for redirects after signup.
+
+In addition, you can change the database and storage credentials to be more secure.
+
+### Start the application
+
+```bash
+docker compose up
+```
+
+Watch the containers being started and the logs flowing in.
+After about 2-3 minutes, the langfuse-web-1 container should log "Ready".
+At this point you can proceed to the next step.
+
+### Done
+
+And you are ready to go! Open `http://<instance-ip>:3000` in your browser to access the Langfuse UI.
+
+Depending on your configuration, you might need to open an SSH tunnel to your VM to access the IP. Please refer to your cloud provider's documentation for how to do this.
+
+</Steps>
+
+## Features
+
+Langfuse supports many configuration options and self-hosted features.
+For more details, please refer to the [configuration guide](/self-hosting/configuration).
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />
+
+## Shutdown
+
+You can stop the containers by hitting `Ctrl+C` in the terminal.
+If you started docker-compose in the background (`-d` flag), you can stop all instance using:
+
+```bash
+docker compose down
+```
+
+Adding the `-v` flag will also remove the volumes.
+
+Ensure to stop the VM instance in your cloud provider interface to avoid unnecessary costs.
+
+## How to Upgrade
+
+To upgrade Langfuse, you can stop the containers and run `docker compose up --pull always`.
+
+For more details on upgrading, please refer to the [upgrade guide](/self-hosting/upgrade).

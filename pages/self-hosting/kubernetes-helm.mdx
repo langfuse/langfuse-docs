@@ -1,0 +1,98 @@
+---
+title: Kubernetes (Helm) (self-hosted)
+description: Step-by-step guide to run Langfuse on Kubernetes via Helm.
+label: "Version: v3"
+---
+
+# Kubernetes (Helm)
+
+This guide will walk you through the steps to deploy Langfuse on Kubernetes using the Helm package manager.
+You will need access to a Kubernetes cluster and Helm installed on your local machine.
+For the purposes of this guide, we will use a local minikube instance, but each step should extend to a managed Kubernetes service like GKE, EKS, or AKS.
+
+By default, the chart will deploy the Langfuse application containers and data stores ([architecture overview](/self-hosting#architecture)).
+You can optionally point to an existing PostgreSQL, Clickhouse and Redis instance.
+See [Readme](https://github.com/langfuse/langfuse-k8s/blob/main/README.md) for more details.
+
+<Callout type="info">
+  If you are interested in contributing to our Kubernetes deployment guide or
+  Helm chart, please reach out to us on [Discord](/discord), contact the
+  maintainers at support@langfuse.com, or join the [GitHub
+  Discussion](https://github.com/orgs/langfuse/discussions/1902).
+</Callout>
+
+Planned: Cloud-specific deployment guides, please upvote and comment on the following threads: [AWS](https://github.com/orgs/langfuse/discussions/4645), [Google Cloud](https://github.com/orgs/langfuse/discussions/4646), [Azure](https://github.com/orgs/langfuse/discussions/4647).
+
+## Fetch the Helm chart and customize values
+
+Fetch the `langfuse-k8s` Helm chart.
+
+```bash
+helm repo add langfuse https://langfuse.github.io/langfuse-k8s
+helm repo update
+```
+
+For local experimentation, the pre-configured variables in the values.yaml file are usually sufficient.
+
+If you send _any_ kind of sensitive data to the application or intend to keep it up for longer, we recommend that
+you modify the values.yaml file according to your needs
+
+For a comprehensive overview of all available environment variables and configuration options, please refer to the [configuration guide](/self-hosting/configuration) and the [Readme](https://github.com/langfuse/langfuse-k8s/blob/main/README.md).
+
+## Deploy the helm chart
+
+Create a new namespace for the Langfuse deployment (optional), e.g.:
+
+```bash
+kubectl create namespace langfuse
+```
+
+Install the Helm chart into your namespace:
+
+```bash
+helm install langfuse langfuse/langfuse -n langfuse
+```
+
+Our chart assumes that it's installed as `langfuse`.
+If you want to install it with a different name, you will have to adjust the Redis hostname in the `values.yaml` accordingly.
+
+At this point, Kubernetes will start to deploy the Langfuse application and its dependencies.
+This can take up to 5 minutes.
+You can monitor the progress by checking `kubectl get pods -n langfuse` - we expect all pods to be running eventually.
+The langfuse-web and langfuse-worker container will restart a couple of times while the databases are being provisioned.
+
+## Smoke test UI
+
+The Langfuse UI will be served on a ClusterIP service by default.
+Use `kubectl get services -n langfuse` and search for `langfuse-web` to see the port mapping.
+Create a port-forward via `kubectl port-forward svc/langfuse-web -n langfuse <local-port>:<nodeport>` and access the UI via `http://localhost:<local-port>` in your browser.
+Go ahead and register, create a new organization, project, and explore Langfuse.
+
+## Features
+
+Langfuse supports many configuration options and self-hosted features.
+For more details, please refer to the [configuration guide](/self-hosting/configuration).
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />
+
+## Shutdown
+
+You can delete the Helm release and the namespace to clean up the resources:
+
+```bash
+helm uninstall langfuse -n langfuse
+kubectl delete namespace langfuse
+```
+
+## How to Upgrade
+
+Run the following commands to upgrade the Helm chart to the latest version:
+
+```bash
+helm repo update
+helm upgrade langfuse langfuse/langfuse -n langfuse
+```
+
+For more details on upgrading, please refer to the [upgrade guide](/self-hosting/upgrade).

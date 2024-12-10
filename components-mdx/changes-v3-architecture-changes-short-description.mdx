@@ -1,0 +1,10 @@
+Langfuse has gained significant traction over the last months, both in our Cloud environment and in self-hosted setups.
+With Langfuse v3 we introduce changes that allow our backend to handle hundreds of events per second with higher reliability.
+To achieve this scale, we introduce a second Langfuse container and additional storage services like S3/Blob store, Clickhouse, and Redis which are better suited for the required workloads than our previous Postgres-based setup.
+
+In short, Langfuse v3 adds:
+
+- A new worker container that processes events asynchronously.
+- A new S3/Blob store for storing large objects.
+- A new Clickhouse instance for storing traces, observations, and scores.
+- Redis/Valkey for queuing events and caching data.

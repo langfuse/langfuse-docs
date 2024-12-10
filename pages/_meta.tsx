@@ -24,6 +24,11 @@ export default {
     type: "page",
     title: "Docs",
   },
+  "self-hosting": {
+    type: "page",
+    title: "Self Hosting",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
+  },
   guides: {
     type: "page",
     title: "Guides",
@@ -140,6 +145,16 @@ export default {
   },
   cn: {
     title: "Chinese Overview",
+    type: "page",
+    display: "hidden",
+  },
+  community: {
+    title: "Community",
+    type: "page",
+    display: "hidden",
+  },
+  events: {
+    title: "Langfuse Events",
     type: "page",
     display: "hidden",
   },

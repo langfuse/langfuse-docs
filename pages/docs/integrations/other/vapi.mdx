@@ -1,0 +1,73 @@
+---
+title: "Open Source Observability for Vapi (Voice AI)"
+description: "Discover how to integrate Vapi with Langfuse for enhanced voice AI telemetry monitoring, enabling improved performance and reliability of your AI applications."
+---
+
+# Vapi Integration
+
+Vapi natively integrates with Langfuse, allowing you to send traces directly to Langfuse for enhanced telemetry monitoring. This integration enables you to gain deeper insights into your voice AI applications and improve their performance and reliability.
+
+<CloudflareVideo
+  videoId="78ea7bee8a3395907f1563e02666f9d1"
+  title="Vapi integration"
+/>
+
+## What is Vapi?
+
+[Vapi](https://docs.vapi.ai/introduction) is a Voice AI platform for developers. It enables you to build, test, and deploy voice AI agents in minutes by abstracting away the complexities of:
+
+- **Simulating Natural Human Conversation**: Handling turn-taking, interruption, backchanneling, and more.
+- **Realtime/Low Latency Demands**: Ensuring responsive conversations with low latency (< 500-800ms voice-to-voice).
+- **Function Calling**: Taking actions during conversations and interfacing with your services for custom actions.
+- **Extracting Conversation Data**: Reviewing conversation audio, transcripts, and metadata.
+
+## What is Langfuse?
+
+Langfuse is an open source LLM engineering platform designed to provide better **[observability](/docs/tracing)** and **[evaluations](/docs/scores/overview)** into AI applications. It helps developers track, analyze, and visualize traces from AI interactions, enabling better performance tuning, debugging, and optimization of AI agents.
+
+## Get Started
+
+<Steps>
+
+### Get your Langfuse Credentials
+
+First, you'll need your Langfuse credentials:
+
+- **Secret Key**
+- **Public Key**
+- **Host URL**
+
+You can obtain these by signing up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosting Langfuse](https://langfuse.com/docs/deployment/self-host).
+
+### Add Langfuse Credentials
+
+Log in to your Vapi dashboard and navigate to the [Provider Credentials page](https://dashboard.vapi.ai/keys).
+
+Under the **Observability Providers** section, you'll find an option for **Langfuse**. Enter your Langfuse credentials:
+
+- **Secret Key**
+- **Public Key**
+- **Host URL** (US data region: `https://us.cloud.langfuse.com`, EU data region: `https://cloud.langfuse.com`)
+
+Click **Save** to update your credentials.
+
+<Frame border className="sm:w-1/2">
+  ![Vapi Provider Credentials](/images/docs/vapi-integration-credentials.png)
+</Frame>
+
+### See Traces in Langfuse
+
+Once you've added your credentials, you should start seeing traces in your Langfuse dashboard for every conversation your agents have.
+
+<Frame border>
+  ![Example trace of Vapi conversation in
+  Langfuse](/images/docs/vapi-integration-example-trace.png)
+</Frame>
+
+Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/50163c14-9784-4cb9-b18e-23e924d0bb66
+
+### Evaluate and Debug your Agent
+
+To make the most out of this integration, you can now use Langfuse's [evaluation](/docs/scores/overview) and [debugging](/docs/analytics/overview) tools to analyze and improve the performance of your voice AI agents.
+
+</Steps>

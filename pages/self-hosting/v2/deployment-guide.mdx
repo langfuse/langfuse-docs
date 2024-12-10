@@ -1,0 +1,629 @@
+---
+title: Self-hosting Langfuse v2
+description: Self-host Langfuse in your infrastructure using Docker.
+label: "Version: v2"
+---
+
+# Deployment Guide (v2)
+
+<Callout type="info">
+  This guide covers Langfuse v2. For Langfuse v3, see the [v3
+  documentation](/self-hosting). Langfuse v2 receives security updates until end
+  of Q1 2025. If you have any questions while upgrading, please refer to the [v3
+  upgrade guide](/self-hosting/upgrade-v2-to-v3) or open a thread on [GitHub
+  Discussions](/gh-support).
+</Callout>
+
+Langfuse Server, which includes the API and Web UI, is open-source and can be self-hosted using Docker.
+
+For a detailed component and architecture diagram, refer to [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md).
+
+<Callout type="info">
+  Looking for a managed solution? Consider [Langfuse
+  Cloud](https://cloud.langfuse.com) maintained by the Langfuse team.
+</Callout>
+
+## Prerequisites: Postgres Database
+
+Langfuse requires a persistent Postgres database to store its state. You can use a managed service on AWS, Azure, or GCP, or host it yourself. Once the database is ready, keep the connection string handy. At least version 12 is required.
+
+## Deploying the Application
+
+Deploy the application container to your infrastructure. You can use managed services like AWS ECS, Azure Container Instances, or GCP Cloud Run, or host it yourself.
+
+During the container startup, all database migrations will be applied automatically. This can be optionally disabled via environment variables.
+
+```bash
+docker pull langfuse/langfuse:2
+```
+
+```bash
+docker run --name langfuse \
+-e DATABASE_URL=postgresql://hello \
+-e NEXTAUTH_URL=http://localhost:3000 \
+-e NEXTAUTH_SECRET=mysecret \
+-e SALT=mysalt \
+-e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \ # generate via: openssl rand -hex 32
+-p 3000:3000 \
+-a STDOUT \
+langfuse/langfuse
+```
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+<Callout type="info">
+
+We follow _semantic versioning_ for Langfuse releases, i.e. breaking changes are only introduced in a new major version.
+
+- We recommend [automated updates](#update) within a major version to benefit from the latest features, bug fixes, and security patches (`docker pull langfuse/langfuse:2`).
+- Subscribe to our mailing list to get notified about new releases and new major versions.
+  <ProductUpdateSignup source="self-host guide" className="my-3 max-w-sm" />
+
+</Callout>
+
+### Recommended Instance Size
+
+For production environments, we suggest using a configuration of 2 CPU cores and 3 GB of RAM for the Langfuse container. On AWS, this would equate to a `t3.medium` instance. The container is stateless, allowing you to autoscale it based on actual resource usage.
+
+### Configuring Environment Variables
+
+Langfuse can be configured using environment variables ([.env.prod.example](https://github.com/langfuse/langfuse/blob/main/.env.prod.example)). Some are mandatory as defined in the table below:
+
+| Variable                                                                                                                                                                                                                                                                                                                                                                                                                                  | Required / Default                                                                                | Description                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                                                                                                                                                                                                                                                                                                                                                                                            | Required                                                                                          | Connection string of your Postgres database. Instead of `DATABASE_URL`, you can also use `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` and `DATABASE_NAME`.                                                                                                                                                                                                                                                         |
+| `DIRECT_URL`                                                                                                                                                                                                                                                                                                                                                                                                                              | `DATABASE_URL`                                                                                    | Connection string of your Postgres database used for database migrations. Use this if you want to use a different user for migrations or use connection pooling on `DATABASE_URL`. **For large deployments**, configure the database user with long timeouts as migrations might need a while to complete.                                                                                                                      |
+| `SHADOW_DATABASE_URL`                                                                                                                                                                                                                                                                                                                                                                                                                     |                                                                                                   | If your database user lacks the `CREATE DATABASE` permission, you must create a shadow database and configure the "SHADOW_DATABASE_URL". This is often the case if you use a Cloud database. Refer to the [Prisma docs](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/shadow-database#cloud-hosted-shadow-databases-must-be-created-manually) for detailed instructions.                           |
+| `NEXTAUTH_URL`                                                                                                                                                                                                                                                                                                                                                                                                                            | Required                                                                                          | URL of your deployment, e.g. `https://yourdomain.com` or `http://localhost:3000`. Required for successful authentication via OAUTH.                                                                                                                                                                                                                                                                                             |
+| `NEXTAUTH_SECRET`                                                                                                                                                                                                                                                                                                                                                                                                                         | Required                                                                                          | Used to validate login session cookies, generate secret with at least 256 entropy using `openssl rand -base64 32`.                                                                                                                                                                                                                                                                                                              |
+| `SALT`                                                                                                                                                                                                                                                                                                                                                                                                                                    | Required                                                                                          | Used to salt hashed API keys, generate secret with at least 256 entropy using `openssl rand -base64 32`.                                                                                                                                                                                                                                                                                                                        |
+| `ENCRYPTION_KEY`                                                                                                                                                                                                                                                                                                                                                                                                                          | Required                                                                                          | Used to encrypt sensitive data. Must be 256 bits, 64 string characters in hex format, generate via: `openssl rand -hex 32`.                                                                                                                                                                                                                                                                                                     |
+| `LANGFUSE_CSP_ENFORCE_HTTPS`                                                                                                                                                                                                                                                                                                                                                                                                              | `false`                                                                                           | Set to `true` to set CSP headers to only allow HTTPS connections.                                                                                                                                                                                                                                                                                                                                                               |
+| `PORT`                                                                                                                                                                                                                                                                                                                                                                                                                                    | `3000`                                                                                            | Port the server listens on.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `HOSTNAME`                                                                                                                                                                                                                                                                                                                                                                                                                                | `localhost`                                                                                       | In some environments it needs to be set to `0.0.0.0` to be accessible from outside the container (e.g. Google Cloud Run).                                                                                                                                                                                                                                                                                                       |
+| `LANGFUSE_DEFAULT_ORG_ID`                                                                                                                                                                                                                                                                                                                                                                                                                 |                                                                                                   | Configure optional default organization for new users. When users create an account they will be automatically added to this organization.                                                                                                                                                                                                                                                                                      |
+| `LANGFUSE_DEFAULT_ORG_ROLE`                                                                                                                                                                                                                                                                                                                                                                                                               | `VIEWER`                                                                                          | Role of the user in the default organization (if set). Possible values are `OWNER`, `ADMIN`, `MEMBER`, `VIEWER`. See [roles](/docs/rbac) for details.                                                                                                                                                                                                                                                                           |
+| `LANGFUSE_DEFAULT_PROJECT_ID`                                                                                                                                                                                                                                                                                                                                                                                                             |                                                                                                   | Configure optional default project for new users. When users create an account they will be automatically added to this project.                                                                                                                                                                                                                                                                                                |
+| `LANGFUSE_DEFAULT_PROJECT_ROLE`                                                                                                                                                                                                                                                                                                                                                                                                           | `VIEWER`                                                                                          | Role of the user in the default project (if set). Possible values are `OWNER`, `ADMIN`, `MEMBER`, `VIEWER`. See [roles](/docs/rbac) for details.                                                                                                                                                                                                                                                                                |
+| `SMTP_CONNECTION_URL`                                                                                                                                                                                                                                                                                                                                                                                                                     |                                                                                                   | Configure optional SMTP server connection for transactional email. Connection URL is passed to Nodemailer ([docs](https://nodemailer.com/smtp)).                                                                                                                                                                                                                                                                                |
+| `EMAIL_FROM_ADDRESS`                                                                                                                                                                                                                                                                                                                                                                                                                      |                                                                                                   | Configure from address for transactional email. Required if `SMTP_CONNECTION_URL` is set.                                                                                                                                                                                                                                                                                                                                       |
+| `S3_ENDPOINT`<br/>`S3_ACCESS_KEY_ID`<br/>`S3_SECRET_ACCESS_KEY`<br/>`S3_BUCKET_NAME`<br/>`S3_REGION`                                                                                                                                                                                                                                                                                                                                      |                                                                                                   | Optional S3 configuration for enabling large exports from the UI. `S3_BUCKET_NAME` is required to enable exports. The other variables are optional and will use the default provider credential chain if not specified.                                                                                                                                                                                                         |
+| `LANGFUSE_S3_MEDIA_UPLOAD_ENABLED`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_REGION`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`<br/>`LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`<br/>`LANGFUSE_S3_MEDIA_MAX_CONTENT_LENGTH`<br/>`LANGFUSE_S3_MEDIA_DOWNLOAD_URL_EXPIRY_SECONDS` | `false`<br/> ` `<br/>` `<br/>` `<br/>` `<br/>` `<br/>` `<br/>` ` <br/>`1_000_000_000` <br/>`3600` | S3 configuration for enabling [multi-modal attachments](/docs/tracing-features/multi-modality). All variables are optional and will use the default values shown if not specified. Set `LANGFUSE_S3_MEDIA_UPLOAD_ENABLED=true` to enable multi-modal attachments. Configured storage bucket must have a publicly resolvable hostname to support direct uploads via our SDKs and media asset fetching directly from the browser. |
+| `DB_EXPORT_PAGE_SIZE`                                                                                                                                                                                                                                                                                                                                                                                                                     | `1000`                                                                                            | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                                                                                                                                                                                                                                                                         |
+| `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED`                                                                                                                                                                                                                                                                                                                                                                                               | `false`                                                                                           | Set to `true` to disable automatic database migrations on docker startup.                                                                                                                                                                                                                                                                                                                                                       |
+| `LANGFUSE_LOG_LEVEL`                                                                                                                                                                                                                                                                                                                                                                                                                      | `info`                                                                                            | Set the log level for the application. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                                                                                                                                                                                                                                                                                                                  |
+| `LANGFUSE_LOG_FORMAT`                                                                                                                                                                                                                                                                                                                                                                                                                     | `text`                                                                                            | Set the log format for the application. Possible values are `text`, `json`.                                                                                                                                                                                                                                                                                                                                                     |
+| `NEXT_PUBLIC_BASE_PATH`                                                                                                                                                                                                                                                                                                                                                                                                                   |                                                                                                   | Set the base path for the application. This is useful if you want to deploy Langfuse on a subpath, especially when integrating Langfuse into existing infrastructure. Refer to the [section](#custom-base-path) below for details.                                                                                                                                                                                              |
+
+### Authentication
+
+#### Email/Password [#auth-email-password]
+
+Email/password authentication is enabled by default. Users can sign up and log in using their email and password.
+
+To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. In this case, you need to set up [SSO](#sso) instead.
+
+If you want to provision a default user for your Langfuse instance, you can use the [`LANGFUSE_INIT_*`](#initialization) environment variables.
+
+**Password Reset**
+
+- **If transactional emails are configured** on your instance via the `SMTP_CONNECTION_URL` and `EMAIL_FROM_ADDRESS` environments, users can reset their password by using the "Forgot password" link on the login page.
+
+- **If transactional emails are not set up**, passwords can be reset by following these steps:
+  1.  Update the email associated with your user account in database, such as by adding a prefix.
+  2.  You can then sign up again with a new password.
+  3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
+  4.  Finally, remove the old user account from the `users` table in database.
+
+#### SSO
+
+To enable OAuth/SSO provider sign-in for Langfuse, add the following environment variables:
+
+| Provider                                                                                                                                                                         | Variables                                                                                                                                                                                                                                                                                                                                | OAuth Redirect URL                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| [Google](https://next-auth.js.org/providers/google)                                                                                                                              | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`<br/><br/>`AUTH_GOOGLE_ALLOW_ACCOUNT_LINKING=true` (optional)<br/>`AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com`(optional, list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload)) | `/api/auth/callback/google`            |
+| [GitHub](https://next-auth.js.org/providers/github)                                                                                                                              | `AUTH_GITHUB_CLIENT_ID`<br/>`AUTH_GITHUB_CLIENT_SECRET`<br/><br/>`AUTH_GITHUB_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                                                     | `/api/auth/callback/github`            |
+| GitHub Enterprise                                                                                                                                                                | `AUTH_GITHUB_ENTERPRISE_CLIENT_ID`<br/>`AUTH_GITHUB_ENTERPRISE_CLIENT_SECRET`<br/>`AUTH_GITHUB_ENTERPRISE_BASE_URL`<br/><br/>`AUTH_GITHUB_ENTERPRISE_ALLOW_ACCOUNT_LINKING=false` (optional)                                                                                                                                             | `/api/auth/callback/github-enterprise` |
+| [GitLab](https://next-auth.js.org/providers/gitlab)                                                                                                                              | `AUTH_GITLAB_CLIENT_ID`<br/>`AUTH_GITLAB_CLIENT_SECRET`<br/><br/>`AUTH_GITLAB_ISSUER` (optional)<br/>`AUTH_GITLAB_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                 | `/api/auth/callback/gitlab`            |
+| [AzureAD/Entra ID](https://next-auth.js.org/providers/azure-ad)                                                                                                                  | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID`<br/><br/>`AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                    | `/api/auth/callback/azure-ad`          |
+| [Okta](https://next-auth.js.org/providers/okta)                                                                                                                                  | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER`<br/><br/>`AUTH_OKTA_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                                    | `/api/auth/callback/okta`              |
+| [Auth0](https://next-auth.js.org/providers/auth0)                                                                                                                                | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER`<br/><br/>`AUTH_AUTH0_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                                | `/api/auth/callback/auth0`             |
+| [AWS Cognito](https://next-auth.js.org/providers/cognito)                                                                                                                        | `AUTH_COGNITO_CLIENT_ID`<br/>`AUTH_COGNITO_CLIENT_SECRET`<br/>`AUTH_COGNITO_ISSUER`<br/><br/>`AUTH_COGNITO_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                        | `/api/auth/callback/cognito`           |
+| [Keycloak](https://next-auth.js.org/providers/keycloak)                                                                                                                          | `AUTH_KEYCLOAK_CLIENT_ID`<br/>`AUTH_KEYCLOAK_CLIENT_SECRET`<br/>`AUTH_KEYCLOAK_ISSUER`<br/><br/>`AUTH_KEYCLOAK_ALLOW_ACCOUNT_LINKING=true` (optional)                                                                                                                                                                                    | `/api/auth/callback/keycloak`          |
+| [Custom OAuth](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([source](https://github.com/langfuse/langfuse/blob/main/web/src/server/auth.ts)) | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI)<br/><br/>`AUTH_CUSTOM_ALLOW_ACCOUNT_LINKING=true` (optional)<br/><br/>`AUTH_CUSTOM_SCOPE` (optional, defaults to `"openid email profile"`)                                                                | `/api/auth/callback/custom`            |
+
+Use `*_ALLOW_ACCOUNT_LINKING` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified.
+
+Need another provider? Langfuse uses Auth.js, which integrates with [many providers](https://next-auth.js.org/providers/). Add a [feature request on GitHub](/ideas) if you want us to add support for a specific provider.
+
+#### Additional configuration
+
+| Variable                            | Description                                                                                                                                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT` | Comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                         |
+| `AUTH_DISABLE_SIGNUP`               | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet. |
+| `AUTH_SESSION_MAX_AGE`              | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.     |
+
+### Headless Initialization [#initialization]
+
+By default, you need to create a user account, organization and project via the Langfuse UI before being able to use the API. You can find the API keys in the project settings within the UI.
+
+If you want to automatically initialize these resources, you can optionally use the following `LANGFUSE_INIT_*` environment variables. When these variables are set, Langfuse will automatically create the specified resources on startup if they don't already exist. This allows for easy integration with infrastructure-as-code and automated deployment pipelines.
+
+| Environment Variable               | Description                            | Required to Create Resource | Example            |
+| ---------------------------------- | -------------------------------------- | --------------------------- | ------------------ |
+| `LANGFUSE_INIT_ORG_ID`             | Unique identifier for the organization | Yes                         | `my-org`           |
+| `LANGFUSE_INIT_ORG_NAME`           | Name of the organization               | No                          | `My Org`           |
+| `LANGFUSE_INIT_PROJECT_ID`         | Unique identifier for the project      | Yes                         | `my-project`       |
+| `LANGFUSE_INIT_PROJECT_NAME`       | Name of the project                    | No                          | `My Project`       |
+| `LANGFUSE_INIT_PROJECT_PUBLIC_KEY` | Public API key for the project         | Yes                         | `lf_pk_1234567890` |
+| `LANGFUSE_INIT_PROJECT_SECRET_KEY` | Secret API key for the project         | Yes                         | `lf_sk_1234567890` |
+| `LANGFUSE_INIT_USER_EMAIL`         | Email address of the initial user      | Yes                         | `user@example.com` |
+| `LANGFUSE_INIT_USER_NAME`          | Name of the initial user               | No                          | `John Doe`         |
+| `LANGFUSE_INIT_USER_PASSWORD`      | Password for the initial user          | Yes                         | `password123`      |
+
+The different resources depend on each other in the following way. You can e.g. intialize an organization and a user without having to also initialize a project and API keys, but you cannot initialize a project without also initializing an organization.
+
+```
+Organization
+├── Project      (part of organization)
+│   └── API Keys (set for project)
+└── User         (owner of organization)
+```
+
+Troubleshooting:
+
+- If you use `LANGFUSE_INIT_*` in Docker Compose, do not double-quote the values ([GitHub issue](https://github.com/langfuse/langfuse/issues/3398)).
+- The resources depend on one another (see note above). For example, you must create an organization to initialize a project.
+
+### Configuring the Enterprise Edition [#ee]
+
+The Enterprise Edition ([compare versions](/pricing-self-host)) of Langfuse includes additional optional configuration options that can be set via environment variables.
+
+| Variable                                                                 | Description                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_ALLOWED_ORGANIZATION_CREATORS`                                 | Comma-separated list of allowlisted users that can create new organizations. By default, all users can create organizations. E.g. `user1@langfuse.com,user2@langfuse.com`.                                                                                                                                   |
+| `LANGFUSE_UI_API_HOST`                                                   | Customize the hostname that is referenced in the settings. Defaults to `window.origin`.                                                                                                                                                                                                                      |
+| `LANGFUSE_UI_DOCUMENTATION_HREF`                                         | Customize the documentation link reference in the menu and settings.                                                                                                                                                                                                                                         |
+| `LANGFUSE_UI_SUPPORT_HREF`                                               | Customize the support link reference in the menu and settings.                                                                                                                                                                                                                                               |
+| `LANGFUSE_UI_FEEDBACK_HREF`                                              | Replace the default feedback widget with your own feedback link.                                                                                                                                                                                                                                             |
+| `LANGFUSE_UI_LOGO_DARK_MODE_HREF`<br/>`LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | Co-brand the Langfuse interface with your own logo. Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower ratios (e.g., 2:3, 1:1) also work. The logo is fitted into a bounding box, so there are no specific pixel constraints. For reference, the example logo is 160px x 400px. |
+| `LANGFUSE_UI_DEFAULT_MODEL_ADAPTER`                                      | Set the default model adapter for the LLM playground and evals. Options: `OpenAI`, `Anthropic`, `Azure`. Example: `Anthropic`                                                                                                                                                                                |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_OPENAI`                                    | Set the default base URL for OpenAI API in the LLM playground and evals. Example: `https://api.openai.com/v1`                                                                                                                                                                                                |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_ANTHROPIC`                                 | Set the default base URL for Anthropic API in the LLM playground and evals. Example: `https://api.anthropic.com`                                                                                                                                                                                             |
+| `LANGFUSE_UI_DEFAULT_BASE_URL_AZURE_OPENAI`                              | Set the default base URL for Azure OpenAI API in the LLM playground and evals. Example: `https://{instanceName}.openai.azure.com/openai/deployments`                                                                                                                                                         |
+
+### Health and Readiness Check Endpoint
+
+Langfuse includes a health check endpoint at `/api/public/health` and a readiness check endpoint at `/api/public/ready`.
+The health check endpoint checks the API functionality and indicates if the application is alive.
+The readiness check endpoint indicates if the application is ready to serve traffic.
+
+Access the health and readiness check endpoints:
+
+```bash
+curl http://localhost:3000/api/public/health
+curl http://localhost:3000/api/public/ready
+```
+
+The potential responses from the health check endpoint are:
+
+- `200 OK`: Both the API is functioning normally and a successful connection to the database was made.
+- `503 Service Unavailable`: Either the API is not functioning or it couldn't establish a connection to the database.
+
+The potential responses from the readiness check endpoint are:
+
+- `200 OK`: The application is ready to serve traffic.
+- `500 Internal Server Error`: The application received a SIGTERM or SIGINT and should not receive traffic.
+
+Applications and monitoring services can call this endpoint periodically for health updates.
+
+Per default, the healthcheck endpoint does not validate if the database is reachable, as there are cases where the
+database is unavailable, but the application still serves traffic.
+If you want to run database healthchecks, you can add `?failIfDatabaseUnavailable=true` to the healthcheck endpoint.
+
+### Encryption
+
+#### Encryption in transit (HTTPS) [#https]
+
+For encryption in transit, HTTPS is strongly recommended. Langfuse itself does not handle HTTPS directly. Instead, HTTPS is typically managed at the infrastructure level. There are two main approaches to handle HTTPS for Langfuse:
+
+1. Load Balancer Termination:
+   In this approach, HTTPS is terminated at the load balancer level. The load balancer handles the SSL/TLS certificates and encryption, then forwards the decrypted traffic to the Langfuse container over HTTP. This is a common and straightforward method, especially in cloud environments.
+
+   - Pros: Simplifies certificate management as it is usually a fully managed service (e.g. AWS ALB), offloads encryption overhead from application servers.
+   - Cons: Traffic between load balancer and Langfuse container is unencrypted (though typically within a secure network).
+
+2. Service Mesh Sidecar:
+   This method involves using a service mesh like Istio or Linkerd. A sidecar proxy is deployed alongside each Langfuse container, handling all network traffic including HTTPS.
+
+   - Pros: Provides end-to-end encryption (mutual TLS), offers advanced traffic management and observability.
+   - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
+
+Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
+
+#### Encryption at rest (database) [#encryption-at-rest]
+
+All Langfuse data is stored in your Postgres database. Database-level encryption is recommended for a secure production deployment and available across cloud providers.
+
+The Langfuse team has implemented this for Langfuse Cloud and it is fully ISO27001, SOC2 Type 2 and GDPR compliant ([security page](/docs/security)).
+
+#### Additional application-level encryption [#application-level-encryption]
+
+In addition to in-transit and at-rest encryption, sensitive data is also encrypted or hashed at the application level.
+
+| Data                                      | Encryption                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| API keys                                  | Hashed using `SALT`                                                                  |
+| Langfuse Console JWTs                     | Encrypted via `NEXTAUTH_SECRET`                                                      |
+| LLM API credentials stored in Langfuse    | Encrypted using `ENCRYPTION_KEY`                                                     |
+| Integration credentials (e.g. PostHog)    | Encrypted using `ENCRYPTION_KEY`                                                     |
+| Input/Outputs of LLM Calls, Traces, Spans | Work in progress, reach out to enterprise@langfuse.com if you are interested in this |
+
+### Build Langfuse from source [#build-from-source]
+
+While we recommend using the prebuilt docker image, you can also build the image yourself from source.
+
+The repo includes multiple `Dockerfile` files. You only need to build the `web` Dockerfile as shown below.
+
+```bash
+# clone repo
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+
+# checkout v2 branch
+# main branch includes unreleased changes that might be unstable
+git checkout v2
+
+# build image
+docker build -t langfuse/langfuse -f ./web/Dockerfile .
+```
+
+### Custom Base Path [#custom-base-path]
+
+If you want to deploy Langfuse behind a custom base path (e.g. `https://yourdomain.com/langfuse`), you can set the `NEXT_PUBLIC_BASE_PATH` environment variable. This is useful if you want to deploy Langfuse on a subpath, especially when integrating Langfuse into existing infrastructure.
+
+As this base path is inlined in static assets, you cannot use the prebuilt docker image. **You need to build the image from source** with the `NEXT_PUBLIC_BASE_PATH` environment variable set at build time.
+
+When using a custom base path, `NEXTAUTH_URL` must be set to the full URL including the base path and `/api/auth`. For example, if you are deploying Langfuse at `https://yourdomain.com/langfuse-base-path`, you need to set:
+
+```bash filename=".env"
+NEXT_PUBLIC_BASE_PATH="/langfuse-base-path"
+NEXTAUTH_URL="https://yourdomain.com/langfuse-base-path/api/auth"
+```
+
+Build image with `NEXT_PUBLIC_BASE_PATH` as build argument:
+
+```bash /NEXT_PUBLIC_BASE_PATH/
+# clone repo
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+
+# checkout v2 branch
+# main branch includes unreleased changes that might be unstable
+git checkout v2
+
+# build image with NEXT_PUBLIC_BASE_PATH
+docker build -t langfuse/langfuse --build-arg NEXT_PUBLIC_BASE_PATH=/langfuse-base-path -f ./web/Dockerfile .
+```
+
+Once your Langfuse instance is running, you can access both the API and console through your configured custom base path. When connecting via SDKs, make sure to include the custom base path in the hostname.
+
+### Troubleshooting
+
+If you encounter issues, ensure the following:
+
+- `NEXTAUTH_URL` exactly matches the URL you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g., 3000 if you do not expose Langfuse on port 80).
+- Set `HOSTNAME` to `0.0.0.0` if you cannot access Langfuse.
+- Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
+- If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
+- Make sure you are at least on Postgres 12.
+- When using Docker Compose / Kubernetes, your application needs to connect to the Langfuse container at the docker internal network address that you specified, e.g. `http://langfuse:3000`/`http://langfuse.docker.internal:3000`. Learn more: [docker compose networking documentation](https://docs.docker.com/compose/how-tos/networking/), [kubernetes networking documentation](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
+- SSO
+  - Ensure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL`, and the OAuth client needs to be configured with the correct callback URL.
+  - Langfuse uses NextAuth.js. Please refer to the [NextAuth.js documentation](https://next-auth.js.org) for more information.
+  - If you encounter issues with your custom SSO setup, please raise an issue and submit a PR to improve Langfuse. Alternatively, the Langfuse team provides support for setting up custom SSO configurations under a commercial agreement. For more information, please reach out to support@langfuse.com.
+
+## Updating the Application [#update]
+
+<Callout type="info">
+  We recommend enabling automated updates within the current major version to
+  benefit from the latest features, bug fixes, and security patches.
+</Callout>
+<Callout type="warning">
+  Coming from Langfuse v1? Please refer to the [upgrade
+  guide](/self-hosting/upgrade-guides/upgrade-v1-to-v2) for more details.
+</Callout>
+
+To update the application:
+
+1. Stop the container.
+2. Pull the latest container.
+3. Restart the application.
+
+During container startup, any necessary database migrations will be applied automatically if the database schema has changed. This can be optionally disabled via environment variables.
+
+Langfuse is released through tagged semver releases. Check [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+
+<Frame className="max-w-md block" border>
+  ![Langfuse releases](/images/docs/github-watch-changelog.gif)
+</Frame>
+
+<span>_Watch the repository on GitHub to get notified about new releases_</span>
+
+## Kubernetes deployments
+
+Kubernetes is a popular choice for deploying Langfuse when teams maintain the rest of their infrastructure using Kubernetes. You can find community-maintained templates and Helm Charts in the [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s) repository.
+
+If you encounter any bugs or have suggestions for improvements, please contribute to the repository by submitting issues or pull requests.
+
+## Platform-specific information
+
+<Callout type="info">
+  This section is work in progress and relies on community contributions. The
+  Langfuse team/maintainers do not have the capacity to maintain or test this
+  section. If you have successfully deployed Langfuse on a specific platform,
+  consider contributing a guide either via a GitHub
+  [PR/Issue](https://github.com/langfuse/langfuse-docs) or by [reaching
+  out](#contact) to the maintainers. Please also let us know if one of these
+  guides does not work anymore or if you have a better solution.
+</Callout>
+
+### Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
+
+### Porter.run
+
+If you use [Porter](https://porter.run) to deploy your application, you can easily add a Langfuse instance to your cluster via the "Add-ons". The add-on will automatically configure the necessary environment variables, inject your database credentials, and deploy and autoscale the Langfuse container. Learn more about this in our [changelog](/changelog/2024-08-15-deployment-as-porter-add-on).
+
+### AWS
+
+We recommend deploying Langfuse on AWS using the Elastic Container Service (ECS) and Fargate for a scalable and low-maintenance container deployment. Note: you can use AWS Cognito for SSO.
+
+Have a look at this configuration template: [aws-samples/deploy-langfuse-on-ecs-with-fargate](https://github.com/aws-samples/deploy-langfuse-on-ecs-with-fargate)
+
+### Azure
+
+Deploy Langfuse to Azure using the Azure Container Instances service for a flexible and low-maintenance container deployment. Note: you can use Azure AD for SSO.
+
+You can deploy Langfuse to Azure via the Azure Developer CLI using this template: [Azure-Samples/langfuse-on-azure](https://github.com/Azure-Samples/langfuse-on-azure).
+
+### Google Cloud Platform (Cloud Run & Cloud SQL)
+
+The simplest way to deploy Langfuse on Google Cloud Platform is to use Cloud Run for the containerized application and Cloud SQL for the database.
+
+#### Option 1: UI Deployment
+
+**Create Cloud SQL Instance:**
+
+1. Open Google Cloud SQL.
+2. Click on Create Instance.
+3. Choose PostgreSQL and configure the instance according to your requirements.
+4. You'll need the following details:
+   - default > user: postgres
+   - default > database schema: public
+   - setup > password: `<password>`
+   - connection > connection name: `<google-cloud-project-id>:<region-id>:<sql-instance-id>`
+
+**Optionally: Create OAuth Credentials for sign-in with Google**
+
+1. Open [API Credentials](https://console.cloud.google.com/apis/credentials)
+2. Click "Create Credentials" and then "OAuth Client ID"
+3. Choose "Web Application" and then give it an appropriate name
+4. Click Create
+
+**Create Secrets:**
+
+1. Open [Secret Manager](https://console.cloud.google.com/security/secret-manager)
+2. For each secret needed (at least `AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,` and `SALT`), click "Create Secret" and fill in the name and value.
+
+Notes:
+
+- `DATABASE_URL` is the connection string to the Cloud SQL instance. `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none&pgbouncer=true`
+- `DIRECT_URL` is for database migrations, without `&pgbouncer=true`, the value should look like this: `postgresql://<user-name>:<password>@localhost/<db-name>/?host=/cloudsql/<google-cloud-project-id>:<region-id>:<sql-instance-id>&sslmode=none`
+- Set `NEXTAUTH_URL` to `http://localhost:3000`. This is a placeholder, we'll update it later.
+
+**Deploy on Cloud Run:**
+
+1.  Open Google Cloud Run.
+2.  Click on Create Service.
+3.  Enter the following container image URL: `docker.io/langfuse/langfuse:2`. We use tag `2` to pin the major version.
+4.  Configure the service name and region according to your requirements.
+5.  Select authentication as 'Allow unauthenticated invocations', as Langfuse will have its own built-in Authentication that you can use.
+6.  Choose 'CPU Allocation and Pricing' as "CPU is only allocated during request processing" to scale down the instance to 0 when there are no requests.
+7.  Configure ingress control according to your needs. For most cases, 'All' should suffice.
+8.  "Container(s), Volumes, Networking & Security":
+
+    - Specify container port as `3000`.
+    - On "Variables & Secrets" tab, add the required environment variables (see table above): `SALT`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, and `DATABASE_URL`, etc.
+
+9.  Scroll all the way down to enable the Cloud SQL connections. Select the created Cloud SQL instance in the dropdown. Context: Your Cloud Run service won't be assigned a static IP, so you can't whitelist the ingress IP in Cloud SQL or any other hosted databases. Instead, we use the Google Cloud SQL Proxy.
+10. Finally, you can finish deploying the application.
+11. While the application is deployed for the first time, you can see how the database migrations are applied in the logs.
+12. Once the application is up and running, you can find the Cloud Run service URL on top of the page. Now, choose "Edit and deploy new revision" to update the `NEXTAUTH_URL` environment variable to the Cloud Run service URL ending in `.run.app`.
+13. Optionally, configure a custom domain for the Cloud Run service.
+
+**Troubleshooting: Cloud SQL Connection Issues**
+
+If you encounter an error like "Error 403: boss::NOT_AUTHORIZED: Not authorized to access resource" or "Possibly missing permission cloudsql.instances.connect" when deploying the Langfuse container, you may need to grant 'Cloud SQL Client' permissions to the relevant service accounts. Here's how to resolve this:
+
+1. In the Google Cloud search box, search for and select "Service Accounts".
+2. Find the service accounts with names ending in `@appspot.gserviceaccount.com` and `-compute@developer.gserviceaccount.com`.
+3. In the Google Cloud search box, search for and select "IAM & Admin".
+4. Click "Grant Access", then "Add Principals".
+5. Enter the name of the first service account you found.
+6. Select the "Cloud SQL Client" role and save.
+7. Repeat steps 4-6 for the second service account.
+
+After granting these permissions, try redeploying your Cloud Run service. This should resolve any authorization issues related to connecting to your Cloud SQL instance.
+
+#### Option 2: Cloud Build
+
+Google Cloud Build is GCP's continuous integration and continuous deployment (CI/CD) service that automates the building, testing, and deployment of your applications. To deploy Langfuse, you can specify your workflow in a cloudbuild.yaml file. Additionally, GCP's Secret Manager can be used to securely handle sensitive information like DATABASE_URL and NEXTAUTH_SECRET. Below is an example of how to set up a Cloud Build configuration:
+
+```yaml
+# Deployment configuration for Langfuse on Google Cloud Run
+substitutions:
+  _SERVICE_NAME: langfuse
+  _REGION: europe-west1 # Change to your desired region
+  _PROJECT_ID: your-project-id # Change to your Google Cloud project ID
+  _SQL_INSTANCE_ID: my-cool-db # the name of the cloud sql database you create
+
+tags: ["${_PROJECT_ID}", "${_SERVICE_NAME}"]
+
+steps:
+  # Step to deploy the Docker image to Google Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: deploy-cloud-run
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        gcloud run deploy ${_SERVICE_NAME} --image docker.io/langfuse/langfuse:2 \
+           --region ${_REGION} \
+           --project ${_PROJECT_ID} \
+           --platform managed \
+           --port 3000 \
+           --allow-unauthenticated \
+           --memory 2Gi \
+           --cpu 1 \
+           --min-instances 0 \
+           --max-instances 3 \
+           --set-env-vars HOSTNAME=0.0.0.0 \
+           --add-cloudsql-instances=${_PROJECT_ID}:${_REGION}:${_SQL_INSTANCE_ID} \
+           --update-secrets AUTH_GOOGLE_CLIENT_ID=AUTH_GOOGLE_CLIENT_ID:latest,AUTH_GOOGLE_CLIENT_SECRET=AUTH_GOOGLE_CLIENT_SECRET:latest,SALT=SALT:latest,NEXTAUTH_URL=NEXTAUTH_URL:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest
+```
+
+You can submit this build using [`gcloud build submit`](https://cloud.google.com/sdk/gcloud/reference/builds/submit) in your local console by issuing the below in the same folder as the `cloudbuild.yaml` file.
+
+To submit this build, use the following command in your local console, in the directory containing the `cloudbuild.yaml` file:
+
+```
+gcloud builds submit .
+```
+
+For automatic rebuilds upon new commits, set up a [Cloud Build Trigger](https://cloud.google.com/build/docs/automating-builds/create-manage-triggers) linked to your repository holding the `cloudbuild.yaml` file. This will redeploy Langfuse whenever changes are pushed to the repository.
+
+#### Note on AlloyDB
+
+[AlloyDB](https://cloud.google.com/alloydb) is a fully-managed postgres compatible database offered by Google Cloud Platform that is tuned for better performance for tasks such as analytical queries and in-database embeddings. It is recommend you use it within a [Shared VPC](https://cloud.google.com/vpc/docs/shared-vpc) with your Cloud Run runtime, which will expose AlloyDB's private ip address to your application. If you are using it the DB connection string changes slightly:
+
+```
+# ALLOYDB_CONNECTION_STRING
+postgresql://<USER>:<PASSWORD>@<ALLOY_DB_PRIVATE_IP>:5432/<ALLOY_DB_DATABASE>/?sslmode=none&pgbouncer=true
+```
+
+```
+# ALLOYDB_DIRECT_URL
+postgresql://<USER>:<PASSWORD>@<ALLOY_DB_PRIVATE_IP>:5432/<ALLOY_DB_DATABASE>/?sslmode=none
+```
+
+### Heroku
+
+To deploy this image on heroku you have to run through the steps in the following deployment guide:
+
+1. **Pull the docker image. This can be achieved by running the following command in your terminal:**
+
+   ```
+   docker pull langfuse/langfuse:2
+   ```
+
+2. **Get the ID of the pulled image**
+
+   _Linux / MacOS_:
+
+   Running the following command should result in directly printing the image ID
+
+   ```
+   docker images | grep langfuse/langfuse | awk '[print $3]'
+   ```
+
+   Following this tutorial, you will always have to insert this image ID when [IMAGE_ID] is written.
+
+   _Windows_:
+
+   On windows you can print the full information of the pulled image using:
+
+   ```
+   docker images | findstr /S "langfuse/langfuse"
+   ```
+
+   This will result in something like:
+
+   ```
+   langfuse/langfuse                                           2          cec90c920468   28 hours ago    595MB
+   ```
+
+   Here you have to manually retrieve the image ID which in this case is `cec90c920468`. It should be located between the tag `2` and the created `28 hours ago` in this example.
+
+3. **Prepare your terminal and docker image**
+
+   First of all, you will have to be logged in to heroku using
+
+   ```
+   heroku login
+   ```
+
+   If this is not working, please visit the [heroku CLI setup](https://devcenter.heroku.com/articles/heroku-cli).
+
+   If you succeeded in logging in to heroku via the CLI, you can continue by following the next steps:
+
+   Tag the docker image (Insert your image ID into the command). You will also have to insert the name of your heroku app/dyno into [HEROKU_APP_NAME]:
+
+   ```
+   docker tag [IMAGE_ID] registry.heroku.com/[HEROKU_APP_NAME]/web
+   ```
+
+4. **Setup a database for your heroku app**
+
+   In the dashboard of your heroku app, add the `Heroku Postgres`-AddOn. This will add a PostgreSQL database to your application.
+
+5. **Set the environment variables**
+
+   For the minimum deployment in heroku, you will have to set the following environment variables (see table above). The `DATABASE_URL` is your database connection string starting with `postgres://` in the configuration of your added PostgreSQL database.
+
+   ```
+   DATABASE_URL=
+   NEXTAUTH_SECRET=
+   NEXTAUTH_URL=
+   SALT=
+   ```
+
+   Have a look at the other optional environment variables in the table above and set them if needed to configure your deployment.
+
+6. **Push to heroku container registry**
+
+   In this step you will push the docker image to the heroku container registry: (Insert the name of your heroku app/dyno)
+
+   ```
+   docker push registry.heroku.com/[HEROKU_APP_NAME]/web
+   ```
+
+7. **Deploy the docker image from the heroku registry**
+
+   In the last step you will have to execute the following command to finally deploy the image. Again insert the name of your heroku app:
+
+   ```
+   heroku container:release web --app=[HEROKU_APP_NAME]
+   ```
+
+## Support
+
+If you experience any issues, please join us on [Discord](/discord) or contact the maintainers at support@langfuse.com.
+
+For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
+
+Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["self-hosting"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["self-hosting"]} />

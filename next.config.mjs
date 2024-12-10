@@ -225,6 +225,19 @@ const nonPermanentRedirects = [
   ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
   ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
 
+  // new self-hosting section
+  ["/docs/deployment/feature-overview", "/self-hosting/license-key"],
+  ["/docs/deployment/local", "/self-hosting/local"],
+  ["/docs/deployment/self-host", "/self-hosting"],
+  ["/docs/deployment/v3/overview", "/self-hosting"],
+  ["/docs/deployment/v3/migrate-v2-to-v3", "/self-hosting/upgrade-guides/upgrade-v2-to-v3"],
+  ["/docs/deployment/v3/troubleshooting", "/self-hosting/troubleshooting"],
+  ["/docs/deployment/v3/guides/docker-compose", "/self-hosting/docker-compose"],
+  ["/docs/deployment/v3/guides/kubernetes-helm", "/self-hosting/kubernetes-helm"],
+  ["/docs/deployment/v3/components/clickhouse", "/self-hosting/infrastructure/clickhouse"],
+  ["/docs/deployment/v3/components/redis", "/self-hosting/infrastructure/cache"],
+  ["/docs/deployment/v3/components/blobstorage", "/self-hosting/infrastructure/blobstorage"],
+
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
   ["/docs/tracing-features", "/docs/tracing"],

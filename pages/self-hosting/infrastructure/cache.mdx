@@ -1,0 +1,120 @@
+---
+title: Cache (Redis/Valkey) (self-hosted)
+description: Langfuse uses Redis/Valkey as a caching layer and queue.
+label: "Version: v3"
+---
+
+# Cache (Redis/Valkey)
+
+<Callout type="info">
+
+This is a deep dive into Redis/Valkey configuration. Follow one of the [deployment guides](/self-hosting#deployment-options) to get started.
+
+</Callout>
+
+Langfuse uses Redis/Valkey as a caching layer and queue.
+It is used to accept new events quickly on the API and defer their processing and insertion.
+This allows Langfuse to handle request peaks gracefully.
+
+You can use a managed service on AWS, Azure, or GCP, or host it yourself.
+At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured.
+
+This guide covers how to configure Redis within Langfuse and what to keep in mind when bringing your own Redis.
+
+## Configuration
+
+Langfuse accepts the following environment variables to fine-tune your Redis usage.
+They need to be provided for the Langfuse Web and Langfuse Worker containers.
+
+| Variable                  | Required / Default | Description                                                                                        |
+| ------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+| `REDIS_CONNECTION_STRING` | Required           | Redis connection string with format `redis[s]://[[username][:password]@][host][:port][/db-number]` |
+
+OR
+
+| Variable     | Required / Default | Description                                   |
+| ------------ | ------------------ | --------------------------------------------- |
+| `REDIS_HOST` | Required           | Redis host name.                              |
+| `REDIS_PORT` | `6379`             | Port of the Redis instance.                   |
+| `REDIS_AUTH` |                    | Authentication string for the Redis instance. |
+
+## Deployment Options
+
+This section covers different deployment options and provides example environment variables.
+
+### Managed Redis/Valkey by Cloud Providers
+
+[Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/de-de/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
+Langfuse handles failovers between read-replicas, but does not support Redis cluster mode for now, i.e. there is no sharding support.
+To connect your cloud provider manager Redis instance, set the environment variables as defined above.
+Ensure that your Langfuse container can reach your Redis instance within the VPC.
+
+<Callout type="warning">
+
+You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the queue jobs are not evicted from the cache.
+
+</Callout>
+
+### Redis on Kubernetes (Helm)
+
+Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
+We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
+See [Langfuse on Kubernetes (Helm)](/self-hosting/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+
+#### Example Configuration
+
+For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Clickhouse Helm chart:
+
+```yaml
+valkey:
+  deploy: true
+  architecture: standalone
+  primary:
+    extraFlags:
+      - "--maxmemory-policy noeviction" # Necessary to handle queue jobs correctly
+  auth:
+    password: changeme
+```
+
+Set the following environment variables to connect to your Redis instance:
+
+```yaml
+REDIS_CONNECTION_STRING=redis://default:changeme@<chart-name>-valkey-master:6379/0
+```
+
+### Docker
+
+You can run Redis in a single [Docker](https://hub.docker.com/_/redis/) container.
+As there is no redundancy, this is **not recommended for production workloads**.
+
+#### Example Configuration
+
+Start the container with
+
+```bash
+docker run --name redis \
+  -p 6379:6379 \
+  redis --requirepass myredissecret --maxmemory-policy noeviction
+```
+
+Set the following environment variables to connect to your Redis instance:
+
+```yaml
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_AUTH=myredissecret
+```
+
+## Sizing Recommendations
+
+Langfuse uses Redis mainly for queuing event metadata that should be processed by the worker.
+In most cases, the worker can process the queue quickly to keep events from piling up.
+For every ~100000 events per minute we recommend about 1GB of memory for the Redis instance.
+
+## Valkey vs Redis
+
+[Valkey](https://github.com/valkey-io/valkey) was created as an open source (BSD) alternative to Redis.
+It is a drop-in replacement for Redis and is compatible with the Redis protocol.
+According to the maintainers their major version 8.0.0 retains compatibility to Redis v7 in most instances.
+We do not extensively test new Langfuse releases with Valkey, but have not encountered any issues in internal experiments using it.
+Therefore, you can consider Valkey as an option, but you may hit compatibility issues in case its behaviour diverges from Redis.

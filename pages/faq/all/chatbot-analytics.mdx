@@ -130,14 +130,13 @@ Ensure your monitoring solution can handle growth.
 
 Langfuse is designed to scale with your needs.
 
-
 ## Start Tracking your Chatbot with Langfuse
 
 The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. In this quickstart we also use the Langfuse [OpenAI integration](/docs/integrations/openai) to automatically capture all model parameters.
 
 Not using OpenAI? Check out how you can [trace any LLM with Langfuse](/docs/get-started).
 
-1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host](/docs/deployment/self-host)
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host](/self-hosting)
 2.  Create a new project
 3.  Create new API credentials in the project settings
 
@@ -155,7 +154,7 @@ LANGFUSE_HOST="https://cloud.langfuse.com" # 🇪🇺 EU region
 ```python
 from langfuse.decorators import observe
 from langfuse.openai import openai # OpenAI integration
- 
+
 @observe()
 def story():
     return openai.chat.completions.create(
@@ -166,15 +165,15 @@ def story():
           {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
         ],
     ).choices[0].message.content
- 
+
 @observe()
 def main():
     return story()
- 
+
 main()
 ```
+
 ## Resources
 
 - To see chatbot tracing in action, have a look at our interactive demo [here](/demo).
 - Have a look at [this guide](/blog/qa-chatbot-for-langfuse-docs) to see how we built and instrumented a chatbot for the Langfuse docs.
-
