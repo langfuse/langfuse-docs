@@ -19,6 +19,5 @@ export default {
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
   lobechat: "LobeChat",
-  inferable: "Inferable",
   other: "More Ways to Integrate",
 };
