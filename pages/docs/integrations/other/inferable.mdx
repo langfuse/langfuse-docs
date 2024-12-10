@@ -67,7 +67,7 @@ If you're self-hosting the console, you can follow the same instructions as the 
 
 ### Tracing
 
-Once you have enabled Langfuse integration, you will start to see traces in the Langfuse dashboard. Every Run in Inferable will be mapped to its own trace in Langfuse.
+Once you have enabled the Langfuse integration, you will start to see [traces](/docs/tracing) in the Langfuse dashboard. Every Run in Inferable will be mapped to its own trace in Langfuse.
 
 ![Inferable trace in Langfuse](/images/docs/inferable-langfuse-trace.png)
 
@@ -76,11 +76,13 @@ You will find two types of spans in the trace:
 - **Tool Calls**: Denoted by function name. These are spans created for each tool call made in the Run by the LLM.
 - **LLM Calls**: Denoted by `GENERATION`. This is the span created for the LLM call. Inferable will create a new span for each LLM call in the Run, including:
   - Agent loop reasoning
-  - Utility calls (e.g. Summarization, Title generation)
+  - Utility calls (e.g., Summarization, Title generation)
+
+Learn more about the Langfuse Tracing data structure [here](/docs/tracing).
 
 ### Evaluations
 
-Whenever you submit an evaluation on a Run via the Playground or the API, Inferable will send a score to Langfuse on the trace for that Run.
+Whenever you submit an evaluation on a Run via the Playground or the API, Inferable will send a [score](/docs/scores) to Langfuse on the trace for that Run.
 
 If you're using Langfuse for evaluation, this will help you correlate the evaluation back to the specific Trace in Langfuse.
 
@@ -100,5 +102,5 @@ If you have **Send Message Payloads** enabled, Inferable will also send the inpu
 
 ## Other notes
 
-- The langfuse traces may take upto 30 seconds to be sent to Langfuse. But usually appear in a few seconds.
+- The Langfuse traces may take up to 30 seconds to be sent to Langfuse. But usually appear in a few seconds.
 - You can report an issue on [Inferable GitHub](https://github.com/inferablehq/inferable/issues) if you're having trouble with the integration.
