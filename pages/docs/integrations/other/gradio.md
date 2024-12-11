@@ -225,4 +225,11 @@ if __name__ == "__main__":
 
 When interacting with the Chatbot, you should see traces, sessions, and feedback scores in your Langfuse project. See video above for a walkthrough.
 
+Example trace, session, and user feedback in Langfuse ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/sessions/5c0b8d01-cbcb-4650-be50-c6e4ca0ce093)):
+
+![Gradio Traces, sessions and user feedback in Langfuse](https://static.langfuse.com/cookbooks/gradio/gradio-traces-in-langfuse.gif)
+
+
 If you have any questions or feedback, please join the [Langfuse Discord](https://langfuse.com/discord) or create a new thread on [GitHub Discussions](https://langfuse.com/gh-support).
+
+
