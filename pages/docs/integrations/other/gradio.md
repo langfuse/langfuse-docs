@@ -12,6 +12,8 @@ We recommend to run this notebook in Google Colab (see link above).
 
 Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implementation and contributions to this notebook.
 
+## Introduction
+
 ### What is Gradio?
 
 [Gradio](https://github.com/gradio-app/gradio) is an open-source Python library that enables quick creation of web interfaces for machine learning models, APIs, and Python functions. It allows developers to wrap any Python function with an interactive UI that can be easily shared or embedded, making it ideal for demos, prototypes, and ML model deployment. See [docs](https://www.gradio.app/docs) for more details.
@@ -35,15 +37,13 @@ We've recorded a walkthrough of the implementation below. You can follow along w
   allowFullScreen
 ></iframe>
 
-## Outline
+### Outline
 
 This notebook will show you how to
 
 1. Build a simple chat interface in Python and rendering it in a Notebook using [Gradio `Chatbot`](https://www.gradio.app/docs/gradio/chatbot)
 2. Add [Langfuse Tracing](https://langfuse.com/docs/tracing) to the chatbot
 3. Implement additional Langfuse tracing features used frequently in chat applications: [chat sessions](https://langfuse.com/docs/tracing-features/sessions), [user feedback](https://langfuse.com/docs/scores/user-feedback)
-
----
 
 ## Setup
 
@@ -193,7 +193,7 @@ async def handle_retry(history, retry_data: gr.RetryData):
         yield message
 ```
 
-# Run Gradio Chatbot
+## Run Gradio Chatbot
 
 After implementing all methods above, we can now put together the [Gradio Chatbot](https://www.gradio.app/docs/gradio/chatbot) and launch it. If run within Colab, you should see an embedded Chatbot interface.
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     demo.launch(share=True, debug=True)
 ```
 
-## Done
+## Explore data in Langfuse
 
 When interacting with the Chatbot, you should see traces, sessions, and feedback scores in your Langfuse project. See video above for a walkthrough.
 
