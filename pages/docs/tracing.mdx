@@ -34,64 +34,23 @@ import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
 
 <TracingOverview />
 
-## Introduction to Observability & Traces in Langfuse
-
-A trace in Langfuse consists of the following objects:
-
-- A `trace` typically represents a single request or operation. It contains the overall input and output of the function, as well as metadata about the request, such as the user, the session, and tags.
-- Each trace can contain multiple `observations` to log the individual steps of the execution.
-  - Observations are of different types:
-    - `Events` are the basic building blocks. They are used to track discrete events in a trace.
-    - `Spans` represent durations of units of work in a trace.
-    - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
-  - Observations can be nested.
-
-<div className="grid grid-cols-2 mt-4 gap-2 md:gap-4">
-
-<div className="border rounded py-4 text-center bg-card">
-
-**Hierarchical structure of traces in Langfuse**
-
-```mermaid
-classDiagram
-    Trace "1" *-- "n" Observation
-    Observation <|-- Event
-    Observation <|-- Span
-    Observation <|-- Generation
-    Observation o-- Observation: Nesting
-```
-
-</div>
-
-<div className="border rounded py-4 text-center block dark:hidden bg-card">
-
-**Example trace in Langfuse UI**
-
-![Trace in Langfuse UI](/images/docs/tracing-observation-tree-light.png)
-
-</div>
-
-<div className="border rounded py-4 text-center bg-background hidden dark:block">
-
-**Example trace in Langfuse UI**
-
-![Trace in Langfuse UI](/images/docs/tracing-observation-tree-dark.png)
-
-</div>
-
-</div>
-
 ## Get Started
 
 Follow the quickstart to add Langfuse tracing to your LLM app.
 
-import { Rocket, Joystick } from "lucide-react";
+import { Rocket, BookOpen, Joystick } from "lucide-react";
 
 <Cards num={3}>
   <Card
     icon={<Rocket size="24" />}
     title="Quickstart"
     href="/docs/get-started"
+    arrow
+  />
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Data Model"
+    href="/docs/tracing-data-model"
     arrow
   />
   <Card
