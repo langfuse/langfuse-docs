@@ -10,6 +10,8 @@ This is a simple end-to-end example notebook which showcases how to integrate a 
 
 We recommend to run this notebook in Google Colab (see link above).
 
+Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implementation and contributions to this notebook.
+
 ### What is Gradio?
 
 [Gradio](https://github.com/gradio-app/gradio) is an open-source Python library that enables quick creation of web interfaces for machine learning models, APIs, and Python functions. It allows developers to wrap any Python function with an interactive UI that can be easily shared or embedded, making it ideal for demos, prototypes, and ML model deployment. See [docs](https://www.gradio.app/docs) for more details.
