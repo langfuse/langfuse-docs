@@ -87,8 +87,8 @@ importers:
         specifier: ^1.1.5
         version: 1.1.5
       langfuse:
-        specifier: ^3.31.1
-        version: 3.31.1
+        specifier: ^3.31.3
+        version: 3.31.3
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@18.3.1)
@@ -708,6 +708,10 @@ packages:
 
   '@jridgewell/gen-mapping@0.3.5':
     resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
+    engines: {node: '>=6.0.0'}
+
+  '@jridgewell/gen-mapping@0.3.8':
+    resolution: {integrity: sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA==}
     engines: {node: '>=6.0.0'}
 
   '@jridgewell/resolve-uri@3.1.2':
@@ -3301,12 +3305,12 @@ packages:
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
-  langfuse-core@3.31.1:
-    resolution: {integrity: sha512-mLFya8KJhCeqBlUy5iNzHoorOTb05Y/Oa9lfcI7PBH+RBmtLB7+QyYyTaP7EmVRkK21uRhn0U/BU0oN8UKxdYQ==}
+  langfuse-core@3.31.3:
+    resolution: {integrity: sha512-meoniCk1dLmtXkcT45aFvlKxwPURp/gc9H8PM4/Ubp8hZvfVBJWsHAB+iOju264lNtvXkZdTz2MsoS64sncAXQ==}
     engines: {node: '>=18'}
 
-  langfuse@3.31.1:
-    resolution: {integrity: sha512-V74AWfB3aLz2Z0TiuIgXK7uG5eMYE20qfp5zYyKAS4DvQSAiSqC9Sgg3xm6OG8Jc1pK/X7s5WeLvswWn7PwfOA==}
+  langfuse@3.31.3:
+    resolution: {integrity: sha512-t0JpJGK0in/ohRexHubAS6qn8zvshw5b/e1DzGJyU56FaPTtdIj5fCynm3r+hgDe13ihoIcajinLOKOAYTuscQ==}
     engines: {node: '>=18'}
 
   langium@3.0.0:
@@ -5284,7 +5288,7 @@ snapshots:
 
   '@ampproject/remapping@2.3.0':
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
   '@antfu/install-pkg@0.4.1':
@@ -5808,6 +5812,12 @@ snapshots:
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
   '@jridgewell/gen-mapping@0.3.5':
+    dependencies:
+      '@jridgewell/set-array': 1.2.1
+      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/trace-mapping': 0.3.25
+
+  '@jridgewell/gen-mapping@0.3.8':
     dependencies:
       '@jridgewell/set-array': 1.2.1
       '@jridgewell/sourcemap-codec': 1.5.0
@@ -9155,13 +9165,13 @@ snapshots:
 
   kolorist@1.8.0: {}
 
-  langfuse-core@3.31.1:
+  langfuse-core@3.31.3:
     dependencies:
       mustache: 4.2.0
 
-  langfuse@3.31.1:
+  langfuse@3.31.3:
     dependencies:
-      langfuse-core: 3.31.1
+      langfuse-core: 3.31.3
 
   langium@3.0.0:
     dependencies:
