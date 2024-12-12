@@ -125,6 +125,16 @@ Adding the `-v` flag will also remove the volumes.
 
 Ensure to stop the VM instance in your cloud provider interface to avoid unnecessary costs.
 
+## Troubleshooting
+
+### Configuring Minio for Media Uploads
+
+To enable multimodal tracing, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
+
+**Development Environment:** When running `docker compose` locally, set `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` to `http://localhost:9090` to ensure presigned URLs correctly loop back to the local instance.
+
+**Production Environment:** In a production environment, configure `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` with a publicly accessible hostname or IP address that is reachable by your SDK clients and browsers.
+
 ## How to Upgrade
 
 To upgrade Langfuse, you can stop the containers and run `docker compose up --pull always`.
