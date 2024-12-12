@@ -229,6 +229,77 @@ The base64 data URIs and the wrapped `LangfuseMedia` objects in Langfuse traces 
 
 Based on this token, the Langfuse UI can automatically detect the `mediaId` and render the media file inline. The `LangfuseMedia` class provides utility functions to extract the `mediaId` from the reference string.
 
+### 3. Resolving Media References
+
+When dealing with traces, observations, or dataset items that include media references, you can convert them back to their base64 data URI format using the `resolve_media_references` utility method provided by the Langfuse client. This is particularly useful for reinserting the original content during fine-tuning, dataset runs, or replaying a generation. The utility method traverses the parsed object and returns a deep copy with all media reference strings replaced by the corresponding base64 data URI representations.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
+# Example object with media references
+obj = {
+    "image": "@@@langfuseMedia:type=image/jpeg|id=some-uuid|source=bytes@@@",
+    "nested": {
+        "pdf": "@@@langfuseMedia:type=application/pdf|id=some-other-uuid|source=bytes@@@"
+    }
+}
+
+# Resolve media references to base64 data URIs
+resolved_trace = langfuse.resolve_media_references(
+    obj=obj,
+    resolve_with="base64_data_uri"
+)
+
+# Result:
+# {
+#     "image": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+#     "nested": {
+#         "pdf": "data:application/pdf;base64,JVBERi0xLjcK..."
+#     }
+# }
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse();
+
+// Example object with media references
+const obj = {
+  image: "@@@langfuseMedia:type=image/jpeg|id=some-uuid|source=bytes@@@",
+  nested: {
+    pdf: "@@@langfuseMedia:type=application/pdf|id=some-other-uuid|source=bytes@@@",
+  },
+};
+
+// Resolve media references to base64 data URIs
+const resolvedTrace = await langfuse.resolveMediaReferences({
+  obj: obj,
+  resolveWith: "base64DataUri",
+});
+
+// Result:
+// {
+//     image: "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+//     nested: {
+//         pdf: "data:application/pdf;base64,JVBERi0xLjcK..."
+//     }
+// }
+```
+
+</Tab>
+</Tabs>
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
