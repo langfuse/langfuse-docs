@@ -55,6 +55,11 @@ const useInkeepSettings = (): InkeepSharedSettings => {
             variant: "subtle", // 'emphasized' 'subtle',
           },
         },
+        AIChatPageWrapper: {
+          defaultProps: {
+            size: "shrink-vertically",
+          },
+        },
       },
     },
   };
