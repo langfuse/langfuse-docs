@@ -10,15 +10,34 @@ This is a simple end-to-end example notebook which showcases how to integrate a 
 
 We recommend to run this notebook in Google Colab (see link above).
 
-## What is Gradio?
+Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implementation and contributions to this notebook.
+
+## Introduction
+
+### What is Gradio?
 
 [Gradio](https://github.com/gradio-app/gradio) is an open-source Python library that enables quick creation of web interfaces for machine learning models, APIs, and Python functions. It allows developers to wrap any Python function with an interactive UI that can be easily shared or embedded, making it ideal for demos, prototypes, and ML model deployment. See [docs](https://www.gradio.app/docs) for more details.
 
-## What is Langfuse?
+### What is Langfuse?
 
 [Langfuse](https://github.com/langfuse/langfuse) is an open-source LLM engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
 
-## Outline
+### Walkthrough
+
+We've recorded a walkthrough of the implementation below. You can follow along with the video or the notebook.
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded mt-3"
+  src="https://www.youtube.com/embed/O--lEvvfWf8?si=5eh_KPJ8FVypSFjV"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+### Outline
 
 This notebook will show you how to
 
@@ -26,14 +45,13 @@ This notebook will show you how to
 2. Add [Langfuse Tracing](https://langfuse.com/docs/tracing) to the chatbot
 3. Implement additional Langfuse tracing features used frequently in chat applications: [chat sessions](https://langfuse.com/docs/tracing-features/sessions), [user feedback](https://langfuse.com/docs/scores/user-feedback)
 
----
-
 ## Setup
 
 Install requirements. We use OpenAI for this simple example. We could use any model here.
 
 
-```
+```python
+# pinning httpx as the latest version is not compatible with the OpenAI SDK at the time of creating this notebook
 !pip install gradio langfuse openai httpx==0.27.2
 ```
 
@@ -42,7 +60,7 @@ Set credentials and initialize Langfuse SDK Client used to add user feedback lat
 You can either create a free [Langfuse Cloud](https://cloud.langfuse.com) account or [self-host Langfuse](https://langfuse.com/self-hosting) in a couple of minutes.
 
 
-```
+```python
 import os
 
 # Get keys for your project from the project settings page
@@ -58,7 +76,7 @@ os.environ["OPENAI_API_KEY"] = ""
 ```
 
 
-```
+```python
 import gradio as gr
 import json
 import uuid
@@ -76,7 +94,7 @@ Each chat message belongs to a thread in the Gradio Chatbot which can be reset u
 We implement the following method that creates a `session_id` that is used globally and can be reset via the `set_new_session_id` method. This session_id will be used for [Langfuse Sessions](https://langfuse.com/docs/tracing-features/sessions).
 
 
-```
+```python
 session_id = None
 def set_new_session_id():
     global session_id
@@ -93,7 +111,7 @@ When implementing the `respond` method, we use the Langfuse [`@observe()` decora
 In addition we use the [openai integration](https://langfuse.com/docs/integrations/openai/python/get-started) as it simplifies instrumenting the LLM call to capture model parameters, token counts, and other metadata. Alternatively, we could use the integrations with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [other frameworks](https://langfuse.com/docs/integrations/overview), or instrument the call itself with the decorator ([example](https://langfuse.com/docs/sdk/python/decorators#log-any-llm-call)).
 
 
-```
+```python
 # Langfuse decorator
 from langfuse.decorators import observe, langfuse_context
 # Optional: automated instrumentation via OpenAI SDK integration
@@ -153,14 +171,13 @@ async def respond(prompt: str, history):
 We implement user [feedback tracking in Langfuse](https://langfuse.com/docs/scores/user-feedback) via the `like` event for the Gradio chatbot ([reference](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This methdod reuses the current trace id available in the global state of this application.
 
 
-```
+```python
 def handle_like(data: gr.LikeData):
     global current_trace_id
     if data.liked:
         langfuse.score(value=1, name="user-feedback", trace_id=current_trace_id)
     else:
         langfuse.score(value=0, name="user-feedback", trace_id=current_trace_id)
-
 ```
 
 ### Retries
@@ -168,7 +185,7 @@ def handle_like(data: gr.LikeData):
 Allow to retry a completion via the Gradio Chatbot `retry` event ([docs](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This is not specific to the integration with Langfuse.
 
 
-```
+```python
 async def handle_retry(history, retry_data: gr.RetryData):
     new_history = history[: retry_data.index]
     previous_prompt = history[retry_data.index]["content"]
@@ -176,12 +193,12 @@ async def handle_retry(history, retry_data: gr.RetryData):
         yield message
 ```
 
-# Run Gradio Chatbot
+## Run Gradio Chatbot
 
 After implementing all methods above, we can now put together the [Gradio Chatbot](https://www.gradio.app/docs/gradio/chatbot) and launch it. If run within Colab, you should see an embedded Chatbot interface.
 
 
-```
+```python
 with gr.Blocks() as demo:
     gr.Markdown("# Chatbot using 🤗 Gradio + 🪢 Langfuse")
     chatbot = gr.Chatbot(
@@ -204,8 +221,15 @@ if __name__ == "__main__":
     demo.launch(share=True, debug=True)
 ```
 
-## Done
+## Explore data in Langfuse
 
 When interacting with the Chatbot, you should see traces, sessions, and feedback scores in your Langfuse project. See video above for a walkthrough.
 
+Example trace, session, and user feedback in Langfuse ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/sessions/5c0b8d01-cbcb-4650-be50-c6e4ca0ce093)):
+
+![Gradio Traces, sessions and user feedback in Langfuse](https://static.langfuse.com/cookbooks/gradio/gradio-traces-in-langfuse.gif)
+
+
 If you have any questions or feedback, please join the [Langfuse Discord](https://langfuse.com/discord) or create a new thread on [GitHub Discussions](https://langfuse.com/gh-support).
+
+

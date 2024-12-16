@@ -12,6 +12,7 @@ export default {
     title: "Tracing",
   },
   tracing: "Introduction",
+  "tracing-data-model": "Data Model",
   "get-started": "Quickstart",
   "tracing-features": "Tracing Features",
   sdk: "SDKs",

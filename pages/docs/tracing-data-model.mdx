@@ -1,0 +1,126 @@
+---
+title: Tracing Data Model in Langfuse
+description: Langfuse (open source) helps you trace and analyze LLM applications. Learn how traces and observations are structured in Langfuse.
+---
+
+# Tracing Data Model
+
+[Tracing](/docs/tracing) in Langfuse is a way to log and analyze the execution of your LLM applications. The following reference provides a detailed overview of the data model used. It is inspired by OpenTelemetry.
+
+## Traces and Observations
+
+A `trace` typically represents a single request or operation.
+It contains the overall input and output of the function, as well as metadata about the request, such as the user, the session, and tags.
+Usually, _a trace corresponds to a single api call of an application_.
+
+Each trace can contain multiple `observations` to log the individual steps of the execution.
+
+- Observations are of different types:
+  - `Events` are the basic building blocks. They are used to track discrete events in a trace.
+  - `Spans` represent durations of units of work in a trace.
+  - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
+- Observations can be nested.
+
+<div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
+
+<div className="border rounded py-4 text-center bg-card">
+
+**Hierarchical structure of traces in Langfuse**
+
+```mermaid
+classDiagram
+    Trace "1" *-- "n" Observation
+    Observation <|-- Event
+    Observation <|-- Span
+    Observation <|-- Generation
+    Observation o-- Observation: Nesting
+```
+
+</div>
+
+<div className="border rounded py-4 text-center block dark:hidden bg-card">
+
+**Example trace in Langfuse UI**
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-light.png)
+
+</div>
+
+<div className="border rounded py-4 text-center bg-background hidden dark:block">
+
+**Example trace in Langfuse UI**
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-dark.png)
+
+</div>
+
+</div>
+
+## Sessions
+
+Optionally, traces can be grouped into [sessions](/docs/tracing-features/sessions).
+Sessions are used to group traces that are part of the same user interaction.
+A common example is a thread in a chat interface.
+
+Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to add sessions to your traces.
+
+<div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
+
+<div className="border rounded py-4 text-center bg-card">
+
+**Optionally, sessions aggregate traces**
+
+```mermaid
+classDiagram
+    Session "1" o-- "n" Trace
+```
+
+</div>
+
+<div className="border rounded pt-4 px-2 pb-2 text-center block bg-card">
+
+**Example session in Langfuse UI**
+
+<Frame border fullWidth>
+  ![Session view](/images/docs/session.png)
+</Frame>
+
+</div>
+
+</div>
+
+## Scores
+
+Traces and observations can be evaluated using [scores](/docs/scores). Scores are flexible objects that store evaluation metrics and can be:
+
+- Numeric, categorical, or boolean values
+- Associated with a trace (required)
+- Linked to a specific observation (optional)
+- Annotated with comments for additional context
+- Validated against a score configuration schema (optional)
+
+Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
+
+<div className="border rounded py-4 mt-6 text-center bg-card">
+
+**Optionally, scores can add evaluation metrics to traces**
+
+```mermaid
+classDiagram
+  namespace Evaluation {
+    class Score
+    class ScoreConfig
+  }
+
+  namespace Tracing {
+    class Trace
+    class Observation
+  }
+
+  Trace *-- Observation
+  Score --> Trace
+  Score --> Observation : optional, reference observation within a trace
+  Score --> ScoreConfig : optional, ensure schema
+```
+
+</div>
