@@ -88,46 +88,110 @@ To address these challenges, we added multiple building blocks to our stack. In 
 
 #### From sync to async processing
 
+<div className="max-w-md">
+
 ```mermaid
 flowchart TB
-  subgraph "After"
-    D[API] --> H[Accept Events]
-    H --> E[(Redis Queue)]
-    E --> F[Worker]
-    F --> G[(Postgres)]
-  end
-
   subgraph "Before"
-    A[API] --> B[Process Events]
-    B --> C[(Postgres)]
+    A["API\n(Process Events)"] --> C[(Postgres)]
   end
 ```
+
+</div>
 
 We started out with an ingestion pipeline which receives a number of events per API call, iterates over them, and processes each event individually. During processing, we first search for a historic row with the same ID, tokenise prompts and completions of LLM calls, calculate cost, and upsert the event in our database.
 When looking into our telemetry, we realized we had two major bottlenecks: Postgres IOPS exhaustion and CPU consumption when tokenising large strings. Both of these are a risk to the uptime and latency of our application. In the worst cases, we lost events and returned HTTP 500 errors on our ingestion API.
 
+<div className="max-w-2xl">
+
+```mermaid
+flowchart TB
+  subgraph "After"
+    A["API\n(Accept Events)"] --> E[(Redis Queue)]
+    E --> F["Worker\n(Process Events)"]
+    F --> G[(Postgres)]
+  end
+```
+
+</div>
+
 When considering a solution, we realized that simply increasing the number of containers would not be effective. We often experience significant spikes in ingested traffic when individual users run large-scale batch jobs. As a result, API traffic from our users is highly unpredictable, and container instances cannot scale quickly enough to manage these spikes. We ultimately decided to route all our ingestion traffic through a message queue in Redis. Unlike Kafka, Redis is easily self-hostable and can scale to meet our requirements. Another Langfuse container will then consume this data asynchronously and apply rate limiting to reduce the load on our database and the CPU usage of the container. With this change, we created a lightweight ingestion endpoint that only checks for authentication and body formats. The other container will handle the more intensive tasks of tokenizing and writing to the database.
 
-#### Write to Clickhouse
+#### Writing updates to Clickhouse without reading from Clickhouse
 
-We only did the steps above because we needed to improve our API performance short term. However, the job was not finished yet. Even if the worker container is doing all the processing asynchronously, we still needed many IOPS to operate the logic of our ingestion pipeline. Self-hosting users reached out to us about this issue as well. At the same time, we had the challenge of improving the API latencies of our read queries. We eventually decided to migrate our tracing data from Postgres to Clickhouse. Clickhouse is an OLAP database, which is used by many new starters in the observability space, has an Apache License, and we observed outstanding performance in our Proof of Concepts. Its column-oriented storage layout was a better fit for the analytical queries that we expected, while still performing well for single-row lookups with large binary columns. Yet, adopting it in production was not easy at all.
+We only did the steps above because we needed to improve our API performance short term. However, the job was not finished yet. Even if the worker container is doing all the processing asynchronously, we still needed too many Postgres IOPS to operate the logic of our ingestion pipeline. Self-hosting users reached out to us about this issue as well. At the same time, we had the challenge of improving the API latencies of our read queries. We eventually decided to migrate our tracing data from Postgres to Clickhouse. Clickhouse is an OLAP database, which is used by many new starters in the observability space, has an Apache License, and we observed outstanding performance in our Proof of Concepts. Its column-oriented storage layout was a better fit for the analytical queries that we expected, while still performing well for single-row lookups with large binary columns. Yet, adopting it in production was not easy at all.
 
-Our SDKs are designed to send updates to our backend for a given object ID. Single row reads and updates in Postgres are fast and easy, while every row update in ClickHouse is an immensely expensive operation. We transition our updates into new inserts and use ClickHouse’s ‘’’ReplacingMergeTree’’’ table engine to eventually deduplicate rows in the background.
+Our SDKs are designed to send updates to our backend for a given object ID. Single row reads and updates in Postgres are fast and easy, while **every row update in ClickHouse is an immensely expensive operation**. We transition our updates into new inserts and use ClickHouse's `ReplacingMergeTree` table engine to eventually deduplicate rows in the background.
+
 This implies that we always need to get the latest state of a row, apply the update, and write it back to Clickhouse.
 
-We analyzed our traffic and realized that 90% of all updates arrive in our database within 10 seconds. This means that we had to watch out for concurrency and data consistency. Unfortunately, we were not able to write the system by reading from Clickhouse and then applying the update on an old record found in Clickhouse. Clickhouse is only read-after-write consistent when using the “select_sequential_consistency” setting which is prohibitively expensive. This setting ensures that all data is synced across Clickhouse nodes before returning a result to a query. Hence, there would be no guarantee to read existing data from Clickhouse. Also, two events could be processed concurrently for the same ID. It could happen, that we would lose data as we could process a second event without reading the original create event.
-To mitigate this, we decided to cache all our ingestion events, as soon as they were acknowledged from our ingestion API in Redis. We would then send an event to our worker container, which would get all events for an object ID and reliably create the new Clickhouse row. We went ahead and coded up the new ingestion pipeline and started processing events in parallel to our Postgres ingestion pipeline.
-We quickly ran into network capacity limitations on AWS ElastiCache even on a very large instance. Another disadvantage of Redis is the in-memory architecture and ephemeral nature of things being written into it. Introducing S3 as a persistent storage for events allowed us to only keep references in Redis. Other benefits include the ability to replay events in case of errors and - to our surprise - significantly reducing the CPU usage of our web containers as serializing events for Redis was an expensive operation. Kafka may have been a better fit for the ingestion case, but with Redis’s caching capabilities and S3 for our new multi-modal features, we preferred to keep fewer components.
-With these changes, we managed to consistently insert data into Clickhouse and at scale.
+```mermaid
+flowchart TB
+  subgraph "Planned"
+    Clickhouse[("Clickhouse\n(ReplacingMergeTree)")]
+    A["Accept new API Event"] --> B["Read current state"]
+    Clickhouse --> B
+    B --> C["Compute new state by applying updates"]
+    C --> D["Insert"]
+    D --> Clickhouse
+  end
+```
+
+We analyzed our traffic and realized that **90% of all updates are written to the database within 10 seconds**. This means that we had to watch out for concurrency and data consistency. Reading from Clickhouse was not feasible to get the latest state of a row. Clickhouse is only read-after-write consistent when using the _prohibitively expensive_ “select_sequential_consistency” setting which ensures that all data is synced across Clickhouse nodes before returning a result to a query. Hence, at our scale, there would be no guarantee to read existing data from Clickhouse. Also, two events could be processed concurrently for the same ID leading to race conditions.
+
+To mitigate this, we decided to cache all our acknowledged events in Redis. We would then send an event to our worker container, which would get all events for an object ID and reliably create the new Clickhouse row without needing to read from Clickhouse at all. We went ahead and implemented the new ingestion pipeline and started processing events in parallel to our Postgres ingestion pipeline.
+
+```mermaid
+flowchart TB
+  subgraph "Final Implementation"
+    Clickhouse[("Clickhouse\n(ReplacingMergeTree)")]
+    S3[("S3\nRaw events")]
+    A["Accept new API Event"] --> S3
+    S3 --> B["Get all events for an object ID"]
+    A -.-> B
+    B --> C["Compute new state"]
+    C --> D["Insert"]
+    D --> Clickhouse
+  end
+```
+
+We quickly encountered network capacity limitations on AWS ElastiCache, even with a very large instance. Another drawback of Redis is its in-memory architecture and the ephemeral nature of stored data. By introducing S3 as persistent storage for events, we could retain only references in Redis. This change also allowed us to replay events in case of errors and, surprisingly, significantly reduced the CPU usage of our web containers, as serializing events for Redis was an expensive operation. While Kafka might have been a better fit for ingestion, we chose to keep fewer components by leveraging Redis's caching capabilities and S3 for our new multi-modal features. With these adjustments, we successfully managed to insert data into Clickhouse consistently and at scale.
 
 ### Building Block 2: Caching + Decoupled Infrastructure
+
+```mermaid
+flowchart TB
+  subgraph "Before"
+    SDK["Langfuse SDK\ngetPrompt"] --> API["API\nGET /prompt/:name"]
+    API --> A["Langfuse Web Container"]
+    A --> B[(Postgres)]
+    B --> A
+    A --> API
+  end
+```
+
+```mermaid
+flowchart TB
+  subgraph "After"
+    SDK["Langfuse SDK\ngetPrompt"] --> SDKCache[("SDK-level Cache")]
+    SDKCache --> SDK
+    SDKCache -->|"prefetch"| API["API\nGET /prompt/:name"]
+    SDKCache -->|"revalidate in background"| API
+    API --> A["Langfuse Web Container\n(Prompt TargetGroup)"]
+    A --> Redis["Redis Cache"]
+    Redis --> A
+    A -->|"if cache miss"| B[(Postgres)]
+    B --> A
+    A --> API
+  end
+```
 
 While solving the data ingestion problem into Clickhouse, we still needed to improve the situation for our users using our prompt management feature.
 When analysing our observability data, we realized that the prompts API had issues for multiple reasons: high ingestion traffic could exhaust the database IOPS or CPU of our containers.
 
-First, we tried to avoid round-trips to our Postgres database to retrieve prompts. Here, we really observed the power of Redis as a cache and the impact it can have. As we know when prompts are updated, we can efficiently invalidate the cache without risking stale results.
+First, we tried to **avoid round-trips to our Postgres database to retrieve prompts**. Here, we really observed the power of Redis as a cache and the impact it can have. As we know when prompts are updated, we can efficiently invalidate the cache without risking stale results.
 
-Second, we separate the latency and availability sensitive infrastructure (prompts, but also authentication) into a dedicated deployment. Using LoadBalancer rules and dedicated TargetGroups for specific endpoints in AWS ECS allowed us to separate the ingestion traffic from the remainder of the application. An amazing side-effect was also the added observability that dedicated routes allow for. This configuration is not part of our self-hoster stack, but can be emulated across all major cloud vendors and Kubernetes if required.
+Second, we separate the latency- and availability-sensitive infrastructure, including prompts and authentication, into a dedicated deployment. By using LoadBalancer rules and dedicated TargetGroups for specific endpoints in AWS ECS, we can isolate the ingestion traffic from the rest of the application. An added benefit is the increased observability that dedicated routes provide. Although this configuration is not part of the Helm Chart yet, it can be emulated across all major cloud providers and Kubernetes if needed.
 
 With these two changes, we managed to bring the p99 of our prompts API from 7 seconds to 100 ms.
 
@@ -172,16 +236,9 @@ Host the new V3 release of Langfuse on your own infrastructure. Follow the [self
 
 ### We are hiring
 
-<div className="md:flex md:justify-center">
-
-<Frame className="max-w-80">![Team](/images/people/team.jpg)</Frame>
-
-<div className="md:p-6">
-
 We are hiring in Berlin! If you are interested in solving similar challenges with us - [apply here](/careers).
 
-</div>
-</div>
+<Frame className="max-w-80">![Team](/images/people/team.jpg)</Frame>
 
 ### GitHub
 
