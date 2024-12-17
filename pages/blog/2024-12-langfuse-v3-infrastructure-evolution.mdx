@@ -17,9 +17,15 @@ import Link from "next/link";
   authors={["steffenschmitz", "maxdeichmann"]}
 />
 
-Langfuse, the open-source LLM observability platform, emerged from the Y Combinator Winter 2023 batch. After building many LLM applications ourselves and realizing that it is hard to go from demo to production, we worked closely with a few of our batchmates to quickly develop a v0 LLM observability platform. We fouced on getting a few core features right: SDKs were asynchronous, based on tracing, as well as open source and easily self-hostable. The first version was written on NextJs, Vercel, and Postgres. Little did we know we would rapidly evolve from an experiment to processing tens of thousands of events per minute.
-Our recent V3 release marks a significant milestone in ensuring Langfuse can scale for all of our users. Additionally, it unlocks capabilities for self-hosting users. Features like online evaluations, async ingestion, and cached prompts are now also available in self-hosting.
+Langfuse, the open-source LLM observability platform, emerged from the Y Combinator Winter 2023 batch. After building many LLM applications ourselves and realizing that it is hard to go from demo to production, we worked closely with a few of our batchmates to quickly develop a v0 LLM observability platform.
+
+Initially, we focused on getting a few core features right: SDKs were asynchronous, Langfuse was based on tracing, and all components were open source and easily self-hostable. The first version was written on NextJs, Vercel, and Postgres. Little did we know we would rapidly evolve from an experiment to processing tens of thousands of events per minute.
+
+Our recent V3 release marks a significant milestone in ensuring Langfuse can scale for all of our users. Additionally, it makes features that we piloted over the recent months available to self-hosting users, such as online evaluations, async/queued ingestion, and cached prompts.
+
 In this post, we will walk you through the scaling challenges we faced while building Langfuse and how our “hypothesis - experiment - feedback” loop helped us arrive at Langfuse v3. If you are interested in solving similar challenges with us - we are hiring in Berlin!
+
+## Context: Architecture Changes
 
 import ArchitectureDiagramV2 from "@/components-mdx/architecture-diagram-v2.mdx";
 import ArchitectureDiagramV3 from "@/components-mdx/architecture-diagram-v3.mdx";
