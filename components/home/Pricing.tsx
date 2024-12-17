@@ -299,8 +299,8 @@ const sections = [
           cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: {
             "Open Source": false,
-            Pro: "yes",
-            Enterprise: "yes",
+            Pro: true,
+            Enterprise: true,
           },
         },
       },
@@ -315,8 +315,8 @@ const sections = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "yes",
-            Enterprise: "yes",
+            Pro: true,
+            Enterprise: true,
           },
         },
       },
@@ -518,7 +518,7 @@ const sections = [
         name: "Enterprise SSO (e.g. Okta, Auth0)",
         tiers: {
           cloud: { Hobby: false, Pro: false, Team: true },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
