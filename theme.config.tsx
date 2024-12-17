@@ -206,11 +206,11 @@ const config: DocsThemeConfig = {
        <Link href="https://news.ycombinator.com">
          {/* mobile */}
          <span className="sm:hidden">
-          Langfuse V3 on Hacker News →
+         Launch HN: Langfuse V3 is GA →
          </span>
          {/* desktop */}
          <span className="hidden sm:inline">
-         Langfuse V3 on Hacker News →
+         Launch HN: Langfuse V3 is GA →
          </span>
        </Link>
      ),
