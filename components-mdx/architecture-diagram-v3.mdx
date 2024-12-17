@@ -1,26 +1,26 @@
 ```mermaid
 flowchart TB
-    User["User, API, SDKs"]
+    User["UI, API, SDKs"]
     subgraph vpc["VPC"]
-        Web["Web Server (langfuse/langfuse)"]
-        Worker["Worker (langfuse/worker)"]
-        Postgres[Postgres Database]
-        Cache["Cache & Queue (Redis/Valkey)"]
-        Clickhouse["Clickhouse Database (observability data)"]
-        S3[S3/Blob Store]
+        Web["Web Server<br/>(langfuse/langfuse)"]
+        Worker["Async Worker<br/>(langfuse/worker)"]
+        Postgres@{ img: "https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg", label: "Postgres - OLTP\n(Transactional Data)", pos: "b", w: 60, h: 60, constraint: "on" }
+        Cache@{ img: "https://static-00.iconduck.com/assets.00/redis-plain-icon-2048x1748-fmvimw1g.png", label: "Redis\n(Cache, Queue)", pos: "b", w: 60, h: 60, constraint: "on" }
+        Clickhouse@{ img: "https://raw.githubusercontent.com/docker-library/docs/007e3209490145a9855f4825218a9a08753d425b/clickhouse/logo.svg", label: "Clickhouse - OLAP\n(Observability Data)", pos: "b", w: 60, h: 60, constraint: "on" }
+        S3@{ img: "https://upload.wikimedia.org/wikipedia/commons/3/32/AWS_Simple_Icons_Storage_Amazon_S3.svg", label: "S3 / Blob Storage\n(Raw events, multi-modal attachments)", pos: "b", w: 60, h: 60, constraint: "on" }
     end
-    LLM["LLM API / Gateway (BYO, optional, same VPC or VPC peering)"]
+    LLM["LLM API/Gateway<br/>(optional; BYO; can be same VPC or VPC-peered)"]
 
     User --> Web
     Web --> S3
     Web --> Postgres
     Web --> Cache
     Web --> Clickhouse
-    Web -.->|"optional for playground"| LLM
+    Web -..->|"optional for playground"| LLM
 
     Cache --> Worker
     Worker --> Clickhouse
     Worker --> Postgres
     Worker --> S3
-    Worker -.->|"optional for evals"| LLM
+    Worker -..->|"optional for evals"| LLM
 ```
