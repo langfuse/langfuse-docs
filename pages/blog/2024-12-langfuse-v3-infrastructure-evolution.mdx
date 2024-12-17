@@ -21,76 +21,92 @@ Langfuse, the open-source LLM observability platform, emerged from the Y Combina
 
 Initially, we focused on getting a few core features right: SDKs were asynchronous, Langfuse was based on tracing, and all components were open source and easily self-hostable. The first version was written on NextJs, Vercel, and Postgres. Little did we know we would rapidly evolve from an experiment to processing tens of thousands of events per minute.
 
-Our recent V3 release marks a significant milestone in ensuring Langfuse can scale for all of our users. Additionally, it makes features that we piloted over the recent months available to self-hosting users, such as online evaluations, async/queued ingestion, and cached prompts.
+Our recent V3 release marks a significant milestone in ensuring Langfuse can scale for all of our users. We have piloted many of these changes on Langfuse Cloud already, and the v3 release now also makes them available to self-hosting users, such as online evaluations, async/queued ingestion, and cached prompts.
 
 In this post, we will walk you through the scaling challenges we faced while building Langfuse and how our “hypothesis - experiment - feedback” loop helped us arrive at Langfuse v3. If you are interested in solving similar challenges with us - we are hiring in Berlin!
 
-## Context: Architecture Changes
+## Status Quo
+
+Before embarking on this journey, this was our architecture. A single container and a Postgres database. It was incredibly simple to run and self-host, but it was also incredibly hard to scale.
 
 import ArchitectureDiagramV2 from "@/components-mdx/architecture-diagram-v2.mdx";
-import ArchitectureDiagramV3 from "@/components-mdx/architecture-diagram-v3.mdx";
-import ArchitectureDescriptionV3 from "@/components-mdx/architecture-description-v3.mdx";
 
-<Tabs items={["Langfuse v3", "Langfuse v2"]}>
-<Tab>
-
-Architecture Diagram
-
-<ArchitectureDiagramV3 />
-
-</Tab>
-
-<Tab>
-
-Architecture Diagram
-
-<ArchitectureDiagramV2 />
-
-</Tab>
-</Tabs>
+<div className="max-w-lg">
+  <ArchitectureDiagramV2 />
+</div>
 
 ## Challenges
 
+We faced a couple of core challenges that led us to rethink our architecture. These are the most important ones:
+
 ### Challenge 1: Building a Resilient High-Throughput Ingestion Pipeline
 
-The core of Langfuse's observability platform relies on efficient event data collection through our SDKs. While we designed these SDKs to minimize performance impact on our users' applications, the ingestion server-components faced significant challenges as we scaled:
+> Goal: Ingestion API needs to accept high volumes of events and maintain consistently low latency under unpredictable load patterns.
+
+The core of Langfuse's observability platform relies on efficient event data collection through our SDKs and API. While we designed these SDKs to minimize performance impact on our users' applications, the ingestion server-components faced significant challenges as we scaled:
+
 Initial Pain Point: By summer 2023, spiky traffic patterns led to response times on our ingestion API spiking up to 50 seconds.
+
 Critical Requirement: Our ingestion API needs to maintain consistently low latency to ensure smooth event flushing from the SKDs. Otherwise, our user’s applications might be impacted negatively.
+
 The challenge wasn't just about handling high volumes of data—it was about maintaining reliability under unpredictable load patterns while ensuring minimal impact on our users' application performance.
 This technical hurdle became our first major scaling challenge, pushing us to rethink our ingestion architecture to handle traffic spikes more gracefully.
 
 ### Challenge 2: Optimizing Prompt Delivery for Production Workloads
 
+> Goal: Prompts API needs to be highly available and performant at all times.
+
 A critical feature of Langfuse is our Prompt Management System, allowing users to define prompts through our UI and retrieve them via SDKs - doing away with the need to re-deploy your application to change a prompt.
 
-While tracing is asynchronous and non-blocking, prompts are in the critical path of LLM applications. This made a seemingly straightforward functionality a complex performance challenge:
-During high ingestion periods, our p95 latency for prompt retrieval spiked to 7 seconds. The situation demanded an architectural solution that could maintain consistent low-latency performance, even under heavy system load from other operations.
+While tracing is asynchronous and non-blocking, prompts are in the critical path of LLM applications. This made a seemingly straightforward functionality a complex performance challenge: During high ingestion periods, our p95 latency for prompt retrieval spiked to 7 seconds. The situation demanded an architectural solution that could maintain consistent low-latency performance, even under heavy system load from other operations.
 
 ### Challenge 3: Fast analytical reads (Dashboards, Table Filters)
+
+> Goal: Dashboards and table filters need to work for large-scale observability data.
 
 Our initial database choice of Postgres served us well in the early days, but as our largest customers began pushing more observability data through the system, we hit significant performance bottlenecks. Despite optimizing queries, our dashboards and table filtering operations became painfully slow for enterprise users. With LLM analytical data often consisting of large blobs, row-oriented storage was too heavy on disk when scanning through millions of rows. The irony wasn't lost on us - the very customers who needed our analytics capabilities the most were experiencing the worst performance. This growing pain signaled that our initial architecture, while perfect for rapid development, needed a fundamental rethink to handle enterprise-scale analytical workloads.
 
 ### Challenge 4: Easy to self-host
 
-Building Langfuse as an open-source solution was a deliberate choice to foster a vibrant developer community. Our vision was simple: anyone should be able to explore Langfuse with a simple `docker-compose up`, but at the same time Langfuse must be able to serve enterprises with hundreds of users and thousands of LLM interactions per minute. This approach reflects our own preferences as developers - we value solutions that are easy to evaluate and deploy.
+> Goal: Langfuse must be easy to self-host, but also scalable with little operational effort.
+
+Building Langfuse as an open-source project was a deliberate choice. Our vision was simple: anyone should be able to explore Langfuse with a simple `docker-compose up`, but at the same time Langfuse must be able to serve enterprise-scale deployments with hundreds of users and thousands of LLM interactions per minute. This approach reflects our own preferences as developers - we value solutions that are easy to evaluate and deploy.
+
 However, building a production-grade open-source observability platform comes with distinct challenges:
-Universal Deployability: Our infrastructure needs to work seamlessly across diverse environments, from a developer's laptop to deployments on different hyperscalers
-Open-Source Dependencies: We're committed to using only open-source components to ensure unrestricted self-hosting capabilities
-Zero-Touch Operations: Enterprise users require automated maintenance and upgrade paths - manual intervention is too error prone and not scalable.
+
+- Universal Deployability: Our infrastructure needs to work seamlessly across diverse environments, from a developer's laptop to deployments on different hyperscalers
+- Open-Source Dependencies: We're committed to using only open-source components to ensure unrestricted self-hosting capabilities
+- Zero-Touch Operations: Enterprise users require automated maintenance and upgrade paths - manual intervention is too error prone and not scalable.
+
 This balance between simplicity and enterprise-readiness has shaped our architectural decisions, pushing us to create a solution that's both accessible and scalable.
 
-## Building blocks
+## New building blocks
 
-Over the past year we added multiple building blocks to address the challenges we laid out above. In this post, we take you on our journey of how we iterated on our stack.
+To address these challenges, we added multiple building blocks to our stack. In this post, we take you on our journey of how we iterated on our stack.
 
 ### Building Block 1: Asynchronous Processing of ingestion data
 
 #### From sync to async processing
 
+```mermaid
+flowchart TB
+  subgraph "After"
+    D[API] --> H[Accept Events]
+    H --> E[(Redis Queue)]
+    E --> F[Worker]
+    F --> G[(Postgres)]
+  end
+
+  subgraph "Before"
+    A[API] --> B[Process Events]
+    B --> C[(Postgres)]
+  end
+```
+
 We started out with an ingestion pipeline which receives a number of events per API call, iterates over them, and processes each event individually. During processing, we first search for a historic row with the same ID, tokenise prompts and completions of LLM calls, calculate cost, and upsert the event in our database.
 When looking into our telemetry, we realized we had two major bottlenecks: Postgres IOPS exhaustion and CPU consumption when tokenising large strings. Both of these are a risk to the uptime and latency of our application. In the worst cases, we lost events and returned HTTP 500 errors on our ingestion API.
 
-When thinking about a solution, we realized that scaling the number of containers is not the solution. API traffic from our users is completely unpredictable. We sometimes see massive spikes of ingested traffic, just because a user decided to run a background job with our instrumentation enabled. Hence, we needed a way to deal with these spikes without the need to scale our containers. We eventually decided to pipe all our ingestion traffic through a message queue in Redis. Contrary to Kafka, Redis is easily self-hostable but can scale to the requirements we have. Another Langfuse container would then consume this data asynchronously and rate limited to spare our database and the CPU consumption of the container. With this change, we managed to have a lightweight ingestion endpoint which only checks for authentication and body formats. The other container will do the heavy lifting of tokenizing and writing to the database.
+When considering a solution, we realized that simply increasing the number of containers would not be effective. We often experience significant spikes in ingested traffic when individual users run large-scale batch jobs. As a result, API traffic from our users is highly unpredictable, and container instances cannot scale quickly enough to manage these spikes. We ultimately decided to route all our ingestion traffic through a message queue in Redis. Unlike Kafka, Redis is easily self-hostable and can scale to meet our requirements. Another Langfuse container will then consume this data asynchronously and apply rate limiting to reduce the load on our database and the CPU usage of the container. With this change, we created a lightweight ingestion endpoint that only checks for authentication and body formats. The other container will handle the more intensive tasks of tokenizing and writing to the database.
 
 #### Write to Clickhouse
 
