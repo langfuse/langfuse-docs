@@ -180,6 +180,13 @@ Also, ensure that you run a recent version of Langfuse, ideally a version later 
 For a zero-downtime upgrade, we recommend that you provision new instances of the Langfuse web and worker containers
 and move your traffic after validating that the new instances are working as expected.
 
+<Callout type="warning">
+  If you go for the zero-downtime upgrade, we recommend to disable background migrations until you shift traffic to the new instances.
+  Otherwise, the migration may miss events that are ingested after the new instances were started.
+  Set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false` in the environment variables of the new Langfuse web and worker containers until traffic is shifted.
+  Afterwards, remove the overwrite or set to `true`.
+</Callout>
+
 ### Upgrade Steps
 
 <Steps>
