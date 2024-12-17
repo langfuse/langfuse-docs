@@ -44,7 +44,7 @@ export default function App({ Component, pageProps }) {
         {process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ? <CrispWidget /> : null}
       </PostHogProvider>
       <Hubspot />
-      <SpeedInsights />
+      <SpeedInsights sampleRate={0.5} />
       <Script
         src="https://app.termly.io/resource-blocker/488cc3b0-ed5a-4e9d-81f2-76014dcae784?autoBlock=on"
         strategy="beforeInteractive"
