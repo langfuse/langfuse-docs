@@ -199,22 +199,22 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  //  banner: {
-  //    key: "community-hour",
-  //    dismissible: true,
-  //    content: (
-  //      <Link href="https://lu.ma/5szapn5d">
-  //        {/* mobile */}
-  //        <span className="sm:hidden">
-  //           Today: Langfuse Community Hour →
-  //        </span>
-  //        {/* desktop */}
-  //        <span className="hidden sm:inline">
-  //          Today: Langfuse Community Hour, 9-10am PT, 6-7pm CEST →
-  //        </span>
-  //      </Link>
-  //    ),
-  //  },
+   banner: {
+     key: "hn-launch-2024-12-17",
+     dismissible: true,
+     content: (
+       <Link href="https://news.ycombinator.com">
+         {/* mobile */}
+         <span className="sm:hidden">
+         Launch HN: Langfuse V3 is GA →
+         </span>
+         {/* desktop */}
+         <span className="hidden sm:inline">
+         Launch HN: Langfuse V3 is GA →
+         </span>
+       </Link>
+     ),
+   },
 };
 
 export default config;
