@@ -65,6 +65,7 @@ export default {
     title: "Demo",
     theme: {
       layout: "full",
+      timestamp: false,
     },
   },
   "schedule-demo": {
