@@ -186,7 +186,9 @@ const config: DocsThemeConfig = {
     Tab: ({
       children,
       ...props
-    }: { children: React.ReactNode } & React.ComponentProps<typeof Tabs.Tab>) => (
+    }: { children: React.ReactNode } & React.ComponentProps<
+      typeof Tabs.Tab
+    >) => (
       <Tabs.Tab {...props} style={{ marginTop: "1rem" }}>
         <div className="border rounded bg-background p-4">{children}</div>
       </Tabs.Tab>
@@ -199,22 +201,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-   banner: {
-     key: "hn-launch-2024-12-17",
-     dismissible: true,
-     content: (
-       <Link href="https://news.ycombinator.com">
-         {/* mobile */}
-         <span className="sm:hidden">
-         Launch HN: Langfuse V3 is GA →
-         </span>
-         {/* desktop */}
-         <span className="hidden sm:inline">
-         Launch HN: Langfuse V3 is GA →
-         </span>
-       </Link>
-     ),
-   },
+  banner: {
+    key: "v3-ga",
+    dismissible: true,
+    content: (
+      <Link href="/changelog/2024-12-09-Langfuse-v3-stable-release">
+        {/* mobile */}
+        <span className="sm:hidden">Langfuse v3 is GA. Learn more →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          We've released Langfuse v3. Learn more →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
