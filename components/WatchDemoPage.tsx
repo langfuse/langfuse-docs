@@ -33,7 +33,7 @@ export function WatchDemoPage() {
                 >
                   Marc Klingen
                 </Link>
-                , Co-founder/CEO
+                , Co-founder and CEO
               </span>
             </span>
             <Button
