@@ -22,10 +22,10 @@ export function WatchDemoPage() {
           />
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
             <span className="text-sm">
-              I have recorded this demo to provide an overview of all Langfuse
-              features. If you are exploring a paid plan and have questions
-              after checking it out, reach out! I am happy to chat.{" "}
-              <span className="inline-block md:inline md:whitespace-nowrap">
+              Watch this demo for a complete overview of Langfuse features.
+              Considering our paid plans and have additional questions? Let's
+              chat about your needs.{" "}
+              <span className="inline-block">
                 –{" "}
                 <Link
                   href="https://www.linkedin.com/in/marcklingen"
