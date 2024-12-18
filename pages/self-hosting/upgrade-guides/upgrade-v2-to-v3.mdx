@@ -163,7 +163,7 @@ By following this guide, you can upgrade your Langfuse v2 deployment to v3 witho
 <iframe
   width="100%"
   className="aspect-[15.94/9] rounded-lg border mt-6 w-full"
-  src="https://www.youtube.com/embed/Bb24vYp5zkA?si=oCRGQUxemOhoUCwi"
+  src="https://www.youtube-nocookie.com/embed/Bb24vYp5zkA?si=oCRGQUxemOhoUCwi"
   title="YouTube video player"
   frameborder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -181,10 +181,12 @@ For a zero-downtime upgrade, we recommend that you provision new instances of th
 and move your traffic after validating that the new instances are working as expected.
 
 <Callout type="warning">
-  If you go for the zero-downtime upgrade, we recommend to disable background migrations until you shift traffic to the new instances.
-  Otherwise, the migration may miss events that are ingested after the new instances were started.
-  Set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false` in the environment variables of the new Langfuse web and worker containers until traffic is shifted.
-  Afterwards, remove the overwrite or set to `true`.
+  If you go for the zero-downtime upgrade, we recommend to disable background
+  migrations until you shift traffic to the new instances. Otherwise, the
+  migration may miss events that are ingested after the new instances were
+  started. Set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false` in the environment
+  variables of the new Langfuse web and worker containers until traffic is
+  shifted. Afterwards, remove the overwrite or set to `true`.
 </Callout>
 
 ### Upgrade Steps

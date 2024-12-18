@@ -29,7 +29,7 @@ We've recorded a walkthrough of the implementation below. You can follow along w
 <iframe
   width="100%"
   className="aspect-[16/9] rounded mt-3"
-  src="https://www.youtube.com/embed/O--lEvvfWf8?si=5eh_KPJ8FVypSFjV"
+  src="https://www.youtube-nocookie.com/embed/O--lEvvfWf8?si=5eh_KPJ8FVypSFjV"
   title="YouTube video player"
   frameborder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
