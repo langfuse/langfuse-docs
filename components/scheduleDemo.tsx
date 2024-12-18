@@ -4,10 +4,10 @@ import { Header } from "./Header";
 
 export function ScheduleDemoPage() {
   return (
-    <section className="flex flex-col gap-10 w-full min-h-screen items-center py-20">
+    <section className="flex flex-col gap-10 w-full min-h-screen items-center pt-10">
       <Header
         title="Talk to us"
-        description="Get a demo by one of the founders to learn more about Langfuse"
+        description="Learn more about Langfuse by meeting one of the founders"
         h="h1"
         buttons={[
           {
@@ -15,8 +15,8 @@ export function ScheduleDemoPage() {
             text: "Enterprise FAQ",
           },
           {
-            href: "/video",
-            text: "Watch 3 min demo",
+            href: "/watch-demo",
+            text: "Watch Langfuse demo (10 min)",
           },
           {
             href: "/docs",

@@ -104,8 +104,8 @@ const menuItems: {
         href: "/demo",
       },
       {
-        name: "Video demo (3 min)",
-        href: "/video",
+        name: "Video demo (10 min)",
+        href: "/watch-demo",
       },
       {
         name: "Changelog",

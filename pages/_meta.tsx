@@ -12,14 +12,6 @@ export default {
     type: "page",
     display: "hidden",
   },
-  "schedule-demo": {
-    type: "page",
-    title: "Schedule demo",
-    display: "hidden",
-    theme: {
-      layout: "raw",
-    },
-  },
   docs: {
     type: "page",
     title: "Docs",
@@ -68,22 +60,19 @@ export default {
       layout: "full",
     },
   },
-  demo: {
+  "watch-demo": {
+    type: "page",
     title: "Demo",
-    type: "menu",
-    items: {
-      "try-yourself": {
-        title: "Interactive demo",
-        href: "/docs/demo",
-      },
-      video: {
-        title: "Video (3 min)",
-        href: "/video",
-      },
-      "schedule-demo": {
-        title: "Schedule demo",
-        href: "/schedule-demo",
-      },
+    theme: {
+      layout: "full",
+    },
+  },
+  "schedule-demo": {
+    type: "page",
+    title: "Schedule demo",
+    display: "hidden",
+    theme: {
+      layout: "raw",
     },
   },
   careers: {
