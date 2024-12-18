@@ -217,13 +217,43 @@ Resulting improvements in performance across frontend and backend API calls whic
   Performance](/images/blog/2024-12-langfuse-v3-infrastructure-evolution/query-performance.png)
 </Frame>
 
+## V3 Architecture
+
+As a summary, these were the major changes we made to the architecture of Langfuse v3:
+
+- A new worker container that processes events asynchronously.
+- A new S3/Blob store for storing large objects.
+- A new Clickhouse instance for storing traces, observations, and scores.
+- Redis/Valkey for queuing events and caching data.
+
+import ArchitectureDiagramV3 from "@/components-mdx/architecture-diagram-v3.mdx";
+import ArchitectureDescriptionV3 from "@/components-mdx/architecture-description-v3.mdx";
+
+<Tabs items={["Langfuse v3", "Langfuse v2 (for reference)"]}>
+<Tab>
+
+<div className="max-w-2xl">
+  <ArchitectureDiagramV3 />
+</div>
+
+</Tab>
+
+<Tab>
+
+<div className="max-w-lg">
+  <ArchitectureDiagramV2 />
+</div>
+
+</Tab>
+</Tabs>
+
 ## Conclusion
 
-All in all, we are extremely happy with the Langfuse v3 release. Positive feedback from cloud users, high adoption among self-hosters in the first week, and a small list of issues prove that we took many right turns throughout the project. Testing new ideas quickly and being guided by a strong hypothesis with clear data allowed us to make relentless progress.
+We are extremely happy with the Langfuse v3 release. Positive feedback from cloud users, high adoption among self-hosters in the first week, and a small list of issues demonstrate that we made many right decisions throughout the project. Testing new ideas quickly and being guided by a strong hypothesis with clear data allowed us to make significant progress.
 
-Nevertheless, we often got timeliness wrong throughout the whole project. For future projects, we want to limit scope to at most a month and introduce more milestones along the way. In addition, we had key personnel being distracted with ongoing incidents and bug fixes. Sharing the on-call load and making room for undistracted work is key to making progress on hard things.
+However, we often misjudged timelines during the project. For future initiatives, we plan to limit the scope to a maximum of one month and introduce more milestones along the way. Additionally, key personnel were often distracted by ongoing incidents and bug fixes as Langfuse is growing quickly while this project was in progress.
 
-Things that we will retain are the data driven culture, a simple way to run experiments on (subsets) of production data, and great observability across the full stack. Those help us to deliver the most bang of each hour spent and continue to delight our customers - self-hosted and cloud ones.
+We will retain our data-driven culture, a straightforward method for running experiments on subsets of production data, and excellent observability across the entire stack. These elements help us maximize the value of each hour spent and continue to delight our customers, both self-hosted and cloud-based.
 
 ## Don't Miss Out
 
