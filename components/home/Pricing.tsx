@@ -234,11 +234,12 @@ const sections = [
       },
       {
         name: "Ingestion throughput",
+        href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "1000 requests / min",
-            Pro: "1000 requests / min",
-            Team: "5000 requests / min",
+            Hobby: "4,000 requests / min",
+            Pro: "4,000 requests / min",
+            Team: "20,000 requests / min",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -390,10 +391,11 @@ const sections = [
       },
       {
         name: "Rate limit",
+        href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "100 requests / min",
-            Pro: "1000 requests / min",
+            Hobby: "1,000 requests / min",
+            Pro: "1,000 requests / min",
             Team: "Custom",
           },
           selfHosted: {
