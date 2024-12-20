@@ -18,7 +18,7 @@ module.exports = {
             .map(({ notebook }) => `/guides/cookbook/${notebook.replace(".ipynb", "")}`),
         // Exclude _meta files
         '*/_meta',
-        '/events'
+        '/events/*'
     ],
 
 }
