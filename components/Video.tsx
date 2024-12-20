@@ -105,7 +105,7 @@ export const Video = ({
       <MediaPlayer
         ref={mediaPlayerRef}
         src={src}
-        controls={!gifStyle && panelDismissed}
+        controls={gifStyle || panelDismissed}
         autoplay={false} // We'll handle autoplay ourselves
         muted={gifStyle}
         loop={gifStyle}
@@ -117,9 +117,7 @@ export const Video = ({
           className
         )}
       >
-        {gifStyle ? (
-          <div className="absolute inset-0 z-10" />
-        ) : !panelDismissed ? (
+        {!gifStyle && !panelDismissed ? (
           <div
             className="group cursor-pointer absolute inset-0 z-10 flex flex-col justify-center items-center bg-cover"
             style={{
