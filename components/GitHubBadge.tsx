@@ -12,7 +12,7 @@ export const GithubMenuBadge = () => (
     <div className="py-1 px-1 block bg-primary/10">
       <IconGithub className="group-hover:opacity-80 opacity-100 h-6 w-6" />
     </div>
-    <div className="hidden sm:block py-1 text-center text-sm group-hover:opacity-80 opacity-100 w-10">
+    <div className="py-1 text-center text-sm group-hover:opacity-80 opacity-100 w-10">
       <StarCount />
     </div>
   </a>

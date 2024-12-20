@@ -66,8 +66,9 @@ export const ToAppButton = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="xs" className="whitespace-nowrap w-[70px]">
-            To App
+          <Button size="xs" className="whitespace-nowrap w-[45px] sm:w-[70px]">
+            <span className="sm:hidden">App</span>
+            <span className="hidden sm:inline">To App</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -82,7 +83,11 @@ export const ToAppButton = () => {
     );
   } else if (signedInUS || signedInEU) {
     return (
-      <Button size="xs" asChild className="whitespace-nowrap w-[70px]">
+      <Button
+        size="xs"
+        asChild
+        className="whitespace-nowrap w-[45px] sm:w-[70px]"
+      >
         <Link
           href={
             signedInUS
@@ -90,13 +95,18 @@ export const ToAppButton = () => {
               : "https://cloud.langfuse.com"
           }
         >
-          To App
+          <span className="sm:hidden">App</span>
+          <span className="hidden sm:inline">To App</span>
         </Link>
       </Button>
     );
   } else {
     return (
-      <Button size="xs" asChild className="whitespace-nowrap w-[70px]">
+      <Button
+        size="xs"
+        asChild
+        className="whitespace-nowrap w-[45px] sm:w-[70px]"
+      >
         <Link
           href={
             continentCode
@@ -104,7 +114,8 @@ export const ToAppButton = () => {
               : "https://cloud.langfuse.com"
           }
         >
-          Sign Up
+          <span className="sm:hidden">App</span>
+          <span className="hidden sm:inline">Sign Up</span>
         </Link>
       </Button>
     );
