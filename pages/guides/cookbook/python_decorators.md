@@ -161,7 +161,7 @@ def anthropic_completion(**kwargs):
   # See docs for more details on token counts and usd cost in Langfuse
   # https://langfuse.com/docs/model-usage-and-cost
   langfuse_context.update_current_observation(
-      usage={
+      usage_details={
           "input": response.usage.input_tokens,
           "output": response.usage.output_tokens
       }

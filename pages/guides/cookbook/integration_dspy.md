@@ -123,7 +123,7 @@ class CustomTracker(LangfuseTracker):
             output=o_content,
             name=name,
             metadata=kwargs,
-            usage=o.usage,
+            usage_details=o.usage,
             model=o.model
         )
 
