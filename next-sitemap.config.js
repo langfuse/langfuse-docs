@@ -17,7 +17,8 @@ module.exports = {
             .filter(({ docsPath }) => !!docsPath)
             .map(({ notebook }) => `/guides/cookbook/${notebook.replace(".ipynb", "")}`),
         // Exclude _meta files
-        '*/_meta'
+        '*/_meta',
+        '/events/*'
     ],
 
 }
