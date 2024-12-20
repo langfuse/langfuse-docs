@@ -274,7 +274,7 @@ chat_completion = {
 # update span and sets end_time
 generation.end(
     output=chat_completion["completion"],
-    usage_details=chat_completion["usage"],
+    usage_details=chat_completion["usage"]
 );
 ```
 
@@ -522,7 +522,7 @@ from langfuse.model import InitialGeneration, Usage
  langfuse.generation(
     InitialGeneration(
         name="my-generation",
-        usage_details=Usage(promptTokens=50, completionTokens=49),
+        usage=Usage(promptTokens=50, completionTokens=49),
     )
 )
 ```

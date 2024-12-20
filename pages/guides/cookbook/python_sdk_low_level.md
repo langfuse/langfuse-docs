@@ -274,7 +274,7 @@ chat_completion = {
 # update span and sets end_time
 generation.end(
     output=chat_completion["completion"],
-    usage=chat_completion["usage"],
+    usage_details=chat_completion["usage"]
 );
 ```
 
@@ -535,21 +535,20 @@ The usage object supports the OpenAi structure with {`promptTokens`, `completion
 # Generic style
 langfuse.generation(
     name="my-claude-generation",
-    usage={
+    usage_details={
         "input": 50,
         "output": 49,
         "total": 99,
-        "unit": "TOKENS"
     },
 )
 
 # OpenAI style
 langfuse.generation(
     name="my-openai-generation",
-    usage={
-        "promptTokens": 50,
-        "completionTokens": 49,
-        "totalTokens": 99
+    usage_details={
+        "prompt_tokens": 50,
+        "completion_tokens": 49,
+        "total_tokens": 99
     }, # defaults to "TOKENS" unit
 )
 
