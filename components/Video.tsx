@@ -97,27 +97,29 @@ export const Video = ({
   }, [gifStyle, remote]);
 
   return (
-    <MediaPlayer
-      ref={mediaPlayerRef}
-      viewType="video"
-      src={src}
-      autoPlay={false} // We'll handle autoplay ourselves
-      muted={gifStyle}
-      loop={gifStyle}
-      load={gifStyle ? "eager" : "visible"}
-      playsInline={gifStyle}
-      aspectRatio={aspectRatio.toString()}
-      title={title}
-      poster={poster}
-      className={cn(
-        "my-4 overflow-hidden rounded-lg shadow-lg ring-1 ring-slate-700 bg-cover object-cover",
-        className
-      )}
-    >
-      <MediaProvider>
-        <Poster className="vds-poster" />
-      </MediaProvider>
-      <DefaultVideoLayout icons={defaultLayoutIcons} />
-    </MediaPlayer>
+    <div ref={containerRef}>
+      <MediaPlayer
+        ref={mediaPlayerRef}
+        viewType="video"
+        src={src}
+        autoPlay={false} // We'll handle autoplay ourselves
+        muted={gifStyle}
+        loop={gifStyle}
+        load={gifStyle ? "eager" : "visible"}
+        playsInline={gifStyle}
+        aspectRatio={aspectRatio.toString()}
+        title={title}
+        poster={poster}
+        className={cn(
+          "my-4 overflow-hidden rounded-lg shadow-lg ring-1 ring-slate-700 bg-cover object-cover",
+          className
+        )}
+      >
+        <MediaProvider>
+          <Poster className="vds-poster" />
+        </MediaProvider>
+        <DefaultVideoLayout icons={defaultLayoutIcons} />
+      </MediaPlayer>
+    </div>
   );
 };
