@@ -80,11 +80,15 @@ Next, we initialize the Langfuse client. [Sign up](https://cloud.langfuse.com/au
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_HOST="https://cloud.langfuse.com" # 🇪🇺 EU region
-# LANGFUSE_HOST="https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = ""
 ```
 
 
