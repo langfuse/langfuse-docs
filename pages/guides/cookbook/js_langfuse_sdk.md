@@ -135,7 +135,7 @@ const chatCompletion = await anthropic.messages.create({
 // Example end - sets endTime, optionally pass a body
 generation.end({
   output: chatCompletion.content[0].text,
-  usage: {
+  usageDetails: {
     input: chatCompletion.usage.input_tokens,
     output: chatCompletion.usage.output_tokens,
   },

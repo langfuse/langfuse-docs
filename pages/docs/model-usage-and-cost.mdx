@@ -5,15 +5,19 @@ description: Langfuse tracks usage and cost of LLM generations for various model
 
 # Model Usage & Cost Tracking
 
-Across Langfuse, usage and cost are tracked for LLM generations:
+Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types.
 
-- **Usage**: token/character counts
-- **Cost**: USD cost of the generation
+- **Usage details**: number of units consumed per usage type
+- **Cost details**: USD cost per usage type
 
-Both usage and cost can be either
+Usage types can be arbitrary strings and differ by LLM provider. At the highest level, they can be simply `input` and `output`. As LLMs grow more sophisticated, additional usage types are necessary, such as `cached_tokens`, `audio_tokens`, `image_tokens`.
+
+In the UI, Langfuse summarizes all usage types that include the string `input` as input usage types, similarly`output` as output usage types. If no `total` usage type is ingested, Langfuse sums up all usage type units to a total.
+
+Both usage details and cost details can be either
 
 - [**ingested**](#ingest) via API, SDKs or integrations
-- or [**inferred**](#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](#custom-model-definitions) or request official support for new models via [GitHub](/issue). Inferred cost are calculated at the time of ingestion.
+- or [**inferred**](#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](#custom-model-definitions) or request official support for new models via [GitHub](/issue). Inferred cost are calculated at the time of ingestion with the model and price information available at that point in time.
 
 Ingested usage and cost are prioritized over inferred usage and cost:
 
@@ -37,7 +41,7 @@ Via the [Daily Metrics API](/docs/analytics/daily-metrics-api), you can retrieve
 
 If available in the LLM response, ingesting usage and/or cost is the most accurate and robust way to track usage in Langfuse.
 
-Many of the Langfuse integrations automatically capture usage and cost data from the LLM response. If this does not work as expected, please create an [issue](/issue) on GitHub.
+Many of the Langfuse integrations automatically capture usage details and cost details data from the LLM response. If this does not work as expected, please create an [issue](/issue) on GitHub.
 
 <Tabs items={["Python (Decorator)", "Python (low-level SDK)", "JS"]}>
 <Tab>
@@ -58,17 +62,19 @@ def anthropic_completion(**kwargs):
   response = anthopic_client.messages.create(**kwargs)
 
   langfuse_context.update_current_observation(
-      usage={
+      usage_details={
           "input": response.usage.input_tokens,
           "output": response.usage.output_tokens,
-          # "total": int,  # if not set, it is derived from input + output
-          "unit": "TOKENS", # any of: "TOKENS", "CHARACTERS", "MILLISECONDS", "SECONDS", "IMAGES"
-
-          # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
-          # Here we assume the input and output cost are 1 USD each.
-          "input_cost": 1,
-          "output_cost": 1,
-          # "total_cost": float, # if not set, it is derived from input_cost + output_cost
+          "cache_read_input_tokens": response.usage.cache_read_input_tokens
+          # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+        }
+      # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
+      cost_details={
+          # Here we assume the input and output cost are 1 USD each and half the price for cached tokens.
+          "input": 1,
+          "cache_read_input_tokens": 0.5,
+          "output": 1,
+          # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
       }
   )
 
@@ -94,17 +100,19 @@ main()
 ```python
 generation = langfuse.generation(
   # ...
-  usage={
+  usage_details={
     # usage
     "input": int,
     "output": int,
-    "total": int,  # if not set, it is derived from input + output
-    "unit": "TOKENS",  # any of: "TOKENS", "CHARACTERS", "MILLISECONDS", "SECONDS", "IMAGES"
-
+    "cache_read_input_tokens": int,
+    "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+  },
+  cost_details: {
     # usd cost
-    "input_cost": float,
-    "output_cost": float,
-    "total_cost": float, # if not set, it is derived from input_cost + output_cost
+    "input": float,
+    "cache_read_input_tokens": float,
+    "output": float,
+    "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
   },
   # ...
 )
@@ -116,17 +124,19 @@ generation = langfuse.generation(
 ```ts
 const generation = langfuse.generation({
   // ...
-  usage: {
+  usageDetails: {
     // usage
     input: int,
     output: int,
-    total: int, // optional, it is derived from input + output
-    unit: "TOKENS", // "TOKENS" | "CHARACTERS" | "MILLISECONDS" | "SECONDS" | "IMAGES"
-
+    cache_read_input_tokens: int,
+    total: int, // optional, it is derived from input + cache_read_input_tokens + output
+  },
+  costDetails: {
     // usd cost
-    inputCost: float,
-    outputCost: float,
-    totalCost: float, // optional, it is derived from input + output
+    input: float,
+    cache_read_input_tokens: float,
+    output: float,
+    total: float, // optional, it is derived from input + cache_read_input_tokens + output
   },
   // ...
 });
@@ -139,7 +149,7 @@ You can also update the usage and cost via `generation.update()` and `generation
 
 ### Compatibility with OpenAI
 
-For increased compatibility with OpenAI, you can also use the following attributes to ingest usage:
+For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
 
 <Tabs items={["Python", "JS"]}>
 <Tab>
@@ -151,7 +161,14 @@ generation = langfuse.generation(
     # usage
     "prompt_tokens": int,
     "completion_tokens": int,
-    "total_tokens": int,  # optional, it is derived from prompt + completion
+    "total_tokens": int,
+    "prompt_tokens_details": {
+      "cached_tokens": int,
+      "audio_tokens": int,
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": int,
+    },
   },
   # ...
 )
@@ -165,9 +182,16 @@ const generation = langfuse.generation({
   // ...
   usage: {
     // usage
-    promptTokens: integer,
-    completionTokens: integer,
-    totalTokens: integer, // optional, derived from prompt + completion
+    prompt_tokens: integer,
+    completion_tokens: integer,
+    total_tokens: integer,
+    prompt_tokens_details: {
+      cached_tokens: integer,
+      audio_tokens: integer,
+    },
+    completion_tokens_details: {
+      reasoning_tokens: integer,
+    },
   },
   // ...
 });
@@ -200,7 +224,7 @@ The following tokenizers are currently supported:
 
 ### Cost
 
-Model definitions include prices per unit (input, output, total).
+Model definitions include prices per usage type. Usage types must match exactly with the keys in the `usage_details` object of the generation.
 
 Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
 
@@ -231,11 +255,9 @@ DELETE /api/public/models/{id}
 
 Models are matched to generations based on:
 
-| Generation Attribute | Model Attribute | Notes                                                                                                                                                                                                                      |
-| -------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`              | `match_pattern` | Uses regular expressions, e.g. `(?i)^(gpt-4-0125-preview)$` matches `gpt-4-0125-preview`.                                                                                                                                  |
-| `unit`               | `unit`          | Unit on the usage object of the generation (e.g. `TOKENS` or `CHARACTERS`) needs to match.                                                                                                                                 |
-| `start_time`         | `start_time`    | Optional, can be used to update the price of a model without affecting past generations. If multiple models match, the model with the most recent `model.start_time` that is earlier than `generation.start_time` is used. |
+| Generation Attribute | Model Attribute | Notes                                                                                     |
+| -------------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `model`              | `match_pattern` | Uses regular expressions, e.g. `(?i)^(gpt-4-0125-preview)$` matches `gpt-4-0125-preview`. |
 
 User-defined models take priority over models maintained by Langfuse.
 
@@ -251,13 +273,13 @@ When using the `openai` tokenizer, you need to specify the following tokenizatio
 }
 ```
 
-### Reasoning models
+### Cost inference for reasoning models
 
-Cost inference is not supported for reasoning models such as the OpenAI o1 model family. That is, if no token counts are ingested, Langfuse can not infer cost for reasoning models.
+Cost inference by tokenizing the LLM input and output is not supported for reasoning models such as the OpenAI o1 model family. That is, if no token counts are ingested, Langfuse can not infer cost for reasoning models.
 
 Reasoning models take multiple steps to arrive to a response. The result from each step generates reasoning tokens that are billed as output tokens. So the cost-effective output token count is the sum of all reasoning tokens and the token count for the final completion. Since Langfuse does not have visibility into the reasoning tokens, it cannot infer the correct cost for generations that have no token usage provided.
 
-To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations via the low-level SDKs. When utilizing the [Langfuse OpenAI wrapper](/docs/integrations/openai/python/get-started) or integrations such as for [Langchain](/docs/integrations/langchain/tracing), [LlamaIndex](/docs/integrations/llama-index/get-started) or [LiteLLM](/docs/integrations/litellm/tracing), token usage is collected and provided automatically for you.
+To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations. When utilizing the [Langfuse OpenAI wrapper](/docs/integrations/openai/python/get-started) or integrations such as for [Langchain](/docs/integrations/langchain/tracing), [LlamaIndex](/docs/integrations/llama-index/get-started) or [LiteLLM](/docs/integrations/litellm/tracing), token usage is collected and provided automatically for you.
 
 For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides/reasoning) on how reasoning models work.
 

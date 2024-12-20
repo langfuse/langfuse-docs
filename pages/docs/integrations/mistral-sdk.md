@@ -100,7 +100,7 @@ def mistral_completion(**kwargs):
 
   # Log the usage details and output content after the LLM call
   langfuse_context.update_current_observation(
-      usage={
+      usage_details={
           "input": res.usage.prompt_tokens,
           "output": res.usage.completion_tokens
       },
@@ -235,7 +235,7 @@ def stream_mistral_completion(**kwargs):
 
         if chunk.data.choices[0].finish_reason == "stop":
             langfuse_context.update_current_observation(
-                usage={
+                usage_details={
                     "input": chunk.data.usage.prompt_tokens,
                     "output": chunk.data.usage.completion_tokens
                 },
@@ -349,7 +349,7 @@ async def async_mistral_completion(**kwargs):
   res = await mistral_client.chat.complete_async(**kwargs)
 
   langfuse_context.update_current_observation(
-      usage={
+      usage_details={
           "input": res.usage.prompt_tokens,
           "output": res.usage.completion_tokens
       },
@@ -427,7 +427,7 @@ async def async_stream_mistral_completion(**kwargs):
 
         if chunk.data.choices[0].finish_reason == "stop":
             langfuse_context.update_current_observation(
-                usage={
+                usage_details={
                     "input": chunk.data.usage.prompt_tokens,
                     "output": chunk.data.usage.completion_tokens
                 },

@@ -141,7 +141,7 @@ def get_response(thread_id, run_id):
         trace_id=langfuse_context.get_current_trace_id(),
         parent_observation_id=langfuse_context.get_current_observation_id(),
         model=run.model,
-        usage=run.usage,
+        usage_details=run.usage,
         input=input_messages,
         output=assistant_response
     )

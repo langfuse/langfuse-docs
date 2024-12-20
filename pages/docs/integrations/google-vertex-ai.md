@@ -123,7 +123,7 @@ def vertex_generate_content(input, model_name = "gemini-pro"):
   langfuse_context.update_current_observation(
       input=input,
       model=model_name,
-      usage={
+      usage_details={
           "input": response.usage_metadata.prompt_token_count,
           "output": response.usage_metadata.candidates_token_count,
           "total": response.usage_metadata.total_token_count

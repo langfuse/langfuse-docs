@@ -134,7 +134,7 @@ def wrapped_bedrock_converse(**kwargs):
   response_text = response["output"]["message"]["content"][0]["text"]
   langfuse_context.update_current_observation(
     output=response_text,
-    usage={
+    usage_details={
         "input": response["usage"]["inputTokens"],
         "output": response["usage"]["outputTokens"],
         "total": response["usage"]["totalTokens"]
