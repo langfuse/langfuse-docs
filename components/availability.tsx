@@ -19,46 +19,17 @@ const availabilities: {
     shortLabel: "Enterprise",
     Icon: Check,
   },
+  {
+    id: "pro",
+    label: "Pro & Enterprise",
+    shortLabel: "Pro & Enterprise",
+    Icon: Check,
+  },
   { id: "full", label: "Full", Icon: Check },
   { id: "private-beta", label: "Private Beta", Icon: Check },
   { id: "public-beta", label: "Public Beta", Icon: Check },
   { id: "not-available", label: "Not Available", Icon: X },
 ];
-
-export function AvailabilitySidebar(props: {
-  frontMatter: Record<string, any>;
-}) {
-  const relevantFrontMatter = Object.entries(props.frontMatter)
-    .filter(([key, value]) => key.startsWith("availability"))
-    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-
-  if (Object.keys(relevantFrontMatter).length === 0) return null;
-
-  return (
-    <div className="flex flex-col space-y-2 text-primary/60 w-full align-middle border-y py-2">
-      <div className="font-bold">Availability</div>
-      <ul className="flex flex-col space-y-1">
-        {plans
-          .filter((plan) => `availability.${plan.id}` in relevantFrontMatter)
-          .map((plan) => {
-            const availability = availabilities.find(
-              (availability) =>
-                relevantFrontMatter[`availability.${plan.id}`] ===
-                availability.id
-            );
-            if (!availability) return null;
-            return (
-              <li key={plan.id} className="flex flex-row gap-2">
-                <availability.Icon className="w-4 h-4 inline-block" />
-                <div className="font-bold">{plan.label}</div>
-                <div>{availability.label}</div>
-              </li>
-            );
-          })}
-      </ul>
-    </div>
-  );
-}
 
 export function AvailabilityBanner(props: {
   availability: Record<

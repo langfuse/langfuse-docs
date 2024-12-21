@@ -12,10 +12,7 @@ import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
-import {
-  AvailabilityBanner,
-  AvailabilitySidebar,
-} from "./components/availability";
+import { AvailabilityBanner } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
 // import InkeepCustomTrigger from "./components/inkeep/InkeepCustomTrigger";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
@@ -72,10 +69,6 @@ const config: DocsThemeConfig = {
   },
   toc: {
     backToTop: true,
-    extraContent: () => {
-      const { frontMatter } = useConfig();
-      return <AvailabilitySidebar frontMatter={frontMatter} />;
-    },
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
