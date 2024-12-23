@@ -63,8 +63,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(next@15.1.1(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(svelte@4.2.18)(vue@3.4.29(typescript@5.6.3))
       '@vidstack/react':
-        specifier: ^1.12.12
-        version: 1.12.12(@types/react@18.3.3)(react@18.3.1)
+        specifier: ^0.6.15
+        version: 0.6.15(@types/react@18.3.3)(maverick.js@0.37.0)(react@18.3.1)(vidstack@0.6.15)
       ai:
         specifier: ^3.4.30
         version: 3.4.30(react@18.3.1)(solid-js@1.8.17)(sswr@2.1.0(svelte@4.2.18))(svelte@4.2.18)(vue@3.4.29(typescript@5.6.3))(zod@3.23.8)
@@ -86,9 +86,6 @@ importers:
       gpt3-tokenizer:
         specifier: ^1.1.5
         version: 1.1.5
-      hls.js:
-        specifier: ^1.5.18
-        version: 1.5.18
       langfuse:
         specifier: ^3.31.3
         version: 3.31.3
@@ -726,6 +723,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@maverick-js/signals@5.11.5':
+    resolution: {integrity: sha512-/GO94awrwN9ROYZDMTeByordjvbhcm3CMvB/2aL/sEUy9Va8nM/2GmNgOOe+rrooTGnz8/DzO73xomuBRrnYWw==}
 
   '@mdx-js/mdx@3.0.1':
     resolution: {integrity: sha512-eIQ4QTrOWyL3LWEe/bu6Taqzq2HQvHcyTMaOrI95P2/LmJE7AsfPfgJGuFLPVqBUE1BC1rik3VIhU+s9u72arA==}
@@ -1713,12 +1713,14 @@ packages:
       vue-router:
         optional: true
 
-  '@vidstack/react@1.12.12':
-    resolution: {integrity: sha512-rEwCkZdp/K0FopUU76lgYJqzOZa3AGM2FumQnTPPSCP9jwShYReY9mXgl4/UP5CH3v7MkaVl5ZT67rhfjPxx9Q==}
-    engines: {node: '>=18'}
+  '@vidstack/react@0.6.15':
+    resolution: {integrity: sha512-S8KkYCte84Pqwb8Zd9vuOCe2YuaXqRdtYQ22zSvDUPlS7m8ilYs6ypfHwZzmgSVZdayVU1C703aFMSdcLfpxpg==}
+    engines: {node: '>=16'}
     peerDependencies:
       '@types/react': ^18.0.0
+      maverick.js: 0.37.0
       react: ^18.0.0
+      vidstack: 0.6.15
 
   '@vue/compiler-core@3.4.29':
     resolution: {integrity: sha512-TFKiRkKKsRCKvg/jTSSKK7mYLJEQdUiUfykbG49rubC9SfDyvT2JrzTReopWlz2MxqeLyxh9UZhvxEIBgAhtrg==}
@@ -3453,6 +3455,10 @@ packages:
   mathjax-full@3.2.2:
     resolution: {integrity: sha512-+LfG9Fik+OuI8SLwsiR02IVdjcnRCy5MufYLi0C3TdMT56L/pjB0alMVGgoWJF8pN9Rc7FESycZB9BMNWIid5w==}
 
+  maverick.js@0.37.0:
+    resolution: {integrity: sha512-1Dk/9rienLiihlktVvH04ADC2UJTMflC1fOMVQCCaQAaz7hgzDI5i0p/arFbDM52hFFiIcq4RdXtYz47SgsLgw==}
+    engines: {node: '>=16'}
+
   mdast-util-definitions@5.1.2:
     resolution: {integrity: sha512-8SVPMuHqlPME/z3gqVwWY4zVXn8lqKv/pAhC57FuJ40ImXyBpmO5ukh98zB2v7Blql2FiHjHv9LVztSIqjY+MA==}
 
@@ -3531,8 +3537,8 @@ packages:
   mdn-data@2.0.30:
     resolution: {integrity: sha512-GaqWWShW4kv/G9IEucWScBx9G1/vsFZZJUO+tD26M8J8z3Kw5RDQjaoZe03YAClgeS/SWPOcb4nkFBTEi5DUEA==}
 
-  media-captions@1.0.4:
-    resolution: {integrity: sha512-cyDNmuZvvO4H27rcBq2Eudxo9IZRDCOX/I7VEyqbxsEiD2Ei7UYUhG/Sc5fvMZjmathgz3fEK7iAKqvpY+Ux1w==}
+  media-captions@0.0.18:
+    resolution: {integrity: sha512-JW18P6FuHdyLSGwC4TQ0kF3WdNj/+wMw2cKOb8BnmY6vSJGtnwJ+vkYj+IjHOV34j3XMc70HDeB/QYKR7E7fuQ==}
     engines: {node: '>=16'}
 
   merge-anything@5.1.7:
@@ -4856,6 +4862,10 @@ packages:
     peerDependencies:
       typescript: '*'
 
+  type-fest@3.13.1:
+    resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
+    engines: {node: '>=14.16'}
+
   typescript@5.6.3:
     resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
     engines: {node: '>=14.17'}
@@ -5036,6 +5046,10 @@ packages:
 
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
+
+  vidstack@0.6.15:
+    resolution: {integrity: sha512-pI2aixBuOpu/LSnRgNJ40tU/KFW+x1X+O2bW1hz946ZZShDM5oqRXF9pavDOuckHAHPgUN9HYUr9vUNTBUPF1Q==}
+    engines: {node: '>=16'}
 
   vscode-jsonrpc@8.2.0:
     resolution: {integrity: sha512-C+r0eKJUIfiDIfwJhria30+TYWPtuHJXHtI7J0YlOmKAo7ogxP20T0zxB7HZQIFhIyvoBPwWskjxrvAtfjyZfA==}
@@ -5850,6 +5864,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@maverick-js/signals@5.11.5': {}
 
   '@mdx-js/mdx@3.0.1':
     dependencies:
@@ -6943,12 +6959,12 @@ snapshots:
       svelte: 4.2.18
       vue: 3.4.29(typescript@5.6.3)
 
-  '@vidstack/react@1.12.12(@types/react@18.3.3)(react@18.3.1)':
+  '@vidstack/react@0.6.15(@types/react@18.3.3)(maverick.js@0.37.0)(react@18.3.1)(vidstack@0.6.15)':
     dependencies:
-      '@floating-ui/dom': 1.6.11
       '@types/react': 18.3.3
-      media-captions: 1.0.4
+      maverick.js: 0.37.0
       react: 18.3.1
+      vidstack: 0.6.15
 
   '@vue/compiler-core@3.4.29':
     dependencies:
@@ -9321,6 +9337,11 @@ snapshots:
       mj-context-menu: 0.6.1
       speech-rule-engine: 4.0.7
 
+  maverick.js@0.37.0:
+    dependencies:
+      '@maverick-js/signals': 5.11.5
+      type-fest: 3.13.1
+
   mdast-util-definitions@5.1.2:
     dependencies:
       '@types/mdast': 3.0.15
@@ -9592,7 +9613,7 @@ snapshots:
 
   mdn-data@2.0.30: {}
 
-  media-captions@1.0.4: {}
+  media-captions@0.0.18: {}
 
   merge-anything@5.1.7:
     dependencies:
@@ -11423,6 +11444,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  type-fest@3.13.1: {}
+
   typescript@5.6.3: {}
 
   ufo@1.5.4: {}
@@ -11652,6 +11675,12 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       vfile-message: 4.0.2
+
+  vidstack@0.6.15:
+    dependencies:
+      maverick.js: 0.37.0
+      media-captions: 0.0.18
+      type-fest: 3.13.1
 
   vscode-jsonrpc@8.2.0: {}
 
