@@ -65,28 +65,28 @@ langfuse.flush()
 
 </Tab>
 <Tab>
+
 ```typescript
 import { Langfuse } from "langfuse";
 
 function maskingFunction(params: { data: any }) {
-if (typeof params.data === "string" && params.data.startsWith("SECRET\_")) {
-return "REDACTED";
-}
+  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
+    return "REDACTED";
+  }
 
-return params.data;
+  return params.data;
 }
 
 const langfuse = new Langfuse({ mask: maskingFunction });
 
 const trace = langfuse.trace({
-output: "SECRET_DATA",
+  output: "SECRET_DATA",
 });
 
 await langfuse.flushAsync();
 
 // The trace output in Langfuse will have the output masked as "REDACTED".
-
-````
+```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
@@ -116,7 +116,7 @@ completion = openai.chat.completions.create(
 )
 
 openai.flush_langfuse()
-````
+```
 
 When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set masking function via the `langfuse_context`:
 
