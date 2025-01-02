@@ -67,8 +67,6 @@ completion = openai.chat.completions.create(
 
 Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages. 
 
-Langfuse supports images passed via link. No support for base64 encoded images yet, see [roadmap](https://langfuse.com/docs/roadmap) for details.
-
 
 ```python
 completion = openai.chat.completions.create(
@@ -191,6 +189,28 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
+
+## Langfuse Features (User, Tags, Metadata, Session)
+
+You can access additional Langfuse features by adding the relevant attributes to the OpenAI request. The Langfuse integration will parse these attributes. See [docs](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) for details on all available features.
+
+
+```python
+completion_with_attributes = openai.chat.completions.create(
+  name="test-chat-with-attributes", # trace name
+  model="gpt-3.5-turbo",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"someMetadataKey": "someValue"}, # trace metadata
+  tags=["tag1", "tag2"], # trace tags
+  user_id="user1234", # trace user id
+  session_id="session1234", # trace session id
+)
+```
+
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/286c5c70-b077-4826-a493-36c510362a5a
 
 ## AzureOpenAI
 
