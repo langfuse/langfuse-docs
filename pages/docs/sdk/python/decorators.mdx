@@ -424,7 +424,7 @@ from operator import itemgetter
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
-from langfuse.decorators import observe
+from langfuse.decorators import langfuse_context, observe
 
 prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
 model = ChatOpenAI()
