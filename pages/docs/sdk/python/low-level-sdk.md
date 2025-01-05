@@ -12,6 +12,8 @@ This is a Python SDK used to send LLM data to Langfuse in a convenient way. It u
 
 For most use cases, you should check out the [decorator-based SDK](https://langfuse.com/docs/sdk/python/decorators), which is more convenient and easier to use. This SDK is more low-level and is only recommended if you need more control over the request process.
 
+Please make sure that you have a good understanding of [tracing](/docs/tracing) in Langfuse and its [data model](https://langfuse.com/docs/tracing-data-model) before getting started.
+
 ## Installation
 
 
