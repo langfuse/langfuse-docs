@@ -30,3 +30,16 @@ We will highlight within the changelog if a deployment stop becomes required.
 ## Configuration
 
 Background migrations are enabled by default and can be disabled by setting `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false`. This is not recommended as it may leave the application in an inconsistent state where the UI and API does not reflect the current state of the data correctly.
+
+## Troubleshooting
+
+### Failed to convert rust String into napi string
+
+If you are seeing the message above for the traces, observations, or scores background migration, it is usually due to large blob data within the rows.
+The error happens, because the postgres database client tries to concatenate all the data into a single string, before parsing it in Node.js.
+If the string exceeds the maximum Node.js string size, the error is thrown.
+
+We can circumvent the issue by loading fewer rows at the same time.
+To do so, adjust the batchSize of your migration by editing the `background_migrations` table.
+Add `{ "batchSize": 2500 }` to the `args` column of the migration you want to adjust.
+Afterward, restart the migration via the UI.
