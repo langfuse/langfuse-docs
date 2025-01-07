@@ -363,8 +363,8 @@ const sections = [
           cloud: { Hobby: "2", Pro: "Unlimited", Team: "Unlimited" },
           selfHosted: {
             "Open Source": "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
+            Pro: "As licensed",
+            Enterprise: "As licensed",
           },
         },
       },
