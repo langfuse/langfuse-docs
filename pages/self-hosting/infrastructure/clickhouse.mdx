@@ -30,11 +30,16 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 | `CLICKHOUSE_URL`                              | Required           | Hostname of the ClickHouse instance. Pattern: `http(s)://<hostname>:(8123/8443)`                         |
 | `CLICKHOUSE_USER`                             | Required           | Username of the ClickHouse database. Needs SELECT, ALTER, INSERT, CREATE, DELETE grants.                 |
 | `CLICKHOUSE_PASSWORD`                         | Required           | Password of the ClickHouse user.                                                                         |
+| `CLICKHOUSE_DB`                               | `default`          | Name of the ClickHouse database to use.                                                                  |
 | `CLICKHOUSE_CLUSTER_ENABLED`                  | `true`             | Whether to run ClickHouse commands `ON CLUSTER`. Set to `false` for single-container setups.             |
 | `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED` | `false`            | Whether to disable automatic ClickHouse migrations.                                                      |
 
-Please note, that Langfuse uses the `default` schema and `default` cluster.
-Get in touch with us on [Discord](/discord) or contact the maintainers at support@langfuse.com if this limitation is blocking.
+Langfuse uses `default` as the cluster name if CLICKHOUSE_CLUSTER_ENABLED is set to `true`.
+You can overwrite this by setting `CLICKHOUSE_CLUSTER_NAME` to a different value.
+In that case, the database migrations will not apply correctly as they cannot run dynamically for different clusters.
+You must set `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED = false` and run ClickHouse migrations manually.
+Clone the Langfuse repository, adjust the cluster name in `./packages/shared/clickhouse/migrations/clustered/*.sql` and run `cd ./packages/shared && sh ./clickhouse/scripts/up.sh`
+to manually apply the migrations.
 
 ## Deployment Options
 
