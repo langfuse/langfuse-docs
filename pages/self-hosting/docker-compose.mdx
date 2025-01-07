@@ -79,8 +79,8 @@ For testing purposes, the pre-configured variables in the docker-compose file ar
 If you send _any_ kind of sensitive data to the application or intend to keep it up for longer, we recommend that you modify the docker-compose file and overwrite the following environment variables:
 
 - `SALT`: A random string used to hash passwords. It should be at least 32 characters long.
-- `ENCRYPTION_KEY`: Generate this via `openssl rand -base64 32`.
-- `NEXTAUTH_SECRET`: A random string used to sign JWT tokens.
+- `ENCRYPTION_KEY`: Generate this via `openssl rand -hex 32`.
+- `NEXTAUTH_SECRET`: A random string used to sign JWT tokens (Generate this via `openssl rand -base64 32`).
 - `NEXTAUTH_URL`: The URL where the application is hosted. Used for redirects after signup.
 
 In addition, you can change the database and storage credentials to be more secure.
