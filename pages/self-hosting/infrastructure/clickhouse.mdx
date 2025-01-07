@@ -157,6 +157,157 @@ CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
 
+## Blob Storage as Disk
+
+ClickHouse supports blob storages (AWS S3, Azure Blob Storage, Google Cloud Storage) as disks.
+This is useful for auto-scaling storages that live outside the container orchestrator and increases availability und durability of the data.
+For a full overview of the feature, see the [ClickHouse External Disks documentation](https://clickhouse.com/docs/en/operations/storing-data).
+
+Below, we give a config.xml example to use S3 and Azure Blob Storage as disks for ClickHouse Docker containers using Docker Compose.
+Keep in mind that metadata is still stored on local disk, i.e. you need to use a persistent volume for the ClickHouse container or risk loosing access to your tables.
+
+### S3 Example
+
+Create a config.xml file with the following contents in your local working directory:
+
+```xml
+<clickhouse>
+    <merge_tree>
+        <storage_policy>s3</storage_policy>
+    </merge_tree>
+    <storage_configuration>
+        <disks>
+            <s3>
+                <type>object_storage</type>
+                <object_storage_type>s3</object_storage_type>
+                <metadata_type>local</metadata_type>
+                <endpoint>https://s3.eu-central-1.amazonaws.com/example-bucket-name/data/</endpoint>
+                <access_key_id>ACCESS_KEY</access_key_id>
+                <secret_access_key>ACCESS_KEY_SECRET</secret_access_key>
+            </s3>
+        </disks>
+        <policies>
+            <s3>
+                <volumes>
+                    <main>
+                        <disk>s3</disk>
+                    </main>
+                </volumes>
+            </s3>
+        </policies>
+    </storage_configuration>
+</clickhouse>
+```
+
+Replace the Access Key Id and Secret Access key with appropriate AWS credentials and change the bucket name within the `endpoint` element.
+Alternatively, you can replace the credentials with `<use_environment_credentials>1</use_environment_credentials>` to automatically retrieve AWS credentials from environment variables.
+
+Now, you can start ClickHouse with the following Docker Compose file:
+
+```yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    user: "101:101"
+    container_name: clickhouse
+    hostname: clickhouse
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: clickhouse
+    volumes:
+      - ./config.xml:/etc/clickhouse-server/config.d/s3disk.xml:ro
+      - langfuse_clickhouse_data:/var/lib/clickhouse
+      - langfuse_clickhouse_logs:/var/log/clickhouse-server
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+
+volumes:
+  langfuse_clickhouse_data:
+    driver: local
+  langfuse_clickhouse_logs:
+    driver: local
+```
+
+### Azure Blob Storage Example
+
+Create a config.xml file with the following contents in your local working directory.
+The credentials below are the default [Azurite](https://github.com/Azure/Azurite) credentials and considered public.
+
+```xml
+<clickhouse>
+    <merge_tree>
+        <storage_policy>blob_storage_disk</storage_policy>
+    </merge_tree>
+    <storage_configuration>
+        <disks>
+            <blob_storage_disk>
+                <type>object_storage</type>
+                <object_storage_type>azure_blob_storage</object_storage_type>
+                <metadata_type>local</metadata_type>
+                <storage_account_url>http://azurite:10000/devstoreaccount1</storage_account_url>
+                <container_name>langfuse</container_name>
+                <account_name>devstoreaccount1</account_name>
+                <account_key>Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==</account_key>
+            </blob_storage_disk>
+        </disks>
+        <policies>
+            <blob_storage_disk>
+                <volumes>
+                    <main>
+                        <disk>blob_storage_disk</disk>
+                    </main>
+                </volumes>
+            </blob_storage_disk>
+        </policies>
+    </storage_configuration>
+</clickhouse>
+```
+
+You can start ClickHouse together with an Azurite service using the following Docker Compose file:
+
+```yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    user: "101:101"
+    container_name: clickhouse
+    hostname: clickhouse
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: clickhouse
+    volumes:
+      - ./config.xml:/etc/clickhouse-server/config.d/azuredisk.xml:ro
+      - langfuse_clickhouse_data:/var/lib/clickhouse
+      - langfuse_clickhouse_logs:/var/log/clickhouse-server
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    depends_on:
+      - azurite
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: azurite
+    command: azurite-blob --blobHost 0.0.0.0
+    ports:
+      - "10000:10000"
+    volumes:
+      - langfuse_azurite_data:/data
+
+volumes:
+  langfuse_clickhouse_data:
+    driver: local
+  langfuse_clickhouse_logs:
+    driver: local
+  langfuse_azurite_data:
+    driver: local
+```
+
+This will store ClickHouse data within the Azurite bucket.
+
 ## Backups
 
 ClickHouse Cloud manages backups automatically for you.
