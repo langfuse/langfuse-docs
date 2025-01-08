@@ -103,6 +103,15 @@ It will accept all events as they come in and queue them for processing before r
 This means that events will _not_ be available immediately after acceptance by the backend and instead will appear
 eventually in subsequent read requests.
 
+As we switched our data store from Postgres to Clickhouse, we also had to remove the updating behavior for some fields. All of the listed fields below are not updatable anymore and new records are only written to the database, if the field was set in any event for the same `id`.
+
+- `observation.startTime`
+- `observation.type`
+- `observation.traceId`
+- `trace.timestamp`
+- `score.timestamp`
+- `score.traceId`
+
 The individual events accepted a `metadata` property within their body of type `string | string[] | Record<string, unknown>`.
 Only the `Record` type is supported within our UI and endpoints to perform queries and filter events.
 Therefore, we enforce an object type for `metadata` going forward.
