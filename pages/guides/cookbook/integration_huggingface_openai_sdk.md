@@ -20,7 +20,7 @@ This allows you to test and evaluate different models, monitor your application'
 
 ### Set Environment Variables
 
-Set up your environment variables with the necessary keys. Get keys for your Langfuse project from [Langfuse Cloud](https://cloud.langfuse.com). Also, obtain an access token from [Huggingface](https://huggingface.co/settings/tokens).
+Set up your environment variables with the necessary keys. Get keys for your Langfuse project from [Langfuse Cloud](https://cloud.langfuse.com). Also, obtain an access token from [Hugging Face](https://huggingface.co/settings/tokens).
 
 
 
@@ -47,15 +47,15 @@ from langfuse.openai import OpenAI
 from langfuse.decorators import observe
 ```
 
-### Initialize the OpenAI Client for Huggingface Models
+### Initialize the OpenAI Client for Hugging Face Models
 
-Initialize the OpenAI client but point it to the Huggingface model endpoint. You can use any model hosted on Huggingface that supports the OpenAI API format. Replace the model URL and access token with your own.
+Initialize the OpenAI client but point it to the Hugging Face model endpoint. You can use any model hosted on Hugging Face that supports the OpenAI API format. Replace the model URL and access token with your own.
 
 For this example, we use the `Meta-Llama-3-8B-Instruct` model.
 
 
 ```python
-# Initialize the OpenAI client, pointing it to the Huggingface Inference API
+# Initialize the OpenAI client, pointing it to the Hugging Face Inference API
 client = OpenAI(
     base_url="https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct" + "/v1/",  # replace with your endpoint url
     api_key= os.getenv('HUGGINGFACE_ACCESS_TOKEN'),  # replace with your token
@@ -66,7 +66,7 @@ client = OpenAI(
 
 ### Chat Completion Request
 
-Use the `client` to make a chat completion request to the Huggingface model. The `model` parameter can be any identifier since the actual model is specified in the `base_url`.
+Use the `client` to make a chat completion request to the Hugging Face model. The `model` parameter can be any identifier since the actual model is specified in the `base_url`.
 
 
 ```python
@@ -176,7 +176,7 @@ print(completion_with_attributes.choices[0].message.content)
 
 ### Learn more
 
-- **[Langfuse Space on Huggingface](https://huggingface.co/spaces/langfuse/langfuse-template-space)**: Langfuse can be deployed as a Space on Huggingface. This allows you to use Langfuse's observability tools right within the Huggingface platform. 
+- **[Langfuse Space on Hugging Face](https://huggingface.co/spaces/langfuse/langfuse-template-space)**: Langfuse can be deployed as a Space on Hugging Face. This allows you to use Langfuse's observability tools right within the Hugging Face platform. 
 - **[Gradio example notebook](https://langfuse.com/docs/integrations/other/gradio)**: This example notebook shows you how to build an LLM Chat UI with Gradio and trace it with Langfuse
 
 ## Feedback
