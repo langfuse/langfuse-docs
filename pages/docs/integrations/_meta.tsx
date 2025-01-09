@@ -19,5 +19,6 @@ export default {
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
   lobechat: "LobeChat",
+  deepseek: "DeepSeek",
   other: "More Ways to Integrate",
 };
