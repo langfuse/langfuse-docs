@@ -20,5 +20,7 @@ export default {
   openwebui: "OpenWebUI",
   lobechat: "LobeChat",
   "huggingface": "Huggingface",
+  deepseek: "DeepSeek",
+  "groq-sdk": "Groq",
   other: "More Ways to Integrate",
 };
