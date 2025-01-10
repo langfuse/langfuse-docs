@@ -97,6 +97,12 @@ Prompt templates contain **`{{variables}}`** that are substituted with actual da
 
 Langfuse uses function/tool calling to extract the evaluation output. At the bottom of the form, you can configure `score` and `reasoning` variables which will be used to instruct the LLM on how to score and reason about the evaluation.
 
+<Callout type="info">
+
+Currently, LLM-as-a-judge templates only support `numeric` scores. Support for `categorical` and `boolean` scores is on our roadmap. ([GitHub Issue](https://github.com/orgs/langfuse/discussions/4965))
+
+</Callout>
+
 <Frame border>![Langfuse](/images/docs/eval-hallucination-template.png)</Frame>
 
 ### Set up an evaluator
