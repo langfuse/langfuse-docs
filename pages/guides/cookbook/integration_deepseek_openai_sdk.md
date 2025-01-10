@@ -5,11 +5,13 @@ category: Integrations
 
 # Cookbook: Monitor DeepSeek Models with Langfuse Using the OpenAI SDK
 
+The DeepSeek API uses an API format compatible with OpenAI. By modifying the configuration, you can use the OpenAI SDK or software compatible with the OpenAI API to access the DeepSeek API.
+
 This cookbook demonstrates how to monitor [DeepSeek](https://github.com/deepseek-ai/DeepSeek-V3) models using the OpenAI SDK integration with [Langfuse](https://langfuse.com). By leveraging Langfuse's observability tools and the OpenAI SDK, you can effectively debug, monitor, and evaluate your applications that utilize DeepSeek models.
 
 This guide will walk you through setting up the integration, making requests to DeepSeek models, and observing the interactions with Langfuse.
 
-**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). These frameworks can be used as well to trace your DeepSeek requests.*
+**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). These frameworks can be used as well to trace DeepSeek requests.*
 
 ## Setup
 
@@ -36,13 +38,15 @@ os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
 
-# Your Hugging Face access token (get it from https://huggingface.co/settings/tokens)
-os.environ["DEEPSEEK_API_KEY"] = "sk-..."  # Replace with your Hugging Face access token
+# Your DeepSeek API key (get it from https://platform.deepseek.com/api_keys)
+os.environ["DEEPSEEK_API_KEY"] = "sk-..."  # Replace with your DeepSeek API key
 ```
 
 ### Import Necessary Modules
 
 Instead of importing `openai` directly, import it from `langfuse.openai`. Also, import any other necessary modules.
+
+Check out our [OpenAI integration docs](https://langfuse.com/docs/integrations/openai/python/get-started) to learn how to use this integration with other Langfuse [features](https://langfuse.com/docs/tracing#advanced-usage).
 
 
 ```python
