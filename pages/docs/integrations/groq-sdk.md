@@ -1,11 +1,16 @@
 ---
-description: Cookbook with examples of the Langfuse Integration for Groq SDK (Python).
+description: Traceability and observability for Groq language models with Langfuse. This cookbook provides examples on how to use the OpenAI SDK and the Groq SDK to interact with Groq models and trace them with Langfuse.
 category: Integrations
 ---
 
-# Cookbook: Groq SDK Integration (Python)
+# Cookbook: Observability for Groq Models (Python)
 
-This cookbook provides step-by-step examples of integrating Langfuse with the Groq SDK in Python. By following these examples, you'll learn how to log and trace interactions with Groq language models, enabling you to debug and evaluate the performance of your AI-driven applications.
+This cookbook shows two ways to interact with Groq models and trace them with Langfuse:
+
+1. Using the OpenAI SDK to interact with the Groq model
+2. Using the Groq SDK to interact with Groq models
+
+By following these examples, you'll learn how to log and trace interactions with Groq language models, enabling you to debug and evaluate the performance of your AI-driven applications.
 
 **Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). If you use one of them, any use of Groq models is instrumented right away.*
 
@@ -17,27 +22,15 @@ In this notebook, we will explore various use cases where Langfuse can be integr
 - **Chained Function Calls:** See how to manage and observe complex workflows where multiple model interactions are linked together to produce a final result.
 - **Streaming Support:** Discover how to use Langfuse with streaming responses from Groq models, ensuring that real-time interactions are fully traceable.
 
-For more detailed guidance on the Groq SDK or the **`@observe`** decorator from Langfuse, please refer to the [Groq Documentation](https://console.groq.com/docs) and the [Langfuse Documentation](https://langfuse.com/docs/sdk/python/decorators#log-any-llm-call).
-
-## Setup
-
-First, install the required packages:
-
-
-```python
-%pip install groq langfuse
-```
-
-
-Set up your environment variables for Langfuse and Groq:
+To get started, set up your environment variables for Langfuse and Groq:
 
 
 ```python
 import os
 
 # Get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # Docs Example
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # Docs Example
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # Private Project
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # Private Project
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
 
@@ -45,7 +38,110 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
 os.environ["GROQ_API_KEY"] = "gsk_..."
 ```
 
-Initialize the Groq client:
+## Option 1: Using the OpenAI SDK to interact with the Groq model
+
+**Note**: *This example shows how to use the OpenAI Python SDK. If you use JS/TS, have a look at our [OpenAI JS/TS SDK](https://langfuse.com/docs/integrations/openai/js/get-started).*
+
+### Install Required Packages
+
+
+```python
+%pip install langfuse openai --upgrade
+```
+
+### Import Necessary Modules
+
+Instead of importing `openai` directly, import it from `langfuse.openai`. Also, import any other necessary modules.
+
+
+```python
+# Instead of: import openai
+from langfuse.openai import OpenAI
+```
+
+### Initialize the OpenAI Client for the Groq Model
+
+Initialize the OpenAI client but point it to the Groq model endpoint. Replace the access token with your own.
+
+
+```python
+client = OpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=os.environ.get("GROQ_API_KEY")
+)
+```
+
+### Chat Completion Request
+
+Use the `client` to make a chat completion request to the Groq model. 
+
+
+
+```python
+completion = client.chat.completions.create(
+    model="llama3-8b-8192",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {
+            "role": "user",
+            "content": "Write a poem about language models"
+        }
+    ]
+)
+print(completion.choices[0].message.content)
+```
+
+    In silicon halls, a dream takes form,
+    A machine that speaks, yet lacks a norm.
+    A language model, born of code and might,
+    Generates prose, both wondrous and bright.
+    
+    With algorithms fine, it weaves its spell,
+    Converting data into words to tell.
+    It learns from texts, both old and new,
+    And synthesizes meaning anew.
+    
+    Its vocabulary vast, its syntax grand,
+    It crafts a language, at its command.
+    It chatters fast, with wit and fluency,
+    A fluent friend, for humanity.
+    
+    It mimics tone, and echoes the heart,
+    A master of words, a work of art.
+    Yet, as we converse, we pause to think,
+    Can it truly understand, or just blink?
+    
+    For language is a dance, both subtle and grand,
+    That requires nuance, and a human hand.
+    The model's skill, though impressive to see,
+    Falls short, at times, of humanity.
+    
+    Still, as we shape its future course,
+    It brings us closer, to the universe.
+    A tool, to aid our creative spark,
+    A language model, that leaves its mark.
+    
+    Let us guide it, with care and wit,
+    To discover new paths, day and night.
+    For in its realm, the possibilities abound,
+    A world where language, and machines entwine, profound.
+
+
+*[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)*
+
+## Option 2: Using the Groq SDK to interact with Groq models
+
+For more detailed guidance on the Groq SDK or the **`@observe`** decorator from Langfuse, please refer to the [Groq Documentation](https://console.groq.com/docs) and the [Langfuse Documentation](https://langfuse.com/docs/sdk/python/decorators#log-any-llm-call).
+
+### Install Required Packages
+
+
+
+```python
+%pip install groq langfuse
+```
+
+### Initialize the Groq client:
 
 
 ```python
@@ -126,7 +222,7 @@ def find_best_painter_from(country="France"):
         messages=[
             {
                 "role": "user",
-                "content": f"Who is the best painter from {country}? Answer in one short sentence."
+                "content": f"this is a test"
             }
         ]
     )
@@ -135,7 +231,7 @@ def find_best_painter_from(country="France"):
 print(find_best_painter_from())
 ```
 
-    Claude Monet, a founder of Impressionism, is often considered the best painter from France.
+    It looks like you're testing to see if I'm working properly! That's perfectly fine. I'm happy to report that I'm functioning as intended and ready to assist you with any questions or topics you'd like to discuss. Is there anything specific you'd like to chat about or ask?
 
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/single-trace-example.png)
@@ -293,3 +389,5 @@ stream_find_best_five_painter_from("Spain")
 ## Feedback
 
 If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your ideas with the community on [Discord](https://langfuse.com/discord).
+
+
