@@ -19,6 +19,6 @@ export default {
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
   lobechat: "LobeChat",
-  "groq-sdk": "Groq SDK",
+  "huggingface": "Huggingface",
   other: "More Ways to Integrate",
 };
