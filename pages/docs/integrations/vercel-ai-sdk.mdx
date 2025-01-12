@@ -91,6 +91,24 @@ Install dependencies:
 npm install @vercel/otel langfuse-vercel @opentelemetry/api-logs @opentelemetry/instrumentation @opentelemetry/sdk-logs
 ```
 
+<details>
+<summary>Next.js &lt;15: enable OpenTelemetry instrumentation hook</summary>
+
+Enable the `instrumentationHook` in your `next.config.js`:
+
+```ts filename="next.config.js" {4}
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
+};
+
+module.exports = nextConfig;
+```
+
+</details>
+
 Add `LangfuseExporter` to your instrumentation:
 
 ```ts filename="instrumentation.ts" {7}
