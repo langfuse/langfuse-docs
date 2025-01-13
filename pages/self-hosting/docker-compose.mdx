@@ -60,7 +60,7 @@ Install Docker packages:
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-Verify installlation:
+Verify installation:
 
 ```bash
 sudo docker run hello-world
@@ -115,6 +115,12 @@ For more details, please refer to the [configuration guide](/self-hosting/config
 import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
 
 <SelfHostFeatures />
+
+## Scaling
+
+Docker compose does not support horizontal scaling without an additional Load Balancer component.
+We recommend to use one of the other deployment options if your load exceeds single-instance scale or requires high availability.
+To add more throughput on a docker compose setup, you can usually use a larger virtual machine, i.e. scale vertically.
 
 ## Shutdown
 
