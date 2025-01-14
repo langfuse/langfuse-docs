@@ -68,7 +68,7 @@ client = OpenAI(
 
 ### Chat Completion Request
 
-Use the `client` to make a chat completion request to the Hugging Face model. The `model` parameter can be any identifier since the actual model is specified in the `base_url.` In this example, we set the model variable  `tgi`, short for [Text Generation Inference](https://huggingface.co/docs/text-generation-inference/en/index). 
+Use the `client` to make a chat completion request to the Hugging Face model. The `model` parameter can be any identifier since the actual model is specified in the `base_url.`
 
 
 ```python
