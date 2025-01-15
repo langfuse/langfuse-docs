@@ -138,7 +138,7 @@ This works with any LLM provider/SDK. In this example, we'll use Anthropic.
 os.environ["ANTHROPIC_API_KEY"] = ""
 
 import anthropic
-anthropic_client = anthropic.Anthropic()
+anthopic_client = anthropic.Anthropic()
 ```
 
 
@@ -156,7 +156,7 @@ def anthropic_completion(**kwargs):
       metadata=kwargs_clone
   )
   
-  response = anthropic_client.messages.create(**kwargs)
+  response = anthopic_client.messages.create(**kwargs)
 
   # See docs for more details on token counts and usd cost in Langfuse
   # https://langfuse.com/docs/model-usage-and-cost
