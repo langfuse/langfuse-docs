@@ -73,6 +73,12 @@ import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
 
 <SelfHostFeatures />
 
+## Timezones
+
+Langfuse expects that its infrastructure components default to UTC.
+Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
+Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
+
 ## Health and Readiness Check Endpoint
 
 Langfuse web includes a health check endpoint at `/api/public/health` and a readiness check endpoint at `/api/public/ready` and the

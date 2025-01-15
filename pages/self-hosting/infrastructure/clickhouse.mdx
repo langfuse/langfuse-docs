@@ -41,6 +41,12 @@ You must set `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED = false` and run Click
 Clone the Langfuse repository, adjust the cluster name in `./packages/shared/clickhouse/migrations/clustered/*.sql` and run `cd ./packages/shared && sh ./clickhouse/scripts/up.sh`
 to manually apply the migrations.
 
+### Timezones
+
+Langfuse expects that its infrastructure components default to UTC.
+Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
+Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
+
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.
