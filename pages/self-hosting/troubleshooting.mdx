@@ -49,6 +49,12 @@ Use the available memory in MiB as the value for `var.memory`, e.g. 4096 for 4 G
 The value should be equal or above the memory limit of the container.
 This ensures that your container orchestrator kills the pod gracefully if the memory limit is exceeded, instead of the application terminating abruptly.
 
+## Timezone Errors
+
+Langfuse is engineered to run in the UTC timezone and expects that all infrastructure components default to UTC.
+Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
+If you would like us to consider supporting other timezones, please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046).
+
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
