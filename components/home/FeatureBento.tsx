@@ -99,7 +99,7 @@ const features = [
     Icon: ThumbsUp,
     name: "Evaluation",
     description:
-      "Collect user feedback, annotate in Langfuse and and run evalutation functions in Langfuse.",
+      "Collect user feedback, annotate in Langfuse, and run evaluation functions in Langfuse.",
     href: "/docs/scores/overview",
     cta: "Learn more",
     background: null,
