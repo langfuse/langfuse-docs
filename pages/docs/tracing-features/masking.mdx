@@ -275,6 +275,167 @@ def llama_index_fn(question: str):
 
 </Tabs>
 
+## Example 1: Redacting Credit Card Numbers
+
+In this example, we'll demonstrate how to redact credit card numbers from strings using a [regular expression](https://docs.python.org/3/library/re.html). This helps in complying with PCI DSS by ensuring that credit card numbers are not transmitted or stored improperly.
+
+<Callout type="info">
+
+Langfuse's masking feature allows you to define a custom masking function with parameters, which you then pass to the Langfuse client constructor. This function is applied to **all event inputs and outputs**, processing each piece of data to mask or redact sensitive information according to your specifications. By ensuring that all events are processed through your masking function before being sent, Langfuse guarantees that only the masked data is transmitted to the Langfuse server.
+
+</Callout>
+
+### Steps:
+
+1. **Import necessary modules**.
+2. **Define a masking function** that uses a regular expression to detect and replace credit card numbers.
+3. **Configure the masking function** in Langfuse.
+4. **Create a sample function** to simulate processing sensitive data.
+5. **Observe the trace** to see the masked output.
+
+```python
+import re
+from langfuse.decorators import langfuse_context, observe
+
+# Step 2: Define the masking function
+def masking_function(data):
+    if isinstance(data, str):
+        # Regular expression to match credit card numbers (Visa, MasterCard, AmEx, etc.)
+        pattern = r'\b(?:\d[ -]*?){13,19}\b'
+        data = re.sub(pattern, '[REDACTED CREDIT CARD]', data)
+    return data
+
+# Step 3: Configure the masking function
+langfuse_context.configure(mask=masking_function)
+
+# Step 4: Create a sample function with sensitive data
+@observe()
+def process_payment():
+    # Simulated sensitive data containing a credit card number
+    transaction_info = "Customer paid with card number 4111 1111 1111 1111."
+    return transaction_info
+
+# Step 5: Observe the trace
+result = process_payment()
+
+print(result)
+# Output: Customer paid with card number [REDACTED CREDIT CARD].
+```
+
+<Frame border>
+![Redacted trace in Langfuse 1](/images/docs/masking/masking_example_1.png)
+</Frame>
+
+[Link to the trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/540eb0a1-77dd-42e9-b27f-03cfee9feb12?timestamp=2025-01-17T09%3A13%3A18.335Z)
+
+## Example 2: Using the `llm-guard` library
+
+In this example, we'll use the `Anonymize` scanner from `llm-guard` to remove personal names and other PII from the data. This is useful for anonymizing user data and protecting privacy.
+
+Find our more about the `llm-guard` library in their [documentation](https://llm-guard.com/).
+
+### Steps:
+
+1. **Install the `llm-guard` library**.
+2. **Import necessary modules**.
+3. **Initialize the Vault and configure the Anonymize scanner**.
+4. **Define a masking function** that uses the Anonymize scanner.
+5. **Configure the masking function** in Langfuse.
+6. **Create a sample function** to simulate processing data with PII.
+7. **Observe the trace** to see the masked output.
+
+```bash
+pip install llm-guard
+```
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from llm_guard.vault import Vault
+from llm_guard.input_scanners import Anonymize
+from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
+
+# Step 3: Initialize the Vault and configure the Anonymize scanner
+vault = Vault()
+
+def create_anonymize_scanner():
+    scanner = Anonymize(
+        vault,
+        recognizer_conf=BERT_LARGE_NER_CONF,
+        language="en"
+    )
+    return scanner
+
+# Step 4: Define the masking function
+def masking_function(data):
+    if isinstance(data, str):
+        scanner = create_anonymize_scanner()
+        # Scan and redact the data
+        sanitized_data, is_valid, risk_score = scanner.scan(data)
+        return sanitized_data
+    return data
+
+# Step 5: Configure the masking function
+langfuse_context.configure(mask=masking_function)
+
+# Step 6: Create a sample function with PII
+@observe()
+def generate_report():
+    # Simulated data containing personal names
+    report = "John Doe met with Jane Smith to discuss the project."
+    return report
+
+# Step 7: Observe the trace
+result = generate_report()
+
+print(result)
+# Output: [REDACTED_PERSON] met with [REDACTED_PERSON] to discuss the project.
+```
+
+<Frame border>
+![Redacted trace in Langfuse](/images/docs/masking/masking_example_2.png)
+</Frame>
+
+[Link to the trace in Langfuse 2](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4abb206f-f8fd-4492-86b9-801602513afd?timestamp=2025-01-17T09%3A30%3A04.127Z)
+
+## Example 3: Masking Email and Phone Numbers
+
+You can extend the masking function to redact other types of PII such as email addresses and phone numbers using regular expressions.
+
+```python
+import re
+from langfuse.decorators import langfuse_context, observe
+
+def masking_function(data):
+    if isinstance(data, str):
+        # Mask email addresses
+        data = re.sub(r'\b[\w.-]+?@\w+?\.\w+?\b', '[REDACTED EMAIL]', data)
+        # Mask phone numbers
+        data = re.sub(r'\b\d{3}[-. ]?\d{3}[-. ]?\d{4}\b', '[REDACTED PHONE]', data)
+    return data
+
+langfuse_context.configure(mask=masking_function)
+
+@observe()
+def contact_customer():
+    info = "Please contact John at john.doe@example.com or call 555-123-4567."
+    return info
+
+result = contact_customer()
+
+print(result)
+# Output: Please contact John at [REDACTED EMAIL] or call [REDACTED PHONE].
+```
+
+<Frame border>
+![Redacted trace in Langfuse 3](/images/docs/masking/masking_example_3.png)
+</Frame>
+
+[Link to the trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/dcc4d640-492e-47a6-b419-922c8b9e0f0f?timestamp=2025-01-17T09%3A38%3A06.814Z)
+
+With custom masking functions in Langfuse, you can effectively control and sanitize the data that gets traced and sent to the server. Whether it's for compliance reasons or to protect user privacy, masking sensitive data is a crucial step in responsible application development.
+
+Learn more about data security and privacy measures at Langfuse [here](/docs/data-security-privacy).
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
