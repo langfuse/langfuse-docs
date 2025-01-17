@@ -121,7 +121,7 @@ Optionally, the output of the application can be evaluated to compare different 
 - Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
 
 <div className="mt-6" />
-<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)"]}>
+<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)", "Vercel AI SDK"]}>
 <Tab>
 
 ```python
@@ -283,6 +283,44 @@ for item in dataset.items:
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 langfuse.flush()
 ```
+
+</Tab>
+<Tab>
+
+Please refer to the [Vercel AI SDK](/docs/integrations/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
+
+```typescript
+// fetch the dataset
+const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
+ 
+// iterate over the dataset items
+for (const item of dataset.items) {
+
+  // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
+  const trace = langfuse.trace({name: "new experiment trace"})
+
+  // run application on the dataset item input
+  const output = await runMyLLMApplication(item.input, trace.id);
+ 
+  // link the execution trace to the dataset item and give it a run_name
+  await item.link(trace, "<run_name>", {
+    description: "My first run", // optional run description
+    metadata: { model: "gpt-3.5-turbo" }, // optional run metadata
+  });
+ 
+  // optionally, evaluate the output to compare different runs more easily
+  trace.score({
+    name: "<score_name>",
+    value: myEvalFunction(item.input, output, item.expectedOutput),
+    comment: "This is a comment", // optional, useful to add reasoning
+  });
+}
+ 
+// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+await langfuse.flushAsync();
+
+```
+
 
 </Tab>
 </Tabs>
