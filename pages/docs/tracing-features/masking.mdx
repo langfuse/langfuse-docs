@@ -4,13 +4,13 @@ description: Configure masking to redact sensitive information from inputs and o
 
 # Masking of sensitive LLM data
 
-Masking is a feature that allows precise control over the [tracing](/docs/tracing/overview) data sent to the Langfuse server. It enables you to:
+Masking is a feature that allows precise control over the [tracing](/docs/tracing/overview) data sent to the Langfuse server. With custom masking functions, you can control and sanitize the data that gets traced and sent to the server. Whether it's for **compliance reasons** or to protect **user privacy**, masking sensitive data is a crucial step in responsible application development. It enables you to:
 
 1. Redact sensitive information from trace or observation inputs and outputs.
 2. Customize the content of events before transmission.
 3. Implement fine-grained data filtering based on your specific requirements.
 
-The process works as follows:
+## How it works
 
 1. You define a custom masking function and pass it to the Langfuse client constructor.
 2. All event inputs and outputs are processed through this function.
@@ -275,7 +275,11 @@ def llama_index_fn(question: str):
 
 </Tabs>
 
-## Example 1: Redacting Credit Card Numbers
+## Examples
+
+Now, we'll show you examples how to use the masking feature. We'll use the Langfuse decorator for this, but you can also use the low-level SDK or the JS/TS SDK analogously.
+
+### Example 1: Redacting Credit Card Numbers
 
 In this example, we'll demonstrate how to redact credit card numbers from strings using a [regular expression](https://docs.python.org/3/library/re.html). This helps in complying with PCI DSS by ensuring that credit card numbers are not transmitted or stored improperly.
 
@@ -285,7 +289,7 @@ Langfuse's masking feature allows you to define a custom masking function with p
 
 </Callout>
 
-### Steps:
+**Steps:**
 
 1. **Import necessary modules**.
 2. **Define a masking function** that uses a regular expression to detect and replace credit card numbers.
@@ -328,13 +332,13 @@ print(result)
 
 [Link to the trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/540eb0a1-77dd-42e9-b27f-03cfee9feb12?timestamp=2025-01-17T09%3A13%3A18.335Z)
 
-## Example 2: Using the `llm-guard` library
+### Example 2: Using the `llm-guard` library
 
 In this example, we'll use the `Anonymize` scanner from `llm-guard` to remove personal names and other PII from the data. This is useful for anonymizing user data and protecting privacy.
 
 Find our more about the `llm-guard` library in their [documentation](https://llm-guard.com/).
 
-### Steps:
+**Steps:**
 
 1. **Install the `llm-guard` library**.
 2. **Import necessary modules**.
@@ -397,7 +401,7 @@ print(result)
 
 [Link to the trace in Langfuse 2](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4abb206f-f8fd-4492-86b9-801602513afd?timestamp=2025-01-17T09%3A30%3A04.127Z)
 
-## Example 3: Masking Email and Phone Numbers
+### Example 3: Masking Email and Phone Numbers
 
 You can extend the masking function to redact other types of PII such as email addresses and phone numbers using regular expressions.
 
@@ -431,8 +435,6 @@ print(result)
 </Frame>
 
 [Link to the trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/dcc4d640-492e-47a6-b419-922c8b9e0f0f?timestamp=2025-01-17T09%3A38%3A06.814Z)
-
-With custom masking functions in Langfuse, you can effectively control and sanitize the data that gets traced and sent to the server. Whether it's for compliance reasons or to protect user privacy, masking sensitive data is a crucial step in responsible application development.
 
 Learn more about data security and privacy measures at Langfuse [here](/docs/data-security-privacy).
 
