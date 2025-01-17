@@ -1150,6 +1150,13 @@ const DiscountOverview = ({ className }: { className?: string }) => (
             <dd className="mt-2 text-sm leading-7 text-primary/60">
               {discount.description}
             </dd>
+            {discount.name === "Early-stage startups" && (
+              <Link href="https://forms.gle/eJAYjRWeCZU1Mn6j8" target="_blank">
+                <button className="mt-4 w-full text-white bg-indigo-600 border border-indigo-600 text-xs px-2 py-1 rounded hover:bg-indigo-700">
+                  Request Startup Discount
+                </button>
+              </Link>
+            )}
           </div>
         ))}
       </div>
@@ -1190,7 +1197,7 @@ const faqs = [
   {
     question: "Do you offer discounts?",
     answer:
-      "Yes, we offer discounts for startups, students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
+      "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
     question: "How do I activate my self-hosted Pro or Enterprise plan?",
