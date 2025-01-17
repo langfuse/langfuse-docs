@@ -290,6 +290,23 @@ langfuse.flush()
 Please refer to the [Vercel AI SDK](/docs/integrations/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
 
 ```typescript
+const runMyLLMApplication = async (input: str, traceId: str) => {
+  const output = await generateText({
+    model: openai("gpt-3.5-turbo"),
+    maxTokens: 50,
+    prompt: input,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: "vercel-ai-sdk-example-trace",
+      metadata: {
+        langfuseTraceId: traceId,
+        langfuseUpdateParent: true, // Update the parent trace with execution results as the trace was created manually to enable linking
+      },
+    },
+  });
+  return output
+}
+
 // fetch the dataset
 const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
  
