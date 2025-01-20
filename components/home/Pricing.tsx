@@ -738,6 +738,19 @@ export default function Pricing({
                             >{`Billed monthly`}</p>
                           </div>
                         )}
+                        {tier.name === "Pro" && (
+                          <div className="flex-1">
+                            <Button
+                              asChild
+                              className="z-10 bg-transparent border border-indigo-500 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-600 hover:text-indigo-700 transition duration-300 ease-in-out transform hover:scale-105 pl-1 pr-1 py-1"
+                              size="large"
+                            >
+                              <Link href="https://docs.google.com/forms/d/e/1FAIpQLScqgenlJUkjCzsJU2XClEHVtD93dVcrumGShSaFi_8wEOVOiQ/viewform?usp=dialog">
+                                Request Startup Discount
+                              </Link>
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       <Button
                         asChild
