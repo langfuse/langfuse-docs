@@ -738,7 +738,7 @@ export default function Pricing({
                             >{`Billed monthly`}</p>
                           </div>
                         )}
-                        {tier.name === "Pro" && (
+                        {tier.name === "Pro" && variant === "cloud" && (
                           <div className="flex-1">
                             <Button
                               asChild
