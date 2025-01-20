@@ -746,7 +746,8 @@ export default function Pricing({
                               size="large"
                             >
                               <Link href="https://docs.google.com/forms/d/e/1FAIpQLScqgenlJUkjCzsJU2XClEHVtD93dVcrumGShSaFi_8wEOVOiQ/viewform?usp=dialog">
-                                Request Startup Discount
+                                <span className="hidden sm:inline">Request Startup Discount</span>
+                                <span className="sm:hidden">Startup Discount</span>
                               </Link>
                             </Button>
                           </div>
