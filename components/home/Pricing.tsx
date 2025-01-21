@@ -539,6 +539,13 @@ const sections = [
         },
       },
       {
+        name: "Audit Logs",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
         name: "Data retention management",
         tiers: {
           cloud: {
