@@ -585,7 +585,7 @@ const langfuseChatPrompt = await langfuse.getPrompt(
 const langchainChatPrompt = ChatPromptTemplate.fromMessages(
   langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
 ).withConfig({
-  metadata: { langfusePrompt: langfuseTextPrompt },
+  metadata: { langfusePrompt: langfuseChatPrompt },
 });
 
 const chatModel = new ChatOpenAI();
