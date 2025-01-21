@@ -41,6 +41,14 @@ Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` t
 
 ## Encryption at rest (database) [#encryption-at-rest]
 
+| Service | Encryption |
+| --- | --- |
+| Elasticache (Redis) | AES-256 |
+| Aurora (Postgres) | AES-256 |
+| Clickhouse | AES-256 |
+| S3 | AES-256 |
+
+
 All Langfuse data is stored in your Postgres database, Clickhouse, Redis, or S3/Blob Store.
 Database-level encryption is recommended for a secure production deployment and available across cloud providers.
 
