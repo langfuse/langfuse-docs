@@ -166,6 +166,7 @@ const nonPermanentRedirects = [
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/typescript", "/docs/integrations/langchain/tracing"],
+  ["/docs/integrations/vercel", "/docs/integrations/vercel-ai-sdk"],
   ["/docs/integrations/langchain", "/docs/integrations/langchain/tracing"],
   ["/docs/integrations/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/integrations/langchain/typescript", "/docs/integrations/langchain/tracing"],
