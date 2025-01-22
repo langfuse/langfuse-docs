@@ -134,6 +134,10 @@ The Langfuse SDKs queue and batches events in the background to reduce the numbe
 If you are running a short-lived application, you need to flush Langfuse to ensure that all events are flushed before the application exits.
 
 ```python
+from langfuse.openai import openai
+
+...
+
 openai.flush_langfuse()
 ```
 
@@ -148,7 +152,18 @@ Tracing of the assistants api is not supported by this integration as OpenAI Ass
 If you are having issues with the integration, you can enable debug mode to get more information about the requests and responses.
 
 ```python
-openai.langfuse_debug=True
+from langfuse.openai import openai
+
+openai.langfuse_debug = True
+```
+### Sampling
+
+[Sampling](/docs/tracing-features/sampling) can be used to control the volume of traces collected by the Langfuse server.
+
+```python
+from langfuse.openai import openai
+
+openai.langfuse_sample_rate = 0.1 # send only 10% of traces to Langfuse servers
 ```
 
 ### Streaming function / tool calls
@@ -170,7 +185,6 @@ You can add the following properties to the openai method, e.g. `openai.chat.com
 | `tags`                  | Set [tags](/docs/tracing-features/tags) to categorize and filter traces.     |
 | `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 | `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
-| `sample_rate`           | [Sample rate](/docs/tracing-features/sampling) for tracing.                  |
 
 Example:
 
