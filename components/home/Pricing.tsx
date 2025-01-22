@@ -543,6 +543,7 @@ const sections = [
       },
       {
         name: "Audit Logs",
+        href: "/changelog/2025-01-21-audit-logs",
         tiers: {
           cloud: { Hobby: false, Pro: false, Team: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
