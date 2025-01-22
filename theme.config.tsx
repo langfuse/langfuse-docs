@@ -19,6 +19,7 @@ import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
+  logoLink: false,
   main: MainContentWrapper,
   search: {
     // placeholder: "Search...",
