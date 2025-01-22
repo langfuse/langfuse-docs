@@ -18,7 +18,18 @@ import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 
 const config: DocsThemeConfig = {
-  logo: <Logo />,
+  logo: (
+    <div className="flex items-center gap-2 rtl:ml-auto" key="logo">
+      <Link href='/' className="flex items-center hover:opacity-75 ltr:mr-auto">
+        <Logo />
+      </Link>
+      <Link href='/careers' className="items-center hover:opacity-75 md:inline hidden">  
+        <span className="text-xs rounded-xl font-medium bg-lime-100 border-lime-300 border px-1 py-0.5 tracking-wide">Hiring</span>
+      </Link>
+     </div>
+  ),
+  // temporarily: manually set redirect to root url in logo component to allow for hiring link
+  logoLink: false,
   main: MainContentWrapper,
   search: {
     // placeholder: "Search...",
