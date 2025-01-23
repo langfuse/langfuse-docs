@@ -162,6 +162,13 @@ Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycl
 | `AUTH_SESSION_MAX_AGE`              | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.     |
 | `AUTH_IGNORE_ACCOUNT_FIELDS`        | Comma-separated list of fields to ignore from the SSO IDP account when creating an account. Use this to correct errors with custom IDP providers.                                                        |
 
+## Troubleshooting
+
+- Make sure that `NEXTAUTH_URL` environment variable is [configured correctly](/self-hosting/configuration) if you want to use any authentication method other than email/password.
+- Error: _"Please sign in with the same provider that you used to create this account"._ This error occurs when you try to sign in with a different provider than the one you used to create your account. To fix this, you need to sign in with the same provider that you used to create your account or allow for account linking/takeover by setting `*_ALLOW_ACCOUNT_LINKING=true` (env depends on the provider, see above).
+- For password reset, see the [Password Reset](#password-reset) section.
+- Langfuse authentication is based on emails. When using SSO, make sure that the email address is included in the profile of the user in the IDP.
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
