@@ -166,6 +166,16 @@ from langfuse.openai import openai
 openai.langfuse_sample_rate = 0.1 # send only 10% of traces to Langfuse servers
 ```
 
+### Disable tracing
+
+You may disable sending traces to Langfuse by setting the `langfuse_enabled` flag on the `openai` module level client at the top of your application.
+
+```python
+from langfuse.openai import openai
+
+openai.langfuse_enabled = False # disable tracing
+```
+
 ### Streaming function / tool calls
 
 The capture of input and output when streaming function / tool calls is currently not supported. Please upvote this feature request in the [GitHub discussion](https://github.com/orgs/langfuse/discussions/2055) if you would like to see this supported going forward.
