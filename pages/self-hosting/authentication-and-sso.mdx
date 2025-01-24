@@ -167,6 +167,10 @@ Configure `AUTH_HTTPS_PROXY` or `AUTH_HTTP_PROXY` to use a proxy for SSO provide
 | `AUTH_SESSION_MAX_AGE`              | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.     |
 | `AUTH_IGNORE_ACCOUNT_FIELDS`        | Comma-separated list of fields to ignore from the SSO IDP account when creating an account. Use this to correct errors with custom IDP providers.                                                        |
 
+Notes:
+
+- If you want to use PKCE code flow, set `AUTH_CUSTOM_CLIENT_AUTH_METHOD='none'`.
+
 ## Troubleshooting
 
 - Make sure that `NEXTAUTH_URL` environment variable is [configured correctly](/self-hosting/configuration) if you want to use any authentication method other than email/password.
