@@ -8,7 +8,7 @@ label: "Version: v3"
 
 <Callout type="info">
 
-Security and privacy are core design objectives at Langfuse. The Langfuse Team runs Langfuse in production on Langfuse Cloud which is ISO27001, SOC2 Type 2 and GDPR compliant ([Langfuse Cloud security page](/docs/security)).
+Security and privacy are core design objectives at Langfuse. The Langfuse Team runs Langfuse in production on Langfuse Cloud which is ISO27001, SOC2 Type 2 and GDPR compliant ([Langfuse Cloud security page](/security)).
 
 </Callout>
 
@@ -39,10 +39,13 @@ There are two main approaches to handle HTTPS for Langfuse:
 
 Once HTTPS is enabled, you can configure add `LANGFUSE_CSP_ENFORCE_HTTPS=true` to ensure browser only allow HTTPS connections when using Langfuse.
 
+
 ## Encryption at rest (database) [#encryption-at-rest]
 
 All Langfuse data is stored in your Postgres database, Clickhouse, Redis, or S3/Blob Store.
 Database-level encryption is recommended for a secure production deployment and available across cloud providers.
+
+On Langfuse Cloud, we use AES-256 across all databases.
 
 ## Additional application-level encryption [#application-level-encryption]
 

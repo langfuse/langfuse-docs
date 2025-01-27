@@ -2,7 +2,7 @@
 
 # Langfuse Docs
 
-Repo for [langfuse.com](https://langfuse.com), based on [Nextra](https://nextra.site/)
+Repo for [langfuse.com](https://langfuse.com). Based on [Nextra](https://nextra.site/).
 
 ## GitHub Codespaces
 

@@ -1,6 +1,5 @@
 import { Check, Plus, Minus, X, ExternalLink } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
-import { BorderBeam } from "../magicui/border-beam";
 import Link from "next/link";
 import { Header } from "../Header";
 import { Button } from "../ui/button";
@@ -67,6 +66,10 @@ const tiers = {
       description:
         "For production projects. Includes access to full history and higher usage.",
       price: "$59",
+      priceDiscountCta: {
+        name: "Discounts available",
+        href: "/pricing#discounts",
+      },
       mainFeatures: [
         "100k observations / month included, additional: $10 / 100k observations",
         "Unlimited data access",
@@ -196,9 +199,9 @@ const sections = [
             Team: "$10 / 100k observations",
           },
           selfHosted: {
-            "Open Source": "n/a",
-            Pro: "n/a",
-            Enterprise: "n/a",
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
           },
         },
       },
@@ -211,9 +214,9 @@ const sections = [
             Team: "Pricing tba, free while in beta",
           },
           selfHosted: {
-            "Open Source": "n/a",
-            Pro: "n/a",
-            Enterprise: "n/a",
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
           },
         },
       },
@@ -539,6 +542,14 @@ const sections = [
         },
       },
       {
+        name: "Audit Logs",
+        href: "/changelog/2025-01-21-audit-logs",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
         name: "Data retention management",
         tiers: {
           cloud: {
@@ -694,12 +705,11 @@ export default function Pricing({
                   key={tier.id}
                   className={classNames(
                     tier.featured
-                      ? "z-10 bg-slate-100 shadow-xl ring-1 ring-gray-900/10"
+                      ? "bg-slate-100 shadow-xl ring-1 ring-gray-900/10"
                       : "bg-gray-800/80 ring-1 ring-white/10 lg:bg-transparent lg:pb-14 lg:ring-0",
                     "relative rounded"
                   )}
                 >
-                  {tier.featured && <BorderBeam borderWidth={2} />}
                   <div className="p-8 lg:pt-12 xl:p-10 xl:pt-14">
                     <h3
                       id={tier.id}
@@ -711,7 +721,7 @@ export default function Pricing({
                       {tier.name}
                     </h3>
                     <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:flex-col lg:items-stretch">
-                      <div className="mt-2 flex items-center gap-x-4">
+                      <div className="mt-2 flex items-center gap-x-4 min-h-12">
                         <p
                           className={classNames(
                             tier.featured ? "text-gray-900" : "text-white",
@@ -721,7 +731,7 @@ export default function Pricing({
                           {tier.price}
                         </p>
                         {tier.price.includes("$") && (
-                          <div className="text-sm leading-5">
+                          <div className="text-sm leading-4">
                             <p
                               className={
                                 tier.featured ? "text-gray-900" : "text-white"
@@ -730,18 +740,33 @@ export default function Pricing({
                               USD {tier.priceUnit ? `/ ${tier.priceUnit}` : ""}
                             </p>
                             <p
-                              className={
+                              className={cn(
                                 tier.featured
                                   ? "text-gray-500"
-                                  : "text-gray-400"
-                              }
-                            >{`Billed monthly`}</p>
+                                  : "text-gray-400",
+                                "text-xs"
+                              )}
+                            >
+                              {`Billed monthly`}
+                            </p>
+                            {tier.priceDiscountCta && (
+                              <Link
+                                href={tier.priceDiscountCta.href}
+                                className={cn(
+                                  "underline text-xs",
+                                  tier.featured
+                                    ? "text-gray-500"
+                                    : "text-gray-400"
+                                )}
+                              >
+                                {tier.priceDiscountCta.name}
+                              </Link>
+                            )}
                           </div>
                         )}
                       </div>
                       <Button
                         asChild
-                        className="z-10"
                         variant={tier.featured ? "cta" : "secondary"}
                       >
                         <Link href={tier.href}>{tier.cta}</Link>
@@ -1121,6 +1146,10 @@ const discounts = [
   {
     name: "Early-stage startups",
     description: "50% off, first year",
+    cta: {
+      text: "Request startup discount",
+      href: "https://forms.gle/eJAYjRWeCZU1Mn6j8",
+    },
   },
   {
     name: "Education / Non-profits",
@@ -1133,7 +1162,10 @@ const discounts = [
 ];
 
 const DiscountOverview = ({ className }: { className?: string }) => (
-  <div className={cn("mx-auto max-w-7xl px-6 lg:px-8", className)}>
+  <div
+    className={cn("mx-auto max-w-7xl px-6 lg:px-8 pt-20", className)}
+    id="discounts"
+  >
     <div className="mx-auto max-w-4xl">
       <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
         Discounts
@@ -1150,6 +1182,13 @@ const DiscountOverview = ({ className }: { className?: string }) => (
             <dd className="mt-2 text-sm leading-7 text-primary/60">
               {discount.description}
             </dd>
+            {discount.cta && (
+              <Button size="sm" variant="secondary" asChild className="mt-2">
+                <Link href={discount.cta.href} target="_blank">
+                  {discount.cta.text}
+                </Link>
+              </Button>
+            )}
           </div>
         ))}
       </div>
@@ -1190,7 +1229,7 @@ const faqs = [
   {
     question: "Do you offer discounts?",
     answer:
-      "Yes, we offer discounts for startups, students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
+      "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
     question: "How do I activate my self-hosted Pro or Enterprise plan?",

@@ -149,6 +149,34 @@ chain.invoke(
 )
 ```
 
+Setting trace attributes dynamically requires the execution of a Langchain chain. Otherwise the dynamically provided chain configuration is not passed to the Langfuse `CallbackHandler` instance. Thus when invoking Langchain LLM class instances with dynamic trace metadata, an additional wrapping is required to force the execution as a chain:
+
+```python
+from langchain_core.runnables import RunnablePassthrough
+from langchain_openai import ChatOpenAI
+
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler()
+
+
+def main():
+    llm = ChatOpenAI()
+
+    runnable = RunnablePassthrough() | llm # force execution as chain
+    result = runnable.invoke(
+        "Whassup?",
+        {
+            "callbacks": [handler],
+            "metadata": {
+                "langfuse_session_id": "my-session",
+                "langfuse_user_id": "my-user",
+            },
+        },
+    )
+
+    handler.flush()
+```
 </Tab>
 
 <Tab>

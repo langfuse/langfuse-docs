@@ -24,6 +24,7 @@ Typical benefits of using a CMS apply here:
 - Decoupling: deploy new prompts without redeploying your application.
 - Non-technical users can create and update prompts via Langfuse Console.
 - Quickly rollback to a previous version of a prompt.
+- Compare different prompt versions side-by-side.
 
 Platform benefits:
 
@@ -585,7 +586,7 @@ const langfuseChatPrompt = await langfuse.getPrompt(
 const langchainChatPrompt = ChatPromptTemplate.fromMessages(
   langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
 ).withConfig({
-  metadata: { langfusePrompt: langfuseTextPrompt },
+  metadata: { langfusePrompt: langfuseChatPrompt },
 });
 
 const chatModel = new ChatOpenAI();
