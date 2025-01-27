@@ -196,15 +196,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "v3-ga",
+    key: "town-hall",
     dismissible: true,
     content: (
-      <Link href="/changelog/2024-12-09-Langfuse-v3-stable-release">
+      <Link href="https://lu.ma/ov28jfk3">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse v3 is GA. Learn more →</span>
+        <span className="sm:hidden">Wednesday: Langfuse Town Hall →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          We've released Langfuse v3. Learn more →
+        Wednesday: Langfuse Town Hall, 10am PT / 7pm CET →
         </span>
       </Link>
     ),
