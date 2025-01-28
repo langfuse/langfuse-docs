@@ -448,7 +448,7 @@ const sections = [
       {
         name: "SLAs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -459,7 +459,7 @@ const sections = [
       {
         name: "Architectural guidance",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -587,7 +587,7 @@ const sections = [
       {
         name: "Billing via AWS Marketplace",
         tiers: {
-          cloud: { Hobby: "n/a", Pro: false, Team: "Add-on" },
+          cloud: { Hobby: "n/a", Pro: false, Team: "Enterprise" },
           selfHosted: {
             "Open Source": "n/a",
             Pro: ">10 users",
@@ -618,14 +618,14 @@ const sections = [
       {
         name: "InfoSec reviews",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "Customized contracts",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Add-on" },
+          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
