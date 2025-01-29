@@ -204,7 +204,7 @@ const config: DocsThemeConfig = {
         <span className="sm:hidden">Wednesday: Langfuse Town Hall →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Wednesday: Langfuse Town Hall, 10am PT / 7pm CET →
+        Wednesday: Langfuse Town Hall, 11am PT / 8pm CET →
         </span>
       </Link>
     ),
