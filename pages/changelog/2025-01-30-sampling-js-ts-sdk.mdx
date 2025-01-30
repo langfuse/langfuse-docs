@@ -1,0 +1,40 @@
+---
+date: 2025-01-30
+title: JS/TS SDK supports trace sampling
+description: Trace sampling is now supported in the JS SDK and integrations.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Trace sampling enables you to specify the proportion of traces that the SDK should collect and send to Langfuse. By adjusting the `sampleRate`, you can balance between comprehensive tracing and resource efficiency.
+
+You can configure the sample rate using the constructor parameter or the environment variable.
+
+**Using Constructor Parameters**
+
+You can set the `sampleRate` when initializing the Langfuse client. The `sampleRate` should be a value between `0` and `1`, representing the share of traces to be sent to Langfuse.
+
+```ts
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  sampleRate: 0.2, // Samples 20% of the traces
+});
+```
+
+**Using Environment Variables**
+
+Alternatively, you can configure the sample rate via the `LANGFUSE_SAMPLE_RATE` environment variable. This method is useful for dynamic configurations without changing the codebase.
+
+```bash filename=".env"
+LANGFUSE_SAMPLE_RATE="0.2"
+```
+
+**Learn More**
+
+For detailed information on configuring and using trace sampling, please refer to the [Sampling Documentation](/docs/tracing-features/sampling) and the [Sampling Section in the Guide](/docs/sdk/typescript/guide#sampling).
