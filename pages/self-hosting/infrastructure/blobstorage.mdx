@@ -106,6 +106,14 @@ Ensure that both entities have the necessary permissions to access the bucket:
 }
 ```
 
+<Callout type="info">
+
+  To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.
+  Note that Langfuse only issues delete statements on the API.
+  If you use versioned buckets, delete markers and non-current versions need to be removed manually or with a lifecycle rule.
+
+</Callout>
+
 #### Example Configuration
 
 Set the following environment variables if you authenticate using an IAM role:

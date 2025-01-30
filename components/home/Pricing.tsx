@@ -551,6 +551,7 @@ const sections = [
       },
       {
         name: "Data retention management",
+        href: "/docs/data-retention",
         tiers: {
           cloud: {
             Hobby: false,
@@ -560,7 +561,7 @@ const sections = [
           selfHosted: {
             "Open Source": false,
             Pro: false,
-            Enterprise: "soon",
+            Enterprise: true,
           },
         },
       },

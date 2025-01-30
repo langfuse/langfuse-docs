@@ -1,0 +1,38 @@
+---
+description: Control Data Retention in Langfuse
+---
+
+# Data Retention
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    pro: "not-available",
+    team: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+With Langfuse's Data Retention feature, you can control how long your event data (Traces, Observations, Scores, and Media Assets) is stored in Langfuse.
+Data retention is configured on a project level, and we accept a number of days with a minimum of 7 days.
+Project owners and administrators can change the data retention setting within the Project Settings view.
+
+[//]: # (TODO: Add screenshot / video of configuration)
+
+## Details
+
+On a nightly basis, Langfuse selects traces, observations, scores, and media assets that are older than the configured retention period and deletes them.
+We use the following properties per entity to decide whether they are outside the retention window:
+
+- **Traces**: `timestamp`
+- **Observations**: `start_time`
+- **Scores**: `timestamp`
+- **Media Assets**: `created_at`
+
+Deleted assets cannot be recovered.
+
+## Self-hosted Instances
+
+To use the Data Retention feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets (see [Blob Storage (S3) docs](/self-hosting/infrastructure/blobstorage)).
+Note that Langfuse only issues delete statements on the API.
+If you use versioned buckets, delete markers and non-current versions need to be removed manually or with a lifecycle rule.

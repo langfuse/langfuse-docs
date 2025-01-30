@@ -62,6 +62,7 @@ export default {
   },
   rbac: "Access Control (RBAC)",
   "data-security-privacy": "Data Security & Privacy",
+  "data-retention": "Data Retention",
   "open-source": "Open Source",
   roadmap: "Roadmap",
   "ask-ai": "Ask AI",
