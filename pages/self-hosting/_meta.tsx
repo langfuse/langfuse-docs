@@ -36,6 +36,11 @@ export default {
     href: "/docs/rbac",
     newWindow: true,
   },
+  "data-retention": {
+    title: "Data Retention ↗ (main docs)",
+    href: "/docs/data-retention",
+    newWindow: true,
+  },
   networking: "Networking",
   "-- Features": {
     type: "separator",
