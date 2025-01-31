@@ -183,16 +183,16 @@ All attributes and resourceAttributes are available within the Langfuse `metadat
 
 Below, we share a non-exhaustive list of mappings that Langfuse applies:
 
-| OpenTelemetry Attribute | Langfuse Property | Description |
-| ----------------------- | ----------------- | ----------- |
-| `gen_ai.usage.cost` | `costDetails.total` | The total cost of the request. |
-| `gen_ai.usage.*` | `usageDetails.*` | Maps all keys within usage aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
-| `gen_ai.request.model` | `model` | The model used for the request. |
-| `gen_ai.response.model` | `model` | The model used for the response. |
-| `gen_ai.request.*` | `modelParameters` | Maps all keys within request to `modelParameters`. |
-| `langfuse.session.id` | `sessionId` | The session ID for the request. |
-| `session.id` | `sessionId` | The session ID for the request. |
-| `langfuse.user.id` | `userId` | The user ID for the request. |
-| `user.id` | `userId` | The user ID for the request. |
-| `gen_ai.prompt` | `input` | Input field. Deprecated by OpenTelemetry as event properties should be preferred. |
-| `gen_ai.completion` | `output` | Output field. Deprecated by OpenTelemetry as event properties should be preferred. |
+| OpenTelemetry Attribute | Langfuse Property   | Description                                                                                                                        |
+|-------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `gen_ai.usage.cost`     | `costDetails.total` | The total cost of the request.                                                                                                     |
+| `gen_ai.usage.*`        | `usageDetails.*`    | Maps all keys within usage aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
+| `gen_ai.request.model`  | `model`             | The model used for the request.                                                                                                    |
+| `gen_ai.response.model` | `model`             | The model used for the response.                                                                                                   |
+| `gen_ai.request.*`      | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                 |
+| `langfuse.session.id`   | `sessionId`         | The session ID for the request.                                                                                                    |
+| `session.id`            | `sessionId`         | The session ID for the request.                                                                                                    |
+| `langfuse.user.id`      | `userId`            | The user ID for the request.                                                                                                       |
+| `user.id`               | `userId`            | The user ID for the request.                                                                                                       |
+| `gen_ai.prompt`         | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                  |
+| `gen_ai.completion`     | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                 |
