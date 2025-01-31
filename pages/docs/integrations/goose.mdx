@@ -1,0 +1,68 @@
+---
+description: Learn how to integrate Goose, an open-source AI agent, with Langfuse for enhanced monitoring and automation of engineering tasks.
+category: Integrations
+---
+
+# Integrating Goose with Langfuse
+
+[Goose](https://github.com/block/goose) is an open-source, on-machine AI agent that automates engineering tasks seamlessly. By integrating Goose with [Langfuse](https://langfuse.com), you can monitor your Goose requests and actions using your self-hosted Langfuse instance.
+
+This guide will walk you through the steps to integrate Goose with Langfuse.
+
+## Prerequisites
+
+- **docker & docker compose** -> use [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows
+- **Goose** installed. Instructions are available on the [Goose repository](https://github.com/block/goose).
+
+## Steps
+
+### 1. Run Langfuse Locally
+
+First, set up a local instance of Langfuse.
+
+**Clone the Langfuse Repository:**
+
+```bash
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+```
+
+**Start the Application:**
+
+```bash
+docker compose up
+```
+
+Wait for the containers to start. Once the Langfuse server is running, you can access it at [http://localhost:3000](http://localhost:3000).
+
+**Log In:**
+
+Go to [http://localhost:3000](http://localhost:3000) and log in using the default email and password provided in the shell output during startup. You can also find these credentials in the `.env.langfuse.local` file.
+
+_For detailed instructions, refer to the [Langfuse Local Deployment Guide](https://langfuse.com/self-hosting/local)._
+
+### 2. Configure Goose to Connect to Langfuse
+
+Set the environment variables so that Goose (written in Rust) can connect to your local Langfuse server.
+
+```bash
+export LANGFUSE_INIT_PROJECT_PUBLIC_KEY=publickey-local
+export LANGFUSE_INIT_PROJECT_SECRET_KEY=secretkey-local
+```
+
+These keys are the default values for a local Langfuse instance.
+
+### 3. Run Goose with Langfuse Integration
+
+Now, you can run Goose and monitor your AI requests and actions through Langfuse. Run Goose as you normally would. 
+
+With Goose running and the environment variables set, Langfuse will start capturing traces of your Goose activities. You can view these traces at [http://localhost:3000](http://localhost:3000).
+
+<Frame>
+![Goose trace in Langfuse](/images/docs/goose-integration/goose-example-trace.png)
+</Frame>
+
+## References
+
+- **Goose Repository:** [https://github.com/block/goose](https://github.com/block/goose)
+- **Langfuse Local Deployment Guide:** [https://langfuse.com/self-hosting/local](https://langfuse.com/self-hosting/local)
