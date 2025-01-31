@@ -19,10 +19,10 @@ description: How to connect Langfuse with Opentelemetry.
   All APIs may change at any point in time without prior notice.
   On Langfuse Cloud, we have strict rate-limits in place for OpenTelemetry span ingestion.
 
-  We share this feature to gather feedback and improve it based on our user's needs.
-  Please share all feedback you have in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
-</Callout>
+We share this feature to gather feedback and improve it based on our user's needs.
+Please share all feedback you have in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
 
+</Callout>
 
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
 OpenTelemetry maintains an experimental set of [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces.
@@ -184,7 +184,7 @@ All attributes and resourceAttributes are available within the Langfuse `metadat
 Below, we share a non-exhaustive list of mappings that Langfuse applies:
 
 | OpenTelemetry Attribute | Langfuse Property   | Description                                                                                                                        |
-|-------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `gen_ai.usage.cost`     | `costDetails.total` | The total cost of the request.                                                                                                     |
 | `gen_ai.usage.*`        | `usageDetails.*`    | Maps all keys within usage aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
 | `gen_ai.request.model`  | `model`             | The model used for the request.                                                                                                    |
