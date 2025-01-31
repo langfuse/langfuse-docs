@@ -23,5 +23,6 @@ export default {
   deepseek: "DeepSeek",
   "groq-sdk": "Groq",
   vapi: "Vapi",
+  goose: "Goose",
   other: "More Ways to Integrate",
 };
