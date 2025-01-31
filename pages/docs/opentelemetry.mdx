@@ -26,152 +26,167 @@ Please share all feedback you have in the [OpenTelemetry Support GitHub Discussi
 
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
 OpenTelemetry maintains an experimental set of [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces.
-In addition, to our [native SDKs](/docs/sdk/overview) and our [vendor specific integrations](/docs/integrations/overview), we added experimental support for OpenTelemetry.
+In addition, to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), we added experimental support for OpenTelemetry to increase compatibility.
 
 ## Getting Started
 
-To get started using the OpenTelemetry integration, you will need the Langfuse Trace API endpoint and your Langfuse API keys.
-For our EU data region the endpoint is `https://cloud.langfuse.com/api/public/otel` and for the US data region it is `https://us.cloud.langfuse.com/api/public/otel`.
-We will use the EU data region in the following examples.
+Langfuses offers an OpenTelemetry Collector. To get started with the OpenTelemetry integration:
 
-In addition, you will need the Langfuse API keys, e.g. `pk-lf-1234567890` and `sk-lf-1234567890`.
-Run `$ echo -n ${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY} | base64` to get the base64 encoded API keys (referred to as "AUTH_STRING" going forward).
+- Endpoint: `/api/public/otel`
+- Authentication: Basic Auth with your Langfuse API keys
 
-Using those parameters, you can configure the OpenTelemetry exporters for your tracing framework as follows:
+### Examples
 
-<Tabs items={["OpenTelemetry Collector", "OpenLIT", "TraceLoop", "Vercel AI SDK"]}>
-  <Tab>
+<Tabs items={["OpenTelemetry Collector", "OpenLIT (Python)", "Traceloop OpenLLMetry (Python)", "Vercel AI SDK (Next.js)"]}>
+<Tab>
 
-    Add a Langfuse exporter to your OpenTelemetry Collector configuration:
+Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):
 
-    ```yaml
-    receivers:
-      otlp:
-        protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-        http:
-          endpoint: 0.0.0.0:4318
+```bash
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
 
-    processors:
-      batch:
-      memory_limiter:
-        # 80% of maximum memory up to 2G
-        limit_mib: 1500
-        # 25% of limit up to 2G
-        spike_limit_mib: 512
-        check_interval: 5s
+Add a Langfuse exporter to your OpenTelemetry Collector configuration:
 
-    exporters:
-      otlp/langfuse:
-        endpoint: "cloud.langfuse.com/api/public/otel"
-        headers:
-          Authorization: "Basic ${AUTH_STRING}"
+```yaml
+receivers:
+  otlp:
+    protocols:
+    grpc:
+      endpoint: 0.0.0.0:4317
+    http:
+      endpoint: 0.0.0.0:4318
 
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [otlp/langfuse]
-    ```
+processors:
+  batch:
+  memory_limiter:
+    # 80% of maximum memory up to 2G
+    limit_mib: 1500
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
 
-  </Tab>
-  <Tab>
+exporters:
+  otlp/langfuse:
+    endpoint: "cloud.langfuse.com/api/public/otel" # EU data region
+    # endpoint: "us.cloud.langfuse.com/api/public/otel" # US data region
+    headers:
+      Authorization: "Basic ${AUTH_STRING}"
 
-    To configure [OpenLIT](https://github.com/openlit/openlit), use the following config:
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/langfuse]
+```
 
-    ```python
-    import os
-    from openai import OpenAI
-    import openlit
+</Tab>
+<Tab>
 
-    os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel"
-    os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {AUTH_STRING}"
+To configure [OpenLIT](https://github.com/openlit/openlit), use the following config:
 
-    openlit.init()
+```python
+import os
+from openai import OpenAI
+import openlit
+import base64
 
-    openai_client = OpenAI(
-        api_key="REPLACE ME"
-    )
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
+# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {base64.b64encode(b'pk-lf-1234567890:sk-lf-1234567890').decode()}"
 
-    chat_completion = openai_client.chat.completions.create(
-        messages=[
-            {
-              "role": "user",
-              "content": "What is LLM Observability?",
-            }
-        ],
-        model="gpt-3.5-turbo",
-    )
-    ```
+openlit.init()
 
-  </Tab>
-  <Tab>
+openai_client = OpenAI(
+    api_key="REPLACE ME"
+)
 
-    To configure the [TraceLoopSDK](https://github.com/traceloop/openllmetry), use the following config:
+chat_completion = openai_client.chat.completions.create(
+    messages=[
+        {
+          "role": "user",
+          "content": "What is LLM Observability?",
+        }
+    ],
+    model="gpt-3.5-turbo",
+)
+```
 
-    ```python
-    import os
-    from openai import OpenAI
-    from traceloop.sdk import Traceloop
+</Tab>
+<Tab>
 
-    os.environ["TRACELOOP_BASE_URL"] = "https://cloud.langfuse.com/api/public/otel"
-    os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {AUTH_STRING}"
+To configure the [TraceLoopSDK](https://github.com/traceloop/openllmetry), use the following config:
 
-    Traceloop.init()
+```python
+import os
+from openai import OpenAI
+from traceloop.sdk import Traceloop
+import base64
 
-    openai_client = OpenAI(
-        api_key="REPLACE ME"
-    )
+os.environ["TRACELOOP_BASE_URL"] = "https://cloud.langfuse.com/api/public/otel"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {base64.b64encode(b'pk-lf-1234567890:sk-lf-1234567890').decode()}"
 
-    chat_completion = openai_client.chat.completions.create(
-        messages=[
-            {
-              "role": "user",
-              "content": "What is LLM Observability?",
-            }
-        ],
-        model="gpt-3.5-turbo",
-    )
-    ```
+Traceloop.init()
 
-  </Tab>
-  <Tab>
+openai_client = OpenAI(
+    api_key="REPLACE ME"
+)
 
-    To configure the [Vercel AI SDK](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry), set the following variables in your Next.js app's `.env` file:
-    ```
-    OTEL_EXPORTER_OTLP_ENDPOINT=https://cloud.langfuse.com/api/public/otel
-    OTEL_EXPORTER_OTLP_HEADERS="Authorization: Basic {AUTH_STRING}"
-    ```
+chat_completion = openai_client.chat.completions.create(
+    messages=[
+        {
+          "role": "user",
+          "content": "What is LLM Observability?",
+        }
+    ],
+    model="gpt-3.5-turbo",
+)
+```
 
-    You can use the `experimental_telemetry` option to enable telemetry on supported AI SDK function calls:
+</Tab>
+<Tab>
 
-    ```typescript
-    import { createOpenAI } from "@ai-sdk/openai";
-    import { generateText } from "ai";
+Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):
 
-    const openai = createOpenAI();
+```bash
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
 
-    async function main() {
-        const result = await generateText({
-            model: openai("gpt-4o-mini"),
-            prompt: "What is 2 + 2?",
-            experimental_telemetry: {
-                isEnabled: true,
-                metadata: {
-                    query: "weather",
-                    location: "San Francisco",
-               },
-           },
-       });
-       console.log(result);
-    }
+To configure the [Vercel AI SDK](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry), set the following variables in your Next.js app's `.env` file:
 
-    main();
-    ```
+```
+OTEL_EXPORTER_OTLP_ENDPOINT=https://cloud.langfuse.com/api/public/otel
+OTEL_EXPORTER_OTLP_HEADERS="Authorization: Basic {AUTH_STRING}"
+```
 
-  </Tab>
+You can use the `experimental_telemetry` option to enable telemetry on supported AI SDK function calls:
+
+```typescript
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+
+const openai = createOpenAI();
+
+async function main() {
+  const result = await generateText({
+    model: openai("gpt-4o-mini"),
+    prompt: "What is 2 + 2?",
+    experimental_telemetry: {
+      isEnabled: true,
+      metadata: {
+        query: "weather",
+        location: "San Francisco",
+      },
+    },
+  });
+  console.log(result);
+}
+
+main();
+```
+
+</Tab>
 </Tabs>
 
 ## Property Mapping
