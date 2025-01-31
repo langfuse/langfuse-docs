@@ -17,7 +17,7 @@ export default {
   "tracing-features": "Tracing Features",
   sdk: "SDKs",
   integrations: "Integrations",
-  opentelemetry: "Opentelemetry",
+  opentelemetry: "OpenTelemetry",
   "model-usage-and-cost": "LLM Usage & Cost Tracking",
   analytics: "Production Analytics",
   "query-traces": "Query Traces",
