@@ -1,0 +1,213 @@
+---
+title: Collect OpenTelemetry Traces in Langfuse (Beta)
+description: How to connect Langfuse with Opentelemetry.
+---
+
+# OpenTelemetry
+
+<AvailabilityBanner
+  availability={{
+    hobby: "public-beta",
+    pro: "public-beta",
+    team: "public-beta",
+    selfHosted: "public-beta",
+  }}
+/>
+
+<Callout type="warning">
+  OpenTelemetry support in Langfuse is experimental.
+  All APIs may change at any point in time without prior notice.
+  On Langfuse Cloud, we have strict rate-limits in place for OpenTelemetry span ingestion.
+
+We share this feature to gather feedback and improve it based on our user's needs.
+Please share all feedback you have in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
+
+</Callout>
+
+[OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
+OpenTelemetry maintains an experimental set of [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces.
+In addition, to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), we added experimental support for OpenTelemetry to increase compatibility.
+
+## Getting Started
+
+Langfuses offers an OpenTelemetry Collector. To get started with the OpenTelemetry integration:
+
+- Endpoint: `/api/public/otel`
+- Authentication: Basic Auth with your Langfuse API keys
+
+### Examples
+
+<Tabs items={["OpenTelemetry Collector", "OpenLIT (Python)", "Traceloop OpenLLMetry (Python)", "Vercel AI SDK (Next.js)"]}>
+<Tab>
+
+Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):
+
+```bash
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
+
+Add a Langfuse exporter to your OpenTelemetry Collector configuration:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+    grpc:
+      endpoint: 0.0.0.0:4317
+    http:
+      endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+  memory_limiter:
+    # 80% of maximum memory up to 2G
+    limit_mib: 1500
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
+
+exporters:
+  otlp/langfuse:
+    endpoint: "cloud.langfuse.com/api/public/otel" # EU data region
+    # endpoint: "us.cloud.langfuse.com/api/public/otel" # US data region
+    headers:
+      Authorization: "Basic ${AUTH_STRING}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/langfuse]
+```
+
+</Tab>
+<Tab>
+
+To configure [OpenLIT](https://github.com/openlit/openlit), use the following config:
+
+```python
+import os
+from openai import OpenAI
+import openlit
+import base64
+
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
+# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {base64.b64encode(b'pk-lf-1234567890:sk-lf-1234567890').decode()}"
+
+openlit.init()
+
+openai_client = OpenAI(
+    api_key="REPLACE ME"
+)
+
+chat_completion = openai_client.chat.completions.create(
+    messages=[
+        {
+          "role": "user",
+          "content": "What is LLM Observability?",
+        }
+    ],
+    model="gpt-3.5-turbo",
+)
+```
+
+</Tab>
+<Tab>
+
+To configure the [TraceLoopSDK](https://github.com/traceloop/openllmetry), use the following config:
+
+```python
+import os
+from openai import OpenAI
+from traceloop.sdk import Traceloop
+import base64
+
+os.environ["TRACELOOP_BASE_URL"] = "https://cloud.langfuse.com/api/public/otel"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {base64.b64encode(b'pk-lf-1234567890:sk-lf-1234567890').decode()}"
+
+Traceloop.init()
+
+openai_client = OpenAI(
+    api_key="REPLACE ME"
+)
+
+chat_completion = openai_client.chat.completions.create(
+    messages=[
+        {
+          "role": "user",
+          "content": "What is LLM Observability?",
+        }
+    ],
+    model="gpt-3.5-turbo",
+)
+```
+
+</Tab>
+<Tab>
+
+Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):
+
+```bash
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
+
+To configure the [Vercel AI SDK](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry), set the following variables in your Next.js app's `.env` file:
+
+```
+OTEL_EXPORTER_OTLP_ENDPOINT=https://cloud.langfuse.com/api/public/otel
+OTEL_EXPORTER_OTLP_HEADERS="Authorization: Basic {AUTH_STRING}"
+```
+
+You can use the `experimental_telemetry` option to enable telemetry on supported AI SDK function calls:
+
+```typescript
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+
+const openai = createOpenAI();
+
+async function main() {
+  const result = await generateText({
+    model: openai("gpt-4o-mini"),
+    prompt: "What is 2 + 2?",
+    experimental_telemetry: {
+      isEnabled: true,
+      metadata: {
+        query: "weather",
+        location: "San Francisco",
+      },
+    },
+  });
+  console.log(result);
+}
+
+main();
+```
+
+</Tab>
+</Tabs>
+
+## Property Mapping
+
+Langfuse accepts any span that adheres to the OpenTelemetry specification.
+In addition, we map many GenAI specific properties to properties in the Langfuse data model to provide a seamless experience when using OpenTelemetry with Langfuse.
+First and foremost, we stick to the [OpenTelemetry Gen AI Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/), but also map vendor specific properties from common frameworks.
+All attributes and resourceAttributes are available within the Langfuse `metadata` property as a fallback.
+
+Below, we share a non-exhaustive list of mappings that Langfuse applies:
+
+| OpenTelemetry Attribute | Langfuse Property   | Description                                                                                                                        |
+| ----------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `gen_ai.usage.cost`     | `costDetails.total` | The total cost of the request.                                                                                                     |
+| `gen_ai.usage.*`        | `usageDetails.*`    | Maps all keys within usage aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
+| `gen_ai.request.model`  | `model`             | The model used for the request.                                                                                                    |
+| `gen_ai.response.model` | `model`             | The model used for the response.                                                                                                   |
+| `gen_ai.request.*`      | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                 |
+| `langfuse.session.id`   | `sessionId`         | The session ID for the request.                                                                                                    |
+| `session.id`            | `sessionId`         | The session ID for the request.                                                                                                    |
+| `langfuse.user.id`      | `userId`            | The user ID for the request.                                                                                                       |
+| `user.id`               | `userId`            | The user ID for the request.                                                                                                       |
+| `gen_ai.prompt`         | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                  |
+| `gen_ai.completion`     | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                 |
