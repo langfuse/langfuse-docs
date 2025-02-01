@@ -6,15 +6,11 @@ description: Configure sampling to control the volume of traces collected by the
 
 Sampling can be used to control the volume of traces collected by the Langfuse server.
 
-<Callout type="info">
-  Sampling is not yet supported by the JS SDK and integrations. Please upvote
-  [this feature request](https://github.com/orgs/langfuse/discussions/3529) if
-  you are interested in this.
-</Callout>
+You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1.
 
-You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1. The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
+The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 
-<Tabs items={["Python", "OpenAI (Python)",  "Langchain (Python)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)"]}>
+<Tabs items={["Python", "JS/TS", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)"]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -48,6 +44,19 @@ trace = langfuse.trace(
 </Tab>
 <Tab>
 
+```ts
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse({
+  sampleRate: 0.5,
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
+
+</Tab>
+<Tab>
+
 When using the [OpenAI SDK Integration](/docs/integrations/openai)
 
 ```python
@@ -69,6 +78,23 @@ completion = openai.chat.completions.create(
 </Tab>
 <Tab>
 
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const openai = observeOpenAI(new OpenAI(), {
+  clientInitParams: {
+    sampleRate: 0.5,
+  },
+});
+```
+
+See [OpenAI Integration (JS/TS)](/docs/integrations/openai/js/get-started) for more details.
+
+</Tab>
+
+<Tab>
+
 When using the [CallbackHandler](/docs/integrations/langchain/tracing)
 
 ```python
@@ -79,6 +105,38 @@ os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
 handler = CallbackHandler(
   sample_rate=0.5
 )
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import { CallbackHandler } from "langfuse-langchain";
+
+const handler = new CallbackHandler({
+  sampleRate: 0.5,
+});
+```
+
+See [Langchain Integration (JS/TS)](/docs/integrations/langchain/js/get-started) for more details.
+
+</Tab>
+
+<Tab>
+
+When using the [Vercel AI SDK Integration](/docs/integrations/vercel-ai-sdk)
+
+```ts filename="instrumentation.ts" {/sampleRate: 0.5/}
+import { registerOTel } from "@vercel/otel";
+import { LangfuseExporter } from "langfuse-vercel";
+
+export function register() {
+  registerOTel({
+    serviceName: "langfuse-vercel-ai-nextjs-example",
+    traceExporter: new LangfuseExporter({ sampleRate: 0.5 }),
+  });
+}
 ```
 
 </Tab>

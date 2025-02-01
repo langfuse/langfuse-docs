@@ -19,8 +19,10 @@ export default {
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
   lobechat: "LobeChat",
-  "huggingface": "Huggingface",
+  huggingface: "Huggingface",
   deepseek: "DeepSeek",
   "groq-sdk": "Groq",
+  vapi: "Vapi",
+  goose: "Goose",
   other: "More Ways to Integrate",
 };

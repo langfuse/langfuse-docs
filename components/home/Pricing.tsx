@@ -89,9 +89,9 @@ const tiers = {
       mainFeatures: [
         "100k observations / month included, additional: $10 / 100k observations",
         "SSO enforcement, fine-grained RBAC",
-        "SOC2, ISO27001, InfoSec reviews",
+        "SOC2, ISO27001",
         "Dedicated support channel",
-        "Add-ons: Enterprise support & SLAs, Billing via AWS Marketplace",
+        "Enterprise Add-ons: SLAs, InfoSec/legal reviews, Architecture reviews, Billing via AWS Marketplace",
       ],
       cta: "Sign up",
       learnMore: "/enterprise",
@@ -551,6 +551,7 @@ const sections = [
       },
       {
         name: "Data retention management",
+        href: "/docs/data-retention",
         tiers: {
           cloud: {
             Hobby: false,
@@ -560,7 +561,7 @@ const sections = [
           selfHosted: {
             "Open Source": false,
             Pro: false,
-            Enterprise: "soon",
+            Enterprise: true,
           },
         },
       },

@@ -488,6 +488,16 @@ Alternatively, you can enable debugging to get detailed logs of what's happening
 langfuse.debug();
 ```
 
+## Sampling [#sampling]
+
+You can use sampling to limit the number of traces sent to Langfuse servers.
+
+You can configure sampling by either passing the `sampleRate` property to the Langfuse client constructor or by configuring the `LANGFUSE_SAMPLE_RATE` environment variable. The sample rate must be between 0 and 1 and reflects the approximate share of traces to be sent to Langfuse servers.
+
+So to send only 20% of traces originating in your application to Lanfuse, pass `{ sampleRate: 0.2 }` to the client constructor or `LANGFUSE_SAMPLE_RATE="0.2"`. Passing `sampleRate` in the constructor will take precedence over the environment variable.
+
+See also our [sampling docs](/docs/tracing-features/sampling).
+
 ## Short lived execution environments (lambda, serverless, Vercel, Cloudflare) [#lambda]
 
 The SDK is optimize to run in the background to queue and flush all requests. Events can get lost if the process exits before all requests are flushed. To ensure all events are sent, use one of the following patterns:
