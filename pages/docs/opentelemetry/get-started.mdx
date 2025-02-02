@@ -15,12 +15,13 @@ description: How to connect Langfuse with Opentelemetry.
 />
 
 <Callout type="warning">
-  OpenTelemetry support in Langfuse is experimental.
-  All APIs may change at any point in time without prior notice.
-  On Langfuse Cloud, we have strict rate-limits in place for OpenTelemetry span ingestion.
 
-We share this feature to gather feedback and improve it based on our user's needs.
-Please share all feedback you have in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
+OpenTelemetry support in Langfuse is experimental.
+All APIs may change at any point in time without prior notice.
+On Langfuse Cloud, we have strict rate-limits in place for OpenTelemetry span ingestion.
+
+The public beta is intended to gather feedback and improve the integration based on your needs.
+Please share all feedback in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
 
 </Callout>
 
@@ -32,162 +33,134 @@ In addition, to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations
 
 Langfuses offers an OpenTelemetry Collector. To get started with the OpenTelemetry integration:
 
-- Endpoint: `/api/public/otel`
-- Authentication: Basic Auth with your Langfuse API keys
+### Endpoint: `/api/public/otel`
 
-### Examples
+- EU: `OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"`
+- US: `OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel"`
 
-<Tabs items={["OpenTelemetry Collector", "OpenLIT (Python)", "Traceloop OpenLLMetry (Python)", "Vercel AI SDK (Next.js)"]}>
-<Tab>
+### Authentication
 
-Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):
+[Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) with your Langfuse API keys. Commonly referred to as `OTEL_EXPORTER_OTLP_HEADERS`.
 
-```bash
-echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+1. Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):<br/>`echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`
+
+2. Add the following authentication header:<br/>`OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"`
+
+## OpenTelemetry Collector
+
+```mermaid
+graph LR
+    A[Application with OTel Instrumentation] --> B[OpenTelemetry Collector]
+    B --> C[Langfuse]
 ```
 
-Add a Langfuse exporter to your OpenTelemetry Collector configuration:
+If you already have an OpenTelemetry Collector and want to export traces to Langfuse, you can use the following configuration:
 
-```yaml
-receivers:
-  otlp:
-    protocols:
-    grpc:
-      endpoint: 0.0.0.0:4317
-    http:
-      endpoint: 0.0.0.0:4318
+import { BookOpen } from "lucide-react";
 
-processors:
-  batch:
-  memory_limiter:
-    # 80% of maximum memory up to 2G
-    limit_mib: 1500
-    # 25% of limit up to 2G
-    spike_limit_mib: 512
-    check_interval: 5s
+<Cards>
+  <Card
+    icon={<BookOpen />}
+    title="OpenTelemetry Collector"
+    href="/docs/opentelemetry/example-opentelemetry-collector"
+  />
+</Cards>
 
-exporters:
-  otlp/langfuse:
-    endpoint: "cloud.langfuse.com/api/public/otel" # EU data region
-    # endpoint: "us.cloud.langfuse.com/api/public/otel" # US data region
-    headers:
-      Authorization: "Basic ${AUTH_STRING}"
+## OpenTelemetry Instrumentation Libraries
 
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [otlp/langfuse]
+```mermaid
+graph LR
+    A[Application with OTel Instrumentation] --> C[Langfuse]
 ```
 
-</Tab>
-<Tab>
+<Callout type="info">
 
-To configure [OpenLIT](https://github.com/openlit/openlit), use the following config:
+Please [raise an issue on GitHub](/issues) if an integration does not work as expected or does not parse the correct attributes. This might happen as not all OTel compatible instrumentation follows the OpenTelemetry GenAI Semantic Conventions or there are relevant additional attributes that are not yet covered by the Semantic Conventions.
 
-```python
-import os
-from openai import OpenAI
-import openlit
-import base64
+</Callout>
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {base64.b64encode(b'pk-lf-1234567890:sk-lf-1234567890').decode()}"
+Any OTel compatible instrumentation can be used to send traces to Langfuse. Check out the following end-to-end examples of popular instrumentation SDKs to get started:
 
-openlit.init()
+<Cards>
+  <Card
+    title="OpenLIT"
+    href="/docs/opentelemetry/example-openlit"
+    icon={<BookOpen />}
+  />
+  <Card
+    title="Pydantic AI"
+    href="/docs/opentelemetry/example-pydantic-ai"
+    icon={<BookOpen />}
+  />
+  <Card
+    title="OpenLLMetry"
+    href="/docs/opentelemetry/example-openllmetry"
+    icon={<BookOpen />}
+  />
+</Cards>
 
-openai_client = OpenAI(
-    api_key="REPLACE ME"
-)
+### Comparison of OpenTelemetry Instrumentation Libraries
 
-chat_completion = openai_client.chat.completions.create(
-    messages=[
-        {
-          "role": "user",
-          "content": "What is LLM Observability?",
-        }
-    ],
-    model="gpt-3.5-turbo",
-)
-```
-
-</Tab>
-<Tab>
-
-To configure the [TraceLoopSDK](https://github.com/traceloop/openllmetry), use the following config:
-
-```python
-import os
-from openai import OpenAI
-from traceloop.sdk import Traceloop
-import base64
-
-os.environ["TRACELOOP_BASE_URL"] = "https://cloud.langfuse.com/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization: Basic {base64.b64encode(b'pk-lf-1234567890:sk-lf-1234567890').decode()}"
-
-Traceloop.init()
-
-openai_client = OpenAI(
-    api_key="REPLACE ME"
-)
-
-chat_completion = openai_client.chat.completions.create(
-    messages=[
-        {
-          "role": "user",
-          "content": "What is LLM Observability?",
-        }
-    ],
-    model="gpt-3.5-turbo",
-)
-```
-
-</Tab>
-<Tab>
-
-Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):
-
-```bash
-echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
-```
-
-To configure the [Vercel AI SDK](https://sdk.vercel.ai/docs/ai-sdk-core/telemetry), set the following variables in your Next.js app's `.env` file:
-
-```
-OTEL_EXPORTER_OTLP_ENDPOINT=https://cloud.langfuse.com/api/public/otel
-OTEL_EXPORTER_OTLP_HEADERS="Authorization: Basic {AUTH_STRING}"
-```
-
-You can use the `experimental_telemetry` option to enable telemetry on supported AI SDK function calls:
-
-```typescript
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
-
-const openai = createOpenAI();
-
-async function main() {
-  const result = await generateText({
-    model: openai("gpt-4o-mini"),
-    prompt: "What is 2 + 2?",
-    experimental_telemetry: {
-      isEnabled: true,
-      metadata: {
-        query: "weather",
-        location: "San Francisco",
-      },
-    },
-  });
-  console.log(result);
-}
-
-main();
-```
-
-</Tab>
-</Tabs>
+| **Category**   | **Item**                      | **OpenLLMetry** | **openlit** |
+| -------------- | ----------------------------- | --------------- | ----------- |
+| **LLMs**       | AI21                          |                 | ✅          |
+|                | Aleph Alpha                   | ✅              |             |
+|                | Amazon Bedrock                | ✅              | ✅          |
+|                | Anthropic                     | ✅              | ✅          |
+|                | Assembly AI                   |                 | ✅          |
+|                | Azure AI Inference            |                 | ✅          |
+|                | Azure OpenAI                  | ✅              | ✅          |
+|                | Cohere                        | ✅              | ✅          |
+|                | DeepSeek                      |                 | ✅          |
+|                | ElevenLabs                    |                 | ✅          |
+|                | GitHub Models                 |                 | ✅          |
+|                | Google AI Studio              |                 | ✅          |
+|                | Google Generative AI (Gemini) | ✅              |             |
+|                | Groq                          | ✅              | ✅          |
+|                | HuggingFace                   | ✅              | ✅          |
+|                | IBM Watsonx AI                | ✅              |             |
+|                | Mistral AI                    | ✅              | ✅          |
+|                | NVIDIA NIM                    |                 | ✅          |
+|                | Ollama                        | ✅              | ✅          |
+|                | OpenAI                        | ✅              | ✅          |
+|                | OLA Krutrim                   |                 | ✅          |
+|                | Prem AI                       |                 | ✅          |
+|                | Replicate                     | ✅              |             |
+|                | SageMaker (AWS)               | ✅              |             |
+|                | Titan ML                      |                 | ✅          |
+|                | Together AI                   | ✅              | ✅          |
+|                | vLLM                          |                 | ✅          |
+|                | Vertex AI                     | ✅              | ✅          |
+|                | xAI                           |                 | ✅          |
+| **Vector DBs** | AstraDB                       |                 | ✅          |
+|                | Chroma                        | ✅              |             |
+|                | ChromaDB                      |                 | ✅          |
+|                | LanceDB                       | ✅              |             |
+|                | Marqo                         | ✅              |             |
+|                | Milvus                        | ✅              | ✅          |
+|                | Pinecone                      | ✅              | ✅          |
+|                | Qdrant                        | ✅              | ✅          |
+|                | Weaviate                      | ✅              |             |
+| **Frameworks** | AutoGen / AG2                 |                 | ✅          |
+|                | ControlFlow                   |                 | ✅          |
+|                | CrewAI                        | ✅              | ✅          |
+|                | Crawl4AI                      |                 | ✅          |
+|                | Dynamiq                       |                 | ✅          |
+|                | EmbedChain                    |                 | ✅          |
+|                | FireCrawl                     |                 | ✅          |
+|                | Guardrails AI                 |                 | ✅          |
+|                | Haystack                      | ✅              | ✅          |
+|                | Julep AI                      |                 | ✅          |
+|                | LangChain                     | ✅              | ✅          |
+|                | LlamaIndex                    | ✅              | ✅          |
+|                | Letta                         |                 | ✅          |
+|                | LiteLLM                       | ✅              | ✅          |
+|                | mem0                          |                 | ✅          |
+|                | MultiOn                       |                 | ✅          |
+|                | Phidata                       |                 | ✅          |
+|                | SwarmZero                     |                 | ✅          |
+| **GPUs**       | AMD Radeon                    |                 | ✅          |
+|                | NVIDIA                        |                 | ✅          |
 
 ## Property Mapping
 
@@ -198,16 +171,16 @@ All attributes and resourceAttributes are available within the Langfuse `metadat
 
 Below, we share a non-exhaustive list of mappings that Langfuse applies:
 
-| OpenTelemetry Attribute | Langfuse Property   | Description                                                                                                                        |
-| ----------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `gen_ai.usage.cost`     | `costDetails.total` | The total cost of the request.                                                                                                     |
-| `gen_ai.usage.*`        | `usageDetails.*`    | Maps all keys within usage aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
-| `gen_ai.request.model`  | `model`             | The model used for the request.                                                                                                    |
-| `gen_ai.response.model` | `model`             | The model used for the response.                                                                                                   |
-| `gen_ai.request.*`      | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                 |
-| `langfuse.session.id`   | `sessionId`         | The session ID for the request.                                                                                                    |
-| `session.id`            | `sessionId`         | The session ID for the request.                                                                                                    |
-| `langfuse.user.id`      | `userId`            | The user ID for the request.                                                                                                       |
-| `user.id`               | `userId`            | The user ID for the request.                                                                                                       |
-| `gen_ai.prompt`         | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                  |
-| `gen_ai.completion`     | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                 |
+| OpenTelemetry Attribute | Langfuse Property   | Description                                                                                                                                                      |
+| ----------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gen_ai.usage.cost`     | `costDetails.total` | The total [cost](/docs/model-usage-and-cost) of the request.                                                                                                     |
+| `gen_ai.usage.*`        | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
+| `gen_ai.request.model`  | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
+| `gen_ai.response.model` | `model`             | The [model](/docs/model-usage-and-cost) used for the response.                                                                                                   |
+| `gen_ai.request.*`      | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
+| `langfuse.session.id`   | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
+| `session.id`            | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
+| `langfuse.user.id`      | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
+| `user.id`               | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
+| `gen_ai.prompt`         | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                                |
+| `gen_ai.completion`     | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                               |

@@ -1,13 +1,13 @@
 ---
-description: Example cookbook for the OpenLIT Langfuse integration using OpenTelemetry.
+description: Example cookbook for the OpenLLMetry Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
 
-# OpenLIT Integration via OpenTelemetry
+# OpenLLMetry Integration via OpenTelemetry
 
 
 ```python
-%pip install openai langfuse openlit
+%pip install openai traceloop-sdk
 ```
 
 
@@ -27,12 +27,14 @@ os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
+## OpenAI SDK
+
 
 ```python
 from openai import OpenAI
-import openlit
+from traceloop.sdk import Traceloop
 
-openlit.init(disable_batch=True)
+Traceloop.init(disable_batch=True)
 
 openai_client = OpenAI()
 
@@ -43,12 +45,12 @@ chat_completion = openai_client.chat.completions.create(
           "content": "What is LLM Observability?",
         }
     ],
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
 )
 
 print(chat_completion)
 ```
 
-[Example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/64902f6a5b4f27738be939b7ad38eab3?timestamp=2025-02-02T22%3A09%3A53.053Z)
+[Example Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e417c49b4044725e48aa0e089534fa12?timestamp=2025-02-02T22%3A04%3A04.487Z)
 
-![OpenLIT OpenAI Trace](https://langfuse.com/images/cookbook/otel-integration-openlit/openlit-openai-trace.png)
+![OpenLLMetry OpenAI Trace](https://langfuse.com/images/cookbook/otel-integration-openllmetry/openllmetry-openai-trace.png)
