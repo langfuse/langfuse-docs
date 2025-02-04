@@ -185,6 +185,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
   ["/docs/opentelemetry", "/docs/opentelemetry/get-started"],
   ["/docs/integrations/other/vapi", "/docs/integrations/vapi"],
+  ["/docs/integrations/other/autogen", "/docs/integrations/autogen"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/integrations/litellm", "/docs/integrations/litellm/tracing"],

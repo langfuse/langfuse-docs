@@ -6,6 +6,7 @@ export default {
   haystack: "Haystack",
   litellm: "LiteLLM",
   "vercel-ai-sdk": "Vercel AI SDK",
+  autogen: "AutoGen",
   dify: "Dify.AI",
   instructor: "Instructor",
   dspy: "DSPy",
