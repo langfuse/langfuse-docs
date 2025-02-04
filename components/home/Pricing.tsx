@@ -399,7 +399,7 @@ const sections = [
           cloud: {
             Hobby: "1,000 requests / min",
             Pro: "1,000 requests / min",
-            Team: "Custom",
+            Team: "1,000 requests / min",
           },
           selfHosted: {
             "Open Source": "n/a",
