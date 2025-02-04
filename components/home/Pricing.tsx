@@ -111,6 +111,7 @@ const tiers = {
         "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
         "Unlimited usage",
         "Deployment docs & Helm chart",
+        "SSO and basic RBAC",
         "Community support",
       ],
       cta: "Deployment guide",
@@ -143,7 +144,7 @@ const tiers = {
         "Enterprise-grade support and security features. Contact us for pricing.",
       mainFeatures: [
         "All Open Source / Pro features",
-        "SSO and fine-grained RBAC",
+        "Fine-grained RBAC",
         "SOC2, ISO27001, and InfoSec reviews",
         "Dedicated support engineer and SLAs",
         "Billing via AWS Marketplace",
@@ -399,7 +400,7 @@ const sections = [
           cloud: {
             Hobby: "1,000 requests / min",
             Pro: "1,000 requests / min",
-            Team: "Custom",
+            Team: "1,000 requests / min",
           },
           selfHosted: {
             "Open Source": "n/a",
