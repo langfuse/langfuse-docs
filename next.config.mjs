@@ -183,7 +183,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/openai/js", "/docs/integrations/openai/js/get-started"],
   ["/docs/integrations/mirascope", "/docs/integrations/mirascope/tracing"],
   ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
-  ["docs/opentelemetry/example-pydantic-ai", "/docs/integrations/pydantic-ai"],
+  ["/docs/opentelemetry/example-pydantic-ai", "/docs/integrations/pydantic-ai"],
   ["/docs/opentelemetry", "/docs/opentelemetry/get-started"],
   ["/docs/integrations/other/vapi", "/docs/integrations/vapi"],
   ["/docs/integrations/other/autogen", "/docs/integrations/autogen"],
