@@ -160,7 +160,7 @@ const nonPermanentRedirects = [
 
   // Redirects to bridge all kinds of old links to new links
   ["/docs/reference", "https://api.reference.langfuse.com/"],
-  ["/docs/integrations/api", "https://api.reference.langfuse.com/"],
+  ["/docs/integrations/api", "/docs/api"],
   ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
   ["/docs/integrations/sdk/python", "/docs/sdk/python"],
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
@@ -185,6 +185,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
   ["/docs/opentelemetry", "/docs/opentelemetry/get-started"],
   ["/docs/integrations/other/vapi", "/docs/integrations/vapi"],
+  ["/docs/integrations/other/autogen", "/docs/integrations/autogen"],
   ["/docs/flowise", "/docs/integrations/flowise"],
   ["/docs/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/integrations/litellm", "/docs/integrations/litellm/tracing"],
@@ -213,7 +214,6 @@ const nonPermanentRedirects = [
   ["/observability", "/docs/tracing"],
   ["/docs/openai", "/docs/integrations/openai/get-started"],
   ["/docs/integrations/openai", "/docs/integrations/openai/get-started"],
-  ["/docs/api", "https://api.reference.langfuse.com/"],
   ["/docs/qa-chatbot", "/docs/demo"],
   ["/docs/user-explorer", "/docs/tracing-features/users"],
   ["/docs/sessions", "/docs/tracing-features/sessions"],

@@ -43,7 +43,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "API",
-    href: "https://api.reference.langfuse.com/",
+    href: "/docs/api",
     icon: <Code className="h-6 w-6" />,
   },
   {

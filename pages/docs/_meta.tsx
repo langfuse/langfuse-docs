@@ -42,11 +42,7 @@ export default {
     type: "separator",
     title: "References",
   },
-  "api-ref": {
-    title: "API ↗",
-    href: "https://api.reference.langfuse.com",
-    newWindow: true,
-  },
+  api: "API",
   "python-ref": {
     title: "Python SDK ↗",
     href: "https://python.reference.langfuse.com",
