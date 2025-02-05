@@ -3,5 +3,4 @@ export default {
   "example-pydantic-ai": "Example: Pydantic AI",
   "example-openlit": "Example: OpenLIT",
   "example-openllmetry": "Example: OpenLLMetry",
-  "example-opentelemetry-collector": "Example: OpenTelemetry Collector",
 };

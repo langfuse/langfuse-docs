@@ -170,7 +170,7 @@ const sections = [
       },
       {
         name: "Custom via API",
-        href: "https://api.reference.langfuse.com/#post-/api/public/ingestion",
+        href: "/docs/api",
         tiers: {
           cloud: { Hobby: true, Pro: true, Team: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
