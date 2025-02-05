@@ -1,0 +1,52 @@
+---
+description: All Langfuse data and features are available via the API. Follow this guide to get started.
+---
+
+# Public API
+
+Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
+
+<Tabs items={["Path", "Cloud US", "Cloud EU"]}>
+
+<Tab>
+
+```
+/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://us.cloud.langfuse.com/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://cloud.langfuse.com/api/public
+```
+
+</Tab>
+</Tabs>
+
+References:
+
+- API Reference: https://api.reference.langfuse.com
+- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
+- Postman collection: https://cloud.langfuse.com/generated/postman/collection.json
+
+## Authentication
+
+Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
+The API keys are available in the Langfuse project settings.
+
+- Username: Langfuse Public Key
+- Password: Langfuse Secret Key
+
+Example:
+
+```bash
+curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
+```

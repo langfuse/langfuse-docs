@@ -191,11 +191,7 @@ export default function Integrations() {
             </Circle>
           </div>
           <div className="flex flex-row items-center justify-between">
-            <Circle
-              ref={inApiRef}
-              title="API"
-              href="https://api.reference.langfuse.com/"
-            >
+            <Circle ref={inApiRef} title="API" href="/docs/api">
               <Code className="h-6 w-6" />
             </Circle>
           </div>
