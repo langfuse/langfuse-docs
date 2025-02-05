@@ -7,6 +7,7 @@ export default {
   litellm: "LiteLLM",
   "vercel-ai-sdk": "Vercel AI SDK",
   autogen: "AutoGen",
+  "semantic-kernel": "Semantic Kernel",
   dify: "Dify.AI",
   instructor: "Instructor",
   dspy: "DSPy",
