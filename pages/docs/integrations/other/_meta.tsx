@@ -3,4 +3,5 @@ export default {
   inferable: "Inferable",
   milvus: "Milvus",
   ragas: "Ragas",
+  semanticKernel: "Semantic Kernel",
 };
