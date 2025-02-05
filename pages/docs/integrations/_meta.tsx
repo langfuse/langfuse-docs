@@ -8,6 +8,7 @@ export default {
   "vercel-ai-sdk": "Vercel AI SDK",
   autogen: "AutoGen",
   "semantic-kernel": "Semantic Kernel",
+  "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",
   instructor: "Instructor",
   dspy: "DSPy",
