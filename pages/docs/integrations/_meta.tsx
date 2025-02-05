@@ -28,5 +28,6 @@ export default {
   vapi: "Vapi",
   goose: "Goose",
   smolagents: "Smolagents",
+  crewai: "CrewAI",
   other: "More Ways to Integrate",
 };
