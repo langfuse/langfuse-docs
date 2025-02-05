@@ -55,10 +55,17 @@ curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 
 Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
-<Callout type="info">When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks</Callout>
+You can use your editor's Intellisense to explore the API methods and their parameters.
+
+<Callout type="info">
+
+When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
+
+</Callout>
 
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
+
 When using the [decorator-based integration](/docs/sdk/python/decorators):
 
 ```python
@@ -84,9 +91,11 @@ langfuse.api.trace.get(trace_id)
 # async client via asyncio
 await langfuse.async_api.trace(trace_id)
 ```
+
 </Tab>
 
 <Tab>
+
 ```ts
 import { Langfuse } from "langfuse"
 
@@ -95,5 +104,6 @@ const langfuse = new Langfuse()
 // fetch a trace
 await langfuse.api.traceGet(traceId)
 ```
+
 </Tab>
 </Tabs>
