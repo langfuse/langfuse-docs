@@ -25,5 +25,6 @@ export default {
   "groq-sdk": "Groq",
   vapi: "Vapi",
   goose: "Goose",
+  smolagents: "Smolagents",
   other: "More Ways to Integrate",
 };
