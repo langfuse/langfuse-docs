@@ -17,9 +17,14 @@ import FlowiseLogo from "./img/flowise_logo.png";
 import LangflowIcon from "./img/langflow_icon.svg";
 import DifyIcon from "./img/dify_icon.png";
 import OpenwebUiIcon from "./img/openwebui_icon.png";
-import MirascopeIcon from "./img/mirascope_icon.svg";
 import DSPyIcon from "./img/dspy_icon.png";
 import GoogleGeminiIcon from "./img/google_gemini.svg";
+import OpenTelemetryIcon from "./img/opentelemetry_icon.svg";
+import CrewAiIcon from "./img/crewai_icon.svg";
+import MicrosoftIcon from "./img/microsoft_icon.svg";
+import HuggingFaceIcon from "./img/huggingface_icon.svg";
+import PydanticAiIcon from "./img/pydantic-ai_icon.svg";
+import AutoGenIcon from "./img/autogen_icon.svg";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import React from "react";
@@ -45,6 +50,18 @@ const integrations: IntegrationTileProps[] = [
     title: "API",
     href: "/docs/api",
     icon: <Code className="h-6 w-6" />,
+  },
+  {
+    title: "Open\u200BTelemetry",
+    href: "/docs/opentelemetry/get-started",
+    icon: (
+      <Image
+        src={OpenTelemetryIcon}
+        alt="OpenTelemetry Icon"
+        width={36}
+        height={36}
+      />
+    ),
   },
   {
     title: "OpenAI SDK",
@@ -75,6 +92,11 @@ const integrations: IntegrationTileProps[] = [
         height={35}
       />
     ),
+  },
+  {
+    title: "CrewAI",
+    href: "/docs/integrations/crewai",
+    icon: <Image src={CrewAiIcon} alt="CrewAI Icon" width={60} height={40} />,
   },
   {
     title: "LiteLLM",
@@ -111,16 +133,50 @@ const integrations: IntegrationTileProps[] = [
     ),
   },
   {
+    title: "Semantic Kernel",
+    href: "/docs/integrations/semantic-kernel",
+    icon: (
+      <Image
+        src={MicrosoftIcon}
+        alt="Semantic Kernel Icon"
+        width={36}
+        height={36}
+      />
+    ),
+  },
+  {
     title: "DSPy",
     href: "/docs/integrations/dspy",
     icon: <Image src={DSPyIcon} alt="DSPy Icon" width={36} height={36} />,
   },
   {
-    title: "Mirascope",
-    href: "/docs/integrations/mirascope",
+    title: "Smolagents",
+    href: "/docs/integrations/smolagents",
     icon: (
-      <Image src={MirascopeIcon} alt="Mirascope Icon" width={36} height={36} />
+      <Image
+        src={HuggingFaceIcon}
+        alt="Smolagents Icon"
+        width={36}
+        height={36}
+      />
     ),
+  },
+  {
+    title: "Pydantic AI",
+    href: "/docs/integrations/pydantic-ai",
+    icon: (
+      <Image
+        src={PydanticAiIcon}
+        alt="Pydantic AI Icon"
+        width={36}
+        height={36}
+      />
+    ),
+  },
+  {
+    title: "AutoGen",
+    href: "/docs/integrations/autogen",
+    icon: <Image src={AutoGenIcon} alt="AutoGen Icon" width={36} height={36} />,
   },
   {
     title: "Amazon Bedrock",
@@ -198,20 +254,20 @@ const integrations: IntegrationTileProps[] = [
 function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
   return (
     <Link href={href} className="group relative aspect-square w-full">
-      <div className="flex h-full flex-col items-center justify-center gap-y-0.5 md:gap-2 p-1 md:p-4">
-        <div className="size-12 flex items-center justify-center perspective-1000">
+      <div className="flex h-full flex-col items-center justify-center gap-y-1 sm:gap-y-2 p-2 sm:p-4">
+        <div className="size-8 sm:size-12 flex items-center justify-center perspective-1000">
           <div className="relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
             {/* Front */}
-            <div className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden]">
+            <div className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden] scale-75 sm:scale-100">
               {icon}
             </div>
             {/* Back */}
             <div className="absolute inset-0 flex items-center justify-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-              <ArrowUpRightFromSquare className="size-6" />
+              <ArrowUpRightFromSquare className="size-4 sm:size-6" />
             </div>
           </div>
         </div>
-        <span className="text-center text-xs md:text-md font-medium">
+        <span className="text-center text-xs sm:text-sm text-muted-foreground line-clamp-2">
           {title}
         </span>
       </div>
@@ -220,70 +276,31 @@ function IntegrationTile({ title, href, icon }: IntegrationTileProps) {
 }
 
 export default function IntegrationsGrid() {
-  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = React.useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovering(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-  };
-
   return (
     <HomeSection>
       <Header
         title="Works with any LLM app and model"
-        description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
+        description="SDKs for Python & JS/TS, native integrations for popular libraries and support for OpenTelemetry"
         buttons={[
           {
             href: "/docs/integrations/overview",
-            text: "Integration docs",
+            text: "Integration overview",
+          },
+          {
+            href: "/ideas",
+            text: "Request new integration",
           },
         ]}
       />
-      <div
-        className="relative w-full mx-auto max-w-2xl rounded border bg-card overflow-hidden"
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className="absolute inset-0 bg-grid-slate-200 [mask-image:radial-gradient(white,transparent_85%)] dark:bg-grid-slate-700/50" />
-
-        {/* Animated background gradient */}
-        <div
-          className="absolute inset-0 opacity-0 transition-opacity duration-300 ease-out"
-          style={{
-            opacity: isHovering ? 0.5 : 0,
-            background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(100,100,255,0.15), transparent 40%)`,
-          }}
-        />
-
-        <div className="relative grid grid-cols-4 md:grid-cols-5">
+      <div className="relative w-full mx-auto max-w-2xl rounded border bg-card overflow-hidden">
+        <div className="grid grid-cols-5 divide-x divide-y divide-border [&>*:nth-child(-n+5)]:border-t [&>*:nth-child(5n+1)]:border-l">
           {integrations.map((integration) => (
             <div
               key={integration.title}
-              className="aspect-square w-full flex items-center justify-center border border-dashed"
+              className="relative flex items-center justify-center"
             >
               <IntegrationTile {...integration} />
             </div>
-          ))}
-          {/* Fill remaining grid spaces with empty divs */}
-          {[
-            ...Array(
-              Math.ceil(integrations.length / 4) * 4 - integrations.length
-            ),
-          ].map((_, i) => (
-            <div key={`empty-${i}`} className="aspect-square w-full" />
           ))}
         </div>
       </div>
