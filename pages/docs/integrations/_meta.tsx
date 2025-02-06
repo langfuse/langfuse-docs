@@ -6,6 +6,9 @@ export default {
   haystack: "Haystack",
   litellm: "LiteLLM",
   "vercel-ai-sdk": "Vercel AI SDK",
+  autogen: "AutoGen",
+  "semantic-kernel": "Semantic Kernel",
+  "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",
   instructor: "Instructor",
   dspy: "DSPy",
@@ -24,5 +27,7 @@ export default {
   "groq-sdk": "Groq",
   vapi: "Vapi",
   goose: "Goose",
+  smolagents: "Smolagents",
+  crewai: "CrewAI",
   other: "More Ways to Integrate",
 };

@@ -1,9 +1,9 @@
 ---
-title: Collect OpenTelemetry Traces in Langfuse (Beta)
-description: How to connect Langfuse with Opentelemetry.
+title: Open Source LLM Observability via OpenTelemetry
+description: How to connect Langfuse with OpenTelemetry to observe LLM applications.
 ---
 
-# OpenTelemetry
+# LLM Observability via OpenTelemetry
 
 <AvailabilityBanner
   availability={{
@@ -14,38 +14,132 @@ description: How to connect Langfuse with Opentelemetry.
   }}
 />
 
-<Callout type="warning">
+<Callout emoji="🚧">
 
-OpenTelemetry support in Langfuse is experimental.
-All APIs may change at any point in time without prior notice.
-
-The public beta is intended to gather feedback and improve the integration based on your needs.
+OpenTelemetry support in Langfuse is in public beta and APIs might still change. The public beta is intended to gather feedback and improve the integration based on your needs.
 Please share all feedback in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
 
 </Callout>
 
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
-OpenTelemetry maintains an experimental set of [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces.
-In addition, to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), we added experimental support for OpenTelemetry to increase compatibility.
 
-## Getting Started
+Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
 
-Langfuses offers an OpenTelemetry Collector. To get started with the OpenTelemetry integration:
+As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/tracing-data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([property mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
 
-### Endpoint: `/api/public/otel`
+## OpenTelemetry endpoint
 
-- EU: `OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"`
-- US: `OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel"`
+Langfuse can receive traces on the `/api/public/otel` (OTLP) endpoint.
 
-### Authentication
+If you use a Collector that uses the OpenTelemetry SDK to export traces, you can use the following configuration:
 
-[Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) with your Langfuse API keys. Commonly referred to as `OTEL_EXPORTER_OTLP_HEADERS`.
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # EU data region
+# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # US data region
 
-1. Use the following command to get the base64 encoded API keys (referred to as "AUTH_STRING"):<br/>`echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
+```
 
-2. Add the following authentication header:<br/>`OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"`
+<Callout type="info">
 
-## OpenTelemetry Collector
+Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) to authenticate requests.
+
+You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`
+
+</Callout>
+
+<Callout type="info">
+
+If your collector requires signal-specific environment variables, the trace endpoint is `/api/public/otel/v1/traces`.
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/traces" # EU data region
+# OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel/v1/traces" # US data region
+```
+
+</Callout>
+
+## Custom via OpenTelemetry SDKs
+
+You can use the OpenTelemetry SDKs to directly export traces to Langfuse with the configuration mentioned above. Thereby, Language support of Langfuse is extended to other languages than the ones supported by the [Langfuse SDKs](/docs/sdk/overview) (Python and JS/TS).
+
+As a reference, see [this example notebook](/docs/opentelemetry/example-python-sdk) on how to use the OpenTelemetry Python SDK to export traces to Langfuse.
+
+## Use OpenTelemetry GenAI Instrumentation Libraries
+
+Any OpenTelemetry compatible instrumentation can be used to export traces to Langfuse. Check out the following end-to-end examples of popular instrumentation SDKs to get started:
+
+- [OpenLIT](/docs/opentelemetry/example-openlit)
+- [OpenLLMetry](/docs/opentelemetry/example-openllmetry)
+
+<details>
+
+<summary>Comparison of OpenTelemetry Instrumentation Libraries</summary>
+
+| Category   | Item                          | OpenLLMetry | openlit |
+| ---------- | ----------------------------- | ----------- | ------- |
+| LLMs       | AI21                          |             | ✅      |
+|            | Aleph Alpha                   | ✅          |         |
+|            | Amazon Bedrock                | ✅          | ✅      |
+|            | Anthropic                     | ✅          | ✅      |
+|            | Assembly AI                   |             | ✅      |
+|            | Azure AI Inference            |             | ✅      |
+|            | Azure OpenAI                  | ✅          | ✅      |
+|            | Cohere                        | ✅          | ✅      |
+|            | DeepSeek                      |             | ✅      |
+|            | ElevenLabs                    |             | ✅      |
+|            | GitHub Models                 |             | ✅      |
+|            | Google AI Studio              |             | ✅      |
+|            | Google Generative AI (Gemini) | ✅          |         |
+|            | Groq                          | ✅          | ✅      |
+|            | HuggingFace                   | ✅          | ✅      |
+|            | IBM Watsonx AI                | ✅          |         |
+|            | Mistral AI                    | ✅          | ✅      |
+|            | NVIDIA NIM                    |             | ✅      |
+|            | Ollama                        | ✅          | ✅      |
+|            | OpenAI                        | ✅          | ✅      |
+|            | OLA Krutrim                   |             | ✅      |
+|            | Prem AI                       |             | ✅      |
+|            | Replicate                     | ✅          |         |
+|            | SageMaker (AWS)               | ✅          |         |
+|            | Titan ML                      |             | ✅      |
+|            | Together AI                   | ✅          | ✅      |
+|            | vLLM                          |             | ✅      |
+|            | Vertex AI                     | ✅          | ✅      |
+|            | xAI                           |             | ✅      |
+| Vector DBs | AstraDB                       |             | ✅      |
+|            | Chroma                        | ✅          |         |
+|            | ChromaDB                      |             | ✅      |
+|            | LanceDB                       | ✅          |         |
+|            | Marqo                         | ✅          |         |
+|            | Milvus                        | ✅          | ✅      |
+|            | Pinecone                      | ✅          | ✅      |
+|            | Qdrant                        | ✅          | ✅      |
+|            | Weaviate                      | ✅          |         |
+| Frameworks | AutoGen / AG2                 |             | ✅      |
+|            | ControlFlow                   |             | ✅      |
+|            | CrewAI                        | ✅          | ✅      |
+|            | Crawl4AI                      |             | ✅      |
+|            | Dynamiq                       |             | ✅      |
+|            | EmbedChain                    |             | ✅      |
+|            | FireCrawl                     |             | ✅      |
+|            | Guardrails AI                 |             | ✅      |
+|            | Haystack                      | ✅          | ✅      |
+|            | Julep AI                      |             | ✅      |
+|            | LangChain                     | ✅          | ✅      |
+|            | LlamaIndex                    | ✅          | ✅      |
+|            | Letta                         |             | ✅      |
+|            | LiteLLM                       | ✅          | ✅      |
+|            | mem0                          |             | ✅      |
+|            | MultiOn                       |             | ✅      |
+|            | Phidata                       |             | ✅      |
+|            | SwarmZero                     |             | ✅      |
+| GPUs       | AMD Radeon                    |             | ✅      |
+|            | NVIDIA                        |             | ✅      |
+
+</details>
+
+## Export from OpenTelemetry Collector
 
 ```mermaid
 graph LR
@@ -53,115 +147,48 @@ graph LR
     B --> C[Langfuse]
 ```
 
-If you already have an OpenTelemetry Collector and want to export traces to Langfuse, you can use the following configuration:
+If you run an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector), you can use the following configuration to export traces to Langfuse:
 
-import { BookOpen } from "lucide-react";
+```yml
+receivers:
+  otlp:
+    protocols:
+    grpc:
+      endpoint: 0.0.0.0:4317
+    http:
+      endpoint: 0.0.0.0:4318
 
-<Cards>
-  <Card
-    icon={<BookOpen />}
-    title="OpenTelemetry Collector"
-    href="/docs/opentelemetry/example-opentelemetry-collector"
-  />
-</Cards>
+processors:
+  batch:
+  memory_limiter:
+    # 80% of maximum memory up to 2G
+    limit_mib: 1500
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
 
-## OpenTelemetry Instrumentation Libraries
+exporters:
+  otlp/langfuse:
+    endpoint: "cloud.langfuse.com/api/public/otel" # EU data region
+    # endpoint: "us.cloud.langfuse.com/api/public/otel" # US data region
+    headers:
+      Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
 
-```mermaid
-graph LR
-    A[Application with OTel Instrumentation] --> C[Langfuse]
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/langfuse]
 ```
+
+## Property Mapping [#property-mapping]
 
 <Callout type="info">
 
-Please [raise an issue on GitHub](/issues) if an integration does not work as expected or does not parse the correct attributes. This might happen as not all OTel compatible instrumentation follows the OpenTelemetry GenAI Semantic Conventions or there are relevant additional attributes that are not yet covered by the Semantic Conventions.
+Please [raise an issue on GitHub](/issues) if an integration does not work as expected or does not parse the correct attributes.
 
 </Callout>
-
-Any OTel compatible instrumentation can be used to send traces to Langfuse. Check out the following end-to-end examples of popular instrumentation SDKs to get started:
-
-<Cards>
-  <Card
-    title="OpenLIT"
-    href="/docs/opentelemetry/example-openlit"
-    icon={<BookOpen />}
-  />
-  <Card
-    title="Pydantic AI"
-    href="/docs/opentelemetry/example-pydantic-ai"
-    icon={<BookOpen />}
-  />
-  <Card
-    title="OpenLLMetry"
-    href="/docs/opentelemetry/example-openllmetry"
-    icon={<BookOpen />}
-  />
-</Cards>
-
-### Comparison of OpenTelemetry Instrumentation Libraries
-
-| **Category**   | **Item**                      | **OpenLLMetry** | **openlit** |
-| -------------- | ----------------------------- | --------------- | ----------- |
-| **LLMs**       | AI21                          |                 | ✅          |
-|                | Aleph Alpha                   | ✅              |             |
-|                | Amazon Bedrock                | ✅              | ✅          |
-|                | Anthropic                     | ✅              | ✅          |
-|                | Assembly AI                   |                 | ✅          |
-|                | Azure AI Inference            |                 | ✅          |
-|                | Azure OpenAI                  | ✅              | ✅          |
-|                | Cohere                        | ✅              | ✅          |
-|                | DeepSeek                      |                 | ✅          |
-|                | ElevenLabs                    |                 | ✅          |
-|                | GitHub Models                 |                 | ✅          |
-|                | Google AI Studio              |                 | ✅          |
-|                | Google Generative AI (Gemini) | ✅              |             |
-|                | Groq                          | ✅              | ✅          |
-|                | HuggingFace                   | ✅              | ✅          |
-|                | IBM Watsonx AI                | ✅              |             |
-|                | Mistral AI                    | ✅              | ✅          |
-|                | NVIDIA NIM                    |                 | ✅          |
-|                | Ollama                        | ✅              | ✅          |
-|                | OpenAI                        | ✅              | ✅          |
-|                | OLA Krutrim                   |                 | ✅          |
-|                | Prem AI                       |                 | ✅          |
-|                | Replicate                     | ✅              |             |
-|                | SageMaker (AWS)               | ✅              |             |
-|                | Titan ML                      |                 | ✅          |
-|                | Together AI                   | ✅              | ✅          |
-|                | vLLM                          |                 | ✅          |
-|                | Vertex AI                     | ✅              | ✅          |
-|                | xAI                           |                 | ✅          |
-| **Vector DBs** | AstraDB                       |                 | ✅          |
-|                | Chroma                        | ✅              |             |
-|                | ChromaDB                      |                 | ✅          |
-|                | LanceDB                       | ✅              |             |
-|                | Marqo                         | ✅              |             |
-|                | Milvus                        | ✅              | ✅          |
-|                | Pinecone                      | ✅              | ✅          |
-|                | Qdrant                        | ✅              | ✅          |
-|                | Weaviate                      | ✅              |             |
-| **Frameworks** | AutoGen / AG2                 |                 | ✅          |
-|                | ControlFlow                   |                 | ✅          |
-|                | CrewAI                        | ✅              | ✅          |
-|                | Crawl4AI                      |                 | ✅          |
-|                | Dynamiq                       |                 | ✅          |
-|                | EmbedChain                    |                 | ✅          |
-|                | FireCrawl                     |                 | ✅          |
-|                | Guardrails AI                 |                 | ✅          |
-|                | Haystack                      | ✅              | ✅          |
-|                | Julep AI                      |                 | ✅          |
-|                | LangChain                     | ✅              | ✅          |
-|                | LlamaIndex                    | ✅              | ✅          |
-|                | Letta                         |                 | ✅          |
-|                | LiteLLM                       | ✅              | ✅          |
-|                | mem0                          |                 | ✅          |
-|                | MultiOn                       |                 | ✅          |
-|                | Phidata                       |                 | ✅          |
-|                | SwarmZero                     |                 | ✅          |
-| **GPUs**       | AMD Radeon                    |                 | ✅          |
-|                | NVIDIA                        |                 | ✅          |
-
-## Property Mapping
 
 Langfuse accepts any span that adheres to the OpenTelemetry specification.
 In addition, we map many GenAI specific properties to properties in the Langfuse data model to provide a seamless experience when using OpenTelemetry with Langfuse.
