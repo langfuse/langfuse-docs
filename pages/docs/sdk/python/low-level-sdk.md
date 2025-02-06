@@ -64,8 +64,7 @@ langfuse = Langfuse()
 | `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
 | `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
 | `LANGFUSE_SAMPLE_RATE`, `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing. | 1.0
-| `LANGFUSE_MAX_EVENT_SIZE_BYTES`, | Configure max event size before input / output / metadata is truncated. Please use in self-hosted environments only.| 1_000_000
-| `LANGFUSE_MAX_BATCH_SIZE_BYTES`, | Configure max batch size per ingestion request. Please use in self-hosted environments only.| 2_500_000
+
 
 ## Tracing
 
