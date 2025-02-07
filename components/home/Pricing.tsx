@@ -542,7 +542,7 @@ const sections: Section[] = [
           selfHosted: {
             "Open Source": false,
             Pro: false,
-            Enterprise: "Add-on",
+            Enterprise: true,
           },
         },
       },
@@ -558,7 +558,7 @@ const sections: Section[] = [
           selfHosted: {
             "Open Source": false,
             Pro: false,
-            Enterprise: "Add-on",
+            Enterprise: true,
           },
         },
       },
@@ -679,18 +679,50 @@ const sections: Section[] = [
     name: "Billing",
     features: [
       {
+        name: "Subscription management",
+        tiers: {
+          cloud: {
+            Hobby: "n/a",
+            Pro: "Self-serve",
+            Team: "Self-serve",
+            Enterprise: "Sales",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "Self-serve",
+            Enterprise: "Sales",
+          },
+        },
+      },
+      {
         name: "Payment methods",
         tiers: {
           cloud: {
             Hobby: "n/a",
-            Pro: "credit card",
-            Team: "credit card",
-            Enterprise: "credit card, invoice",
+            Pro: "Credit card",
+            Team: "Credit card",
+            Enterprise: "Credit card, Invoice",
           },
           selfHosted: {
             "Open Source": "n/a",
-            Pro: "credit card",
-            Enterprise: "credit card, invoice",
+            Pro: "Credit card",
+            Enterprise: "Credit card, Invoice",
+          },
+        },
+      },
+      {
+        name: "Contract duration",
+        tiers: {
+          cloud: {
+            Hobby: "n/a",
+            Pro: "Monthly",
+            Team: "Monthly",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "Monthly",
+            Enterprise: "Custom",
           },
         },
       },
@@ -717,6 +749,22 @@ const sections: Section[] = [
     href: "/security",
     features: [
       {
+        name: "Contracts",
+        tiers: {
+          cloud: {
+            Hobby: "Standard T&Cs",
+            Pro: "Standard T&Cs & DPA",
+            Team: "Standard T&Cs & DPA",
+            Enterprise: "Custom",
+          },
+          selfHosted: {
+            "Open Source": "n/a",
+            Pro: "Standard T&Cs",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
         name: "Data processing agreement (GDPR)",
         tiers: {
           cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
@@ -740,22 +788,6 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
-        },
-      },
-      {
-        name: "Contracts",
-        tiers: {
-          cloud: {
-            Hobby: "Standard T&Cs",
-            Pro: "Standard T&Cs & DPA",
-            Team: "Standard T&Cs & DPA",
-            Enterprise: "Custom",
-          },
-          selfHosted: {
-            "Open Source": "n/a",
-            Pro: "Standard T&Cs",
-            Enterprise: "Custom",
-          },
         },
       },
     ],
