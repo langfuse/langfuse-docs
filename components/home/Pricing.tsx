@@ -729,7 +729,7 @@ export default function Pricing({
             </Tabs>
 
             {/* Pricing Cards Grid */}
-            <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:items-stretch mb-10">
+            <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:items-stretch mb-20">
               {selectedTiers.map((tier) => (
                 <Card
                   key={tier.id}
@@ -873,13 +873,13 @@ export default function Pricing({
               <Table className="w-full">
                 <TableHeader>
                   <TableRow className="bg-muted hover:bg-muted">
-                    <TableHead className="w-3/12 text-primary">
+                    <TableHead className="w-3/12 text-primary font-bold">
                       Features
                     </TableHead>
                     {selectedTiers.map((tier) => (
                       <TableHead
                         key={tier.id}
-                        className="w-2/12 text-primary text-lg font-medium text-center"
+                        className="w-2/12 text-primary font-bold text-center text-xl"
                       >
                         {tier.name}
                       </TableHead>
@@ -890,7 +890,7 @@ export default function Pricing({
                   {sections.map((section) => (
                     <React.Fragment key={section.name}>
                       <TableRow className="bg-muted/50">
-                        <TableCell colSpan={5} className="font-bold">
+                        <TableCell colSpan={5} className="font-medium">
                           {section.name}
                           {section.href && <InfoLink href={section.href} />}
                         </TableCell>
