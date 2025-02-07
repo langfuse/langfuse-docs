@@ -894,7 +894,7 @@ export default function Pricing({
 
               <div className="mx-auto max-w-2xl space-y-16">
                 {selectedTiers.map((tier) => (
-                  <div key={tier.id} className="border-t">
+                  <div key={tier.id}>
                     <div className="mb-4">
                       <h4 className="text-xl font-medium">{tier.name}</h4>
                       <p className="mt-2 text-sm text-muted-foreground">
