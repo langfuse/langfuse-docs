@@ -93,7 +93,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All platform features (with limits)",
         "50k observations / month included",
         "30 days data access",
-        "2 users included",
+        "2 users",
         "Community support (Discord & GitHub)",
       ],
       cta: "Sign up",
@@ -115,6 +115,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "100k observations / month included, additional: $10 / 100k observations",
         "Unlimited data access",
         "Unlimited users",
+        "Unlimited evaluators",
         "Support via Email/Chat",
       ],
       cta: "Sign up",
@@ -127,10 +128,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "$499",
       description: "Dedicated support, and security controls for larger teams.",
       mainFeatures: [
+        "Everything in Pro",
         "100k observations / month included, additional: $10 / 100k observations",
-        "SSO enforcement, fine-grained RBAC",
+        "Custom SSO, SSO enforcement",
+        "Fine-grained RBAC",
         "SOC2, ISO27001",
-        "Dedicated support channel",
+        "Support via Slack",
       ],
       cta: "Sign up",
     },
@@ -633,6 +636,20 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
+        },
+      },
+      {
+        name: "Organization Creators",
+        href: "/self-hosting/organization-creators",
+        tiers: {
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
+        name: "UI Customization",
+        href: "/self-hosting/ui-customization",
+        tiers: {
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
