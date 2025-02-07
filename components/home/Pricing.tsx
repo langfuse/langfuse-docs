@@ -355,6 +355,7 @@ const sections: Section[] = [
       },
       {
         name: "Prompt Experiments",
+        href: "/docs/datasets/prompt-experiments",
         tiers: {
           cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: {
@@ -596,7 +597,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Enterprise SSO (e.g. Okta, Auth0)",
+        name: "Enterprise SSO (e.g. Okta, AzureAD/EntraID)",
         tiers: {
           cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
