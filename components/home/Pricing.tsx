@@ -931,14 +931,14 @@ export default function Pricing({
             {/* Feature comparison (lg+) */}
             <section
               aria-labelledby="comparison-heading"
-              className="hidden lg:block"
+              className="hidden lg:block bg-card rounded-lg overflow-hidden border"
             >
               <h2 id="comparison-heading" className="sr-only">
                 Feature comparison
               </h2>
 
               <Table className="w-full">
-                <TableHeader>
+                <TableHeader className="bg-background">
                   <TableRow className="bg-muted hover:bg-muted">
                     <TableHead className="w-3/12" />
                     {selectedTiers.map((tier) => (
