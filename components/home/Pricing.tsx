@@ -789,10 +789,10 @@ export default function Pricing({
             {/* Pricing Cards Grid */}
             <div
               className={cn(
-                "mt-12 grid sm:grid-cols-2 gap-6 lg:items-stretch mb-20",
-                selectedTiers.length === 4 && "lg:grid-cols-4",
-                selectedTiers.length === 3 && "lg:grid-cols-3",
-                selectedTiers.length === 2 && "lg:grid-cols-2"
+                "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch mb-20",
+                selectedTiers.length === 4 && "md:grid-cols-4",
+                selectedTiers.length === 3 && "md:grid-cols-3",
+                selectedTiers.length === 2 && "md:grid-cols-2"
               )}
             >
               {selectedTiers.map((tier) => (
@@ -803,21 +803,11 @@ export default function Pricing({
                     "relative h-full flex flex-col"
                   )}
                 >
-                  <CardHeader className="text-center pb-2">
-                    <CardTitle className="mb-7 text-lg text-foreground font-semibold">
+                  <CardHeader className="p-4 lg:p-6 text-left">
+                    <CardTitle className="text-lg text-foreground font-semibold">
                       {tier.name}
                     </CardTitle>
-                    <div>
-                      <span className="font-bold text-5xl">{tier.price}</span>
-                      {tier.price.includes("$") && (
-                        <span className="text-sm leading-4 mt-2">
-                          {tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month"}
-                        </span>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow my-6">
-                    <CardDescription className="text-left">
+                    <CardDescription className="text-left md:min-h-20 lg:min-h-16">
                       {tier.description}
                       {tier.learnMore && (
                         <>
@@ -829,6 +819,25 @@ export default function Pricing({
                         </>
                       )}
                     </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0 px-4 lg:px-6 mb-4">
+                    <Button
+                      className="w-full"
+                      variant={tier.featured ? "default" : "outline"}
+                      asChild
+                    >
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
+                  </CardContent>
+                  <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
+                    <div>
+                      <span className="font-bold text-3xl">{tier.price}</span>
+                      {tier.price.includes("$") && (
+                        <span className="text-sm leading-4 mt-2">
+                          {tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month"}
+                        </span>
+                      )}
+                    </div>
                     <ul className="mt-3 space-y-2.5 text-sm">
                       {tier.mainFeatures.map((feature) => (
                         <li key={feature} className="flex space-x-2">
@@ -839,15 +848,6 @@ export default function Pricing({
                         </li>
                       ))}
                     </ul>
-                  </CardContent>
-                  <CardFooter className="mt-auto">
-                    <Button
-                      className="w-full"
-                      variant={tier.featured ? "default" : "outline"}
-                      asChild
-                    >
-                      <Link href={tier.href}>{tier.cta}</Link>
-                    </Button>
                   </CardFooter>
                 </Card>
               ))}
