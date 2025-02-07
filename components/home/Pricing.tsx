@@ -743,18 +743,18 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Custom contracts",
+        name: "Contracts",
         tiers: {
           cloud: {
-            Hobby: false,
-            Pro: false,
-            Team: false,
-            Enterprise: true,
+            Hobby: "Standard T&Cs",
+            Pro: "Standard T&Cs & DPA",
+            Team: "Standard T&Cs & DPA",
+            Enterprise: "Custom",
           },
           selfHosted: {
-            "Open Source": false,
-            Pro: false,
-            Enterprise: true,
+            "Open Source": "n/a",
+            Pro: "Standard T&Cs",
+            Enterprise: "Custom",
           },
         },
       },
