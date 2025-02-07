@@ -150,7 +150,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "InfoSec/legal reviews",
         "Billing via AWS Marketplace",
       ],
-      cta: "Schedule a demo",
+      cta: "Talk to sales",
     },
   ],
   selfHosted: [
@@ -204,7 +204,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Dedicated support engineer and SLAs",
         "Billing via AWS Marketplace",
       ],
-      cta: "Talk to founders",
+      cta: "Talk to sales",
       learnMore: "/enterprise",
     },
   ],
