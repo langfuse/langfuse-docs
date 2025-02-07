@@ -918,9 +918,7 @@ export default function Pricing({
               <Table className="w-full">
                 <TableHeader>
                   <TableRow className="bg-muted hover:bg-muted">
-                    <TableHead className="w-3/12 text-primary font-bold">
-                      Features
-                    </TableHead>
+                    <TableHead className="w-3/12" />
                     {selectedTiers.map((tier) => (
                       <TableHead
                         key={tier.id}
