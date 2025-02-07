@@ -14,7 +14,7 @@ export function Hero() {
   return (
     <HomeSection>
       {/* HERO */}
-      <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(60vh-100px)] pb-12 lg:py-20">
+      <div className="flex flex-col items-start justify-center gap-3 md:min-h-[calc(min(calc(60vh-100px),60vw))] pb-12 lg:py-20">
         <h1 className="text-4xl sm:text-7xl lg:text-8xl font-bold font-mono">
           Open Source
           <br />
