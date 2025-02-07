@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Plus, Minus, X, ExternalLink } from "lucide-react";
+import { Check, Plus, Minus, ExternalLink } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -26,11 +26,16 @@ import {
 import { CheckIcon, MinusIcon } from "lucide-react";
 import React from "react";
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+type DeploymentOption = "cloud" | "selfHosted";
 
-const deploymentOptions = {
+type DeploymentOptionParams = {
+  switch: React.ReactNode;
+  title: string;
+  subtitle: string;
+  href: string;
+};
+
+const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
   cloud: {
     switch: (
       <span className="flex flex-row items-center gap-x-1">
@@ -57,7 +62,24 @@ const deploymentOptions = {
   },
 };
 
-const tiers = {
+type Tier = {
+  name: string;
+  id: string;
+  href: string;
+  featured: boolean;
+  description: string;
+  price: string;
+  priceUnit?: string;
+  mainFeatures: string[];
+  cta: string;
+  priceDiscountCta?: {
+    name: string;
+    href: string;
+  };
+  learnMore?: string;
+};
+
+const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
     {
       name: "Hobby",
@@ -118,9 +140,8 @@ const tiers = {
       href: "/schedule-demo",
 
       featured: false,
-      description:
-        "Enterprise-grade support and security features. Contact us for pricing.",
-      price: "Talk to us",
+      description: "Enterprise-grade support and security features.",
+      price: "Custom",
       mainFeatures: [
         "All features",
         "Dedicated support engineer",
@@ -159,7 +180,7 @@ const tiers = {
       description:
         "Get access to additional workflow features to accelerate your team.",
       price: "$100",
-      priceUnit: "user",
+      priceUnit: "user per month",
       mainFeatures: [
         "All Open Source features",
         "LLM Playground",
@@ -175,8 +196,7 @@ const tiers = {
       href: "/schedule-demo",
       featured: false,
       price: "Custom",
-      description:
-        "Enterprise-grade support and security features. Contact us for pricing.",
+      description: "Enterprise-grade support and security features.",
       mainFeatures: [
         "All Open Source / Pro features",
         "Fine-grained RBAC",
@@ -190,7 +210,17 @@ const tiers = {
   ],
 } as const;
 
-const sections = [
+type Section = {
+  name: string;
+  href?: string;
+  features: {
+    name: string;
+    href?: string;
+    tiers: Partial<Record<DeploymentOption, Record<string, boolean | string>>>;
+  }[];
+};
+
+const sections: Section[] = [
   {
     name: "Tracing",
     href: "/docs/tracing",
@@ -236,11 +266,6 @@ const sections = [
             Team: "$10 / 100k observations",
             Enterprise: "$10 / 100k observations",
           },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
         },
       },
       {
@@ -268,11 +293,6 @@ const sections = [
             Team: "Unlimited",
             Enterprise: "Unlimited",
           },
-          selfHosted: {
-            "Open Source": "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
         },
       },
       {
@@ -284,11 +304,6 @@ const sections = [
             Pro: "4,000 requests / min",
             Team: "20,000 requests / min",
             Enterprise: "20,000 requests / min",
-          },
-          selfHosted: {
-            "Open Source": "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
           },
         },
       },
@@ -427,7 +442,7 @@ const sections = [
     href: "/docs/api",
     features: [
       {
-        name: "Extensive GET API",
+        name: "Extensive Public API",
         tiers: {
           cloud: {
             Hobby: true,
@@ -452,11 +467,13 @@ const sections = [
             Team: "1,000 requests / min",
             Enterprise: "1,000 requests / min",
           },
-          selfHosted: {
-            "Open Source": "n/a",
-            Pro: "n/a",
-            Enterprise: "n/a",
-          },
+        },
+      },
+      {
+        name: "SLA",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
         },
       },
     ],
@@ -484,7 +501,7 @@ const sections = [
           cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: {
             "Open Source": false,
-            Pro: "Add-on, included at >10 users",
+            Pro: "included at >10 users",
             Enterprise: true,
           },
         },
@@ -492,12 +509,12 @@ const sections = [
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
-        name: "SLAs",
+        name: "Support SLA",
         tiers: {
           cloud: {
             Hobby: false,
@@ -542,11 +559,6 @@ const sections = [
             Pro: "US or EU",
             Team: "US or EU",
             Enterprise: "US or EU",
-          },
-          selfHosted: {
-            "Open Source": "Own infrastructure",
-            Pro: "Own infrastructure",
-            Enterprise: "Own infrastructure",
           },
         },
       },
@@ -688,7 +700,7 @@ const sections = [
         },
       },
       {
-        name: "InfoSec reviews",
+        name: "InfoSec/legal reviews",
         tiers: {
           cloud: {
             Hobby: false,
@@ -700,7 +712,7 @@ const sections = [
         },
       },
       {
-        name: "Customized contracts",
+        name: "Custom contracts",
         tiers: {
           cloud: {
             Hobby: false,
@@ -711,7 +723,7 @@ const sections = [
           selfHosted: {
             "Open Source": false,
             Pro: false,
-            Enterprise: "Add-on",
+            Enterprise: true,
           },
         },
       },
@@ -774,7 +786,14 @@ export default function Pricing({
             </Tabs>
 
             {/* Pricing Cards Grid */}
-            <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:items-stretch mb-20">
+            <div
+              className={cn(
+                "mt-12 grid sm:grid-cols-2 gap-6 lg:items-stretch mb-20",
+                selectedTiers.length === 4 && "lg:grid-cols-4",
+                selectedTiers.length === 3 && "lg:grid-cols-3",
+                selectedTiers.length === 2 && "lg:grid-cols-2"
+              )}
+            >
               {selectedTiers.map((tier) => (
                 <Card
                   key={tier.id}
@@ -784,19 +803,20 @@ export default function Pricing({
                   )}
                 >
                   <CardHeader className="text-center pb-2">
-                    <CardTitle className="mb-7">{tier.name}</CardTitle>
-                    <span className="font-bold text-5xl">
-                      {tier.price}
+                    <CardTitle className="mb-7 text-lg text-foreground font-semibold">
+                      {tier.name}
+                    </CardTitle>
+                    <div>
+                      <span className="font-bold text-5xl">{tier.price}</span>
                       {tier.price.includes("$") && (
-                        <div className="text-sm leading-4 mt-2">
-                          <p className="text-primary">
-                            USD {tier.priceUnit ? `/ ${tier.priceUnit}` : ""} /
-                            month
-                          </p>
-                        </div>
+                        <span className="text-sm leading-4 mt-2">
+                          {tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month"}
+                        </span>
                       )}
-                    </span>
-                    <CardDescription className="text-center">
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow my-6">
+                    <CardDescription className="text-left">
                       {tier.description}
                       {tier.learnMore && (
                         <>
@@ -808,9 +828,7 @@ export default function Pricing({
                         </>
                       )}
                     </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <ul className="mt-7 space-y-2.5 text-sm">
+                    <ul className="mt-3 space-y-2.5 text-sm">
                       {tier.mainFeatures.map((feature) => (
                         <li key={feature} className="flex space-x-2">
                           <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
@@ -867,36 +885,39 @@ export default function Pricing({
                                 )}
                               </TableCell>
                             </TableRow>
-                            {section.features.map((feature) => (
-                              <TableRow
-                                key={feature.name}
-                                className="text-muted-foreground"
-                              >
-                                <TableCell className="w-11/12">
-                                  {feature.name}
-                                  {feature.href && (
-                                    <InfoLink href={feature.href} />
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  {typeof feature.tiers[variant][tier.name] ===
-                                  "string" ? (
-                                    <div className="text-sm leading-6 text-center">
-                                      {feature.tiers[variant][tier.name]}
-                                    </div>
-                                  ) : (
-                                    <div className="flex justify-center">
-                                      {feature.tiers[variant][tier.name] ===
-                                      true ? (
-                                        <CheckIcon className="h-5 w-5 text-primary" />
-                                      ) : (
-                                        <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                      )}
-                                    </div>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
+                            {section.features
+                              .filter((f) => variant in f.tiers)
+                              .map((feature) => (
+                                <TableRow
+                                  key={feature.name}
+                                  className="text-muted-foreground"
+                                >
+                                  <TableCell className="w-11/12">
+                                    {feature.name}
+                                    {feature.href && (
+                                      <InfoLink href={feature.href} />
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    {typeof feature.tiers[variant][
+                                      tier.name
+                                    ] === "string" ? (
+                                      <div className="text-sm leading-6 text-center">
+                                        {feature.tiers[variant][tier.name]}
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-center">
+                                        {feature.tiers[variant][tier.name] ===
+                                        true ? (
+                                          <CheckIcon className="h-5 w-5 text-primary" />
+                                        ) : (
+                                          <MinusIcon className="h-5 w-5 text-muted-foreground" />
+                                        )}
+                                      </div>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                           </React.Fragment>
                         ))}
                       </TableBody>
@@ -938,36 +959,38 @@ export default function Pricing({
                           {section.href && <InfoLink href={section.href} />}
                         </TableCell>
                       </TableRow>
-                      {section.features.map((feature) => (
-                        <TableRow
-                          key={feature.name}
-                          className="text-muted-foreground"
-                        >
-                          <TableCell>
-                            {feature.name}
-                            {feature.href && <InfoLink href={feature.href} />}
-                          </TableCell>
-                          {selectedTiers.map((tier) => (
-                            <TableCell key={tier.id}>
-                              {typeof feature.tiers[variant][tier.name] ===
-                              "string" ? (
-                                <div className="text-sm leading-6 text-center">
-                                  {feature.tiers[variant][tier.name]}
-                                </div>
-                              ) : (
-                                <div className="flex justify-center">
-                                  {feature.tiers[variant][tier.name] ===
-                                  true ? (
-                                    <CheckIcon className="h-5 w-5 text-primary" />
-                                  ) : (
-                                    <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                  )}
-                                </div>
-                              )}
+                      {section.features
+                        .filter((f) => variant in f.tiers)
+                        .map((feature) => (
+                          <TableRow
+                            key={feature.name}
+                            className="text-muted-foreground"
+                          >
+                            <TableCell>
+                              {feature.name}
+                              {feature.href && <InfoLink href={feature.href} />}
                             </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
+                            {selectedTiers.map((tier) => (
+                              <TableCell key={tier.id}>
+                                {typeof feature.tiers[variant][tier.name] ===
+                                "string" ? (
+                                  <div className="text-sm leading-6 text-center">
+                                    {feature.tiers[variant][tier.name]}
+                                  </div>
+                                ) : (
+                                  <div className="flex justify-center">
+                                    {feature.tiers[variant][tier.name] ===
+                                    true ? (
+                                      <CheckIcon className="h-5 w-5 text-primary" />
+                                    ) : (
+                                      <MinusIcon className="h-5 w-5 text-muted-foreground" />
+                                    )}
+                                  </div>
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
                     </React.Fragment>
                   ))}
                 </TableBody>
@@ -1007,36 +1030,39 @@ export default function Pricing({
                                 )}
                               </TableCell>
                             </TableRow>
-                            {section.features.map((feature) => (
-                              <TableRow
-                                key={feature.name}
-                                className="text-muted-foreground"
-                              >
-                                <TableCell className="w-11/12">
-                                  {feature.name}
-                                  {feature.href && (
-                                    <InfoLink href={feature.href} />
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  {typeof feature.tiers[variant][tier.name] ===
-                                  "string" ? (
-                                    <div className="text-sm leading-6 text-center">
-                                      {feature.tiers[variant][tier.name]}
-                                    </div>
-                                  ) : (
-                                    <div className="flex justify-center">
-                                      {feature.tiers[variant][tier.name] ===
-                                      true ? (
-                                        <CheckIcon className="h-5 w-5 text-primary" />
-                                      ) : (
-                                        <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                      )}
-                                    </div>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
+                            {section.features
+                              .filter((f) => variant in f.tiers)
+                              .map((feature) => (
+                                <TableRow
+                                  key={feature.name}
+                                  className="text-muted-foreground"
+                                >
+                                  <TableCell className="w-11/12">
+                                    {feature.name}
+                                    {feature.href && (
+                                      <InfoLink href={feature.href} />
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    {typeof feature.tiers[variant][
+                                      tier.name
+                                    ] === "string" ? (
+                                      <div className="text-sm leading-6 text-center">
+                                        {feature.tiers[variant][tier.name]}
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-center">
+                                        {feature.tiers[variant][tier.name] ===
+                                        true ? (
+                                          <CheckIcon className="h-5 w-5 text-primary" />
+                                        ) : (
+                                          <MinusIcon className="h-5 w-5 text-muted-foreground" />
+                                        )}
+                                      </div>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                           </React.Fragment>
                         ))}
                       </TableBody>
