@@ -926,8 +926,11 @@ export default function Pricing({
 
               <div className="mx-auto max-w-2xl space-y-16">
                 {selectedTiers.map((tier) => (
-                  <div key={tier.id}>
-                    <div className="mb-4">
+                  <div
+                    key={tier.id}
+                    className="mb-10 bg-card rounded-lg overflow-hidden border p-4"
+                  >
+                    <div className="mb-6">
                       <h4 className="text-xl font-medium">{tier.name}</h4>
                       <p className="mt-2 text-sm text-muted-foreground">
                         {tier.description}
@@ -1058,81 +1061,6 @@ export default function Pricing({
                   ))}
                 </TableBody>
               </Table>
-            </section>
-
-            {/* Feature comparison (xs to lg) */}
-            <section
-              aria-labelledby="mobile-comparison-heading"
-              className="lg:hidden"
-            >
-              <h2 id="mobile-comparison-heading" className="sr-only">
-                Feature comparison
-              </h2>
-
-              <div className="mx-auto max-w-2xl space-y-16">
-                {selectedTiers.map((tier) => (
-                  <div key={tier.id} className="border-t border-gray-900/10">
-                    <div className="mb-4">
-                      <h4 className="text-xl font-medium">{tier.name}</h4>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {tier.description}
-                      </p>
-                    </div>
-                    <Table>
-                      <TableBody>
-                        {sections.map((section) => (
-                          <React.Fragment key={section.name}>
-                            <TableRow className="bg-muted hover:bg-muted">
-                              <TableCell
-                                colSpan={2}
-                                className="w-10/12 text-primary font-bold"
-                              >
-                                {section.name}
-                                {section.href && (
-                                  <InfoLink href={section.href} />
-                                )}
-                              </TableCell>
-                            </TableRow>
-                            {section.features
-                              .filter((f) => variant in f.tiers)
-                              .map((feature) => (
-                                <TableRow
-                                  key={feature.name}
-                                  className="text-muted-foreground"
-                                >
-                                  <TableCell className="w-11/12">
-                                    {feature.name}
-                                    {feature.href && (
-                                      <InfoLink href={feature.href} />
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {typeof feature.tiers[variant][
-                                      tier.name
-                                    ] === "string" ? (
-                                      <div className="text-sm leading-6 text-center">
-                                        {feature.tiers[variant][tier.name]}
-                                      </div>
-                                    ) : (
-                                      <div className="flex justify-center">
-                                        {feature.tiers[variant][tier.name] ===
-                                        true ? (
-                                          <CheckIcon className="h-5 w-5 text-primary" />
-                                        ) : (
-                                          <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                        )}
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                          </React.Fragment>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ))}
-              </div>
             </section>
           </div>
         </div>
