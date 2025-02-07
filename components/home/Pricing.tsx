@@ -168,9 +168,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "MIT License",
         "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
-        "Unlimited usage",
+        "Scalability of Langfuse Cloud",
         "Deployment docs & Helm chart",
-        "SSO and basic RBAC",
+        "Custom SSO and basic RBAC",
         "Community support",
       ],
       cta: "Deployment guide",
@@ -188,7 +188,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All Open Source features",
         "LLM Playground",
         "Human annotation queues",
-        "LLM as a judge evaluators",
+        "LLM-as-a-judge evaluators",
+        "Prompt Experiments",
         "Chat & Email support",
       ],
       cta: "Subscribe",
@@ -203,8 +204,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "All Open Source / Pro features",
         "Fine-grained RBAC",
+        "Enterprise Security Features",
         "SOC2, ISO27001, and InfoSec reviews",
-        "Dedicated support engineer and SLAs",
+        "Dedicated support engineer",
+        "Support SLA",
         "Billing via AWS Marketplace",
       ],
       cta: "Talk to sales",
@@ -273,12 +276,13 @@ const sections: Section[] = [
       },
       {
         name: "Multi-modal",
+        href: "/docs/tracing-features/multi-modality",
         tiers: {
           cloud: {
-            Hobby: "Pricing tba, free while in beta",
-            Pro: "Pricing tba, free while in beta",
-            Team: "Pricing tba, free while in beta",
-            Enterprise: "Pricing tba, free while in beta",
+            Hobby: "Free while in beta",
+            Pro: "Free while in beta",
+            Team: "Free while in beta",
+            Enterprise: "Free while in beta",
           },
           selfHosted: {
             "Open Source": true,
@@ -484,7 +488,16 @@ const sections: Section[] = [
   },
   {
     name: "Support",
+    href: "/support",
     features: [
+      {
+        name: "Ask AI",
+        href: "/docs/ask-ai",
+        tiers: {
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
       {
         name: "Community (GitHub, Discord)",
         tiers: {
