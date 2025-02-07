@@ -851,7 +851,7 @@ export default function Pricing({
             {/* Pricing Cards Grid */}
             <div
               className={cn(
-                "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch mb-20",
+                "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
                 selectedTiers.length === 4 && "md:grid-cols-4",
                 selectedTiers.length === 3 && "md:grid-cols-3",
                 selectedTiers.length === 2 && "md:grid-cols-2"
@@ -915,56 +915,134 @@ export default function Pricing({
               ))}
             </div>
 
-            {/* Feature comparison (up to lg) */}
-            <section
-              aria-labelledby="mobile-comparison-heading"
-              className="lg:hidden"
-            >
-              <h2 id="mobile-comparison-heading" className="sr-only">
-                Feature comparison
-              </h2>
+            {isPricingPage && (
+              <>
+                {/* Feature comparison (up to lg) */}
+                <section
+                  aria-labelledby="mobile-comparison-heading"
+                  className="lg:hidden mt-20"
+                >
+                  <h2 id="mobile-comparison-heading" className="sr-only">
+                    Feature comparison
+                  </h2>
 
-              <div className="mx-auto max-w-2xl space-y-16">
-                {selectedTiers.map((tier) => (
-                  <div
-                    key={tier.id}
-                    className="mb-10 bg-card rounded-lg overflow-hidden border p-4"
-                  >
-                    <div className="mb-6">
-                      <h4 className="text-xl font-medium">{tier.name}</h4>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {tier.description}
-                      </p>
-                    </div>
-                    <Table>
-                      <TableBody>
-                        {sections.map((section) => (
-                          <React.Fragment key={section.name}>
-                            <TableRow className="bg-muted hover:bg-muted">
-                              <TableCell
-                                colSpan={2}
-                                className="w-10/12 text-primary font-bold"
-                              >
-                                {section.name}
-                                {section.href && (
-                                  <InfoLink href={section.href} />
-                                )}
-                              </TableCell>
-                            </TableRow>
-                            {section.features
-                              .filter((f) => variant in f.tiers)
-                              .map((feature) => (
-                                <TableRow
-                                  key={feature.name}
-                                  className="text-muted-foreground"
-                                >
-                                  <TableCell className="w-11/12">
-                                    {feature.name}
-                                    {feature.href && (
-                                      <InfoLink href={feature.href} />
+                  <div className="mx-auto max-w-2xl space-y-16">
+                    {selectedTiers.map((tier) => (
+                      <div
+                        key={tier.id}
+                        className="mb-10 bg-card rounded-lg overflow-hidden border p-4"
+                      >
+                        <div className="mb-6">
+                          <h4 className="text-xl font-medium">{tier.name}</h4>
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {tier.description}
+                          </p>
+                        </div>
+                        <Table>
+                          <TableBody>
+                            {sections.map((section) => (
+                              <React.Fragment key={section.name}>
+                                <TableRow className="bg-muted hover:bg-muted">
+                                  <TableCell
+                                    colSpan={2}
+                                    className="w-10/12 text-primary font-bold"
+                                  >
+                                    {section.name}
+                                    {section.href && (
+                                      <InfoLink href={section.href} />
                                     )}
                                   </TableCell>
-                                  <TableCell>
+                                </TableRow>
+                                {section.features
+                                  .filter((f) => variant in f.tiers)
+                                  .map((feature) => (
+                                    <TableRow
+                                      key={feature.name}
+                                      className="text-muted-foreground"
+                                    >
+                                      <TableCell className="w-11/12">
+                                        {feature.name}
+                                        {feature.href && (
+                                          <InfoLink href={feature.href} />
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {typeof feature.tiers[variant][
+                                          tier.name
+                                        ] === "string" ? (
+                                          <div className="text-sm leading-6 text-center">
+                                            {feature.tiers[variant][tier.name]}
+                                          </div>
+                                        ) : (
+                                          <div className="flex justify-center">
+                                            {feature.tiers[variant][
+                                              tier.name
+                                            ] === true ? (
+                                              <CheckIcon className="h-5 w-5 text-primary" />
+                                            ) : (
+                                              <MinusIcon className="h-5 w-5 text-muted-foreground" />
+                                            )}
+                                          </div>
+                                        )}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                              </React.Fragment>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Feature comparison (lg+) */}
+                <section
+                  aria-labelledby="comparison-heading"
+                  className="hidden lg:block bg-card rounded-lg overflow-hidden border mt-20"
+                >
+                  <h2 id="comparison-heading" className="sr-only">
+                    Feature comparison
+                  </h2>
+
+                  <Table className="w-full">
+                    <TableHeader className="bg-background">
+                      <TableRow className="bg-muted hover:bg-muted">
+                        <TableHead className="w-3/12" />
+                        {selectedTiers.map((tier) => (
+                          <TableHead
+                            key={tier.id}
+                            className="w-2/12 text-primary font-bold text-center text-xl"
+                          >
+                            {tier.name}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sections.map((section) => (
+                        <React.Fragment key={section.name}>
+                          <TableRow className="bg-muted/50">
+                            <TableCell colSpan={5} className="font-medium">
+                              {section.name}
+                              {section.href && <InfoLink href={section.href} />}
+                            </TableCell>
+                          </TableRow>
+                          {section.features
+                            .filter((f) => variant in f.tiers)
+                            .map((feature) => (
+                              <TableRow
+                                key={feature.name}
+                                className="text-muted-foreground"
+                              >
+                                <TableCell>
+                                  {feature.name}
+                                  {feature.href && (
+                                    <InfoLink href={feature.href} />
+                                  )}
+                                </TableCell>
+                                {selectedTiers.map((tier) => (
+                                  <TableCell key={tier.id}>
                                     {typeof feature.tiers[variant][
                                       tier.name
                                     ] === "string" ? (
@@ -982,86 +1060,16 @@ export default function Pricing({
                                       </div>
                                     )}
                                   </TableCell>
-                                </TableRow>
-                              ))}
-                          </React.Fragment>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Feature comparison (lg+) */}
-            <section
-              aria-labelledby="comparison-heading"
-              className="hidden lg:block bg-card rounded-lg overflow-hidden border"
-            >
-              <h2 id="comparison-heading" className="sr-only">
-                Feature comparison
-              </h2>
-
-              <Table className="w-full">
-                <TableHeader className="bg-background">
-                  <TableRow className="bg-muted hover:bg-muted">
-                    <TableHead className="w-3/12" />
-                    {selectedTiers.map((tier) => (
-                      <TableHead
-                        key={tier.id}
-                        className="w-2/12 text-primary font-bold text-center text-xl"
-                      >
-                        {tier.name}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sections.map((section) => (
-                    <React.Fragment key={section.name}>
-                      <TableRow className="bg-muted/50">
-                        <TableCell colSpan={5} className="font-medium">
-                          {section.name}
-                          {section.href && <InfoLink href={section.href} />}
-                        </TableCell>
-                      </TableRow>
-                      {section.features
-                        .filter((f) => variant in f.tiers)
-                        .map((feature) => (
-                          <TableRow
-                            key={feature.name}
-                            className="text-muted-foreground"
-                          >
-                            <TableCell>
-                              {feature.name}
-                              {feature.href && <InfoLink href={feature.href} />}
-                            </TableCell>
-                            {selectedTiers.map((tier) => (
-                              <TableCell key={tier.id}>
-                                {typeof feature.tiers[variant][tier.name] ===
-                                "string" ? (
-                                  <div className="text-sm leading-6 text-center">
-                                    {feature.tiers[variant][tier.name]}
-                                  </div>
-                                ) : (
-                                  <div className="flex justify-center">
-                                    {feature.tiers[variant][tier.name] ===
-                                    true ? (
-                                      <CheckIcon className="h-5 w-5 text-primary" />
-                                    ) : (
-                                      <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                    )}
-                                  </div>
-                                )}
-                              </TableCell>
+                                ))}
+                              </TableRow>
                             ))}
-                          </TableRow>
-                        ))}
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </section>
+                        </React.Fragment>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </section>
+              </>
+            )}
           </div>
         </div>
         {isPricingPage ? (
