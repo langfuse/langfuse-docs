@@ -1,0 +1,109 @@
+---
+description: All Langfuse data and features are available via the API. Follow this guide to get started.
+---
+
+# Public API
+
+Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
+
+<Tabs items={["Path", "Cloud US", "Cloud EU"]}>
+
+<Tab>
+
+```
+/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://us.cloud.langfuse.com/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://cloud.langfuse.com/api/public
+```
+
+</Tab>
+</Tabs>
+
+References:
+
+- API Reference: https://api.reference.langfuse.com
+- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
+- Postman collection: https://cloud.langfuse.com/generated/postman/collection.json
+
+## Authentication
+
+Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
+The API keys are available in the Langfuse project settings.
+
+- Username: Langfuse Public Key
+- Password: Langfuse Secret Key
+
+Example:
+
+```bash
+curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
+```
+
+## Access via SDKs
+
+Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+
+You can use your editor's Intellisense to explore the API methods and their parameters.
+
+<Callout type="info">
+
+When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
+
+</Callout>
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+When using the [decorator-based integration](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context
+
+# fetch a trace
+langfuse_context.client_instance.api.trace.get(trace_id)
+
+# async client via asyncio
+await langfuse_context.client_instance.async_api.trace(trace_id)
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+...
+# fetch a trace
+langfuse.api.trace.get(trace_id)
+
+# async client via asyncio
+await langfuse.async_api.trace(trace_id)
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse"
+
+const langfuse = new Langfuse()
+...
+// fetch a trace
+await langfuse.api.traceGet(traceId)
+```
+
+</Tab>
+</Tabs>

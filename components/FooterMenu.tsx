@@ -91,7 +91,7 @@ const menuItems: {
       },
       {
         name: "API",
-        href: "https://api.reference.langfuse.com/",
+        href: "/docs/api",
       },
     ],
   },

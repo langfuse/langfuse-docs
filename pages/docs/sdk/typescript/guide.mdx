@@ -498,6 +498,12 @@ So to send only 20% of traces originating in your application to Lanfuse, pass `
 
 See also our [sampling docs](/docs/tracing-features/sampling).
 
+## Event and batch size limit when self-hosting
+
+The JS SDK is truncating large events by dropping input / output / metadata of the event until the event fits the size limit. Also, a max batch size limit is enforced to limit the size of the batches sent to the Langfuse server instance.
+
+When sending events from the SDK to a **self hosted Langfuse instance**, you can configure these size limits via `LANGFUSE_MAX_EVENT_SIZE_BYTES` and `LANGFUSE_MAX_BATCH_SIZE_BYTES` environment variables.
+
 ## Short lived execution environments (lambda, serverless, Vercel, Cloudflare) [#lambda]
 
 The SDK is optimize to run in the background to queue and flush all requests. Events can get lost if the process exits before all requests are flushed. To ensure all events are sent, use one of the following patterns:
