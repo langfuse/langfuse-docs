@@ -199,7 +199,7 @@ const sections = [
         name: "Integrations/SDKs",
         href: "/docs/integrations/overview",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -207,7 +207,7 @@ const sections = [
         name: "Custom via API",
         href: "/docs/api",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -218,6 +218,7 @@ const sections = [
             Hobby: "50k observations",
             Pro: "100k observations",
             Team: "100k observations",
+            Enterprise: "100k observations",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -233,6 +234,7 @@ const sections = [
             Hobby: false,
             Pro: "$10 / 100k observations",
             Team: "$10 / 100k observations",
+            Enterprise: "$10 / 100k observations",
           },
           selfHosted: {
             "Open Source": true,
@@ -248,6 +250,7 @@ const sections = [
             Hobby: "Pricing tba, free while in beta",
             Pro: "Pricing tba, free while in beta",
             Team: "Pricing tba, free while in beta",
+            Enterprise: "Pricing tba, free while in beta",
           },
           selfHosted: {
             "Open Source": true,
@@ -263,6 +266,7 @@ const sections = [
             Hobby: "30 days",
             Pro: "Unlimited",
             Team: "Unlimited",
+            Enterprise: "Unlimited",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -279,6 +283,7 @@ const sections = [
             Hobby: "4,000 requests / min",
             Pro: "4,000 requests / min",
             Team: "20,000 requests / min",
+            Enterprise: "20,000 requests / min",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -296,7 +301,7 @@ const sections = [
         name: "Datasets",
         href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -304,7 +309,7 @@ const sections = [
         name: "Evaluation / User-feedback",
         href: "/docs/scores",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -312,7 +317,7 @@ const sections = [
         name: "Prompt Management",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: {
             "Open Source": true,
             Pro: true,
@@ -329,14 +334,14 @@ const sections = [
         name: "Playground",
         href: "/docs/playground",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Prompt Experiments",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: {
             "Open Source": false,
             Pro: true,
@@ -352,6 +357,7 @@ const sections = [
             Hobby: "1 evaluator",
             Pro: true,
             Team: true,
+            Enterprise: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -368,6 +374,7 @@ const sections = [
             Hobby: "1 queue",
             Pro: "3 queues",
             Team: true,
+            Enterprise: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -388,6 +395,7 @@ const sections = [
             Hobby: "Unlimited",
             Pro: "Unlimited",
             Team: "Unlimited",
+            Enterprise: "Unlimited",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -399,7 +407,12 @@ const sections = [
       {
         name: "Users",
         tiers: {
-          cloud: { Hobby: "2", Pro: "Unlimited", Team: "Unlimited" },
+          cloud: {
+            Hobby: "2",
+            Pro: "Unlimited",
+            Team: "Unlimited",
+            Enterprise: "Unlimited",
+          },
           selfHosted: {
             "Open Source": "Unlimited",
             Pro: "As licensed",
@@ -420,6 +433,7 @@ const sections = [
             Hobby: true,
             Pro: true,
             Team: true,
+            Enterprise: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -436,6 +450,7 @@ const sections = [
             Hobby: "1,000 requests / min",
             Pro: "1,000 requests / min",
             Team: "1,000 requests / min",
+            Enterprise: "1,000 requests / min",
           },
           selfHosted: {
             "Open Source": "n/a",
@@ -452,21 +467,21 @@ const sections = [
       {
         name: "Community (GitHub, Discord)",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Chat & Email",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true },
+          cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Private Slack/Discord channel",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: {
             "Open Source": false,
             Pro: "Add-on, included at >10 users",
@@ -477,14 +492,19 @@ const sections = [
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SLAs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: {
+            Hobby: false,
+            Pro: false,
+            Team: false,
+            Enterprise: true,
+          },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -495,7 +515,12 @@ const sections = [
       {
         name: "Architectural guidance",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: {
+            Hobby: false,
+            Pro: false,
+            Team: false,
+            Enterprise: true,
+          },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -516,6 +541,7 @@ const sections = [
             Hobby: "US or EU",
             Pro: "US or EU",
             Team: "US or EU",
+            Enterprise: "US or EU",
           },
           selfHosted: {
             "Open Source": "Own infrastructure",
@@ -531,6 +557,7 @@ const sections = [
             Hobby: true,
             Pro: true,
             Team: true,
+            Enterprise: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -547,6 +574,7 @@ const sections = [
             Hobby: true,
             Pro: true,
             Team: true,
+            Enterprise: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -558,14 +586,14 @@ const sections = [
       {
         name: "Enterprise SSO (e.g. Okta, Auth0)",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "SSO enforcement",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -573,15 +601,7 @@ const sections = [
         name: "Project-level RBAC",
         href: "/docs/rbac",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
-        },
-      },
-      {
-        name: "Audit Logs",
-        href: "/changelog/2025-01-21-audit-logs",
-        tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -593,12 +613,21 @@ const sections = [
             Hobby: false,
             Pro: false,
             Team: true,
+            Enterprise: true,
           },
           selfHosted: {
             "Open Source": false,
             Pro: false,
             Enterprise: true,
           },
+        },
+      },
+      {
+        name: "Audit Logs",
+        href: "/changelog/2025-01-21-audit-logs",
+        tiers: {
+          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
     ],
@@ -612,7 +641,8 @@ const sections = [
           cloud: {
             Hobby: "n/a",
             Pro: "credit card",
-            Team: "credit card, invoice",
+            Team: "credit card",
+            Enterprise: "credit card, invoice",
           },
           selfHosted: {
             "Open Source": "n/a",
@@ -624,7 +654,12 @@ const sections = [
       {
         name: "Billing via AWS Marketplace",
         tiers: {
-          cloud: { Hobby: "n/a", Pro: false, Team: "Enterprise" },
+          cloud: {
+            Hobby: "n/a",
+            Pro: false,
+            Team: false,
+            Enterprise: true,
+          },
           selfHosted: {
             "Open Source": "n/a",
             Pro: ">10 users",
@@ -641,28 +676,38 @@ const sections = [
       {
         name: "Data processing agreement (GDPR)",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true },
+          cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "InfoSec reviews",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: {
+            Hobby: false,
+            Pro: false,
+            Team: false,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "Customized contracts",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: {
+            Hobby: false,
+            Pro: false,
+            Team: false,
+            Enterprise: true,
+          },
           selfHosted: {
             "Open Source": false,
             Pro: false,
