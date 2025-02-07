@@ -146,11 +146,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description: "Enterprise-grade support and security features.",
       price: "Custom",
       mainFeatures: [
-        "All features",
+        "Everything in Team",
+        "Uptime SLA",
+        "Support SLA",
+        "Custom Terms & DPA",
         "Dedicated support engineer",
-        "SLAs",
         "Architecture reviews",
-        "InfoSec/legal reviews",
         "Billing via AWS Marketplace",
       ],
       cta: "Talk to sales",
@@ -254,7 +255,7 @@ const sections: Section[] = [
             Hobby: "50k observations",
             Pro: "100k observations",
             Team: "100k observations",
-            Enterprise: "100k observations",
+            Enterprise: "Custom",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -270,7 +271,7 @@ const sections: Section[] = [
             Hobby: false,
             Pro: "$10 / 100k observations",
             Team: "$10 / 100k observations",
-            Enterprise: "$10 / 100k observations",
+            Enterprise: "Custom",
           },
         },
       },
@@ -310,7 +311,7 @@ const sections: Section[] = [
             Hobby: "4,000 requests / min",
             Pro: "4,000 requests / min",
             Team: "20,000 requests / min",
-            Enterprise: "20,000 requests / min",
+            Enterprise: "Custom",
           },
         },
       },
@@ -473,7 +474,7 @@ const sections: Section[] = [
             Hobby: "1,000 requests / min",
             Pro: "1,000 requests / min",
             Team: "1,000 requests / min",
-            Enterprise: "1,000 requests / min",
+            Enterprise: "Custom",
           },
         },
       },
@@ -682,13 +683,13 @@ const sections: Section[] = [
         name: "Subscription management",
         tiers: {
           cloud: {
-            Hobby: "n/a",
+            Hobby: false,
             Pro: "Self-serve",
             Team: "Self-serve",
             Enterprise: "Sales",
           },
           selfHosted: {
-            "Open Source": "n/a",
+            "Open Source": false,
             Pro: "Self-serve",
             Enterprise: "Sales",
           },
@@ -698,13 +699,13 @@ const sections: Section[] = [
         name: "Payment methods",
         tiers: {
           cloud: {
-            Hobby: "n/a",
+            Hobby: false,
             Pro: "Credit card",
             Team: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
           selfHosted: {
-            "Open Source": "n/a",
+            "Open Source": false,
             Pro: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
@@ -714,13 +715,13 @@ const sections: Section[] = [
         name: "Contract duration",
         tiers: {
           cloud: {
-            Hobby: "n/a",
+            Hobby: false,
             Pro: "Monthly",
             Team: "Monthly",
             Enterprise: "Custom",
           },
           selfHosted: {
-            "Open Source": "n/a",
+            "Open Source": false,
             Pro: "Monthly",
             Enterprise: "Custom",
           },
@@ -730,13 +731,13 @@ const sections: Section[] = [
         name: "Billing via AWS Marketplace",
         tiers: {
           cloud: {
-            Hobby: "n/a",
+            Hobby: false,
             Pro: false,
             Team: false,
             Enterprise: true,
           },
           selfHosted: {
-            "Open Source": "n/a",
+            "Open Source": false,
             Pro: ">10 users",
             Enterprise: true,
           },
@@ -758,7 +759,7 @@ const sections: Section[] = [
             Enterprise: "Custom",
           },
           selfHosted: {
-            "Open Source": "n/a",
+            "Open Source": false,
             Pro: "Standard T&Cs",
             Enterprise: "Custom",
           },
