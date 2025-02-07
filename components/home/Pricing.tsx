@@ -1,8 +1,16 @@
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Check, Plus, Minus, X, ExternalLink } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
-import { Button } from "../ui/button";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
@@ -59,8 +67,8 @@ const tiers = {
       cta: "Sign up",
     },
     {
-      name: "Pro",
-      id: "tier-pro",
+      name: "Starter",
+      id: "tier-starter",
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
@@ -71,6 +79,7 @@ const tiers = {
         href: "/pricing#discounts",
       },
       mainFeatures: [
+        "Everything in Hobby",
         "100k observations / month included, additional: $10 / 100k observations",
         "Unlimited data access",
         "Unlimited users",
@@ -79,22 +88,38 @@ const tiers = {
       cta: "Sign up",
     },
     {
-      name: "Team",
-      id: "tier-team",
+      name: "Pro",
+      id: "tier-pro",
       href: "https://cloud.langfuse.com",
       featured: false,
-      price: "$499",
-      description:
-        "Dedicated support, and security controls for larger teams. Enterprise:",
+      price: "$199",
+      description: "Dedicated support, and security controls for larger teams.",
       mainFeatures: [
         "100k observations / month included, additional: $10 / 100k observations",
         "SSO enforcement, fine-grained RBAC",
         "SOC2, ISO27001",
         "Dedicated support channel",
-        "Enterprise Add-ons: SLAs, InfoSec/legal reviews, Architecture reviews, Billing via AWS Marketplace",
       ],
       cta: "Sign up",
-      learnMore: "/enterprise",
+    },
+    {
+      name: "Enterprise",
+      id: "tier-enterprise",
+      href: "/schedule-demo",
+
+      featured: false,
+      description:
+        "Enterprise-grade support and security features. Contact us for pricing.",
+      price: "Talk to us",
+      mainFeatures: [
+        "All features",
+        "Dedicated support engineer",
+        "SLAs",
+        "Architecture reviews",
+        "InfoSec/legal reviews",
+        "Billing via AWS Marketplace",
+      ],
+      cta: "Schedule a demo",
     },
   ],
   selfHosted: [
@@ -164,7 +189,7 @@ const sections = [
         name: "Integrations/SDKs",
         href: "/docs/integrations/overview",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -172,7 +197,7 @@ const sections = [
         name: "Custom via API",
         href: "/docs/api",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -181,8 +206,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "50k observations",
+            Starter: "100k observations",
             Pro: "100k observations",
-            Team: "100k observations",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -196,8 +221,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: false,
+            Starter: "$10 / 100k observations",
             Pro: "$10 / 100k observations",
-            Team: "$10 / 100k observations",
           },
           selfHosted: {
             "Open Source": true,
@@ -211,8 +236,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "Pricing tba, free while in beta",
+            Starter: "Pricing tba, free while in beta",
             Pro: "Pricing tba, free while in beta",
-            Team: "Pricing tba, free while in beta",
           },
           selfHosted: {
             "Open Source": true,
@@ -226,8 +251,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "30 days",
+            Starter: "Unlimited",
             Pro: "Unlimited",
-            Team: "Unlimited",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -242,8 +267,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "4,000 requests / min",
-            Pro: "4,000 requests / min",
-            Team: "20,000 requests / min",
+            Starter: "4,000 requests / min",
+            Pro: "20,000 requests / min",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -261,7 +286,7 @@ const sections = [
         name: "Datasets",
         href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -269,7 +294,7 @@ const sections = [
         name: "Evaluation / User-feedback",
         href: "/docs/scores",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -277,7 +302,7 @@ const sections = [
         name: "Prompt Management",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: {
             "Open Source": true,
             Pro: true,
@@ -294,14 +319,14 @@ const sections = [
         name: "Playground",
         href: "/docs/playground",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Prompt Experiments",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: {
             "Open Source": false,
             Pro: true,
@@ -315,8 +340,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "1 evaluator",
+            Starter: true,
             Pro: true,
-            Team: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -331,8 +356,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "1 queue",
-            Pro: "3 queues",
-            Team: true,
+            Starter: "3 queues",
+            Pro: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -351,8 +376,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "Unlimited",
+            Starter: "Unlimited",
             Pro: "Unlimited",
-            Team: "Unlimited",
           },
           selfHosted: {
             "Open Source": "Unlimited",
@@ -364,7 +389,7 @@ const sections = [
       {
         name: "Users",
         tiers: {
-          cloud: { Hobby: "2", Pro: "Unlimited", Team: "Unlimited" },
+          cloud: { Hobby: "2", Starter: "Unlimited", Pro: "Unlimited" },
           selfHosted: {
             "Open Source": "Unlimited",
             Pro: "As licensed",
@@ -383,8 +408,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: true,
+            Starter: true,
             Pro: true,
-            Team: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -399,8 +424,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "1,000 requests / min",
+            Starter: "1,000 requests / min",
             Pro: "1,000 requests / min",
-            Team: "1,000 requests / min",
           },
           selfHosted: {
             "Open Source": "n/a",
@@ -417,21 +442,21 @@ const sections = [
       {
         name: "Community (GitHub, Discord)",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true },
+          cloud: { Hobby: true, Starter: true, Pro: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Chat & Email",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true },
+          cloud: { Hobby: false, Starter: true, Pro: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Private Slack/Discord channel",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: {
             "Open Source": false,
             Pro: "Add-on, included at >10 users",
@@ -442,14 +467,14 @@ const sections = [
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SLAs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: { Hobby: false, Starter: false, Pro: "Enterprise" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -460,7 +485,7 @@ const sections = [
       {
         name: "Architectural guidance",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: { Hobby: false, Starter: false, Pro: "Enterprise" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -479,8 +504,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "US or EU",
+            Starter: "US or EU",
             Pro: "US or EU",
-            Team: "US or EU",
           },
           selfHosted: {
             "Open Source": "Own infrastructure",
@@ -494,8 +519,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: true,
+            Starter: true,
             Pro: true,
-            Team: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -510,8 +535,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: true,
+            Starter: true,
             Pro: true,
-            Team: true,
           },
           selfHosted: {
             "Open Source": true,
@@ -523,14 +548,14 @@ const sections = [
       {
         name: "Enterprise SSO (e.g. Okta, Auth0)",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "SSO enforcement",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -538,7 +563,7 @@ const sections = [
         name: "Project-level RBAC",
         href: "/docs/rbac",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -546,7 +571,7 @@ const sections = [
         name: "Audit Logs",
         href: "/changelog/2025-01-21-audit-logs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -556,8 +581,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: false,
-            Pro: false,
-            Team: true,
+            Starter: false,
+            Pro: true,
           },
           selfHosted: {
             "Open Source": false,
@@ -576,8 +601,8 @@ const sections = [
         tiers: {
           cloud: {
             Hobby: "n/a",
-            Pro: "credit card",
-            Team: "credit card, invoice",
+            Starter: "credit card",
+            Pro: "credit card, invoice",
           },
           selfHosted: {
             "Open Source": "n/a",
@@ -589,7 +614,7 @@ const sections = [
       {
         name: "Billing via AWS Marketplace",
         tiers: {
-          cloud: { Hobby: "n/a", Pro: false, Team: "Enterprise" },
+          cloud: { Hobby: "n/a", Starter: false, Pro: "Enterprise" },
           selfHosted: {
             "Open Source": "n/a",
             Pro: ">10 users",
@@ -606,28 +631,28 @@ const sections = [
       {
         name: "Data processing agreement (GDPR)",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true },
+          cloud: { Hobby: false, Starter: true, Pro: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true },
+          cloud: { Hobby: false, Starter: false, Pro: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "InfoSec reviews",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: { Hobby: false, Starter: false, Pro: "Enterprise" },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "Customized contracts",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: "Enterprise" },
+          cloud: { Hobby: false, Starter: false, Pro: "Enterprise" },
           selfHosted: {
             "Open Source": false,
             Pro: false,
@@ -647,7 +672,6 @@ export default function Pricing({
   initialVariant?: "cloud" | "selfHosted";
 }) {
   const [localVariant, setLocalVariant] = useState(initialVariant);
-
   const variant = isPricingPage ? initialVariant : localVariant;
   const selectedTiers = tiers[variant];
 
@@ -656,6 +680,7 @@ export default function Pricing({
       <ExternalLink className="size-4 ml-2 pt-0.5" />
     </Link>
   );
+
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
       <div className="isolate overflow-hidden">
@@ -667,7 +692,7 @@ export default function Pricing({
               h="h1"
             />
 
-            {/* Pricing page (different href), landingpage (local state) */}
+            {/* Deployment Options Tabs */}
             <Tabs
               defaultValue={variant}
               value={variant}
@@ -680,11 +705,7 @@ export default function Pricing({
             >
               <TabsList>
                 {Object.keys(deploymentOptions).map((key) => (
-                  <TabsTrigger
-                    key={key}
-                    value={key}
-                    asChild={isPricingPage} // Only use asChild on pricing page
-                  >
+                  <TabsTrigger key={key} value={key} asChild={isPricingPage}>
                     {isPricingPage ? (
                       <Link href={deploymentOptions[key].href}>
                         {deploymentOptions[key].switch}
@@ -697,89 +718,30 @@ export default function Pricing({
               </TabsList>
             </Tabs>
 
-            <div className="relative mx-auto mt-10 grid max-w-md grid-cols-1 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-              <div
-                className="hidden lg:absolute lg:inset-x-px lg:bottom-4 lg:top-4 lg:block lg:rounded lg:bg-gray-800/80 lg:ring-1 lg:ring-white/10"
-                aria-hidden="true"
-              />
+            {/* Pricing Cards Grid */}
+            <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:items-stretch">
               {selectedTiers.map((tier) => (
-                <div
+                <Card
                   key={tier.id}
-                  className={classNames(
-                    tier.featured
-                      ? "bg-slate-100 shadow-xl ring-1 ring-gray-900/10"
-                      : "bg-gray-800/80 ring-1 ring-white/10 lg:bg-transparent lg:pb-14 lg:ring-0",
-                    "relative rounded"
+                  className={cn(
+                    tier.featured && "border-primary",
+                    "relative h-full flex flex-col"
                   )}
                 >
-                  <div className="p-8 lg:pt-12 xl:p-10 xl:pt-14">
-                    <h3
-                      id={tier.id}
-                      className={classNames(
-                        tier.featured ? "text-gray-900" : "text-white",
-                        "text-sm font-semibold leading-6"
+                  <CardHeader className="text-center pb-2">
+                    <CardTitle className="mb-7">{tier.name}</CardTitle>
+                    <span className="font-bold text-5xl">
+                      {tier.price}
+                      {tier.price.includes("$") && (
+                        <div className="text-sm leading-4 mt-2">
+                          <p className="text-primary">
+                            USD {tier.priceUnit ? `/ ${tier.priceUnit}` : ""} /
+                            month
+                          </p>
+                        </div>
                       )}
-                    >
-                      {tier.name}
-                    </h3>
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:flex-col lg:items-stretch">
-                      <div className="mt-2 flex items-center gap-x-4 min-h-12">
-                        <p
-                          className={classNames(
-                            tier.featured ? "text-gray-900" : "text-white",
-                            "text-4xl font-bold tracking-tight"
-                          )}
-                        >
-                          {tier.price}
-                        </p>
-                        {tier.price.includes("$") && (
-                          <div className="text-sm leading-4">
-                            <p
-                              className={
-                                tier.featured ? "text-gray-900" : "text-white"
-                              }
-                            >
-                              USD {tier.priceUnit ? `/ ${tier.priceUnit}` : ""}
-                            </p>
-                            <p
-                              className={cn(
-                                tier.featured
-                                  ? "text-gray-500"
-                                  : "text-gray-400",
-                                "text-xs"
-                              )}
-                            >
-                              {`Billed monthly`}
-                            </p>
-                            {tier.priceDiscountCta && (
-                              <Link
-                                href={tier.priceDiscountCta.href}
-                                className={cn(
-                                  "underline text-xs",
-                                  tier.featured
-                                    ? "text-gray-500"
-                                    : "text-gray-400"
-                                )}
-                              >
-                                {tier.priceDiscountCta.name}
-                              </Link>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        asChild
-                        variant={tier.featured ? "cta" : "secondary"}
-                      >
-                        <Link href={tier.href}>{tier.cta}</Link>
-                      </Button>
-                    </div>
-                    <p
-                      className={classNames(
-                        tier.featured ? "text-gray-600" : "text-gray-300",
-                        "text-sm leading-6 mt-6"
-                      )}
-                    >
+                    </span>
+                    <CardDescription className="text-center">
                       {tier.description}
                       {tier.learnMore && (
                         <>
@@ -790,340 +752,324 @@ export default function Pricing({
                           .
                         </>
                       )}
-                    </p>
-                    <div className="mt-8 flow-root sm:mt-10">
-                      <ul
-                        role="list"
-                        className={classNames(
-                          tier.featured
-                            ? "divide-gray-900/5 border-gray-900/5 text-gray-600"
-                            : "divide-white/5 border-white/5 text-white",
-                          "-my-2 divide-y border-t text-sm leading-6 lg:border-t-0"
-                        )}
-                      >
-                        {tier.mainFeatures.map((mainFeature) => (
-                          <li key={mainFeature} className="flex gap-x-3 py-2">
-                            <Check
-                              className={classNames(
-                                tier.featured
-                                  ? "text-indigo-600"
-                                  : "text-gray-500",
-                                "h-6 w-5 flex-none"
-                              )}
-                              aria-hidden="true"
-                            />
-                            {mainFeature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <ul className="mt-7 space-y-2.5 text-sm">
+                      {tier.mainFeatures.map((feature) => (
+                        <li key={feature} className="flex space-x-2">
+                          <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                          <span className="text-muted-foreground">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="mt-auto">
+                    <Button
+                      className="w-full"
+                      variant={tier.featured ? "default" : "outline"}
+                      asChild
+                    >
+                      <Link href={tier.href}>{tier.cta}</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
+
+            {/* Feature comparison (up to lg) */}
+            <section
+              aria-labelledby="mobile-comparison-heading"
+              className="lg:hidden"
+            >
+              <h2 id="mobile-comparison-heading" className="sr-only">
+                Feature comparison
+              </h2>
+
+              <div className="mx-auto max-w-2xl space-y-16">
+                {selectedTiers.map((tier) => (
+                  <div key={tier.id} className="border-t border-gray-900/10">
+                    <div
+                      className={classNames(
+                        tier.featured
+                          ? "border-indigo-600"
+                          : "border-transparent",
+                        "-mt-px w-72 border-t-2 pt-10 md:w-80"
+                      )}
+                    >
+                      <h3
+                        className={classNames(
+                          tier.featured
+                            ? "text-indigo-600 dark:text-indigo-400"
+                            : "text-primary",
+                          "text-sm font-semibold leading-6"
+                        )}
+                      >
+                        {tier.name}
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-primary/60">
+                        {tier.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-10 space-y-10">
+                      {sections.map((section) => (
+                        <div key={section.name}>
+                          <div>
+                            <h4 className="text-sm font-semibold leading-6 text-primary inline">
+                              {section.name}
+                            </h4>
+                            {section.href && <InfoLink href={section.href} />}
+                          </div>
+                          <div className="relative mt-6">
+                            {/* Fake card background */}
+                            <div
+                              aria-hidden="true"
+                              className="absolute inset-y-0 right-0 hidden w-1/2 rounded bg-white dark:bg-gray-800/80 shadow-sm sm:block"
+                            />
+
+                            <div
+                              className={classNames(
+                                tier.featured
+                                  ? "ring-2 ring-indigo-600"
+                                  : "ring-1 ring-gray-900/10",
+                                "relative rounded bg-white dark:bg-gray-800/80 shadow-sm sm:rounded-none dark:sm:bg-transparent sm:shadow-none sm:ring-0"
+                              )}
+                            >
+                              <dl className="divide-y divide-gray-200 text-sm leading-6">
+                                {section.features.map((feature) => (
+                                  <div
+                                    key={feature.name}
+                                    className="flex items-center justify-between px-4 py-3 sm:grid sm:grid-cols-2 sm:px-0"
+                                  >
+                                    <dt className="pr-4 text-primary/60">
+                                      {feature.name}
+                                      {feature.href && (
+                                        <InfoLink href={feature.href} />
+                                      )}
+                                    </dt>
+                                    <dd className="flex items-center justify-end sm:justify-center sm:px-4">
+                                      {typeof feature.tiers[variant][
+                                        tier.name
+                                      ] === "string" ? (
+                                        <span
+                                          className={classNames(
+                                            tier.featured
+                                              ? "font-semibold text-indigo-600 dark:text-indigo-400"
+                                              : "text-primary",
+                                            "text-sm leading-6"
+                                          )}
+                                        >
+                                          {feature.tiers[variant][tier.name]}
+                                        </span>
+                                      ) : (
+                                        <>
+                                          {feature.tiers[variant][tier.name] ===
+                                          true ? (
+                                            <Check
+                                              className="mx-auto h-5 w-5 text-indigo-600"
+                                              aria-hidden="true"
+                                            />
+                                          ) : (
+                                            <X
+                                              className="mx-auto h-5 w-5 text-gray-400"
+                                              aria-hidden="true"
+                                            />
+                                          )}
+                                        </>
+                                      )}
+                                    </dd>
+                                  </div>
+                                ))}
+                              </dl>
+                            </div>
+
+                            {/* Fake card border */}
+                            <div
+                              aria-hidden="true"
+                              className={classNames(
+                                tier.featured
+                                  ? "ring-2 ring-indigo-600"
+                                  : "ring-1 ring-gray-900/10",
+                                "pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 rounded sm:block"
+                              )}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Feature comparison (lg+) */}
+            <section
+              aria-labelledby="comparison-heading"
+              className="hidden lg:block"
+            >
+              <h2 id="comparison-heading" className="sr-only">
+                Feature comparison
+              </h2>
+
+              <div className="grid grid-cols-4 gap-x-8 border-t border-gray-900/10 before:block">
+                {selectedTiers.map((tier) => (
+                  <div key={tier.id} aria-hidden="true" className="-mt-px">
+                    <div
+                      className={classNames(
+                        tier.featured
+                          ? "border-indigo-600"
+                          : "border-transparent",
+                        "border-t-2 pt-10"
+                      )}
+                    >
+                      <p
+                        className={classNames(
+                          tier.featured
+                            ? "text-indigo-600 dark:text-indigo-400"
+                            : "text-primary",
+                          "text-sm font-semibold leading-6"
+                        )}
+                      >
+                        {tier.name}
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-primary/70">
+                        {tier.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="-mt-6 space-y-16">
+                {sections.map((section) => (
+                  <div key={section.name}>
+                    <div>
+                      <h3 className="text-sm font-semibold leading-6 text-primary inline">
+                        {section.name}
+                      </h3>
+                      {section.href && <InfoLink href={section.href} />}
+                    </div>
+                    <div className="relative -mx-8 mt-10">
+                      {/* Fake card backgrounds */}
+                      <div
+                        className="absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
+                        aria-hidden="true"
+                      >
+                        <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
+                        <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
+                        <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
+                      </div>
+
+                      <table className="relative w-full border-separate border-spacing-x-8">
+                        <thead>
+                          <tr className="text-left">
+                            <th scope="col">
+                              <span className="sr-only">Feature</span>
+                            </th>
+                            {selectedTiers.map((tier) => (
+                              <th key={tier.id} scope="col">
+                                <span className="sr-only">
+                                  {tier.name} tier
+                                </span>
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {section.features.map((feature, featureIdx) => (
+                            <tr key={feature.name}>
+                              <th
+                                scope="row"
+                                className="w-1/4 py-3 pr-4 text-left text-sm font-normal leading-6 text-primary"
+                              >
+                                <div>
+                                  {feature.name}
+                                  {feature.href && (
+                                    <InfoLink href={feature.href} />
+                                  )}
+                                </div>
+                                {featureIdx !== section.features.length - 1 ? (
+                                  <div className="absolute inset-x-8 mt-3 h-px bg-gray-200" />
+                                ) : null}
+                              </th>
+                              {selectedTiers.map((tier) => (
+                                <td
+                                  key={tier.id}
+                                  className="relative w-1/4 px-4 py-0 text-center"
+                                >
+                                  <span className="relative h-full w-full py-3">
+                                    {typeof feature.tiers[variant][
+                                      tier.name
+                                    ] === "string" ? (
+                                      <span
+                                        className={classNames(
+                                          tier.featured
+                                            ? "font-semibold text-indigo-600 dark:text-indigo-400"
+                                            : "text-primary",
+                                          "text-sm leading-6"
+                                        )}
+                                      >
+                                        {feature.tiers[variant][tier.name]}
+                                      </span>
+                                    ) : (
+                                      <>
+                                        {feature.tiers[variant][tier.name] ===
+                                        true ? (
+                                          <Check
+                                            className="mx-auto h-5 w-5 text-indigo-600"
+                                            aria-hidden="true"
+                                          />
+                                        ) : (
+                                          <X
+                                            className="mx-auto h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                          />
+                                        )}
+                                      </>
+                                    )}
+                                  </span>
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      {/* Fake card borders */}
+                      <div
+                        className="pointer-events-none absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
+                        aria-hidden="true"
+                      >
+                        {selectedTiers.map((tier) => (
+                          <div
+                            key={tier.id}
+                            className={classNames(
+                              tier.featured
+                                ? "ring-2 ring-indigo-600"
+                                : "ring-1 ring-gray-900/10",
+                              "rounded"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
         </div>
         {isPricingPage ? (
           <>
             <div className="relative">
               <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-                {/* Feature comparison (up to lg) */}
-                <section
-                  aria-labelledby="mobile-comparison-heading"
-                  className="lg:hidden"
-                >
-                  <h2 id="mobile-comparison-heading" className="sr-only">
-                    Feature comparison
-                  </h2>
-
-                  <div className="mx-auto max-w-2xl space-y-16">
-                    {selectedTiers.map((tier) => (
-                      <div
-                        key={tier.id}
-                        className="border-t border-gray-900/10"
-                      >
-                        <div
-                          className={classNames(
-                            tier.featured
-                              ? "border-indigo-600"
-                              : "border-transparent",
-                            "-mt-px w-72 border-t-2 pt-10 md:w-80"
-                          )}
-                        >
-                          <h3
-                            className={classNames(
-                              tier.featured
-                                ? "text-indigo-600 dark:text-indigo-400"
-                                : "text-primary",
-                              "text-sm font-semibold leading-6"
-                            )}
-                          >
-                            {tier.name}
-                          </h3>
-                          <p className="mt-1 text-sm leading-6 text-primary/60">
-                            {tier.description}
-                          </p>
-                        </div>
-
-                        <div className="mt-10 space-y-10">
-                          {sections.map((section) => (
-                            <div key={section.name}>
-                              <div>
-                                <h4 className="text-sm font-semibold leading-6 text-primary inline">
-                                  {section.name}
-                                </h4>
-                                {section.href && (
-                                  <InfoLink href={section.href} />
-                                )}
-                              </div>
-                              <div className="relative mt-6">
-                                {/* Fake card background */}
-                                <div
-                                  aria-hidden="true"
-                                  className="absolute inset-y-0 right-0 hidden w-1/2 rounded bg-white dark:bg-gray-800/80 shadow-sm sm:block"
-                                />
-
-                                <div
-                                  className={classNames(
-                                    tier.featured
-                                      ? "ring-2 ring-indigo-600"
-                                      : "ring-1 ring-gray-900/10",
-                                    "relative rounded bg-white dark:bg-gray-800/80 shadow-sm sm:rounded-none dark:sm:bg-transparent sm:shadow-none sm:ring-0"
-                                  )}
-                                >
-                                  <dl className="divide-y divide-gray-200 text-sm leading-6">
-                                    {section.features.map((feature) => (
-                                      <div
-                                        key={feature.name}
-                                        className="flex items-center justify-between px-4 py-3 sm:grid sm:grid-cols-2 sm:px-0"
-                                      >
-                                        <dt className="pr-4 text-primary/60">
-                                          {feature.name}
-                                          {feature.href && (
-                                            <InfoLink href={feature.href} />
-                                          )}
-                                        </dt>
-                                        <dd className="flex items-center justify-end sm:justify-center sm:px-4">
-                                          {typeof feature.tiers[variant][
-                                            tier.name
-                                          ] === "string" ? (
-                                            <span
-                                              className={classNames(
-                                                tier.featured
-                                                  ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                                                  : "text-primary",
-                                                "text-sm leading-6"
-                                              )}
-                                            >
-                                              {
-                                                feature.tiers[variant][
-                                                  tier.name
-                                                ]
-                                              }
-                                            </span>
-                                          ) : (
-                                            <>
-                                              {feature.tiers[variant][
-                                                tier.name
-                                              ] === true ? (
-                                                <Check
-                                                  className="mx-auto h-5 w-5 text-indigo-600"
-                                                  aria-hidden="true"
-                                                />
-                                              ) : (
-                                                <X
-                                                  className="mx-auto h-5 w-5 text-gray-400"
-                                                  aria-hidden="true"
-                                                />
-                                              )}
-                                            </>
-                                          )}
-                                        </dd>
-                                      </div>
-                                    ))}
-                                  </dl>
-                                </div>
-
-                                {/* Fake card border */}
-                                <div
-                                  aria-hidden="true"
-                                  className={classNames(
-                                    tier.featured
-                                      ? "ring-2 ring-indigo-600"
-                                      : "ring-1 ring-gray-900/10",
-                                    "pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 rounded sm:block"
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Feature comparison (lg+) */}
-                <section
-                  aria-labelledby="comparison-heading"
-                  className="hidden lg:block"
-                >
-                  <h2 id="comparison-heading" className="sr-only">
-                    Feature comparison
-                  </h2>
-
-                  <div className="grid grid-cols-4 gap-x-8 border-t border-gray-900/10 before:block">
-                    {selectedTiers.map((tier) => (
-                      <div key={tier.id} aria-hidden="true" className="-mt-px">
-                        <div
-                          className={classNames(
-                            tier.featured
-                              ? "border-indigo-600"
-                              : "border-transparent",
-                            "border-t-2 pt-10"
-                          )}
-                        >
-                          <p
-                            className={classNames(
-                              tier.featured
-                                ? "text-indigo-600 dark:text-indigo-400"
-                                : "text-primary",
-                              "text-sm font-semibold leading-6"
-                            )}
-                          >
-                            {tier.name}
-                          </p>
-                          <p className="mt-1 text-sm leading-6 text-primary/70">
-                            {tier.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="-mt-6 space-y-16">
-                    {sections.map((section) => (
-                      <div key={section.name}>
-                        <div>
-                          <h3 className="text-sm font-semibold leading-6 text-primary inline">
-                            {section.name}
-                          </h3>
-                          {section.href && <InfoLink href={section.href} />}
-                        </div>
-                        <div className="relative -mx-8 mt-10">
-                          {/* Fake card backgrounds */}
-                          <div
-                            className="absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
-                            aria-hidden="true"
-                          >
-                            <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
-                            <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
-                            <div className="h-full w-full rounded bg-white dark:bg-gray-800/80 shadow-sm" />
-                          </div>
-
-                          <table className="relative w-full border-separate border-spacing-x-8">
-                            <thead>
-                              <tr className="text-left">
-                                <th scope="col">
-                                  <span className="sr-only">Feature</span>
-                                </th>
-                                {selectedTiers.map((tier) => (
-                                  <th key={tier.id} scope="col">
-                                    <span className="sr-only">
-                                      {tier.name} tier
-                                    </span>
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {section.features.map((feature, featureIdx) => (
-                                <tr key={feature.name}>
-                                  <th
-                                    scope="row"
-                                    className="w-1/4 py-3 pr-4 text-left text-sm font-normal leading-6 text-primary"
-                                  >
-                                    <div>
-                                      {feature.name}
-                                      {feature.href && (
-                                        <InfoLink href={feature.href} />
-                                      )}
-                                    </div>
-                                    {featureIdx !==
-                                    section.features.length - 1 ? (
-                                      <div className="absolute inset-x-8 mt-3 h-px bg-gray-200" />
-                                    ) : null}
-                                  </th>
-                                  {selectedTiers.map((tier) => (
-                                    <td
-                                      key={tier.id}
-                                      className="relative w-1/4 px-4 py-0 text-center"
-                                    >
-                                      <span className="relative h-full w-full py-3">
-                                        {typeof feature.tiers[variant][
-                                          tier.name
-                                        ] === "string" ? (
-                                          <span
-                                            className={classNames(
-                                              tier.featured
-                                                ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                                                : "text-primary",
-                                              "text-sm leading-6"
-                                            )}
-                                          >
-                                            {feature.tiers[variant][tier.name]}
-                                          </span>
-                                        ) : (
-                                          <>
-                                            {feature.tiers[variant][
-                                              tier.name
-                                            ] === true ? (
-                                              <Check
-                                                className="mx-auto h-5 w-5 text-indigo-600"
-                                                aria-hidden="true"
-                                              />
-                                            ) : (
-                                              <X
-                                                className="mx-auto h-5 w-5 text-gray-400"
-                                                aria-hidden="true"
-                                              />
-                                            )}
-                                          </>
-                                        )}
-                                      </span>
-                                    </td>
-                                  ))}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-
-                          {/* Fake card borders */}
-                          <div
-                            className="pointer-events-none absolute inset-x-8 inset-y-0 grid grid-cols-4 gap-x-8 before:block"
-                            aria-hidden="true"
-                          >
-                            {selectedTiers.map((tier) => (
-                              <div
-                                key={tier.id}
-                                className={classNames(
-                                  tier.featured
-                                    ? "ring-2 ring-indigo-600"
-                                    : "ring-1 ring-gray-900/10",
-                                  "rounded"
-                                )}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
+                <DiscountOverview className="mt-10" />
+                <PricingFAQ />
               </div>
             </div>
-            <DiscountOverview className="mt-10" />
-            <PricingFAQ />
           </>
         ) : (
           <>
