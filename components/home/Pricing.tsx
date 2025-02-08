@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Plus, Minus, ExternalLink } from "lucide-react";
+import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -25,6 +25,11 @@ import {
 } from "@/components/ui/table";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import React from "react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 type DeploymentOption = "cloud" | "selfHosted";
 
@@ -83,6 +88,8 @@ type Tier = {
   };
   learnMore?: string;
 };
+
+const TEAMS_ADDON = "Teams add-on";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -662,7 +669,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Starter: false,
-            Pro: "Teams add-on",
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
@@ -674,7 +681,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Starter: false,
-            Pro: "Teams add-on",
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
@@ -687,7 +694,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Starter: false,
-            Pro: "Teams add-on",
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
@@ -700,7 +707,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Starter: false,
-            Pro: "Teams add-on",
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: {
@@ -841,7 +848,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Starter: false,
-            Pro: "Teams add-on",
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
@@ -880,7 +887,33 @@ export default function Pricing({
     </Link>
   );
 
-  const featureCell = (value: boolean | string) => {};
+  const FeatureCell = ({ value }: { value: boolean | string }) => {
+    return typeof value === "string" ? (
+      <div className="text-sm leading-6 text-center">
+        {value}
+        {value === TEAMS_ADDON && (
+          <HoverCard>
+            <HoverCardTrigger>
+              <InfoIcon className="inline-block size-3 ml-1" />
+            </HoverCardTrigger>
+            <HoverCardContent className="w-60">
+              <p className="text-sm">
+                Available as part of the Teams add-on on the Pro plan.
+              </p>
+            </HoverCardContent>
+          </HoverCard>
+        )}
+      </div>
+    ) : (
+      <div className="flex justify-center">
+        {value === true ? (
+          <CheckIcon className="h-5 w-5 text-primary" />
+        ) : (
+          <MinusIcon className="h-5 w-5 text-muted-foreground" />
+        )}
+      </div>
+    );
+  };
 
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
@@ -1065,23 +1098,11 @@ export default function Pricing({
                                         )}
                                       </TableCell>
                                       <TableCell>
-                                        {typeof feature.tiers[variant][
-                                          tier.name
-                                        ] === "string" ? (
-                                          <div className="text-sm leading-6 text-center">
-                                            {feature.tiers[variant][tier.name]}
-                                          </div>
-                                        ) : (
-                                          <div className="flex justify-center">
-                                            {feature.tiers[variant][
-                                              tier.name
-                                            ] === true ? (
-                                              <CheckIcon className="h-5 w-5 text-primary" />
-                                            ) : (
-                                              <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                            )}
-                                          </div>
-                                        )}
+                                        <FeatureCell
+                                          value={
+                                            feature.tiers[variant][tier.name]
+                                          }
+                                        />
                                       </TableCell>
                                     </TableRow>
                                   ))}
@@ -1141,22 +1162,9 @@ export default function Pricing({
                                 </TableCell>
                                 {selectedTiers.map((tier) => (
                                   <TableCell key={tier.id}>
-                                    {typeof feature.tiers[variant][
-                                      tier.name
-                                    ] === "string" ? (
-                                      <div className="text-sm leading-6 text-center">
-                                        {feature.tiers[variant][tier.name]}
-                                      </div>
-                                    ) : (
-                                      <div className="flex justify-center">
-                                        {feature.tiers[variant][tier.name] ===
-                                        true ? (
-                                          <CheckIcon className="h-5 w-5 text-primary" />
-                                        ) : (
-                                          <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                        )}
-                                      </div>
-                                    )}
+                                    <FeatureCell
+                                      value={feature.tiers[variant][tier.name]}
+                                    />
                                   </TableCell>
                                 ))}
                               </TableRow>
