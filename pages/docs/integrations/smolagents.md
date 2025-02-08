@@ -7,7 +7,7 @@ description: Learn how to integrate Langfuse with Hugging Face smolagents using 
 
 This notebook shows how to monitor and debug your Hugging Face **smolagents** with **Langfuse** using the `SmolagentsInstrumentor`. By the end of this guide, you will be able to trace your smolagents applications with Langfuse.
 
-> **What are smolagents?** [smolagents](https://huggingface.co/docs/smol/quicktour) is a minimalist and open-source AI agent framework developed by Hugging Face, designed to simplify the creation and deployment of powerful agents with just a few lines of code. It focuses on simplicity and efficiency, making it easy for developers to leverage LLMs for various applications.
+> **What are smolagents?** [smolagents](https://github.com/huggingface/smolagents) is a minimalist and open-source AI agent framework developed by Hugging Face, designed to simplify the creation and deployment of powerful agents with just a few lines of code. It focuses on simplicity and efficiency, making it easy for developers to leverage LLMs for various applications.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source platform for LLM engineering. It provides tracing and monitoring capabilities for AI agents, helping developers debug, analyze, and optimize their products. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and SDKs.
 
