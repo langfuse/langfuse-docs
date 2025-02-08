@@ -138,6 +138,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited data access",
         "Unlimited annotation queues",
         "High rate limits",
+        "Support via Slack",
       ],
       addOn: {
         name: "Teams",
@@ -147,7 +148,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "SSO enforcement",
           "Fine-grained RBAC",
           "SOC2, ISO27001",
-          "Support via Slack",
         ],
       },
       cta: "Sign up",
@@ -324,7 +324,7 @@ const sections: Section[] = [
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "4,000 requests / min",
+            Hobby: "1,000 requests / min",
             Starter: "4,000 requests / min",
             Pro: "20,000 requests / min",
             Enterprise: "Custom",
@@ -468,6 +468,7 @@ const sections: Section[] = [
     features: [
       {
         name: "Extensive Public API",
+        href: "/docs/api",
         tiers: {
           cloud: {
             Hobby: true,
@@ -483,20 +484,31 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit",
+        name: "Rate limit (general API routes)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "1,000 requests / min",
-            Starter: "1,000 requests / min",
+            Hobby: "10 requests / min",
+            Starter: "100 requests / min",
             Pro: "1,000 requests / min",
             Enterprise: "Custom",
           },
         },
       },
       {
-        name: "SLA",
+        name: "Rate limit (metrics api)",
         href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "10 requests / day",
+            Starter: "20 requests / day",
+            Pro: "200 requests / day",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "SLA",
         tiers: {
           cloud: {
             Hobby: false,
@@ -540,7 +552,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Starter: false,
-            Pro: "Teams add-on",
+            Pro: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -867,6 +879,8 @@ export default function Pricing({
       <ExternalLink className="size-4 ml-2 pt-0.5" />
     </Link>
   );
+
+  const featureCell = (value: boolean | string) => {};
 
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
