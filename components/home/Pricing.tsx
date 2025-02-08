@@ -76,6 +76,11 @@ type Tier = {
     name: string;
     href: string;
   };
+  addOn?: {
+    name: string;
+    price: string;
+    mainFeatures: string[];
+  };
   learnMore?: string;
 };
 
@@ -132,12 +137,14 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "100k observations / month included, additional: $10 / 100k observations",
         "Unlimited data access",
         "Unlimited annotation queues",
+        "High rate limits",
       ],
       addOn: {
         name: "Teams",
-        price: "$199",
+        price: "$299",
         mainFeatures: [
-          "Custom SSO, SSO enforcement",
+          "Enterprise SSO (e.g. Okta)",
+          "SSO enforcement",
           "Fine-grained RBAC",
           "SOC2, ISO27001",
           "Support via Slack",
@@ -155,6 +162,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom",
       mainFeatures: [
         "Everything in Team",
+        "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
         "Custom Terms & DPA",
@@ -959,6 +967,31 @@ export default function Pricing({
                         </li>
                       ))}
                     </ul>
+                    {tier.addOn && (
+                      <div className="mt-3 border rounded pt-4 p-3 relative w-full">
+                        <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 -top-0 bg-card px-2 text-xs text-muted-foreground">
+                          + optional
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-sm text-primary">
+                            {tier.addOn.name} Add-on
+                          </span>
+                          <span className="font-bold text-sm text-primary">
+                            {tier.addOn.price}/mo
+                          </span>
+                        </div>
+                        <ul className="mt-1 space-y-1 text-sm">
+                          {tier.addOn.mainFeatures.map((feature) => (
+                            <li key={feature} className="flex space-x-2">
+                              <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                              <span className="text-muted-foreground">
+                                {feature}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
