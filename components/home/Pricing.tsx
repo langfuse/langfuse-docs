@@ -1029,7 +1029,9 @@ export default function Pricing({
                         className="mb-10 bg-card rounded-lg overflow-hidden border p-4"
                       >
                         <div className="mb-6">
-                          <h4 className="text-xl font-medium">{tier.name}</h4>
+                          <h4 className="text-lg text-foreground font-semibold">
+                            {tier.name}
+                          </h4>
                           <p className="mt-2 text-sm text-muted-foreground">
                             {tier.description}
                           </p>
@@ -1108,7 +1110,7 @@ export default function Pricing({
                         {selectedTiers.map((tier) => (
                           <TableHead
                             key={tier.id}
-                            className="w-2/12 text-primary font-bold text-center text-xl"
+                            className="w-2/12 text-center text-lg text-foreground font-semibold"
                           >
                             {tier.name}
                           </TableHead>
