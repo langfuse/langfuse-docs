@@ -629,7 +629,7 @@ const sections: Section[] = [
       },
       {
         name: "Project-level RBAC",
-        href: "/docs/rbac",
+        href: "/docs/rbac#project-level-roles",
         tiers: {
           cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
