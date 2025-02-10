@@ -7,19 +7,12 @@ description: How to connect Langfuse with OpenTelemetry to observe LLM applicati
 
 <AvailabilityBanner
   availability={{
-    hobby: "public-beta",
-    pro: "public-beta",
-    team: "public-beta",
-    selfHosted: "public-beta",
+    hobby: "full",
+    pro: "full",
+    team: "full",
+    selfHosted: "full",
   }}
 />
-
-<Callout emoji="🚧">
-
-OpenTelemetry support in Langfuse is in public beta and APIs might still change. The public beta is intended to gather feedback and improve the integration based on your needs.
-Please share all feedback in the [OpenTelemetry Support GitHub Discussion](https://github.com/orgs/langfuse/discussions/2509).
-
-</Callout>
 
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
 
@@ -68,6 +61,8 @@ As a reference, see [this example notebook](/docs/opentelemetry/example-python-s
 ## Use OpenTelemetry GenAI Instrumentation Libraries
 
 Any OpenTelemetry compatible instrumentation can be used to export traces to Langfuse. Check out the following end-to-end examples of popular instrumentation SDKs to get started:
+
+**Libraries**
 
 - [OpenLIT](/docs/opentelemetry/example-openlit)
 - [OpenLLMetry](/docs/opentelemetry/example-openllmetry)
@@ -139,6 +134,14 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 
 </details>
 
+**Framework integrations powered by OpenTelemetry**
+
+- [Hugging Face smolagents](/docs/integrations/smolagents)
+- [CrewAI](/docs/integrations/crewai)
+- [AutoGen](/docs/integrations/autogen)
+- [Semantic Kernel](/docs/integrations/semantic-kernel)
+- [Pydantic AI](/docs/integrations/pydantic-ai)
+
 ## Export from OpenTelemetry Collector
 
 ```mermaid
@@ -198,7 +201,7 @@ All attributes and resourceAttributes are available within the Langfuse `metadat
 Below, we share a non-exhaustive list of mappings that Langfuse applies:
 
 | OpenTelemetry Attribute       | Langfuse Property   | Description                                                                                                                                                      |
-|-------------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gen_ai.usage.cost`           | `costDetails.total` | The total [cost](/docs/model-usage-and-cost) of the request.                                                                                                     |
 | `gen_ai.usage.*`              | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
 | `llm.token_count.*`           | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`.                   |
