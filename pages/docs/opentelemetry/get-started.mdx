@@ -168,9 +168,9 @@ processors:
     check_interval: 5s
 
 exporters:
-  otlp/langfuse:
-    endpoint: "cloud.langfuse.com/api/public/otel" # EU data region
-    # endpoint: "us.cloud.langfuse.com/api/public/otel" # US data region
+  otlphttp/langfuse:
+    endpoint: "https://cloud.langfuse.com/api/public/otel" # EU data region
+    # endpoint: "https://us.cloud.langfuse.com/api/public/otel" # US data region
     headers:
       Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
 
@@ -179,7 +179,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp/langfuse]
+      exporters: [otlphttp/langfuse]
 ```
 
 ## Property Mapping [#property-mapping]
