@@ -195,20 +195,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "town-hall",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/ov28jfk3">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Wednesday: Langfuse Town Hall →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //       Wednesday: Langfuse Town Hall, 10am PT / 7pm CET →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "community-hour",
+    dismissible: true,
+    content: (
+      <Link href="https://lu.ma/f4v0qo34">
+        {/* mobile */}
+        <span className="sm:hidden">Wednesday: Langfuse Community Hour →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+        Wednesday: Langfuse Community Hour, 10am PT / 7pm CET →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
