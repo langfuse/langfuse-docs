@@ -185,6 +185,46 @@ service:
       exporters: [otlphttp/langfuse]
 ```
 
+### Filtering Spans sent to Langfuse
+
+In case you want to selectively send OTel Spans to Langfuse, you can use the OTel Collector [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md).
+It enables you to filter spans based on attributes, span names, and more.
+As this applies on a Span level, you may risk incomplete traces and should be careful when applying complex filter rules.
+Langfuse also requires that a root span is sent to our backend to ensure that a trace is created correctly.
+
+With the configuration below, you would only forward Spans which have a `gen_ai.system` attribute set to `openai`:
+
+```yml
+receivers:
+  otlp:
+    protocols:
+    grpc:
+      endpoint: 0.0.0.0:4317
+    http:
+      endpoint: 0.0.0.0:4318
+
+processors:
+  filter/openaisystem:
+    error_mode: ignore
+    traces:
+      span:
+        - 'attributes["gen_ai.system"] != "openai"'
+
+exporters:
+  otlphttp/langfuse:
+    endpoint: "https://cloud.langfuse.com/api/public/otel" # EU data region
+    # endpoint: "https://us.cloud.langfuse.com/api/public/otel" # US data region
+    headers:
+      Authorization: "Basic ${AUTH_STRING}" # Previously encoded API keys
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [filter/openaisystem]
+      exporters: [otlphttp/langfuse]
+```
+
 ## Property Mapping [#property-mapping]
 
 <Callout type="info">
