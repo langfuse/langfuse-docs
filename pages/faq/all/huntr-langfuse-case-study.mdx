@@ -1,0 +1,31 @@
+---
+title: How Huntr Uses Langfuse to improve their LLM app development
+tags: [case-studies]
+---
+
+# Case Study: Huntr and Langfuse
+
+> **About Huntr:** [Huntr](https://huntr.co/) is a job search platform that helps users create tailored resumes and cover letters using AI, autofill application forms, and organize their job search. 
+
+## Challenge
+
+As [Huntr](https://huntr.co/) expanded its use of LLMs with the [**AI Resume Builder**](https://huntr.co/product/ai-resume-builder), managing prompt observability and generation tracking became **increasingly complex**. The team initially built an internal tool to handle this, but it lacked the necessary capabilities to support an AI-first product. Developing a more robust infrastructure would require dedicated engineering resources that the small team could not spare.
+
+Working with LLMs also introduced new challenges compared to traditional APIs. The inherent **unpredictability of language model outputs** required a different approach to quality assurance and user experience management. Risks such as model hallucinations had to be addressed to maintain a high level of reliability and trust in the AI-generated results.
+
+## Solution
+
+Huntr integrated [Langfuse](https://langfuse.com/) to improve LLM observability, optimize prompt iterations, and evaluate model outputs more effectively. For this they use:
+
+* [Prompt management](/docs/prompts/get-started) for structured iteration and testing.  
+* [Evaluations](/docs/scores/overview) to assess model accuracy and performance at scale.  
+* [Datasets](/docs/datasets/overview) to analyze model behavior across diverse inputs.  
+* Dashboards and tracing for better visibility into LLM interactions.
+
+Langfuse provided a solution that eliminated the need for custom-built infrastructure, allowing Huntr to focus on refining its AI-driven features. 
+
+## Results
+
+Using Langfuse has improved Huntr’s ability to **iterate on prompts** and **maintain quality control** over model outputs. Previously, assessing LLM-generated content was challenging, but with Langfuse, the team can now track and analyze results more systematically. This has led to faster issue identification and resolution before they affect users and the dashboard and evaluations give us confidence that we are not facing unseen issues.
+
+Today, Huntr logs LLM generations for its [**AI Resume Builder**](https://huntr.co/product/ai-resume-builder), processing tens of thousands of resumes each month. The team plans to expand its use of Langfuse’s tracing model to support agent-based workflows in 2025\.
