@@ -14,7 +14,7 @@ export function ScheduleDemo({ className }: { className?: string }) {
   }, []);
   return (
     <Cal
-      calLink="marc-kl/demo"
+      calLink="clemo/sales"
       className={className}
       style={{ width: "100%", height: "100%", overflow: "scroll" }}
       config={{ layout: "month_view" }}

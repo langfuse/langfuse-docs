@@ -90,6 +90,9 @@ openai.langfuse_secret_key="sk-lf-..."
 openai.langfuse_enabled=True # Default is True, set to False to disable Langfuse
 openai.langfuse_host="https://cloud.langfuse.com" # 🇪🇺 EU region
 # openai.langfuse_host="https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Set openai key via attribute
+openai.api_key = "sk-..."
 ```
 
 </Tab>
@@ -156,6 +159,7 @@ from langfuse.openai import openai
 
 openai.langfuse_debug = True
 ```
+
 ### Sampling
 
 [Sampling](/docs/tracing-features/sampling) can be used to control the volume of traces collected by the Langfuse server.
@@ -496,7 +500,11 @@ _Note that you need to provide `trace_id` and `parent_observation_id` to each ge
 OpenAI returns the token usage on streamed responses only when in `stream_options` the `include_usage` parameter is set to `True`. If you would like to benefit from OpenAI's directly provided token usage, you can set `{"include_usage": True} in the `stream_options` argument.
 
 <Callout type="info">
-  When using streaming responses with `include_usage=True`, OpenAI returns token usage information in a final chunk that has an empty `choices` list. Make sure your application properly handles these empty `choices` chunks to ensure accurate token usage tracking by not trying to access some index in the `choices` list without checking if it is non-empty.
+  When using streaming responses with `include_usage=True`, OpenAI returns token
+  usage information in a final chunk that has an empty `choices` list. Make sure
+  your application properly handles these empty `choices` chunks to ensure
+  accurate token usage tracking by not trying to access some index in the
+  `choices` list without checking if it is non-empty.
 </Callout>
 
 ```python /stream_options={"include_usage": True}/
