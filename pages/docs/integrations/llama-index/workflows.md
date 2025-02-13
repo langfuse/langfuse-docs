@@ -1,11 +1,11 @@
 ---
 title: Observability for LlamaIndex Workflows with Langfuse  
-description: Learn how to integrate Langfuse with LlamaIndex Workflows using OpenTelemetry. This cookbook shows you how to trace AI workflows, improve observability, and debug LLM applications.  
+description: Learn how to monitor LlamaIndex Workflows with Langfuse. This cookbook shows you how to trace AI workflows, improve observability, and debug LLM applications.  
 ---
 
 # Observability for LlamaIndex Workflows
 
-This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain real-time observability for your [LlamaIndex Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/). You will learn how to leverage OpenTelemetry to trace each step within a workflow for improved monitoring, debugging, and performance optimization.
+This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain real-time observability for your [LlamaIndex Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/).
 
 > **What are LlamaIndex Workflows?** [LlamaIndex Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/) is a flexible, event-driven framework designed to build robust AI agents. In LlamaIndex, workflows are created by chaining together multiple steps—each defined and validated using the `@step` decorator. Every step processes specific event types, allowing you to orchestrate complex processes such as AI agent collaboration, RAG flows, data extraction, and more.
 
@@ -13,60 +13,44 @@ This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain r
 
 ## Get Started
 
-We'll walk through a simple example of using LlamaIndex Workflows and integrating it with Langfuse via OpenTelemetry.
+We'll walk through a simple example of using LlamaIndex Workflows and integrating it with Langfuse.
 
 ### Step 1: Install Dependencies
 
 
 ```python
-%pip install opentelemetry-sdk opentelemetry-exporter-otlp
-%pip install openai gcsfs nest-asyncio "openinference-instrumentation-llama-index>=2.0.0"
-%pip install llama-index
+%pip install langfuse openai llama-index
 ```
 
 ### Step 2: Set Up Environment Variables
 
-Configure your Langfuse API keys and OpenTelemetry export settings. Replace the placeholder values with your actual credentials. These settings ensure that OpenTelemetry traces are sent to Langfuse for real-time observability.
+Configure your Langfuse API keys. You can get them by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
 
 ```python
 import os
-import base64
 
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = "sk-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # DOCS EXAMPLE KEYS
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # DOCS EXAMPLE KEYS
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 ### Step 3: Initialize the `LlamaIndexInstrumentor`
 
-Initialize the `LlamaIndexInstrumentor` from the [openinference library](https://github.com/Arize-ai/openinference) before your application code. Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` (here imported as `HTTPSpanExporter`) uses the endpoint and headers from the environment variables.
+At the root of your LlamaIndex application, register Langfuse’s `LlamaIndexInstrumentor`. When instantiating `LlamaIndexInstrumentor`, make sure to configure your Langfuse API keys and the Host URL correctly via environment variables or constructor arguments.
 
 
 ```python
-from opentelemetry.sdk import trace as trace_sdk
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
-    OTLPSpanExporter as HTTPSpanExporter,
-)
-from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+from langfuse.llama_index import LlamaIndexInstrumentor
 
-# Add Langfuse
-span_langfuse_processor = SimpleSpanProcessor(HTTPSpanExporter())
-
-# Add them to the tracer
-tracer_provider = trace_sdk.TracerProvider()
-tracer_provider.add_span_processor(span_processor=span_langfuse_processor)
-
-# Instrument the application
-LlamaIndexInstrumentor().instrument(tracer_provider=tracer_provider)
+# Get your keys from the Langfuse project settings page and set them as environment variables or pass them as arguments when initializing the instrumentor
+instrumentor = LlamaIndexInstrumentor()
 ```
 
 ### Step 4: Create a Simple LlamaIndex Workflows Application
@@ -75,6 +59,8 @@ In LlamaIndex Workflows, you build event-driven AI agents by defining steps with
 
 
 ```python
+instrumentor.start()
+
 from llama_index.core.workflow import (
     Event,
     StartEvent,
@@ -111,27 +97,30 @@ class JokeFlow(Workflow):
 w = JokeFlow(timeout=60, verbose=False)
 result = await w.run(topic="pirates")
 print(str(result))
+
+instrumentor.flush()
 ```
 
+    Trace ID is not set. Creating generation client with new trace id.
+
+
     Analysis:
-    This joke plays on the pun of "fish and ships" sounding like "fish and chips," a popular dish at seafood restaurants. The joke also incorporates the pirate theme by mentioning a pirate going to a seafood restaurant, which adds an element of humor.
+    This joke plays on the pun of "fish and ships" sounding like "fish and chips," a popular dish at seafood restaurants. The joke also incorporates the pirate theme by mentioning a pirate going to a seafood restaurant, which adds an element of humor and surprise.
     
     Critique:
-    Overall, this joke is light-hearted and playful, making it suitable for a general audience. The pun is clever and well-executed, providing a humorous twist to a common phrase. However, the joke may be considered somewhat predictable or cliché, as puns involving homophones are a common comedic device. Additionally, the joke relies heavily on wordplay and does not have a complex setup or punchline, which may limit its appeal to some audiences. Overall, while this joke is amusing and likely to elicit a chuckle, it may not be considered particularly original or innovative.
+    Overall, this joke is light-hearted and playful, making it suitable for a general audience. The use of wordplay is clever and adds an element of wit to the punchline. However, the joke may be considered somewhat predictable as the punchline is somewhat expected once the pirate theme is introduced. Additionally, the humor may not be particularly sophisticated or original, as puns involving food and wordplay are common in comedy. Overall, while this joke may elicit a chuckle or a smile, it may not be particularly memorable or groundbreaking in terms of humor.
 
 
 ### Step 5: View Traces in Langfuse
 
-After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated OpenTelemetry traces. You will see detailed logs for each workflow step along with metrics such as token counts, latencies, and execution paths. For example, the trace may show how the preprocessing and reply generation steps were executed in your LlamaIndex Workflows application.
+After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths. 
 
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-llamaindex-workflows/llamaindex-workflows-example-trace.png)
 
-_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9463f912ef8b9763a62d67445bcbc737?timestamp=2025-02-06T13%3A51%3A33.358Z&observation=7d9e694bfe0dd983)_
+_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4?timestamp=2025-02-13T16%3A03%3A09.705Z)_
 
 ## References
 
-- [Langfuse OpenTelemetry Docs](https://langfuse.com/docs/opentelemetry/get-started)  
 - [LlamaIndex Workflows Documentation](https://docs.llamaindex.ai/en/stable/module_guides/workflow/)  
-
 
 
