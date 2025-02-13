@@ -66,18 +66,6 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
-When using the [decorator-based integration](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context
-
-# fetch a trace
-langfuse_context.client_instance.api.trace.get(trace_id)
-
-# async client via asyncio
-await langfuse_context.client_instance.async_api.trace(trace_id)
-```
-
 When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
@@ -90,6 +78,26 @@ langfuse.api.trace.get(trace_id)
 
 # async client via asyncio
 await langfuse.async_api.trace(trace_id)
+
+# explore more endpoints via Intellisense
+langfuse.api.*
+await langfuse.async_api.*
+```
+
+You can also access the Langfuse client instance when using the [decorator-based integration](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context
+
+# fetch a trace
+langfuse_context.client_instance.api.trace.get(trace_id)
+
+# async client via asyncio
+await langfuse_context.client_instance.async_api.trace(trace_id)
+
+# explore more endpoints via Intellisense
+langfuse_context.client_instance.api.*
+await langfuse_context.client_instance.async_api.*
 ```
 
 </Tab>
@@ -103,6 +111,9 @@ const langfuse = new Langfuse()
 ...
 // fetch a trace
 await langfuse.api.traceGet(traceId)
+
+// explore more endpoints via Intellisense
+langfuse.api.*
 ```
 
 </Tab>

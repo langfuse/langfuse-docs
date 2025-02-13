@@ -13,7 +13,7 @@ Common use cases:
 - Collect few-shot examples to improve quality of output.
 - Programmatically create [datasets](/docs/datasets).
 
-If you are new to Langfuse, we recommend familiarizing yourself with the [Langfuse data model](/docs/data-model).
+If you are new to Langfuse, we recommend familiarizing yourself with the [Langfuse data model](/docs/tracing-data-model).
 
 <Callout type="info">
 
@@ -24,6 +24,12 @@ New data is typically available for querying within 15-30 seconds of ingestion, 
 ## SDKs [#sdks]
 
 Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
+
+<Callout type="info">
+
+There dedicated `fetch*` methods for core entities are covered by tests and semantic versioning. The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities.
+
+</Callout>
 
 <Tabs items={["Python", "JS/TS"]}>
 <Tab>
@@ -41,6 +47,8 @@ langfuse = Langfuse(
   # host="https://us.cloud.langfuse.com" # 🇺🇸 US region
 )
 
+### Dedicated fetch_* methods for core entities
+
 # Fetch list of traces, supports filters and pagination
 traces = langfuse.fetch_traces()
 
@@ -55,6 +63,17 @@ observation = langfuse.fetch_observation("observationId")
 
 # Fetch list of sessions
 sessions = langfuse.fetch_sessions()
+
+### Methods on langfuse.api namespace for other entities (generated from the API reference)
+
+# Fetch list of scores
+langfuse.api.score.list()
+
+# Fetch a single score by ID
+langfuse.api.score.get("scoreId")
+
+# Explore more entities via Intellisense
+langfuse.api.*
 ```
 
 Python SDK reference including all available filters:
@@ -83,6 +102,10 @@ const langfuse = new Langfuse({
   // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
 });
 
+
+
+// Dedicated fetch* methods for core entities
+
 // Fetch list of traces, supports filters and pagination
 const traces = await langfuse.fetchTraces();
 
@@ -97,6 +120,19 @@ const observation = await langfuse.fetchObservation("observationId");
 
 // Fetch list of sessions
 const sessions = await langfuse.fetchSessions();
+
+
+
+// Methods on langfuse.api namespace for other entities (generated from the API reference)
+
+// Fetch list of scores
+const scores = await langfuse.api.scoreGet();
+
+// Fetch a single score by ID
+const score = await langfuse.api.scoreGetById("scoreId");
+
+// Explore more entities via Intellisense
+langfuse.api.*
 ```
 
 JS/TS SDK reference including all available filters:

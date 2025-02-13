@@ -19,7 +19,7 @@ We'll walk through a simple example of using CrewAI and integrating it with Lang
 
 
 ```python
-%pip install langfuse crewai
+%pip install langfuse openlit crewai crewai_tools
 ```
 
 ### Step 2: Set Up Environment Variables

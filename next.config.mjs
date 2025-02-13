@@ -230,6 +230,7 @@ const nonPermanentRedirects = [
   ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
 
   // new self-hosting section
+  ["/docs/self-hosting", "/self-hosting"],
   ["/docs/deployment/feature-overview", "/self-hosting/license-key"],
   ["/docs/deployment/local", "/self-hosting/local"],
   ["/docs/deployment/self-host", "/self-hosting"],
