@@ -624,7 +624,7 @@ const sections: Section[] = [
         name: "SSO enforcement",
         tiers: {
           cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
