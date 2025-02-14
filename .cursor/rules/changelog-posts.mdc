@@ -1,0 +1,61 @@
+---
+description: How we do changelog posts anf format them
+globs: pages/changelog/**
+---
+# Changelog Posts Guidelines
+
+## Overview
+Changelog posts document updates, new features, bug fixes, and improvements. They serve as a historical record of changes and provide clarity for users and developers alike.
+
+## File Placement
+- Place all changelog posts in the `/changelog` directory.
+- Use a clear naming convention (e.g., include the date and a brief description, such as `2023-10-01-new-feature.md`).
+
+## Frontmatter Configuration Options
+Each changelog post should define the following frontmatter fields:
+
+- **title** (string, required):
+  The title of the changelog entry, displayed prominently in both the header and index.
+
+- **description** (string, required):
+  A concise summary of the changes covered in the post.
+
+- **date** (string, required):
+  The release date of the update. Use a date format that can be parsed by JavaScript (e.g., YYYY-MM-DD). This is formatted and displayed in the changelog header and index.
+
+- **author** (string, required):
+  The name or identifier of the author responsible for the changelog entry.
+
+- **showOgInHeader** (boolean, optional):
+  Set to false to hide the media in the header. If omitted or true, media will be rendered as described below.
+
+- **ogCloudflareVideo** (string, optional):
+  The video ID for a Cloudflare-hosted video. When provided, this video will be embedded in the header.
+
+- **ogVideo** (string, optional):
+  A fallback video URL to use if no Cloudflare video is provided. Point to mp4 file.
+
+- **ogImage** (string, optional):
+  The URL of an image to display if there is no video. If both an image and a GIF are provided, the GIF may be prioritized.
+
+- **gif** (string, optional):
+  URL for an animated GIF. This can be used in place of a static image if desired.
+
+*Note*: The display components (`ChangelogHeader.tsx` and `ChangelogIndex.tsx`) use these options in the following priority order:
+1. Cloudflare Video (`ogCloudflareVideo`)
+2. Fallback Video (`ogVideo`)
+3. Image (`ogImage`), optionally replaced by `gif` if provided
+
+## Content Structure
+- After the frontmatter, write your post content in Markdown.
+- Structure your content with clear headings and sections, such as:
+  - New Features
+  - Improvements
+  - Bug Fixes
+  - Miscellaneous
+- Use bullet points and concise paragraphs for readability.
+- Maintain a consistent tone and style that aligns with existing changelog examples.
+
+## Examples in Use
+- Refer to existing changelog posts in the `/changelog` directory to see real-world examples of how these frontmatter options are applied.
+- Notice how the posts integrate media and text to create an engaging changelog experience.
