@@ -27,16 +27,20 @@ Langfuse accepts the following environment variables to fine-tune your Redis usa
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 | Variable                  | Required / Default | Description                                                                                        |
-| ------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+|---------------------------|--------------------|----------------------------------------------------------------------------------------------------|
 | `REDIS_CONNECTION_STRING` | Required           | Redis connection string with format `redis[s]://[[username][:password]@][host][:port][/db-number]` |
 
 OR
 
-| Variable     | Required / Default | Description                                   |
-| ------------ | ------------------ | --------------------------------------------- |
-| `REDIS_HOST` | Required           | Redis host name.                              |
-| `REDIS_PORT` | `6379`             | Port of the Redis instance.                   |
-| `REDIS_AUTH` |                    | Authentication string for the Redis instance. |
+| Variable              | Required / Default | Description                                          |
+|-----------------------|--------------------|------------------------------------------------------|
+| `REDIS_HOST`          | Required           | Redis host name.                                     |
+| `REDIS_PORT`          | `6379`             | Port of the Redis instance.                          |
+| `REDIS_AUTH`          |                    | Authentication string for the Redis instance.        |
+| `REDIS_TLS_ENABLED`   | `false`            | Enable TLS for the Redis connection.                 |
+| `REDIS_TLS_CA_PATH`   |                    | Path to the CA certificate for the Redis connection. |
+| `REDIS_TLS_CERT_PATH` |                    | Path to the certificate for the Redis connection.    |
+| `REDIS_TLS_KEY_PATH`  |                    | Path to the private key for the Redis connection.    |
 
 ## Deployment Options
 
