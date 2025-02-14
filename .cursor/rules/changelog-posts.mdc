@@ -47,7 +47,14 @@ Each changelog post should define the following frontmatter fields:
 3. Image (`ogImage`), optionally replaced by `gif` if provided
 
 ## Content Structure
-- After the frontmatter, write your post content in Markdown.
+- After the frontmatter
+- Never forget to add the `ChangelogHeader` component after the frontmatter.
+  ```tsx
+  import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+  <ChangelogHeader />
+  ```
+- After the header, write your post content in Markdown.
 - Structure your content with clear headings and sections, such as:
   - New Features
   - Improvements
