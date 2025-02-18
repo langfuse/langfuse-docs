@@ -60,7 +60,7 @@ dspy.configure(lm=lm)
 
 ## Step 4: Running DSPy Modules with Observability
 
-Here are a few examples from the [DSPy documentation](https://dspy.ai/) showing core features. Each example automatically sends trace data to Langfuse via MLflow.
+Here are a few examples form the [DSPy documentation](https://dspy.ai/) showing core features. Each example automatically sends trace data to Langfuse via MLflow.
 
 ### Example 1: Using the Chain-of-Thought Module (Math Reasoning)
 
@@ -98,7 +98,7 @@ rag(context=search_wikipedia(question), question=question)
 
 
     Prediction(
-        reasoning='The context mentions that David Gregory inherited Kinnairdy Castle in 1664. This information directly answers the question regarding the name of the castle he inherited.',
+        reasoning='The context states that David Gregory inherited Kinnairdy Castle in 1664. Therefore, the name of the castle he inherited is Kinnairdy Castle.',
         response='The name of the castle that David Gregory inherited is Kinnairdy Castle.'
     )
 
@@ -126,13 +126,13 @@ print(pred.answer)
 
 ### Disabling Auto Tracing
 
-If you decide that you want to disable auto tracing, you can do so by passing the `disabled=True` parameter:
+If you decide that you want to disable auto tracing, you can do so by passing the `disable=True` parameter:
 
 
 
 ```python
 import mlflow
-mlflow.dspy.autolog(disabled=True)
+mlflow.dspy.autolog(disable=True)
 ```
 
 ### MLflow Trace Decorator
@@ -160,5 +160,5 @@ After running your DSPy application, you can inspect the traced events in Langfu
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-dspy/dspy-example-trace.png)
 
-_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c41422725cf61e12a25c2811cff9ffba?timestamp=2025-02-17T13%3A50%3A52.692Z)_
+_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5db0902e3e045c3832063536ae0cba1d?timestamp=2025-02-18T12%3A05%3A27.582Z)_
 
