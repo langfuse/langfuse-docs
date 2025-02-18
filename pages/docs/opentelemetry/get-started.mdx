@@ -238,23 +238,42 @@ In addition, we map many GenAI specific properties to properties in the Langfuse
 First and foremost, we stick to the [OpenTelemetry Gen AI Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/), but also map vendor specific properties from common frameworks.
 All attributes and resourceAttributes are available within the Langfuse `metadata` property as a fallback.
 
-Below, we share a non-exhaustive list of mappings that Langfuse applies:
+Langfuse uses the `langfuse.*` namespace to map properties from OpenTelemetry to the Langfuse data model.
+This enables features like linking [Prompts](/docs/prompts/get-started) to spans, adding [tags](/docs/tracing-features/tags), or marking traces as public.
+Attributes in the Langfuse namespace take precedence over the generic mapping we specify below.
+Some of the attributes are only taken into consideration if they are set on the root span. We mark those in the table below.
+The following Langfuse specific properties are supported:
+
+| OpenTelemetry Attribute   | Langfuse Property | Type       | Root Span only | Description                                                                                                                          |
+|---------------------------|-------------------|------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `langfuse.session.id`     | `sessionId`       | `string`   | `true`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                   |
+| `langfuse.user.id`        | `userId`          | `string`   | `true`         | The [user ID](/docs/tracing-features/users) for the request.                                                                         |
+| `langfuse.public`         | `public`          | `boolean`  | `true`         | Mark the trace as public to be able to [share it via url](/docs/tracing-features/url). This can be changed later in the Langfuse UI. |
+| `langfuse.release`        | `release`         | `string`   | `true`         | The [release](/docs/tracing-features/releases-and-versioning) for the request.                                                       |
+| `langfuse.version`        | `version`         | `string`   | `true`         | The [version](/docs/tracing-features/releases-and-versioning) for the request.                                                       |
+| `langfuse.tags`           | `tags`            | `string[]` | `true`         | The [tags](/docs/tracing-features/tags) for the request.                                                                             |
+| `langfuse.prompt.name`    | `promptName`      | `string`   | `false`        | The [prompt name](/docs/prompts/get-started) for the request.                                                                        |
+| `langfuse.prompt.version` | `promptVersion`   | `int`      | `false`        | The [prompt version](/docs/prompts/get-started) for the request.                                                                     |
+
+Below, we present a non-exhaustive list of additional mappings that Langfuse applies.
+These mappings are based on OTel GenAI semantic conventions and vendor-specific implementations that deviate from these conventions:
 
 | OpenTelemetry Attribute       | Langfuse Property   | Description                                                                                                                                                      |
-| ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `gen_ai.usage.cost`           | `costDetails.total` | The total [cost](/docs/model-usage-and-cost) of the request.                                                                                                     |
 | `gen_ai.usage.*`              | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
 | `llm.token_count.*`           | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`.                   |
 | `gen_ai.request.model`        | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
 | `gen_ai.response.model`       | `model`             | The [model](/docs/model-usage-and-cost) used for the response.                                                                                                   |
 | `llm.model_name`              | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
+| `model`                       | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
 | `gen_ai.request.*`            | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
 | `llm.invocation_parameters.*` | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
-| `langfuse.session.id`         | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
 | `session.id`                  | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
-| `langfuse.user.id`            | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
 | `user.id`                     | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
 | `gen_ai.prompt`               | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                                |
 | `gen_ai.completion`           | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                               |
 | `input.value`                 | `input`             | Input field. Used by OpenInference based traces.                                                                                                                 |
 | `output.value`                | `output`            | Output field. Used by OpenInference based traces.                                                                                                                |
+| `mlflow.spanInputs`           | `input`             | Input field. Used by MLflow based traces.                                                                                                                        |
+| `mlflow.spanOutputs`          | `output`            | Output field. Used by MLflow based traces.                                                                                                                       |
