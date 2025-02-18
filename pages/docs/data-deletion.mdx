@@ -70,13 +70,18 @@ Within the next minutes, all related data is irreversibly removed from our syste
   Be cautious when executing this action.
 </Callout>
 
-## Deleting an Organization (Cloud only)
+## Deleting an Organization
 
 If there are no projects left in an organization, you can delete the organization in the organization settings.
 Navigate to the organization settings and scroll to the `Danger Zone` within the `General` section.
 Confirm that you want to delete your organization.
 The organization and all associated user information will be removed from our system.
 
-## Deleting a User Account (Cloud only)
+## Deleting a User Account (Cloud)
 
 To delete your user account, please message us at support@langfuse.com.
+
+## Deleting a User Account (Self-Host)
+
+Remove the corresponding user record from the `users` table and drop all foreign keys to it using cascade.
+
