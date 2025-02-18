@@ -29,5 +29,6 @@ export default {
   goose: "Goose",
   smolagents: "Smolagents",
   crewai: "CrewAI",
+  "spring-ai": "Spring AI",
   other: "More Ways to Integrate",
 };
