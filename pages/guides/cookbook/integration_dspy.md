@@ -14,7 +14,7 @@ Install the latest versions of DSPy and MLflow. For example:
 
 
 ```python
-%pip install dspy mlflow
+%pip install dspy mlflow opentelemetry-exporter-otlp-proto-http
 ```
 
 ## Step 1: Setup Langfuse Environment Variables
