@@ -40,7 +40,7 @@ from firecrawl import FirecrawlApp
 app = FirecrawlApp(api_key="fc-...")
 ```
 
-To monitor your Firecrawl scraper, we use the L[angfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `scrape_website()` function. All trace data is automatically sent to Langfuse, allowing you to monitor your Firecrawl operations in real time.
+To monitor your Firecrawl scraper, we use the [Langfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `scrape_website()` function. All trace data is automatically sent to Langfuse, allowing you to monitor your Firecrawl operations in real time.
 
 
 ```python
