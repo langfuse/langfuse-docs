@@ -15,12 +15,14 @@ Install the necessary Python packages to enable OpenTelemetry tracing, openinfer
 
 
 ```python
-%pip install openai opentelemetry-sdk opentelemetry-exporter-otlp-proto-http openinference-instrumentation-openai
+%pip install arize-phoenix-otel openai openinference-instrumentation-openai
 ```
 
 ## Step 2: Configure Environment Variables
 
-Configure your environment by setting the endpoint and header variables.
+Set your Langfuse API keys for the basic auth header. Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
+Also, add your `OPENAI_API_KEY` as an environment variable.
 
 
 ```python
@@ -31,37 +33,22 @@ LANGFUSE_PUBLIC_KEY="pk-lf-..."
 LANGFUSE_SECRET_KEY="sk-lf-..."
 LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
 # your openai key
 os.environ["OPENAI_API_KEY"] = "sk-..."
 ```
 
 ## Step 3: Initialize Instrumentation
 
-Before running any application code let's set up our instrumentor (you can replace this with any of the frameworks supported [here](https://docs.arize.com/phoenix/tracing/integrations-tracing))
+Initialize the Arize Phoenix module [`register()`](https://docs.arize.com/phoenix/tracing/how-to-tracing/setup-tracing-python) by passing in the protocol, endpoint, and headers. The use the `SmolagentsInstrumentor` to instrument your Smolagents application. (You can replace this with any of the frameworks supported [here](https://docs.arize.com/phoenix/tracing/integrations-tracing))
 
 
 ```python
-import openai
-from opentelemetry import trace as trace_api
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk import trace as trace_sdk
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-# Set up the trace provider
-resource = Resource(attributes={})
-tracer_provider = trace_sdk.TracerProvider(resource=resource)
-span_exporter = OTLPSpanExporter()
-span_processor = SimpleSpanProcessor(span_exporter=span_exporter)
-tracer_provider.add_span_processor(span_processor=span_processor)
-trace_api.set_tracer_provider(tracer_provider=tracer_provider)
-
-# Now instrument OpenAI
+from phoenix.otel import register
 from openinference.instrumentation.openai import OpenAIInstrumentor
+
+# configure the Phoenix tracer
+register(protocol="http/protobuf", endpoint="https://cloud.langfuse.com/api/public/otel/v1/traces", headers={"Authorization": f"Basic {LANGFUSE_AUTH}"})
+
 OpenAIInstrumentor().instrument()
 ```
 

@@ -60,7 +60,7 @@ dspy.configure(lm=lm)
 
 ## Step 4: Running DSPy Modules with Observability
 
-Here are a few examples from the [DSPy documentation](https://dspy.ai/) showing core features. Each example automatically sends trace data to Langfuse via MLflow.
+Here are a few examples form the [DSPy documentation](https://dspy.ai/) showing core features. Each example automatically sends trace data to Langfuse via MLflow.
 
 ### Example 1: Using the Chain-of-Thought Module (Math Reasoning)
 

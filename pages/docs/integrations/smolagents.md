@@ -19,7 +19,7 @@ We'll walk through a simple example of using smolagents and integrating it with 
 
 
 ```python
-%pip install smolagents
+%pip install 'smolagents[telemetry]' arize-phoenix-otel
 %pip install opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-smolagents
 ```
 
@@ -35,13 +35,9 @@ Also, add your [Hugging Face token](https://huggingface.co/settings/tokens) (`HF
 import os
 import base64
 
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
-
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_AUTH = base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
 
 # your Hugging Face token
 os.environ["HF_TOKEN"] = "hf_..."
@@ -49,22 +45,34 @@ os.environ["HF_TOKEN"] = "hf_..."
 
 ### Step 3: Initialize the `SmolagentsInstrumentor`
 
-Initialize the `SmolagentsInstrumentor` before your application code. Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
-
+Initialize the Arize Phoenix module [`register()`](https://docs.arize.com/phoenix/tracing/how-to-tracing/setup-tracing-python) by passing in the protocol, endpoint, and headers. The use the `SmolagentsInstrumentor` to instrument your smolagents application.
 
 
 ```python
-from opentelemetry.sdk.trace import TracerProvider
-
+from phoenix.otel import register
 from openinference.instrumentation.smolagents import SmolagentsInstrumentor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
+register(protocol="http/protobuf", 
+         endpoint = "https://cloud.langfuse.com/api/public/otel/v1/traces", 
+         headers = {"Authorization": f"Basic {LANGFUSE_AUTH}"}
+         )
 
-SmolagentsInstrumentor().instrument(tracer_provider=trace_provider)
+SmolagentsInstrumentor().instrument()
 ```
+
+    🔭 OpenTelemetry Tracing Details 🔭
+    |  Phoenix Project: default
+    |  Span Processor: SimpleSpanProcessor
+    |  Collector Endpoint: https://cloud.langfuse.com/api/public/otel/v1/traces
+    |  Transport: HTTP + protobuf
+    |  Transport Headers: {'authorization': '****'}
+    |  
+    |  Using a default SpanProcessor. `add_span_processor` will overwrite this default.
+    |  
+    |  `register` has set this TracerProvider as the global OpenTelemetry default.
+    |  To disable this behavior, call `register` with `set_global_tracer_provider=False`.
+    
+
 
 ### Step 4: Run your smolagent
 
