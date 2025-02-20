@@ -1,0 +1,160 @@
+---
+title: "The Agent Deep Dive: David Zhang’s Open Deep Research"
+description: "Exploring Zhang’s open-source Deep Research. We look at the prompting, search executions, and report creation, and compare it to both OpenAI’s and Perplexity’s Deep Research solutions."
+ogImage: /images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/the-agent-deep-dive.png
+tag: agent
+date: 2025/02/20
+author: "Jannik"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="The Agent Deep Dive: David Zhang’s Open Deep Research"
+  description="This blog post explores David Zhang’s open-source framework for iterative AI research. We look at the system’s query process, parallel search executions, and markdown report creation, and compare it to both OpenAI’s and Perplexity’s research solutions."
+  authors={["jannikmaierhoefer"]}
+  image="/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/the-agent-deep-dive.png"
+/>
+
+AI-driven research is evolving fast. While OpenAI has introduced Deep Research recently, open-source alternatives are just as exciting. In this post, we take a closer look at the inner workings of open [deep-research](https://github.com/dzhng/deep-research) by David Zhang ([dzhng](https://github.com/dzhng))—a lightweight, transparent framework for iterative AI research.
+
+At under 500 lines of code, `deep-research` packs a surprising punch. It runs recursive research loops, refining queries based on the information it finds—no hidden logic, no unnecessary dependencies, just a clean, modular setup that’s easy to hack or extend.
+
+We decided to put it to the test. With [Langfuse](https://github.com/langfuse/langfuse), we traced its execution (thanks to [@hassiebp](https://github.com/hassiebp) for building the [integration](https://github.com/hassiebp/deep-research-with-langfuse)), broke down its decision-making, and measured performance. Below, we’ll show how it works, why it’s worth a look, and how it compares to other AI research tools.
+
+---
+
+## Why We Like This Agent
+
+- **Simple** – Minimalist design, easy to modify, and fully open-source.  
+- **Iterative Research** – Runs deep research loops, refining its queries at each step.  
+- **Control Over Depth & Breadth** – Users define how far (depth) and wide (breadth) the research should go.  
+- **Parallel Execution** – Fires off multiple queries at once, speeding up research.
+
+**Tech Stack**:
+- **o3-mini** as the language model for SERP generation, learnings, and the final report.  
+- **Firecrawl** for executing SERP queries.
+
+Despite its minimal footprint, the framework is robust enough to generate meaningful follow-up questions, refine its search, and compile a structured final report. This simplicity makes it an approachable playground for anyone looking to experiment with or build upon an iterative AI research agent.
+
+---
+
+## How the Execution Looks in Langfuse
+
+To see how `deep-research` holds up, we asked it a more nuanced question:
+
+> "I don't get how Whisper is fully open source (MIT), yet ChatGPT's speech-to-text is vastly better than Perplexity's and Apple's. Can you help me figure this out?"
+
+This isn’t a simple fact lookup—it requires synthesizing multiple sources, filtering insights, and producing structured responses.
+
+With a breadth of 4 and a depth of 2, for instance, we might see the agent generate multiple parallel queries—and then refine those queries after it sees what the search turned up. You’d end up with a thorough markdown report summarizing everything, plus any missing links the agent found intriguing.
+
+Each iteration of this loop can be viewed as an event within Langfuse. Tracking these events provides a step-by-step replay of the agent’s logic—useful for debugging and fine-tuning. Here’s the public trace in Langfuse:
+
+[**Link to Public Trace**](https://cloud.langfuse.com/project/cm6y5qfi901bzad07tyaeg3no/traces/fd9be9b8-ffd2-435b-ba90-45a0af649954)
+
+<Frame className="my-10" fullWidth>
+  ![Gantt chart](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/gatt.png)
+</Frame>
+
+*Note: The chart above is a Gantt-like overview of query processes.*
+
+Next, let’s break down each step of the research loop in more detail.
+
+<Steps>
+
+### 1. Initial Query
+The system message and user prompt are created. This is where the agent sets the context.
+
+<Frame className="my-10" fullWidth>
+  ![Initial Query](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/system-prompt.png)
+</Frame>
+
+### 2. Follow-Up Questions
+The agent proposes up to three follow-up questions based on the initial prompt.
+
+<Frame className="my-10" fullWidth>
+  ![Follow Up Questions](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/follow-up-1.png)
+</Frame>
+
+### 3. Search Queries
+Based on those follow-up questions, the agent generates SERP queries to investigate the topic further.
+
+<Frame className="my-10" fullWidth>
+  ![Search Queries](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/serp-queries.png)
+</Frame>
+
+### 4. Search Engine Calls
+The system then spawns multiple queries to a search API (in this case, Firecrawl).
+
+<Frame className="my-10" fullWidth>
+  ![Search Engine Calls](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/context.png)
+</Frame>
+
+### 5. Learnings from the Content
+After retrieving the search results, the agent processes them and generates up to three “learnings” (insights). It also proposes new follow-up questions, continuing the loop if necessary.
+
+<Frame className="my-10" fullWidth>
+  ![Learnings](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/learnings.png)
+</Frame>
+
+<Frame className="my-10" fullWidth>
+  ![Follow Up Questions](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/follow-up.png)
+</Frame>
+
+### 6. Markdown Report
+Finally, once the maximum research breadth (e.g., 4) and depth (e.g., 2) are reached, the agent compiles a Markdown report summarizing key findings. It uses all the intermediate “learnings” from previous steps to form a coherent answer.
+
+<Frame className="my-10" fullWidth>
+  ![Markdown Report](/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/final-report.png)
+</Frame>
+
+</Steps>
+
+All these steps are tracked in Langfuse—timestamps, search calls, LLM calls, and final outputs—providing a transparent view of how the agent arrives at its answer.
+
+---
+
+## Comparison With Other AI Research Tools
+
+Although `deep-research` is a small, open-source project, we wanted to see how it fares alongside two well-known AI tools: OpenAI’s ChatGPT (with advanced research features or higher usage tiers) and Perplexity Pro.
+
+To keep it fair, we ran the **same** question on all three:
+
+### David Zhang’s Open Deep Research
+- **Time to finish**: ~3 minutes and 34 seconds  
+- **Estimated model usage cost**: ~$0.71  
+- **Generated report length**: ~12k characters  
+- **Trace**: [Langfuse Link](https://cloud.langfuse.com/project/cm6y5qfi901bzad07tyaeg3no/traces/fd9be9b8-ffd2-435b-ba90-45a0af649954)
+
+### OpenAI’s Deep Research
+- **Time to finish**: ~6 minutes  
+- **Insights**: ~27 sources  
+- **Generated report length**: ~87k characters  
+- **Costs**: Hard to pin down exactly; it likely depends on o3 and crawler usage.
+- **Example link**: [OpenAI Example Thread](https://chatgpt.com/share/67aa55e9-1cb4-8009-a3c1-69607e6ca1cd)
+
+### Perplexity Pro Deep Research
+- **Time to finish**: ~3 minutes  
+- **Insights**: ~49 sources  
+- **Report length**: ~8k characters  
+- **Link to Perplexity Thread**: [Perplexity Deep Research Example](https://www.perplexity.ai/search/i-don-t-get-how-whisper-is-ful-Uuq8BQh8SyOOkAuOeG0j_Q)
+
+**Takeaways**:  
+- `deep-research` is impressively agile for a lean, open-source tool.  
+- Perplexity’s product can pull in a larger number of sources quickly, leveraging its specialization on web search.  
+- OpenAI’s Deep Research generated a very long report and leveraged more sources—potentially drawing on internal fine-tuning or advanced system prompts.
+
+Ultimately, if you want transparency, low cost, and hackability, David Zhang’s `deep-research` stands out. If you need huge reports or integrated browsing at scale, you may prefer a more mature commercial solution.
+
+## Other Open Source Research Agent Frameworks
+
+If you’re interested in exploring similar projects, check out these options:
+
+* [Hugging Face’s open-deep-research](https://github.com/huggingface/smolagents/tree/gaia-submission-r1/examples/open_deep_research)  
+* [assafelovic/gpt-researcher](https://github.com/assafelovic/gpt-researcher)  
+* [jina-ai/node-DeepResearch](https://github.com/jina-ai/node-DeepResearch)
+
+## What's Next?
+
+We will do deep dives on interesting OSS agents. Email us if you have suggestions agent-deep-dive@langfuse.com  
