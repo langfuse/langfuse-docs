@@ -116,7 +116,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Includes access to full history and higher usage.",
+        "For production projects. Includes access to more history, usage and unlimited users.",
       price: "$59",
       priceDiscountCta: {
         name: "Discounts available",
@@ -138,9 +138,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: false,
       price: "$199",
-      description: "Dedicated support, and security controls for larger teams.",
+      description: "Unlimited history, high rate limits, all features.",
       mainFeatures: [
-        "Everything in Pro",
+        "Everything in Lite",
         "100k observations / month included, additional: $10 / 100k observations",
         "Unlimited data access",
         "Unlimited annotation queues",
