@@ -111,10 +111,12 @@ Now that you have created an evaluator template, you can configure on what data 
 
 Here we need to configure the following aspects:
 
+
 - Which **Evaluator Template** to use
-- **Trigger**: On what incoming data should the evaluator be executed?
+- **Trigger**: Decide on which data the evaluator shouold execute.
   - [**Traces**](/docs/tracing): On new traces that are ingested into Langfuse. You can configure filters to select a subset of traces.
   - [**Datasets**](/docs/datasets): On all experiments run on a specific dataset in offline development.
+  - New/Existing data: Decide whether the evaluator should be run on new, existing, or all data.
 - **Name of the `scores`** which will be created as a result of the evaluation.
 - Specify how Langfuse should fill the **`{{variables}}`** in the template.
   - Langfuse traces can be deeply nested (see [conceptual overview](/docs/tracing)). You can query from the trace directly, or from any nested observation via its name.
