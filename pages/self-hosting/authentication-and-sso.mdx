@@ -57,6 +57,8 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 | Optional Variables | `AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com` (list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload))<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
 | OAuth Redirect URL | `/api/auth/callback/google`                                                                                                                                                                                                                                                                               |
 
+Provider: `GOOGLE`
+
 ### GitHub
 
 [NextAuth GitHub Provider Docs](https://next-auth.js.org/providers/github)
@@ -67,6 +69,8 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 | Optional Variables | See [additional configuration](#additional-configuration) section below. |
 | OAuth Redirect URL | `/api/auth/callback/github`                                              |
 
+Provider: `GITHUB`
+
 ### GitHub Enterprise
 
 | Configuration      | Value                                                                                                               |
@@ -74,6 +78,8 @@ Need another provider? Langfuse uses Auth.js, which integrates with [many provid
 | Required Variables | `AUTH_GITHUB_ENTERPRISE_CLIENT_ID`<br/>`AUTH_GITHUB_ENTERPRISE_CLIENT_SECRET`<br/>`AUTH_GITHUB_ENTERPRISE_BASE_URL` |
 | Optional Variables | See [additional configuration](#additional-configuration) section below.                                            |
 | OAuth Redirect URL | `/api/auth/callback/github-enterprise`                                                                              |
+
+Provider: `GITHUB_ENTERPRISE`
 
 Thanks to [@jay0129](https://github.com/jay0129) for the initial contribution of GitHub Enterprise support!
 
@@ -87,6 +93,8 @@ Thanks to [@jay0129](https://github.com/jay0129) for the initial contribution of
 | Optional Variables | `AUTH_GITLAB_ISSUER`<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
 | OAuth Redirect URL | `/api/auth/callback/gitlab`                                                                                             |
 
+Provider: `GITLAB`
+
 ### Azure AD/Entra ID
 
 [NextAuth Azure AD Provider Docs](https://next-auth.js.org/providers/azure-ad)
@@ -96,6 +104,8 @@ Thanks to [@jay0129](https://github.com/jay0129) for the initial contribution of
 | Required Variables | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID` |
 | Optional Variables | See [additional configuration](#additional-configuration) section below.                  |
 | OAuth Redirect URL | `/api/auth/callback/azure-ad`                                                             |
+
+Provider: `AZURE_AD`
 
 Notes:
 
@@ -111,6 +121,8 @@ Notes:
 | Optional Variables | See [additional configuration](#additional-configuration) section below.   |
 | OAuth Redirect URL | `/api/auth/callback/okta`                                                  |
 
+Provider: `OKTA`
+
 ### Auth0
 
 [NextAuth Auth0 Provider Docs](https://next-auth.js.org/providers/auth0)
@@ -120,6 +132,8 @@ Notes:
 | Required Variables | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER` |
 | Optional Variables | See [additional configuration](#additional-configuration) section below.      |
 | OAuth Redirect URL | `/api/auth/callback/auth0`                                                    |
+
+Provider: `AUTH0`
 
 ### AWS Cognito
 
@@ -131,6 +145,8 @@ Notes:
 | Optional Variables | See [additional configuration](#additional-configuration) section below.            |
 | OAuth Redirect URL | `/api/auth/callback/cognito`                                                        |
 
+Provider: `COGNITO`
+
 ### Keycloak
 
 [NextAuth Keycloak Provider Docs](https://next-auth.js.org/providers/keycloak)
@@ -140,6 +156,8 @@ Notes:
 | Required Variables | `AUTH_KEYCLOAK_CLIENT_ID`<br/>`AUTH_KEYCLOAK_CLIENT_SECRET`<br/>`AUTH_KEYCLOAK_ISSUER` |
 | Optional Variables | See [additional configuration](#additional-configuration) section below.               |
 | OAuth Redirect URL | `/api/auth/callback/keycloak`                                                          |
+
+Provider: `KEYCLOAK`
 
 Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycloak support!
 
@@ -152,6 +170,8 @@ Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycl
 | Required Variables | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI)                                                                                                                                                                                                                           |
 | Optional Variables | `AUTH_CUSTOM_SCOPE` (defaults to `"openid email profile"`)<br/>`AUTH_CUSTOM_ID_TOKEN` (Defaults to `true`, set to `false` if you want to make a request to the `userinfo` endpoint instead of extracting user information from the `id_token` claims)<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
 | OAuth Redirect URL | `/api/auth/callback/custom`                                                                                                                                                                                                                                                                                                                              |
+
+Provider: `CUSTOM`
 
 ## HTTP Proxy for SSO
 

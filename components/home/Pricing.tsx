@@ -684,12 +684,12 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Project-level RBAC",
-        href: "/docs/rbac",
+        href: "/docs/rbac#project-level-roles",
         tiers: {
           cloud: {
             Hobby: false,

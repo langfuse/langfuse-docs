@@ -178,21 +178,21 @@ Learn more about tracing in the [docs](https://langfuse.com/docs/tracing).
 
 ## RAG Pipeline with Chat
 
-Here is another example connecting a RAG pipeline to a chat generator. Using a component like Haystack's `DynamicChatPromptBuilder` is a great way to add a chat component to your application, which can add a level of personalization and interactivity to your program.
+Here is another example connecting a RAG pipeline to a chat generator. Using a component like Haystack's `ChatPromptBuilder` is a great way to add a chat component to your application, which can add a level of personalization and interactivity to your program.
 
 **Note**: Make sure to set the `HAYSTACK_CONTENT_TRACING_ENABLED` environment variable before importing `LangfuseConnector`.
 
 
 ```python
 from haystack import Pipeline
-from haystack.components.builders import DynamicChatPromptBuilder
+from haystack.components.builders import ChatPromptBuilder
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 from haystack_integrations.components.connectors.langfuse import LangfuseConnector
 
 pipe = Pipeline()
 pipe.add_component("tracer", LangfuseConnector("Chat generation"))
-pipe.add_component("prompt_builder", DynamicChatPromptBuilder())
+pipe.add_component("prompt_builder", ChatPromptBuilder())
 pipe.add_component("llm", OpenAIChatGenerator(model="gpt-3.5-turbo"))
 
 pipe.connect("prompt_builder.prompt", "llm.messages")
@@ -202,7 +202,7 @@ messages = [
 ]
 
 response = pipe.run(
-    data={"prompt_builder": {"template_variables": {"location": "Berlin"}, "prompt_source": messages}}
+    data={"prompt_builder": {"template_variables": {"location": "Berlin"}, "template": messages}}
 )
 
 trace_url = response["tracer"]["trace_url"]
