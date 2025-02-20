@@ -16,15 +16,15 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   image="/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/the-agent-deep-dive.png"
 />
 
-AI-driven research is evolving fast. While OpenAI has introduced Deep Research recently, open-source alternatives are just as exciting. In this post, we take a closer look at the inner workings of open [deep-research](https://github.com/dzhng/deep-research) by David Zhang ([dzhng](https://github.com/dzhng))—a lightweight, transparent framework for iterative AI research.
+AI-driven research is evolving fast. While Google pioneered Deep Research, OpenAI popularized it and Perplexity and Grok followed, open-source alternatives are just as exciting and help to understand how one of the first forms of autonomous _useful_ agents works. In this post, I take a closer look at the inner workings of open [deep-research](https://github.com/dzhng/deep-research) by David Zhang ([dzhng](https://github.com/dzhng))—a lightweight, transparent framework for iterative AI research.
 
 At under 500 lines of code, `deep-research` packs a surprising punch. It runs recursive research loops, refining queries based on the information it finds—no hidden logic, no unnecessary dependencies, just a clean, modular setup that’s easy to hack or extend.
 
-We decided to put it to the test. With [Langfuse](https://github.com/langfuse/langfuse), we traced its execution (thanks to [@hassiebp](https://github.com/hassiebp) for building the [integration](https://github.com/hassiebp/deep-research-with-langfuse)), broke down its decision-making, and measured performance. Below, we’ll show how it works, why it’s worth a look, and how it compares to other AI research tools.
+I decided to put it to the test. With [Langfuse](https://github.com/langfuse/langfuse), I traced its execution (thanks to [@hassiebp](https://github.com/hassiebp) for instrumenting it in this [fork](https://github.com/hassiebp/deep-research-with-langfuse)), broke down its decision-making, and measured performance. Below, I’ll show how it works, why it’s worth a look, and how it compares to other AI deep research tools.
 
 ---
 
-## Why We Like This Agent
+## Why I Like This Agent
 
 - **Simple** – Minimalist design, easy to modify, and fully open-source.
 - **Iterative Research** – Runs deep research loops, refining its queries at each step.
@@ -40,15 +40,15 @@ Despite its minimal footprint, the framework is robust enough to generate meanin
 
 ---
 
-## How the Execution Looks in Langfuse
+## How Does the Agent Work?
 
-To see how `deep-research` holds up, we asked it a more nuanced question:
+To see how `deep-research` holds up, I asked it a more nuanced question:
 
 > "I don't get how Whisper is fully open source (MIT), yet ChatGPT's speech-to-text is vastly better than Perplexity's and Apple's. Can you help me figure this out?"
 
 This isn’t a simple fact lookup—it requires synthesizing multiple sources, filtering insights, and producing structured responses.
 
-With a breadth of 4 and a depth of 2, for instance, we might see the agent generate multiple parallel queries—and then refine those queries after it sees what the search turned up. You’d end up with a thorough markdown report summarizing everything, plus any missing links the agent found intriguing.
+With a breadth of 4 and a depth of 2 (which are the two configuration options that are available), we might see the agent generate multiple parallel queries—and then refine those queries after it sees what the search turned up. You’d end up with a thorough markdown report summarizing everything, plus any missing links the agent found intriguing.
 
 Each iteration of this loop can be viewed as an event within Langfuse. Tracking these events provides a step-by-step replay of the agent’s logic—useful for debugging and fine-tuning. Here’s the public trace in Langfuse:
 
@@ -125,15 +125,15 @@ Finally, once the maximum research breadth (e.g., 4) and depth (e.g., 2) are rea
 
 </Steps>
 
-All these steps are tracked in Langfuse—timestamps, search calls, LLM calls, and final outputs—providing a transparent view of how the agent arrives at its answer.
+Thanks to the instrumentation we added above, all these steps are tracked in Langfuse—timestamps, search calls, LLM calls, and final outputs—providing a transparent view of how the agent arrives at its answer.
 
 ---
 
 ## Comparison With Other AI Research Tools
 
-Although `deep-research` is a small, open-source project, we wanted to see how it fares alongside two well-known AI tools: OpenAI’s ChatGPT (with advanced research features or higher usage tiers) and Perplexity Pro.
+Although `deep-research` is a small, open-source project, I wanted to see how it fares alongside two well-known AI tools: OpenAI’s ChatGPT (with advanced research features or higher usage tiers) and Perplexity Pro.
 
-To keep it fair, we ran the **same** question on all three:
+To keep it fair, I ran the **same** question on all three:
 
 ### David Zhang’s Open Deep Research
 
@@ -157,11 +157,11 @@ To keep it fair, we ran the **same** question on all three:
 - **Report length**: ~8k characters
 - **Link to Perplexity Thread**: [Perplexity Deep Research Example](https://www.perplexity.ai/search/i-don-t-get-how-whisper-is-ful-Uuq8BQh8SyOOkAuOeG0j_Q)
 
-**Takeaways**:
+## Takeaways
 
 - `deep-research` is impressively agile for a lean, open-source tool.
 - Perplexity’s product can pull in a larger number of sources quickly, leveraging its specialization on web search.
-- OpenAI’s Deep Research generated a very long report and leveraged more sources—potentially drawing on internal fine-tuning or advanced system prompts.
+- OpenAI’s Deep Research produced a lengthy report, utilized more sources, and conducted a thorough investigation based on follow-up searches. Overall, the reasoning capabilities (o3, post-training for this use case) are significantly stronger than those of the other contestants.
 
 Ultimately, if you want transparency, low cost, and hackability, David Zhang’s `deep-research` stands out. If you need huge reports or integrated browsing at scale, you may prefer a more mature commercial solution.
 
@@ -175,4 +175,4 @@ If you’re interested in exploring similar projects, check out these options:
 
 ## What's Next?
 
-We will do deep dives on interesting OSS agents. Email us if you have suggestions agent-deep-dive@langfuse.com
+I will do more deep dives on interesting OSS agents to dissect how they work and what's interesting about them. Email me if you have suggestions: agent-deep-dive@langfuse.com
