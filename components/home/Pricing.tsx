@@ -103,7 +103,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Free",
       mainFeatures: [
         "All platform features (with limits)",
-        "50k observations / month included",
+        "50k events / month included",
         "30 days data access",
         "2 users",
         "Community support (Discord & GitHub)",
@@ -124,7 +124,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       },
       mainFeatures: [
         "Everything in Hobby",
-        "100k observations / month included, additional: $10 / 100k observations",
+        "100k events / month included, additional: $8 / 100k events",
         "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
@@ -141,10 +141,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description: "Unlimited history, high rate limits, all features.",
       mainFeatures: [
         "Everything in Lite",
-        "100k observations / month included, additional: $10 / 100k observations",
+        "100k events / month included, additional: $8 / 100k events",
         "Unlimited data access",
         "Unlimited annotation queues",
         "High rate limits",
+        "SOC2, ISO27001 reports",
         "Support via Slack",
       ],
       addOn: {
@@ -154,7 +155,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
           "Fine-grained RBAC",
-          "SOC2, ISO27001",
         ],
       },
       cta: "Sign up",
@@ -275,9 +275,9 @@ const sections: Section[] = [
         name: "Included usage",
         tiers: {
           cloud: {
-            Hobby: "50k observations",
-            Lite: "100k observations",
-            Pro: "100k observations",
+            Hobby: "50k events",
+            Lite: "100k events",
+            Pro: "100k events",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -292,8 +292,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Lite: "$10 / 100k observations",
-            Pro: "$10 / 100k observations",
+            Lite: "$8 / 100k events",
+            Pro: "$8 / 100k events",
             Enterprise: "Custom",
           },
         },
@@ -848,7 +848,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: false,
             Lite: false,
-            Pro: TEAMS_ADDON,
+            Pro: true,
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
