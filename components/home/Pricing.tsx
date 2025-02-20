@@ -125,7 +125,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Hobby",
         "100k observations / month included, additional: $10 / 100k observations",
-        "3 months data access",
+        "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
         "Support via Email/Chat",
@@ -320,7 +320,7 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "30 days",
-            Starter: "3 months",
+            Starter: "90 days",
             Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
