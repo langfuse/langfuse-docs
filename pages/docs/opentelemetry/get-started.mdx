@@ -66,71 +66,80 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 
 - [OpenLIT](/docs/opentelemetry/example-openlit)
 - [OpenLLMetry](/docs/opentelemetry/example-openllmetry)
+- [Arize](/docs/opentelemetry/example-arize)
 
 <details>
 
 <summary>Comparison of OpenTelemetry Instrumentation Libraries</summary>
 
-| Category   | Item                          | OpenLLMetry | openlit |
-| ---------- | ----------------------------- | ----------- | ------- |
-| LLMs       | AI21                          |             | ✅      |
-|            | Aleph Alpha                   | ✅          |         |
-|            | Amazon Bedrock                | ✅          | ✅      |
-|            | Anthropic                     | ✅          | ✅      |
-|            | Assembly AI                   |             | ✅      |
-|            | Azure AI Inference            |             | ✅      |
-|            | Azure OpenAI                  | ✅          | ✅      |
-|            | Cohere                        | ✅          | ✅      |
-|            | DeepSeek                      |             | ✅      |
-|            | ElevenLabs                    |             | ✅      |
-|            | GitHub Models                 |             | ✅      |
-|            | Google AI Studio              |             | ✅      |
-|            | Google Generative AI (Gemini) | ✅          |         |
-|            | Groq                          | ✅          | ✅      |
-|            | HuggingFace                   | ✅          | ✅      |
-|            | IBM Watsonx AI                | ✅          |         |
-|            | Mistral AI                    | ✅          | ✅      |
-|            | NVIDIA NIM                    |             | ✅      |
-|            | Ollama                        | ✅          | ✅      |
-|            | OpenAI                        | ✅          | ✅      |
-|            | OLA Krutrim                   |             | ✅      |
-|            | Prem AI                       |             | ✅      |
-|            | Replicate                     | ✅          |         |
-|            | SageMaker (AWS)               | ✅          |         |
-|            | Titan ML                      |             | ✅      |
-|            | Together AI                   | ✅          | ✅      |
-|            | vLLM                          |             | ✅      |
-|            | Vertex AI                     | ✅          | ✅      |
-|            | xAI                           |             | ✅      |
-| Vector DBs | AstraDB                       |             | ✅      |
-|            | Chroma                        | ✅          |         |
-|            | ChromaDB                      |             | ✅      |
-|            | LanceDB                       | ✅          |         |
-|            | Marqo                         | ✅          |         |
-|            | Milvus                        | ✅          | ✅      |
-|            | Pinecone                      | ✅          | ✅      |
-|            | Qdrant                        | ✅          | ✅      |
-|            | Weaviate                      | ✅          |         |
-| Frameworks | AutoGen / AG2                 |             | ✅      |
-|            | ControlFlow                   |             | ✅      |
-|            | CrewAI                        | ✅          | ✅      |
-|            | Crawl4AI                      |             | ✅      |
-|            | Dynamiq                       |             | ✅      |
-|            | EmbedChain                    |             | ✅      |
-|            | FireCrawl                     |             | ✅      |
-|            | Guardrails AI                 |             | ✅      |
-|            | Haystack                      | ✅          | ✅      |
-|            | Julep AI                      |             | ✅      |
-|            | LangChain                     | ✅          | ✅      |
-|            | LlamaIndex                    | ✅          | ✅      |
-|            | Letta                         |             | ✅      |
-|            | LiteLLM                       | ✅          | ✅      |
-|            | mem0                          |             | ✅      |
-|            | MultiOn                       |             | ✅      |
-|            | Phidata                       |             | ✅      |
-|            | SwarmZero                     |             | ✅      |
-| GPUs       | AMD Radeon                    |             | ✅      |
-|            | NVIDIA                        |             | ✅      |
+| Category    | Item                          | OpenLLMetry | openlit | Arize |
+| ----------- | ----------------------------- | ----------- | ------- | ----- |
+| LLMs        | AI21                          |             | ✅      |       |
+|             | Aleph Alpha                   | ✅          |         |       |
+|             | Amazon Bedrock                | ✅          | ✅      | ✅    |
+|             | Anthropic                     | ✅          | ✅      | ✅    |
+|             | Assembly AI                   |             | ✅      |       |
+|             | Azure AI Inference            |             | ✅      |       |
+|             | Azure OpenAI                  | ✅          | ✅      |       |
+|             | Cohere                        | ✅          | ✅      |       |
+|             | DeepSeek                      |             | ✅      |       |
+|             | ElevenLabs                    |             | ✅      |       |
+|             | GitHub Models                 |             | ✅      |       |
+|             | Google AI Studio              |             | ✅      |       |
+|             | Google Generative AI (Gemini) | ✅          |         |       |
+|             | Groq                          | ✅          | ✅      | ✅    |
+|             | HuggingFace                   | ✅          | ✅      | ✅    |
+|             | IBM Watsonx AI                | ✅          |         |       |
+|             | Mistral AI                    | ✅          | ✅      | ✅    |
+|             | NVIDIA NIM                    |             | ✅      |       |
+|             | Ollama                        | ✅          | ✅      |       |
+|             | OpenAI                        | ✅          | ✅      | ✅    |
+|             | OLA Krutrim                   |             | ✅      |       |
+|             | Prem AI                       |             | ✅      |       |
+|             | Replicate                     | ✅          |         |       |
+|             | SageMaker (AWS)               | ✅          |         |       |
+|             | Titan ML                      |             | ✅      |       |
+|             | Together AI                   | ✅          | ✅      |       |
+|             | vLLM                          |             | ✅      |       |
+|             | Vertex AI                     | ✅          | ✅      | ✅    |
+|             | xAI                           |             | ✅      |       |
+| Vector DBs  | AstraDB                       |             | ✅      |       |
+|             | Chroma                        | ✅          |         |       |
+|             | ChromaDB                      |             | ✅      |       |
+|             | LanceDB                       | ✅          |         |       |
+|             | Marqo                         | ✅          |         |       |
+|             | Milvus                        | ✅          | ✅      |       |
+|             | Pinecone                      | ✅          | ✅      |       |
+|             | Qdrant                        | ✅          | ✅      |       |
+|             | Weaviate                      | ✅          |         |       |
+| Frameworks  | AutoGen / AG2                 |             | ✅      | ✅    |
+|             | ControlFlow                   |             | ✅      |       |
+|             | CrewAI                        | ✅          | ✅      | ✅    |
+|             | Crawl4AI                      |             | ✅      |       |
+|             | Dynamiq                       |             | ✅      |       |
+|             | EmbedChain                    |             | ✅      |       |
+|             | FireCrawl                     |             | ✅      |       |
+|             | Guardrails AI                 |             | ✅      | ✅    |
+|             | Haystack                      | ✅          | ✅      | ✅    |
+|             | Julep AI                      |             | ✅      |       |
+|             | LangChain                     | ✅          | ✅      | ✅    |
+|             | LlamaIndex                    | ✅          | ✅      | ✅    |
+|             | Letta                         |             | ✅      |       |
+|             | LiteLLM                       | ✅          | ✅      | ✅    |
+|             | mem0                          |             | ✅      |       |
+|             | MultiOn                       |             | ✅      |       |
+|             | Phidata                       |             | ✅      |       |
+|             | SwarmZero                     |             | ✅      |       |
+|             | LlamaIndex Workflows          |             |         | ✅    |
+|             | LangGraph                     |             |         | ✅    |
+|             | DSPy                          |             |         | ✅    |
+|             | Prompt flow                   |             |         | ✅    |
+|             | Instructor                    |             |         | ✅    |
+| GPUs        | AMD Radeon                    |             | ✅      |       |
+|             | NVIDIA                        |             | ✅      |       |
+| JavaScript  | OpenAI Node SDK               |             |         | ✅    |
+|             | LangChain.js                  |             |         | ✅    |
+|             | Vercel AI SDK                 |             |         | ✅    |
 
 </details>
 
@@ -141,6 +150,8 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 - [AutoGen](/docs/integrations/autogen)
 - [Semantic Kernel](/docs/integrations/semantic-kernel)
 - [Pydantic AI](/docs/integrations/pydantic-ai)
+- [Spring AI](/docs/integrations/spring-ai)
+- [LlamaIndex Workflows](/docs/integrations/llama-index/workflows.md)
 
 ## Export from OpenTelemetry Collector
 
