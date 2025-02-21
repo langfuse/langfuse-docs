@@ -138,7 +138,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: false,
       price: "$199",
-      description: "Unlimited history, high rate limits, all features.",
+      description:
+        "For scaling projects. Unlimited history, high rate limits, all features.",
       mainFeatures: [
         "Everything in Core",
         "100k events / month included, additional: $8 / 100k events",
@@ -155,6 +156,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
           "Fine-grained RBAC",
+          "Data retention management",
         ],
       },
       cta: "Sign up",
