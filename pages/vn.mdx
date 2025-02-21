@@ -1,0 +1,168 @@
+
+---
+title: "Langfuse - Nền tảng LLM mã nguồn mở dành cho Dev tại Việt Nam"
+description: "Langfuse là nền tảng LLMOps mã nguồn mở hàng đầu, giúp các dev giám sát, đánh giá và debug ứng dụng AI một cách hiệu quả."
+hreflang:
+  - lang: "en"
+    url: "https://langfuse.com"
+  - lang: "vn"
+    url: "https://langfuse.com/vn"
+---
+
+# **Langfuse - Nền tảng LLMOps mã nguồn mở  🇻🇳🤝 🪢**
+
+Langfuse là một nền tảng **mã nguồn mở** (open-source) được thiết kế để hỗ trợ các dev xây dựng, giám sát, đánh giá và debug các ứng dụng AI dựa trên Large Language Models (LLM). Với bộ công cụ tích hợp đa dạng, Langfuse giúp đơn giản hóa quy trình phát triển ứng dụng LLM, từ giai đoạn thử nghiệm đến triển khai thực tế. 🚀
+
+---
+
+## **Tính năng nổi bật của Langfuse** 🛠️
+
+### **1. Quan sát ứng dụng LLM (LLM Observability)** 🔍
+
+> **Theo dõi chi tiết:**  
+> Ghi lại toàn bộ quá trình thực thi của ứng dụng LLM, bao gồm các lời gọi API (API calls), context, prompt và quá trình xử lý song song (parallel processing).  
+> 
+> **Debug hiệu quả:**  
+> Hỗ trợ phân tích log phức tạp, giám sát chi phí model (model cost tracking) và thu thập feedback từ người dùng để tối ưu hóa chất lượng đầu ra (output quality).
+
+---
+
+### **2. Quản lý Prompt (Prompt Management)** 📝
+
+> **Kiểm soát phiên bản:**  
+> Quản lý tập trung các phiên bản prompt (prompt versioning), giúp dễ dàng theo dõi và triển khai thay đổi.  
+> 
+> **Triển khai linh hoạt:**  
+> Thay đổi prompt mà không cần chỉnh sửa code (no-code deployment), đồng thời so sánh hiệu suất giữa các phiên bản khác nhau (A/B testing).
+
+---
+
+### **3. Đánh giá Model (Model Evaluation)** 📊
+
+> **Đa dạng phương pháp:**  
+> Hỗ trợ đánh giá đầu ra LLM thông qua gán nhãn thủ công (manual labeling), sử dụng LLM-as-a-judge, hoặc tích hợp SDK/API tùy chỉnh (custom SDK/API integration).  
+> 
+> **Giám sát liên tục:**  
+> Theo dõi chất lượng đầu ra (output quality monitoring) và đo lường tác động của các thay đổi trước khi triển khai (impact analysis).
+
+---
+
+### **4. Kho dữ liệu & Thử nghiệm (Data Management & Testing)** 🗂️
+
+> **Quản lý dữ liệu:**  
+> Tổ chức và quản lý dữ liệu kiểm thử (test data management), chạy thử nghiệm (run experiments) và so sánh kết quả giữa các phiên bản (version comparison).  
+> 
+> **Cải thiện liên tục:**  
+> Cho phép thêm dữ liệu mới từ ứng dụng thực tế vào kho dữ liệu để nâng cao hiệu suất model (continuous model improvement).
+
+---
+
+### **5. Môi trường thử nghiệm (Playground)** 🎮
+
+> **Tương tác trực quan:**  
+> Cung cấp giao diện thử nghiệm trực quan (interactive playground) để điều chỉnh prompt và cấu hình model (model configuration).  
+> 
+> **Tối ưu hóa nhanh chóng:**  
+> Giúp phát triển và cải thiện ứng dụng LLM một cách nhanh chóng và hiệu quả (rapid iteration).
+
+---
+
+## **Tích hợp và mở rộng (Integrations & Extensibility)** 🔗
+
+Langfuse hỗ trợ tích hợp với nhiều công cụ và nền tảng phổ biến, giúp bạn xây dựng và quản lý ứng dụng LLM một cách linh hoạt. Dưới đây là danh sách các tích hợp được hỗ trợ:
+
+**Các tích hợp nổi bật:**  
+
+|      |       |
+|-------------------|-----------------|
+| OpenAI SDK       | Langchain       |
+| LlamaIndex       | Haystack        |
+| LiteLLM          | Vercel AI SDK   |
+| AutoGen          | Semantic Kernel |
+| Pydantic AI      | Dify AI         |
+| Instructor       | DSPy            |
+| Ollama           | Mirascope       |
+| Flowise          | Langflow        |
+| Amazon Bedrock   | Google Vertex AI |
+| Mistral SDK      | Promptfoo       |
+| OpenWebUI        | LobeChat        |
+| Huggingface      | DeepSeek        |
+| Groq             | Vapi            |
+| Goose            | Smolagents      |
+| CrewAI           | Spring AI       |
+
+Ngoài ra, Langfuse cung cấp **API công khai** (public API) và **SDK** (Python, JavaScript/TypeScript) để bạn có thể tích hợp với bất kỳ công cụ hoặc nền tảng nào khác.
+
+
+
+---
+
+## **Bắt đầu với Langfuse (Getting Started)** 🚀
+### **1. Tạo dự án mới (Create a New Project)** 
+> **Bước 1:** > Đăng ký tài khoản Langfuse hoặc tự triển khai nền tảng.
+> **Bước 2:** > Tạo một dự án mới và lấy API key từ phần cài đặt.
+
+### **2. Ghi lại lời gọi LLM đầu tiên (Log Your First LLM Call)**
+> **Cài đặt SDK và ghi lại truy vấn LLM:**
+```python
+pip install langfuse openai
+
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_HOST="https://cloud.langfuse.com"
+
+from langfuse.decorators import observe
+from langfuse.openai import openai
+
+@observe()
+def story():
+    return openai.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Langfuse là gì?"}],
+    ).choices[0].message.content
+
+@observe()
+def main():
+    return story()
+
+main()
+```
+### **3. Xem truy vấn trong Langfuse (View Traces in Langfuse)**
+
+> Theo dõi các lời gọi model và logic ứng dụng trực tiếp trên giao diện Langfuse.
+
+----------
+
+## **Hỗ trợ & Cộng đồng (Support & Community)** 🤝
+
+> **Tài liệu:**  
+> [docs.langfuse.com](https://docs.langfuse.com)
+> 
+> **GitHub:**  
+> [github.com/langfuse](https://github.com/langfuse)
+> 
+> **Diễn đàn:**  
+> [GitHub Discussions](https://github.com/orgs/langfuse/discussions)
+> 
+> **Discord:**  
+> [discord.langfuse.com](https://discord.langfuse.com)
+
+----------
+
+## **Tham gia phát triển Langfuse (Contribute to Langfuse)** 💡
+
+> Langfuse là một dự án mã nguồn mở, và mọi đóng góp từ cộng đồng đều được hoan nghênh!
+> 
+> **Đề xuất tính năng mới (Feature Requests):**  
+> Tham gia thảo luận trên GitHub Discussions.
+> 
+> **Báo cáo lỗi (Bug Reports):**  
+> Gửi issue trên GitHub Issues.
+> 
+> **Đóng góp code (Code Contributions):**  
+> Gửi Pull Request để cải thiện dự án.
+> 
+> Langfuse sử dụng giấy phép MIT, ngoại trừ một số phần dành riêng cho doanh nghiệp.
+> 
+> ⭐️ **Gắn sao trên GitHub:**  
+> [Langfuse GitHub](https://github.com/langfuse) để nhận thông tin cập nhật mới nhất!
