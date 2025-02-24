@@ -7,4 +7,5 @@ export default {
     title: "Prompt Experiments ↗",
     href: "/docs/datasets/prompt-experiments",
   },
+  "mcp-server": "Prompt MCP Server",
 };

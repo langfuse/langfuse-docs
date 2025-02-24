@@ -129,6 +129,8 @@ client = OpenAI()
 
 Use Langfuse prompt to construct the `summarize_story` example function.
 
+**Note:** You can link the generation in Langfuse Tracing to the prompt version by passing the `langfuse_prompt` parameter to the `create` method. Have a look at our [prompt management docs](https://langfuse.com/docs/prompts/get-started#link-with-langfuse-tracing-optional) to learn how to link prompt and generation with other integrations and SDKs.
+
 
 ```python
 import json

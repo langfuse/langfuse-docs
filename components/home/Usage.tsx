@@ -6,8 +6,6 @@ import circlebackLight from "./img/circleback_light.png";
 import circlebackDark from "./img/circleback_dark.png";
 import samsaraLight from "./img/samsara_light.png";
 import samsaraDark from "./img/samsara_dark.png";
-import posthogLight from "./img/posthog_light.svg";
-import posthogDark from "./img/posthog_dark.svg";
 import fortoLight from "./img/forto_light.svg";
 import fortoDark from "./img/forto_dark.svg";
 import juiceboxLight from "./img/juicebox_light.svg";
@@ -17,6 +15,8 @@ import khanacademyDark from "./img/khanacademy_dark.png";
 import NumberTicker from "@/components/ui/number-ticker";
 import twilioLight from "./img/twilio_light.svg";
 import twilioDark from "./img/twilio_dark.svg";
+import sumupLight from "./img/sumup_light.svg";
+import sumupDark from "./img/sumup_dark.svg";
 
 type User = {
   name: string;
@@ -28,22 +28,22 @@ type User = {
 
 const users: User[] = [
   {
-    name: "PostHog",
-    lightImage: posthogLight,
-    darkImage: posthogDark,
-    href: "https://posthog.com",
-  },
-  {
     name: "Samsara",
     lightImage: samsaraLight,
     darkImage: samsaraDark,
     href: "https://www.samsara.com",
   },
   {
-    name: "Circleback",
-    lightImage: circlebackLight,
-    darkImage: circlebackDark,
-    href: "https://circleback.ai",
+    name: "Twilio",
+    lightImage: twilioLight,
+    darkImage: twilioDark,
+    href: "https://www.twilio.com",
+  },
+  {
+    name: "SumUp",
+    lightImage: sumupLight,
+    darkImage: sumupDark,
+    href: "https://sumup.com",
   },
   {
     name: "Khan Academy",
@@ -70,10 +70,10 @@ const users: User[] = [
     href: "https://juicebox.ai/",
   },
   {
-    name: "Twilio",
-    lightImage: twilioLight,
-    darkImage: twilioDark,
-    href: "https://www.twilio.com",
+    name: "Circleback",
+    lightImage: circlebackLight,
+    darkImage: circlebackDark,
+    href: "https://circleback.ai",
   },
 ];
 

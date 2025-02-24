@@ -42,11 +42,7 @@ export default {
     type: "separator",
     title: "References",
   },
-  "api-ref": {
-    title: "API ↗",
-    href: "https://api.reference.langfuse.com",
-    newWindow: true,
-  },
+  api: "API",
   "python-ref": {
     title: "Python SDK ↗",
     href: "https://python.reference.langfuse.com",
@@ -64,6 +60,7 @@ export default {
   rbac: "Access Control (RBAC)",
   "data-security-privacy": "Data Security & Privacy",
   "data-retention": "Data Retention",
+  "data-deletion": "Data Deletion",
   "open-source": "Open Source",
   roadmap: "Roadmap",
   "ask-ai": "Ask AI",

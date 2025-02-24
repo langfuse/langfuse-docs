@@ -91,7 +91,7 @@ const menuItems: {
       },
       {
         name: "API",
-        href: "https://api.reference.langfuse.com/",
+        href: "/docs/api",
       },
     ],
   },
@@ -154,7 +154,7 @@ const menuItems: {
     heading: "About",
     items: [
       { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "/careers", notificationCount: 2 },
+      { name: "Careers", href: "/careers", notificationCount: 4 },
       {
         name: "About us",
         href: "/about",

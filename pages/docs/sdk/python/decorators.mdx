@@ -221,6 +221,22 @@ langfuse_context.configure(
 
 By setting the `enabled` parameter to `False`, you can disable the decorator and prevent any traces from being sent to Langfuse.
 
+You may also use environment variables to configure the Langfuse client:
+
+| Environment, Variable | Description   | Default value
+| --- | --- | ---
+| `LANGFUSE_PUBLIC_KEY`, `public_key` | Public key, get in project settings |
+| `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings |
+| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"` |
+| no env, `enabled` | Optional. Manually enable/disable tracing. | If keys are provided, enabled defaults to `True`, otherwise `False` |
+| `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
+| `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
+| `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
+| `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
+| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
+| `LANGFUSE_SAMPLE_RATE`, `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing. | 1.0
+
+
 See the [API Reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.configure) for more details on the available parameters.
 
 ### Add additional attributes to the trace and observations [#additional-attributes]

@@ -59,7 +59,14 @@ import { FileCode } from "lucide-react";
 
 By setting the callback to Langfuse in the LiteLLM UI you can instantly log your responses across all providers. For more information on how to setup the Proxy UI, see the [LiteLLM docs](https://docs.litellm.ai/docs/proxy/ui).
 
-You can add additional Langfuse attibutes to the requests in order to group requests into traces, add userIds, tags, sessionIds, and more. See [integration docs](https://docs.litellm.ai/docs/proxy/logging#langfuse) for details.
+<Callout type="info">
+
+You can add additional Langfuse attributes to the requests in order to group requests into traces, add userIds, tags, sessionIds, and more. These attributes are shared across LiteLLM Proxy and SDK, please refer to both documentation pages to learn about all potential options:
+
+- [LiteLLM Proxy docs](https://docs.litellm.ai/docs/proxy/logging#langfuse)
+- [LiteLLM Python SDK docs](https://litellm.vercel.app/docs/observability/langfuse_integration#advanced)
+
+</Callout>
 
 <Frame border>
   ![Set Langfuse as callback in Proxy
@@ -151,6 +158,15 @@ def fn():
 
 ### Set Custom Trace ID, Trace User ID and Tags
 
+<Callout type="info">
+
+You can add additional Langfuse attributes to the requests in order to group requests into traces, add userIds, tags, sessionIds, and more. These attributes are shared across LiteLLM Proxy and SDK, please refer to both documentation pages to learn about all potential options:
+
+- [LiteLLM Proxy docs](https://docs.litellm.ai/docs/proxy/logging#langfuse)
+- [LiteLLM Python SDK docs](https://litellm.vercel.app/docs/observability/langfuse_integration#advanced)
+
+</Callout>
+
 ```python filename="main.py"
 from litellm import completion
 
@@ -209,21 +225,21 @@ chat(messages)
 
 To customise Langfuse settings, use the [Langfuse environment variables](/docs/sdk/python/low-level-sdk#initialize-client). These will be picked up by the LiteLLM SDK on initialization as it uses the Langfuse Python SDK under the hood.
 
-### Learn more about LiteLLM
+## Learn more about LiteLLM
 
-#### What is LiteLLM?
+### What is LiteLLM?
 
 [LiteLLM](https://litellm.ai) is an open source proxy server to manage auth, loadbalancing, and spend tracking across more than 100 LLMs. LiteLLM has grown to be a popular utility for developers working with LLMs and is universally thought to be a useful abstraction.
 
-#### Is LiteLLM an Open Source project?
+### Is LiteLLM an Open Source project?
 
 Yes, LiteLLM is open source. The majority of its code is permissively MIT-licesned. You can find the open source LiteLLM repository on [GitHub](https://github.com/BerriAI/litellm).
 
-#### Can I use LiteLLM with Ollama and local models?
+### Can I use LiteLLM with Ollama and local models?
 
 Yes, you can use LiteLLM with Ollama and other local models. LiteLLM supports all models from Ollama, and it provides a Docker image for an OpenAI API-compatible server for local LLMs like llama2, mistral, and codellama.
 
-#### How does LiteLLM simplify API calls across multiple LLM providers?
+## # How does LiteLLM simplify API calls across multiple LLM providers?
 
 LiteLLM provides a unified interface for calling models such as OpenAI, Anthrophic, Cohere, Ollama and others. This means you can call any supported model using a consistent method, such as `completion(model, messages)`, and expect a uniform response format. The library does away with the need for if/else statements or provider-specific code, making it easier to manage and debug LLM interactions in your application.
 

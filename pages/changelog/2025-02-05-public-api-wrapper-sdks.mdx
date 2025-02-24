@@ -1,0 +1,58 @@
+---
+date: 2025-02-05
+title: Typed public API client in SDKs
+description: Access all of Langfuse public API resources via a typed client in our SDKs
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+
+Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) now provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+When using the [decorator-based integration](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context
+
+# fetch a trace
+langfuse_context.client_instance.api.trace.get(trace_id)
+
+# async client via asyncio
+await langfuse_context.client_instance.async_api.trace(trace_id)
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+...
+# fetch a trace
+langfuse.api.trace.get(trace_id)
+
+# async client via asyncio
+await langfuse.async_api.trace(trace_id)
+```
+</Tab>
+
+<Tab>
+```ts
+import { Langfuse } from "langfuse"
+
+const langfuse = new Langfuse()
+...
+// fetch a trace
+await langfuse.api.traceGet(traceId)
+```
+</Tab>
+</Tabs>
+
+## Learn more
+
+- [Langfuse public REST API](/docs/api#access-via-sdks)

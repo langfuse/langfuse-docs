@@ -1,7 +1,7 @@
 export default {
   "get-started": "Overview",
-  "example-pydantic-ai": "Example: Pydantic AI",
+  "example-python-sdk": "Example: OTel Python SDK",
   "example-openlit": "Example: OpenLIT",
   "example-openllmetry": "Example: OpenLLMetry",
-  "example-opentelemetry-collector": "Example: OpenTelemetry Collector",
+  "example-arize": "Example: Arize AI",
 };

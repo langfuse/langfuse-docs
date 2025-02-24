@@ -135,6 +135,8 @@ const nonPermanentRedirects = [
   ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
   ["/sticker", "/stickers"],
 
+  // stripe
+  ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
 
   ["/security", "/docs/data-security-privacy"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
@@ -160,7 +162,7 @@ const nonPermanentRedirects = [
 
   // Redirects to bridge all kinds of old links to new links
   ["/docs/reference", "https://api.reference.langfuse.com/"],
-  ["/docs/integrations/api", "https://api.reference.langfuse.com/"],
+  ["/docs/integrations/api", "/docs/api"],
   ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
   ["/docs/integrations/sdk/python", "/docs/sdk/python"],
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
@@ -183,6 +185,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/openai/js", "/docs/integrations/openai/js/get-started"],
   ["/docs/integrations/mirascope", "/docs/integrations/mirascope/tracing"],
   ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
+  ["/docs/opentelemetry/example-pydantic-ai", "/docs/integrations/pydantic-ai"],
   ["/docs/opentelemetry", "/docs/opentelemetry/get-started"],
   ["/docs/integrations/other/vapi", "/docs/integrations/vapi"],
   ["/docs/integrations/other/autogen", "/docs/integrations/autogen"],
@@ -214,7 +217,6 @@ const nonPermanentRedirects = [
   ["/observability", "/docs/tracing"],
   ["/docs/openai", "/docs/integrations/openai/get-started"],
   ["/docs/integrations/openai", "/docs/integrations/openai/get-started"],
-  ["/docs/api", "https://api.reference.langfuse.com/"],
   ["/docs/qa-chatbot", "/docs/demo"],
   ["/docs/user-explorer", "/docs/tracing-features/users"],
   ["/docs/sessions", "/docs/tracing-features/sessions"],
@@ -230,6 +232,7 @@ const nonPermanentRedirects = [
   ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
 
   // new self-hosting section
+  ["/docs/self-hosting", "/self-hosting"],
   ["/docs/deployment/feature-overview", "/self-hosting/license-key"],
   ["/docs/deployment/local", "/self-hosting/local"],
   ["/docs/deployment/self-host", "/self-hosting"],
