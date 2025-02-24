@@ -1,3 +1,4 @@
+
 export default {
   index: {
     type: "page",
@@ -130,6 +131,11 @@ export default {
   },
   kr: {
     title: "Korean Overview",
+    type: "page",
+    display: "hidden",
+  },
+  vn: {
+    title: "Vietnamese Overview",
     type: "page",
     display: "hidden",
   },
