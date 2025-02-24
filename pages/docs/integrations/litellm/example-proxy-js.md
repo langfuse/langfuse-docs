@@ -8,7 +8,7 @@ category: Integrations
 This notebook demonstrates how to use the following stack to experiment with 100+ LLMs from different providers without changing code:
 
 - [**LiteLLM Proxy**](https://docs.litellm.ai/docs/) ([GitHub](https://github.com/BerriAI/litellm)): Standardizes 100+ model provider APIs on the OpenAI API schema.
-- **Langfuse OpenAI SDK Wrapper** ([JS/TS](https://langfuse.com/docs/integrations/openai/js/get-started)): Natively instruments calls to 100+ models via the OpenAI SDK.
+- **Langfuse OpenAI SDK Wrapper** ([JS/TS](https://langfuse.com/docs/integrations/openai/python/get-started/js/get-started)): Natively instruments calls to 100+ models via the OpenAI SDK.
 - **Langfuse**: OSS LLM Observability, full overview [here](https://langfuse.com/docs).
 
 Let's get started!
@@ -67,7 +67,7 @@ The Langfuse SDK offers a wrapper function around the OpenAI SDK, automatically 
 
 We wrap the client for each call separately in order to be able to pass a name.
 
-For more details, please refer to our [documentation](https://langfuse.com/docs/integrations/openai/js/get-started).
+For more details, please refer to our [documentation](https://langfuse.com/docs/integrations/openai/python/get-started/js/get-started).
 
 
 ```typescript
@@ -169,7 +169,7 @@ await langfuse.flushAsync();
 
 Check out the docs to learn more about all components of this stack:
 - [LiteLLM Proxy](https://docs.litellm.ai/docs/)
-- [Langfuse OpenAI SDK Wrapper](https://langfuse.com/docs/integrations/openai/js/get-started)
+- [Langfuse OpenAI SDK Wrapper](https://langfuse.com/docs/integrations/openai/python/get-started/js/get-started)
 - [Langfuse](https://langfuse.com/docs)
 
 If you do not want to capture traces via the OpenAI SDK Wrapper, you can also directly log requests from the LiteLLM Proxy to Langfuse. For more details, refer to the [LiteLLM Docs](https://litellm.vercel.app/docs/proxy/logging#logging-proxy-inputoutput---langfuse).
