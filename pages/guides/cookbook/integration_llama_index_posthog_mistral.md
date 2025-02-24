@@ -245,7 +245,7 @@ To create your own dashboard from a template:
 
 ![Posthog Dashboard with latency and cost of AI application](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-2.png)
 
-# Feedback
+## Feedback
 ---
 
 If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your idea with the community on [Discord](https://discord.langfuse.com/).
