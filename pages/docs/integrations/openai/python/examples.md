@@ -7,7 +7,7 @@ category: Integrations
 
 This is a cookbook with examples of the Langfuse Integration for OpenAI (Python).
 
-Follow the [integration guide](https://langfuse.com/docs/integrations/openai/get-started) to add this integration to your OpenAI project.
+Follow the [integration guide](https://langfuse.com/docs/integrations/openai/python/get-started/get-started) to add this integration to your OpenAI project.
 
 ## Setup
 
@@ -192,7 +192,7 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ## Langfuse Features (User, Tags, Metadata, Session)
 
-You can access additional Langfuse features by adding the relevant attributes to the OpenAI request. The Langfuse integration will parse these attributes. See [docs](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) for details on all available features.
+You can access additional Langfuse features by adding the relevant attributes to the OpenAI request. The Langfuse integration will parse these attributes. See [docs](https://langfuse.com/docs/integrations/openai/python/get-started/python/get-started#custom-trace-properties) for details on all available features.
 
 
 ```python
