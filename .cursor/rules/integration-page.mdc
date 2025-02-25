@@ -51,8 +51,21 @@ Each integration page should follow this specific structure:
      - **Step 1: Install Dependencies**
        - Code cell with pip install commands
      - **Step 2: Set Up Environment Variables**
-       - Instructions for getting API keys
-       - Code cell demonstrating environment variable setup
+       - Example: 
+       ```markdown
+        import os 
+        
+        # Get keys for your project from the project settings page
+        # https://cloud.langfuse.com
+
+        os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+        os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+        os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+        # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+        # Get your Together.ai API key from the project settings page
+        os.environ["TOGETHER_API_KEY"] = "..."
+      ```
      - **Step 3: Initialize Integration**
        - Code cell showing how to initialize Langfuse with the framework
      - **Step 4: Run an Example**
@@ -68,6 +81,10 @@ Each integration page should follow this specific structure:
 
          _[Public example trace in Langfuse](mdc:https:/cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4)_
          ```
+
+**Resources**
+  - Link to the documentation page of the framework used
+  - Link to 1-2 relevant pages in the Langfuse documentation
 
 ## Notebook Format
 - Make sure all code cells are executable without modification (except for API keys)
