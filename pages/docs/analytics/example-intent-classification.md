@@ -1,11 +1,12 @@
 ---
+title: Guide - Building an intent classification pipeline
 description: Build an intent classification pipeline to understand how users are using your LLM application and how performance differs by intent.
 category: Classification
 ---
 
 # LLM Application Intent Classification
 
-This notebook will help you build a basic intent classification pipeline to automate the labeling and analysis of trace data from your Langfuse projects.
+This guide demonstrates how to build an intent classification pipeline using Langfuse trace data. With both supervised and unsupervised approaches, you can automate the labeling and analysis of traces from your Langfuse projects.
 
 Why is this useful?
 
@@ -32,11 +33,15 @@ Thank you [@thompsgj](https://github.com/thompsgj) for the contribution ([pr](ht
 
 ## Setup
 
+Begin by setting up your environment. First, disable unwanted warnings:
+
 
 ```python
 import warnings
 warnings.filterwarnings("ignore")
 ```
+
+Install the necessary packages:
 
 
 ```python
@@ -47,6 +52,8 @@ warnings.filterwarnings("ignore")
 # Install dependencies for unsupervised intent recognition
 %pip install --quiet chromadb hdbscan openai
 ```
+
+Configure your Langfuse project credentials (retrieve these from your [Langfuse Project Settings](https://cloud.langfuse.com)):
 
 
 ```python
@@ -60,6 +67,8 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
 
+Select an embedding model from the Sentence Transformers library:
+
 
 ```python
 # Select embedding model
@@ -72,6 +81,8 @@ embedding_model = SentenceTransformer("all-mpnet-base-v2")
 This section outlines the process of creating a supervised intent classification model with Langfuse trace data. The steps include retrieving trace data, using scikit-learn and sentence transformers to build and train the model, predicting intents, and tagging traces with labels in Langfuse. This method requires labeled data but ensures consistent predictions for predefined intents, ideal for clearly defined intent identification.
 
 ### 1. Retrieve Langfuse traces
+
+Initialize the Langfuse client:
 
 
 ```python
@@ -97,7 +108,7 @@ for utterance in sample_utterances:
     langfuse.trace(input={"message": utterance})
 ```
 
-#### Fetch data from your project
+Fetch data from your project
 
 
 ```python
@@ -133,6 +144,8 @@ traces.data[0].dict()
 
 
 
+Construct a DataFrame for analysis:
+
 
 ```python
 traces_list = []
@@ -147,6 +160,8 @@ traces_df.head()
 
 ### 2. Build and train an intent classification model
 
+Prepare a small labeled dataset:
+
 
 ```python
 import numpy as np
@@ -157,6 +172,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from tqdm.notebook import tqdm
 ```
+
+Split the data and define an embedding transformer:
 
 
 ```python

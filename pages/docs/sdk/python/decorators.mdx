@@ -666,14 +666,11 @@ def execute_groups(task_args):
 
         for task_arg in task_args:
             ctx = copy_context()
-            task = lambda p=task_arg: ctx.run(execute_task, *p)
+            task = lambda p=task_arg, ctx=ctx: ctx.run(execute_task, *p)
 
             futures.append(executor.submit(task))
 
-        for future in as_completed(futures):
-            future.result()
-
-    return [f.result() for f in futures]
+    return [f.result() for f in as_completed(futures)]
 
 execute_groups(task_args)
 

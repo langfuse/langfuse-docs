@@ -66,71 +66,80 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 
 - [OpenLIT](/docs/opentelemetry/example-openlit)
 - [OpenLLMetry](/docs/opentelemetry/example-openllmetry)
+- [Arize](/docs/opentelemetry/example-arize)
 
 <details>
 
 <summary>Comparison of OpenTelemetry Instrumentation Libraries</summary>
 
-| Category   | Item                          | OpenLLMetry | openlit |
-| ---------- | ----------------------------- | ----------- | ------- |
-| LLMs       | AI21                          |             | ✅      |
-|            | Aleph Alpha                   | ✅          |         |
-|            | Amazon Bedrock                | ✅          | ✅      |
-|            | Anthropic                     | ✅          | ✅      |
-|            | Assembly AI                   |             | ✅      |
-|            | Azure AI Inference            |             | ✅      |
-|            | Azure OpenAI                  | ✅          | ✅      |
-|            | Cohere                        | ✅          | ✅      |
-|            | DeepSeek                      |             | ✅      |
-|            | ElevenLabs                    |             | ✅      |
-|            | GitHub Models                 |             | ✅      |
-|            | Google AI Studio              |             | ✅      |
-|            | Google Generative AI (Gemini) | ✅          |         |
-|            | Groq                          | ✅          | ✅      |
-|            | HuggingFace                   | ✅          | ✅      |
-|            | IBM Watsonx AI                | ✅          |         |
-|            | Mistral AI                    | ✅          | ✅      |
-|            | NVIDIA NIM                    |             | ✅      |
-|            | Ollama                        | ✅          | ✅      |
-|            | OpenAI                        | ✅          | ✅      |
-|            | OLA Krutrim                   |             | ✅      |
-|            | Prem AI                       |             | ✅      |
-|            | Replicate                     | ✅          |         |
-|            | SageMaker (AWS)               | ✅          |         |
-|            | Titan ML                      |             | ✅      |
-|            | Together AI                   | ✅          | ✅      |
-|            | vLLM                          |             | ✅      |
-|            | Vertex AI                     | ✅          | ✅      |
-|            | xAI                           |             | ✅      |
-| Vector DBs | AstraDB                       |             | ✅      |
-|            | Chroma                        | ✅          |         |
-|            | ChromaDB                      |             | ✅      |
-|            | LanceDB                       | ✅          |         |
-|            | Marqo                         | ✅          |         |
-|            | Milvus                        | ✅          | ✅      |
-|            | Pinecone                      | ✅          | ✅      |
-|            | Qdrant                        | ✅          | ✅      |
-|            | Weaviate                      | ✅          |         |
-| Frameworks | AutoGen / AG2                 |             | ✅      |
-|            | ControlFlow                   |             | ✅      |
-|            | CrewAI                        | ✅          | ✅      |
-|            | Crawl4AI                      |             | ✅      |
-|            | Dynamiq                       |             | ✅      |
-|            | EmbedChain                    |             | ✅      |
-|            | FireCrawl                     |             | ✅      |
-|            | Guardrails AI                 |             | ✅      |
-|            | Haystack                      | ✅          | ✅      |
-|            | Julep AI                      |             | ✅      |
-|            | LangChain                     | ✅          | ✅      |
-|            | LlamaIndex                    | ✅          | ✅      |
-|            | Letta                         |             | ✅      |
-|            | LiteLLM                       | ✅          | ✅      |
-|            | mem0                          |             | ✅      |
-|            | MultiOn                       |             | ✅      |
-|            | Phidata                       |             | ✅      |
-|            | SwarmZero                     |             | ✅      |
-| GPUs       | AMD Radeon                    |             | ✅      |
-|            | NVIDIA                        |             | ✅      |
+| Category   | Item                          | OpenLLMetry | openlit | Arize |
+| ---------- | ----------------------------- | ----------- | ------- | ----- |
+| LLMs       | AI21                          |             | ✅      |       |
+|            | Aleph Alpha                   | ✅          |         |       |
+|            | Amazon Bedrock                | ✅          | ✅      | ✅    |
+|            | Anthropic                     | ✅          | ✅      | ✅    |
+|            | Assembly AI                   |             | ✅      |       |
+|            | Azure AI Inference            |             | ✅      |       |
+|            | Azure OpenAI                  | ✅          | ✅      |       |
+|            | Cohere                        | ✅          | ✅      |       |
+|            | DeepSeek                      |             | ✅      |       |
+|            | ElevenLabs                    |             | ✅      |       |
+|            | GitHub Models                 |             | ✅      |       |
+|            | Google AI Studio              |             | ✅      |       |
+|            | Google Generative AI (Gemini) | ✅          |         |       |
+|            | Groq                          | ✅          | ✅      | ✅    |
+|            | HuggingFace                   | ✅          | ✅      | ✅    |
+|            | IBM Watsonx AI                | ✅          |         |       |
+|            | Mistral AI                    | ✅          | ✅      | ✅    |
+|            | NVIDIA NIM                    |             | ✅      |       |
+|            | Ollama                        | ✅          | ✅      |       |
+|            | OpenAI                        | ✅          | ✅      | ✅    |
+|            | OLA Krutrim                   |             | ✅      |       |
+|            | Prem AI                       |             | ✅      |       |
+|            | Replicate                     | ✅          |         |       |
+|            | SageMaker (AWS)               | ✅          |         |       |
+|            | Titan ML                      |             | ✅      |       |
+|            | Together AI                   | ✅          | ✅      |       |
+|            | vLLM                          |             | ✅      |       |
+|            | Vertex AI                     | ✅          | ✅      | ✅    |
+|            | xAI                           |             | ✅      |       |
+| Vector DBs | AstraDB                       |             | ✅      |       |
+|            | Chroma                        | ✅          |         |       |
+|            | ChromaDB                      |             | ✅      |       |
+|            | LanceDB                       | ✅          |         |       |
+|            | Marqo                         | ✅          |         |       |
+|            | Milvus                        | ✅          | ✅      |       |
+|            | Pinecone                      | ✅          | ✅      |       |
+|            | Qdrant                        | ✅          | ✅      |       |
+|            | Weaviate                      | ✅          |         |       |
+| Frameworks | AutoGen / AG2                 |             | ✅      | ✅    |
+|            | ControlFlow                   |             | ✅      |       |
+|            | CrewAI                        | ✅          | ✅      | ✅    |
+|            | Crawl4AI                      |             | ✅      |       |
+|            | Dynamiq                       |             | ✅      |       |
+|            | EmbedChain                    |             | ✅      |       |
+|            | FireCrawl                     |             | ✅      |       |
+|            | Guardrails AI                 |             | ✅      | ✅    |
+|            | Haystack                      | ✅          | ✅      | ✅    |
+|            | Julep AI                      |             | ✅      |       |
+|            | LangChain                     | ✅          | ✅      | ✅    |
+|            | LlamaIndex                    | ✅          | ✅      | ✅    |
+|            | Letta                         |             | ✅      |       |
+|            | LiteLLM                       | ✅          | ✅      | ✅    |
+|            | mem0                          |             | ✅      |       |
+|            | MultiOn                       |             | ✅      |       |
+|            | Phidata                       |             | ✅      |       |
+|            | SwarmZero                     |             | ✅      |       |
+|            | LlamaIndex Workflows          |             |         | ✅    |
+|            | LangGraph                     |             |         | ✅    |
+|            | DSPy                          |             |         | ✅    |
+|            | Prompt flow                   |             |         | ✅    |
+|            | Instructor                    |             |         | ✅    |
+| GPUs       | AMD Radeon                    |             | ✅      |       |
+|            | NVIDIA                        |             | ✅      |       |
+| JavaScript | OpenAI Node SDK               |             |         | ✅    |
+|            | LangChain.js                  |             |         | ✅    |
+|            | Vercel AI SDK                 |             |         | ✅    |
 
 </details>
 
@@ -141,6 +150,8 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 - [AutoGen](/docs/integrations/autogen)
 - [Semantic Kernel](/docs/integrations/semantic-kernel)
 - [Pydantic AI](/docs/integrations/pydantic-ai)
+- [Spring AI](/docs/integrations/spring-ai)
+- [LlamaIndex Workflows](/docs/integrations/llama-index/workflows.md)
 
 ## Export from OpenTelemetry Collector
 
@@ -238,7 +249,25 @@ In addition, we map many GenAI specific properties to properties in the Langfuse
 First and foremost, we stick to the [OpenTelemetry Gen AI Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/), but also map vendor specific properties from common frameworks.
 All attributes and resourceAttributes are available within the Langfuse `metadata` property as a fallback.
 
-Below, we share a non-exhaustive list of mappings that Langfuse applies:
+Langfuse uses the `langfuse.*` namespace to map properties from OpenTelemetry to the Langfuse data model.
+This enables features like linking [Prompts](/docs/prompts/get-started) to spans, adding [tags](/docs/tracing-features/tags), or marking traces as public.
+Attributes in the Langfuse namespace take precedence over the generic mapping we specify below.
+Some of the attributes are only taken into consideration if they are set on the root span. We mark those in the table below.
+The following Langfuse specific properties are supported:
+
+| OpenTelemetry Attribute   | Langfuse Property | Type       | Root Span only | Description                                                                                                                          |
+| ------------------------- | ----------------- | ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `langfuse.session.id`     | `sessionId`       | `string`   | `true`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                   |
+| `langfuse.user.id`        | `userId`          | `string`   | `true`         | The [user ID](/docs/tracing-features/users) for the request.                                                                         |
+| `langfuse.public`         | `public`          | `boolean`  | `true`         | Mark the trace as public to be able to [share it via url](/docs/tracing-features/url). This can be changed later in the Langfuse UI. |
+| `langfuse.release`        | `release`         | `string`   | `true`         | The [release](/docs/tracing-features/releases-and-versioning) for the request.                                                       |
+| `langfuse.version`        | `version`         | `string`   | `true`         | The [version](/docs/tracing-features/releases-and-versioning) for the request.                                                       |
+| `langfuse.tags`           | `tags`            | `string[]` | `true`         | The [tags](/docs/tracing-features/tags) for the request.                                                                             |
+| `langfuse.prompt.name`    | `promptName`      | `string`   | `false`        | The [prompt name](/docs/prompts/get-started) for the request.                                                                        |
+| `langfuse.prompt.version` | `promptVersion`   | `int`      | `false`        | The [prompt version](/docs/prompts/get-started) for the request.                                                                     |
+
+Below, we present a non-exhaustive list of additional mappings that Langfuse applies.
+These mappings are based on OTel GenAI semantic conventions and vendor-specific implementations that deviate from these conventions:
 
 | OpenTelemetry Attribute       | Langfuse Property   | Description                                                                                                                                                      |
 | ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -248,13 +277,18 @@ Below, we share a non-exhaustive list of mappings that Langfuse applies:
 | `gen_ai.request.model`        | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
 | `gen_ai.response.model`       | `model`             | The [model](/docs/model-usage-and-cost) used for the response.                                                                                                   |
 | `llm.model_name`              | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
+| `model`                       | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
 | `gen_ai.request.*`            | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
 | `llm.invocation_parameters.*` | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
-| `langfuse.session.id`         | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
 | `session.id`                  | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
-| `langfuse.user.id`            | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
 | `user.id`                     | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
 | `gen_ai.prompt`               | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                                |
 | `gen_ai.completion`           | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                               |
 | `input.value`                 | `input`             | Input field. Used by OpenInference based traces.                                                                                                                 |
 | `output.value`                | `output`            | Output field. Used by OpenInference based traces.                                                                                                                |
+| `mlflow.spanInputs`           | `input`             | Input field. Used by MLflow based traces.                                                                                                                        |
+| `mlflow.spanOutputs`          | `output`            | Output field. Used by MLflow based traces.                                                                                                                       |
+
+## Troubleshooting
+
+- If you encounter `4xx` errors while self-hosting Langfuse, please upgrade your deployment to the latest version. The OpenTelemetry endpoint was first introduced in [v3.22.0](https://github.com/langfuse/langfuse/releases/tag/v3.22.0) and has seen significant improvements since then.

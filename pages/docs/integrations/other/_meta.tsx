@@ -4,4 +4,5 @@ export default {
   milvus: "Milvus",
   ragas: "Ragas",
   openrouter: "OpenRouter",
+  firecrawl: "Firecrawl",
 };
