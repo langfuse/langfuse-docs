@@ -1,9 +1,9 @@
 ---
 title: "Monitor Together.ai with Langfuse"
-description: "Learn how to integrate Together.ai using the OpenAI Python SDK with Langfuse."
+description: "Learn how to integrate Together.ai with Langfuse using the OpenAI drop-in replacement."
 ---
 
-# Integrate Together.ai with Langfuse
+# Observability for Together.ai with Langfuse
 
 This guide shows you how to integrate Together.ai with Langfuse. Together's API endpoints for chat, language and code, images, and embeddings are fully compatible with OpenAI's API. This allows us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
 
