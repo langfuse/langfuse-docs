@@ -9,4 +9,5 @@ export default {
   tags: "Tags",
   url: "Trace URL",
   users: "Users",
+  environments: "Environments",
 };
