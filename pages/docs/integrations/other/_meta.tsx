@@ -5,4 +5,5 @@ export default {
   ragas: "Ragas",
   openrouter: "OpenRouter",
   firecrawl: "Firecrawl",
+  togetherai: "Together.ai",
 };

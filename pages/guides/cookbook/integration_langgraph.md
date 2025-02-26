@@ -609,6 +609,17 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
     {'chatbot': {'messages': [AIMessage(content='¿Qué es Langfuse?', response_metadata={'token_usage': {'completion_tokens': 6, 'prompt_tokens': 30, 'total_tokens': 36}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-1f419fe3-73e2-4413-aa6c-96560bbd09c8-0', usage_metadata={'input_tokens': 30, 'output_tokens': 6, 'total_tokens': 36})]}}
 
 
+## Add session and user id to LangGraph traces
+
+You can add a session and user id to LangGraph traces while initializing the Langfuse CallbackHandler to see how different users interact with your application.
+
+
+```python
+# Create a callback handler with a session and user id
+langfuse_handler = CallbackHandler(session_id="conversation_chain",
+                                   user_id="user_123")
+```
+
 ## Feedback
 
 If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your idea with the community on [Discord](https://langfuse.com/discord).
