@@ -226,7 +226,7 @@ langchain_stats_with_langfuse
 
 ## OpenAI Integration
 
-Docs: https://langfuse.com/docs/integrations/openai
+Docs: https://langfuse.com/docs/integrations/openai/python/get-started
 
 
 ```python
