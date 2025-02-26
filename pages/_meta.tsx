@@ -133,13 +133,13 @@ export default {
     type: "page",
     display: "hidden",
   },
-  vn: {
-    title: "Vietnamese Overview",
+  cn: {
+    title: "Chinese Overview",
     type: "page",
     display: "hidden",
   },
-  cn: {
-    title: "Chinese Overview",
+  vn: {
+    title: "Vietnamese Overview",
     type: "page",
     display: "hidden",
   },
