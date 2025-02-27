@@ -266,6 +266,7 @@ The following Langfuse specific properties are supported:
 | `langfuse.tags`           | `tags`            | `string[]` | `true`         | The [tags](/docs/tracing-features/tags) for the request.                                                                             |
 | `langfuse.prompt.name`    | `promptName`      | `string`   | `false`        | The [prompt name](/docs/prompts/get-started) for the request.                                                                        |
 | `langfuse.prompt.version` | `promptVersion`   | `int`      | `false`        | The [prompt version](/docs/prompts/get-started) for the request.                                                                     |
+| `langfuse.environment`    | `environment`     | `string`   | `false`        | The environment for the request.                                                                                                     |
 
 Below, we present a non-exhaustive list of additional mappings that Langfuse applies.
 These mappings are based on OTel GenAI semantic conventions and vendor-specific implementations that deviate from these conventions:
@@ -289,6 +290,8 @@ These mappings are based on OTel GenAI semantic conventions and vendor-specific 
 | `output.value`                | `output`            | Output field. Used by OpenInference based traces.                                                                                                                |
 | `mlflow.spanInputs`           | `input`             | Input field. Used by MLflow based traces.                                                                                                                        |
 | `mlflow.spanOutputs`          | `output`            | Output field. Used by MLflow based traces.                                                                                                                       |
+| `deployment.environment.name` | `environment`       | The environment for the request.                                                                                                                                 |
+| `deployment.environment`      | `environment`       | The environment for the request.                                                                                                                                 |
 
 ## Troubleshooting
 
