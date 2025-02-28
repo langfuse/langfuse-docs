@@ -7,7 +7,7 @@ description: Example cookbook on using the Arize AI SDK to trace your applicatio
 
 Langfuse offers an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/get-started) to ingest trace data from your LLM applications. With the Arize SDK and OpenTelemetry, you can log traces from multiple other frameworks to Langfuse. Below is an example of tracing OpenAI to Langfuse, you can find a full list of supported frameworks [here](https://docs.arize.com/phoenix/tracing/integrations-tracing). To make this example work with other frameworks, you just need to change the instrumentor to match the framework. 
 
-> **Arize AI SDK:** Arize AI provides [Openinference](https://github.com/Arize-ai/openinference), a library that is complimentary to OpenTelemetry to enable tracing of AI applications. OpenInference can be used with any OpenTelemetry-compatible backend. 
+> **Arize AI SDK:** Arize AI provides [Openinference](https://github.com/Arize-ai/openinference), a library that is complementary to OpenTelemetry to enable tracing of AI applications. OpenInference can be used with any OpenTelemetry-compatible backend.
 
 ## Step 1: Install Dependencies
 
