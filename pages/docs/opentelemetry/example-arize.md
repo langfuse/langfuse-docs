@@ -5,9 +5,9 @@ description: Example cookbook on using the Arize AI SDK to trace your applicatio
 
 # Tracing using the Arize SDK
 
-Langfuse offers an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/get-started) to ingest trace data from your LLM applications. With the Arize SDK and OpenTelemetry, you can log traces from multiple other frameworks to Langfuse. Below is an example of tracing OpenAI to Langfuse. You can find a full list of supported frameworks [here](https://docs.arize.com/phoenix/tracing/integrations-tracing). To make this example work with other frameworks, you just need to change the instrumentor to match the framework. 
+Langfuse offers an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/get-started) to ingest trace data from your LLM applications. With the Arize SDK and OpenTelemetry, you can log traces from multiple other frameworks to Langfuse. Below is an example of tracing OpenAI to Langfuse, you can find a full list of supported frameworks [here](https://docs.arize.com/phoenix/tracing/integrations-tracing). To make this example work with other frameworks, you just need to change the instrumentor to match the framework. 
 
-> **Arize AI SDK:** Arize AI provides [Openinference](https://github.com/Arize-ai/openinference), a library that is complementary to OpenTelemetry for enabling tracing of AI applications. OpenInference can be used with any OpenTelemetry-compatible backend. 
+> **Arize AI SDK:** Arize AI provides [Openinference](https://github.com/Arize-ai/openinference), a library that is complimentary to OpenTelemetry to enable tracing of AI applications. OpenInference can be used with any OpenTelemetry-compatible backend. 
 
 ## Step 1: Install Dependencies
 
@@ -70,10 +70,36 @@ response = openai.OpenAI().chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+## Passing User and Session ID (Optional)
+
+To pass user and session id, you can use the [using_attributes](https://docs.arize.com/arize/llm-tracing/how-to-tracing-manual/hybrid-instrumentation#using_attributes) module. This allows you to group traces into [Langfuse Sessions](https://langfuse.com/docs/tracing-features/sessions) and assign [User IDs](https://langfuse.com/docs/tracing-features/users).
+
+
+```python
+import openai
+
+from openinference.instrumentation import using_attributes
+with using_attributes(
+    session_id = "my-session-id",
+    user_id = "my-user-name",
+):
+
+  response = openai.OpenAI().chat.completions.create(
+      messages=[
+          {
+              "role": "user",
+              "content": "How does enhanced LLM observability improve AI debugging?",
+          }
+      ],
+      model="gpt-4o-mini",
+  )
+  print(response.choices[0].message.content)
+```
+
 ## Step 5: View the Traces in Langfuse
 
 After running the above code, you can inspect the generated traces on your Langfuse dashboard:
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/otel-integration-arize/arize-ai-instrumentation-example-trace.png)
 
-_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/68481bf61e3088f38b9000c74e342fbb?timestamp=2025-02-11T16%3A18%3A13.316Z&observation=5e19466096ae5a95)_
+_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/76e520bd3ec1f70356cde4f6d369fd2e?timestamp=2025-02-28T12%3A57%3A01.513Z&observation=cc20bc20cebf9361)_
