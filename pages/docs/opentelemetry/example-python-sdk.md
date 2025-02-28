@@ -45,7 +45,7 @@ tracer = trace.get_tracer(__name__)
 
 ## Flattened attributes
 
-OpenTelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span).
+Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span).
 
 **GenAI Semantic Convention Attributes:**
 
