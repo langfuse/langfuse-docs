@@ -45,7 +45,9 @@ tracer = trace.get_tracer(__name__)
 
 ## Flattened attributes
 
-Export a span with flattened attribute names following the GenAI semantic conventions
+Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span).
+
+**GenAI Semantic Convention Attributes:**
 
 
 ```python
@@ -68,6 +70,19 @@ with tracer.start_as_current_span("GenAI Attributes") as span:
 ```
 
 [Example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/226b5e5ea844788de7bced27fc475c62?timestamp=2025-02-06T10%3A57%3A11.141Z&observation=db79c5e1372feffc)
+
+**Langfuse Attributes:**
+
+ [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span) allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
+
+
+```python
+with tracer.start_as_current_span("Langfuse Attributes") as span:
+    span.set_attribute("langfuse.user.id", "user-123")
+    span.set_attribute("langfuse.session.id", "123456789")
+    span.set_attribute("langfuse.tags", ["staging", "demo"])
+    span.set_attribute("langfuse.prompt.name", "test-1")
+```
 
 ## JSON-serialized attributes
 
