@@ -1,0 +1,112 @@
+---
+description: Use Environments to separate the source of events within a project.
+---
+
+# Environments
+
+Environments in Langfuse allow you to separate events from different deployment environments (e.g., development, staging, production) within a single project. This helps you:
+
+- Keep your development and production data separate while using the same project
+- Filter and analyze data by environment
+- Reuse datasets and prompts across environments
+
+## Data Model
+
+The `environment` attribute is available on all events in Langfuse:
+
+- Traces
+- Observations (spans, events, generations)
+- Scores
+- Sessions
+
+See [Data Model](/docs/tracing-data-model) for more details.
+
+When not specified, events are assigned to the `default` environment by default.
+All environments names starting with `langfuse` are reserved and will be rejected as are any environments that are longer than 40 characters or include characters aside from `[a-z0-9-_]`.
+
+## Usage
+
+<Tabs items={["Python", "JS/TS", "OpenTelemetry"]}>
+<Tab>
+
+Use `LANGFUSE_TRACING_ENVIRONMENT` to configure the environment globally for your application, e.g.
+
+```python
+import os
+from langfuse.decorators import langfuse_context, observe
+
+os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "staging"
+
+@observe()
+def fn():
+    # All events in this function will be in the staging environment
+    pass
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse(environment="staging")
+
+# Create a trace with staging environment.
+trace = langfuse.trace()
+```
+
+</Tab>
+<Tab>
+
+Use `LANGFUSE_TRACING_ENVIRONMENT` to configure the environment globally for your application or pass it on instantiation, e.g.
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse({ environment: "staging" });
+
+// Create a trace in the staging environment
+const trace = langfuse.trace({});
+```
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the environment using any of these attributes:
+
+- `langfuse.environment`
+- `deployment.environment.name`
+- `deployment.environment`
+
+```python
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set environment using Langfuse-specific attribute
+    span.set_attribute("langfuse.environment", "staging")
+
+    # Or using OpenTelemetry convention
+    span.set_attribute("deployment.environment.name", "staging")
+```
+
+</Tab>
+</Tabs>
+
+## Filtering
+
+In the Langfuse UI, you can filter events by environment using the environment filter in the navigation bar. This filter applies across all views in Langfuse (Coming soon).
+
+See our [API Reference](/docs/api) for details on how to filter by environment on our API.
+
+## Best Practices
+
+1. **Consistent Environment Names**: Use consistent environment names across your application to make filtering and analysis easier.
+2. **Environment-Specific Analysis**: Use environments to analyze and compare metrics across different deployment stages.
+3. **Testing**: Use separate environments for testing to avoid polluting production data.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-tracing-environments"]} />

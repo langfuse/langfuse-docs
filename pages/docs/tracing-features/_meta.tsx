@@ -1,4 +1,5 @@
 export default {
+  "environments": "Environments",
   "log-levels": "Log Levels",
   masking: "Masking",
   metadata: "Metadata",
