@@ -1,0 +1,53 @@
+---
+date: 2025-03-03
+title: Langfuse Java Client
+description: Langfuse offers a new Java API client for easy integration with your Java applications.
+author: Steffen
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Langfuse added a new Java API client that allows you to easily integrate Langfuse with your Java application.
+Now, you can fetch prompts and submit scores using the Langfuse API directly from your Java code.
+
+To install the Langfuse Java API client, add the following to your `pom.xml`:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.langfuse</groupId>
+        <artifactId>langfuse-java</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+</dependencies>
+
+<repositories>
+    <repository>
+        <id>github</id>
+        <name>GitHub Package Registry</name>
+        <url>https://maven.pkg.github.com/langfuse/langfuse-java</url>
+    </repository>
+</repositories>
+```
+
+and create a client like this:
+
+```java
+import com.langfuse.client.LangfuseClient;
+import com.langfuse.client.resources.prompts.types.PromptMetaListResponse;
+
+LangfuseClient client = LangfuseClient.builder()
+        .url("https://cloud.langfuse.com") // 🇪🇺 EU data region
+        // .url("https://us.cloud.langfuse.com") // 🇺🇸 US data region
+        // .url("http://localhost:3000") // 🏠 Local deployment
+        .credentials("pk-lf-...", "sk-lf-...")
+        .build();
+
+PromptMetaListResponse prompts = client.prompts().list();
+```
+
+To instrument your Java application check out our [Spring AI Example](https://github.com/langfuse/langfuse-examples/tree/main/applications/spring-ai-demo).
+
+For all details, head over to the new [langfuse-java](https://github.com/langfuse/langfuse-java) repository.
