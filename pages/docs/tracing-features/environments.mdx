@@ -4,18 +4,37 @@ description: Configure environments to organize your traces, observations, and s
 
 # Environments
 
-Environments allow you to organize your traces, observations, and scores from different contexts such as production, staging, or development.
+Environments allow you to organize your traces, observations, and scores from different contexts such as production, staging, or development. This helps you:
 
-You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization. If both are specified, the initialization parameter takes precedence. If nothing is specified, the default environment is `default`.
+- Keep your development and production data separate while using the same project
+- Filter and analyze data by environment
+- Reuse datasets and prompts across environments
 
-The environment must be a string that follows this regex pattern: `^(?!langfuse)[a-z0-9-_]+$`
+You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization.
+If both are specified, the initialization parameter takes precedence.
+If nothing is specified, the default environment is `default`.
+
+## Data Model
+
+The `environment` attribute is available on all events in Langfuse:
+
+- Traces
+- Observations (spans, events, generations)
+- Scores
+- Sessions
+
+See [Data Model](/docs/tracing-data-model) for more details.
+
+The environment must be a string that follows this regex pattern: `^(?!langfuse)[a-z0-9-_]+$` with at most 40 characters.
 
 This means:
 
 - Cannot start with "langfuse"
 - Can only contain lowercase letters, numbers, hyphens, and underscores
 
-<Tabs items={["Python", "JS/TS", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
+## Usage
+
+<Tabs items={["Python", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -64,6 +83,29 @@ const langfuse = new Langfuse({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide#environments) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the environment using any of these attributes:
+
+- `langfuse.environment`
+- `deployment.environment.name`
+- `deployment.environment`
+
+```python
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set environment using Langfuse-specific attribute
+    span.set_attribute("langfuse.environment", "staging")
+
+    # Or using OpenTelemetry convention
+    span.set_attribute("deployment.environment.name", "staging")
+```
 
 </Tab>
 <Tab>
@@ -170,6 +212,18 @@ instrumentor = LlamaIndexInstrumentor(environment="production")
 </Tab>
 
 </Tabs>
+
+## Filtering
+
+In the Langfuse UI, you can filter events by environment using the environment filter in the navigation bar. This filter applies across all views in Langfuse (Coming soon).
+
+See our [API Reference](/docs/api) for details on how to filter by environment on our API.
+
+## Best Practices
+
+1. **Consistent Environment Names**: Use consistent environment names across your application to make filtering and analysis easier.
+2. **Environment-Specific Analysis**: Use environments to analyze and compare metrics across different deployment stages.
+3. **Testing**: Use separate environments for testing to avoid polluting production data.
 
 ## GitHub Discussions
 

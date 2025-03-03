@@ -1,4 +1,5 @@
 export default {
+  environments: "Environments",
   "log-levels": "Log Levels",
   masking: "Masking",
   metadata: "Metadata",
@@ -9,5 +10,4 @@ export default {
   tags: "Tags",
   url: "Trace URL",
   users: "Users",
-  environments: "Environments",
 };
