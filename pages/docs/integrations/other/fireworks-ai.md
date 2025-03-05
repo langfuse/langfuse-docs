@@ -44,8 +44,8 @@ os.environ["FIREWORKS_AI_API_KEY"] = "fw_..."
 from langfuse.openai import openai
 
 client = openai.OpenAI(
-  api_key=os.environ.get("FIREWORKS_AI_API_BASE"),
-  base_url=os.environ.get("FIREWORKS_AI_API_KEY")
+  api_key=os.environ.get("FIREWORKS_AI_API_KEY"),
+  base_url=os.environ.get("FIREWORKS_AI_API_BASE")
 )
 ```
 
