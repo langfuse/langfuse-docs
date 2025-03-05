@@ -165,17 +165,18 @@ Provider: `OKTA`
 
 [NextAuth WorkOS Provider Docs](https://next-auth.js.org/providers/workos)
 
-| Configuration      | Value                                                    |
-| ------------------ | -------------------------------------------------------- |
-| Required Variables | `AUTH_WORKOS_CLIENT_ID`<br/>`AUTH_WORKOS_CLIENT_SECRET`  |
-| Optional Variables | There are no optional variables for the WorkOS provider. |
-| OAuth Redirect URL | `/api/auth/callback/workos`                              |
+| Configuration      | Value                                                        |
+| ------------------ | ------------------------------------------------------------ |
+| Required Variables | `AUTH_WORKOS_CLIENT_ID`<br/>`AUTH_WORKOS_CLIENT_SECRET`      |
+| Optional Variables | `AUTH_WORKOS_ORGANIZATION_ID` or `AUTH_WORKOS_CONNECTION_ID` |
+| OAuth Redirect URL | `/api/auth/callback/workos`                                  |
 
 Provider: `WORKOS`
 
 Notes:
 
-- When enabling WorkOS as an identity provider, two buttons will be shown on the login page: "WorkOS (organization)" and "WorkOS (connection)". Users will need to provide their organization or connection ID in order to sign in.
+- Without specifying `AUTH_WORKOS_ORGANIZATION_ID` or `AUTH_WORKOS_CONNECTION_ID`, users will see two login options and must provide their organization or connection ID.
+- If you specify either variable, only one login button appears with that default setting. You cannot specify both variables simultaneously.
 
 ### Custom OAuth Provider
 
