@@ -171,7 +171,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
         "Scalability of Langfuse Cloud",
         "Deployment docs & Helm chart",
-        "Custom SSO and basic RBAC",
+        "Enterprise SSO and RBAC",
         "Community support",
       ],
       cta: "Deployment guide",
@@ -204,7 +204,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description: "Enterprise-grade support and security features.",
       mainFeatures: [
         "All Open Source / Pro features",
-        "Fine-grained RBAC",
+        "Project-level RBAC",
         "Enterprise Security Features",
         "SOC2, ISO27001, and InfoSec reviews",
         "Dedicated support engineer",
