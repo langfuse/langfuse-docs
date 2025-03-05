@@ -53,6 +53,11 @@ export default {
     href: "https://js.reference.langfuse.com",
     newWindow: true,
   },
+  "java-ref": {
+    title: "Java SDK ↗",
+    href: "https://github.com/langfuse/langfuse-java",
+    newWindow: true,
+  },
   "-- More": {
     type: "separator",
     title: "More",
