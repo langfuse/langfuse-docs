@@ -111,7 +111,7 @@ Find out more about Langfuse Evaluations and Prompt Management in the [Langfuse 
 
 After running the example, log in to Langfuse to view the detailed traces, including request parameters, response content, token usage, and latency metrics.
 
-<img src="https://langfuse.com/images/cookbook/integration_cohere/cohere-example-trace.png" alt="Langfuse Trace Example" style="border-radius: 8px;" />
+<!-- <img src="https://langfuse.com/images/cookbook/integration_cohere/cohere-example-trace.png" alt="Langfuse Trace Example" style="border-radius: 8px;" /> -->
 
 _[Public example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/17d82424-f22f-46d1-a63b-6ec3e2c3da1e?timestamp=2025-03-05T11%3A35%3A26.398Z&observation=490e73b2-fdf5-40ad-95d7-a1d0bd054e0e)_
 
