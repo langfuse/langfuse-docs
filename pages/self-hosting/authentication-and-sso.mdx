@@ -47,17 +47,45 @@ Use `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` to allow merging accounts with the s
 
 Need another provider? Langfuse uses Auth.js, which integrates with [many providers](https://next-auth.js.org/providers/). Add a [feature request on GitHub](/ideas) if you want us to add support for a specific provider.
 
-### Google
+### Auth0
 
-[NextAuth Google Provider Docs](https://next-auth.js.org/providers/google)
+[NextAuth Auth0 Provider Docs](https://next-auth.js.org/providers/auth0)
 
-| Configuration      | Value                                                                                                                                                                                                                                                                                                     |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Required Variables | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`                                                                                                                                                                                                                                                   |
-| Optional Variables | `AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com` (list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload))<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
-| OAuth Redirect URL | `/api/auth/callback/google`                                                                                                                                                                                                                                                                               |
+| Configuration      | Value                                                                         |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.      |
+| OAuth Redirect URL | `/api/auth/callback/auth0`                                                    |
 
-Provider: `GOOGLE`
+Provider: `AUTH0`
+
+### AWS Cognito
+
+[NextAuth Cognito Provider Docs](https://next-auth.js.org/providers/cognito)
+
+| Configuration      | Value                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_COGNITO_CLIENT_ID`<br/>`AUTH_COGNITO_CLIENT_SECRET`<br/>`AUTH_COGNITO_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.            |
+| OAuth Redirect URL | `/api/auth/callback/cognito`                                                        |
+
+Provider: `COGNITO`
+
+### Azure AD/Entra ID
+
+[NextAuth Azure AD Provider Docs](https://next-auth.js.org/providers/azure-ad)
+
+| Configuration      | Value                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.                  |
+| OAuth Redirect URL | `/api/auth/callback/azure-ad`                                                             |
+
+Provider: `AZURE_AD`
+
+Notes:
+
+- [#4764](https://github.com/orgs/langfuse/discussions/4764): Langfuse uses email to identify users. Thus, you need to add the `email` claim in the token configurationn and all users must have an `Email` in their user profile.
 
 ### GitHub
 
@@ -95,57 +123,17 @@ Thanks to [@jay0129](https://github.com/jay0129) for the initial contribution of
 
 Provider: `GITLAB`
 
-### Azure AD/Entra ID
+### Google
 
-[NextAuth Azure AD Provider Docs](https://next-auth.js.org/providers/azure-ad)
+[NextAuth Google Provider Docs](https://next-auth.js.org/providers/google)
 
-| Configuration      | Value                                                                                     |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| Required Variables | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID` |
-| Optional Variables | See [additional configuration](#additional-configuration) section below.                  |
-| OAuth Redirect URL | `/api/auth/callback/azure-ad`                                                             |
+| Configuration      | Value                                                                                                                                                                                                                                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`                                                                                                                                                                                                                                                   |
+| Optional Variables | `AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com` (list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload))<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
+| OAuth Redirect URL | `/api/auth/callback/google`                                                                                                                                                                                                                                                                               |
 
-Provider: `AZURE_AD`
-
-Notes:
-
-- [#4764](https://github.com/orgs/langfuse/discussions/4764): Langfuse uses email to identify users. Thus, you need to add the `email` claim in the token configurationn and all users must have an `Email` in their user profile.
-
-### Okta
-
-[NextAuth Okta Provider Docs](https://next-auth.js.org/providers/okta)
-
-| Configuration      | Value                                                                      |
-| ------------------ | -------------------------------------------------------------------------- |
-| Required Variables | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER` |
-| Optional Variables | See [additional configuration](#additional-configuration) section below.   |
-| OAuth Redirect URL | `/api/auth/callback/okta`                                                  |
-
-Provider: `OKTA`
-
-### Auth0
-
-[NextAuth Auth0 Provider Docs](https://next-auth.js.org/providers/auth0)
-
-| Configuration      | Value                                                                         |
-| ------------------ | ----------------------------------------------------------------------------- |
-| Required Variables | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER` |
-| Optional Variables | See [additional configuration](#additional-configuration) section below.      |
-| OAuth Redirect URL | `/api/auth/callback/auth0`                                                    |
-
-Provider: `AUTH0`
-
-### AWS Cognito
-
-[NextAuth Cognito Provider Docs](https://next-auth.js.org/providers/cognito)
-
-| Configuration      | Value                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| Required Variables | `AUTH_COGNITO_CLIENT_ID`<br/>`AUTH_COGNITO_CLIENT_SECRET`<br/>`AUTH_COGNITO_ISSUER` |
-| Optional Variables | See [additional configuration](#additional-configuration) section below.            |
-| OAuth Redirect URL | `/api/auth/callback/cognito`                                                        |
-
-Provider: `COGNITO`
+Provider: `GOOGLE`
 
 ### Keycloak
 
@@ -160,6 +148,18 @@ Provider: `COGNITO`
 Provider: `KEYCLOAK`
 
 Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycloak support!
+
+### Okta
+
+[NextAuth Okta Provider Docs](https://next-auth.js.org/providers/okta)
+
+| Configuration      | Value                                                                      |
+| ------------------ | -------------------------------------------------------------------------- |
+| Required Variables | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.   |
+| OAuth Redirect URL | `/api/auth/callback/okta`                                                  |
+
+Provider: `OKTA`
 
 ### Custom OAuth Provider
 
