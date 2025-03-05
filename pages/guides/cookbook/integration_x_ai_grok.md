@@ -104,9 +104,13 @@ After running the example, log in to Langfuse to view the detailed traces, inclu
 - Response content
 - Token usage and latency metrics
 
-![Langfuse Trace Example](public/images/cookbook/integration-grok/grok-example-trace.png)
+<img src="https://langfuse.com/images/cookbook/integration-grok/grok-example-trace.png" alt="Langfuse Trace Example" style="border-radius: 8px;" />
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9178205e-2cb4-4952-8ec0-5244a1105263?timestamp=2025-03-05T11%3A07%3A46.600Z)_
+
+
+
+
 
 ## Resources
 
