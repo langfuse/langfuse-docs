@@ -6,4 +6,5 @@ export default {
   openrouter: "OpenRouter",
   firecrawl: "Firecrawl",
   togetherai: "Together.ai",
+  xai: "xAI / Grok",
 };

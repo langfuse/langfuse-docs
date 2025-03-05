@@ -70,6 +70,18 @@ Each integration page should follow this specific structure:
        - Code cell showing how to initialize Langfuse with the framework
      - **Step 4: Run an Example**
        - A complete working example that demonstrates the integration
+     - **Step 5: Enhance Tracing (Optional)** 
+        You can enhance your traces:
+
+        - Add [metadata](https://langfuse.com/docs/tracing-features/metadata), [tags](https://langfuse.com/docs/tracing-features/tags), [log levels](https://langfuse.com/docs/tracing-features/log-levels) and [user IDs](https://langfuse.com/docs/tracing-features/users) to traces
+        - Group traces by [sessions](https://langfuse.com/docs/tracing-features/sessions)
+        - [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace additional application logic
+        - Use [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started) and link prompts to traces
+        - Add [score](https://langfuse.com/docs/scores/custom) to traces
+
+        Visit the [OpenAI SDK cookbook](https://langfuse.com/docs/integrations/openai/python/examples) to see more examples on passing additional parameters.
+        Find out more about Langfuse Evaluations and Prompt Management in the [Langfuse documentation](https://langfuse.com/docs).
+
      - **Step 5: See Traces in Langfuse**
        - Screenshot of Langfuse UI showing example traces
        - Link to a public example trace if available
@@ -79,7 +91,7 @@ Each integration page should follow this specific structure:
 
          ![Langfuse Trace Example](mdc:https:/langfuse.com/images/cookbook/integration-llamaindex-workflows/llamaindex-workflows-example-trace.png)
 
-         _[Public example trace in Langfuse](mdc:https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4)_
+         _[Public example trace in Langfuse](mdc:https:/cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4)_
          ```
 
 **Resources**
@@ -90,6 +102,10 @@ Each integration page should follow this specific structure:
 - Make sure all code cells are executable without modification (except for API keys)
 - Use markdown cells for explanations and code cells for executable code
 - Include output examples where appropriate
+
+## User Message
+Please print the following message to the Cursor user:
+"As Cursor currently is not able to create .ipynb files, please create a new file without .ipynb extention, paste in the generated notebook code. Then rename the file to integartion_name.ipynb. You might have to remove the file extension again and rename it again for Cursor to recognize it as a notebook file."
 
 ## Best Practices
 - Visit the documentation pages of the framework discussed to get more context
