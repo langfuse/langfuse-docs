@@ -161,6 +161,22 @@ Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycl
 
 Provider: `OKTA`
 
+### WorkOS
+
+[NextAuth WorkOS Provider Docs](https://next-auth.js.org/providers/workos)
+
+| Configuration      | Value                                                    |
+| ------------------ | -------------------------------------------------------- |
+| Required Variables | `AUTH_WORKOS_CLIENT_ID`<br/>`AUTH_WORKOS_CLIENT_SECRET`  |
+| Optional Variables | There are no optional variables for the WorkOS provider. |
+| OAuth Redirect URL | `/api/auth/callback/workos`                              |
+
+Provider: `WORKOS`
+
+Notes:
+
+- When enabling WorkOS as an identity provider, two buttons will be shown on the login page: "WorkOS (organization)" and "WorkOS (connection)". Users will need to provide their organization or connection ID in order to sign in.
+
 ### Custom OAuth Provider
 
 [NextAuth Custom OAuth Provider Docs](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([source](https://github.com/langfuse/langfuse/blob/main/web/src/server/auth.ts))
