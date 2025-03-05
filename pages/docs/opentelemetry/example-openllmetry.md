@@ -27,29 +27,57 @@ Before sending any requests, configure your environment with the necessary crede
 import os
 import base64
 
-LANGFUSE_PUBLIC_KEY=""
-LANGFUSE_SECRET_KEY=""
-LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_AUTH = base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
 
-os.environ["TRACELOOP_BASE_URL"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["TRACELOOP_BASE_URL"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
-os.environ["TRACELOOP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+
+# Set your OpenAI API key.
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
+
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+
+trace_provider = TracerProvider()
+trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
+
+# Sets the global default tracer provider
+from opentelemetry import trace
+trace.set_tracer_provider(trace_provider)
+
+# Creates a tracer from the global tracer provider
+tracer = trace.get_tracer(__name__)
 ```
 
 ## Step 3: Initialize Instrumentation
 
-Next, initialize the OpenLLMetry instrumentation using the `traceloop-sdk`. Using `disable_batch=True` is recommended if you run this code in a notebook as traces are sent immediately without waiting for batching. Once initialized, any action taken using the OpenAI SDK (such as a chat completion request) will be automatically traced and forwarded to Langfuse.
+Next, initialize the OpenLLMetry instrumentation using the `traceloop-sdk`. Using `disable_batch=True` is recommended if you run this code in a notebook as traces are sent immediately without waiting for batching. 
 
 
 ```python
-from openai import OpenAI
 from traceloop.sdk import Traceloop
 
-Traceloop.init(disable_batch=True)
+Traceloop.init(disable_batch=True,
+               api_endpoint=os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"),
+               headers=os.environ.get(f"Authorization=Basic {LANGFUSE_AUTH}"),)
+```
 
+## Step 4: Execute a Sample LLM Request
+
+With instrumentation enabled, every OpenAI API call will now be traced. The following example sends a chat completion request to illustrate the integration.
+
+
+```python
 openai_client = OpenAI()
 
 chat_completion = openai_client.chat.completions.create(
@@ -65,10 +93,41 @@ chat_completion = openai_client.chat.completions.create(
 print(chat_completion)
 ```
 
-## Step 4: View the Trace in Langfuse
+## Step 5: Pass Additional Attributes (Optional)
+
+Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
+
+
+```python
+from openai import OpenAI
+
+with tracer.start_as_current_span("OpenAI-Trace") as span:
+    span.set_attribute("langfuse.user.id", "user-123")
+    span.set_attribute("langfuse.session.id", "123456789")
+    span.set_attribute("langfuse.tags", ["smolagents", "demo"])
+    span.set_attribute("langfuse.prompt.name", "test-1")
+
+    # Create an instance of the OpenAI client.
+    openai_client = OpenAI()
+
+    # Make a sample chat completion request. This request will be traced by OpenLLMetry and sent to Langfuse.
+    chat_completion = openai_client.chat.completions.create(
+        messages=[
+            {
+              "role": "user",
+              "content": "What is LLM Observability?",
+            }
+        ],
+        model="gpt-3.5-turbo",
+    )
+
+    print(chat_completion)
+```
+
+## Step 6: View the Trace in Langfuse
 
 After running the above code, you can review the generated trace in your Langfuse dashboard:
 
 [Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e417c49b4044725e48aa0e089534fa12?timestamp=2025-02-02T22%3A04%3A04.487Z)
 
-![OpenLLMetry OpenAI Trace](https://langfuse.com/images/cookbook/otel-integration-openllmetry/openllmetry-openai-trace.png)
+![OpenLLMetry OpenAI Trace Link](https://langfuse.com/images/cookbook/otel-integration-openllmetry/openllmetry-openai-trace.png)
