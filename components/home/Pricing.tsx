@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Plus, Minus, ExternalLink } from "lucide-react";
+import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -25,6 +25,11 @@ import {
 } from "@/components/ui/table";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import React from "react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 type DeploymentOption = "cloud" | "selfHosted";
 
@@ -76,8 +81,15 @@ type Tier = {
     name: string;
     href: string;
   };
+  addOn?: {
+    name: string;
+    price: string;
+    mainFeatures: string[];
+  };
   learnMore?: string;
 };
+
+const TEAMS_ADDON = "Teams add-on";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -91,7 +103,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Free",
       mainFeatures: [
         "All platform features (with limits)",
-        "50k observations / month included",
+        "50k events / month included",
         "30 days data access",
         "2 users",
         "Community support (Discord & GitHub)",
@@ -99,12 +111,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Sign up",
     },
     {
-      name: "Pro",
-      id: "tier-pro",
+      name: "Core",
+      id: "tier-core",
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Includes access to full history and higher usage.",
+        "For production projects. Includes access to more history, usage and unlimited users.",
       price: "$59",
       priceDiscountCta: {
         name: "Discounts available",
@@ -112,8 +124,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       },
       mainFeatures: [
         "Everything in Hobby",
-        "100k observations / month included, additional: $10 / 100k observations",
-        "Unlimited data access",
+        "100k events / month included, additional: $8 / 100k events",
+        "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
         "Support via Email/Chat",
@@ -121,20 +133,32 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Sign up",
     },
     {
-      name: "Team",
-      id: "tier-team",
+      name: "Pro",
+      id: "tier-pro",
       href: "https://cloud.langfuse.com",
       featured: false,
-      price: "$499",
-      description: "Dedicated support, and security controls for larger teams.",
+      price: "$199",
+      description:
+        "For scaling projects. Unlimited history, high rate limits, all features.",
       mainFeatures: [
-        "Everything in Pro",
-        "100k observations / month included, additional: $10 / 100k observations",
-        "Custom SSO, SSO enforcement",
-        "Fine-grained RBAC",
-        "SOC2, ISO27001",
+        "Everything in Core",
+        "100k events / month included, additional: $8 / 100k events",
+        "Unlimited data access",
+        "Unlimited annotation queues",
+        "High rate limits",
+        "SOC2, ISO27001 reports",
         "Support via Slack",
       ],
+      addOn: {
+        name: "Teams",
+        price: "$299",
+        mainFeatures: [
+          "Enterprise SSO (e.g. Okta)",
+          "SSO enforcement",
+          "Fine-grained RBAC",
+          "Data retention management",
+        ],
+      },
       cta: "Sign up",
     },
     {
@@ -147,6 +171,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom",
       mainFeatures: [
         "Everything in Team",
+        "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
         "Custom Terms & DPA",
@@ -236,7 +261,7 @@ const sections: Section[] = [
         name: "Integrations/SDKs",
         href: "/docs/integrations/overview",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -244,7 +269,7 @@ const sections: Section[] = [
         name: "Custom via API",
         href: "/docs/api",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -252,9 +277,9 @@ const sections: Section[] = [
         name: "Included usage",
         tiers: {
           cloud: {
-            Hobby: "50k observations",
-            Pro: "100k observations",
-            Team: "100k observations",
+            Hobby: "50k events",
+            Core: "100k events",
+            Pro: "100k events",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -269,8 +294,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Pro: "$10 / 100k observations",
-            Team: "$10 / 100k observations",
+            Core: "$8 / 100k events",
+            Pro: "$8 / 100k events",
             Enterprise: "Custom",
           },
         },
@@ -281,8 +306,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "Free while in beta",
+            Core: "Free while in beta",
             Pro: "Free while in beta",
-            Team: "Free while in beta",
             Enterprise: "Free while in beta",
           },
           selfHosted: {
@@ -297,8 +322,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "30 days",
+            Core: "90 days",
             Pro: "Unlimited",
-            Team: "Unlimited",
             Enterprise: "Unlimited",
           },
         },
@@ -308,9 +333,9 @@ const sections: Section[] = [
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "4,000 requests / min",
-            Pro: "4,000 requests / min",
-            Team: "20,000 requests / min",
+            Hobby: "1,000 requests / min",
+            Core: "4,000 requests / min",
+            Pro: "20,000 requests / min",
             Enterprise: "Custom",
           },
         },
@@ -324,7 +349,7 @@ const sections: Section[] = [
         name: "Datasets",
         href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -332,7 +357,7 @@ const sections: Section[] = [
         name: "Evaluation / User-feedback",
         href: "/docs/scores",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -340,7 +365,7 @@ const sections: Section[] = [
         name: "Prompt Management",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
             "Open Source": true,
             Pro: true,
@@ -357,7 +382,7 @@ const sections: Section[] = [
         name: "Playground",
         href: "/docs/playground",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
@@ -365,7 +390,7 @@ const sections: Section[] = [
         name: "Prompt Experiments",
         href: "/docs/datasets/prompt-experiments",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
             "Open Source": false,
             Pro: true,
@@ -379,8 +404,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "1 evaluator",
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -396,8 +421,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "1 queue",
-            Pro: "3 queues",
-            Team: true,
+            Core: "3 queues",
+            Pro: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -417,8 +442,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "Unlimited",
+            Core: "Unlimited",
             Pro: "Unlimited",
-            Team: "Unlimited",
             Enterprise: "Unlimited",
           },
           selfHosted: {
@@ -433,8 +458,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "2",
+            Core: "Unlimited",
             Pro: "Unlimited",
-            Team: "Unlimited",
             Enterprise: "Unlimited",
           },
           selfHosted: {
@@ -452,11 +477,12 @@ const sections: Section[] = [
     features: [
       {
         name: "Extensive Public API",
+        href: "/docs/api",
         tiers: {
           cloud: {
             Hobby: true,
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -467,22 +493,38 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit",
+        name: "Rate limit (general API routes)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "1,000 requests / min",
+            Hobby: "10 requests / min",
+            Core: "100 requests / min",
             Pro: "1,000 requests / min",
-            Team: "1,000 requests / min",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (metrics api)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "10 requests / day",
+            Core: "20 requests / day",
+            Pro: "200 requests / day",
             Enterprise: "Custom",
           },
         },
       },
       {
         name: "SLA",
-        href: "/faq/all/api-limits",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
         },
       },
     ],
@@ -495,28 +537,33 @@ const sections: Section[] = [
         name: "Ask AI",
         href: "/docs/ask-ai",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Community (GitHub, Discord)",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Chat & Email",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Private Slack/Discord channel",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: true,
+            Enterprise: true,
+          },
           selfHosted: {
             "Open Source": false,
             Pro: "included at >10 users",
@@ -527,7 +574,12 @@ const sections: Section[] = [
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -536,8 +588,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: {
@@ -552,8 +604,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: {
@@ -574,8 +626,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "US or EU",
+            Core: "US or EU",
             Pro: "US or EU",
-            Team: "US or EU",
             Enterprise: "US or EU",
           },
         },
@@ -585,8 +637,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: true,
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -602,8 +654,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: true,
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -616,14 +668,24 @@ const sections: Section[] = [
       {
         name: "Enterprise SSO (e.g. Okta, AzureAD/EntraID)",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "SSO enforcement",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -631,7 +693,12 @@ const sections: Section[] = [
         name: "Project-level RBAC",
         href: "/docs/rbac#project-level-roles",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -641,8 +708,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Pro: false,
-            Team: true,
+            Core: false,
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: {
@@ -670,7 +737,12 @@ const sections: Section[] = [
         name: "Audit Logs",
         href: "/changelog/2025-01-21-audit-logs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -684,8 +756,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: "Self-serve",
             Pro: "Self-serve",
-            Team: "Self-serve",
             Enterprise: "Sales",
           },
           selfHosted: {
@@ -700,8 +772,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: "Credit card",
             Pro: "Credit card",
-            Team: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
           selfHosted: {
@@ -716,8 +788,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: "Monthly",
             Pro: "Monthly",
-            Team: "Monthly",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -732,8 +804,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: {
@@ -754,8 +826,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "Standard T&Cs",
+            Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Team: "Standard T&Cs & DPA",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -768,14 +840,19 @@ const sections: Section[] = [
       {
         name: "Data processing agreement (GDPR)",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: true,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -784,8 +861,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
@@ -811,6 +888,34 @@ export default function Pricing({
       <ExternalLink className="size-4 ml-2 pt-0.5" />
     </Link>
   );
+
+  const FeatureCell = ({ value }: { value: boolean | string }) => {
+    return typeof value === "string" ? (
+      <div className="text-sm leading-6 text-center">
+        {value}
+        {value === TEAMS_ADDON && (
+          <HoverCard>
+            <HoverCardTrigger>
+              <InfoIcon className="inline-block size-3 ml-1" />
+            </HoverCardTrigger>
+            <HoverCardContent className="w-60">
+              <p className="text-sm">
+                Available as part of the Teams add-on on the Pro plan.
+              </p>
+            </HoverCardContent>
+          </HoverCard>
+        )}
+      </div>
+    ) : (
+      <div className="flex justify-center">
+        {value === true ? (
+          <CheckIcon className="h-5 w-5 text-primary" />
+        ) : (
+          <MinusIcon className="h-5 w-5 text-muted-foreground" />
+        )}
+      </div>
+    );
+  };
 
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
@@ -911,6 +1016,31 @@ export default function Pricing({
                         </li>
                       ))}
                     </ul>
+                    {tier.addOn && (
+                      <div className="mt-3 border rounded pt-4 p-3 relative w-full">
+                        <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 -top-0 bg-card px-2 text-xs text-muted-foreground">
+                          + optional
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-sm text-primary">
+                            {tier.addOn.name} Add-on
+                          </span>
+                          <span className="font-bold text-sm text-primary">
+                            {tier.addOn.price}/mo
+                          </span>
+                        </div>
+                        <ul className="mt-1 space-y-1 text-sm">
+                          {tier.addOn.mainFeatures.map((feature) => (
+                            <li key={feature} className="flex space-x-2">
+                              <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                              <span className="text-muted-foreground">
+                                {feature}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
@@ -970,23 +1100,11 @@ export default function Pricing({
                                         )}
                                       </TableCell>
                                       <TableCell>
-                                        {typeof feature.tiers[variant][
-                                          tier.name
-                                        ] === "string" ? (
-                                          <div className="text-sm leading-6 text-center">
-                                            {feature.tiers[variant][tier.name]}
-                                          </div>
-                                        ) : (
-                                          <div className="flex justify-center">
-                                            {feature.tiers[variant][
-                                              tier.name
-                                            ] === true ? (
-                                              <CheckIcon className="h-5 w-5 text-primary" />
-                                            ) : (
-                                              <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                            )}
-                                          </div>
-                                        )}
+                                        <FeatureCell
+                                          value={
+                                            feature.tiers[variant][tier.name]
+                                          }
+                                        />
                                       </TableCell>
                                     </TableRow>
                                   ))}
@@ -1046,22 +1164,9 @@ export default function Pricing({
                                 </TableCell>
                                 {selectedTiers.map((tier) => (
                                   <TableCell key={tier.id}>
-                                    {typeof feature.tiers[variant][
-                                      tier.name
-                                    ] === "string" ? (
-                                      <div className="text-sm leading-6 text-center">
-                                        {feature.tiers[variant][tier.name]}
-                                      </div>
-                                    ) : (
-                                      <div className="flex justify-center">
-                                        {feature.tiers[variant][tier.name] ===
-                                        true ? (
-                                          <CheckIcon className="h-5 w-5 text-primary" />
-                                        ) : (
-                                          <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                        )}
-                                      </div>
-                                    )}
+                                    <FeatureCell
+                                      value={feature.tiers[variant][tier.name]}
+                                    />
                                   </TableCell>
                                 ))}
                               </TableRow>
