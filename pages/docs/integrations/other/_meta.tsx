@@ -7,4 +7,5 @@ export default {
   firecrawl: "Firecrawl",
   togetherai: "Together.ai",
   xai: "xAI / Grok",
+  cohere: "Cohere",
 };
