@@ -8,4 +8,5 @@ export default {
   togetherai: "Together.ai",
   xai: "xAI / Grok",
   cohere: "Cohere",
+  fireworksai: "Fireworks AI",
 };
