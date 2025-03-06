@@ -93,7 +93,11 @@ When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the env
 - `deployment.environment.name`
 - `deployment.environment`
 
-```python
+To set an environment property globally, you can use resource attributes: `os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.environment=staging"`.
+
+Alternatively, you can set the environment on a per-span basis:
+
+  ```python
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
