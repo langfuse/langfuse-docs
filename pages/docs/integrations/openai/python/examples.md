@@ -7,7 +7,7 @@ category: Integrations
 
 This is a cookbook with examples of the Langfuse Integration for OpenAI (Python).
 
-Follow the [integration guide](https://langfuse.com/docs/integrations/openai/python/get-started/get-started) to add this integration to your OpenAI project.
+Follow the [integration guide](https://langfuse.com/docs/integrations/openai/python/get-started) to add this integration to your OpenAI project.
 
 ## Setup
 

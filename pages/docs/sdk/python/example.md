@@ -13,13 +13,11 @@ This cookbook containes examples for all key functionalities of the decorator-ba
 
 Install `langfuse`:
 
-
 ```python
 %pip install langfuse
 ```
 
 If you haven't done so yet, [sign up to Langfuse](https://cloud.langfuse.com/auth/sign-up) and obtain your API keys from the project settings. You can also [self-host](https://langfuse.com/self-hosting) Langfuse.
-
 
 ```python
 import os
@@ -42,11 +40,11 @@ Langfuse simplifies observability in LLM-powered applications by organizing acti
 `@observe()` decorator automatically and asynchronously logs nested traces to Langfuse. The outermost function becomes a `trace` in Langfuse, all children are `spans` by default.
 
 By default it captures:
+
 - nesting via context vars
 - timings/durations
 - args and kwargs as input dict
 - returned values as output
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -78,13 +76,13 @@ Voilà! ✨ Langfuse will generate a trace with a nested span for you.
 In addition to the attributes automatically captured by the decorator, you can add others to use the full features of Langfuse.
 
 Two utility methods:
+
 - `langfuse_context.update_current_observation`: Update the trace/span of the current function scope
 - `langfuse_context.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
 
 For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -124,15 +122,13 @@ On the Langfuse platform the trace now shows with the updated name from the `dee
 
 ## Log an LLM Call using `as_type="generation"`
 
-Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)). 
+Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)).
 
 This works with any LLM provider/SDK. In this example, we'll use Anthropic.
-
 
 ```python
 %pip install anthropic
 ```
-
 
 ```python
 os.environ["ANTHROPIC_API_KEY"] = ""
@@ -140,7 +136,6 @@ os.environ["ANTHROPIC_API_KEY"] = ""
 import anthropic
 anthropic_client = anthropic.Anthropic()
 ```
-
 
 ```python
 # Wrap LLM function with decorator
@@ -155,7 +150,7 @@ def anthropic_completion(**kwargs):
       model=model,
       metadata=kwargs_clone
   )
-  
+
   response = anthropic_client.messages.create(**kwargs)
 
   # See docs for more details on token counts and usd cost in Langfuse
@@ -191,7 +186,6 @@ By default, input/ouput of a function are captured by `@observe()`.
 
 **You can disable capturing input/output** for a specific function:
 
-
 ```python
 from langfuse.decorators import observe
 
@@ -205,7 +199,6 @@ stealth_fn("Super secret content")
 > **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6bdeb443-ef8c-41d8-a8a1-68fe75639428
 
 Alternatively, you can **override input and output** via `update_current_observation` (or `update_current_trace`):
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -236,15 +229,13 @@ Langfuse is tightly integrated with the OpenAI SDK, LangChain, and LlamaIndex. T
 
 ### 1. Initializing example applications
 
-
 ```python
 %pip install llama-index langchain langchain_openai --upgrade
 ```
 
 #### OpenAI
 
-The [OpenAI integration](https://langfuse.com/docs/integrations/openai/python/get-started/get-started) automatically detects the context in which it is executed. Just use `from langfuse.openai import openai` and get native tracing of all OpenAI calls.
-
+The [OpenAI integration](https://langfuse.com/docs/integrations/openai/python/get-started) automatically detects the context in which it is executed. Just use `from langfuse.openai import openai` and get native tracing of all OpenAI calls.
 
 ```python
 from langfuse.openai import openai
@@ -264,7 +255,6 @@ def openai_fn(calc: str):
 #### LlamaIndex
 
 Via `Settings.callback_manager` you can configure the callback to use for tracing of the subsequent LlamaIndex executions. `langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `llama_index_fn()`.
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -295,14 +285,13 @@ def llama_index_fn(question: str):
 
 `langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `langchain_fn()`. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
 
-
 ```python
 from operator import itemgetter
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langfuse.decorators import observe
- 
+
 prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
 model = ChatOpenAI()
 chain = prompt | model | StrOutputParser()
@@ -318,7 +307,6 @@ def langchain_fn(person: str):
 
 ### 2. Run all in a single trace
 
-
 ```python
 from langfuse.decorators import observe
 
@@ -332,7 +320,6 @@ def main():
 
 main();
 ```
-
 
 > **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4fcd93e3-79f2-474a-8e25-0e21c616249a
 
@@ -348,17 +335,15 @@ Make sure to call `langfuse_context.flush()` before exiting to prevent this. Thi
 
 [Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. You can create them via our annotation workflow in the Langfuse UI, run model-based evaluation or ingest via the SDK.
 
-| Parameter | Type   | Optional | Description
-| --- | --- | --- | ---
-| name | string | no | Identifier of the score.
-| value | number | no | The value of the score. Can be any number, often standardized to 0..1
-| comment | string | yes | Additional context/explanation of the score.
-
+| Parameter | Type   | Optional | Description                                                           |
+| --------- | ------ | -------- | --------------------------------------------------------------------- |
+| name      | string | no       | Identifier of the score.                                              |
+| value     | number | no       | The value of the score. Can be any number, often standardized to 0..1 |
+| comment   | string | yes      | Additional context/explanation of the score.                          |
 
 #### Within the decorated function
 
 You can attach a score to the current observation context by calling `langfuse_context.score_current_observation`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse_context.score_current_trace`:
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -398,7 +383,6 @@ main()
 Alternatively you may also score a trace or observation from outside its context as often scores are added async. For example, based on user feedback.
 
 The decorators expose the trace_id and observation_id which are necessary to add scores outside of the decorated functions:
-
 
 ```python
 from langfuse import Langfuse
@@ -459,7 +443,6 @@ If you have your own unique ID (e.g. messageId, traceId, correlationId), you can
 
 To dynamically set a custom ID for a trace or observation, simply pass a keyword argument `langfuse_observation_id` to the function decorated with `@observe()`. Thereby, the trace/observation in Langfuse will use this id. Note: ids in Langfuse are unique and traces/observations are upserted/merged on these ids.
 
-
 ```python
 from langfuse.decorators import langfuse_context, observe
 import uuid
@@ -491,12 +474,12 @@ main()
 > **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/custom-bbda815f-c61a-4cf5-a545-7fceeef1b635
 
 ### Debug mode
+
 Enable debug mode to get verbose logs. Set the debug mode via the environment variable `LANGFUSE_DEBUG=True`.
 
 ### Authentication check
 
 Use `langfuse_context.auth_check()` to verify that your host and API credentials are valid.
-
 
 ```python
 from langfuse.decorators import langfuse_context
