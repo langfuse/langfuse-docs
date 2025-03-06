@@ -10,6 +10,7 @@ export default {
   "semantic-kernel": "Semantic Kernel",
   "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",
+  databricks: "Databricks",
   instructor: "Instructor",
   dspy: "DSPy",
   ollama: "Ollama",

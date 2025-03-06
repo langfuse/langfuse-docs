@@ -1,0 +1,123 @@
+# A/B Testing of LLM Prompts
+
+Langfuse Prompt Management enables A/B testing by allowing you to label different versions of a prompt (e.g., `prod-a` and `prod-b`). Your application can randomly alternate between these versions, while Langfuse tracks performance metrics like response latency, cost, token usage, and evaluation metrics for each version.
+
+<Callout type="info">
+
+**When to use A/B testing?**
+
+A/B testing helps you see how different prompt versions work in real situations, adding to what you learn from testing on datasets. This works best when:
+
+- Your app has good ways to measure success, deals with many different kinds of user inputs, and can handle some ups and downs in performance. This usually works for consumer apps where mistakes aren't a big deal.
+- You've already tested thoroughly on your test data and want to try your changes with a small group of users before rolling out to everyone (also called canary deployment).
+
+</Callout>
+
+## Implementation
+
+<Steps>
+
+### Create Tagged Prompt Versions
+
+Label your prompt versions (e.g., `prod-a` and `prod-b`) to identify different variants for testing.
+
+### Fetch Prompts and Run A/B Test
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+import random
+from langfuse.openai import openai
+
+# Requires environment variables for initialization
+langfuse = Langfuse()
+
+# Fetch prompt versions
+prompt_a = langfuse.get_prompt("my-prompt-name", label="prod-a")
+prompt_b = langfuse.get_prompt("my-prompt-name", label="prod-b")
+
+# Randomly select version
+selected_prompt = random.choice([prompt_a, prompt_b])
+
+# Use in LLM call
+response = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": selected_prompt.compile(variable="value")}],
+    # Link prompt to generation for analytics
+    langfuse_prompt=selected_prompt
+)
+result_text = response.choices[0].message.content
+```
+
+</Tab>
+<Tab>
+
+```js
+import { Langfuse, observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+// Requires environment variables for initialization
+const langfuse = new Langfuse();
+
+// Create and wrap OpenAI client
+const openai = observeOpenAI(new OpenAI());
+
+// Fetch prompt versions
+const promptA = await langfuse.getPrompt("my-prompt-name", undefined, {
+  label: "prod-a",
+});
+const promptB = await langfuse.getPrompt("my-prompt-name", undefined, {
+  label: "prod-b",
+});
+
+// Randomly select version
+const selectedPrompt = Math.random() < 0.5 ? promptA : promptB;
+
+// Use in LLM call
+const completion = await openai.chat.completions.create({
+  model: "gpt-3.5-turbo",
+  messages: [
+    {
+      role: "user",
+      content: selectedPrompt.compile({ variable: "value" }),
+    },
+  ],
+  // Link prompt to generation for analytics
+  langfusePrompt: selectedPrompt,
+});
+const resultText = completion.choices[0].message.content;
+```
+
+</Tab>
+</Tabs>
+
+<Callout type="info">
+
+Refer to [prompt management documentation](/docs/prompts/get-started) for additional examples on how to fetch and use prompts.
+
+</Callout>
+
+### Analyze Results
+
+Compare metrics for each prompt version in the Langfuse UI:
+
+<CloudflareVideo
+  videoId="82868148f98f377f2d7fd05226e639d6"
+  aspectRatio={1696 / 1080}
+  gifStyle
+/>
+
+Key metrics available for comparison:
+
+- Response latency and token usage
+- Cost per request
+- Quality evaluation scores
+- Custom metrics you define
+
+</Steps>
+
+## Learn more
+
+For more details on prompt management features like versioning, caching, and analytics, see our [Prompt Management Guide](/docs/prompts/get-started).
