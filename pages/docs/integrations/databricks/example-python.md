@@ -261,7 +261,7 @@ Langfuse supports additional features for richer trace data:
 Check out the [Langfuse docs](https://langfuse.com/docs) for more details.
 
 ## Next Steps
-- See how to use Databricks models in the Langfuse Playground and for LLM-as-a-Judge evaluations [here](https://langfuse.com/docs/integrations/databricks/use-with-playground-and-evals.mdx).
+- See how to use Databricks models in the Langfuse Playground and for LLM-as-a-Judge evaluations [here](https://langfuse.com/docs/integrations/databricks/use-with-playground-and-evals).
 - Explore the [Databricks documentation](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints) for advanced model serving configurations.
 - Learn more about [Langfuse tracing features](https://langfuse.com/docs) to track your entire application flow.
 - Try out Langfuse [Prompt Management](https://langfuse.com/docs/prompts/get-started) or set up [LLM-as-a-Judge evaluations](https://langfuse.com/docs/scores/model-based-evals).
