@@ -1,0 +1,70 @@
+---
+title: Databricks for Playground and Evaluations
+description: This guide shows how to use Databricks language model endpoints with Langfuse, enabling you to experiment interactively in the Playground and benchmark your models in Evaluations.
+---
+
+# Databricks for Playground and Evaluations
+
+This guide walks you through integrating Databricks language model endpoints with Langfuse. By doing so, you can quickly **experiment** with prompts and debug interactions using the Langfuse Playground, as well as **benchmark** your models systematically with Evaluations.
+
+With Langfuse, you can:
+- **Experiment in the Playground:** The interactive Playground lets you test your language models in real-time. You can send custom prompts, review detailed responses, and add prompts to your [Prompt Library](/docs/prompts/get-started).
+- **Benchmark with Evaluations:** [LLM-as-a-Judge evaluations](/docs/scores/model-based-evals) provide a way to benchmark your application's performance. You can run pre-defined test templates, analyze metrics like latency and accuracy, and refine your models based on measurable outcomes.
+
+## 1. Step: Set Up a Serving Endpoint in Databricks
+
+Begin by setting up a serving endpoint in Databricks. This lets you query custom fine-tuned models or models served via a gateway such as OpenAI or Anthropic. For advanced configuration options, refer to the [Databricks docs](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints).
+
+<Frame className="my-10" fullWidth border>
+![Set up a Serving Endpoint in Databricks](/images/docs/databricks/add-databricsk-serving-endpoint.png)
+</Frame>
+
+## 2. Add the Model in your Project Settings
+
+Next, add your Databricks model endpoint to your Langfuse project settings.
+
+Make sure you've entered the correct endpoint URL and authentication details. The `model name` is the name of the serving endpoint you created in Databricks.
+
+<Frame className="sm:w-1/2" border>
+![Add the Model in Your Project Settings](/images/docs/databricks/databricks-add-to-langfuse.png)
+</Frame>
+
+## 3. Use the Model in the Playground
+
+The Langfuse Playground offers an interactive interface where you can:
+
+- Send prompts and view quick results.
+- Add prompts to your [Prompt Library](/docs/prompts/get-started).
+
+<Frame className="my-10" fullWidth border>
+![Use the Model in the Playground](/images/docs/databricks/databricks-playground.png)
+</Frame>
+
+Select **Databricks** as your LLM provider and choose the endpoint you configured earlier. 
+
+## 4. Use the Model for Evaluations
+
+LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The scores and reasoning are stored as [scores](/docs/scores/data-model) in Langfuse.
+
+<Frame className="my-10" fullWidth border>
+![Use the Model for Evaluations](/images/docs/databricks/databricks-evaluations.png)
+</Frame>
+
+## Next Steps
+
+Visit the example notebook for a step-by-step guide on tracing Databricks models with LangChain, LlamaIndex, and the OpenAI SDK:
+
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards>
+  <Card
+    title="Example Notebook"
+    href="/docs/integrations/databricks/example-notebook"
+    icon={<FileCode />}
+  />
+  <Card
+    title="LLM Evaluation 101: Best Practices and Challenges"
+    href="/blog/2025-03-04-llm-evaluation-101-best-practices-and-challenges"
+    icon={<BookOpen />}
+  />
+</Cards>
