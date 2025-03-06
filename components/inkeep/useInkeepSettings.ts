@@ -69,7 +69,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
   const contactSupportCallToAction: InvokeCallbackAction = {
     type: "invoke_callback",
     callback: (args) => {
-      if (args.conversation.messages.length === 0) {
+      if (!args.conversation?.messages?.length) {
         openChat();
         return;
       }
