@@ -45,8 +45,8 @@ jobs:
 
       - name: Start server and check links
         run: |
-          # Start the server in the background
-          pnpm start &
+          # Start the server in the background and capture its PID
+          pnpm start & SERVER_PID=$!
 
           # Wait for the server to be ready (max 30 seconds)
           timeout 30 bash -c 'until curl -s http://localhost:3333 > /dev/null; do sleep 1; done'
@@ -57,8 +57,8 @@ jobs:
           # Store the exit code
           LINK_CHECK_EXIT=$?
 
-          # Kill the background server
-          kill $(lsof -t -i:3333) || true
+          # Kill the server using the captured PID
+          kill $SERVER_PID || true
 
           # Exit with the link checker's exit code
           exit $LINK_CHECK_EXIT
