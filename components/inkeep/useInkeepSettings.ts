@@ -38,7 +38,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
   const posthog = usePostHog();
 
   const baseSettings: InkeepBaseSettings = {
-    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY! || '',
+    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY! || "",
     primaryBrandColor: "#E11312", // your brand color, widget color scheme is derived from this
     organizationDisplayName: "Langfuse",
     // ...optional settings
