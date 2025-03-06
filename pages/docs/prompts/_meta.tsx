@@ -8,4 +8,5 @@ export default {
     href: "/docs/datasets/prompt-experiments",
   },
   "mcp-server": "Prompt MCP Server",
+  "a-b-testing": "A/B Testing",
 };
