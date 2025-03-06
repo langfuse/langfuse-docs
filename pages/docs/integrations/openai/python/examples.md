@@ -13,9 +13,11 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/openai/pyt
 
 The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
 
+
 ```python
 %pip install langfuse openai --upgrade
 ```
+
 
 ```python
 import os
@@ -32,10 +34,12 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
+
 ```python
 # instead of: import openai
 from langfuse.openai import openai
 ```
+
 
 ```python
 # For debugging, checks the SDK connection with the server. Do not use in production as it adds latency.
@@ -45,6 +49,7 @@ openai.langfuse_auth_check()
 ## Examples
 
 ### Chat completion (text)
+
 
 ```python
 completion = openai.chat.completions.create(
@@ -60,7 +65,8 @@ completion = openai.chat.completions.create(
 
 ### Chat completion (image)
 
-Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages.
+Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages. 
+
 
 ```python
 completion = openai.chat.completions.create(
@@ -92,6 +98,7 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 Simple example using the OpenAI streaming functionality.
 
+
 ```python
 completion = openai.chat.completions.create(
   name="test-chat",
@@ -112,11 +119,13 @@ for chunk in completion:
 
 Simple example using the OpenAI async client. It takes the Langfuse configurations either from the environment variables or from the attributes on the `openai` module.
 
+
 ```python
 from langfuse.openai import AsyncOpenAI
 
 async_client = AsyncOpenAI()
 ```
+
 
 ```python
 completion = await async_client.chat.completions.create(
@@ -138,9 +147,11 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 Simple example using Pydantic to generate the function schema.
 
+
 ```python
 %pip install pydantic --upgrade
 ```
+
 
 ```python
 from typing import List
@@ -151,6 +162,7 @@ class StepByStepAIResponse(BaseModel):
     steps: List[str]
 schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
 ```
+
 
 ```python
 import json
@@ -177,9 +189,11 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
+
 ## Langfuse Features (User, Tags, Metadata, Session)
 
 You can access additional Langfuse features by adding the relevant attributes to the OpenAI request. The Langfuse integration will parse these attributes. See [docs](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) for details on all available features.
+
 
 ```python
 completion_with_attributes = openai.chat.completions.create(
@@ -202,24 +216,28 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 The integration also works with the `AzureOpenAI` and `AsyncAzureOpenAI` classes.
 
+
 ```python
 AZURE_OPENAI_KEY=""
 AZURE_ENDPOINT=""
 AZURE_DEPLOYMENT_NAME="cookbook-gpt-4o-mini" # example deployment name
 ```
 
+
 ```python
 # instead of: from openai import AzureOpenAI
 from langfuse.openai import AzureOpenAI
 ```
 
+
 ```python
 client = AzureOpenAI(
-    api_key=AZURE_OPENAI_KEY,
+    api_key=AZURE_OPENAI_KEY,  
     api_version="2023-03-15-preview",
     azure_endpoint=AZURE_ENDPOINT
 )
 ```
+
 
 ```python
 client.chat.completions.create(
@@ -238,6 +256,7 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 ## Group multiple generations into a single trace
 
 Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
+
 
 ```python
 from langfuse.openai import openai
@@ -281,11 +300,11 @@ Go to https://cloud.langfuse.com or your own instance to see your trace.
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
 Some of the functionality enabled by custom traces:
-
 - custom name to identify a specific trace-type
 - user-level tracking
 - experiment tracking via versions and releases
 - custom metadata
+
 
 ```python
 from langfuse.openai import openai
@@ -341,6 +360,7 @@ print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 You can add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some programmatic evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 
 The score is associated to the trace using the `trace_id`.
+
 
 ```python
 from langfuse import Langfuse

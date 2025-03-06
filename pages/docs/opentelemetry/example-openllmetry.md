@@ -110,7 +110,7 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
     # Create an instance of the OpenAI client.
     openai_client = OpenAI()
 
-    # Make a sample chat completion request. This request will be traced by OpenLLMetry and sent to Langfuse.
+    # Make a sample chat completion request. This request will be traced by OpenLIT and sent to Langfuse.
     chat_completion = openai_client.chat.completions.create(
         messages=[
             {
