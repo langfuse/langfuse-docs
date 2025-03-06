@@ -187,7 +187,7 @@ If you use [LlamaIndex](https://github.com/jerryjliu/llama_index) for data inges
 4. Invoke the LLM with a chat request.
 5. See the trace in your Langfuse dashboard.
 
-**Note:** For more examples on tracing LlamaIdex with Langfuse see the [LlamaIndex integration docs](https://langfuse.com/docs/integrations/llama-index/get-started).
+**Note:** For more examples on tracing LlamaIndex with Langfuse see the [LlamaIndex integration docs](https://langfuse.com/docs/integrations/llama-index/get-started).
 
 
 
