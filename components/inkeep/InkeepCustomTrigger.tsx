@@ -1,17 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useInkeepSettings from "./useInkeepSettings";
-import type { InkeepCustomTriggerProps } from "@inkeep/uikit";
+import type { InkeepModalSearchAndChatProps } from "@inkeep/cxkit-react";
 import { Search } from "lucide-react";
 
 export default function InkeepCustomTrigger() {
   const [isOpen, setIsOpen] = useState(false);
   const [CustomTrigger, setCustomTrigger] =
-    useState<(e: InkeepCustomTriggerProps) => JSX.Element>();
-
-  const handleClose = useCallback(() => {
-    console.log("Modal closed");
-    setIsOpen(false);
-  }, []);
+    useState<(e: InkeepModalSearchAndChatProps) => JSX.Element>();
 
   const { baseSettings, aiChatSettings, searchSettings, modalSettings } =
     useInkeepSettings();
@@ -36,8 +31,8 @@ export default function InkeepCustomTrigger() {
   useEffect(() => {
     const loadCustomTrigger = async () => {
       try {
-        const { InkeepCustomTrigger } = await import("@inkeep/uikit");
-        setCustomTrigger(() => InkeepCustomTrigger);
+        const { InkeepModalSearchAndChat } = await import("@inkeep/cxkit-react");
+        setCustomTrigger(() => InkeepModalSearchAndChat);
       } catch (error) {
         console.error("Failed to load CustomTrigger:", error);
       }
@@ -46,13 +41,15 @@ export default function InkeepCustomTrigger() {
     loadCustomTrigger();
   }, []);
 
-  const customTriggerProps: InkeepCustomTriggerProps = {
-    isOpen,
-    onClose: handleClose,
+  const customTriggerProps: InkeepModalSearchAndChatProps = {
     baseSettings,
     aiChatSettings,
     searchSettings,
-    modalSettings,
+    modalSettings: {
+      ...modalSettings,
+      isOpen,
+      onOpenChange: setIsOpen,
+    },
   };
 
   return (
