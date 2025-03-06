@@ -93,6 +93,10 @@ When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the env
 - `deployment.environment.name`
 - `deployment.environment`
 
+To set an environment property globally, you can use resource attributes: `os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.environment=staging"`.
+
+Alternatively, you can set the environment on a per-span basis:
+
 ```python
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
@@ -215,7 +219,7 @@ instrumentor = LlamaIndexInstrumentor(environment="production")
 
 ## Filtering
 
-In the Langfuse UI, you can filter events by environment using the environment filter in the navigation bar. This filter applies across all views in Langfuse (Coming soon).
+In the Langfuse UI, you can filter events by environment using the environment filter in the navigation bar. This filter applies across all views in Langfuse.
 
 See our [API Reference](/docs/api) for details on how to filter by environment on our API.
 
