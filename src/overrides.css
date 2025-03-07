@@ -3,29 +3,31 @@
   background: transparent !important;
 }
 
-:is(
-    html[class~="dark"] .nextra-nav-container-blur,
-    html[class~="dark"] .nextra-nav-container-blur
-  ) {
+:is(html[class~="dark"] .nextra-nav-container-blur,
+  html[class~="dark"] .nextra-nav-container-blur) {
   background: transparent !important;
 }
 
-.nextra-toc > div > :last-child {
+.nextra-toc>div> :last-child {
   fill-opacity: 50;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
 
 /* Hide guides and faq from main menu */
-.nextra-nav-container > nav > div > a[href="/guides"] {
+.nextra-nav-container>nav>div>a[href="/guides"] {
   display: none !important;
 }
 
-.nextra-nav-container > nav > div > a[href="/faq"] {
+.nextra-nav-container>nav>div>a[href="/faq"] {
   display: none !important;
 }
 
-.nextra-nav-container > nav > div > a[href="/self-hosting"] {
+.nextra-nav-container>nav>div>a[href="/self-hosting"] {
+  display: none !important;
+}
+
+.nextra-nav-container>nav>div>a[href="/library"] {
   display: none !important;
 }
 
@@ -33,18 +35,20 @@
 .nextra-menu-desktop {
   gap: 0.1rem;
 }
-.nextra-menu-desktop > li:not(:has(*)) {
+
+.nextra-menu-desktop>li:not(:has(*)) {
   /* only those that have no children */
   margin-bottom: 0.1rem;
 }
 
-.nextra-nav-container > nav {
+.nextra-nav-container>nav {
   gap: 0.5rem;
 
   @media (min-width: 768px) {
     gap: 1rem;
   }
 }
+
 /* smaller search bar */
 /* .nextra-nav-container input[type="search"] {
   width: 8rem;
@@ -61,13 +65,13 @@
 } */
 
 /* Fix logo overflowing */
-.nextra-nav-container > nav > a:first-child {
+.nextra-nav-container>nav>a:first-child {
   flex-shrink: 0;
 }
 
 /* Fix nested lists */
-li > ol,
-li > ul {
+li>ol,
+li>ul {
   margin-top: 0 !important;
 }
 
@@ -81,6 +85,7 @@ article.nextra-content h2._border-b {
   /* h2 with border-bottom as this is how h2 is on default docs mode, we do not want to target custom/raw h2 on landingpage, changelog, blog etc. */
   margin-top: 4rem;
 }
+
 article.nextra-body-typesetting-article h2 {
   margin-top: 6rem;
 }
@@ -102,16 +107,16 @@ svg .edgeLabel {
 }
 
 /* Subsequent details should have less of a gap */
-details + details {
+details+details {
   margin-top: 0.5rem !important;
 }
 
 /* Fix detail padding */
-details > div {
+details>div {
   padding: 0.25rem;
 }
 
 /* Details header should be bold */
-details > summary {
+details>summary {
   font-weight: 700;
 }
