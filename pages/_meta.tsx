@@ -107,10 +107,9 @@ export default {
   library: {
     title: "Library",
     type: "page",
-    display: "hidden",
     theme: {
       typesetting: "article",
-      timestamp: false,
+      breadcrumb: false,
     },
   },
   terms: {

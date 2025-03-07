@@ -133,6 +133,10 @@ const menuItems: {
       },
       { name: "Why Langfuse?", href: "/why" },
       {
+        name: "AI Engineering Library",
+        href: "/library",
+      },
+      {
         name: "Status",
         href: "https://status.langfuse.com",
       },
