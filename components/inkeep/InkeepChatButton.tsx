@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
-import type { InkeepChatButtonProps } from "@inkeep/uikit";
+import type { InkeepChatButtonProps } from "@inkeep/cxkit-react";
 import useInkeepSettings from "./useInkeepSettings";
 
 const ChatButton = dynamic(
-  () => import("@inkeep/uikit").then((mod) => mod.InkeepChatButton),
+  () => import("@inkeep/cxkit-react").then((mod) => mod.InkeepChatButton),
   {
     ssr: false,
   }
