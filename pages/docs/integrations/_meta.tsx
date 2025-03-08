@@ -31,5 +31,6 @@ export default {
   smolagents: "Smolagents",
   crewai: "CrewAI",
   "spring-ai": "Spring AI",
+  "quarkus-langchain4j": "Quarkus LangChain4j",
   other: "More Ways to Integrate",
 };
