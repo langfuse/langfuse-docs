@@ -373,7 +373,7 @@ stream_find_best_five_painter_from("Spain")
     5. **Joan Miró** (1893-1983)
     	* Most famous painting: "The Birth of the World" (1925) - a seminal work of Surrealist art, showcasing the artist's unique blend of abstract forms and vibrant colors.
     
-    These five painters have not only contributed significantly to the development of Spanish art but also left an indelible mark on the global art scene.None
+    These five painters have not only contributed significantly to the development of Spanish art but also left an indelible mark on the global art scene.
 
 
 
