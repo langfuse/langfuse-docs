@@ -29,8 +29,8 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # DOCS EXAMPLE KEYS
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # DOCS EXAMPLE KEYS
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -107,10 +107,6 @@ After running the example, log in to Langfuse to view the detailed traces, inclu
 <img src="https://langfuse.com/images/cookbook/integration-grok/grok-example-trace.png" alt="Langfuse Trace Example" style="border-radius: 8px;" />
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9178205e-2cb4-4952-8ec0-5244a1105263?timestamp=2025-03-05T11%3A07%3A46.600Z)_
-
-
-
-
 
 ## Resources
 
