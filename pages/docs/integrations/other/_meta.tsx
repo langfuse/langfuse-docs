@@ -9,4 +9,5 @@ export default {
   xai: "xAI / Grok",
   cohere: "Cohere",
   "fireworks-ai": "Fireworks AI",
+  novitaai: "Novita AI",
 };
