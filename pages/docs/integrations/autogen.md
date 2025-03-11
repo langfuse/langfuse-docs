@@ -21,6 +21,7 @@ We'll walk through a simple example of using AutoGen and integrating it with Lan
 
 ```python
 %pip install langfuse openlit autogen
+%pip install opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
 ### Step 2: Set Up Environment Variables

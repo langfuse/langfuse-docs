@@ -121,22 +121,21 @@ with tracer.start_as_current_span("GenAI JSON-Serialized Attributes") as span:
 
 [Example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019440a211c0ee6739d0be1f9101ac3f?timestamp=2025-02-06T10%3A57%3A44.540Z&observation=a09151c5814c1803)
 
-## Dataset Experiments
+## Dataset Experiments when using OpenTelemetry
 
-With [Dataset Experiments](https://langfuse.com/docs/datasets/overview), you can test your application on a dataset before deploying it to production. 
+You can also test your smolagents using [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview):
 
-First, set up the function that will be used to run the application. This function returns the application output as well as the Langfuse trace to link to dataset run with the trace.
+1. Create a benchmark dataset (with prompt and expected output pairs)
+2. Run your agent on that dataset
+3. Compare outputs to the expected results or use an additional scoring mechanism
+
+Below, we demonstrate this approach with the [GSM8K dataset](https://huggingface.co/datasets/gsm8k), which contains math questions and solutions.
 
 
 ```python
 from opentelemetry.trace import format_trace_id
-from opentelemetry import trace
 
-# Set the global default tracer provider
-trace.set_tracer_provider(trace_provider)
-tracer = trace.get_tracer(__name__)
-
-def run_oetl_application(input):
+def otel_helper_function(input):
     with tracer.start_as_current_span("Otel-Trace") as span:
 
         # Your gen ai application logic here: (make sure this function is sending traces to Langfuse)
@@ -167,7 +166,7 @@ dataset = langfuse.get_dataset("<langfuse_dataset_name>")
 
 # Run our application against each dataset item
 for item in dataset.items:
-    langfuse_trace, output = run_oetl_application(item.input["text"])
+    langfuse_trace, output = otel_helper_function(item.input["text"])
 
     # Link the trace to the dataset item for analysis
     item.link(
@@ -189,7 +188,6 @@ langfuse.flush()
 
 You can repeat this process with different:
 - Models (OpenAI GPT, local LLM, etc.)
-- Tools (search vs. no search)
 - Prompts (different system messages)
 
 Then compare them side-by-side in your observability tool:
