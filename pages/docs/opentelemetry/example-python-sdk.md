@@ -15,31 +15,40 @@ In this example, we'll use the [Python OpenTelemetry SDK](https://opentelemetry.
 
 
 ```python
-import json
+import os
 import base64
 
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+
+LANGFUSE_AUTH = base64.b64encode(
+    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
+).decode()
+
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+```
+
+Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
+
+
+```python
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-LANGFUSE_OTEL_API = "https://cloud.langfuse.com/api/public/otel" # EU Data Region
-# LANGFUSE_OTEL_API = "https://us.cloud.langfuse.com/api/public/otel" # US Data Region
+trace_provider = TracerProvider()
+trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
 
-LANGFUSE_PUBLIC_KEY="pk-lf-xxx"
-LANGFUSE_SECRET_KEY="sk-lf-xxx"
+# Sets the global default tracer provider
+from opentelemetry import trace
+trace.set_tracer_provider(trace_provider)
 
-
-LANGFUSE_AUTH = base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
-provider = TracerProvider()
-processor = BatchSpanProcessor(
-    OTLPSpanExporter(
-        endpoint=f"{LANGFUSE_OTEL_API}/v1/traces",
-        headers={"Authorization": f"Basic {LANGFUSE_AUTH}"},
-    )
-)
-provider.add_span_processor(processor)
-trace.set_tracer_provider(provider)
+# Creates a tracer from the global tracer provider
 tracer = trace.get_tracer(__name__)
 ```
 
@@ -111,3 +120,79 @@ with tracer.start_as_current_span("GenAI JSON-Serialized Attributes") as span:
 ```
 
 [Example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019440a211c0ee6739d0be1f9101ac3f?timestamp=2025-02-06T10%3A57%3A44.540Z&observation=a09151c5814c1803)
+
+## Dataset Experiments
+
+With [Dataset Experiments](https://langfuse.com/docs/datasets/overview), you can test your application on a dataset before deploying it to production. 
+
+First, set up the function that will be used to run the application. This function returns the application output as well as the Langfuse trace to link to dataset run with the trace.
+
+
+```python
+from opentelemetry.trace import format_trace_id
+from opentelemetry import trace
+
+# Set the global default tracer provider
+trace.set_tracer_provider(trace_provider)
+tracer = trace.get_tracer(__name__)
+
+def run_oetl_application(input):
+    with tracer.start_as_current_span("Otel-Trace") as span:
+
+        # Your gen ai application logic here: (make sure this function is sending traces to Langfuse)
+        output = your_application(input)
+
+        # Fetch the current span and trace id
+        current_span = trace.get_current_span()
+        span_context = current_span.get_span_context()
+        trace_id = span_context.trace_id
+        formatted_trace_id = format_trace_id(trace_id)
+
+        langfuse_trace = langfuse.trace(
+            id=formatted_trace_id, 
+            input=input, 
+            output=output
+        )
+    return langfuse_trace, output
+```
+
+Then loop over the dataset items and run the application.
+
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+dataset = langfuse.get_dataset("<langfuse_dataset_name>")
+
+# Run our application against each dataset item
+for item in dataset.items:
+    langfuse_trace, output = run_oetl_application(item.input["text"])
+
+    # Link the trace to the dataset item for analysis
+    item.link(
+        langfuse_trace,
+        run_name="run-01",
+        run_metadata={ "model": model.model_id }
+    )
+
+    # Optionally, store a quick evaluation score for demonstration
+    langfuse_trace.score(
+        name="<example_eval>",
+        value= your_evaluation_function(output),
+        comment="This is a comment"
+    )
+
+# Flush data to ensure all telemetry is sent
+langfuse.flush()
+```
+
+You can repeat this process with different:
+- Models (OpenAI GPT, local LLM, etc.)
+- Tools (search vs. no search)
+- Prompts (different system messages)
+
+Then compare them side-by-side in your observability tool:
+
+![Dataset run overview](https://langfuse.com/images/cookbook/huggingface-agent-course/dataset_runs.png)
+![Dataset run comparison](https://langfuse.com/images/cookbook/huggingface-agent-course/dataset-run-comparison.png)
