@@ -106,6 +106,8 @@ loop = asyncio.get_running_loop()
 await loop.create_task(main())
 ```
 
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace.png)
+
 **Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d78d9fe296dcdc8975d7127c8f?timestamp=2025-03-12T10%3A12%3A39.967Z)
 
 Clicking the link above (or your own project link) lets you view all sub-spans, token usage, latencies, etc., for debugging or optimization.
@@ -144,6 +146,8 @@ result = await Runner.run(triage_agent, input="Hola, ¿cómo estás?")
 print(result.final_output)
 ```
 
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-handoff.png)
+
 **Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d7eb4d42b2cd24067ac4eb0a33?timestamp=2025-03-12T10%3A13%3A03.949Z)
 
 ## 6. Functions Example
@@ -175,6 +179,8 @@ loop = asyncio.get_running_loop()
 await loop.create_task(main())
 ```
 
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-function.png)
+
 **Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d809d7c869f1164b0d1bdab0f3?timestamp=2025-03-12T10%3A13%3A11.767Z)
 
 When viewing the trace, you’ll see a span capturing the function call `get_weather` and the arguments passed.
@@ -201,6 +207,8 @@ async def main():
 loop = asyncio.get_running_loop()
 await loop.create_task(main())
 ```
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-grouped.png)
 
 **Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d88acdc96f860fdd904968b006?timestamp=2025-03-12T10%3A13%3A44.781Z)
 
