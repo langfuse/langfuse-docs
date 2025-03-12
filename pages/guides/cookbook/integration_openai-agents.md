@@ -54,9 +54,9 @@ os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}
 os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
 ```
 
-## 3. Instrumenting the Agent with Pydantic
+## 3. Instrumenting the Agent
 
-Pydantic Logfire offerst an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
+Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
 
 
 
@@ -82,10 +82,6 @@ logfire.instrument_openai_agents()
 ## 4. Hello World Example
 
 Below we create an **OpenAI Agent** that always replies in **haiku** form. We run it with `Runner.run` and print the final output.
-
-Observability notes:
-1. **All steps** of the agent's chain-of-thought, function calls, or tool usage are captured.
-2. The entire run is recorded as a single trace in Langfuse.
 
 
 
