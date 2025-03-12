@@ -75,7 +75,7 @@ prompt.config;
 ```
 
 ```
-{ modelName: [32m"gpt-4o"[39m, temperature: [33m1[39m }
+{ modelName: "gpt-4o", temperature: 1 }
 ```
 
 #### Transform prompt into Langchain PromptTemplate
