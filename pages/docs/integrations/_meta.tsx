@@ -1,7 +1,7 @@
 export default {
   overview: "Overview",
   openai: "OpenAI SDK",
-  openai_agents: "OpenAI Agents",
+  "openai-agents": "OpenAI Agents SDK",
   langchain: "Langchain",
   "llama-index": "LlamaIndex",
   haystack: "Haystack",

@@ -1,14 +1,14 @@
 ---
-title: Observe OpenAI Agents with Langfuse
+title: Observe the OpenAI Agents SDK with Langfuse
 description: Learn how to use Langfuse to monitor OpenAI Agents SDK to debug and evaluate your AI agents
 category: Integrations
 ---
 
-# Observe OpenAI Agents with Langfuse
+# Observe the OpenAI Agents SDK with Langfuse
 
 This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agents** workflow.
 
-> **What are OpenAI Agents?**: [OpenAI Agents](https://platform.openai.com/docs/guides/agents) are systems that intelligently accomplish tasks, from simple steps to complex, open-ended objectives.
+> **What is the OpenAI Agents SDK?**: The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a lightweight, open-source framework that lets developers build AI agents and orchestrate multi-agent workflows. It provides building blocks—such as tools, handoffs, and guardrails to configure large language models with custom instructions and integrated tools. Its Python-first design supports dynamic instructions and function tools for rapid prototyping and integration with external systems.
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
@@ -54,9 +54,9 @@ os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}
 os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
 ```
 
-## 3. Instrumenting the Agent with Pydantic
+## 3. Instrumenting the Agent
 
-Pydantic Logfire offerst an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
+Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
 
 
 
@@ -75,17 +75,13 @@ logfire.configure(
 
     send_to_logfire=False,
 )
-# This method automatically patches OpenAI Agents to send logs via OTLP to Langfuse.
+# This method automatically patches the OpenAI Agents SDK to send logs via OTLP to Langfuse.
 logfire.instrument_openai_agents()
 ```
 
 ## 4. Hello World Example
 
 Below we create an **OpenAI Agent** that always replies in **haiku** form. We run it with `Runner.run` and print the final output.
-
-Observability notes:
-1. **All steps** of the agent's chain-of-thought, function calls, or tool usage are captured.
-2. The entire run is recorded as a single trace in Langfuse.
 
 
 
@@ -152,7 +148,7 @@ print(result.final_output)
 
 ## 6. Functions Example
 
-OpenAI Agents typically allow the agent to call Python functions. With Langfuse instrumentation, you can see which **functions** are called, their arguments, and the return values. Here we define a simple function `get_weather(city: str)` and add it as a tool.
+The OpenAI Agents SDK allows the agent to call Python functions. With Langfuse instrumentation, you can see which **functions** are called, their arguments, and the return values. Here we define a simple function `get_weather(city: str)` and add it as a tool.
 
 
 
