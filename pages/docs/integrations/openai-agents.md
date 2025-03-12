@@ -9,9 +9,8 @@ category: Integrations
 This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agents** workflow.
 
 > **What are OpenAI Agents?**: [OpenAI Agents](https://platform.openai.com/docs/guides/agents) are systems that intelligently accomplish tasks, from simple steps to complex, open-ended objectives.
-> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
-**Tip**: Observability is crucial to diagnosing, improving, and comparing AI agents. By sending traces and logs to Langfuse, you can quickly analyze the performance of your system.
+> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
 ## 1. Install Dependencies
 
