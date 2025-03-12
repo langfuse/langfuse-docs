@@ -98,7 +98,7 @@ await client.flushAsync();
 
 Public trace links for the following examples:
 
-- [gpt-4o-minihttps://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5084c45a-4e73-45f6-97b2-ad134abc6af1?observation=20073c4e-749a-4289-ad78-6b48f6e61093)
+- [gpt-4o-mini](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5084c45a-4e73-45f6-97b2-ad134abc6af1?observation=20073c4e-749a-4289-ad78-6b48f6e61093)
 - [llama3](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/05e0d142-20be-4e67-9baf-feb0d18271e6?observation=5bb6d269-8f3d-4c6e-8464-5103cbee4ada)
 
 ## Trace nested LLM Calls using Langfuse JS SDK
