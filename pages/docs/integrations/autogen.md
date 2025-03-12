@@ -21,6 +21,7 @@ We'll walk through a simple example of using AutoGen and integrating it with Lan
 
 ```python
 %pip install langfuse openlit autogen
+%pip install opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
 ### Step 2: Set Up Environment Variables
@@ -32,16 +33,41 @@ Set your Langfuse API keys and configure OpenTelemetry export settings to send t
 import os
 import base64
 
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
+
+LANGFUSE_AUTH = base64.b64encode(
+    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
+).decode()
+
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
 # your openai key
-os.environ["OPENAI_API_KEY"] = "sk-..."
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
+
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+
+trace_provider = TracerProvider()
+trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
+
+# Sets the global default tracer provider
+from opentelemetry import trace
+trace.set_tracer_provider(trace_provider)
+
+# Creates a tracer from the global tracer provider
+tracer = trace.get_tracer(__name__)
 ```
 
 ### Step 3: Initialize OpenLit
@@ -52,7 +78,8 @@ Initialize OpenLit to start capturing OpenTelemetry traces.
 ```python
 import openlit
 
-openlit.init()
+# Initialize OpenLIT instrumentation. The disable_batch flag is set to true to process traces immediately.
+openlit.init(tracer=tracer, disable_batch=True)
 ```
 
 ### Step 4: Create a Simple AutoGen Application
@@ -98,8 +125,60 @@ user_proxy.initiate_chat(
 
 
 
+### Step 5: Pass Additional Attributes (Optional)
 
-### Step 5: See Traces in Langfuse
+Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
+
+
+```python
+with tracer.start_as_current_span("AutoGen-Trace") as span:
+    span.set_attribute("langfuse.user.id", "user-123")
+    span.set_attribute("langfuse.session.id", "123456789")
+    span.set_attribute("langfuse.tags", ["semantic-kernel", "demo"])
+    span.set_attribute("langfuse.prompt.name", "test-1")
+
+    # Start the chat
+    user_proxy.initiate_chat(
+        assistant,
+        message="What is Langfuse?",
+    )
+```
+
+Alternatively, OpenTelemetry traces in Langfuse can also be modified using the [Python low-level SDK](https://langfuse.com/docs/sdk/python/low-level-sdk). For this, we create a new parent span and fetch the OpenTelemetry `trace_id`. This trace_id is then used to modify the span. Have a look at the [Python low-level SDK](https://langfuse.com/docs/sdk/python/low-level-sdk) for more examples. 
+
+
+```python
+from opentelemetry.trace import format_trace_id
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+with tracer.start_as_current_span("Semantic-Kernel-Trace") as span:
+
+    # Start the chat
+    user_proxy.initiate_chat(
+        assistant,
+        message="What is Langfuse?",
+    )
+    
+    # Get the trace_id from the Otel span
+    current_span = trace.get_current_span()
+    span_context = current_span.get_span_context()
+    trace_id = span_context.trace_id
+    formatted_trace_id = format_trace_id(trace_id)
+
+    # Update the trace using the low-level Python SDK.
+    langfuse.trace(
+        id=formatted_trace_id, 
+        name = "docs-retrieval",
+        user_id = "user__935d7d1d-8625-4ef4-8651-544613e7bd22",
+        metadata = {"email": "user@langfuse.com"},
+        tags = ["production"]
+    )
+```
+
+
+### Step 6: See Traces in Langfuse
 
 After running the agent above, you can log in to your Langfuse dashboard and view the traces generated by your AutoGen application. Here is an example screenshot of a trace in Langfuse:
 
@@ -111,7 +190,5 @@ You can also view the public trace here: [Langfuse Trace Example](https://cloud.
 
 - [Langfuse OpenTelemetry Docs](https://langfuse.com/docs/opentelemetry/get-started)
 - [AutoGen OpenTelemetry Docs](https://microsoft.github.io/autogen/dev//user-guide/core-user-guide/framework/telemetry.html)
-
-
 
 
