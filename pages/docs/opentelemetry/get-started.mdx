@@ -38,7 +38,8 @@ OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
 
 Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) to authenticate requests.
 
-You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64 -w 0` # Note: `-w 0` is GNU-specific; macOS uses `-b` or other methods.
+You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`.
+For long API Keys on GNU systems, you may have to add `-w 0` at the end since `base64` auto-wraps columns.
 
 </Callout>
 
