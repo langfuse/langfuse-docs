@@ -13,7 +13,6 @@ Langfuse provides a backend built on OpenTelemetry for ingesting trace data, and
 
 Begin by installing the necessary Python packages. In this example, we need the `openai` library to interact with OpenAI’s API and `traceloop-sdk` for enabling OpenLLMetry instrumentation.
 
-
 ```python
 %pip install openai traceloop-sdk
 ```
@@ -21,7 +20,6 @@ Begin by installing the necessary Python packages. In this example, we need the 
 ## Step 2: Configure Environment Variables
 
 Before sending any requests, configure your environment with the necessary credentials and endpoints. Here, we set up Langfuse authentication by combining your public and secret keys into a Base64-encoded token. We also specify the Langfuse endpoint based on your desired geographical region (EU or US) and provide your OpenAI API key.
-
 
 ```python
 import os
@@ -42,7 +40,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
 
-
 ```python
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -61,8 +58,7 @@ tracer = trace.get_tracer(__name__)
 
 ## Step 3: Initialize Instrumentation
 
-Next, initialize the OpenLLMetry instrumentation using the `traceloop-sdk`. Using `disable_batch=True` is recommended if you run this code in a notebook as traces are sent immediately without waiting for batching. 
-
+Next, initialize the OpenLLMetry instrumentation using the `traceloop-sdk`. Using `disable_batch=True` is recommended if you run this code in a notebook as traces are sent immediately without waiting for batching.
 
 ```python
 from traceloop.sdk import Traceloop
@@ -75,7 +71,6 @@ Traceloop.init(disable_batch=True,
 ## Step 4: Execute a Sample LLM Request
 
 With instrumentation enabled, every OpenAI API call will now be traced. The following example sends a chat completion request to illustrate the integration.
-
 
 ```python
 openai_client = OpenAI()
@@ -97,7 +92,6 @@ print(chat_completion)
 
 Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
 
-
 ```python
 from openai import OpenAI
 
@@ -118,7 +112,7 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
               "content": "What is LLM Observability?",
             }
         ],
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
     )
 
     print(chat_completion)

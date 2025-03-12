@@ -11,7 +11,7 @@ This is a very simple example, you can run experiments on any LLM application th
 
 _Simple example application_
 
-- **Model**: gpt-3.5-turbo
+- **Model**: gpt-4o-mini
 - **Input**: country name
 - **Output**: capital
 - **Evaluation**: exact match of completion and ground truth
@@ -19,11 +19,9 @@ _Simple example application_
 
 ## Setup
 
-
 ```python
 %pip install langfuse openai langchain_openai langchain --upgrade
 ```
-
 
 ```python
 import os
@@ -40,7 +38,6 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-
 ```python
 # import
 from langfuse import Langfuse
@@ -52,7 +49,6 @@ langfuse = Langfuse()
 
 ## Create a dataset
 
-
 ```python
 langfuse.create_dataset(name="capital_cities");
 ```
@@ -60,7 +56,6 @@ langfuse.create_dataset(name="capital_cities");
 ### Items
 
 Load local items into the Langfuse dataset. Alternatively you can add items from production via the Langfuse UI.
-
 
 ```python
 # example items, could also be json instead of strings
@@ -77,7 +72,6 @@ local_items = [
     {"input": {"country": "Egypt"}, "expected_output": "Cairo"},
 ]
 ```
-
 
 ```python
 # Upload to Langfuse
@@ -97,7 +91,6 @@ for item in local_items:
 
 This an example production application that we want to evaluate. It is instrumented with the Langfuse Decorator. We do not need to change the application code to evaluate it subsequently.
 
-
 ```python
 from langfuse.openai import openai
 from langfuse.decorators import observe, langfuse_context
@@ -110,7 +103,7 @@ def run_my_custom_llm_app(input, system_prompt):
   ]
 
   completion = openai.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model="gpt-4o-mini",
       messages=messages
   ).choices[0].message.content
 
@@ -121,7 +114,6 @@ def run_my_custom_llm_app(input, system_prompt):
 
 This is a simple experiment runner that runs the application on each item in the dataset and evaluates the output.
 
-
 ```python
 # we use a very simple eval here, you can use any eval library
 # see https://langfuse.com/docs/scores/model-based-evals for details
@@ -129,7 +121,6 @@ This is a simple experiment runner that runs the application on each item in the
 def simple_evaluation(output, expected_output):
   return output == expected_output
 ```
-
 
 ```python
 def run_experiment(experiment_name, system_prompt):
@@ -155,7 +146,6 @@ def run_experiment(experiment_name, system_prompt):
 ### Run experiments
 
 Now we can easily run experiments with different configurations to explore which yields the best results.
-
 
 ```python
 from langfuse.decorators import langfuse_context
@@ -184,13 +174,12 @@ langfuse.flush()
 
 ## Example using Langchain
 
-
 ```python
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage
- 
+
 def run_my_langchain_llm_app(input, system_message, callback_handler):
   prompt = ChatPromptTemplate.from_messages(
     [
@@ -208,10 +197,9 @@ def run_my_langchain_llm_app(input, system_message, callback_handler):
     { "messages": [HumanMessage(content=input)] },
     config={"callbacks":[callback_handler]}
   )
-  
+
   return res
 ```
-
 
 ```python
 def run_langchain_experiment(experiment_name, system_message):
@@ -227,7 +215,6 @@ def run_langchain_experiment(experiment_name, system_message):
       value=simple_evaluation(completion, item.expected_output)
     )
 ```
-
 
 ```python
 run_langchain_experiment(

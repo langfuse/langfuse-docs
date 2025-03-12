@@ -13,11 +13,9 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/openai/pyt
 
 The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
 
-
 ```python
 %pip install langfuse openai --upgrade
 ```
-
 
 ```python
 import os
@@ -34,12 +32,10 @@ os.environ["OPENAI_API_KEY"] = ""
 # os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
 ```
 
-
 ```python
 # instead of: import openai
 from langfuse.openai import openai
 ```
-
 
 ```python
 # For debugging, checks the SDK connection with the server. Do not use in production as it adds latency.
@@ -50,11 +46,10 @@ openai.langfuse_auth_check()
 
 ### Chat completion (text)
 
-
 ```python
 completion = openai.chat.completions.create(
   name="test-chat",
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
@@ -65,8 +60,7 @@ completion = openai.chat.completions.create(
 
 ### Chat completion (image)
 
-Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages. 
-
+Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages.
 
 ```python
 completion = openai.chat.completions.create(
@@ -98,11 +92,10 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 Simple example using the OpenAI streaming functionality.
 
-
 ```python
 completion = openai.chat.completions.create(
   name="test-chat",
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "You are a professional comedian."},
       {"role": "user", "content": "Tell me a joke."}],
@@ -119,18 +112,16 @@ for chunk in completion:
 
 Simple example using the OpenAI async client. It takes the Langfuse configurations either from the environment variables or from the attributes on the `openai` module.
 
-
 ```python
 from langfuse.openai import AsyncOpenAI
 
 async_client = AsyncOpenAI()
 ```
 
-
 ```python
 completion = await async_client.chat.completions.create(
   name="test-chat",
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 100 = "}],
@@ -147,11 +138,9 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 Simple example using Pydantic to generate the function schema.
 
-
 ```python
 %pip install pydantic --upgrade
 ```
-
 
 ```python
 from typing import List
@@ -163,12 +152,11 @@ class StepByStepAIResponse(BaseModel):
 schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
 ```
 
-
 ```python
 import json
 response = openai.chat.completions.create(
     name="test-function",
-    model="gpt-3.5-turbo-0613",
+    model="gpt-4o-mini-0613",
     messages=[
        {"role": "user", "content": "Explain how to assemble a PC"}
     ],
@@ -189,16 +177,14 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
-
 ## Langfuse Features (User, Tags, Metadata, Session)
 
 You can access additional Langfuse features by adding the relevant attributes to the OpenAI request. The Langfuse integration will parse these attributes. See [docs](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) for details on all available features.
 
-
 ```python
 completion_with_attributes = openai.chat.completions.create(
   name="test-chat-with-attributes", # trace name
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
@@ -216,28 +202,24 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 The integration also works with the `AzureOpenAI` and `AsyncAzureOpenAI` classes.
 
-
 ```python
 AZURE_OPENAI_KEY=""
 AZURE_ENDPOINT=""
 AZURE_DEPLOYMENT_NAME="cookbook-gpt-4o-mini" # example deployment name
 ```
 
-
 ```python
 # instead of: from openai import AzureOpenAI
 from langfuse.openai import AzureOpenAI
 ```
 
-
 ```python
 client = AzureOpenAI(
-    api_key=AZURE_OPENAI_KEY,  
+    api_key=AZURE_OPENAI_KEY,
     api_version="2023-03-15-preview",
     azure_endpoint=AZURE_ENDPOINT
 )
 ```
-
 
 ```python
 client.chat.completions.create(
@@ -257,7 +239,6 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
 
-
 ```python
 from langfuse.openai import openai
 from langfuse.decorators import observe
@@ -267,7 +248,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 1: use openai to get capital of country
     capital = openai.chat.completions.create(
       name="geography-teacher",
-      model="gpt-3.5-turbo",
+      model="gpt-4o-mini",
       messages=[
           {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
           {"role": "user", "content": country}],
@@ -277,7 +258,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 2: use openai to write poem on capital
     poem = openai.chat.completions.create(
       name="poet",
-      model="gpt-3.5-turbo",
+      model="gpt-4o-mini",
       messages=[
           {"role": "system", "content": "You are a poet. Create a poem about a city."},
           {"role": "user", "content": capital}],
@@ -300,11 +281,11 @@ Go to https://cloud.langfuse.com or your own instance to see your trace.
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
 Some of the functionality enabled by custom traces:
+
 - custom name to identify a specific trace-type
 - user-level tracking
 - experiment tracking via versions and releases
 - custom metadata
-
 
 ```python
 from langfuse.openai import openai
@@ -315,7 +296,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 1: use openai to get capital of country
     capital = openai.chat.completions.create(
       name="geography-teacher",
-      model="gpt-3.5-turbo",
+      model="gpt-4o-mini",
       messages=[
           {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
           {"role": "user", "content": country}],
@@ -325,7 +306,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 2: use openai to write poem on capital
     poem = openai.chat.completions.create(
       name="poet",
-      model="gpt-3.5-turbo",
+      model="gpt-4o-mini",
       messages=[
           {"role": "system", "content": "You are a poet. Create a poem about a city."},
           {"role": "user", "content": capital}],
@@ -360,7 +341,6 @@ print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 You can add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some programmatic evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 
 The score is associated to the trace using the `trace_id`.
-
 
 ```python
 from langfuse import Langfuse

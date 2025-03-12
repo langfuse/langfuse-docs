@@ -74,7 +74,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
 
     const res = await openai.chat.completions.create({
       messages: [{ role: "system", content: "Tell me a story about a dog." }],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       max_tokens: 300,
     });
     ```
@@ -95,7 +95,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
       },
     }).chat.completions.create({
       messages: [{ role: "system", content: "Tell me a story about a dog." }],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       max_tokens: 300,
     });
     ```
@@ -173,7 +173,7 @@ const res = await observeOpenAI(new OpenAI(), {
   release: "beta",
 }).chat.completions.create({
   messages: [{ role: "system", content: "Tell me a story about a dog." }],
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   max_tokens: 300,
 });
 ```
@@ -200,7 +200,7 @@ const res = await observeOpenAI(new OpenAI(), {
   langfusePrompt,
 }).completions.create({
   prompt: langfusePrompt.prompt,
-  model: "gpt-3.5-turbo-instruct",
+  model: "gpt-4o-mini-instruct",
   max_tokens: 300,
 });
 ```
@@ -220,7 +220,7 @@ import { observeOpenAI } from "langfuse";
 const openai = observeOpenAI(new OpenAI());
 
 const stream = await openai.chat.completions.create({
-  model: "gpt-4",
+  model: "gpt-4o",
   messages: [{ role: "user", content: "How are you?" }],
   stream: true,
   stream_options: { include_usage: true }
@@ -290,7 +290,7 @@ const capital = (
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       { role: "system", content: "What is the capital of the country?" },
       { role: "user", content: country },
@@ -303,7 +303,7 @@ const poem = (
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",

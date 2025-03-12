@@ -130,7 +130,7 @@ def summarize_transcript(prompt: str):
   sanitized_prompt = anonymize(prompt)
 
   answer = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "Summarize the given court transcript."},

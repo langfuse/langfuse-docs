@@ -200,7 +200,7 @@ Example:
 
 ```python {6-7}
 openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
@@ -254,7 +254,7 @@ from langfuse.openai import openai
 @observe()
 def capital_poem_generator(country)
   capital = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "What is the capital of the country?"},
         {"role": "user", "content": country}],
@@ -262,7 +262,7 @@ def capital_poem_generator(country)
   ).choices[0].message.content
 
   poem = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "You are a poet. Create a poem about this city."},
         {"role": "user", "content": capital}],
@@ -301,7 +301,7 @@ from langfuse.openai import openai
 @observe()
 def capital_poem_generator(country)
   capital = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "What is the capital of the country?"},
         {"role": "user", "content": country}],
@@ -309,7 +309,7 @@ def capital_poem_generator(country)
   ).choices[0].message.content
 
   poem = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "You are a poet. Create a poem about this city."},
         {"role": "user", "content": capital}],
@@ -341,7 +341,7 @@ trace_id = str(uuid4())
 country = "Bulgaria"
 
 capital = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "What is the capital of the country?"},
       {"role": "user", "content": country}],
@@ -351,7 +351,7 @@ capital = openai.chat.completions.create(
 ).choices[0].message.content
 
 poem = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "You are a poet. Create a poem about this city."},
       {"role": "user", "content": capital}],
@@ -405,7 +405,7 @@ trace = langfuse.trace(name="capital-poem-generator")
 country = "Bulgaria"
 
 capital = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "What is the capital of the country?"},
       {"role": "user", "content": country}],
@@ -414,7 +414,7 @@ capital = openai.chat.completions.create(
 ).choices[0].message.content
 
 poem = openai.chat.completions.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
       {"role": "system", "content": "You are a poet. Create a poem about this city."},
       {"role": "user", "content": capital}],
@@ -460,7 +460,7 @@ for country in ["Bulgaria", "France"]:
   span = trace.span(name=country)
 
   capital = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "What is the capital of the country?"},
         {"role": "user", "content": country}],
@@ -470,7 +470,7 @@ for country in ["Bulgaria", "France"]:
   ).choices[0].message.content
 
   poem = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "You are a poet. Create a poem about this city."},
         {"role": "user", "content": capital}],

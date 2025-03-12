@@ -110,7 +110,7 @@ import litellm
 
 # openai call
 openai_response = litellm.completion(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
     {"role": "user", "content": "Hi 👋 - i'm openai"}
   ]
@@ -141,7 +141,7 @@ from langfuse.decorators import langfuse_context, observe
 def fn():
   # set custom langfuse trace params and generation params
   response = completion(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
       {"role": "user", "content": "Hi 👋 - i'm openai"}
     ],
@@ -172,7 +172,7 @@ from litellm import completion
 
 # set custom langfuse trace params and generation params
 response = completion(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
     {"role": "user", "content": "Hi 👋 - i'm openai"}
   ],
@@ -203,7 +203,7 @@ import litellm
 
 
 chat = ChatLiteLLM(
-  model="gpt-3.5-turbo"
+  model="gpt-4o-mini"
   model_kwargs={
       "metadata": {
         "trace_user_id": "user-id", # set Langfuse Trace User ID

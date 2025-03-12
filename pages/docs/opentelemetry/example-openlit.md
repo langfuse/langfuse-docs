@@ -12,7 +12,6 @@ Langfuse is an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/e
 
 Install the necessary Python packages: `openai`, `langfuse`, and `openlit`. These will allow you to interact with OpenAI as well as setup the instrumentation for tracing.
 
-
 ```python
 %pip install openai langfuse openlit
 ```
@@ -20,7 +19,6 @@ Install the necessary Python packages: `openai`, `langfuse`, and `openlit`. Thes
 ## Step 2: Configure Environment Variables
 
 Before sending any requests, you need to configure your credentials and endpoints. First, set up the Langfuse authentication by providing your public and secret keys. Then, configure the OpenTelemetry exporter endpoint and headers to point to Langfuse's backend. You should also specify your OpenAI API key.
-
 
 ```python
 import os
@@ -41,7 +39,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
 
-
 ```python
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -58,12 +55,11 @@ trace.set_tracer_provider(trace_provider)
 tracer = trace.get_tracer(__name__)
 ```
 
-*Explanation:* This block configures the necessary environment variables. The Langfuse keys are combined and base64 encoded to form an authentication token that is then set in the OTLP headers. Additionally, the OpenTelemetry endpoint is provided to direct trace data to Langfuse's backend.
+_Explanation:_ This block configures the necessary environment variables. The Langfuse keys are combined and base64 encoded to form an authentication token that is then set in the OTLP headers. Additionally, the OpenTelemetry endpoint is provided to direct trace data to Langfuse's backend.
 
 ## Step 3: Initialize Instrumentation
 
 With the environment set up, import the needed libraries and initialize OpenLIT instrumentation. We set `tracer=tracer` to use the tracer we created in the previous step.
-
 
 ```python
 import openlit
@@ -75,7 +71,6 @@ openlit.init(tracer=tracer, disable_batch=True)
 ## Step 4: Make a Chat Completion Request
 
 For this example, we will make a simple chat completion request to the OpenAI Chat API. This will generate trace data that you can later view in the Langfuse dashboard.
-
 
 ```python
 from openai import OpenAI
@@ -91,7 +86,7 @@ chat_completion = openai_client.chat.completions.create(
           "content": "What is LLM Observability?",
         }
     ],
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
 )
 
 print(chat_completion)
@@ -100,7 +95,6 @@ print(chat_completion)
 ## Step 5: Pass Additional Attributes (Optional)
 
 Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
-
 
 ```python
 import openai
@@ -132,10 +126,9 @@ You can view the generated trace data in Langfuse. You can view this [example tr
 
 ## Using Dataset Experiments with the OpenLit Instrumentation
 
-With [Dataset Experiments](https://langfuse.com/docs/datasets/overview), you can test your application on a dataset before deploying it to production. 
+With [Dataset Experiments](https://langfuse.com/docs/datasets/overview), you can test your application on a dataset before deploying it to production.
 
 First, set up the helper function (`otel_helper_function`) that will be used to run the application. This function returns the application output as well as the Langfuse trace to link to dataset run with the trace.
-
 
 ```python
 from opentelemetry.trace import format_trace_id
@@ -157,15 +150,14 @@ def otel_helper_function(input):
         formatted_trace_id = format_trace_id(trace_id)
 
         langfuse_trace = langfuse.trace(
-            id=formatted_trace_id, 
-            input=input, 
+            id=formatted_trace_id,
+            input=input,
             output=response.choices[0].message.content
         )
     return langfuse_trace, response.choices[0].message.content
 ```
 
 Then loop over the dataset items and run the application.
-
 
 ```python
 from langfuse import Langfuse
@@ -196,6 +188,7 @@ langfuse.flush()
 ```
 
 You can repeat this process with different:
+
 - Models (OpenAI GPT, local LLM, etc.)
 - Prompts (different system messages)
 

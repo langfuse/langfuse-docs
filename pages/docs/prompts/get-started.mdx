@@ -94,7 +94,7 @@ Depending on the scale of your experiments, there are different approaches you c
   "type": "text",
   "prompt": "As a {{criticLevel}} movie critic, do you like {{movie}}?",
   "config": {
-    "model": "gpt-3.5-turbo",
+    "model": "gpt-4o-mini",
     "temperature": 0.5,
     "supported_languages": ["en", "fr"]
   },
@@ -468,7 +468,7 @@ langfuse.generation({
 prompt = langfuse.get_prompt("calculator")
 
 openai.chat.completions.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
     {"role": "system", "content": prompt.compile(base=10)},
     {"role": "user", "content": "1 + 1 = "}],
@@ -490,7 +490,7 @@ const res = await observeOpenAI(new OpenAI(), {
   langfusePrompt,
 }).completions.create({
   prompt: langfusePrompt.prompt,
-  model: "gpt-3.5-turbo-instruct",
+  model: "gpt-4o-mini-instruct",
   max_tokens: 300,
 });
 ```

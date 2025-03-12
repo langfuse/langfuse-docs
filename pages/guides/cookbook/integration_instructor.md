@@ -4,7 +4,6 @@ description: Open-source observability for Instructor, a popular library to get 
 category: Integrations
 ---
 
-
 # Instructor - Observability & Tracing
 
 [Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.
@@ -15,13 +14,11 @@ This is a cookbook with examples of the Langfuse Integration for Python.
 
 ## Setup
 
-
 ```python
 %pip install langfuse openai pydantic instructor --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
-
 
 ```python
 import os
@@ -40,7 +37,6 @@ It is easy to use instructor with Langfuse. We use the [Langfuse OpenAI intgerat
 
 ### Langfuse-Instructor integration with sychnronous OpenAI client
 
-
 ```python
 import instructor
 from langfuse.openai import OpenAI
@@ -55,7 +51,7 @@ class WeatherDetail(BaseModel):
 
 # Run synchronous OpenAI client
 weather_info = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     response_model=WeatherDetail,
     messages=[
         {"role": "user", "content": "The weather in Paris is 18 degrees Celsius."},
@@ -73,7 +69,6 @@ print(weather_info.model_dump_json(indent=2))
 
 ### Langfuse-Instructor integration with asychnronous OpenAI client
 
-
 ```python
 import instructor
 from langfuse.openai import AsyncOpenAI
@@ -88,7 +83,7 @@ class WeatherDetail(BaseModel):
 
 # Run asynchronous OpenAI client
 task = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     response_model=WeatherDetail,
     messages=[
         {"role": "user", "content": "The weather in Paris is 18 degrees Celsius."},
@@ -108,7 +103,6 @@ print(response.model_dump_json(indent=2))
 ## Example
 
 In this example, we first classify customer feedback into categories like `PRAISE`, `SUGGESTION`, `BUG` and `QUESTION`, and further scores the relvance of each feedback to the business on a scale of 0.0 to 1.0. In this case, we use the asynchronous OpenAI client `AsyncOpenAI` to classify and evaluate the feedback.
-
 
 ```python
 from typing import List, Tuple
@@ -165,7 +159,7 @@ async def classify_feedback(feedback: str) -> Tuple[FeedbackClassification, floa
     """
     async with sem:  # simple rate limiting
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             response_model=FeedbackClassification,
             max_retries=2,
             messages=[

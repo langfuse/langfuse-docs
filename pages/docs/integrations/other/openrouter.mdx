@@ -102,7 +102,7 @@ def analyze_text(text: str):
 @observe()  # Nested function to be traced
 def summarize_text(text: str):
     return client.chat.completions.create(
-        model="openai/gpt-3.5-turbo",
+        model="openai/gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You summarize texts in a concise manner."},
             {"role": "user", "content": f"Summarize the following text:\n{text}"}
@@ -113,7 +113,7 @@ def summarize_text(text: str):
 @observe()  # Nested function to be traced
 def analyze_sentiment(summary: str):
     return client.chat.completions.create(
-        model="openai/gpt-3.5-turbo",
+        model="openai/gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You analyze the sentiment of texts."},
             {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}

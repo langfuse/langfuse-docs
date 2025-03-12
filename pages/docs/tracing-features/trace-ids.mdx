@@ -142,7 +142,7 @@ from langfuse.openai import openai
 # Set trace_id directly in the completion call
 completion = openai.chat.completions.create(
     name="test-chat",
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "You are a calculator."},
         {"role": "user", "content": "1 + 1 = "}
@@ -164,7 +164,7 @@ def calculate_sum(a: int, b: int, **kwargs):
 
     completion = openai.chat.completions.create(
         name="calculator",
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a calculator. Only output the numeric result."},
             {"role": "user", "content": f"{a} + {b} = "}
@@ -202,7 +202,7 @@ const openai = observeOpenAI(new OpenAI(), {
 });
 
 const completion = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   messages: [{ role: "user", content: "Hello!" }],
 });
 ```
@@ -303,7 +303,7 @@ from litellm import completion
 
 # Set custom trace ID and other parameters
 response = completion(
-  model="gpt-3.5-turbo",
+  model="gpt-4o-mini",
   messages=[
     {"role": "user", "content": "Hi 👋"}
   ],

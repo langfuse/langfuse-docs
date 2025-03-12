@@ -314,7 +314,7 @@ Generations are used to log generations of AI model. They contain additional att
 // Example generation creation
 const generation = trace.generation({
   name: "chat-completion",
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   modelParameters: {
     temperature: 0.9,
     maxTokens: 2000,
@@ -545,7 +545,7 @@ export const handler() {
 
   trace.event({ name: "get-user-profile" });
   const span = trace.span({ name: "chat-interaction" });
-  span.generation({ name: "chat-completion", model: "gpt-3.5-turbo", input: prompt, output: completion });
+  span.generation({ name: "chat-completion", model: "gpt-4o-mini", input: prompt, output: completion });
 
   // So far all requests are queued
 

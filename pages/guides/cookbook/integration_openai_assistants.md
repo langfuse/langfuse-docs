@@ -22,13 +22,11 @@ The Assistants API from OpenAI allows developers to build AI assistants that can
 
 Install the required packages:
 
-
 ```python
 %pip install --upgrade openai langfuse
 ```
 
 Set your environment:
-
 
 ```python
 import os
@@ -50,7 +48,6 @@ os.environ["OPENAI_API_KEY"] = ""
 
 Use the `client.beta.assistants.create` method to create a new assistant. Alternatively you can also create the assistant via the OpenAI console:
 
-
 ```python
 from langfuse.decorators import observe
 from openai import OpenAI
@@ -58,13 +55,13 @@ from openai import OpenAI
 @observe()
 def create_assistant():
     client = OpenAI()
-    
+
     assistant = client.beta.assistants.create(
         name="Math Tutor",
         instructions="You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-        model="gpt-4"
+        model="gpt-4o"
     )
-    
+
     return assistant
 
 assistant = create_assistant()
@@ -77,12 +74,11 @@ print(f"Created assistant: {assistant.id}")
 
 Create a thread and run the assistant on it:
 
-
 ```python
 @observe()
 def run_assistant(assistant_id, user_input):
     client = OpenAI()
-    
+
     thread = client.beta.threads.create()
 
     client.beta.threads.messages.create(
@@ -91,12 +87,12 @@ def run_assistant(assistant_id, user_input):
     client.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=user_input
     )
-    
+
     run = client.beta.threads.runs.create(
         thread_id=thread.id,
         assistant_id=assistant_id,
     )
-    
+
     return run, thread
 
 user_input = "I need to solve the equation `3x + 11 = 14`. Can you help me?"
@@ -110,7 +106,6 @@ print(f"Created run: {run.id}")
 
 Retrieve the assistant's response from the thread:
 
-
 ```python
 import json
 from langfuse.decorators import langfuse_context
@@ -118,7 +113,7 @@ from langfuse.decorators import langfuse_context
 @observe()
 def get_response(thread_id, run_id):
     client = OpenAI()
-    
+
     messages = client.beta.threads.messages.list(thread_id=thread_id, order="asc")
     assistant_response = messages.data[-1].content[0].text.value
 
@@ -145,7 +140,7 @@ def get_response(thread_id, run_id):
         input=input_messages,
         output=assistant_response
     )
-    
+
     return assistant_response, run
 
 response = get_response(thread.id, run.id)
@@ -155,7 +150,6 @@ print(f"Assistant response: {response[0]}")
 **[Public link of example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e0933ea5-6806-4eb7-aed8-a42d23c57096?observation=401fb816-22e5-45ac-a4c9-e437b120f2e7) of fetching the response**
 
 ## All in one trace
-
 
 ```python
 import time
@@ -168,7 +162,7 @@ def run_math_tutor(user_input):
     time.sleep(5) # notebook only, wait for the assistant to finish
 
     response = get_response(thread.id, run.id)
-    
+
     return response[0]
 
 user_input = "I need to solve the equation `3x + 11 = 14`. Can you help me?"

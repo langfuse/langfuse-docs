@@ -11,8 +11,7 @@ This cookbook provides examples of the Langfuse Integration for OpenAI (JS/TS). 
 
 The integration is compatible with OpenAI SDK versions >=4.0.0.
 
-*Note: This cookbook uses Deno.js, which requires different syntax for importing packages and setting environment variables.*
-
+_Note: This cookbook uses Deno.js, which requires different syntax for importing packages and setting environment variables._
 
 ```typescript
 import OpenAI from "npm:openai@^4.0.0";
@@ -23,15 +22,13 @@ You can set the secrets either via (1) environment variables or (2) initParams:
 
 ### 1. Environment Variables
 
-
 ```typescript
 // Set env variables, Deno-specific syntax
 Deno.env.set("OPENAI_API_KEY", "");
 Deno.env.set("LANGFUSE_PUBLIC_KEY", "");
 Deno.env.set("LANGFUSE_SECRET_KEY", "");
-Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com") // For US data region, set this to "https://us.cloud.langfuse.com"
+Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com"); // For US data region, set this to "https://us.cloud.langfuse.com"
 ```
-
 
 ```typescript
 // Initialize OpenAI client with observerOpenAI wrapper
@@ -40,24 +37,23 @@ const openai = observeOpenAI(new OpenAI());
 
 ### 2. InitParams
 
-
 ```typescript
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:langfuse";
 
-const openai = observeOpenAI(new OpenAI({apiKey: ""}), 
-     {clientInitParams: {
-        publicKey: "",
-        secretKey: "",
-        baseUrl: "https://cloud.langfuse.com", // Your host, defaults to https://cloud.langfuse.com
-        // For US data region, set this to "https://us.cloud.langfuse.com"
-      }});
+const openai = observeOpenAI(new OpenAI({ apiKey: "" }), {
+  clientInitParams: {
+    publicKey: "",
+    secretKey: "",
+    baseUrl: "https://cloud.langfuse.com", // Your host, defaults to https://cloud.langfuse.com
+    // For US data region, set this to "https://us.cloud.langfuse.com"
+  },
+});
 ```
 
 ## Examples
 
 ### Chat completion
-
 
 ```typescript
 import OpenAI from "npm:openai";
@@ -67,7 +63,7 @@ import { observeOpenAI } from "npm:langfuse";
 const openai = observeOpenAI(new OpenAI());
 
 const completion = await openai.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: "gpt-4o-mini",
   messages: [{ role: "system", content: "Tell me a joke." }],
   max_tokens: 100,
 });
@@ -86,7 +82,6 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 
 Simple example using OpenAI streaming, passing custom parameters to rename the generation and add a tag to the trace.
 
-
 ```typescript
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:langfuse";
@@ -96,7 +91,7 @@ const openaiWithLangfuse = observeOpenAI(new OpenAI(), { generationName: "OpenAI
 
 // Call OpenAI
 const stream = await openaiWithLangfuse.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o-mini
   messages: [{ role: "system", content: "Tell me a joke." }],
   stream: true,
 });
@@ -123,7 +118,6 @@ Example usage:
 - Tracking experiments through versions and releases
 - Adding custom metadata
 
-
 ```typescript
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:langfuse";
@@ -141,7 +135,7 @@ const openaiWithLangfuse = observeOpenAI(new OpenAI(), {
 
 // Call OpenAI
 const completion = await openaiWithLangfuse.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o-mini
   messages: [{ role: "system", content: "Tell me a joke." }],
   max_tokens: 100,
 });
@@ -154,7 +148,6 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 
 ### Function Calling
 
-
 ```typescript
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:langfuse";
@@ -166,7 +159,7 @@ const openaiWithLangfuse = observeOpenAI(new OpenAI(), { generationName: "OpenAI
 async function getWeather(location: string) {
   if (location === "Berlin")
     {return "20degC"}
-  else 
+  else
     {return "unknown"}
 }
 
@@ -191,7 +184,7 @@ const functions = [{
 
 // Call OpenAI
 const res = await openaiWithLangfuse.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o-mini
     messages: [{ role: 'user', content: "What's the weather like in Berlin today"}],
     tool_choice: "auto",
     tools: functions,
@@ -200,7 +193,7 @@ const res = await openaiWithLangfuse.chat.completions.create({
 const tool_call = res.choices[0].message.tool_calls;
 if (tool_call[0].function.name === "getWeather") {
     const argsStr = tool_call[0].function.arguments;
-    const args = JSON.parse(argsStr); 
+    const args = JSON.parse(argsStr);
     const answer = await getWeather(args["location"]);
     console.log(answer);
 }
@@ -215,7 +208,6 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 
 Use the Langfuse JS/TS SDK to create traces or spans and add OpenAI calls to it by passing the trace/span as a `parent` to the `observeOpenAI` wrapper.
 
-
 ```typescript
 import Langfuse from "npm:langfuse";
 import { observeOpenAI } from "npm:langfuse";
@@ -224,10 +216,10 @@ import OpenAI from "npm:openai";
 
 // Init Langfuse SDK
 const langfuse = new Langfuse();
- 
+
 // Create trace and add params
 const trace = langfuse.trace({ name: "capital-poem-generator", tags: ["grouped"]});
- 
+
 // Create span
 const country = "Germany";
 const span = trace.span({ name: country });
@@ -238,7 +230,7 @@ const capital = (
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini
     messages: [
       { role: "system", content: "What is the capital of the country?" },
       { role: "user", content: country },
@@ -251,7 +243,7 @@ const poem = (
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini
     messages: [
       {
         role: "system",
@@ -264,7 +256,7 @@ const poem = (
 
 // End span to get span-level latencies
 span.end();
- 
+
 // notebook only: await events being flushed to Langfuse
 await langfuse.flushAsync();
 ```
@@ -274,7 +266,6 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 ![Langfuse Trace](https://langfuse.com/images/cookbook/js_integration_openai_grouped.png)
 
 ### Update trace
-
 
 ```typescript
 import Langfuse from "npm:langfuse";
@@ -295,7 +286,7 @@ const capital = (
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini
     messages: [
       { role: "system", content: "What is the capital of the country?" },
       { role: "user", content: "France" },
@@ -308,7 +299,7 @@ const poem = (
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini
     messages: [
       {
         role: "system",

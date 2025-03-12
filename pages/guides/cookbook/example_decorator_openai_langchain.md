@@ -5,11 +5,9 @@ category: Integrations
 
 # Example: Langfuse Decorator + OpenAI Integration + Langchain Integration
 
-
 ```python
 %pip install langfuse openai langchain_openai langchain
 ```
-
 
 ```python
 import os
@@ -27,11 +25,9 @@ os.environ["OPENAI_API_KEY"] = ""
 
 ## Imports
 
-
 ```python
 import random
 ```
-
 
 ```python
 from operator import itemgetter
@@ -40,7 +36,6 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langfuse.decorators import observe
 ```
-
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -51,7 +46,6 @@ from langfuse.openai import openai
 
 ## Example: LLM Rap Battle
 
-
 ```python
 @observe()
 def get_random_rap_topic():
@@ -61,7 +55,6 @@ def get_random_rap_topic():
   ]
   return random.choice(topics)
 ```
-
 
 ```python
 @observe()
@@ -82,7 +75,6 @@ def summarize_rap_langchain(rap):
     return summary
 ```
 
-
 ```python
 @observe()
 def rap_battle(turns: int = 5):
@@ -102,7 +94,7 @@ def rap_battle(turns: int = 5):
 
   for turn in range(turns):
       completion = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=messages,
       )
       rap_line = completion.choices[0].message.content
@@ -113,7 +105,6 @@ def rap_battle(turns: int = 5):
 
   return summary
 ```
-
 
 ```python
 rap_summary = rap_battle(turns=4)

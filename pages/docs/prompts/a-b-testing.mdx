@@ -48,7 +48,7 @@ selected_prompt = random.choice([prompt_a, prompt_b])
 
 # Use in LLM call
 response = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": selected_prompt.compile(variable="value")}],
     # Link prompt to generation for analytics
     langfuse_prompt=selected_prompt
@@ -82,7 +82,7 @@ const selectedPrompt = Math.random() < 0.5 ? promptA : promptB;
 
 // Use in LLM call
 const completion = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   messages: [
     {
       role: "user",

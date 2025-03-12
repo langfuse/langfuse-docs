@@ -42,7 +42,7 @@ While telemetry is experimental ([docs](https://sdk.vercel.ai/docs/ai-sdk-core/t
 
 ```ts {4}
 const result = await generateText({
-  model: openai("gpt-4-turbo"),
+  model: openai("gpt-4o"),
   prompt: "Write a short story about a cat.",
   experimental_telemetry: { isEnabled: true },
 });
@@ -142,7 +142,7 @@ sdk.start();
 
 async function main() {
   const result = await generateText({
-    model: openai("gpt-3.5-turbo"),
+    model: openai("gpt-4o-mini"),
     maxTokens: 50,
     prompt: "Invent a new holiday and describe its traditions.",
     experimental_telemetry: {
@@ -197,7 +197,7 @@ langfuse.trace({
 
 for (let i = 0; i < 3; i++) {
   const result = await generateText({
-    model: openai("gpt-3.5-turbo"),
+    model: openai("gpt-4o-mini"),
     maxTokens: 50,
     prompt: "Invent a new holiday and describe its traditions.",
     experimental_telemetry: {
@@ -257,7 +257,7 @@ All of the `metadata` fields are automatically captured by the exporter. You can
 
 ```ts showLineNumbers {6-12}
 const result = await generateText({
-  model: openai("gpt-4-turbo"),
+  model: openai("gpt-4o"),
   prompt: "Write a short story about a cat.",
   experimental_telemetry: {
     isEnabled: true,
