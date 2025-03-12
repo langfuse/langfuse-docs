@@ -186,7 +186,7 @@ from haystack_integrations.components.connectors.langfuse import LangfuseConnect
 pipe = Pipeline()
 pipe.add_component("tracer", LangfuseConnector("Chat generation"))
 pipe.add_component("prompt_builder", ChatPromptBuilder())
-pipe.add_component("llm", OpenAIChatGenerator(model="gpt-4o-mini
+pipe.add_component("llm", OpenAIChatGenerator(model="gpt-4o-mini"))
 
 pipe.connect("prompt_builder.prompt", "llm.messages")
 messages = [
