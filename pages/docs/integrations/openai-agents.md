@@ -56,7 +56,7 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 ## 3. Instrumenting the Agent
 
-Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
+Pydantic Logfire offers an instrumentation for the OpenAI Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
 
 
 
