@@ -102,7 +102,7 @@ def rap_battle(turns: int = 5):
 
   for turn in range(turns):
       completion = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=messages,
       )
       rap_line = completion.choices[0].message.content

@@ -12,6 +12,8 @@ This notebook demonstrates how to integrate **Langfuse** with **Semantic Kernel*
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source platform for LLM observability. It provides tracing and monitoring capabilities for AI applications, helping developers debug, analyze, and optimize their AI systems. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and SDKs.
 
+_**Note:** This notebook uses Python. However, this integration also works with other languages supported by Semantic Kernel, such as [C#](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-csharp) and [Java](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-java)._
+
 ## Get Started
 
 We'll walk through a simple example of using Semantic Kernel and integrating it with Langfuse.
@@ -24,6 +26,7 @@ Install the necessary packages:
 
 ```python
 %pip install langfuse openlit semantic-kernel
+%pip install opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
 

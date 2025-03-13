@@ -54,7 +54,7 @@ openai.langfuse_auth_check()
 ```python
 completion = openai.chat.completions.create(
   name="test-chat",
-  model="gpt-3.5-turbo",
+  model="gpt-4o",
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
@@ -102,7 +102,7 @@ Simple example using the OpenAI streaming functionality.
 ```python
 completion = openai.chat.completions.create(
   name="test-chat",
-  model="gpt-3.5-turbo",
+  model="gpt-4o",
   messages=[
       {"role": "system", "content": "You are a professional comedian."},
       {"role": "user", "content": "Tell me a joke."}],
@@ -130,7 +130,7 @@ async_client = AsyncOpenAI()
 ```python
 completion = await async_client.chat.completions.create(
   name="test-chat",
-  model="gpt-3.5-turbo",
+  model="gpt-4o",
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 100 = "}],
@@ -168,7 +168,7 @@ schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
 import json
 response = openai.chat.completions.create(
     name="test-function",
-    model="gpt-3.5-turbo-0613",
+    model="gpt-4o-0613",
     messages=[
        {"role": "user", "content": "Explain how to assemble a PC"}
     ],
@@ -198,7 +198,7 @@ You can access additional Langfuse features by adding the relevant attributes to
 ```python
 completion_with_attributes = openai.chat.completions.create(
   name="test-chat-with-attributes", # trace name
-  model="gpt-3.5-turbo",
+  model="gpt-4o",
   messages=[
       {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
       {"role": "user", "content": "1 + 1 = "}],
@@ -267,7 +267,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 1: use openai to get capital of country
     capital = openai.chat.completions.create(
       name="geography-teacher",
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       messages=[
           {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
           {"role": "user", "content": country}],
@@ -277,7 +277,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 2: use openai to write poem on capital
     poem = openai.chat.completions.create(
       name="poet",
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       messages=[
           {"role": "system", "content": "You are a poet. Create a poem about a city."},
           {"role": "user", "content": capital}],
@@ -315,7 +315,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 1: use openai to get capital of country
     capital = openai.chat.completions.create(
       name="geography-teacher",
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       messages=[
           {"role": "system", "content": "You are a Geography teacher helping students learn the capitals of countries. Output only the capital when being asked."},
           {"role": "user", "content": country}],
@@ -325,7 +325,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     # nested generation 2: use openai to write poem on capital
     poem = openai.chat.completions.create(
       name="poet",
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       messages=[
           {"role": "system", "content": "You are a poet. Create a poem about a city."},
           {"role": "user", "content": capital}],

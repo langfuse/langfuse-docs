@@ -15,7 +15,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 prompt = langfuse.get_prompt("calculator")
 
 openai.chat.completions.create(
-  model="gpt-3.5-turbo",
+  model="gpt-4o",
   messages=[
     {"role": "system", "content": prompt.compile(base=10)},
     {"role": "user", "content": "1 + 1 = "}],
