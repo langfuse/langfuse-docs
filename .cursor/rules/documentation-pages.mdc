@@ -1,0 +1,69 @@
+---
+description: 
+globs: 
+---
+Here's a continuation and elaboration of the guidelines for creating documentation pages for Langfuse, based on the existing documentation structure and content style observed across various files:
+
+### Langfuse Documentation Creation Guide
+
+#### General Structure
+Each documentation page typically follows a structured format to ensure consistency and ease of understanding. Here’s a breakdown of the common elements:
+
+1. **Metadata Block**: At the top of each document, include YAML front matter that specifies metadata such as title, description, and category. This helps in SEO optimization and categorizing the content.
+
+    ```markdown
+    ---
+    title: Title of the Document
+    description: A brief description of what the document covers.
+    category: Category Name
+    ---
+    ```
+
+2. **Introduction**: Start with a brief introduction that outlines what the document will cover and why it’s important. This section sets the context for the readers.
+
+3. **Prerequisites**: If applicable, list any prerequisites that readers need to fulfill before they can effectively use the documentation. This could include software installations, account setups, or background knowledge.
+
+4. **Step-by-Step Instructions**: Provide detailed, actionable steps for the users to follow. Use numbered lists for sequences that need to be followed in order.
+
+5. **Code Snippets**: Include code examples where necessary. Use syntax highlighting to improve readability. Ensure that any placeholders are clearly indicated.
+
+    ```python
+    import langfuse
+
+    # Replace 'your_api_key' with your actual API key
+    langfuse.configure(api_key='your_api_key')
+    ```
+
+6. **Images and Diagrams**: Use images and diagrams to explain concepts that are difficult to convey through text alone. Wrap images in a `<Frame>` component to maintain styling consistency.
+
+    ```markdown
+    <Frame className="my-10" fullWidth>
+        ![Alt text for image](mdc:path/to/image.png)
+    </Frame>
+    ```
+
+7. **Tips and Notes**: Use callouts to highlight tips, warnings, or important notes. This can be done using markdown syntax or specific components if available.
+
+    ```markdown
+    > **Tip:** This is a helpful tip.
+    ```
+
+8. **FAQs and Troubleshooting**: End the document with a FAQ or troubleshooting section to address common issues or questions related to the topic.
+
+9. **Further Resources**: Provide links to related documents, external resources, or further reading to help users deepen their understanding.
+
+#### Writing Style
+- **Clarity and Conciseness**: Use clear and concise language. Avoid jargon unless it is commonly understood in the context of the documentation.
+- **Active Voice**: Use active voice to make the content more engaging.
+- **Second Person**: Address the reader directly using second person ("you") to make the text more user-friendly.
+
+#### Formatting
+- **Headers**: Use headers to organize content into logical sections. Headers should be hierarchical (`#`, `##`, `###`).
+- **Lists**: Use bullet points for unordered lists and numbers for ordered lists.
+- **Links**: Always use descriptive link texts instead of generic texts like "click here".
+
+#### Accessibility
+- **Alt Texts for Images**: Provide descriptive alt texts for all images to improve accessibility.
+- **Readable Fonts and Colors**: Ensure that the text is readable by using sufficient contrast between text and background colors.
+
+By adhering to these guidelines, the documentation will not only maintain a consistent style but also enhance the user experience, making it easier for readers to find, understand, and use the information they need.
