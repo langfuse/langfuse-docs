@@ -70,8 +70,8 @@ langfuse_handler = CallbackHandler()
 
 prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
 model = AzureChatOpenAI(
-    deployment_name="gpt-35-turbo",
-    model_name="gpt-3.5-turbo",
+    deployment_name="gpt-4o",
+    model_name="gpt-4o",
 )
 chain = prompt | model
 
@@ -121,8 +121,8 @@ system_message_prompt = SystemMessagePromptTemplate.from_template(langfuse_promp
 
 ```python
 llm = AzureChatOpenAI(
-    deployment_name="gpt-35-turbo",
-    model_name="gpt-3.5-turbo",
+    deployment_name="gpt-4o",
+    model_name="gpt-4o",
 )
 
 human_message_prompt = HumanMessagePromptTemplate.from_template("{text}")
@@ -156,8 +156,8 @@ prompt2 = ChatPromptTemplate.from_template(
     "How {type} can be learned in 21 days? respond in {language}"
 )
 model = AzureChatOpenAI(
-    deployment_name="gpt-35-turbo",
-    model_name="gpt-3.5-turbo",
+    deployment_name="gpt-4o",
+    model_name="gpt-4o",
 )
 chain1 = prompt1 | model | StrOutputParser()
 chain2 = (

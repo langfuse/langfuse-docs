@@ -253,7 +253,7 @@ from langfuse.decorators import observe
 @observe()
 def openai_fn(calc: str):
     res = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=[
           {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
           {"role": "user", "content": calc}],

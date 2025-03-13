@@ -67,7 +67,7 @@ import { observeOpenAI } from "npm:langfuse";
 const openai = observeOpenAI(new OpenAI());
 
 const completion = await openai.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o',
   messages: [{ role: "system", content: "Tell me a joke." }],
   max_tokens: 100,
 });
@@ -96,7 +96,7 @@ const openaiWithLangfuse = observeOpenAI(new OpenAI(), { generationName: "OpenAI
 
 // Call OpenAI
 const stream = await openaiWithLangfuse.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o',
   messages: [{ role: "system", content: "Tell me a joke." }],
   stream: true,
 });
@@ -141,7 +141,7 @@ const openaiWithLangfuse = observeOpenAI(new OpenAI(), {
 
 // Call OpenAI
 const completion = await openaiWithLangfuse.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-4o',
   messages: [{ role: "system", content: "Tell me a joke." }],
   max_tokens: 100,
 });
@@ -191,7 +191,7 @@ const functions = [{
 
 // Call OpenAI
 const res = await openaiWithLangfuse.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     messages: [{ role: 'user', content: "What's the weather like in Berlin today"}],
     tool_choice: "auto",
     tools: functions,
@@ -238,7 +238,7 @@ const capital = (
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
     messages: [
       { role: "system", content: "What is the capital of the country?" },
       { role: "user", content: country },
@@ -251,7 +251,7 @@ const poem = (
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
@@ -295,7 +295,7 @@ const capital = (
     parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
     messages: [
       { role: "system", content: "What is the capital of the country?" },
       { role: "user", content: "France" },
@@ -308,7 +308,7 @@ const poem = (
     parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",

@@ -58,7 +58,7 @@ from langfuse.openai import openai # OpenAI integration
 @observe()
 def story(topic: str):
     return openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "You are a great storyteller. Write a story about the topic that the user provides."},
@@ -105,7 +105,7 @@ def story(topic: str):
         return "This is not child safe, please request another topic"
 
     return openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "You are a great storyteller. Write a story about the topic that the user provides."},
@@ -182,7 +182,7 @@ def summarize_transcript(prompt: str):
   sanitized_prompt = anonymize(prompt)
 
   answer = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "Summarize the given court transcript."},
@@ -233,7 +233,7 @@ def query(input: str):
 
     print(f"Prompt: {sanitized_prompt}")
     return openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         max_tokens=100,
         messages=[
           {"role": "system", "content": "You are a support chatbot. Answer the query that the user provides with as much detail and helpfulness as possible."},
@@ -328,7 +328,7 @@ def respond(prompt: str):
       return "There is danger of prompt injection. Do not send this prompt to the model."
 
   return openai.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       max_tokens=200,
       messages=[
         {"role": "system", "content": "Roleplay what the user wants you to"},
@@ -382,7 +382,7 @@ def respond(prompt: str):
   else:
       # Send the user's prompt to your LLM of choice.
       return openai.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       max_tokens=200,
       messages=[
         {"role": "system", "content": "Roleplay what the user wants you to"},
@@ -431,7 +431,7 @@ def answer_question(question: str, context: str):
       return("Lakera Guard identified a prompt injection. No user was harmed by this LLM.")
 
   return openai.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       max_tokens=100,
       messages=[
         {"role": "system", "content": "Answer the question with the provided context: {}".format(context)},

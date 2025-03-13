@@ -211,7 +211,7 @@ from langchain import hub
 
 langfuse_handler = CallbackHandler()
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 tools = load_tools(["serpapi"])
 prompt = hub.pull("hwchase17/openai-functions-agent")
 agent = create_openai_functions_agent(llm, tools, prompt)
@@ -239,8 +239,8 @@ langfuse_handler = CallbackHandler()
 
 prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
 model = AzureChatOpenAI(
-    deployment_name="gpt-35-turbo",
-    model_name="gpt-3.5-turbo",
+    deployment_name="gpt-4o",
+    model_name="gpt-4o",
 )
 chain = prompt | model
 

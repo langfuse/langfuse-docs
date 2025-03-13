@@ -118,7 +118,7 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
               "content": "What is LLM Observability?",
             }
         ],
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
     )
 
     print(chat_completion)

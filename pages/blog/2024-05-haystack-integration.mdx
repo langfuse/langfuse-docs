@@ -103,7 +103,7 @@ basic_rag_pipeline = Pipeline()
     )
     basic_rag_pipeline.add_component("retriever", retriever)
     basic_rag_pipeline.add_component("prompt_builder", prompt_builder)
-    basic_rag_pipeline.add_component("llm", OpenAIGenerator(model="gpt-3.5-turbo", generation_kwargs={"n": 2}))
+    basic_rag_pipeline.add_component("llm", OpenAIGenerator(model="gpt-4o", generation_kwargs={"n": 2}))
 ```
 
 For each trace, you can see:

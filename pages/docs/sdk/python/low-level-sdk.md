@@ -260,14 +260,14 @@ Use trace or observation objects to create child generations:
 # creates generation
 generation = trace.generation(
     name="summary-generation",
-    model="gpt-3.5-turbo",
+    model="gpt-4o",
     model_parameters={"maxTokens": "1000", "temperature": "0.9"},
     input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
     metadata={"interface": "whatsapp"}
 )
 
 # execute model, mocked here
-# chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}])
+# chat_completion = openai.ChatCompletion.create(model="gpt-4o", messages=[{"role": "user", "content": "Hello world"}])
 chat_completion = {
     "completion":"The Q3 OKRs contain goals for multiple teams...",
     "usage":{"input": 50, "output": 49, "unit":"TOKENS"}
