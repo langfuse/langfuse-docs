@@ -78,16 +78,14 @@ cd langfuse
 
 ### Update Secrets
 
-For testing purposes, the pre-configured variables in the docker-compose file are usually sufficient. Feel free to skip this step.
+We strongly recommend that you update the secrets in the docker-compose file.
+All sensitive lines are marked with `# CHANGEME`.
+Make sure to select long, random passwords for all secrets.
 
-If you send _any_ kind of sensitive data to the application or intend to keep it up for longer, we recommend that you modify the docker-compose file and overwrite the following environment variables:
+### Update network parameters (optional)
 
-- `SALT`: A random string used to hash passwords. It should be at least 32 characters long.
-- `ENCRYPTION_KEY`: Generate this via `openssl rand -hex 32`.
-- `NEXTAUTH_SECRET`: A random string used to sign JWT tokens (Generate this via `openssl rand -base64 32`).
-- `NEXTAUTH_URL`: The URL where the application is hosted. Used for redirects after signup.
-
-In addition, you can change the database and storage credentials to be more secure.
+Only the langfuse-web container and minio must be accesible from outside the instance.
+Therefore, we recommend to add a security group or firewall to your instance that restricts incoming traffic to port :3000 and :9090.
 
 ### Start the application
 
