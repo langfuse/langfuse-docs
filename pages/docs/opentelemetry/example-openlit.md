@@ -15,6 +15,7 @@ Install the necessary Python packages: `openai`, `langfuse`, and `openlit`. Thes
 
 ```python
 %pip install openai langfuse openlit
+%pip install opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
 ## Step 2: Configure Environment Variables
@@ -91,7 +92,7 @@ chat_completion = openai_client.chat.completions.create(
           "content": "What is LLM Observability?",
         }
     ],
-    model="gpt-3.5-turbo",
+    model="gpt-4o",
 )
 
 print(chat_completion)
@@ -105,6 +106,8 @@ Opentelemetry lets you attach a set of attributes to all spans by setting [`set_
 ```python
 import openai
 
+input = "How does enhanced LLM observability improve AI debugging?"
+
 with tracer.start_as_current_span("OpenAI-Trace") as span:
     span.set_attribute("langfuse.user.id", "user-123")
     span.set_attribute("langfuse.session.id", "123456789")
@@ -116,12 +119,16 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
         messages=[
             {
                 "role": "user",
-                "content": "How does enhanced LLM observability improve AI debugging?",
+                "content": input,
             }
         ],
         model="gpt-4o-mini",
     )
     print(response.choices[0].message.content)
+
+    # Add input and output values to the new parent span
+    span.set_attribute("input.value", input)
+    span.set_attribute("output.value", response.choices[0].message.content)
 ```
 
 ## Step 6: See Traces in Langfuse

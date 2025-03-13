@@ -292,7 +292,7 @@ Please refer to the [Vercel AI SDK](/docs/integrations/vercel-ai-sdk) docs for d
 ```typescript
 const runMyLLMApplication = async (input: string, traceId: string) => {
   const output = await generateText({
-    model: openai("gpt-3.5-turbo"),
+    model: openai("gpt-4o"),
     maxTokens: 50,
     prompt: input,
     experimental_telemetry: {
@@ -322,7 +322,7 @@ for (const item of dataset.items) {
   // link the execution trace to the dataset item and give it a run_name
   await item.link(trace, "<run_name>", {
     description: "My first run", // optional run description
-    metadata: { model: "gpt-3.5-turbo" }, // optional run metadata
+    metadata: { model: "gpt-4o" }, // optional run metadata
   });
  
   // optionally, evaluate the output to compare different runs more easily
