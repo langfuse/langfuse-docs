@@ -243,7 +243,7 @@ Langfuse is tightly integrated with the OpenAI SDK, LangChain, and LlamaIndex. T
 
 #### OpenAI
 
-The [OpenAI integration](https://langfuse.com/docs/integrations/openai/get-started) automatically detects the context in which it is executed. Just use `from langfuse.openai import openai` and get native tracing of all OpenAI calls.
+The [OpenAI integration](https://langfuse.com/docs/integrations/openai/python/get-started) automatically detects the context in which it is executed. Just use `from langfuse.openai import openai` and get native tracing of all OpenAI calls.
 
 
 ```python

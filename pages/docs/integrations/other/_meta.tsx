@@ -5,4 +5,9 @@ export default {
   ragas: "Ragas",
   openrouter: "OpenRouter",
   firecrawl: "Firecrawl",
+  togetherai: "Together.ai",
+  xai: "xAI / Grok",
+  cohere: "Cohere",
+  "fireworks-ai": "Fireworks AI",
+  novitaai: "Novita AI",
 };

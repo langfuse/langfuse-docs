@@ -1,6 +1,7 @@
 export default {
   overview: "Overview",
   openai: "OpenAI SDK",
+  "openai-agents": "OpenAI Agents SDK",
   langchain: "Langchain",
   "llama-index": "LlamaIndex",
   haystack: "Haystack",
@@ -10,6 +11,7 @@ export default {
   "semantic-kernel": "Semantic Kernel",
   "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",
+  databricks: "Databricks",
   instructor: "Instructor",
   dspy: "DSPy",
   ollama: "Ollama",
@@ -30,5 +32,6 @@ export default {
   smolagents: "Smolagents",
   crewai: "CrewAI",
   "spring-ai": "Spring AI",
+  "quarkus-langchain4j": "Quarkus LangChain4j",
   other: "More Ways to Integrate",
 };

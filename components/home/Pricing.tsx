@@ -196,7 +196,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
         "Scalability of Langfuse Cloud",
         "Deployment docs & Helm chart",
-        "Custom SSO and basic RBAC",
+        "Enterprise SSO and RBAC",
         "Community support",
       ],
       cta: "Deployment guide",
@@ -229,7 +229,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description: "Enterprise-grade support and security features.",
       mainFeatures: [
         "All Open Source / Pro features",
-        "Fine-grained RBAC",
+        "Project-level RBAC",
         "Enterprise Security Features",
         "SOC2, ISO27001, and InfoSec reviews",
         "Dedicated support engineer",
@@ -1280,7 +1280,7 @@ const faqs = [
   {
     question: "What is an observation?",
     answer:
-      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing'>Langfuse Tracing docs<a/> for more details.",
+      "Traces in Langfuse include a set of observations. An observation is a single event that occurred in your system. For example, a single LLM call, a single HTTP request, a single log object, or a database query. Check out the <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs<a/> for more details.",
   },
   {
     question: "Can I self-host Langfuse?",
@@ -1305,7 +1305,7 @@ const faqs = [
   {
     question: "How can I manage my subscription?",
     answer:
-      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
+      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='/billing-portal'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
   },
   {
     question: "Can I redline the contracts?",

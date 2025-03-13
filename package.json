@@ -10,7 +10,8 @@
     "analyze": "cross-env ANALYZE=true next build",
     "postbuild:sitemap": "next-sitemap",
     "postbuild:cleanup": "echo 'Removing .next/cache to resolve Nextra caching bug' && rm -rf .next/cache",
-    "postbuild:llms-txt": "node scripts/generate_llms_txt.js"
+    "postbuild:llms-txt": "node scripts/generate_llms_txt.js",
+    "link-check": "node scripts/check-links.js"
   },
   "engines": {
     "node": "20"
@@ -20,7 +21,7 @@
     "@calcom/embed-react": "^1.5.2",
     "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^3.9.1",
-    "@inkeep/uikit": "^0.3.20",
+    "@inkeep/cxkit-react": "^0.5.11",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.4",
@@ -72,6 +73,7 @@
     "@next/bundle-analyzer": "^15.1.4",
     "@types/node": "20.11.1",
     "cross-env": "^7.0.3",
+    "markdown-link-check": "^3.13.6",
     "typescript": "^5.6.3",
     "xml2js": "^0.6.2"
   },

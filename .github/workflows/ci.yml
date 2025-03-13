@@ -17,7 +17,7 @@ jobs:
         with:
           do_not_skip: '["workflow_dispatch"]'
 
-  build:
+  build-and-check-links:
     needs:
       - pre-job
     if: needs.pre-job.outputs.should_skip != 'true'
@@ -42,3 +42,23 @@ jobs:
 
       - name: Build next.js app
         run: pnpm build
+
+      - name: Start server and check links
+        run: |
+          # Start the server in the background and capture its PID
+          pnpm start & SERVER_PID=$!
+
+          # Wait for the server to be ready (max 30 seconds)
+          timeout 30 bash -c 'until curl -s http://localhost:3333 > /dev/null; do sleep 1; done'
+
+          # Run the link checker
+          pnpm link-check
+
+          # Store the exit code
+          LINK_CHECK_EXIT=$?
+
+          # Kill the server using the captured PID
+          kill $SERVER_PID || true
+
+          # Exit with the link checker's exit code
+          exit $LINK_CHECK_EXIT

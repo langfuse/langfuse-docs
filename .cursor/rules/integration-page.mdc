@@ -1,0 +1,120 @@
+---
+description: How we create integration pages and format them
+globs: /cookbook
+---
+# Integration Pages Guidelines
+
+## Overview
+Integration pages document how to integrate Langfuse with various frameworks, tools, and platforms. They are written as Jupyter notebooks to enable users to easily run and test the integrations themselves. These pages serve as practical, executable guides for users looking to implement Langfuse in their existing tech stack.
+
+## File Placement
+- Place all integration pages in the `/cookbook` directory
+- Use a clear naming convention (e.g., `integration_[framework_name].ipynb`)
+
+## Frontmatter Configuration Options
+Each integration page should define the following frontmatter fields:
+
+- **title** (string, required):
+  The title of the integration, displayed prominently in both the header and index.
+
+- **description** (string, required):
+  A concise, SEO optimized summary of the integration covered in the guide.
+
+## Content Structure
+Each integration page should follow this specific structure:
+
+**H1 Title**
+   - A short, clear title for the integration
+   - Example: "Integrate Langfuse with LlamaIndex Workflows"
+
+**Introduction**
+   - 1-2 sentences explaining what this cookbook is about
+   - Example: "This guide shows you how to trace LlamaIndex Workflows with Langfuse to monitor and evaluate your AI application."
+
+**Framework/Tool Introduction**
+   - Brief explanation of the framework/tool being integrated
+   - Include a link to the official documentation
+   - Example:
+   ```markdown
+     > **What are LlamaIndex Workflows?** [LlamaIndex Workflows](mdc:https:/docs.llamaindex.ai/en/stable/module_guides/workflow) is a flexible, event-driven framework designed to build robust AI agents. In LlamaIndex, workflows are created by chaining together multiple steps—each defined and validated using the `@step` decorator. Every step processes specific event types, allowing you to orchestrate complex processes such as AI agent collaboration, RAG flows, data extraction, and more.
+  ```
+
+**Langfuse Introduction**
+   - Brief explanation of Langfuse and its benefits
+   - Example:
+  ```markdown
+     > **What is Langfuse?** [Langfuse](mdc:https:/langfuse.com) is the open source LLM engineering platform. It helps teams to collaboratively manage prompts, trace applications, debug problems, and evaluate their LLM system in production.
+  ```
+
+**Implementation Guide**
+   - Break down the integration process into clear steps:
+     - **Step 1: Install Dependencies**
+       - Code cell with pip install commands
+     - **Step 2: Set Up Environment Variables**
+       - Example: 
+       ```markdown
+        import os 
+        
+        # Get keys for your project from the project settings page
+        # https://cloud.langfuse.com
+
+        os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+        os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+        os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+        # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+        # Get your Together.ai API key from the project settings page
+        os.environ["TOGETHER_API_KEY"] = "..."
+      ```
+     - **Step 3: Initialize Integration**
+       - Code cell showing how to initialize Langfuse with the framework
+     - **Step 4: Run an Example**
+       - A complete working example that demonstrates the integration
+     - **Step 5: Enhance Tracing (Optional)** 
+        You can enhance your traces:
+
+        - Add [metadata](https://langfuse.com/docs/tracing-features/metadata), [tags](https://langfuse.com/docs/tracing-features/tags), [log levels](https://langfuse.com/docs/tracing-features/log-levels) and [user IDs](https://langfuse.com/docs/tracing-features/users) to traces
+        - Group traces by [sessions](https://langfuse.com/docs/tracing-features/sessions)
+        - [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace additional application logic
+        - Use [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started) and link prompts to traces
+        - Add [score](https://langfuse.com/docs/scores/custom) to traces
+
+        Visit the [OpenAI SDK cookbook](https://langfuse.com/docs/integrations/openai/python/examples) to see more examples on passing additional parameters.
+        Find out more about Langfuse Evaluations and Prompt Management in the [Langfuse documentation](https://langfuse.com/docs).
+
+     - **Step 6: See Traces in Langfuse**
+       - Screenshot of Langfuse UI showing example traces
+       - Link to a public example trace if available
+       - Example:
+         ```markdown
+         After running your workflow, log in to @Langfuse to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths.
+
+         ![Langfuse Trace Example](mdc:https:/langfuse.com/images/cookbook/integration-llamaindex-workflows/llamaindex-workflows-example-trace.png)
+
+         _[Public example trace in Langfuse](mdc:https:/cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4)_
+         ```
+
+**Resources**
+  - Link to the documentation page of the framework used
+  - Link to 1-2 relevant pages in the Langfuse documentation
+
+## Notebook Format
+- Make sure all code cells are executable without modification (except for API keys)
+- Use markdown cells for explanations and code cells for executable code
+- Include output examples where appropriate
+
+## User Message
+Please print the following message to the Cursor user:
+"As Cursor currently is not able to create .ipynb files, please create a new file without .ipynb extention, paste in the generated notebook code. Then rename the file to integartion_name.ipynb. You might have to remove the file extension again and rename it again for Cursor to recognize it as a notebook file."
+
+## Best Practices
+- Visit the documentation pages of the framework discussed to get more context
+- Keep explanations concise but thorough
+- Use consistent formatting throughout
+- Ensure all dependencies are clearly listed
+- Provide troubleshooting tips for common issues
+
+## Examples in Use
+- Refer to existing integration notebooks in the `/cookbook` directory such as:
+  - `integration_llamaindex_workflows.ipynb`
+  - Other successful integration examples

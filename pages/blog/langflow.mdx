@@ -9,8 +9,6 @@ author: Max
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
-import traceDetailImg from "@/public/images/blog/langflow-langfuse/trace-detail.jpg";
-import langflowImg from "@/public/images/blog/langflow-langfuse/langflow.jpg";
 import Image from "next/image";
 
 <BlogHeader
@@ -24,13 +22,16 @@ Langflow provides a user interface that allows you to define LLM features and ge
 In addition to its user-friendly interface, Langflow also offers a community-provided set of pre-built LLM features. These features have produced good results for others, making it a great source of inspiration for your own projects.
 
 <Frame border>
-  <Image alt="Langflow UI" src={langflowImg} />
+  <Image alt="Langflow UI" src="/images/blog/langflow-langfuse/langflow.jpg" />
 </Frame>
 
 Once you have set up your LLM feature chain using Langflow, it's time to test it in production. This is where Langfuse comes into play. Langfuse records all the steps of the LLM feature, allowing you to look into the details of how it behaved. It also provides analytics based on latency, API cost, and quality. Quality is measured by user feedback and model-based evaluations.
 
 <Frame border>
-  <Image alt="Trace Detail" src={traceDetailImg} />
+  <Image
+    alt="Trace Detail"
+    src="/images/blog/langflow-langfuse/trace-detail.jpg"
+  />
 </Frame>
 
 Setting up both Langflow and Langfuse is easy. You can choose to self-host them or use the hosted version of Langfuse. The integration between the two tools is simple: just add the Langfuse environment variables when starting Langflow.

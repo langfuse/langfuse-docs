@@ -196,15 +196,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   // banner: {
-  //   key: "town-hall",
+  //   key: "langfuse-community-hour",
   //   dismissible: true,
   //   content: (
-  //     <Link href="https://lu.ma/ov28jfk3">
+  //     <Link href="https://lu.ma/by4k3643">
   //       {/* mobile */}
-  //       <span className="sm:hidden">Wednesday: Langfuse Town Hall →</span>
+  //       <span className="sm:hidden">Wednesday: Langfuse Community Hour →</span>
   //       {/* desktop */}
   //       <span className="hidden sm:inline">
-  //       Wednesday: Langfuse Town Hall, 10am PT / 7pm CET →
+  //         Wednesday: Langfuse Community Hour, 10am PT / 7pm CET →
   //       </span>
   //     </Link>
   //   ),
