@@ -244,9 +244,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
 
 type Section = {
   name: string;
+  description?: string;
   href?: string;
   features: {
     name: string;
+    description?: string;
     href?: string;
     tiers: Partial<Record<DeploymentOption, Record<string, boolean | string>>>;
   }[];
@@ -254,12 +256,108 @@ type Section = {
 
 const sections: Section[] = [
   {
-    name: "Tracing",
+    name: "LLM Application & Agent Tracing",
     href: "/docs/tracing",
     features: [
       {
-        name: "Integrations/SDKs",
+        name: "Traces and Graphs (Agents)",
+        href: "/docs/tracing",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Session Tracking (Chats/Threads)",
+        href: "/docs/tracing-features/sessions",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "User Tracking",
+        href: "/docs/tracing-features/users",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Token and Cost Tracking",
+        href: "/docs/model-usage-and-cost",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Native Frameworks Integrations",
+        description:
+          "Langfuse integrates natively with many LLM providers and agent frameworks such as LangChain, LlamaIndex, LangGraph, CrewAI, Semantic Kernel, ...",
         href: "/docs/integrations/overview",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "SDKs (Python, JavaScript)",
+        href: "/docs/sdk/overview",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "OpenTelemetry (Java, Go, custom)",
+        description:
+          "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
+        href: "/docs/opentelemetry/get-started",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Proxy-based Logging (via LiteLLM)",
+        href: "/docs/integrations/litellm/tracing",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
@@ -343,43 +441,48 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "Core Platform Features",
+    name: "Prompt Management",
     features: [
       {
-        name: "Datasets",
-        href: "/docs/datasets",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
-        },
-      },
-      {
-        name: "Evaluation / User-feedback",
-        href: "/docs/scores",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
-        },
-      },
-      {
-        name: "Prompt Management",
+        name: "Prompt Versioning",
+        description: "Manage prompts via UI, API, SDKs",
         href: "/docs/prompts",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
-    ],
-  },
-  {
-    name: "Add-on Features",
-    features: [
+      {
+        name: "Prompt Release Management",
+        description: "Deploy and rollback prompts to different environments",
+        href: "/docs/prompts",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Composability",
+        description:
+          "Create shared snippets that can be reused in different prompts",
+        href: "/docs/prompts/get-started#composability",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Caching (server and client)",
+        description: "Use prompts with 0 latency and uptime impact",
+        href: "/docs/prompts/get-started#caching-in-client-sdks",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
       {
         name: "Playground",
+        description: "Test prompts in a sandbox environment",
         href: "/docs/playground",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -388,6 +491,7 @@ const sections: Section[] = [
       },
       {
         name: "Prompt Experiments",
+        description: "Run structured experiments on new prompt versions",
         href: "/docs/datasets/prompt-experiments",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -398,13 +502,52 @@ const sections: Section[] = [
           },
         },
       },
+    ],
+  },
+  {
+    name: "Evaluation (online and offline)",
+    features: [
       {
-        name: "LLM-as-judge evaluators",
-        href: "/docs/scores/model-based-evals",
+        name: "Datasets",
+        href: "/docs/datasets",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Evaluation Scores (custom)",
+        href: "/docs/scores",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "User Feedback tracking",
+        href: "/docs/scores/user-feedback",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Human Annotation",
+        description: "Manually annotate LLM traces in Langfuse",
+        href: "/docs/scores/annotation",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Human Annotation Queues",
+        description: "Managed human annotation workflows with queues",
+        href: "/docs/scores/annotation#annotation-queues",
         tiers: {
           cloud: {
-            Hobby: "1 evaluator",
-            Core: true,
+            Hobby: "1 queue",
+            Core: "3 queues",
             Pro: true,
             Enterprise: true,
           },
@@ -416,12 +559,23 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Human Annotation Queues",
-        href: "/docs/scores/annotation#annotation-queues",
+        name: "External Evaluation Pipelines",
+        description: "Run external evaluation pipelines on data in Langfuse",
+        href: "/docs/scores/external-evaluation-pipelines",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        description:
+          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
+        href: "/docs/scores/model-based-evals",
         tiers: {
           cloud: {
-            Hobby: "1 queue",
-            Core: "3 queues",
+            Hobby: "1 evaluator",
+            Core: true,
             Pro: true,
             Enterprise: true,
           },
@@ -883,11 +1037,48 @@ export default function Pricing({
   const variant = isPricingPage ? initialVariant : localVariant;
   const selectedTiers = tiers[variant];
 
-  const InfoLink = ({ href }: { href: string }) => (
-    <Link href={href} className="inline-block" target="_blank">
-      <ExternalLink className="size-4 ml-2 pt-0.5" />
-    </Link>
-  );
+  const FeatureDetails = ({
+    description,
+    href,
+  }: {
+    description?: string;
+    href?: string;
+  }) => {
+    if (!description && !href) {
+      return null;
+    }
+
+    if (!description && href) {
+      return (
+        <Link href={href} className="inline-block" target="_blank">
+          <ExternalLink className="size-4 ml-2 pt-0.5" />
+        </Link>
+      );
+    }
+
+    return (
+      <HoverCard>
+        <HoverCardTrigger>
+          <InfoIcon className="inline-block size-3 ml-1" />
+        </HoverCardTrigger>
+        <HoverCardContent className="w-60 text-xs">
+          <p>
+            {description}
+            {href && (
+              <span>
+                {" "}
+                (
+                <Link href={href} className="underline" target="_blank">
+                  learn more
+                </Link>
+                )
+              </span>
+            )}
+          </p>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
 
   const FeatureCell = ({ value }: { value: boolean | string }) => {
     return typeof value === "string" ? (
@@ -1081,23 +1272,22 @@ export default function Pricing({
                                     className="w-10/12 text-primary font-bold"
                                   >
                                     {section.name}
-                                    {section.href && (
-                                      <InfoLink href={section.href} />
-                                    )}
+                                    <FeatureDetails
+                                      description={section.description}
+                                      href={section.href}
+                                    />
                                   </TableCell>
                                 </TableRow>
                                 {section.features
                                   .filter((f) => variant in f.tiers)
                                   .map((feature) => (
-                                    <TableRow
-                                      key={feature.name}
-                                      className="text-muted-foreground"
-                                    >
+                                    <TableRow key={feature.name}>
                                       <TableCell className="w-11/12">
                                         {feature.name}
-                                        {feature.href && (
-                                          <InfoLink href={feature.href} />
-                                        )}
+                                        <FeatureDetails
+                                          description={feature.description}
+                                          href={feature.href}
+                                        />
                                       </TableCell>
                                       <TableCell>
                                         <FeatureCell
@@ -1146,21 +1336,22 @@ export default function Pricing({
                           <TableRow className="bg-muted/50">
                             <TableCell colSpan={5} className="font-medium">
                               {section.name}
-                              {section.href && <InfoLink href={section.href} />}
+                              <FeatureDetails
+                                description={section.description}
+                                href={section.href}
+                              />
                             </TableCell>
                           </TableRow>
                           {section.features
                             .filter((f) => variant in f.tiers)
                             .map((feature) => (
-                              <TableRow
-                                key={feature.name}
-                                className="text-muted-foreground"
-                              >
+                              <TableRow key={feature.name}>
                                 <TableCell>
                                   {feature.name}
-                                  {feature.href && (
-                                    <InfoLink href={feature.href} />
-                                  )}
+                                  <FeatureDetails
+                                    description={feature.description}
+                                    href={feature.href}
+                                  />
                                 </TableCell>
                                 {selectedTiers.map((tier) => (
                                   <TableCell key={tier.id}>
