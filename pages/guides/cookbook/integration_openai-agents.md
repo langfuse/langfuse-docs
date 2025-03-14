@@ -1,12 +1,12 @@
 ---
-title: Observe the OpenAI Agents SDK with Langfuse
+title: Trace the OpenAI Agents SDK with Langfuse
 description: Learn how to use Langfuse to monitor OpenAI Agents SDK to debug and evaluate your AI agents
 category: Integrations
 ---
 
-# Observe the OpenAI Agents SDK with Langfuse
+# Trace the OpenAI Agents SDK with Langfuse
 
-This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agents** workflow.
+This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agents** workflow to monitor, debug and evaluate your AI agents.
 
 > **What is the OpenAI Agents SDK?**: The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a lightweight, open-source framework that lets developers build AI agents and orchestrate multi-agent workflows. It provides building blocks—such as tools, handoffs, and guardrails to configure large language models with custom instructions and integrated tools. Its Python-first design supports dynamic instructions and function tools for rapid prototyping and integration with external systems.
 
