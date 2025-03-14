@@ -151,7 +151,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       ],
       addOn: {
         name: "Teams",
-        price: "$299",
+        price: "$300",
         mainFeatures: [
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
