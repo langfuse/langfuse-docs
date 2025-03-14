@@ -1,8 +1,8 @@
 ---
-title: "Integrating Hugging Face and Langfuse: Closing the LLM Development Loop"
-description: "Hugging Face and Langfuse are popular platforms to develop and run LLM applications. This guide shows you how to use both platforms together to simplify open source LLM development."
+title: "🤗 Hugging Face and 🪢 Langfuse: 5 Ways to use them Together"
+description: "Hugging Face and Langfuse are popular platforms to develop and run LLM applications. This guide shows you 5 ways how to use both platforms together to simplify open source LLM development."
 ogImage: /images/blog/2025-03-13-hugging-face-with-langfuse/hugging-face-with-langfuse.png
-tag: update
+tag: guide
 date: 2025/03/13
 author: "Jannik"
 
@@ -11,13 +11,13 @@ author: "Jannik"
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Integrating Hugging Face and Langfuse: Closing the LLM Development Loop"
-  description="Hugging Face and Langfuse are popular platforms to develop and run LLM applications. This guide shows you how to use both platforms together to simplify open source LLM development."
+  title="🤗 Hugging Face and 🪢 Langfuse: 5 Ways to use them Together"
+  description="Hugging Face and Langfuse are popular platforms to develop and run LLM applications. This guide shows you 5 ways how to use both platforms together to simplify open source LLM development."
   image="/images/blog/2025-03-13-hugging-face-with-langfuse/hugging-face-with-langfuse.png"
   authors={["jannikmaierhoefer"]}
 />
 
-Hugging Face and Langfuse are popular platforms to develop and run LLM applications. This guide shows you how to use both platforms together to simplify open source LLM development.
+Hugging Face and Langfuse are popular platforms to develop and run LLM applications. This guide shows you 5 ways how to use both platforms together to simplify your open source LLM development.
 
 > **What is Hugging Face?** [Hugging Face](https://huggingface.co) is a platform for machine learning and AI. It provides a range of tools and services for developers to build, train, and deploy machine learning and language models.
 
@@ -141,7 +141,11 @@ Learn more about how to set up Langfuse’s [LLM-as-a-Judge evaluators](/docs/sc
 
 ## 4) Hugging Face Datasets for Dataset Experiments
 
-Hugging Face offers a variety of datasets that can be used to evaluate LLMs and AI agents. These datasets can be used to run [Langfuse Dataset Experiments](/docs/datasets/overview). The following Python example shows how you can load a dataset and create Langfuse dataset items:
+Hugging Face offers a variety of datasets that can be used to evaluate LLMs and AI agents. These datasets can be used to run [Langfuse Dataset Experiments](/docs/datasets/overview). 
+
+This example shows how you can bring Hugging Face datasets into your observability pipeline, allowing you to track performance and evaluation scores with Langfuse. 
+
+First, we fetch a dataset from Hugging Face. In this case the [GSM8K dataset](https://huggingface.co/datasets/openai/gsm8k) containing math word problems.
 
 ```python
 import os
@@ -215,8 +219,6 @@ Then compare them side-by-side in Langfuse:
 ![Dataset run overview](/images/cookbook/huggingface-agent-course/dataset_runs.png)
 ![Dataset run comparison](/images/cookbook/huggingface-agent-course/dataset-run-comparison.png)
 
-This example shows how you can bring Hugging Face dataset into your observability pipeline, allowing you to track performance and evaluation scores with Langfuse. 
-
 For more details on how to use Langfuse Dataset Experiments, check out the [docs](/docs/datasets/overview).
 
 ---
@@ -235,4 +237,6 @@ For a step-by-step guide on deploying Langfuse on Spaces, check out the [Hugging
 
 ### Next Steps
 
-Find out more about all Langfuse features in the [Langfuse documentation](/docs).
+Find out more about all features in the [Langfuse docs](/docs).
+
+(Note: This blog post was also published on Hugging Face ([link](https://huggingface.co/blog/MJannik/hugging-face-and-langfuse)))
