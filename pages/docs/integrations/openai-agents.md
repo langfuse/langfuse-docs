@@ -12,9 +12,11 @@ This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agen
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
+<br>
+
 <div style="position: relative; padding-top: 69.85769728331177%;">
   <iframe
-    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/1b048205cbf89ad4f14adf6248e970f7/iframe?poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2F1b048205cbf89ad4f14adf6248e970f7%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600"
+    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/1b048205cbf89ad4f14adf6248e970f7/iframe?muted=true&loop=true&autoplay=true&poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2F1b048205cbf89ad4f14adf6248e970f7%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false"
     loading="lazy"
     style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
