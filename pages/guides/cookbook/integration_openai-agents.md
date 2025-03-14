@@ -12,6 +12,16 @@ This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agen
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
+<div style="position: relative; padding-top: 69.85769728331177%;">
+  <iframe
+    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/1b048205cbf89ad4f14adf6248e970f7/iframe?poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2F1b048205cbf89ad4f14adf6248e970f7%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600"
+    loading="lazy"
+    style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
+    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+    allowfullscreen="true"
+  ></iframe>
+</div>
+
 ## 1. Install Dependencies
 
 Below we install the `openai-agents` library (the OpenAI Agents SDK), and the `pydantic-ai[logfire]` OpenTelemetry instrumentation.
@@ -104,7 +114,7 @@ await loop.create_task(main())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d78d9fe296dcdc8975d7127c8f?timestamp=2025-03-12T10%3A12%3A39.967Z)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c7330da67c08219bd1c75b7a6d?timestamp=2025-03-14T08%3A31%3A00.365Z&observation=81e525d819153eed)
 
 Clicking the link above (or your own project link) lets you view all sub-spans, token usage, latencies, etc., for debugging or optimization.
 
@@ -144,7 +154,7 @@ print(result.final_output)
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-handoff.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d7eb4d42b2cd24067ac4eb0a33?timestamp=2025-03-12T10%3A13%3A03.949Z)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74429a6d0489e9259703a1148?timestamp=2025-03-14T08%3A31%3A04.745Z&observation=e83609282c443b0d)
 
 ## 6. Functions Example
 
@@ -177,7 +187,7 @@ await loop.create_task(main())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-function.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d809d7c869f1164b0d1bdab0f3?timestamp=2025-03-12T10%3A13%3A11.767Z)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74a162f93387d9261b01f9ca9?timestamp=2025-03-14T08%3A31%3A06.262Z&observation=0e2988966786cdf4)
 
 When viewing the trace, you’ll see a span capturing the function call `get_weather` and the arguments passed.
 
@@ -206,6 +216,59 @@ await loop.create_task(main())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-example-trace-grouped.png)
 
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019589d88acdc96f860fdd904968b006?timestamp=2025-03-12T10%3A13%3A44.781Z)
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c7523686ff7667b85673d033bf?timestamp=2025-03-14T08%3A31%3A08.342Z&observation=d69e377f62b1d331)
 
 Each child call is represented as a sub-span under the top-level **Joke workflow** span, making it easy to see the entire conversation or sequence of calls.
+
+## 8: Pass Additional Attributes
+
+Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
+
+In this example, we pass a [user_id](https://langfuse.com/docs/tracing-features/users), [session_id](https://langfuse.com/docs/tracing-features/sessions) and [trace_tags](https://langfuse.com/docs/tracing-features/tags) to Langfuse. You can also use the span attribute `input.value` and `output.value` to set the trace level input and output.
+
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+ 
+trace_provider = TracerProvider()
+trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
+ 
+# Sets the global default tracer provider
+from opentelemetry import trace
+trace.set_tracer_provider(trace_provider)
+ 
+# Creates a tracer from the global tracer provider
+tracer = trace.get_tracer(__name__)
+```
+
+
+```python
+input_query = "Why is AI agent evaluation important?"
+ 
+with tracer.start_as_current_span("OpenAI-Agent-Trace") as span:
+    span.set_attribute("langfuse.user.id", "user-12345")
+    span.set_attribute("langfuse.session.id", "my-agent-session")
+    span.set_attribute("langfuse.tags", ["staging", "demo", "OpenAI Agent SDK"])
+ 
+    async def main(input_query):
+        agent = Agent(
+            name = "Assistant",
+            instructions = "You are a helpful assistant.",
+        )
+
+        result = await Runner.run(agent, input_query)
+        print(result.final_output)
+        return result
+
+    result = await main(input_query)
+ 
+    # Add input and output values to parent trace
+    span.set_attribute("input.value", input_query)
+    span.set_attribute("output.value", result.final_output)
+```
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-sdk-custom-attributes.png)
+
+**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593d79e1efd7d7542e76c15a81bdb?timestamp=2025-03-14T08%3A48%3A56.349Z&view=preview)
