@@ -346,14 +346,14 @@ def on_feedback(button):
       langfuse.score(
             value=1,
             name="user-feedback",
-            comment="The user gave this response a thumps up",
+            comment="The user gave this response a thumbs up",
             trace_id=formatted_trace_id
         )
     elif button.icon == "thumbs-down":
       langfuse.score(
             value=0,
             name="user-feedback",
-            comment="The user gave this response a thumps down",
+            comment="The user gave this response a thumbs down",
             trace_id=formatted_trace_id
         )
     print("Scored the trace in Langfuse")
