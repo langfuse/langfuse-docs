@@ -31,6 +31,10 @@ Below, we will walk through each of the options and their guarantees.
 
 ### Single Trace
 
+<Tabs items={["UI", "API"]}>
+
+<Tab>
+
 To delete a single trace, open its detail view and hit the `Delete` button.
 Confirm that you want to delete the given trace.
 
@@ -38,7 +42,25 @@ Confirm that you want to delete the given trace.
   ![Delete a single trace](/images/docs/delete-single-trace.png)
 </Frame>
 
+</Tab>
+
+<Tab>
+
+```
+DELETE /api/public/traces/{traceId}​
+```
+
+See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces/%7BtraceId%7D).
+
+</Tab>
+
+</Tabs>
+
 ### Batch of Traces
+
+<Tabs items={["UI", "API"]}>
+
+<Tab>
 
 To delete a batch of traces, select them in the trace list and select `Delete` in the `Actions` dropdown.
 
@@ -46,7 +68,25 @@ To delete a batch of traces, select them in the trace list and select `Delete` i
   ![Delete a batch of traces](/images/docs/delete-trace-batch.png)
 </Frame>
 
+</Tab>
+
+<Tab>
+
+```
+DELETE /api/public/traces
+```
+
+See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces).
+
+</Tab>
+
+</Tabs>
+
 ### Delete by Query
+
+<Tabs items={["UI"]}>
+
+<Tab>
 
 To delete all traces that match a query filter, configure your desired filter in the traces list.
 Select all items on the current page and change that to all items in the top bar.
@@ -55,6 +95,10 @@ Then select `Delete` in the `Actions` dropdown.
 <Frame className="my-10" fullWidth>
   ![Delete traces by query](/images/docs/delete-filtered-traces.png)
 </Frame>
+
+</Tab>
+
+</Tabs>
 
 ### Limitations
 
@@ -66,22 +110,38 @@ in order to verify that your data got deleted, you will have to query it again.
 
 ## Deleting a Project
 
+<Tabs items={["UI"]}>
+
+<Tab>
+
 To delete a project, navigate to the project settings and scroll to the `Danger Zone` within the `General` section.
 Confirm that you want to delete your project.
 This action immediately revokes all API keys and schedules the project for deletion.
 Within the next minutes, all related data is irreversibly removed from our system.
 
 <Callout type="warning">
-  Deleting a project is irreversible and all data will be removed.
-  Be cautious when executing this action.
+  Deleting a project is irreversible and all data will be removed. Be cautious
+  when executing this action.
 </Callout>
 
+</Tab>
+
+</Tabs>
+
 ## Deleting an Organization
+
+<Tabs items={["UI"]}>
+
+<Tab>
 
 If there are no projects left in an organization, you can delete the organization in the organization settings.
 Navigate to the organization settings and scroll to the `Danger Zone` within the `General` section.
 Confirm that you want to delete your organization.
 The organization and all associated user information will be removed from our system.
+
+</Tab>
+
+</Tabs>
 
 ## Deleting a User Account (Cloud)
 
@@ -90,4 +150,3 @@ To delete your user account, please message us at support@langfuse.com.
 ## Deleting a User Account (Self-Host)
 
 Remove the corresponding user record from the `users` table and drop all foreign keys to it using cascade.
-
