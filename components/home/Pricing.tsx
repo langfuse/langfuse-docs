@@ -14,7 +14,7 @@ import { Header } from "../Header";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -1036,6 +1036,58 @@ export default function Pricing({
   const [localVariant, setLocalVariant] = useState(initialVariant);
   const variant = isPricingPage ? initialVariant : localVariant;
   const selectedTiers = tiers[variant];
+  const [isHeaderFixed, setIsHeaderFixed] = useState(false);
+  const [headerWidth, setHeaderWidth] = useState<number>(0);
+  const [columnWidths, setColumnWidths] = useState<number[]>([]);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLTableSectionElement>(null);
+
+  useEffect(() => {
+    if (!isPricingPage) return;
+
+    const calculateWidths = () => {
+      if (headerRef.current && tableRef.current) {
+        // Get the total width of the table
+        const tableWidth = tableRef.current.getBoundingClientRect().width;
+        setHeaderWidth(tableWidth);
+
+        // Get the widths of each column
+        const headerCells = headerRef.current.querySelectorAll("th");
+        const widths = Array.from(headerCells).map(
+          (cell) => (cell as HTMLElement).getBoundingClientRect().width
+        );
+        setColumnWidths(widths);
+      }
+    };
+
+    // Calculate widths initially and on resize
+    calculateWidths();
+    window.addEventListener("resize", calculateWidths);
+
+    const handleScroll = () => {
+      if (!tableRef.current) return;
+
+      const tableRect = tableRef.current.getBoundingClientRect();
+      const navbarHeight = 64; // Approximate height of the navbar
+
+      // Check if we're within the table's vertical bounds
+      const isWithinTableBounds =
+        tableRect.top < navbarHeight && tableRect.bottom > navbarHeight;
+
+      if (isWithinTableBounds && !isHeaderFixed) {
+        setIsHeaderFixed(true);
+      } else if (!isWithinTableBounds && isHeaderFixed) {
+        setIsHeaderFixed(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", calculateWidths);
+    };
+  }, [isHeaderFixed, isPricingPage]);
 
   const FeatureDetails = ({
     description,
@@ -1311,61 +1363,108 @@ export default function Pricing({
                 <section
                   aria-labelledby="comparison-heading"
                   className="hidden lg:block bg-card rounded-lg overflow-hidden border mt-20"
+                  ref={tableRef}
                 >
                   <h2 id="comparison-heading" className="sr-only">
                     Feature comparison
                   </h2>
 
-                  <Table className="w-full">
-                    <TableHeader className="bg-background">
-                      <TableRow className="bg-muted hover:bg-muted">
-                        <TableHead className="w-3/12" />
-                        {selectedTiers.map((tier) => (
-                          <TableHead
-                            key={tier.id}
-                            className="w-2/12 text-center text-lg text-foreground font-semibold"
+                  {isHeaderFixed && (
+                    <div
+                      className="fixed left-0 right-0 bg-muted z-50 shadow-md border-b"
+                      style={{ top: "64px" }}
+                    >
+                      <div className="mx-auto max-w-7xl px-6">
+                        <div className="overflow-hidden pl-[16px]">
+                          <table
+                            className="w-full"
+                            style={{
+                              width: headerWidth,
+                            }}
                           >
-                            {tier.name}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sections.map((section) => (
-                        <React.Fragment key={section.name}>
-                          <TableRow className="bg-muted/50">
-                            <TableCell colSpan={5} className="font-medium">
-                              {section.name}
-                              <FeatureDetails
-                                description={section.description}
-                                href={section.href}
-                              />
-                            </TableCell>
-                          </TableRow>
-                          {section.features
-                            .filter((f) => variant in f.tiers)
-                            .map((feature) => (
-                              <TableRow key={feature.name}>
-                                <TableCell>
-                                  {feature.name}
-                                  <FeatureDetails
-                                    description={feature.description}
-                                    href={feature.href}
-                                  />
-                                </TableCell>
-                                {selectedTiers.map((tier) => (
-                                  <TableCell key={tier.id}>
-                                    <FeatureCell
-                                      value={feature.tiers[variant][tier.name]}
+                            <thead>
+                              <tr>
+                                {columnWidths.length > 0 && (
+                                  <>
+                                    <th
+                                      style={{ width: columnWidths[0] }}
+                                      className="text-left font-medium"
+                                    ></th>
+                                    {selectedTiers.map((tier, index) => (
+                                      <th
+                                        key={tier.id}
+                                        style={{
+                                          width: columnWidths[index + 1],
+                                        }}
+                                        className="py-2 text-center text-lg text-foreground font-semibold"
+                                      >
+                                        {tier.name}
+                                      </th>
+                                    ))}
+                                  </>
+                                )}
+                              </tr>
+                            </thead>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="relative">
+                    <Table className="w-full">
+                      <thead ref={headerRef} className="bg-muted">
+                        <tr>
+                          <th className="w-3/12 text-left font-medium"></th>
+                          {selectedTiers.map((tier) => (
+                            <th
+                              key={tier.id}
+                              className="w-2/12 p-2 text-center text-lg text-foreground font-semibold"
+                            >
+                              {tier.name}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <TableBody>
+                        {sections.map((section) => (
+                          <React.Fragment key={section.name}>
+                            <TableRow className="bg-muted/50">
+                              <TableCell colSpan={5} className="font-medium">
+                                {section.name}
+                                <FeatureDetails
+                                  description={section.description}
+                                  href={section.href}
+                                />
+                              </TableCell>
+                            </TableRow>
+                            {section.features
+                              .filter((f) => variant in f.tiers)
+                              .map((feature) => (
+                                <TableRow key={feature.name}>
+                                  <TableCell>
+                                    {feature.name}
+                                    <FeatureDetails
+                                      description={feature.description}
+                                      href={feature.href}
                                     />
                                   </TableCell>
-                                ))}
-                              </TableRow>
-                            ))}
-                        </React.Fragment>
-                      ))}
-                    </TableBody>
-                  </Table>
+                                  {selectedTiers.map((tier) => (
+                                    <TableCell key={tier.id}>
+                                      <FeatureCell
+                                        value={
+                                          feature.tiers[variant][tier.name]
+                                        }
+                                      />
+                                    </TableCell>
+                                  ))}
+                                </TableRow>
+                              ))}
+                          </React.Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </section>
               </>
             )}
