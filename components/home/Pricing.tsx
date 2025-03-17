@@ -373,6 +373,9 @@ const sections: Section[] = [
       },
       {
         name: "Included usage",
+        description:
+          "Events are the collection of created traces, observations, and scores in Langfuse.",
+        href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
             Hobby: "50k events",
@@ -389,6 +392,9 @@ const sections: Section[] = [
       },
       {
         name: "Additional usage",
+        description:
+          "Events are the collection of created traces, observations, and scores in Langfuse.",
+        href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
             Hobby: false,
@@ -442,6 +448,7 @@ const sections: Section[] = [
   },
   {
     name: "Prompt Management",
+    href: "/docs/prompts",
     features: [
       {
         name: "Prompt Versioning",
@@ -509,6 +516,18 @@ const sections: Section[] = [
     features: [
       {
         name: "Datasets",
+        description:
+          "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
+        href: "/docs/datasets",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Custom Experiments (via SDK)",
+        description:
+          "Run custom experiments on your Langfuse datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
         href: "/docs/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -524,7 +543,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "User Feedback tracking",
+        name: "User Feedback Tracking",
         href: "/docs/scores/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -560,7 +579,6 @@ const sections: Section[] = [
       },
       {
         name: "External Evaluation Pipelines",
-        description: "Run external evaluation pipelines on data in Langfuse",
         href: "/docs/scores/external-evaluation-pipelines",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
