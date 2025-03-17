@@ -274,3 +274,7 @@ with tracer.start_as_current_span("OpenAI-Agent-Trace") as span:
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-sdk-custom-attributes.png)
 
 **Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593d79e1efd7d7542e76c15a81bdb?timestamp=2025-03-14T08%3A48%3A56.349Z&view=preview)
+
+## Evaluating OpenAI Agents
+
+Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents) with Langfuse. 
