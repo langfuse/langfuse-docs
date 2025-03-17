@@ -231,6 +231,7 @@ const nonPermanentRedirects = [
   ["/docs/export-and-fine-tuning", "/docs/query-traces"],
   ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
   ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
+  ["/docs/integrations/openai-agents", "/docs/integrations/openaiagentssdk/openai-agents"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
