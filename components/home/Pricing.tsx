@@ -460,6 +460,22 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Prompt Fetching",
+        tiers: {
+          cloud: {
+            Hobby: "Unlimited",
+            Core: "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+          selfHosted: {
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+        },
+      },
+      {
         name: "Prompt Release Management",
         description: "Deploy and rollback prompts to different environments",
         href: "/docs/prompts",
