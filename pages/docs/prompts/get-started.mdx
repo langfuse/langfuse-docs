@@ -530,6 +530,14 @@ langchain_chat_prompt = ChatPromptTemplate.from_messages(
 )
 langchain_chat_prompt.metadata = {"langfuse_prompt": langfuse_chat_prompt}
 
+## or use the ChatPromptTemplate constructor directly.
+## Note that using ChatPromptTemplate.from_template led to issues in the past
+## See: https://github.com/langfuse/langfuse/issues/5374
+langchain_chat_prompt = ChatPromptTemplate(
+    langfuse_chat_prompt.get_langchain_prompt(),
+    metadata={"langfuse_prompt": langfuse_prompt}
+)
+
 ## Use the chat prompt in a Langchain chain
 chat_llm = ChatOpenAI()
 chat_chain = langchain_chat_prompt | chat_llm

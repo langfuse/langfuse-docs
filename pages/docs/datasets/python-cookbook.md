@@ -11,7 +11,7 @@ This is a very simple example, you can run experiments on any LLM application th
 
 _Simple example application_
 
-- **Model**: gpt-3.5-turbo
+- **Model**: gpt-4o
 - **Input**: country name
 - **Output**: capital
 - **Evaluation**: exact match of completion and ground truth
@@ -110,7 +110,7 @@ def run_my_custom_llm_app(input, system_prompt):
   ]
 
   completion = openai.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model="gpt-4o",
       messages=messages
   ).choices[0].message.content
 
