@@ -1108,11 +1108,14 @@ export default function Pricing({
       const isWithinTableBounds =
         tableRect.top < navbarHeight && tableRect.bottom > navbarHeight;
 
-      if (isWithinTableBounds && !isHeaderFixed) {
-        setIsHeaderFixed(true);
-      } else if (!isWithinTableBounds && isHeaderFixed) {
-        setIsHeaderFixed(false);
-      }
+      setIsHeaderFixed((prevIsHeaderFixed) => {
+        if (isWithinTableBounds && !prevIsHeaderFixed) {
+          return true;
+        } else if (!isWithinTableBounds && prevIsHeaderFixed) {
+          return false;
+        }
+        return prevIsHeaderFixed;
+      });
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -1121,7 +1124,7 @@ export default function Pricing({
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", calculateWidths);
     };
-  }, [isHeaderFixed, isPricingPage]);
+  }, [isPricingPage]);
 
   const FeatureDetails = ({
     description,
