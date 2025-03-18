@@ -1353,28 +1353,32 @@ export default function Pricing({
                             {sections.map((section) => (
                               <React.Fragment key={section.name}>
                                 <TableRow className="bg-muted hover:bg-muted">
-                                  <TableCell
+                                  <TableHead
                                     colSpan={2}
                                     className="w-10/12 text-primary font-bold"
+                                    scope="colgroup"
                                   >
                                     {section.name}
                                     <FeatureDetails
                                       description={section.description}
                                       href={section.href}
                                     />
-                                  </TableCell>
+                                  </TableHead>
                                 </TableRow>
                                 {section.features
                                   .filter((f) => variant in f.tiers)
                                   .map((feature) => (
                                     <TableRow key={feature.name}>
-                                      <TableCell className="w-11/12">
+                                      <TableHead
+                                        className="w-11/12"
+                                        scope="row"
+                                      >
                                         {feature.name}
                                         <FeatureDetails
                                           description={feature.description}
                                           href={feature.href}
                                         />
-                                      </TableCell>
+                                      </TableHead>
                                       <TableCell>
                                         <FeatureCell
                                           value={
@@ -1423,6 +1427,7 @@ export default function Pricing({
                                     <th
                                       style={{ width: columnWidths[0] }}
                                       className="text-left font-medium"
+                                      scope="col"
                                     ></th>
                                     {selectedTiers.map((tier, index) => (
                                       <th
@@ -1431,6 +1436,7 @@ export default function Pricing({
                                           width: columnWidths[index + 1],
                                         }}
                                         className="py-2 text-center text-lg text-foreground font-semibold"
+                                        scope="col"
                                       >
                                         {tier.name}
                                       </th>
@@ -1449,11 +1455,15 @@ export default function Pricing({
                     <Table className="w-full">
                       <thead ref={headerRef} className="bg-muted">
                         <tr>
-                          <th className="w-3/12 text-left font-medium"></th>
+                          <th
+                            className="w-3/12 text-left font-medium"
+                            scope="col"
+                          ></th>
                           {selectedTiers.map((tier) => (
                             <th
                               key={tier.id}
                               className="w-2/12 p-2 text-center text-lg text-foreground font-semibold"
+                              scope="col"
                             >
                               {tier.name}
                             </th>
