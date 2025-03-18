@@ -1168,7 +1168,7 @@ export default function Pricing({
 
   const FeatureCell = ({ value }: { value: boolean | string }) => {
     return typeof value === "string" ? (
-      <div className="text-sm leading-6 text-center">
+      <div className="text-sm leading-6 text-center break-words">
         {value}
         {value === TEAMS_ADDON && (
           <HoverCard>
@@ -1355,7 +1355,7 @@ export default function Pricing({
                                 <TableRow className="bg-muted hover:bg-muted">
                                   <TableHead
                                     colSpan={2}
-                                    className="w-10/12 text-primary font-bold"
+                                    className="w-full text-primary font-bold"
                                     scope="colgroup"
                                   >
                                     {section.name}
@@ -1369,17 +1369,14 @@ export default function Pricing({
                                   .filter((f) => variant in f.tiers)
                                   .map((feature) => (
                                     <TableRow key={feature.name}>
-                                      <TableHead
-                                        className="w-11/12"
-                                        scope="row"
-                                      >
+                                      <TableHead className="w-9/12" scope="row">
                                         {feature.name}
                                         <FeatureDetails
                                           description={feature.description}
                                           href={feature.href}
                                         />
                                       </TableHead>
-                                      <TableCell>
+                                      <TableCell className="w-3/12 text-center">
                                         <FeatureCell
                                           value={
                                             feature.tiers[variant][tier.name]
