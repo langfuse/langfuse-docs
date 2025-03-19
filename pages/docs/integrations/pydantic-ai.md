@@ -1,10 +1,10 @@
 ---
-title: Pydantic AI Integration via OpenTelemetry
+title: Trace Pydantic AI agents with OpenTelemetry
 description: Open Source Observability for Pydantic AI. Example cookbook for the Pydantic AI Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
 
-# Pydantic AI Integration via OpenTelemetry
+# Trace Pydantic AI Agents with OpenTelemetry
 
 Langfuse offers an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/) that ingests trace data from a variety of OpenTelemetry instrumentation libraries. In this guide, we demonstrate how to use the Pydantic Logfire instrumentation library to instrument your Pydantic AI agents.
 
