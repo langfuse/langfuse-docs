@@ -144,8 +144,7 @@ Rather than prescribing a specific tool, it’s more important to focus on the h
 - **Performance and Scalability**  
   Think about the performance demands of your application. High concurrency and real-time interactions may necessitate an event-driven architecture. Observability tools become crucial here, allowing you to trace agent behavior and optimize performance over time.
 
-To capture these considerations visually, here’s a Mermaid flowchart outlining the key decision variables:
-
+Below’s a Mermaid flowchart outlining some of the key decision. However, please note that this is not an exhaustive list and framework abilities might overlap (e.g. OpenAI Agents SDK can be used for multi-agent workflows).
 
 ```mermaid
 flowchart TD
@@ -153,27 +152,18 @@ flowchart TD
     B -->|Yes| C{"Preferred multi-agent style?"}
     B -->|No| D{"Single-agent approach?"}
 
-    %% MULTI-AGENT BRANCH
-    C -->|"Conversation-based (chat & tool calls)"| E["AutoGen (Microsoft)"]
-    C -->|Structured flows, DAG, or roles| F{"Workflow approach"}
-    
-    F -->|Graph-based & fine-grained control| G["LangGraph\n(DAG of nodes)"]
-    F -->|Role-based, collaborative crew| H["CrewAI\n(Multi-role synergy)"]
-
-    %% ENTERPRISE CHECK FOR MULTI-AGENT (via AutoGen)
-    E --> I{"Enterprise .NET scenario?"}
-    I -->|Yes| J["Semantic Kernel\n(Skills & Planner)"]
-    I -->|No| K[Stay with AutoGen]
-
     %% SINGLE-AGENT BRANCH
     D -->|"RAG-based retrieval (doc search)"| L["LlamaIndex\n(Retrieving data)"]
     D -->|"Code-gen agent (lightweight)"| M["SmolAgents\n(Small code approach)"]
     D -->|"Generic OpenAI approach"| N["OpenAI Agents SDK"]
 
-    %% ENTERPRISE CHECK FOR SINGLE-AGENT
-    N --> O{"Need .NET or enterprise features?"}
-    O -->|Yes| P["Semantic Kernel\n(Planner & AI skills)"]
-    O -->|No| Q[Stay with OpenAI Agents SDK]
+    %% MULTI-AGENT BRANCH
+    F -->|Graph-based & fine-grained control| G["LangGraph\n(DAG of nodes)"]
+    F -->|Role-based, collaborative crew| H["CrewAI\n(Multi-role synergy)"]
+
+    C -->|"Conversation-based (chat & tool calls)"| E["AutoGen (Microsoft)"]
+    C -->|"Planner-based (multi-step task)"| X["Semantic Kernel (Microsoft)"]
+    C -->|Structured flows, DAG, or roles| F{"Workflow approach"}
 
 ```
 
