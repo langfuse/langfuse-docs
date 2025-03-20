@@ -62,7 +62,7 @@ tracer = trace.get_tracer(__name__)
 
 ## Step 3: Initialize Instrumentation
 
-With the environment set up, import the needed libraries and initialize MLflow instrumentation. Have a look at all avaliable instrumentation modules [here](https://mlflow.org/docs/latest/tracing/integrations/). 
+With the environment set up, import the needed libraries and initialize MLflow instrumentation. Have a look at all available instrumentation modules [here](https://mlflow.org/docs/latest/tracing/integrations/).
 
 
 ```python
