@@ -1,9 +1,9 @@
 ---
 title: "AI Agent Observability with Langfuse"
-date: 2024/07/31
-description: Learn about agents and the importance of monitoring and tracking performance, cost, and user interactions. Explore tools like LangGraph, Llama Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to trace and optimize your application.
+date: 2025/03/16
+description: Learn about agents and the importance of monitoring and tracking performance, cost, and user interactions. Explore tools like LangGraph, Llama Agents, Smolagents, OpenAI Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to trace and optimize your application.
 ogImage: /images/blog/ai-agent-observability/ai-agent-observability.png
-tag: showcase
+tag: agent
 author: Jannik
 ---
 
@@ -12,7 +12,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 <BlogHeader
   title="AI Agent Observability with Langfuse"
   description="Easily monitor, trace and debug your AI agents. Explore tools like LangGraph, Llama Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to monitor and optimize your application."
-  date="July 31, 2024"
+  date="March 16, 2025"
   authors={["jannikmaierhoefer"]}
 />
 
@@ -89,25 +89,12 @@ LangGraph ([GitHub](https://github.com/langchain-ai/langgraph)) is an open-sourc
 
 LangGraph agents can be [monitored with Langfuse](/docs/integrations/langchain/example-python-langgraph) to observe and debug the steps of an agent.
 
-<div className="mt-10">
-  ![LangGraph Example](/images/blog/ai-agent-observability/langgraph.png)
-</div>
+<CloudflareVideo
+  videoId="dbe2ea8e8d64f27126a3734fa51cd0e7"
+  gifStyle
+/>
 
-<span>
-  _Example of an agent setup created with LangGraph and visualized with Mermaid,
-  featuring two executing agents: One research agent and one agent to tell the
-  current time._
-</span>
-
-<div className="mt-10">
-  ![Example Trace in
-  Langfuse](/images/blog/ai-agent-observability/example-trace-in-langfuse.png)
-</div>
-
-<span>
-  _Example traces in Langfuse ([view
-  trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289))_
-</span>
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)_
 
 #### Llama Agents
 
@@ -115,11 +102,32 @@ Llama Agents ([GitHub](https://github.com/run-llama/llama-agents)) is an open-so
 
 Langfuse offers a simple [integration](/docs/integrations/llama-index/get-started) for automatic capture of traces and metrics generated in LlamaIndex applications.
 
-<div className="mt-10">
-  ![Llama Agent Example](/images/blog/ai-agent-observability/llama-agent.png)
-</div>
+![Llama Agents Example trace in Langfuse](/images/blog/ai-agent-observability/llama-agents.png)
 
-<span>_Llama agent system layout._</span>
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)_
+
+#### OpenAI Agents SDK
+
+OpenAI Agents SDK provides a simple yet powerful framework for building and orchestrating AI agents. By instrumenting the SDK with Langfuse, you can capture detailed traces of agent execution, including planning, function calls, and multi-agent handoffs. This integration enables you to monitor performance metrics, trace issues in real time, and optimize your workflows effectively.
+
+For a comprehensive guide on setting up this integration, please refer to our [Trace the OpenAI Agents SDK with Langfuse](/docs/integrations/openaiagentssdk/openai-agents) notebook.
+
+<CloudflareVideo
+  videoId="1b048205cbf89ad4f14adf6248e970f7"
+  gifStyle
+/>
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74429a6d0489e9259703a1148?timestamp=2025-03-14T08%3A31%3A04.745Z&observation=e83609282c443b0d)_
+
+#### Hugging Face smolagents
+
+Hugging Face smolagents is a minimalist framework for building AI agents. With the Langfuse integration, you can effortlessly capture and visualize telemetry data from your agents. By initializing the SmolagentsInstrumentor, your agent interactions are traced using OpenTelemetry and displayed in Langfuse, enabling you to debug and optimize decision-making processes.
+
+For a comprehensive, step-by-step guide, see our integration notebook: [Observability for smolagents with Langfuse](/docs/integrations/smolagents).
+
+![Smolagents Example trace in Langfuse](/images/cookbook/integration-smolagents/smolagent_example_trace.png)
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ce5160f9bfd5a6cd63b07d2bfcec6f54?timestamp=2025-02-11T09%3A25%3A45.163Z&display=details)_
 
 ### No-code Agent Builders
 
@@ -166,3 +174,5 @@ With the native Langfuse [integration](/docs/integrations/dify), you can use Dif
 ## Get Started
 
 If you want to get started with building your AI Agents and monitoring them with Langfuse, check out our [end-to-end example](/docs/integrations/langchain/example-python-langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
+
+To get an in-depth guide on when to use which agent framework, check out our [AI Agent Comparison](/blog/2025-03-19-ai-agent-comparison) blog post.

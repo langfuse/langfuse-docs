@@ -3,7 +3,7 @@ title: Fully managed LLM-as-a-judge evaluation
 description: Langfuse (open source) helps run model-based evaluations (llm-as-a-judge) on production data to monitor and improve LLMs applications.
 ---
 
-# LLM-as-a-Judge
+# Fully managed LLM-as-a-judge evaluation
 
 <AvailabilityBanner
   availability={{
@@ -86,6 +86,8 @@ Langfuse supports a variety of LLM providers including OpenAI, Anthropic, Azure 
 
 To use LLM-as-a-judge, you have to configure your LLM provider in the Langfuse project settings.
 
+<Frame border>![Langfuse](/images/docs/llm-as-a-judge/add-llm.png)</Frame>
+
 **Note:** tool/function calling needs to be supported by the model for LLM-as-a-judge to work.
 
 ### Create an LLM-as-a-judge template
@@ -104,7 +106,7 @@ Currently, LLM-as-a-judge templates only support `numeric` scores. Support for `
 
 </Callout>
 
-<Frame border>![Langfuse](/images/docs/eval-hallucination-template.png)</Frame>
+<Frame border>![Langfuse](/images/docs/llm-as-a-judge/evaluator-template.png)</Frame>
 
 ### Set up an evaluator
 
@@ -125,7 +127,7 @@ Here we need to configure the following aspects:
 - Optional: Add **sampling** to reduce costs when running evaluations on a large volume of production data.
 - Optional: Configure **custom delay**. This is how you can ensure all data arrived at Langfuse servers before evaluation is executed. The time starts when the trace is first added to Langfuse while it might be still in progress. This is especially important for long-running agent executions.
 
-<Frame border>![Langfuse](/images/docs/eval-config.png)</Frame>
+<Frame border>![Langfuse](/images/docs/llm-as-a-judge/eval-config.png)</Frame>
 
 </Steps>
 
@@ -133,8 +135,8 @@ Here we need to configure the following aspects:
 
 ✨ Done! You have created an evaluator which will now automatically be executed on all data that matches the selected trigger.
 
-<Frame border className="max-w-lg">
-  ![Langfuse](/images/docs/eval-score.png)
+<Frame border>
+  ![Langfuse](/images/docs/llm-as-a-judge/eval-score.png)
 </Frame>
 
 </Callout>
@@ -143,13 +145,13 @@ Here we need to configure the following aspects:
 
 Each evaluator has its own log page where you can view the progress and logs to potentially debug any issues.
 
-<Frame border className="max-w-lg">
-  ![Langfuse](/images/docs/evals-log.png)
+<Frame border>
+  ![Langfuse](/images/docs/llm-as-a-judge/evals-log.png)
 </Frame>
 
 ## Troubleshooting
 
-### LLM proxies
+### LLM proxies 
 
 You can use an LLM proxy to power LLM-as-a-judge in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
 
