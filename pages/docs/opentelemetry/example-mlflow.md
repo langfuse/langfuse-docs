@@ -159,4 +159,4 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
 
 You can view the generated trace data in Langfuse. You can view this [example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6dea86b6feae03db538e248b38e124e1?timestamp=2025-03-20T10%3A35%3A41.217Z&display=details&observation=948b7a084327d5e6) in the Langfuse UI.
 
-m![MLflow OpenAI Trace](https://langfuse.com/images/cookbook/otel-integration-mlflow/mlflow-openai-trace.png)
+![MLflow OpenAI Trace](https://langfuse.com/images/cookbook/otel-integration-mlflow/mlflow-openai-trace.png)
