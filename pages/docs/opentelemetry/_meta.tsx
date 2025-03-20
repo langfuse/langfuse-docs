@@ -4,4 +4,5 @@ export default {
   "example-openlit": "Example: OpenLIT",
   "example-openllmetry": "Example: OpenLLMetry",
   "example-arize": "Example: Arize AI",
+  "example-mlflow": "Example: MLflow",
 };
