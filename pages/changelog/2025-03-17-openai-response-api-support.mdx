@@ -1,0 +1,52 @@
+---
+date: 2025-03-17
+title: OpenAI Response API support in SDKs
+description: Trace your OpenAI Response API calls with our Python and JS SDKs
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+OpenAI has released their new improved Response API for a better developer experience building agentic applications. We have added support for tracing OpenAI Response API executions in the OpenAI integrations in both our JS and Python SDK.
+
+<Tabs items={['Python SDK', 'JS/TS SDK']}>
+<Tab>
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+client.responses.create(
+    model="gpt-4o",
+    input="Tell me a three sentence bedtime story about a unicorn.",
+)
+
+openai.flush_langfuse()
+```
+</Tab>
+
+<Tab>
+```typescript
+import { observeOpenAI } from "../langfuse";
+
+const client = observeOpenAI(openai);
+
+const response = await client.responses.create({
+  model: "gpt-4o",
+  input: "Tell me a three sentence bedtime story about a unicorn.",
+});
+
+await client.flushAsync();
+```
+</Tab>
+</Tabs>
+
+**Releases**
+- [Python SDK](https://github.com/langfuse/langfuse-python/releases/tag/v2.60.0)
+- [JS/TS SDK](https://github.com/langfuse/langfuse-js/releases/tag/v3.37.0)
+
+**Learn more**
+- [OpenAI Response API](https://platform.openai.com/docs/api-reference/responses)
+- [Langfuse OpenAI integration](/docs/integrations/openai)

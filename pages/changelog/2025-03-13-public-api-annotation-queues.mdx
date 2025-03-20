@@ -1,0 +1,24 @@
+---
+date: 2025-03-13
+title: Public API for Annotation Queues
+description: Access and manage your annotation queues programmatically with our new Public API endpoints.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+[Annotation queues](/docs/scores/annotation) help to label and review LLM Traces in Langfuse and are often a baseline for any LLM evaluation. This change adds a new public API to manage annotation queues programmatically. Thereby, you can now scale and automate your annotation workflows.
+
+Check out our [API docs](/docs/api) for detailed information on how to use these new endpoints.
+
+Endpoints:
+
+- `GET /api/public/annotation-queues` - Get all annotation queues
+- `GET /api/public/annotation-queues/{queueId}` - Get an annotation queue by ID
+- `GET /api/public/annotation-queues/{queueId}/items` - Get items for a specific annotation queue
+- `POST /api/public/annotation-queues/{queueId}/items` - Add an item to an annotation queue
+- `GET /api/public/annotation-queues/{queueId}/items/{itemId}` - Get a specific item from an annotation queue
+- `PATCH /api/public/annotation-queues/{queueId}/items/{itemId}` - Update an annotation queue item
+- `DELETE /api/public/annotation-queues/{queueId}/items/{itemId}` - Remove an item from an annotation queue

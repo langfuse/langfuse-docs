@@ -64,7 +64,7 @@ langfuse.create_prompt(
     "Consider the following factors: audience, budget, venue, catering options, and entertainment. "
     "Provide a detailed plan including potential vendors and logistics.",
     config={
-        "model":"gpt-3.5-turbo-1106",
+        "model":"gpt-4o",
         "temperature": 0,
     },
     labels=["production"]

@@ -1,0 +1,40 @@
+---
+date: 2025-03-12
+title: Prompt Composability
+description: Create modular, reusable prompts by referencing existing prompts within other prompts.
+author: Hassieb
+ogCloudflareVideo: 6e9c25ba3d4c72363680af5dfb6a9bd2
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're excited to announce a powerful new feature: **Prompt Composability**. This feature allows you to reference existing prompts within other prompts, enabling better organization, reusability, and maintenance of your prompt library.
+
+**How it works**
+
+You can now reference other **text** prompts using a simple tag format:
+
+```
+@@@langfusePrompt:name=PromptName|version=1@@@
+```
+
+or using a label instead of a specific version:
+
+```
+@@@langfusePrompt:name=PromptName|label=production@@@
+```
+
+When creating via the UI, you can use the `Add prompt reference` button to insert a prompt reference tag into your prompt.
+
+When fetched via the SDK / API, these tags are automatically replaced with the referenced prompt content, enabling you to:
+
+- Create modular prompt components that can be reused across multiple prompts
+- Maintain common instructions, examples, or context in a single place
+- Update dependent prompts automatically when base prompts change
+
+**Learn more**
+
+- [Prompt Composability](/docs/prompts#composability)
+- [Prompt Management](/docs/prompts)

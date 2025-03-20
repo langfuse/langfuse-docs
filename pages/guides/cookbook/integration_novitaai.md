@@ -7,7 +7,7 @@ description: "Learn how to integrate Novita AI with Langfuse using the OpenAI dr
 
 This guide shows you how to integrate Novita AI with Langfuse. Novita AI's API endpoints for chat, language and code are fully compatible with OpenAI's API. This allows us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
 
-> **What is Novita AI?** [Novita AI](https://novita.ai/) is an AI cloud platform that helps developers easily deploy AI models through a simple API, backed by affordable and reliable GPU cloud infrastructure. Try the [Novita AI Llama 3 API Demo](https://novita.ai/model-api/product/llm-api/playground/meta-llama-llama-3.1-70b-instruct) today!
+> **What is Novita AI?** [Novita AI](https://novita.ai/) is an AI cloud platform that helps developers easily deploy AI models through a simple API, backed by affordable and reliable GPU cloud infrastructure. You can try the Novita AI Llama 3 API Demo [here](https://novita.ai/model-api/product/llm-api/playground/meta-llama-llama-3.1-70b-instruct).
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
 
@@ -17,7 +17,7 @@ Make sure you have installed the necessary Python packages:
 
 
 ```python
-!pip install openai langfuse
+%pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
@@ -29,8 +29,8 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..." # DOCS EXAMPLE KEYS
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-..." # DOCS EXAMPLE KEYS
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 

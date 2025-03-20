@@ -15,6 +15,7 @@ Install the necessary Python packages: `openai`, `langfuse`, and `openlit`. Thes
 
 ```python
 %pip install openai langfuse openlit
+%pip install opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
 ## Step 2: Configure Environment Variables
@@ -91,7 +92,7 @@ chat_completion = openai_client.chat.completions.create(
           "content": "What is LLM Observability?",
         }
     ],
-    model="gpt-3.5-turbo",
+    model="gpt-4o",
 )
 
 print(chat_completion)
@@ -105,6 +106,8 @@ Opentelemetry lets you attach a set of attributes to all spans by setting [`set_
 ```python
 import openai
 
+input = "How does enhanced LLM observability improve AI debugging?"
+
 with tracer.start_as_current_span("OpenAI-Trace") as span:
     span.set_attribute("langfuse.user.id", "user-123")
     span.set_attribute("langfuse.session.id", "123456789")
@@ -112,17 +115,20 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
     span.set_attribute("langfuse.prompt.name", "test-1")
 
     # You application code below:
-
     response = openai.OpenAI().chat.completions.create(
         messages=[
             {
                 "role": "user",
-                "content": "How does enhanced LLM observability improve AI debugging?",
+                "content": input,
             }
         ],
         model="gpt-4o-mini",
     )
     print(response.choices[0].message.content)
+
+    # Add input and output values to the new parent span
+    span.set_attribute("input.value", input)
+    span.set_attribute("output.value", response.choices[0].message.content)
 ```
 
 ## Step 6: See Traces in Langfuse
@@ -130,3 +136,77 @@ with tracer.start_as_current_span("OpenAI-Trace") as span:
 You can view the generated trace data in Langfuse. You can view this [example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/64902f6a5b4f27738be939b7ad38eab3?timestamp=2025-02-02T22%3A09%3A53.053Z) in the Langfuse UI.
 
 ![OpenLIT OpenAI Trace](https://langfuse.com/images/cookbook/otel-integration-openlit/openlit-openai-trace.png)
+
+## Using Dataset Experiments with the OpenLit Instrumentation
+
+With [Dataset Experiments](https://langfuse.com/docs/datasets/overview), you can test your application on a dataset before deploying it to production. 
+
+First, set up the helper function (`otel_helper_function`) that will be used to run the application. This function returns the application output as well as the Langfuse trace to link to dataset run with the trace.
+
+
+```python
+from opentelemetry.trace import format_trace_id
+
+def otel_helper_function(input):
+    with tracer.start_as_current_span("Otel-Trace") as span:
+
+        # Your gen ai application logic here: (make sure this function is sending traces to Langfuse)
+        response = openai.OpenAI().chat.completions.create(
+            messages=[{"role": "user", "content": input}],
+            model="gpt-4o-mini",
+        )
+        print(response.choices[0].message.content)
+
+        # Fetch the current span and trace id
+        current_span = trace.get_current_span()
+        span_context = current_span.get_span_context()
+        trace_id = span_context.trace_id
+        formatted_trace_id = format_trace_id(trace_id)
+
+        langfuse_trace = langfuse.trace(
+            id=formatted_trace_id, 
+            input=input, 
+            output=response.choices[0].message.content
+        )
+    return langfuse_trace, response.choices[0].message.content
+```
+
+Then loop over the dataset items and run the application.
+
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+dataset = langfuse.get_dataset("<langfuse_dataset_name>")
+
+# Run our application against each dataset item
+for item in dataset.items:
+    langfuse_trace, output = otel_helper_function(item.input["text"])
+
+    # Link the trace to the dataset item for analysis
+    item.link(
+        langfuse_trace,
+        run_name="run-01",
+        run_metadata={ "model": "gpt-4o-mini" }
+    )
+
+    # Optionally, store a quick evaluation score for demonstration
+    langfuse_trace.score(
+        name="<example_eval>",
+        value= your_evaluation_function(output),
+        comment="This is a comment"
+    )
+
+# Flush data to ensure all telemetry is sent
+langfuse.flush()
+```
+
+You can repeat this process with different:
+- Models (OpenAI GPT, local LLM, etc.)
+- Prompts (different system messages)
+
+Then compare them side-by-side in Langfuse:
+
+![Dataset run overview](https://langfuse.com/images/cookbook/huggingface-agent-course/dataset_runs.png)
+![Dataset run comparison](https://langfuse.com/images/cookbook/huggingface-agent-course/dataset-run-comparison.png)

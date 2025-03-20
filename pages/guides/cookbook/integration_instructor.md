@@ -55,7 +55,7 @@ class WeatherDetail(BaseModel):
 
 # Run synchronous OpenAI client
 weather_info = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o",
     response_model=WeatherDetail,
     messages=[
         {"role": "user", "content": "The weather in Paris is 18 degrees Celsius."},
@@ -88,7 +88,7 @@ class WeatherDetail(BaseModel):
 
 # Run asynchronous OpenAI client
 task = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4o",
     response_model=WeatherDetail,
     messages=[
         {"role": "user", "content": "The weather in Paris is 18 degrees Celsius."},
@@ -165,7 +165,7 @@ async def classify_feedback(feedback: str) -> Tuple[FeedbackClassification, floa
     """
     async with sem:  # simple rate limiting
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             response_model=FeedbackClassification,
             max_retries=2,
             messages=[

@@ -12,6 +12,7 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
         >
       )
         .filter((page) => page.route !== "/cookbook")
+        .filter((page) => page.route !== "/guides/cookbook")
         .reduce((acc, page) => {
           const category = page.frontMatter?.category || "Other";
           if (!acc[category]) acc[category] = [];

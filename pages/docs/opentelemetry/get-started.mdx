@@ -8,8 +8,9 @@ description: How to connect Langfuse with OpenTelemetry to observe LLM applicati
 <AvailabilityBanner
   availability={{
     hobby: "full",
+    core: "full",
     pro: "full",
-    team: "full",
+    enterprise: "full",
     selfHosted: "full",
   }}
 />
@@ -249,6 +250,8 @@ Langfuse accepts any span that adheres to the OpenTelemetry specification.
 In addition, we map many GenAI specific properties to properties in the Langfuse data model to provide a seamless experience when using OpenTelemetry with Langfuse.
 First and foremost, we stick to the [OpenTelemetry Gen AI Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/), but also map vendor specific properties from common frameworks.
 All attributes and resourceAttributes are available within the Langfuse `metadata` property as a fallback.
+
+LLM Calls are tracked as `GENERATION` spans (see [data model](/docs/tracing-data-model)). Any span that includes an attribute mapped to `model` is considered a LLM call and thus tracked as a `GENERATION` span.
 
 Langfuse uses the `langfuse.*` namespace to map properties from OpenTelemetry to the Langfuse data model.
 This enables features like linking [Prompts](/docs/prompts/get-started) to spans, adding [tags](/docs/tracing-features/tags), or marking traces as public.

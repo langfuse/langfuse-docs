@@ -7,14 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Plus, Minus, ExternalLink } from "lucide-react";
+import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -25,6 +25,11 @@ import {
 } from "@/components/ui/table";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import React from "react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 type DeploymentOption = "cloud" | "selfHosted";
 
@@ -76,8 +81,15 @@ type Tier = {
     name: string;
     href: string;
   };
+  addOn?: {
+    name: string;
+    price: string;
+    mainFeatures: string[];
+  };
   learnMore?: string;
 };
+
+const TEAMS_ADDON = "Teams add-on";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -91,7 +103,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Free",
       mainFeatures: [
         "All platform features (with limits)",
-        "50k observations / month included",
+        "50k events / month included",
         "30 days data access",
         "2 users",
         "Community support (Discord & GitHub)",
@@ -99,12 +111,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Sign up",
     },
     {
-      name: "Pro",
-      id: "tier-pro",
+      name: "Core",
+      id: "tier-core",
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Includes access to full history and higher usage.",
+        "For production projects. Includes access to more history, usage and unlimited users.",
       price: "$59",
       priceDiscountCta: {
         name: "Discounts available",
@@ -112,8 +124,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       },
       mainFeatures: [
         "Everything in Hobby",
-        "100k observations / month included, additional: $10 / 100k observations",
-        "Unlimited data access",
+        "100k events / month included, additional: $8 / 100k events",
+        "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
         "Support via Email/Chat",
@@ -121,20 +133,32 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Sign up",
     },
     {
-      name: "Team",
-      id: "tier-team",
+      name: "Pro",
+      id: "tier-pro",
       href: "https://cloud.langfuse.com",
       featured: false,
-      price: "$499",
-      description: "Dedicated support, and security controls for larger teams.",
+      price: "$199",
+      description:
+        "For scaling projects. Unlimited history, high rate limits, all features.",
       mainFeatures: [
-        "Everything in Pro",
-        "100k observations / month included, additional: $10 / 100k observations",
-        "Custom SSO, SSO enforcement",
-        "Fine-grained RBAC",
-        "SOC2, ISO27001",
+        "Everything in Core",
+        "100k events / month included, additional: $8 / 100k events",
+        "Unlimited data access",
+        "Unlimited annotation queues",
+        "High rate limits",
+        "SOC2, ISO27001 reports",
         "Support via Slack",
       ],
+      addOn: {
+        name: "Teams",
+        price: "$300",
+        mainFeatures: [
+          "Enterprise SSO (e.g. Okta)",
+          "SSO enforcement",
+          "Fine-grained RBAC",
+          "Data retention management",
+        ],
+      },
       cta: "Sign up",
     },
     {
@@ -147,6 +171,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom",
       mainFeatures: [
         "Everything in Team",
+        "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
         "Custom Terms & DPA",
@@ -219,9 +244,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
 
 type Section = {
   name: string;
+  description?: string;
   href?: string;
   features: {
     name: string;
+    description?: string;
     href?: string;
     tiers: Partial<Record<DeploymentOption, Record<string, boolean | string>>>;
   }[];
@@ -229,14 +256,110 @@ type Section = {
 
 const sections: Section[] = [
   {
-    name: "Tracing",
+    name: "LLM Application & Agent Tracing",
     href: "/docs/tracing",
     features: [
       {
-        name: "Integrations/SDKs",
+        name: "Traces and Graphs (Agents)",
+        href: "/docs/tracing",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Session Tracking (Chats/Threads)",
+        href: "/docs/tracing-features/sessions",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "User Tracking",
+        href: "/docs/tracing-features/users",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Token and Cost Tracking",
+        href: "/docs/model-usage-and-cost",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "Native Frameworks Integrations",
+        description:
+          "Langfuse integrates natively with many LLM providers and agent frameworks such as LangChain, LlamaIndex, LangGraph, CrewAI, Semantic Kernel, ...",
         href: "/docs/integrations/overview",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "SDKs (Python, JavaScript)",
+        href: "/docs/sdk/overview",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "OpenTelemetry (Java, Go, custom)",
+        description:
+          "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
+        href: "/docs/opentelemetry/get-started",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Proxy-based Logging (via LiteLLM)",
+        href: "/docs/integrations/litellm/tracing",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -244,17 +367,20 @@ const sections: Section[] = [
         name: "Custom via API",
         href: "/docs/api",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Included usage",
+        description:
+          "Events are the collection of created traces, observations, and scores in Langfuse.",
+        href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
-            Hobby: "50k observations",
-            Pro: "100k observations",
-            Team: "100k observations",
+            Hobby: "50k events",
+            Core: "100k events",
+            Pro: "100k events",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -266,11 +392,14 @@ const sections: Section[] = [
       },
       {
         name: "Additional usage",
+        description:
+          "Events are the collection of created traces, observations, and scores in Langfuse.",
+        href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
             Hobby: false,
-            Pro: "$10 / 100k observations",
-            Team: "$10 / 100k observations",
+            Core: "$8 / 100k events",
+            Pro: "$8 / 100k events",
             Enterprise: "Custom",
           },
         },
@@ -281,8 +410,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "Free while in beta",
+            Core: "Free while in beta",
             Pro: "Free while in beta",
-            Team: "Free while in beta",
             Enterprise: "Free while in beta",
           },
           selfHosted: {
@@ -297,8 +426,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "30 days",
+            Core: "90 days",
             Pro: "Unlimited",
-            Team: "Unlimited",
             Enterprise: "Unlimited",
           },
         },
@@ -308,9 +437,9 @@ const sections: Section[] = [
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "4,000 requests / min",
-            Pro: "4,000 requests / min",
-            Team: "20,000 requests / min",
+            Hobby: "1,000 requests / min",
+            Core: "4,000 requests / min",
+            Pro: "20,000 requests / min",
             Enterprise: "Custom",
           },
         },
@@ -318,31 +447,79 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "Core Platform Features",
+    name: "Prompt Management",
+    href: "/docs/prompts",
     features: [
       {
-        name: "Datasets",
-        href: "/docs/datasets",
-        tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
-        },
-      },
-      {
-        name: "Evaluation / User-feedback",
-        href: "/docs/scores",
-        tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
-        },
-      },
-      {
-        name: "Prompt Management",
+        name: "Prompt Versioning",
+        description: "Manage prompts via UI, API, SDKs",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Fetching",
+        tiers: {
+          cloud: {
+            Hobby: "Unlimited",
+            Core: "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
           selfHosted: {
-            "Open Source": true,
+            "Open Source": "Unlimited",
+            Pro: "Unlimited",
+            Enterprise: "Unlimited",
+          },
+        },
+      },
+      {
+        name: "Prompt Release Management",
+        description: "Deploy and rollback prompts to different environments",
+        href: "/docs/prompts",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Composability",
+        description:
+          "Create shared snippets that can be reused in different prompts",
+        href: "/docs/prompts/get-started#composability",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Caching (server and client)",
+        description: "Use prompts with 0 latency and uptime impact",
+        href: "/docs/prompts/get-started#caching-in-client-sdks",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Playground",
+        description: "Test prompts in a sandbox environment",
+        href: "/docs/playground",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Prompt Experiments",
+        description: "Run structured experiments on new prompt versions",
+        href: "/docs/datasets/prompt-experiments",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": false,
             Pro: true,
             Enterprise: true,
           },
@@ -351,53 +528,89 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "Add-on Features",
+    name: "Evaluation (online and offline)",
     features: [
       {
-        name: "Playground",
-        href: "/docs/playground",
+        name: "Datasets",
+        description:
+          "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
+        href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
-        name: "Prompt Experiments",
-        href: "/docs/datasets/prompt-experiments",
+        name: "Custom Experiments (via SDK)",
+        description:
+          "Run custom experiments on your Langfuse datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
+        href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
-          selfHosted: {
-            "Open Source": false,
-            Pro: true,
-            Enterprise: true,
-          },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
-        name: "LLM-as-judge evaluators",
-        href: "/docs/scores/model-based-evals",
+        name: "Evaluation Scores (custom)",
+        href: "/docs/scores",
         tiers: {
-          cloud: {
-            Hobby: "1 evaluator",
-            Pro: true,
-            Team: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: true,
-            Enterprise: true,
-          },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "User Feedback Tracking",
+        href: "/docs/scores/user-feedback",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Human Annotation",
+        description: "Manually annotate LLM traces in Langfuse",
+        href: "/docs/scores/annotation",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Human Annotation Queues",
+        description: "Managed human annotation workflows with queues",
         href: "/docs/scores/annotation#annotation-queues",
         tiers: {
           cloud: {
             Hobby: "1 queue",
-            Pro: "3 queues",
-            Team: true,
+            Core: "3 queues",
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
+        name: "External Evaluation Pipelines",
+        href: "/docs/scores/external-evaluation-pipelines",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        description:
+          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
+        href: "/docs/scores/model-based-evals",
+        tiers: {
+          cloud: {
+            Hobby: "1 evaluator",
+            Core: true,
+            Pro: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -417,8 +630,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "Unlimited",
+            Core: "Unlimited",
             Pro: "Unlimited",
-            Team: "Unlimited",
             Enterprise: "Unlimited",
           },
           selfHosted: {
@@ -433,8 +646,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "2",
+            Core: "Unlimited",
             Pro: "Unlimited",
-            Team: "Unlimited",
             Enterprise: "Unlimited",
           },
           selfHosted: {
@@ -452,11 +665,12 @@ const sections: Section[] = [
     features: [
       {
         name: "Extensive Public API",
+        href: "/docs/api",
         tiers: {
           cloud: {
             Hobby: true,
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -467,22 +681,38 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit",
+        name: "Rate limit (general API routes)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "1,000 requests / min",
+            Hobby: "10 requests / min",
+            Core: "100 requests / min",
             Pro: "1,000 requests / min",
-            Team: "1,000 requests / min",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (metrics api)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "10 requests / day",
+            Core: "20 requests / day",
+            Pro: "200 requests / day",
             Enterprise: "Custom",
           },
         },
       },
       {
         name: "SLA",
-        href: "/faq/all/api-limits",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
         },
       },
     ],
@@ -495,28 +725,33 @@ const sections: Section[] = [
         name: "Ask AI",
         href: "/docs/ask-ai",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Community (GitHub, Discord)",
         tiers: {
-          cloud: { Hobby: true, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Chat & Email",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
         },
       },
       {
         name: "Private Slack/Discord channel",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: true,
+            Enterprise: true,
+          },
           selfHosted: {
             "Open Source": false,
             Pro: "included at >10 users",
@@ -527,7 +762,12 @@ const sections: Section[] = [
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -536,8 +776,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: {
@@ -552,8 +792,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: {
@@ -574,8 +814,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "US or EU",
+            Core: "US or EU",
             Pro: "US or EU",
-            Team: "US or EU",
             Enterprise: "US or EU",
           },
         },
@@ -585,8 +825,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: true,
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -602,8 +842,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: true,
+            Core: true,
             Pro: true,
-            Team: true,
             Enterprise: true,
           },
           selfHosted: {
@@ -616,14 +856,24 @@ const sections: Section[] = [
       {
         name: "Enterprise SSO (e.g. Okta, AzureAD/EntraID)",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
       {
         name: "SSO enforcement",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
         },
       },
@@ -631,7 +881,12 @@ const sections: Section[] = [
         name: "Project-level RBAC",
         href: "/docs/rbac#project-level-roles",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -641,8 +896,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Pro: false,
-            Team: true,
+            Core: false,
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: {
@@ -670,7 +925,12 @@ const sections: Section[] = [
         name: "Audit Logs",
         href: "/changelog/2025-01-21-audit-logs",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: false, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -684,8 +944,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: "Self-serve",
             Pro: "Self-serve",
-            Team: "Self-serve",
             Enterprise: "Sales",
           },
           selfHosted: {
@@ -700,8 +960,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: "Credit card",
             Pro: "Credit card",
-            Team: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
           selfHosted: {
@@ -716,8 +976,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: "Monthly",
             Pro: "Monthly",
-            Team: "Monthly",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -732,8 +992,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: {
@@ -754,8 +1014,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: "Standard T&Cs",
+            Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Team: "Standard T&Cs & DPA",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -768,14 +1028,19 @@ const sections: Section[] = [
       {
         name: "Data processing agreement (GDPR)",
         tiers: {
-          cloud: { Hobby: false, Pro: true, Team: true, Enterprise: true },
+          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
         tiers: {
-          cloud: { Hobby: false, Pro: false, Team: true, Enterprise: true },
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: true,
+            Enterprise: true,
+          },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
@@ -784,8 +1049,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
+            Core: false,
             Pro: false,
-            Team: false,
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
@@ -805,12 +1070,132 @@ export default function Pricing({
   const [localVariant, setLocalVariant] = useState(initialVariant);
   const variant = isPricingPage ? initialVariant : localVariant;
   const selectedTiers = tiers[variant];
+  const [isHeaderFixed, setIsHeaderFixed] = useState(false);
+  const [headerWidth, setHeaderWidth] = useState<number>(0);
+  const [columnWidths, setColumnWidths] = useState<number[]>([]);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLTableSectionElement>(null);
 
-  const InfoLink = ({ href }: { href: string }) => (
-    <Link href={href} className="inline-block" target="_blank">
-      <ExternalLink className="size-4 ml-2 pt-0.5" />
-    </Link>
-  );
+  useEffect(() => {
+    if (!isPricingPage) return;
+
+    const calculateWidths = () => {
+      if (headerRef.current && tableRef.current) {
+        // Get the total width of the table
+        const tableWidth = tableRef.current.getBoundingClientRect().width;
+        setHeaderWidth(tableWidth);
+
+        // Get the widths of each column
+        const headerCells = headerRef.current.querySelectorAll("th");
+        const widths = Array.from(headerCells).map(
+          (cell) => (cell as HTMLElement).getBoundingClientRect().width
+        );
+        setColumnWidths(widths);
+      }
+    };
+
+    // Calculate widths initially and on resize
+    calculateWidths();
+    window.addEventListener("resize", calculateWidths);
+
+    const handleScroll = () => {
+      if (!tableRef.current) return;
+
+      const tableRect = tableRef.current.getBoundingClientRect();
+      const navbarHeight = 64; // Approximate height of the navbar
+
+      // Check if we're within the table's vertical bounds
+      const isWithinTableBounds =
+        tableRect.top < navbarHeight && tableRect.bottom > navbarHeight;
+
+      setIsHeaderFixed((prevIsHeaderFixed) => {
+        if (isWithinTableBounds && !prevIsHeaderFixed) {
+          return true;
+        } else if (!isWithinTableBounds && prevIsHeaderFixed) {
+          return false;
+        }
+        return prevIsHeaderFixed;
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", calculateWidths);
+    };
+  }, [isPricingPage]);
+
+  const FeatureDetails = ({
+    description,
+    href,
+  }: {
+    description?: string;
+    href?: string;
+  }) => {
+    if (!description && !href) {
+      return null;
+    }
+
+    if (!description && href) {
+      return (
+        <Link href={href} className="inline-block" target="_blank">
+          <ExternalLink className="size-4 ml-2 pt-0.5" />
+        </Link>
+      );
+    }
+
+    return (
+      <HoverCard>
+        <HoverCardTrigger>
+          <InfoIcon className="inline-block size-3 ml-1" />
+        </HoverCardTrigger>
+        <HoverCardContent className="w-60 text-xs">
+          <p>
+            {description}
+            {href && (
+              <span>
+                {" "}
+                (
+                <Link href={href} className="underline" target="_blank">
+                  learn more
+                </Link>
+                )
+              </span>
+            )}
+          </p>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
+
+  const FeatureCell = ({ value }: { value: boolean | string }) => {
+    return typeof value === "string" ? (
+      <div className="text-sm leading-6 text-center break-words">
+        {value}
+        {value === TEAMS_ADDON && (
+          <HoverCard>
+            <HoverCardTrigger>
+              <InfoIcon className="inline-block size-3 ml-1" />
+            </HoverCardTrigger>
+            <HoverCardContent className="w-60">
+              <p className="text-sm">
+                Available as part of the Teams add-on on the Pro plan.
+              </p>
+            </HoverCardContent>
+          </HoverCard>
+        )}
+      </div>
+    ) : (
+      <div className="flex justify-center">
+        {value === true ? (
+          <CheckIcon className="h-5 w-5 text-primary" />
+        ) : (
+          <MinusIcon className="h-5 w-5 text-muted-foreground" />
+        )}
+      </div>
+    );
+  };
 
   return (
     <HomeSection id="pricing" className={cn(isPricingPage && "px-0 sm:px-0")}>
@@ -911,6 +1296,31 @@ export default function Pricing({
                         </li>
                       ))}
                     </ul>
+                    {tier.addOn && (
+                      <div className="mt-3 border rounded pt-4 p-3 relative w-full">
+                        <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 -top-0 bg-card px-2 text-xs text-muted-foreground">
+                          + optional
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-sm text-primary">
+                            {tier.addOn.name} Add-on
+                          </span>
+                          <span className="font-bold text-sm text-primary">
+                            {tier.addOn.price}/mo
+                          </span>
+                        </div>
+                        <ul className="mt-1 space-y-1 text-sm">
+                          {tier.addOn.mainFeatures.map((feature) => (
+                            <li key={feature} className="flex space-x-2">
+                              <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                              <span className="text-muted-foreground">
+                                {feature}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
@@ -946,47 +1356,35 @@ export default function Pricing({
                             {sections.map((section) => (
                               <React.Fragment key={section.name}>
                                 <TableRow className="bg-muted hover:bg-muted">
-                                  <TableCell
+                                  <TableHead
                                     colSpan={2}
-                                    className="w-10/12 text-primary font-bold"
+                                    className="w-full text-primary font-bold"
+                                    scope="colgroup"
                                   >
                                     {section.name}
-                                    {section.href && (
-                                      <InfoLink href={section.href} />
-                                    )}
-                                  </TableCell>
+                                    <FeatureDetails
+                                      description={section.description}
+                                      href={section.href}
+                                    />
+                                  </TableHead>
                                 </TableRow>
                                 {section.features
                                   .filter((f) => variant in f.tiers)
                                   .map((feature) => (
-                                    <TableRow
-                                      key={feature.name}
-                                      className="text-muted-foreground"
-                                    >
-                                      <TableCell className="w-11/12">
+                                    <TableRow key={feature.name}>
+                                      <TableHead className="w-9/12" scope="row">
                                         {feature.name}
-                                        {feature.href && (
-                                          <InfoLink href={feature.href} />
-                                        )}
-                                      </TableCell>
-                                      <TableCell>
-                                        {typeof feature.tiers[variant][
-                                          tier.name
-                                        ] === "string" ? (
-                                          <div className="text-sm leading-6 text-center">
-                                            {feature.tiers[variant][tier.name]}
-                                          </div>
-                                        ) : (
-                                          <div className="flex justify-center">
-                                            {feature.tiers[variant][
-                                              tier.name
-                                            ] === true ? (
-                                              <CheckIcon className="h-5 w-5 text-primary" />
-                                            ) : (
-                                              <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                            )}
-                                          </div>
-                                        )}
+                                        <FeatureDetails
+                                          description={feature.description}
+                                          href={feature.href}
+                                        />
+                                      </TableHead>
+                                      <TableCell className="w-3/12 text-center">
+                                        <FeatureCell
+                                          value={
+                                            feature.tiers[variant][tier.name]
+                                          }
+                                        />
                                       </TableCell>
                                     </TableRow>
                                   ))}
@@ -1003,73 +1401,114 @@ export default function Pricing({
                 <section
                   aria-labelledby="comparison-heading"
                   className="hidden lg:block bg-card rounded-lg overflow-hidden border mt-20"
+                  ref={tableRef}
                 >
                   <h2 id="comparison-heading" className="sr-only">
                     Feature comparison
                   </h2>
 
-                  <Table className="w-full">
-                    <TableHeader className="bg-background">
-                      <TableRow className="bg-muted hover:bg-muted">
-                        <TableHead className="w-3/12" />
-                        {selectedTiers.map((tier) => (
-                          <TableHead
-                            key={tier.id}
-                            className="w-2/12 text-center text-lg text-foreground font-semibold"
+                  {isHeaderFixed && (
+                    <div
+                      className="fixed left-0 right-0 bg-muted z-50 shadow-md border-b"
+                      style={{ top: "64px" }}
+                    >
+                      <div className="mx-auto max-w-7xl px-6">
+                        <div className="overflow-hidden pl-[16px]">
+                          <table
+                            className="w-full"
+                            style={{
+                              width: headerWidth,
+                            }}
                           >
-                            {tier.name}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sections.map((section) => (
-                        <React.Fragment key={section.name}>
-                          <TableRow className="bg-muted/50">
-                            <TableCell colSpan={5} className="font-medium">
-                              {section.name}
-                              {section.href && <InfoLink href={section.href} />}
-                            </TableCell>
-                          </TableRow>
-                          {section.features
-                            .filter((f) => variant in f.tiers)
-                            .map((feature) => (
-                              <TableRow
-                                key={feature.name}
-                                className="text-muted-foreground"
-                              >
-                                <TableCell>
-                                  {feature.name}
-                                  {feature.href && (
-                                    <InfoLink href={feature.href} />
-                                  )}
-                                </TableCell>
-                                {selectedTiers.map((tier) => (
-                                  <TableCell key={tier.id}>
-                                    {typeof feature.tiers[variant][
-                                      tier.name
-                                    ] === "string" ? (
-                                      <div className="text-sm leading-6 text-center">
-                                        {feature.tiers[variant][tier.name]}
-                                      </div>
-                                    ) : (
-                                      <div className="flex justify-center">
-                                        {feature.tiers[variant][tier.name] ===
-                                        true ? (
-                                          <CheckIcon className="h-5 w-5 text-primary" />
-                                        ) : (
-                                          <MinusIcon className="h-5 w-5 text-muted-foreground" />
-                                        )}
-                                      </div>
-                                    )}
+                            <thead>
+                              <tr>
+                                {columnWidths.length > 0 && (
+                                  <>
+                                    <th
+                                      style={{ width: columnWidths[0] }}
+                                      className="text-left font-medium"
+                                      scope="col"
+                                    ></th>
+                                    {selectedTiers.map((tier, index) => (
+                                      <th
+                                        key={tier.id}
+                                        style={{
+                                          width: columnWidths[index + 1],
+                                        }}
+                                        className="py-2 text-center text-lg text-foreground font-semibold"
+                                        scope="col"
+                                      >
+                                        {tier.name}
+                                      </th>
+                                    ))}
+                                  </>
+                                )}
+                              </tr>
+                            </thead>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="relative">
+                    <Table className="w-full">
+                      <thead ref={headerRef} className="bg-muted">
+                        <tr>
+                          <th
+                            className="w-3/12 text-left font-medium"
+                            scope="col"
+                          ></th>
+                          {selectedTiers.map((tier) => (
+                            <th
+                              key={tier.id}
+                              className="w-2/12 p-2 text-center text-lg text-foreground font-semibold"
+                              scope="col"
+                            >
+                              {tier.name}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <TableBody>
+                        {sections.map((section) => (
+                          <React.Fragment key={section.name}>
+                            <TableRow className="bg-muted/50">
+                              <TableCell colSpan={5} className="font-medium">
+                                {section.name}
+                                <FeatureDetails
+                                  description={section.description}
+                                  href={section.href}
+                                />
+                              </TableCell>
+                            </TableRow>
+                            {section.features
+                              .filter((f) => variant in f.tiers)
+                              .map((feature) => (
+                                <TableRow key={feature.name}>
+                                  <TableCell>
+                                    {feature.name}
+                                    <FeatureDetails
+                                      description={feature.description}
+                                      href={feature.href}
+                                    />
                                   </TableCell>
-                                ))}
-                              </TableRow>
-                            ))}
-                        </React.Fragment>
-                      ))}
-                    </TableBody>
-                  </Table>
+                                  {selectedTiers.map((tier) => (
+                                    <TableCell key={tier.id}>
+                                      <FeatureCell
+                                        value={
+                                          feature.tiers[variant][tier.name]
+                                        }
+                                      />
+                                    </TableCell>
+                                  ))}
+                                </TableRow>
+                              ))}
+                          </React.Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </section>
               </>
             )}

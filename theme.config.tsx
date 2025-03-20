@@ -196,10 +196,10 @@ const config: DocsThemeConfig = {
     Video,
   },
   // banner: {
-  //   key: "town-hall",
+  //   key: "langfuse-community-hour",
   //   dismissible: true,
   //   content: (
-  //     <Link href="https://lu.ma/s22z25ed">
+  //     <Link href="https://lu.ma/by4k3643">
   //       {/* mobile */}
   //       <span className="sm:hidden">Wednesday: Langfuse Community Hour →</span>
   //       {/* desktop */}
