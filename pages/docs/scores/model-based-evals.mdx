@@ -123,7 +123,7 @@ Here we need to configure the following aspects:
 - Specify how Langfuse should fill the **`{{variables}}`** in the template.
   - Langfuse traces can be deeply nested (see [conceptual overview](/docs/tracing)). You can query from the trace directly, or from any nested observation via its name.
   - Select whether to use the `Input`, `Output`, or `Metadata` value.
-  - Optional: Provide a [JsonPath expression](https://github.com/JSONPath-Plus/JSONPath?tab=readme-ov-file#syntax-through-examples) to extract a specific value from the `Input`, `Output`, or `Metadata` value. If this is not provided, the entire value will be used.
+  - Optional: Provide a [JsonPath expression](https://github.com/JSONPath-Plus/JSONPath?tab=readme-ov-file#syntax-through-examples) to extract a specific value from the `Input`, `Output`, or `Metadata` value. If this is not provided, the entire value will be used. [This free online tool](https://jsonpathfinder.com/) is useful to determine the JSONPath of your input or output object.
 - Optional: Add **sampling** to reduce costs when running evaluations on a large volume of production data.
 - Optional: Configure **custom delay**. This is how you can ensure all data arrived at Langfuse servers before evaluation is executed. The time starts when the trace is first added to Langfuse while it might be still in progress. This is especially important for long-running agent executions.
 
