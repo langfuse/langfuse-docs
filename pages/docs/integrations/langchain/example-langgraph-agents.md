@@ -503,8 +503,8 @@ LLM-as-a-Judge is another way to automatically evaluate your agent's output. You
 
 Example from Langfuse:
 
-![LLM-as-a-Judge Evaluation Template](https://langfuse.com/images/cookbook/example-langgraph-evaluation/evaluator-template.png)
-![LLM-as-a-Judge Evaluator](https://langfuse.com/images/cookbook/example-langgraph-evaluation/evaluator.png)
+![LLM-as-a-Judge Evaluation Template](https://langfuse.com/images/cookbook/integration_openai-agents/evaluator-template.png)
+![LLM-as-a-Judge Evaluator](https://langfuse.com/images/cookbook/integration_openai-agents/evaluator.png)
 
 
 ```python
@@ -537,7 +537,7 @@ You can see that the answer of this example is judged as "not toxic".
 
 All of these metrics can be visualized together in dashboards. This enables you to quickly see how your agent performs across many sessions and helps you to track quality metrics over time.
 
-![Observability metrics overview](https://langfuse.com/images/cookbook/example-langgraph-evaluation/dashboard-dark.png)
+![Observability metrics overview](https://langfuse.com/images/cookbook/integration_openai-agents/dashboard-dark.png)
 
 ## Offline Evaluation
 
