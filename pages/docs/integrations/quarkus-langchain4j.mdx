@@ -36,7 +36,15 @@ quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
 
 With these configurations and dependencies in place, your Quarkus application is ready to produce OpenTelemetry traces. Quarkus LangChain4j internal calls (e.g. when you invoke a chat model) will be recorded as spans.
 
-Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content
+Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc.. 
+In order to enable events for the prompt and response content you need to activate the langchain4j prompt tracing.
+
+**Configure Langchain4j prompt tracing** (`application.properties`):
+
+```properties
+quarkus.langchain4j.tracing.include-prompt=true
+quarkus.langchain4j.tracing.include-completion=true
+```
 
 ## Step 2: Configure Langfuse
 
