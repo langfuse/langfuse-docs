@@ -174,7 +174,7 @@ Subject: {email['subject']}
 Body: {email['body']}
 
 First, determine if this email is spam.
-answer with SPAM or HAM if it's legitimate. Only reurn the answer
+answer with SPAM or HAM if it's legitimate. Only return the answer
 Answer :
     """
     messages = [HumanMessage(content=prompt)]
@@ -716,7 +716,7 @@ You can repeat this process with different agent configurations such as:
 - Models (gpt-4o-mini, o1, etc.)
 - Prompts
 - Tools (search vs. no search)
-- Complexitiy of agent (multi agent vs single agent)
+- Complexity of agent (multi agent vs single agent)
 
 Then compare them side-by-side in Langfuse. In this example, I did run the agent 3 times on the 30 dataset questions. For each run, I used a different OpenAI model. You can see that amount of correctly answered questions improves when using a larger model (as expected). The `correct_answer` score is created by an [LLM-as-a-Judge Evaluator](https://langfuse.com/docs/scores/model-based-evals) that is set up to judge the correctness of the question based on the sample answer given in the dataset.
 
