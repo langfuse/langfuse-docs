@@ -176,6 +176,31 @@ Available export formats:
   aspectRatio={1844 / 1080}
   gifStyle
 />
+
+## Export via Blob Storage Integration [#blob-storage]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "public-beta",
+    enterprise: "public-beta",
+    selfHosted: "pro",
+  }}
+/>
+
+You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for traces, observations, and scores.
+Those exports can run on an hourly, daily, or weekly schedule.
+Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
+Select whether you want to use S3, a S3 compatible storage, or Azure Blob Storage.
+Fill in the settings to authenticate with your vendor, enable the integration, and press save.
+Within an hour an initial export should start and continue based on the schedule you have selected.
+Read [our blob storage documentation](/self-hosting/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
+
+<Frame className="my-10" fullWidth>
+  ![Blob Storage Integration Setup](/images/docs/blob-storage-integration.png)
+</Frame>
+
 ## Trouble exporting?
 
 If you're having trouble exporting data, please [let us know](#contact) and we'll help you out.
