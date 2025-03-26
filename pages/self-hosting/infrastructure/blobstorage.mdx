@@ -201,6 +201,10 @@ To get started, create a new bucket within Google Cloud Storage.
 Navigate to `Settings > Interoperability` to create a service account HMAC key.
 Ensure that the HMAC key has the necessary permissions to access the bucket.
 
+Please note that GCS does not implement all functions of the S3 API.
+We are aware of issues around DeleteObject requests that may cause errors in your application.
+This will have no effect on normal operations within Langfuse, but may limit your ability to delete data.
+
 #### Example Configuration
 
 Set the following environment variables to connect Langfuse with your Google Cloud Storage bucket:
