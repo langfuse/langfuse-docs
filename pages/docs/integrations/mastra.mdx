@@ -62,7 +62,7 @@ This guide shows you how to integrate **Langfuse** with **Mastra** for observabi
   export const chefAgent = new Agent({
     name: "chef-agent",
     instructions:
-      "You are Michel, a practical and experienced home chef" +
+      "You are Michel, a practical and experienced home chef " +
       "You help people cook with whatever ingredients they have available.",
     model: openai("gpt-4o-mini"),
   });
@@ -87,16 +87,20 @@ This guide shows you how to integrate **Langfuse** with **Mastra** for observabi
       serviceName: "ai", // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace
       enabled: true,
       export: {
-      type: "custom",
-      exporter: new LangfuseExporter({
-          publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-          secretKey: process.env.LANGFUSE_SECRET_KEY,
-          baseUrl: process.env.LANGFUSE_HOST,
-      }),
+        type: "custom",
+        exporter: new LangfuseExporter({
+            publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+            secretKey: process.env.LANGFUSE_SECRET_KEY,
+            baseUrl: process.env.LANGFUSE_HOST,
+        }),
       },
     },
   });
   ```
+
+  <Callout type="info">
+    The `telemetry.serviceName` field must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace.
+  </Callout>
 
   ### Run mastra dev server
   Start the Mastra development server:
@@ -105,11 +109,15 @@ This guide shows you how to integrate **Langfuse** with **Mastra** for observabi
   npm run dev
   ```
 
-  Head over to the Playground with the provided URL and start chatting with your agent.
+  Head over to the developer playground with the provided URL and start chatting with your agent.
 
 
   ### View traces in Langfuse
   Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
+
+  Here's an example of a trace:
+
+  ![Mastra trace in Langfuse UI](/images/docs/langfuse-mastra-trace.png)
 
 </Steps>
 
