@@ -33,5 +33,6 @@ export default {
   crewai: "CrewAI",
   "spring-ai": "Spring AI",
   "quarkus-langchain4j": "Quarkus LangChain4j",
+  mastra: "Mastra",
   other: "More Ways to Integrate",
 };
