@@ -1,0 +1,86 @@
+---
+title: Scaling Langfuse Deployments
+description: Learn how to scale your self-hosted Langfuse deployment to handle more traffic and data.
+label: "Version: v3"
+---
+
+# Scaling
+
+This guide covers how you can operate your Langfuse deployment at scale and includes best practices and tweaks to get the best performance.
+
+## Ingestion Throughput
+
+Langfuse is designed to handle a large amount and volume of ingested data.
+On very high loads, it may become necessary to apply additional settings that influence the throughput.
+
+### Scaling the worker containers
+
+For most environments, we recommend to scale the worker containers by their CPU load as this is a straightforward metric to measure.
+A load above 50% for a 2 CPU container is an indicator that the instance is saturated and that the throughput should increase by adding more containers.
+
+In addition, the Langfuse worker also publishes queue length metrics via statsd that can be used to scale the worker containers.
+`langfuse.queue.ingestion.length` is the main metric that we use to make scaling decisions.
+The queue metrics can also be published to AWS CloudWatch by setting `ENABLE_AWS_CLOUDWATCH_METRIC_PUBLISHING=true` to configure auto-scalers based on AWS metrics.
+
+### Reducing ClickHouse reads within the ingestion processing
+
+Per default, the Langfuse worker reads the existing event from ClickHouse and merges it with any incoming data.
+This increases the load on ClickHouse and may limit the total throughput.
+For projects that were not migrated from a previous version of Langfuse, this is optional as the full event history is available in S3.
+You can set `LANGFUSE_SKIP_INGESTION_CLICKHOUSE_READ_MIN_PROJECT_CREATE_DATE` to a date in the past before your first project was created, e.g. `2025-01-01`.
+Please note that any S3/blob storage deletion lifecycle rules in combination with late updates to events may cause duplicates in the event history.
+If you use the default integration methods with the Langfuse SDKs or OpenTelemetry this should not affect you.
+
+### Separating ingestion and user interface
+
+When the ingestion load is high, the Langfuse web interface and API calls may become slow or unresponsive.
+In this case, splitting the langfuse-web deployment into one ingestion handling and one user interface handling deployment can help to keep the user interface responsive.
+You can create a new identical replica of the langfuse-web deployment and route all traffic to `/api/public/ingestion*`, `/api/public/media*`, and `/api/public/otel*` to the new deployment.
+
+## Slow UI queries or API calls
+
+If you notice long-loading screens within the UI or slow API calls, it is usually related to insufficient resources on the ClickHouse database or missing time filters.
+The tracing data is indexed by projectId and time, i.e. adding filter conditions on those should significantly improve performance.
+
+If all filters are in place, a larger ClickHouse instance may increase the observed performance.
+ClickHouse is designed to scale vertically, i.e. adding more memory to the instance should yield faster response times.
+You can check the [ClickHouse Docs](https://clickhouse.com/docs/operations/tips#using-less-than-16gb-of-ram) on which memory size to choose for your workloads.
+In general, we recommend at least 16 GiB of memory for larger deployments.
+
+## Increasing Disk Usage
+
+LLM tracing data may contain large payloads due to inputs and outputs being tracked.
+In addition, ClickHouse stores observability data within its system tables.
+If you notice that your disk space is increasing significantly on S3/Blob Storage or ClickHouse, we can recommend the following.
+
+In general, the most effective way to free disk space is to configure a [data retention](/docs/data-retention) policy.
+If this is not available in your plan, consider the options below.
+
+### S3 / Blob Storage Disk Usage
+
+You can implement lifecycle rules to automatically remove old files from your blob storage.
+We recommend to keep events for as long as you want to access them within the UI or you want to update them.
+For most customers, a default of 30 days is a good choice.
+
+### ClickHouse Disk Usage
+
+To automatically remove data within ClickHouse, you can use the [TTL](https://clickhouse.com/docs/guides/developer/ttl) feature.
+See the ClickHouse documentation for more details on how to configure it.
+This is applicable for the `traces`, `observations`, `scores`, and `event_log` table within ClickHouse.
+
+In addition, the `system.trace_log` and `system.text_log` tables within ClickHouse may grow large, even on smaller deployments.
+You can modify your ClickHouse settings to set a TTL on both tables.
+It is also safe to manually prune them from time to time.
+Check the [ClickHouse documentation](https://clickhouse.com/docs/operations/server-configuration-parameters/settings#trace_log) for details on how to configure a TTL on those tables.
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["self-hosting"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["self-hosting"]} />
