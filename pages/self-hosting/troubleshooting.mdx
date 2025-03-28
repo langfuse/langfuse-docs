@@ -49,6 +49,13 @@ Use the available memory in MiB as the value for `var.memory`, e.g. 4096 for 4 G
 The value should be equal or above the memory limit of the container.
 This ensures that your container orchestrator kills the pod gracefully if the memory limit is exceeded, instead of the application terminating abruptly.
 
+## Socket usage at capacity
+
+If you are experiencing socket usage at capacity errors, it indicates that the Langfuse Web container is not able to open new connections.
+You can either increase the number of langfuse-web containers handling requests or increase the number of available sockets.
+To achieve the latter, set `LANGFUSE_S3_CONCURRENT_WRITES` to a value greater than `50`.
+Note that an increased number of sockets may increase the memory consumption of your container.
+
 ## Timezone Errors
 
 Langfuse is engineered to run in the UTC timezone and expects that all infrastructure components default to UTC.
