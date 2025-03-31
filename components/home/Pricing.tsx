@@ -718,6 +718,40 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "Exports",
+    features: [
+      {
+        name: "Batch Export via UI",
+        href: "/docs/query-traces#ui",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "PostHog Integration",
+        href: "/docs/analytics/posthog",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
+      },
+      {
+        name: "Scheduled Batch Export to Blob Storage",
+        href: "/docs/query-traces#blob-storage",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
+          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+        },
+      },
+    ],
+  },
+  {
     name: "Support",
     href: "/support",
     features: [
