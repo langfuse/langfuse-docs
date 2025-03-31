@@ -12,8 +12,9 @@ This is a deep dive into the configuration of S3. Follow one of the [deployment 
 
 </Callout>
 
-Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, multi-modal inputs, batch expors, and other files.
-You can use a managed service on AWS, or GCP, or host it yourself using MinIO.
+Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, multi-modal inputs, batch exports, and other files.
+In addition, we have dedicated implementations for [Azure Blob Storage](#azure-blob-storage) and [Google Cloud Storage](#google-cloud-storage).
+You can use a managed service on AWS, or CloudFlare, or host it yourself using MinIO.
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
 
@@ -193,33 +194,7 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=<secret-access-key>
 LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://${ACCOUNT_ID}.r2.cloudflarestorage.com
 ```
 
-### Google Cloud Storage
-
-[Google Cloud Storage](https://cloud.google.com/storage) is a globally available object storage by Google Cloud.
-It offers S3-compatibility through its interoperability interface.
-To get started, create a new bucket within Google Cloud Storage.
-Navigate to `Settings > Interoperability` to create a service account HMAC key.
-Ensure that the HMAC key has the necessary permissions to access the bucket.
-
-Please note that GCS does not implement all functions of the S3 API.
-We are aware of issues around DeleteObject requests that may cause errors in your application.
-This will have no effect on normal operations within Langfuse, but may limit your ability to delete data.
-
-#### Example Configuration
-
-Set the following environment variables to connect Langfuse with your Google Cloud Storage bucket:
-
-```yaml
-LANGFUSE_S3_EVENT_UPLOAD_BUCKET=my-bucket-name
-LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
-LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=<HMAC Access Key>
-LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=<HMAC Secret Key>
-LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://storage.googleapis.com
-LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
-LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
-```
-
-### Azure Blob Storage
+### Azure Blob Storage [#azure-blob-storage]
 
 [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/) is a globally available object storage by Microsoft Azure.
 It does not offer an S3-compatible API and requires slightly different configurations.
@@ -240,6 +215,54 @@ LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Container name - If it does not exist
 LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=devstoreaccount1 # ABS Account
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw== # ABS Account Key
 LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=http://localhost:10000/devstoreaccount1 # URL, e.g. `https://${account}.blob.core.windows.net`
+```
+
+### Google Cloud Storage (Native) [#google-cloud-storage]
+
+[Google Cloud Storage](https://cloud.google.com/storage) is a globally available object storage by Google Cloud.
+To configure the native Google Cloud Storage integration, create a new bucket within Google Cloud Storage.
+Configure the following settings to use the bucket with Langfuse.
+
+#### Example Configuration
+
+Set the following environment variables to connect Langfuse with your Google Cloud Storage bucket:
+
+```yaml
+LANGFUSE_USE_GOOGLE_CLOUD_STORAGE=true
+
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Bucket name
+LANGFUSE_GOOGLE_CLOUD_STORAGE_CREDENTIALS=<json-credentials OR path-to-credentials.json> # JSON key or path to JSON key file. Optional. Will fallback to environment credentials
+LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/ # Optional prefix to store events within a subpath of the bucket
+```
+
+### Google Cloud Storage (Compatibility Mode)
+
+[Google Cloud Storage](https://cloud.google.com/storage) is a globally available object storage by Google Cloud.
+It offers S3-compatibility through its interoperability interface.
+To get started, create a new bucket within Google Cloud Storage.
+Navigate to `Settings > Interoperability` to create a service account HMAC key.
+Ensure that the HMAC key has the necessary permissions to access the bucket.
+
+<Callout type="warning">
+
+  Please note that GCS does not implement all functions of the S3 API.
+  We are aware of issues around DeleteObject requests that may cause errors in your application.
+  This will have no effect on most operations within Langfuse, but may limit your ability to delete data.
+
+</Callout>
+
+#### Example Configuration
+
+Set the following environment variables to connect Langfuse with your Google Cloud Storage bucket:
+
+```yaml
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=my-bucket-name
+LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=<HMAC Access Key>
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=<HMAC Secret Key>
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://storage.googleapis.com
+LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
+LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 ```
 
 ### Other Providers
