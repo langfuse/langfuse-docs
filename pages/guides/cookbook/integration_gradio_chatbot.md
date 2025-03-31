@@ -8,7 +8,7 @@ category: Integrations
 
 This is a simple end-to-end example notebook which showcases how to integrate a Gradio application with Langfuse for LLM Observability and Evaluation.
 
-**Note:** We recommend to run this notebook in Google Colab (see link above). This notebook is also avaliable as Hugging Face Space template [here](https://huggingface.co/spaces/langfuse/langfuse-gradio-example-template).
+**Note:** We recommend to run this notebook in Google Colab (see link above). This notebook is also available as a Hugging Face Space template [here](https://huggingface.co/spaces/langfuse/langfuse-gradio-example-template).
 
 Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implementation and contributions to this notebook.
 
