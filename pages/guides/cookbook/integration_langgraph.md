@@ -633,6 +633,10 @@ langfuse_handler = CallbackHandler(session_id="conversation_chain",
                                    user_id="user_123")
 ```
 
+## Add custom spans to a LangGraph trace
+
+Sometimes it is helpful to add custom spans to a LangGraph trace. This [GitHub discussion thread](https://github.com/orgs/langfuse/discussions/2988#discussioncomment-11634600) provides an example of how to do this.
+
 ## Feedback
 
 If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your idea with the community on [Discord](https://langfuse.com/discord).
