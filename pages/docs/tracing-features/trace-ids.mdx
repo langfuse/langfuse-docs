@@ -52,19 +52,16 @@ def process_user_request(user_id, request_data, **kwargs):
     pass
 
 def main():
-    # Custom ID for tracking
-    custom_observation_id = "custom-" + str(uuid.uuid4())
+    # Custom trace ID
+    custom_trace_id = "custom-" + str(uuid.uuid4())
 
     # Pass id as kwarg
+    # Can be passed to multiple functions
     process_user_request(
         user_id=user_id,
         request_data=request_data,
-        langfuse_observation_id=custom_observation_id,
+        langfuse_parent_trace_id=custom_trace_id,
     )
-
-# Get current trace ID from context
-trace_id = langfuse_context.get_current_trace_id()
-observation_id = langfuse_context.get_current_observation_id()
 ```
 
 When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
