@@ -26,8 +26,9 @@ Test and iterate on your prompts directly in the Langfuse Prompt Playground. Twe
 **Core features**
 
 - `{{variables}}` in prompts
-- OpenAI and Anthropic models
-- Compare model parameters
+- tool calling
+- structured outputs
+- OpenAI, Anthropic, Bedrock, Google Vertex AI, Google AI Studio, and more
 - Linked to [prompt management](/docs/prompts/get-started)
 
 We'll be adding more features and models in the future. If you have any feedback or feature requests, please let us know!
@@ -40,6 +41,16 @@ You can either start from scratch or jump into the playground from an existing p
   videoId="44bbf8b87ae2dfa815d0bf0769eea542"
   gifStyle
   aspectRatio={16 / 9.68}
+  className="max-w-3xl"
+/>
+
+## Tool calling and structured outputs
+
+The Langfuse Prompt Playground supports tool calling and structured outputs. Tool call results can be mocked directly in the playground to prompt the LLM for a final response.
+
+<CloudflareVideo
+  videoId="8a19028067239a8e9ffe929d6dfd426e"
+  gifStyle
   className="max-w-3xl"
 />
 
@@ -86,10 +97,23 @@ export function ModelList() {
     "claude-instant-1.2",
   ];
   const vertexAIModels = [
+    "gemini-2.5-pro-exp-03-25",
+    "gemini-2.0-pro-exp-02-05",
+    "gemini-2.0-flash-001",
+    "gemini-2.0-flash-lite-preview-02-05",
     "gemini-2.0-flash-exp",
     "gemini-1.5-pro",
     "gemini-1.5-flash",
     "gemini-1.0-pro",
+  ];
+  const googleAIStudioModels = [
+    "gemini-2.5-pro-exp-03-25",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite-preview-02-05",
+    "gemini-2.0-flash-thinking-exp-01-21",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
   ];
   return (
     <div>
@@ -105,6 +129,9 @@ export function ModelList() {
           may also add additional model names supported by Google Vertex AI
           platform and enabled in your GCP account through the `Custom model
           names` section in the LLM API Key creation form.
+        </li>
+        <li>
+          <strong>Google AI Studio:</strong> {vertexAIModels.join(", ")}
         </li>
         <li>
           <strong>Amazon Bedrock:</strong> All Amazon Bedrock models are
