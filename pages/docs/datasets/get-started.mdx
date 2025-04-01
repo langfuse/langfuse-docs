@@ -233,6 +233,9 @@ for item in dataset.items:
     # Execute application and pass custom handler
     my_langchain_chain.run(item.input, callbacks=[handler])
 
+    # Add a score to the linked trace depending on the chain output and expected output
+    langfuse.score(trace_id=handler.get_trace_id(), name="my_score", value=1)
+
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 langfuse.flush()
 ```

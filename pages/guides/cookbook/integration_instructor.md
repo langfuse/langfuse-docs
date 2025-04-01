@@ -7,9 +7,8 @@ category: Integrations
 
 # Instructor - Observability & Tracing
 
-[Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.
-
-> Instructor makes it easy to reliably get structured data like JSON from Large Language Models (LLMs) like GPT-3.5, GPT-4, GPT-4-Vision, including open source models like Mistral/Mixtral from Together, Anyscale, Ollama, and llama-cpp-python. By leveraging various modes like Function Calling, Tool Calling and even constrained sampling modes like JSON mode, JSON Schema; Instructor stands out for its simplicity, transparency, and user-centric design. Under the hood, Instructor leverages Pydantic to do the heavy lifting, and provides a simple, easy-to-use API on top of it by helping you manage validation context, retries with Tenacity, and streaming Lists and Partial responses.
+**What is Instructor?**
+> [Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.Instructor makes it easy to reliably get structured data like JSON from Large Language Models (LLMs) like GPT-3.5, GPT-4, GPT-4-Vision, including open source models like Mistral/Mixtral from Together, Anyscale, Ollama, and llama-cpp-python. By leveraging various modes like Function Calling, Tool Calling and even constrained sampling modes like JSON mode, JSON Schema; Instructor stands out for its simplicity, transparency, and user-centric design. Under the hood, Instructor leverages Pydantic to do the heavy lifting, and provides a simple, easy-to-use API on top of it by helping you manage validation context, retries with Tenacity, and streaming Lists and Partial responses.
 
 This is a cookbook with examples of the Langfuse Integration for Python.
 
@@ -24,14 +23,16 @@ Initialize the Langfuse client with your API keys from the project settings in t
 
 
 ```python
-import os
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 ## Get started
@@ -71,6 +72,19 @@ print(weather_info.model_dump_json(indent=2))
 """
 ```
 
+    {
+      "city": "Paris",
+      "temperature": 18
+    }
+
+
+
+
+
+    '\n{\n  "city": "Paris",\n  "temperature": 18\n}\n'
+
+
+
 ### Langfuse-Instructor integration with asychnronous OpenAI client
 
 
@@ -104,6 +118,23 @@ print(response.model_dump_json(indent=2))
 }
 """
 ```
+
+    <ipython-input-5-609add46bbd5>:6: DeprecationWarning: apatch is deprecated, use patch instead
+      client = instructor.apatch(AsyncOpenAI())
+
+
+    {
+      "city": "Paris",
+      "temperature": 18
+    }
+
+
+
+
+
+    '\n{\n  "city": "Paris",\n  "temperature": 18\n}\n'
+
+
 
 ## Example
 
@@ -246,4 +277,27 @@ Relevance Score: 0.9
 """
 ```
 
+    Feedback: The chat bot on your website does not work.
+    Classification: ['BUG']
+    Relevance Score: 0.9
+    Feedback: Could you add more features to your app?
+    Classification: ['SUGGESTION']
+    Relevance Score: 0.8
+    Feedback: Your customer service is exceptional!
+    Classification: ['PRAISE']
+    Relevance Score: 0.9
+    Feedback: I have a question about my recent order.
+    Classification: ['QUESTION']
+    Relevance Score: 0.9
+
+
+
+
+
+    "\nFeedback: I have a question about my recent order.\nClassification: ['QUESTION']\nRelevance Score: 0.0\nFeedback: Could you add more features to your app?\nClassification: ['SUGGESTION']\nRelevance Score: 0.0\nFeedback: The chat bot on your website does not work.\nClassification: ['BUG']\nRelevance Score: 0.9\nFeedback: Your customer service is exceptional!\nClassification: ['PRAISE']\nRelevance Score: 0.9\n"
+
+
+
 ![Instructor Trace in Langfuse](https://langfuse.com/images/docs/instructor-trace.png)
+
+_[Public link to trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ba27e7b1-e23e-4f50-87de-420cf038190f?timestamp=2025-03-31T16:12:57.041Z&display=details)_
