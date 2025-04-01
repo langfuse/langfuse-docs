@@ -1,0 +1,89 @@
+---
+title: "Langfuse March Update"
+description: "Langfuse March Update: New UI, Prompt Composability, Environments & More!"
+ogImage: /images/blog/2025-03-31-langfuse-march-update/march-update.png
+tag: update
+date: 2025/03/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse March Update"
+  description="Langfuse March Update: New UI, Prompt Composability, Environments & More!"
+  authors={["marcklingen"]}
+  image="/images/blog/2025-03-31-langfuse-march-update/march-update.png"
+/>
+
+We’ve been busy this month at **Langfuse**! From a fresh UI redesign to major feature rollouts, here’s a summary of the highlights:
+
+## 💫 UI Redesign
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Langfuse UI Redesign](/images/blog/2025-03-31-langfuse-march-update/new-ui.gif)
+</Frame>
+
+In the last few weeks, we’ve revamped the Trace and Prompt views. We love the new look as it makes the pages cleaner, simplifies navigation, includes more data, and speeds up navigation when going through a lot of data.
+
+→ [Explore the new design](https://cloud.langfuse.com/)
+
+## 🧩 Prompt Composability
+This was one of the most requested features: you can now reuse prompts in other prompts, letting you organize prompts in a modular way.
+
+For example, create a shared “guidelines” prompt and use it across all of your prompts. When guidelines are updated, the all of your dependent prompts will be updated.
+
+→ Check out the end-to-end demo [here](https://langfuse.com/changelog/2025-03-12-prompt-composability).
+
+## 🗃️ Environments
+Langfuse is all about closing the loop between production and development to iterate quickly. That’s why we introduced Environments, allowing you to separate environments (e.g. production, staging, dev) in Langfuse Tracing without needing to use tags or projects.
+
+This enables you to share prompts, datasets, and more within a project without mixing the source of your tracing data.
+
+→ Learn how to set this up in our [docs](https://langfuse.com/docs/tracing-features/environments).
+
+## ➕ More Features
+
+- **[OpenAI Responses API support in SDKs](https://langfuse.com/changelog/2025-03-17-openai-response-api-support)**
+Trace OpenAI Responses API calls with our Python and JS SDKs
+
+- **[Public API for Annotation Queues](https://langfuse.com/changelog/2025-03-13-public-api-annotation-queues)**
+Access and manage annotation queues programmatically with our new endpoints.
+
+- **[Langfuse Java Client](https://langfuse.com/changelog/2025-03-03-langfuse-java-client)**
+Langfuse offers a new Java API client for easy integration with Java applications.
+
+- **[Batch-export Scores via UI](https://langfuse.com/changelog/2025-03-13-batch-export-scores-ui)**
+Evaluation scores can now be exported in bulk as CSV or JSON directly from the Langfuse UI for easier one-off analysis and reporting. 
+
+- **[Export via Blob Storage Integration](https://langfuse.com/docs/query-traces#blob-storage)**
+You can create scheduled exports to Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for traces, observations, and scores. Thereby you can analyze and join the data in your own data warehouse.
+
+## 🤝 New Integrations
+
+<Frame className="rounded-lg overflow-hidden">
+  ![New Integrations](/images/blog/2025-03-31-langfuse-march-update/march-25-new-integrations.png)
+</Frame>
+
+This month, we also added a couple of new integrations:
+
+- [OpenAI Agents SDK](https://langfuse.com/docs/integrations/openaiagentssdk/openai-agents)
+- [Atla AI](https://docs.atla-ai.com/integration-langfuse)
+- [Databricks](https://www.linkedin.com/feed/update/urn:li:activity:7303456774387314688/)
+- [Fireworks AI](https://langfuse.com/docs/integrations/other/fireworks-ai)
+- [Quarkus LangChain4j](https://langfuse.com/docs/integrations/quarkus-langchain4j)
+- [Novita AI](https://langfuse.com/docs/integrations/other/novitaai)
+
+→ If there is an integration you would like to see, add it to our [public roadmap on GitHub](https://github.com/orgs/langfuse/discussions/categories/ideas).
+
+## 📅 Langfuse Town Hall (April 9th)
+Join us for our next Town Hall, where we will showcase live demos of the main Q1 releases and share a sneak peek at what’s planned for Q2.
+
+→ Sign up [here](https://lu.ma/6ba9aueo).
+
+## 👨‍💻 We're Hiring in Berlin
+
+Langfuse is growing fast! We’re looking for talented individuals to join our Berlin team. 
+If you or someone you know might be interested, check out our open positions. We offer a USD 5K referral bonus!
+
+→ [Learn more and apply](https://langfuse.com/careers)
