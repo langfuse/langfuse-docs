@@ -10,4 +10,5 @@ export default {
   cohere: "Cohere",
   "fireworks-ai": "Fireworks AI",
   novitaai: "Novita AI",
+  cleanlab: "Cleanlab",
 };
