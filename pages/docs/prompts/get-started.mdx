@@ -717,7 +717,17 @@ await langfuse.updatePrompt({
 
 ### Protected prompt labels
 
-Protected prompt labels give project admins and owners the ability to prevent labels from being modified or deleted, ensuring better control over prompt deployment.
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Protected prompt labels give project admins and owners ([RBAC docs](/docs/rbac)) the ability to prevent labels from being modified or deleted, ensuring better control over prompt deployment.
 
 Once a label such as `production` is marked as protected:
 
@@ -726,11 +736,10 @@ Once a label such as `production` is marked as protected:
 
 Admins and owners can update a label's protection status in the project settings.
 
-Protected labels are available on all Team (Cloud) and Enterprise (Cloud and Self-Hosted) plans.
-
 <CloudflareVideo
   videoId="512685314ff082abb62233baba411395"
   aspectRatio={16 / 9}
+  gifStyle
 />
 
 ## Prompt Composability [#composability]

@@ -525,6 +525,25 @@ const sections: Section[] = [
           },
         },
       },
+      {
+        name: "Protected Deployment Labels",
+        description:
+          "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
+        href: "/docs/prompts/get-started#protected-prompt-labels",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: TEAMS_ADDON,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Pro: false,
+            Enterprise: true,
+          },
+        },
+      },
     ],
   },
   {
