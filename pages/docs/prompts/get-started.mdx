@@ -715,6 +715,24 @@ await langfuse.updatePrompt({
 </Tab>
 </Tabs>
 
+### Protected prompt labels
+
+Protected prompt labels give project admins and owners the ability to prevent labels from being modified or deleted, ensuring better control over prompt deployment.
+
+Once a label such as `production` is marked as protected:
+
+- `viewer` and `member` roles cannot modify or delete the label from prompts, preventing changes to the `production` prompt version.
+- `admin` and `owner` roles can still modify or delete it, effectively changing the `production` prompt version
+
+Admins and owners can update a label's protection status in the project settings.
+
+Protected labels are available on all Team (Cloud) and Enterprise (Cloud and Self-Hosted) plans.
+
+<CloudflareVideo
+  videoId="512685314ff082abb62233baba411395"
+  aspectRatio={16 / 9}
+/>
+
 ## Prompt Composability [#composability]
 
 <CloudflareVideo

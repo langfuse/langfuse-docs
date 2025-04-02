@@ -1,0 +1,30 @@
+---
+date: 2025-04-02
+title: Protected prompt labels
+description: Langfuse now supports protected prompt labels for better access control over your prompt deployment workflow
+author: Hassieb
+ogCloudflareVideo: 512685314ff082abb62233baba411395
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Protected prompt labels give project admins and owners the ability to prevent labels from being modified or deleted, ensuring better control over prompt deployment.
+
+Once a label such as `production` is marked as protected:
+
+- `viewer` and `member` roles cannot modify or delete the label from prompts, preventing changes to the `production` prompt version.
+- `admin` and `owner` roles can still modify or delete it, effectively changing the `production` prompt version
+
+Admins and owners can update a label's protection status in the project settings.
+
+**Availability**
+
+Protected labels are available on all Team (Cloud) and Enterprise (Cloud and Self-Hosted) plans. Check your project settings and upgrade if needed to start using this feature.
+
+**Learn more**
+
+- [Langfuse Prompt Management](/docs/prompts/get-started)
+- [Langfuse Prompt Deployment Labels](/docs/prompts/get-started#labels)
+- [OSS Release Notes](https://github.com/langfuse/langfuse/releases/tag/v3.47.0)
