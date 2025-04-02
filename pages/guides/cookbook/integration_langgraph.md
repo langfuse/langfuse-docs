@@ -395,6 +395,7 @@ from langfuse.callback import CallbackHandler
 langfuse_handler = CallbackHandler()
 
 # Add Langfuse handler as callback: config={"callbacks": [langfuse_handler]}
+# You can also set an optional 'run_name' that will be used as the trace name in Langfuse
 for s in graph_2.stream({"messages": [HumanMessage(content = "How does photosynthesis work?")]},
                       config={"callbacks": [langfuse_handler]}):
     print(s)
