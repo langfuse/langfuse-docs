@@ -115,6 +115,11 @@ Langfuse uses Redis mainly for queuing event metadata that should be processed b
 In most cases, the worker can process the queue quickly to keep events from piling up.
 For every ~100000 events per minute we recommend about 1GB of memory for the Redis instance.
 
+## Redis Permissions
+
+Redis allows users to restrict the keys and commands that a given user can access [Redis ACL Docs](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/).
+Langfuse expects that the provided user has access to all keys and commands within the given database, i.e. the access control should be defined as `on ~* +@all`.
+
 ## Valkey vs Redis
 
 [Valkey](https://github.com/valkey-io/valkey) was created as an open source (BSD) alternative to Redis.
