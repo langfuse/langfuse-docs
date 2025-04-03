@@ -28,22 +28,33 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
     [maxItems]
   );
 
+  // Function to normalize and split tags
+  const normalizeTags = (tagString?: string) => {
+    if (!tagString) return [];
+    return tagString
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase())
+      .filter(Boolean);
+  };
+
   const filteredPosts = useMemo(
     () =>
-      posts.filter(
-        (page) => !selectedTag || page.frontMatter?.tag === selectedTag
-      ),
+      posts.filter((page) => {
+        if (!selectedTag) return true;
+        const postTags = normalizeTags(page.frontMatter?.tag);
+        const selectedTags = normalizeTags(selectedTag);
+        return selectedTags.some((tag) => postTags.includes(tag));
+      }),
     [posts, selectedTag]
   );
 
   // Get unique tags
-  const tags = useMemo(
-    () =>
-      Array.from(
-        new Set(posts.map((page) => page.frontMatter?.tag).filter(Boolean))
-      ),
-    [posts]
-  );
+  const tags = useMemo(() => {
+    const allTags = posts.flatMap((page) =>
+      normalizeTags(page.frontMatter?.tag)
+    );
+    return Array.from(new Set(allTags));
+  }, [posts]);
 
   const handleTagClick = (tag: string) => {
     const newTag = selectedTag === tag ? null : tag;
@@ -69,7 +80,11 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
             key={tag}
             onClick={() => handleTagClick(tag)}
             className={`text-sm py-1 px-3 rounded-full transition-colors ${
-              selectedTag === tag
+              selectedTag
+                ?.toLowerCase()
+                .split(",")
+                .map((t) => t.trim())
+                .includes(tag)
                 ? "bg-gray-900 text-white dark:bg-white dark:text-black"
                 : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
             }`}
@@ -100,11 +115,14 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
               {page.frontMatter?.description} <span>Read more →</span>
             </div>
             <div className="flex gap-2 flex-wrap mt-3 items-baseline">
-              {page.frontMatter?.tag ? (
-                <span className="opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded group-hover:opacity-100">
-                  {page.frontMatter.tag}
+              {normalizeTags(page.frontMatter?.tag).map((tag, index) => (
+                <span
+                  key={index}
+                  className="opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded group-hover:opacity-100"
+                >
+                  {tag.charAt(0).toUpperCase() + tag.slice(1)}
                 </span>
-              ) : null}
+              ))}
               {page.frontMatter?.date ? (
                 <span className="opacity-60 text-sm group-hover:opacity-100">
                   {page.frontMatter.date}
