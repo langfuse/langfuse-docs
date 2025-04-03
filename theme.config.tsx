@@ -195,20 +195,23 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "langfuse-community-hour",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/yvg9gv12">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Wednesday: Langfuse Community Hour →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Wednesday: Langfuse Community Hour, 10am PT / 7pm CET →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "townhall-q2-roadmap",
+    dismissible: true,
+    content: (
+      <Link href="https://lu.ma/6ba9aueo">
+        {/* mobile */}
+        <span className="sm:hidden">
+          Town Hall (Apr 9): Demos & Q2 Roadmap →
+        </span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Town Hall (Apr 9th): Demos of latest features and discussion of Q2
+          Roadmap →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
