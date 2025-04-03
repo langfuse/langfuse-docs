@@ -4,6 +4,7 @@ import Image from "next/image";
 import { type Page } from "nextra";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
+import { cn } from "@/lib/utils";
 
 export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
   const router = useRouter();
@@ -79,7 +80,8 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
           <button
             key={tag}
             onClick={() => handleTagClick(tag)}
-            className={`text-sm py-1 px-3 rounded-full transition-colors ${
+            className={cn(
+              "text-sm py-1 px-3 rounded-full transition-colors",
               selectedTag
                 ?.toLowerCase()
                 .split(",")
@@ -87,7 +89,7 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
                 .includes(tag)
                 ? "bg-gray-900 text-white dark:bg-white dark:text-black"
                 : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            }`}
+            )}
           >
             {tag.charAt(0).toUpperCase() + tag.slice(1)}
           </button>
