@@ -4,7 +4,7 @@ import Image from "next/image";
 import { type Page } from "nextra";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
   const router = useRouter();
@@ -75,24 +75,24 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
 
   return (
     <div>
-      <div className="flex gap-2 flex-wrap mb-8 justify-center">
+      <div className="flex gap-2 flex-wrap mb-10 justify-center">
         {tags.map((tag) => (
-          <button
+          <Button
             key={tag}
             onClick={() => handleTagClick(tag)}
-            className={cn(
-              "text-sm py-1 px-3 rounded-full transition-colors",
+            variant={
               selectedTag
                 ?.toLowerCase()
                 .split(",")
                 .map((t) => t.trim())
                 .includes(tag)
-                ? "bg-gray-900 text-white dark:bg-white dark:text-black"
-                : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            )}
+                ? "default"
+                : "outline"
+            }
+            size="xs"
           >
             {tag.charAt(0).toUpperCase() + tag.slice(1)}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -118,16 +118,26 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
             </div>
             <div className="flex gap-2 flex-wrap mt-3 items-baseline">
               {normalizeTags(page.frontMatter?.tag).map((tag, index) => (
-                <button
+                <Button
                   key={index}
                   onClick={(e) => {
                     e.preventDefault();
                     handleTagClick(tag);
                   }}
-                  className="opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  variant={
+                    selectedTag
+                      ?.toLowerCase()
+                      .split(",")
+                      .map((t) => t.trim())
+                      .includes(tag)
+                      ? "secondary"
+                      : "outline"
+                  }
+                  size="xs"
+                  className="opacity-80 group-hover:opacity-100"
                 >
                   {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                </button>
+                </Button>
               ))}
               {page.frontMatter?.date ? (
                 <span className="opacity-60 text-sm group-hover:opacity-100">
