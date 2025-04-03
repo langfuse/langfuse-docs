@@ -87,9 +87,9 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
                 .map((t) => t.trim())
                 .includes(tag)
                 ? "default"
-                : "outline"
+                : "secondary"
             }
-            size="xs"
+            size="pill"
           >
             {tag.charAt(0).toUpperCase() + tag.slice(1)}
           </Button>
@@ -133,7 +133,7 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
                       ? "secondary"
                       : "outline"
                   }
-                  size="xs"
+                  size="pill"
                   className="opacity-80 group-hover:opacity-100"
                 >
                   {tag.charAt(0).toUpperCase() + tag.slice(1)}
