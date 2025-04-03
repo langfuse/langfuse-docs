@@ -116,12 +116,16 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
             </div>
             <div className="flex gap-2 flex-wrap mt-3 items-baseline">
               {normalizeTags(page.frontMatter?.tag).map((tag, index) => (
-                <span
+                <button
                   key={index}
-                  className="opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleTagClick(tag);
+                  }}
+                  className="opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                </span>
+                </button>
               ))}
               {page.frontMatter?.date ? (
                 <span className="opacity-60 text-sm group-hover:opacity-100">
