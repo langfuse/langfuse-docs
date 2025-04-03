@@ -2,10 +2,9 @@
 title: "LLM Evaluation 101: Best Practices, Challenges & Proven Techniques"
 description: "Explore proven strategies for LLM evaluation — from offline and online benchmarking – this post briefs you on the state of the art."
 ogImage: /images/blog/2025-03-04-llm-evaluation/blog-post-llm-evaluation.png
-tag: update
+tag: guide, evaluation
 date: 2025/03/04
 author: "Jannik"
-
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
@@ -63,13 +62,15 @@ graph LR
 
 When you’re dealing with a workflow that spans multiple steps—like the above RAG pipeline—each stage needs its own evaluation criteria. Otherwise, you’ll struggle to pinpoint exactly where things go wrong (or right).
 
-
 ## Data Model for Evaluation – Traces
 
 To make sense of all these moving parts, it helps to have an organized way to record exactly what’s happening at each step. That’s where **traces** come in. Traces capture detailed logs of user interactions, intermediate steps, and final outputs, giving you a treasure trove of data for diagnosing issues and measuring performance over time.
 
- <Frame className="max-w-sm">
-![Example Trace](/images/blog/2025-03-04-llm-evaluation/blog-post-example-trace.png)
+{" "}
+
+<Frame className="max-w-sm">
+  ![Example
+  Trace](/images/blog/2025-03-04-llm-evaluation/blog-post-example-trace.png)
 </Frame>
 
 _Example of a trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8ed12d68-353f-464f-bc62-720984c3b6a0?display=graph)_
@@ -78,65 +79,74 @@ _Example of a trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj000
 **Quantify Performance:** Compare model outputs against ground truths or reference answers.  
 **Accelerate Iteration:** With detailed traces, it’s easy to see which inputs cause the biggest problems and quickly focus your tuning efforts there.
 
-
 ## Online vs. Offline Evaluation
 
 Effective LLM evaluation usually blends **offline (development/test)** and **online (production)** methods, each catching different types of errors and insights.
 
 **Offline Evaluation:**  
-  You’ll typically run your model on curated datasets—maybe as part of your CI pipeline or local dev tests (Read more on datasets [here](/docs/datasets/overview)). Smaller datasets are great for quick, “gut check” experiments; larger ones provide a broader sweep of performance indicators. The main challenge is making sure these test sets stay relevant and actually resemble what you’ll see in the wild.
+ You’ll typically run your model on curated datasets—maybe as part of your CI pipeline or local dev tests (Read more on datasets [here](/docs/datasets/overview)). Smaller datasets are great for quick, “gut check” experiments; larger ones provide a broader sweep of performance indicators. The main challenge is making sure these test sets stay relevant and actually resemble what you’ll see in the wild.
 
-  The image below shows an example of a dataset in Langfuse with inputs and expected outputs:
+The image below shows an example of a dataset in Langfuse with inputs and expected outputs:
 
 <Frame className="my-10" fullWidth>
-  ![Example of a dataset in Langfuse](/images/blog/2025-03-04-llm-evaluation/dataset-example.png)
+  ![Example of a dataset in
+  Langfuse](/images/blog/2025-03-04-llm-evaluation/dataset-example.png)
 </Frame>
 
 **Online Evaluation:**  
-  Running evaluations in a live environment lets you spot issues like model drift (where performance gradually degrades over time) or unexpected user queries you never anticipated. But gathering feedback in production can be tricky; you need solid data capture processes and a clear plan for feeding these insights back into your development cycle.
+ Running evaluations in a live environment lets you spot issues like model drift (where performance gradually degrades over time) or unexpected user queries you never anticipated. But gathering feedback in production can be tricky; you need solid data capture processes and a clear plan for feeding these insights back into your development cycle.
 
-  The image below shows an example of a live LLM-as-a-Judge Evaluator in Langfuse that scores new traces for toxicity:
+The image below shows an example of a live LLM-as-a-Judge Evaluator in Langfuse that scores new traces for toxicity:
 
 <Frame className="my-10" fullWidth>
-  ![Example of a live LLM-as-a-Judge Evaluator in Langfuse](/images/blog/2025-03-04-llm-evaluation/online-eval-example.png)
+  ![Example of a live LLM-as-a-Judge Evaluator in
+  Langfuse](/images/blog/2025-03-04-llm-evaluation/online-eval-example.png)
 </Frame>
 
 A balanced approach—where you do regular offline benchmarking and maintain some form of continuous production monitoring—tends to yield the most robust results.
-
 
 ## Common Evaluation Techniques
 
 No single method will capture everything about your model’s behavior, so it often pays to mix and match.
 
 **User Feedback:**  
-   Direct feedback—like user ratings or open-ended comments—offers the clearest signal of whether your LLM is hitting the mark. However, collecting and organizing these insights at scale can be expensive and time-consuming.
+ Direct feedback—like user ratings or open-ended comments—offers the clearest signal of whether your LLM is hitting the mark. However, collecting and organizing these insights at scale can be expensive and time-consuming.
 
-   Example of user feedback captured in ChatGPT:
+Example of user feedback captured in ChatGPT:
 
-   <Frame className="frame-lg" fullWidth>
-   ![Example of user feedback in ChatGPT](/images/blog/2025-03-04-llm-evaluation/user-feedback.png)
-   </Frame>
+{" "}
+
+<Frame className="frame-lg" fullWidth>
+  ![Example of user feedback in
+  ChatGPT](/images/blog/2025-03-04-llm-evaluation/user-feedback.png)
+</Frame>
 
 **Implicit User Feedback (Human-in-the-Loop):**  
-   Instead of waiting for explicit ratings, you can infer quality from user behavior: Did they ask the same question again? Did they click on recommended links? Though it’s usually easier to gather, the signal can be noisy and needs careful interpretation.
+ Instead of waiting for explicit ratings, you can infer quality from user behavior: Did they ask the same question again? Did they click on recommended links? Though it’s usually easier to gather, the signal can be noisy and needs careful interpretation.
 
 **Manual Annotation:**  
-   Having experts (or crowdworkers) label or grade outputs can provide deep insights, especially for complex tasks. The downside is cost and time: manual annotation doesn’t scale easily.
+ Having experts (or crowdworkers) label or grade outputs can provide deep insights, especially for complex tasks. The downside is cost and time: manual annotation doesn’t scale easily.
 
-   Example of a manual annotation workflow in Langfuse:
+Example of a manual annotation workflow in Langfuse:
 
-   <Frame className="my-10" fullWidth>
-   ![Example of a manual annotation workflow in Langfuse](/images/blog/2025-03-04-llm-evaluation/human-annotation-example.png)
-   </Frame>
+{" "}
+
+<Frame className="my-10" fullWidth>
+  ![Example of a manual annotation workflow in
+  Langfuse](/images/blog/2025-03-04-llm-evaluation/human-annotation-example.png)
+</Frame>
 
 **Automated Evaluation:**  
-   Using metrics like precision, recall, F1-score, or specialized generative metrics can give a quick, numerical snapshot of performance. Tools like OpenAI Evals, LangChain Evals, and RAGAS fall in this bucket. These are fast and repeatable but must be validated against human judgment to avoid misleading conclusions.
+ Using metrics like precision, recall, F1-score, or specialized generative metrics can give a quick, numerical snapshot of performance. Tools like OpenAI Evals, LangChain Evals, and RAGAS fall in this bucket. These are fast and repeatable but must be validated against human judgment to avoid misleading conclusions.
 
-   Example of different automated evaluation scores over time in Langfuse:
+Example of different automated evaluation scores over time in Langfuse:
 
- <Frame className="max-w-sm">
-   ![Example of different automated evaluation scores over time in Langfuse](/images/blog/2025-03-04-llm-evaluation/eval-score-example.png)
-   </Frame>
+{" "}
+
+<Frame className="max-w-sm">
+  ![Example of different automated evaluation scores over time in
+  Langfuse](/images/blog/2025-03-04-llm-evaluation/eval-score-example.png)
+</Frame>
 
 Traces are the underlying thread across all these methods—by systematically logging interactions, you create a structured record that each evaluation technique can draw from.
 
@@ -173,13 +183,13 @@ Ultimately, common toolkits like built in LLM-as-a-Judge evals or external libra
 What makes LLM evaluation both fascinating and challenging is how different each use case can be:
 
 **Retrieval-Augmented Generation (RAG):**  
-  Because you’re evaluating both the retrieval step and the generative step, it’s helpful to measure them separately. For example, you might track relevance and precision for document retrieval, then apply generative metrics (like RAGAS) to the summarized output. (Guide on using RAGAS [here](/guides/cookbook/evaluation_of_rag_with_ragas))
+ Because you’re evaluating both the retrieval step and the generative step, it’s helpful to measure them separately. For example, you might track relevance and precision for document retrieval, then apply generative metrics (like RAGAS) to the summarized output. (Guide on using RAGAS [here](/guides/cookbook/evaluation_of_rag_with_ragas))
 
 **Agent-Based LLM Applications:**  
-  Here, the model isn’t just producing text—it’s also making decisions or taking actions based on user inputs. Evaluating such agents usually involves simulating interactive conversations and carefully checking each intermediate decision. Human-in-the-loop feedback can be especially helpful to confirm the agent’s logic or to flag any odd behavior.
+ Here, the model isn’t just producing text—it’s also making decisions or taking actions based on user inputs. Evaluating such agents usually involves simulating interactive conversations and carefully checking each intermediate decision. Human-in-the-loop feedback can be especially helpful to confirm the agent’s logic or to flag any odd behavior.
 
 **Voice Agent Evaluation:**  
-  Voice-based applications bring unique challenges, as they combine speech recognition, synthesis, and interactive dialogue. Evaluating these agents often requires assessing both the conversational dynamics and the audio processing performance. For a comprehensive overview of best practices and challenges in this area, see our dedicated guide: [Evaluating and Monitoring Voice AI Agents](/blog/2025-01-22-evaluating-voice-ai-agents).
+ Voice-based applications bring unique challenges, as they combine speech recognition, synthesis, and interactive dialogue. Evaluating these agents often requires assessing both the conversational dynamics and the audio processing performance. For a comprehensive overview of best practices and challenges in this area, see our dedicated guide: [Evaluating and Monitoring Voice AI Agents](/blog/2025-01-22-evaluating-voice-ai-agents).
 
 ## Getting Started with LLM Evaluation
 
@@ -199,23 +209,29 @@ flowchart LR
 <Steps>
 
 ### Collect Data
-Use traces or structured logs from real interactions or test runs. This is your source of truth.  
+
+Use traces or structured logs from real interactions or test runs. This is your source of truth.
 
 ### Experiment with Different Methods
-Don’t rely on just one technique. Try manual annotation, automated metrics, user feedback—even pairwise comparisons if that fits your use case.  
+
+Don’t rely on just one technique. Try manual annotation, automated metrics, user feedback—even pairwise comparisons if that fits your use case.
 
 ### Set Baselines
-Establish performance benchmarks (even if they’re rough) so you can see progress or detect regressions over time.  
+
+Establish performance benchmarks (even if they’re rough) so you can see progress or detect regressions over time.
 
 ### Pick Your Environment
-Decide whether to run initial tests offline for quick iteration or go straight to production for immediate, real-world feedback. 
+
+Decide whether to run initial tests offline for quick iteration or go straight to production for immediate, real-world feedback.
 
 ### Close the Loop
+
 Feed learnings from production back into development. In other words, if you spot new failure modes in the wild, incorporate them into your offline test sets.
 
 </Steps>
 
 For more in-depth guidance on setting up your evaluation workflows with Langfuse, check out the [evaluation docs](https://langfuse.com/docs/scores/overview). It’s packed with best practices and step-by-step instructions for capturing traces, running tests, and refining your pipeline.
 
-## Final Thoughts  
+## Final Thoughts
+
 Evaluating LLMs is never a one-and-done task. As your model and user base evolve, your evaluation strategies need to keep pace. By combining offline benchmarks with real-time insights, leveraging traces, and staying open to new techniques, you’ll be well on your way to building more reliable, impactful LLM applications.
