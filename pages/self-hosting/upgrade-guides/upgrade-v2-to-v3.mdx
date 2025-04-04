@@ -196,6 +196,10 @@ and move your traffic after validating that the new instances are working as exp
   started. Set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false` in the environment
   variables of the new Langfuse web and worker containers until traffic is
   shifted. Afterwards, remove the overwrite or set to `true`.
+
+  In addition, the upgrade is known to work well between v2.92.0 and v3.29.0.
+  Newer versions of v3 remove database entities that v2 still depends on.
+  Therefore, we recommend to use v3.29.0 for parallel operations and upgrade to the latest v3 once the migration is complete.
 </Callout>
 
 ### Upgrade Steps
