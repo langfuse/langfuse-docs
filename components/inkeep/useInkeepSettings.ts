@@ -133,7 +133,7 @@ const useInkeepSettings = (): InkeepSharedSettings => {
           }
           return [];
         },
-      } as ToolFunction<{answerConfidence: string}>,
+      } as ToolFunction<{explanation: string; answerConfidence: string}>,
     ],
   };
 
