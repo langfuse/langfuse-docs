@@ -16,7 +16,7 @@ You can use the same environment variables for the Langfuse Web and Langfuse Wor
 ### Core Infrastructure Settings
 
 | Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                                           |
-|-------------------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`                                  | Required           | Connection string of your Postgres database. Instead of `DATABASE_URL`, you can also use `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME`, and `DATABASE_ARGS`.                                                                                                                                                                                                             |
 | `DIRECT_URL`                                    | `DATABASE_URL`     | Connection string of your Postgres database used for database migrations. Use this if you want to use a different user for migrations or use connection pooling on `DATABASE_URL`. **For large deployments**, configure the database user with long timeouts as migrations might need a while to complete.                                                                                            |
 | `SHADOW_DATABASE_URL`                           |                    | If your database user lacks the `CREATE DATABASE` permission, you must create a shadow database and configure the "SHADOW_DATABASE_URL". This is often the case if you use a Cloud database. Refer to the [Prisma docs](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/shadow-database#cloud-hosted-shadow-databases-must-be-created-manually) for detailed instructions. |
@@ -74,7 +74,7 @@ There are additional features that can be enabled and configured via environment
 
 import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
 
-<SelfHostFeatures/>
+<SelfHostFeatures />
 
 ## Timezones
 
@@ -91,8 +91,11 @@ The health check endpoint indicates if the application is alive and the readines
 Access the health and readiness check endpoints:
 
 ```bash
+# langfuse-web
 curl http://localhost:3000/api/public/health
 curl http://localhost:3000/api/public/ready
+
+# langfuse-worker
 curl http://localhost:3030/api/health
 ```
 
@@ -118,7 +121,7 @@ Langfuse uses OpenTelemetry to provide observability into the application.
 If you want to include Langfuse into your own tracing setup, you can configure the following environment variables to send spans to your own collector:
 
 | Variable                      | Required / Default      | Description                                                                                       |
-|-------------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------- |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | The OTLP collector endpoint Langfuse should send traces to. Path is /v1/traces.                   |
 | `OTEL_SERVICE_NAME`           | `web/worker`            | Name of the service within your APM tool.                                                         |
 | `OTEL_TRACE_SAMPLING_RATIO`   | `1`                     | The sampling ratio for traces. A value of `1` means all traces are sent. Must be between 0 and 1. |
