@@ -57,12 +57,32 @@ Langfuse will act as the “backend” for OpenTelemetry in this setup – essen
    - Sign up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosted Langfuse](https://langfuse.com/self-hosting).
    - Set the OTLP endpoint (e.g. `https://cloud.langfuse.com/api/public/otel`) and API keys.
 
+<Tabs items={["Env Variables", "Configuration in `application.properties`"]}>
+<Tab>
+
 Configure these via environment variables:
 
 ```bash
 QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: set this to the Langfuse OTLP URL (e.g. https://cloud.langfuse.com/api/public/otel).
 QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 public:secret>.
 ```
+
+</Tab>
+<Tab>
+
+Making the following configuration in `application.properties`:
+
+```bash
+quarkus.otel.exporter.otlp.headers=Authorization=Basic <base64 of public:key>
+quarkus.otel.exporter.otlp.endpoint=https://cloud.langfuse.com/api/public/otel
+quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
+```
+
+</Tab>
+</Tabs>
+
+
+
 
 <Callout type="info">
 You can find more on authentication via Basic Auth [here](/docs/opentelemetry/get-started).
