@@ -63,6 +63,7 @@ export default {
     title: "More",
   },
   rbac: "Access Control (RBAC)",
+  "custom-dashboards": "Custom Dashboards",
   "data-security-privacy": "Data Security & Privacy",
   "data-retention": "Data Retention",
   "data-deletion": "Data Deletion",
