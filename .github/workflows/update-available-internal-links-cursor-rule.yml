@@ -2,15 +2,18 @@ name: Update available-internal-links cursor rule
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs daily at midnight UTC
+    - cron: "0 1 * * *" # Runs daily at 1am UTC
   workflow_dispatch: # Allows manual triggering
 
 jobs:
   update-available-internal-links-cursor-rule:
     runs-on: ubuntu-latest
+    environment: "main"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
