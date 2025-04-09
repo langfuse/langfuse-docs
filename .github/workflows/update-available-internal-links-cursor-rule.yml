@@ -1,0 +1,57 @@
+name: Update available-internal-links cursor rule
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs daily at midnight UTC
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-available-internal-links-cursor-rule:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: "9.5.0"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build sitemap and generate llms.txt
+        run: pnpm run build
+        # The llms.txt generation happens automatically as part of the postbuild process
+
+      - name: Append llms.txt to available-internal-links cursor rule
+        run: |
+          # Find the line number where "// Start of LLMs.txt" appears
+          LINE_NUM=$(grep -n "// Start of LLMs.txt" .cursor/rules/available-internal-links.mdc | cut -d: -f1)
+
+          if [ -n "$LINE_NUM" ]; then
+            # Keep the file content up to that line
+            head -n $LINE_NUM .cursor/rules/available-internal-links.mdc > temp_file
+            echo "" >> temp_file  # Add a blank line after the marker
+            
+            # Filter the llms.txt content - replace absolute links with relative ones
+            cat public/llms.txt | sed 's|https://langfuse.com||g' >> temp_file
+            
+            mv temp_file .cursor/rules/available-internal-links.mdc
+            echo "Successfully appended llms.txt content to available-internal-links.mdc with relative links"
+          else
+            echo "Could not find '// Start of LLMs.txt' marker in available-internal-links.mdc"
+            exit 1
+          fi
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add .cursor/rules/available-internal-links.mdc
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update available-internal-links.mdc" && git push origin ${GITHUB_REF#refs/heads/})
