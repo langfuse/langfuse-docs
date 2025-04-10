@@ -196,7 +196,7 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "townhall-q2-roadmap- recording",
+    key: "townhall-q2-roadmap-recording",
     dismissible: true,
     content: (
       <Link href="https://www.youtube.com/watch?v=uDsnMaaFzho">
