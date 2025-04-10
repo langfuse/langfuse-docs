@@ -1,5 +1,5 @@
 ---
-description: This cookbook demonstate how to trace Amazon Bedrock Agents with Langfuse.
+description: This cookbook demonstrate how to trace Amazon Bedrock Agents with Langfuse.
 category: Integrations
 ---
 
