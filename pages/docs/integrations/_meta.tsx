@@ -18,7 +18,7 @@ export default {
   mirascope: "Mirascope",
   flowise: "Flowise",
   langflow: "Langflow",
-  "amazon-bedrock": "Amazon Bedrock",
+  bedrock: "Amazon Bedrock",
   "google-vertex-ai": "Google Vertex AI",
   "mistral-sdk": "Mistral SDK",
   promptfoo: "Promptfoo",
