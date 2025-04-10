@@ -195,23 +195,22 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "townhall-q2-roadmap",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/6ba9aueo">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">
-  //         Town Hall (Apr 9): Demos & Q2 Roadmap →
-  //       </span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Town Hall (Apr 9th): Demos of latest features and discussion of Q2
-  //         Roadmap →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "townhall-q2-roadmap- recording",
+    dismissible: true,
+    content: (
+      <Link href="https://www.youtube.com/watch?v=uDsnMaaFzho">
+        {/* mobile */}
+        <span className="sm:hidden">
+          Watch Town Hall: Demos & Q2 Roadmap →
+        </span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Watch Town Hall: Demos of latest features and discussion of Q2 Roadmap →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
