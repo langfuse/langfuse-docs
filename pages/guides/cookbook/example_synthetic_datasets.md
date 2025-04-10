@@ -1,8 +1,13 @@
+---
+description: Notebook on generating synthetic datasets for LLM application and AI agents evaluation. 
+category: Evaluation
+---
+
 # Synthetic Dataset Generation for LLM Evaluation
 
 In this notebook, we will explore how to **generate synthetic datasets** using language models and uploading them to [Langfuse](https://langfuse.com) for evaluation. 
 
-## What Are Datasets in Langfuse?
+## What Langfuse Datasets?
 
 In Langfuse, a *dataset* is a collection of *dataset items*, each typically containing an `input` (e.g., user prompt/question), `expected_output` (the ground truth or ideal answer) and optional metadata.
 
@@ -232,7 +237,7 @@ for golden in synthetic_goldens:
 
 ![Dataset in Langfuse](https://langfuse.com/images/cookbook/example-synthetic-datasets/deepeval-dataset.png)
 
-### Example 4: No-Code via Hugging Face Synthetic Dataset Generator
+### Example 4: No-Code via Hugging Face Dataset Generator
 
 If you prefer a more UI-based approach, check out [Hugging Face's Synthetic Data Generator](https://huggingface.co/blog/synthetic-data-generator). You can generate examples in the Hugging Face UI. Then you can download them as CSV and upload it in the Langfuse UI.
 
