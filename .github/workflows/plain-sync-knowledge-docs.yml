@@ -1,0 +1,30 @@
+name: Index Plain Knowledge Docs
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # 3am every day
+  workflow_dispatch:
+
+jobs:
+  index-plain-knowledge-docs:
+    name: Index Plain Knowledge Docs
+    environment: "main"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install CLI
+        run: npm install -g @team-plain/cli@latest
+
+      - name: Index Langfuse.com
+        run: plain index-sitemap https://langfuse.com/sitemap-0.xml
+        env:
+          PLAIN_API_KEY: ${{ secrets.PLAIN_API_KEY_WRITE_INDEXED_DOCUMENTS }}
+
+      - name: Index GH Discussions
+        run: plain index-sitemap https://langfuse.com/github-discussions-sitemap.xml
+        env:
+          PLAIN_API_KEY: ${{ secrets.PLAIN_API_KEY_WRITE_INDEXED_DOCUMENTS }}
