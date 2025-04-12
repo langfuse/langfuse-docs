@@ -3,6 +3,7 @@ import json
 import os
 import csv
 from datetime import datetime, timezone
+import xml.dom.minidom as md
 
 def run_query(query, variables):
     url = 'https://api.github.com/graphql'
@@ -36,6 +37,7 @@ def load_github_discussions():
             title
             url
             createdAt
+            updatedAt
             upvoteCount
             comments {
               totalCount
@@ -79,8 +81,9 @@ def load_github_discussions():
                 "title": discussion['title'],
                 "href": discussion['url'],
                 "created_at": discussion['createdAt'],
+                "updated_at": discussion['updatedAt'],
                 "upvotes": discussion['upvoteCount'],
-                "comment_count": discussion['comments']['totalCount'],  # Reverted this line
+                "comment_count": discussion['comments']['totalCount'],
                 "resolved": discussion['answer'] is not None,
                 "labels": [label['name'] for label in discussion['labels']['nodes']],
                 "author": {
@@ -122,7 +125,7 @@ def save_discussions_to_csv(discussions, filename="src/langfuse_github_discussio
     
     with open(file_path, "w", newline='', encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=[
-            "number", "title", "href", "created_at", "upvotes", "comment_count",
+            "number", "title", "href", "created_at", "updated_at", "upvotes", "comment_count",
             "resolved", "labels", "author_login", "author_url", "category"
         ])
         writer.writeheader()
@@ -132,6 +135,7 @@ def save_discussions_to_csv(discussions, filename="src/langfuse_github_discussio
                 "title": discussion["title"],
                 "href": discussion["href"],
                 "created_at": discussion["created_at"],
+                "updated_at": discussion["updated_at"],
                 "upvotes": discussion["upvotes"],
                 "comment_count": discussion["comment_count"],
                 "resolved": discussion["resolved"],
@@ -151,10 +155,67 @@ def save_discussions_to_json(discussions, filename="src/langfuse_github_discussi
     
     print(f"Discussions saved to {file_path}")
 
+def generate_sitemap(discussions, filename="public/github-discussions-sitemap.xml"):
+    """Generate a sitemap XML file with all GitHub discussions for third-party indexing."""
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)
+    
+    # Create the XML document
+    doc = md.getDOMImplementation().createDocument(None, "urlset", None)
+    root = doc.documentElement
+    root.setAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
+    
+    # Add all discussion URLs to the sitemap
+    for category in discussions["categories"]:
+        for discussion in category["discussions"]:
+            url_element = doc.createElement("url")
+            
+            loc = doc.createElement("loc")
+            loc.appendChild(doc.createTextNode(discussion["href"]))
+            url_element.appendChild(loc)
+            
+            lastmod = doc.createElement("lastmod")
+            # Use the full ISO 8601 timestamp for lastmod
+            updated_date = datetime.fromisoformat(discussion["updated_at"].replace("Z", "+00:00"))
+            lastmod.appendChild(doc.createTextNode(updated_date.isoformat()))
+            url_element.appendChild(lastmod)
+            
+            # Add priority based on category and resolution status
+            priority = doc.createElement("priority")
+            category_name = category["category"]
+            is_resolved = discussion["resolved"]
+            
+            priority_value = "0" # Default priority
+            
+            if category_name == "Announcements":
+                priority_value = "0.9"
+            elif category_name == "Ideas":
+                priority_value = "0.8"
+            elif category_name == "Support" and is_resolved:
+                priority_value = "0.8"
+            
+            # Skip if priority is 0
+            if priority_value == "0":
+                continue
+
+            priority.appendChild(doc.createTextNode(priority_value))
+            url_element.appendChild(priority)
+            
+            root.appendChild(url_element)
+    
+    # Create the directories if they don't exist
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    # Write the XML to a file with proper formatting
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(doc.toprettyxml(indent="  "))
+    
+    print(f"Sitemap generated at {file_path}")
+
 if __name__ == "__main__":
     try:
         discussions = load_github_discussions()
         save_discussions_to_json(discussions)
+        generate_sitemap(discussions)
     except ValueError as e:
         print(f"Error: {e}")
     except requests.exceptions.RequestException as e:
