@@ -37,6 +37,7 @@ def load_github_discussions():
             title
             url
             createdAt
+            updatedAt
             upvoteCount
             comments {
               totalCount
@@ -80,8 +81,9 @@ def load_github_discussions():
                 "title": discussion['title'],
                 "href": discussion['url'],
                 "created_at": discussion['createdAt'],
+                "updated_at": discussion['updatedAt'],
                 "upvotes": discussion['upvoteCount'],
-                "comment_count": discussion['comments']['totalCount'],  # Reverted this line
+                "comment_count": discussion['comments']['totalCount'],
                 "resolved": discussion['answer'] is not None,
                 "labels": [label['name'] for label in discussion['labels']['nodes']],
                 "author": {
@@ -123,7 +125,7 @@ def save_discussions_to_csv(discussions, filename="src/langfuse_github_discussio
     
     with open(file_path, "w", newline='', encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=[
-            "number", "title", "href", "created_at", "upvotes", "comment_count",
+            "number", "title", "href", "created_at", "updated_at", "upvotes", "comment_count",
             "resolved", "labels", "author_login", "author_url", "category"
         ])
         writer.writeheader()
@@ -133,6 +135,7 @@ def save_discussions_to_csv(discussions, filename="src/langfuse_github_discussio
                 "title": discussion["title"],
                 "href": discussion["href"],
                 "created_at": discussion["created_at"],
+                "updated_at": discussion["updated_at"],
                 "upvotes": discussion["upvotes"],
                 "comment_count": discussion["comment_count"],
                 "resolved": discussion["resolved"],
@@ -171,17 +174,30 @@ def generate_sitemap(discussions, filename="public/github-discussions-sitemap.xm
             url_element.appendChild(loc)
             
             lastmod = doc.createElement("lastmod")
-            # Format the datetime to YYYY-MM-DD format
-            created_date = datetime.fromisoformat(discussion["created_at"].replace("Z", "+00:00"))
-            lastmod.appendChild(doc.createTextNode(created_date.strftime("%Y-%m-%d")))
+            # Use the full ISO 8601 timestamp for lastmod
+            updated_date = datetime.fromisoformat(discussion["updated_at"].replace("Z", "+00:00"))
+            lastmod.appendChild(doc.createTextNode(updated_date.isoformat()))
             url_element.appendChild(lastmod)
             
-            # Add priority based on category (can be customized)
+            # Add priority based on category and resolution status
             priority = doc.createElement("priority")
-            if category["category"] == "Announcements":
-                priority.appendChild(doc.createTextNode("0.9"))
-            else:
-                priority.appendChild(doc.createTextNode("0.7"))
+            category_name = category["category"]
+            is_resolved = discussion["resolved"]
+            
+            priority_value = "0" # Default priority
+            
+            if category_name == "Announcements":
+                priority_value = "0.9"
+            elif category_name == "Ideas":
+                priority_value = "0.8"
+            elif category_name == "Support" and is_resolved:
+                priority_value = "0.8"
+            
+            # Skip if priority is 0
+            if priority_value == "0":
+                continue
+
+            priority.appendChild(doc.createTextNode(priority_value))
             url_element.appendChild(priority)
             
             root.appendChild(url_element)
