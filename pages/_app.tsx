@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
-import { CrispWidget } from "@/components/supportChat";
+import { PlainChat } from "@/components/supportChat";
 import { Hubspot, hsPageView } from "@/components/analytics/hubspot";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
@@ -40,7 +40,7 @@ export default function App({ Component, pageProps }) {
     <div className={`${GeistSans.variable} font-sans ${GeistMono.variable}`}>
       <PostHogProvider client={posthog}>
         <Component {...pageProps} />
-        {process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ? <CrispWidget /> : null}
+        <PlainChat />
       </PostHogProvider>
       <Hubspot />
       <Script
