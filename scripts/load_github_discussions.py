@@ -3,6 +3,7 @@ import json
 import os
 import csv
 from datetime import datetime, timezone
+import xml.dom.minidom as md
 
 def run_query(query, variables):
     url = 'https://api.github.com/graphql'
@@ -151,10 +152,54 @@ def save_discussions_to_json(discussions, filename="src/langfuse_github_discussi
     
     print(f"Discussions saved to {file_path}")
 
+def generate_sitemap(discussions, filename="public/github-discussions-sitemap.xml"):
+    """Generate a sitemap XML file with all GitHub discussions for third-party indexing."""
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)
+    
+    # Create the XML document
+    doc = md.getDOMImplementation().createDocument(None, "urlset", None)
+    root = doc.documentElement
+    root.setAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
+    
+    # Add all discussion URLs to the sitemap
+    for category in discussions["categories"]:
+        for discussion in category["discussions"]:
+            url_element = doc.createElement("url")
+            
+            loc = doc.createElement("loc")
+            loc.appendChild(doc.createTextNode(discussion["href"]))
+            url_element.appendChild(loc)
+            
+            lastmod = doc.createElement("lastmod")
+            # Format the datetime to YYYY-MM-DD format
+            created_date = datetime.fromisoformat(discussion["created_at"].replace("Z", "+00:00"))
+            lastmod.appendChild(doc.createTextNode(created_date.strftime("%Y-%m-%d")))
+            url_element.appendChild(lastmod)
+            
+            # Add priority based on category (can be customized)
+            priority = doc.createElement("priority")
+            if category["category"] == "Announcements":
+                priority.appendChild(doc.createTextNode("0.9"))
+            else:
+                priority.appendChild(doc.createTextNode("0.7"))
+            url_element.appendChild(priority)
+            
+            root.appendChild(url_element)
+    
+    # Create the directories if they don't exist
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    # Write the XML to a file with proper formatting
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(doc.toprettyxml(indent="  "))
+    
+    print(f"Sitemap generated at {file_path}")
+
 if __name__ == "__main__":
     try:
         discussions = load_github_discussions()
         save_discussions_to_json(discussions)
+        generate_sitemap(discussions)
     except ValueError as e:
         print(f"Error: {e}")
     except requests.exceptions.RequestException as e:
