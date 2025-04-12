@@ -15,6 +15,11 @@ export const PlainChat = () => {
       return;
     }
 
+    // Check if URL contains supportChat parameter
+    const shouldShowChat =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("supportChat") === "1";
+
     // Load the script only once
     if (!scriptRef.current) {
       const script = document.createElement("script");
@@ -23,7 +28,7 @@ export const PlainChat = () => {
       script.onload = () => {
         window.Plain.init({
           appId: process.env.NEXT_PUBLIC_PLAIN_APP_ID,
-          hideLauncher: true,
+          hideLauncher: !shouldShowChat, // Show launcher if URL parameter is present
           hideBranding: true,
           requireAuthentication: true,
           style: {
@@ -41,15 +46,15 @@ export const PlainChat = () => {
             bottom: "80px",
           },
         });
+
+        // If URL parameter is present, open the chat immediately
+        if (shouldShowChat) {
+          window.Plain.open();
+        }
       };
 
       document.head.appendChild(script);
       scriptRef.current = script;
-
-      // in 1 second, check if there are unread messages and show the chat launcher if there are
-      setTimeout(() => {
-        showChatLauncherIfUnreadMessages();
-      }, 1000);
 
       // Cleanup function to remove the script when the component unmounts
       return () => {
