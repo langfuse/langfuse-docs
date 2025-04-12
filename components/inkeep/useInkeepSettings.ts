@@ -8,7 +8,7 @@ import type {
   InkeepCallbackEvent,
 } from "@inkeep/cxkit-react";
 import { useTheme } from "nextra-theme-docs";
-import { openChat } from "../supportChat";
+import { showChat } from "../supportChat";
 import { type PostHog, usePostHog } from "posthog-js/react";
 
 const customAnalyticsCallback = (
@@ -68,20 +68,21 @@ const useInkeepSettings = (): InkeepSharedSettings => {
 
   const contactSupportCallToAction: InvokeCallbackAction = {
     type: "invoke_callback",
-    callback: (args) => {
-      if (!args.conversation?.messages?.length) {
-        openChat();
-        return;
-      }
+    callback: () => {
+      showChat();
+      // if (!args.conversation?.messages?.length) {
+      //   showChat();
+      //   return;
+      // }
 
-      const draftMessage =
-        "I tried to get answers via the AI chat but was unable to. My questions were:\n\n" +
-        args.conversation.messages
-          .filter((message) => message.role === "user")
-          .map((message) => message.content)
-          .join("\n");
+      // const draftMessage =
+      //   "I tried to get answers via the AI chat but was unable to. My questions were:\n\n" +
+      //   args.conversation.messages
+      //     .filter((message) => message.role === "user")
+      //     .map((message) => message.content)
+      //     .join("\n");
 
-      openChat(draftMessage);
+      // openChat(draftMessage);
     },
     shouldCloseModal: false,
   };
