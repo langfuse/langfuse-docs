@@ -52,3 +52,13 @@ Example:
 curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 ```
 
+## User Management
+
+To create a new user within Langfuse, one can use the SCIM-style endpoints and `POST /Users`.
+This will create a new user if the email does not exist yet.
+Then it will add the user to the organization with role `NONE`.
+
+Afterward, the role can be updated using the memberships endpoints either on an organization or a project level.
+
+To remove a user from an organization, call the `DELETE /Users/{id}` endpoint.
+This will not delete the user itself, only its membership with the organization.
