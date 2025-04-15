@@ -10,6 +10,12 @@ By default, you need to create a user account, organization and project via the 
 
 If you want to automatically initialize these resources, you can optionally use the following `LANGFUSE_INIT_*` environment variables. When these variables are set, Langfuse will automatically create the specified resources on startup if they don't already exist. This allows for easy integration with infrastructure-as-code and automated deployment pipelines.
 
+<Callout type="info">
+
+For more programmatic control over the provisioning process, you can also use the [Organization Management API](/self-hosting/organization-management-api).
+
+</Callout>
+
 ## Resource Dependencies
 
 The different resources depend on each other.
@@ -26,7 +32,7 @@ Organization
 ## Environment Variables
 
 | Environment Variable               | Description                                                                                    | Required to Create Resource | Example            |
-|------------------------------------|------------------------------------------------------------------------------------------------|-----------------------------|--------------------|
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------- | ------------------ |
 | `LANGFUSE_INIT_ORG_ID`             | Unique identifier for the organization                                                         | Yes                         | `my-org`           |
 | `LANGFUSE_INIT_ORG_NAME`           | Name of the organization                                                                       | No                          | `My Org`           |
 | `LANGFUSE_INIT_PROJECT_ID`         | Unique identifier for the project                                                              | Yes                         | `my-project`       |
