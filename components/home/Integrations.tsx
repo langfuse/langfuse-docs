@@ -166,7 +166,7 @@ export default function Integrations() {
             <Circle
               ref={inLitellmRef}
               title="LiteLLM (proxy)"
-              href="/docs/integrations/litellm"
+              href="/docs/integrations/litellm/tracing"
             >
               <Image
                 src={LitellmIcon}
