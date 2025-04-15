@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.UPDATE_DISCUSSIONS_JSON_PAT }}
+          token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -34,5 +34,5 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add src/langfuse_github_discussions.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update langfuse_github_discussions.json" && git push origin ${GITHUB_REF#refs/heads/})
+          git add src/langfuse_github_discussions.json public/github-discussions-sitemap.xml
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update GitHub discussions JSON and sitemap" && git push origin ${GITHUB_REF#refs/heads/})

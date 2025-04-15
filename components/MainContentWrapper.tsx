@@ -10,7 +10,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { openChat } from "./supportChat";
+import { showChat } from "./supportChat";
 import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
@@ -80,7 +80,7 @@ export const DocsSupport = () => {
             <IconGithub className="h-4 w-4 ml-3" />
           </a>
         </Button>
-        <Button variant="outline" size="sm" onClick={() => openChat()}>
+        <Button variant="outline" size="sm" onClick={() => showChat()}>
           <span>Chat</span> <MessageSquare className="h-4 w-4 ml-3" />
         </Button>
         <Button variant="outline" size="sm" asChild>
