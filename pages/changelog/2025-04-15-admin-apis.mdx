@@ -9,24 +9,45 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-The new Langfuse Admin APIs allow you to create, update, and delete organizations, as well as manage projects and users within those organizations.
-Users can create API keys with organization and project scope, which can be used to authenticate with the Langfuse API and access management routes for projects and users.
-The user management endpoints are written in a [SCIM](https://datatracker.ietf.org/doc/html/rfc7642) compatible way, which allows for easy integration with existing identity management systems.
-We plan to expand SCIM support in upcoming releases.
+These APIs allow you to create, update, and delete organizations, manage projects within organizations, and handle user access with organization and project-scoped API keys.
 
-**Getting Started**
+## Overview
 
-To get started with the Organization Management API, you need to set the `ADMIN_API_KEY` environment variable in your self-hosted instance.
-Set the `ADMIN_API_KEY` as a Bearer token for your requests, and you can start using the [Organization Management API](https://organizations-api.reference.langfuse.com/) to create a new organization and an organization API key.
+| Resource              | Description                                                       | API                         |
+| --------------------- | ----------------------------------------------------------------- | --------------------------- |
+| Organizations         | Create, update, and delete organizations                          | Organization Management API |
+| Organization API Keys | Generate and manage organization-level API keys                   | Organization Management API |
+| Projects              | Create, update, and delete projects within organizations          | Admin API                   |
+| Project API Keys      | Generate and manage project-level API keys                        | Admin API                   |
+| Users                 | Invite, manage, and remove users from organizations and projects  | Admin API                   |
+| User Permissions      | Control access levels for users across organizations and projects | Admin API                   |
 
-With the organization API key, you can make use of the new administrative endpoints which are documented in [Admin API](/docs/admin-api).
+## Organization Management API
 
-**Availability**
+**Availability:** Self-hosted (enterprise) instances only
 
-The Organization Management API is only available for self-hosted instances.
-The Admin API is available for self-hosted instances, and soon we'll add support for it on Langfuse Cloud.
+The Organization Management API provides endpoints for creating and managing organizations in your Langfuse instance. To use this API:
 
-**Learn more**
+1. Set the `ADMIN_API_KEY` environment variable in your self-hosted instance
+2. Include this key as a Bearer token in your API requests
+3. Use the endpoints to create organizations and organization API keys
 
-- [Organization Management API (Self-Hosted Only)](/self-hosting/organization-management-api)
-- [Admin API](/docs/admin-api)
+This API enables full programmatic control over organization creation and management.
+
+Learn more: [Organization Management API](/self-hosting/organization-management-api) | [API Reference](https://organizations-api.reference.langfuse.com/)
+
+## Admin API
+
+**Availability:** Self-hosted (enterprise) instances, Langfuse Cloud support coming soon
+
+The Admin API provides administrative endpoints for managing projects and users within organizations. The user management endpoints follow [SCIM](https://datatracker.ietf.org/doc/html/rfc7642) standards for seamless integration with existing identity management systems, with expanded SCIM support planned for future releases.
+
+To use this API:
+
+1. Obtain an organization API key through the Organization Management API
+2. Use this key to authenticate with the Admin API endpoints
+3. Manage projects, users, and access controls programmatically
+
+These endpoints give organization administrators programmatic control over their Langfuse resources.
+
+Learn more: [Admin API](/docs/admin-api)
