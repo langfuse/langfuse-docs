@@ -43,6 +43,7 @@ export default {
     title: "References",
   },
   api: "API",
+  "admin-api": "Admin API",
   "python-ref": {
     title: "Python SDK ↗",
     href: "https://python.reference.langfuse.com",

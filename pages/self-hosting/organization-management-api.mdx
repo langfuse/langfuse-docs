@@ -1,0 +1,40 @@
+---
+title: Manage Organizations via API
+description: Learn how to create, update, and delete organizations via the Langfuse API on self-hosted installations.
+label: "Version: v3"
+---
+
+# Organization Management API
+
+<Callout type="info">
+
+  This is only available on self-hosted Langfuse deployments.
+  You must configure the `ADMIN_API_KEY` environment variable and add `Bearer ADMIN_API_KEY` as the `Authorization` header to your requests.
+
+</Callout>
+
+## Overview
+
+The Organization Management API allows administrators to programmatically manage organizations in a self-hosted Langfuse instance.
+This API is not available on Langfuse Cloud.
+
+## Authentication
+
+Authenticate with the API by setting the Authorization header:
+
+```bash
+Authorization: Bearer $ADMIN_API_KEY
+```
+
+Where `$ADMIN_API_KEY` is the value set in your environment configuration.
+
+## API Reference
+
+The API provides endpoints for creating, retrieving, updating, and deleting organizations.
+In addition, you can create, list, and delete API keys with an organization scope.
+Those can be used to authenticate with the Langfuse API and use management routes for projects and users ([Admin API](/docs/admin-api)).
+
+References:
+
+- API Reference: https://organizations-api.reference.langfuse.com
+- OpenAPI spec: https://cloud.langfuse.com/generated/organizations-api/openapi.yml
