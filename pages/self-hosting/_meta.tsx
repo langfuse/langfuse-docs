@@ -53,6 +53,7 @@ export default {
   "organization-creators": "Organization Creators (EE)",
   "transactional-emails": "Transactional Emails",
   "ui-customization": "UI Customization (EE)",
+  "organization-management-api": "Organization Management API",
   "-- Upgrade": {
     type: "separator",
     title: "Upgrade",
