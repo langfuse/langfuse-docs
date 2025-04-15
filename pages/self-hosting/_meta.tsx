@@ -9,7 +9,7 @@ export default {
   configuration: "Configuration",
   "license-key": "License Key",
   troubleshooting: "Troubleshooting",
-  "scaling": "Scaling",
+  scaling: "Scaling",
   "-- Deployment": {
     type: "separator",
     title: "Deployment",
@@ -53,7 +53,7 @@ export default {
   "organization-creators": "Organization Creators (EE)",
   "transactional-emails": "Transactional Emails",
   "ui-customization": "UI Customization (EE)",
-  "organization-management-api": "Organization Management API",
+  "organization-management-api": "Organization Management API (EE)",
   "-- Upgrade": {
     type: "separator",
     title: "Upgrade",

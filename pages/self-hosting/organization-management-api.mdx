@@ -8,8 +8,7 @@ label: "Version: v3"
 
 <Callout type="info">
 
-  This is only available on self-hosted Langfuse deployments.
-  You must configure the `ADMIN_API_KEY` environment variable and add `Bearer ADMIN_API_KEY` as the `Authorization` header to your requests.
+This is only available in the self-hosted Enterprise Edition. Please add your [license key](/self-hosting/license-key) to activate it.
 
 </Callout>
 
@@ -18,15 +17,32 @@ label: "Version: v3"
 The Organization Management API allows administrators to programmatically manage organizations in a self-hosted Langfuse instance.
 This API is not available on Langfuse Cloud.
 
+| Resource              | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| Organizations         | Create, update, and delete organizations        |
+| Organization API Keys | Generate and manage organization-level API keys |
+
 ## Authentication
 
-Authenticate with the API by setting the Authorization header:
+<Steps>
+
+### Configure an `ADMIN_API_KEY`
+
+Configure an `ADMIN_API_KEY` in your environment configuration:
+
+```bash filename="Environment"
+ADMIN_API_KEY=your-admin-api-key
+```
+
+### Authenticate with the API
+
+Then, authenticate with the API by setting the Authorization header:
 
 ```bash
 Authorization: Bearer $ADMIN_API_KEY
 ```
 
-Where `$ADMIN_API_KEY` is the value set in your environment configuration.
+</Steps>
 
 ## API Reference
 
