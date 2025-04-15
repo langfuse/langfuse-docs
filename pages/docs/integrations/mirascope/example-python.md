@@ -9,7 +9,7 @@ category: Integrations
 
 [Langfuse](https://langfuse.com/docs) is an open source LLM engineering platform. Traces, evals, prompt management and metrics to debug and improve your LLM application.
 
-With the [Langfuse <-> Mirascope integration](https://langfuse.com/docs/integrations/mirascope), you can log your application to Langfuse by adding the `@with_langfuse` decorator.
+With the [Langfuse <-> Mirascope integration](https://langfuse.com/docs/integrations/mirascope/tracing), you can log your application to Langfuse by adding the `@with_langfuse` decorator.
 
 Let's dive right in with some examples:
 
