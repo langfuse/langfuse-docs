@@ -63,7 +63,7 @@ const menuItems: {
       },
       {
         name: "Litellm",
-        href: "/docs/integrations/litellm",
+        href: "/docs/integrations/litellm/tracing",
       },
       {
         name: "Dify",

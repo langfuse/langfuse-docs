@@ -100,7 +100,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "LiteLLM",
-    href: "/docs/integrations/litellm",
+    href: "/docs/integrations/litellm/tracing",
     icon: <Image src={LitellmIcon} alt="LiteLLM Icon" width={40} height={40} />,
   },
   {

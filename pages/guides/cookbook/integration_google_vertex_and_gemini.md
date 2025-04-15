@@ -25,7 +25,7 @@ There are a few ways through which you can capture traces and metrics for Google
    - [Haystack](https://langfuse.com/docs/integrations/haystack)
    - [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk)
 
-2. via a Proxy such as [LiteLLM](https://langfuse.com/docs/integrations/litellm)
+2. via a Proxy such as [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing)
 3. via wrapping the Vertex AI SDK with the [Langfuse Decorator](https://langfuse.com/docs/sdk/python/decorators) (_see example below_)
 
 ## Notebook Setup
