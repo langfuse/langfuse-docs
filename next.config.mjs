@@ -162,6 +162,7 @@ const nonPermanentRedirects = [
   ].map((path) => [path, path + "/overview"]),
 
   // Redirects to bridge all kinds of old links to new links
+  ["/docs/admin-api", "/docs/api#org-scoped-routes"],
   ["/docs/reference", "https://api.reference.langfuse.com/"],
   ["/docs/integrations/api", "/docs/api"],
   ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
