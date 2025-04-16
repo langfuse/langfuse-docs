@@ -55,6 +55,19 @@ const LogoContextMenu: React.FC<{
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            onClick={(e) => handleAction(e, "/langfuse_logo_white.png", true)}
+          >
+            <Download size={14} className="mr-2" />
+            Logo white (png)
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, "/langfuse_logo_white.svg", true)}
+          >
+            <Download size={14} className="mr-2" />
+            Logo white (svg)
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
             onClick={(e) => handleAction(e, "/langfuse_icon.png", true)}
           >
             <Download size={14} className="mr-2" />
