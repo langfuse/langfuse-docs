@@ -36,25 +36,8 @@ export function ScheduleDemoPage() {
             href: "/docs",
             text: "Docs",
           },
-        ]}
-      />
-
-      {!isValidRegion && (
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-lg">Please select your timezone region</p>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => handleRegionSelect("us")}>
-              US timezone
-            </Button>
-            <Button variant="outline" onClick={() => handleRegionSelect("eu")}>
-              EU timezone
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {isValidRegion && selectedRegion && (
-        <ScheduleDemo region={selectedRegion} />
+        
+        <ScheduleDemo />
       )}
 
       <Background />
