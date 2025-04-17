@@ -11,7 +11,6 @@ from .constants import SpanAttributes, SpanKindValues
 from .tracing import set_span_attributes
 from .agent import extract_trace_id, span_manager
 from .timer_lib import timer
-from .agent import extract_trace_id
 
 
 # Initialize logging
