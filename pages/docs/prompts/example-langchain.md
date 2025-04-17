@@ -20,13 +20,15 @@ _In addition, we use [Langfuse Tracing](https://langfuse.com/docs/tracing) via t
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 
@@ -121,7 +123,7 @@ print(f"Prompt model configurations\nModel: {model}\nTemperature: {temperature}"
 ```
 
     Prompt model configurations
-    Model: gpt-3.5-turbo-1106
+    Model: gpt-4o
     Temperature: 0
 
 
@@ -156,42 +158,133 @@ response = chain.invoke(input=example_input,config={"callbacks":[langfuse_callba
 print(response.content)
 ```
 
-    Event Title: Julia and Alex's Artful Nature Wedding
+    **Event Title:** Central Park Summer Fest
     
-    Audience: Family, friends, and loved ones of Julia and Alex, as well as art and nature enthusiasts.
+    **Event Description:** Central Park Summer Fest is a vibrant outdoor festival celebrating the onset of summer with a blend of music, art, food, and community activities. The event aims to bring together New Yorkers and tourists alike for a day of fun, relaxation, and cultural enrichment in the heart of the city.
     
-    Budget: $30,000
+    **Date and Location:** June 5, 2024, Central Park, New York City
     
-    Venue: Central Park, New York City
+    ---
     
-    Catering Options: 
-    - Organic and locally sourced menu options
-    - Vegetarian and vegan options
-    - Artfully presented dishes
-    - Champagne toast and signature cocktails
+    ### Event Plan
     
-    Entertainment:
-    - Live acoustic music during the ceremony
-    - DJ for the reception
-    - Interactive art stations for guests to create their own masterpieces
-    - Nature-inspired photo booth
+    #### Audience
+    - **Target Audience:** Families, young adults, tourists, and local residents.
+    - **Expected Attendance:** 5,000 - 7,000 people.
     
-    Logistics:
-    - Ceremony and reception to be held in a secluded area of Central Park, surrounded by lush greenery and blooming flowers
-    - Tents and seating to be set up for guests
-    - Art installations and sculptures to be placed around the venue
-    - Transportation for guests to and from the park
-    - Permits and permissions for the event in Central Park
+    #### Budget
+    - **Estimated Total Budget:** $150,000
+      - Venue and Permits: $20,000
+      - Catering: $40,000
+      - Entertainment: $50,000
+      - Marketing and Promotion: $20,000
+      - Logistics and Operations: $20,000
     
-    Potential Vendors:
-    - Catering: Farm-to-table catering company
-    - Music: Local acoustic musician and DJ
-    - Art installations: Local artists and galleries
-    - Photography: Nature and art-focused photographer
-    - Transportation: Eco-friendly shuttle service
+    #### Venue
+    - **Location:** Central Park, New York City
+    - **Specific Area:** Great Lawn or Sheep Meadow (pending permit approval)
+    - **Permits:** Obtain necessary permits from NYC Parks Department. Ensure compliance with noise ordinances and capacity regulations.
     
-    Overall, the wedding will be a beautiful blend of art and nature, with a focus on sustainability and creativity. The event will showcase the couple's love for each other and their shared passions, creating a memorable and unique experience for all in attendance.
+    #### Catering Options
+    - **Food Trucks and Stalls:** Partner with local vendors to provide a diverse range of cuisines, including vegan and gluten-free options.
+      - Potential Vendors:
+        - **The Halal Guys** - Middle Eastern cuisine
+        - **Wafels & Dinges** - Belgian waffles
+        - **Korilla BBQ** - Korean BBQ
+        - **Van Leeuwen Ice Cream** - Artisan ice cream
+    - **Beverage Stations:** Set up hydration stations with water and soft drinks. Consider partnerships with local breweries for a craft beer garden.
+    
+    #### Entertainment
+    - **Main Stage Performances:**
+      - Headliner: A well-known band or artist (e.g., Vampire Weekend or The Strokes)
+      - Supporting Acts: Local bands and emerging artists
+    - **Art Installations:** Collaborate with local artists to create interactive art pieces throughout the park.
+    - **Workshops and Activities:**
+      - Yoga and wellness sessions
+      - Kids' zone with face painting and games
+      - Community art projects
+    
+    #### Logistics
+    - **Security and Safety:** Hire a professional security team. Coordinate with local police and emergency services for safety protocols.
+    - **Transportation and Parking:** Encourage public transportation. Provide shuttle services from major subway stations.
+    - **Waste Management:** Implement a recycling and waste management plan. Partner with a local waste management company for cleanup services.
+    
+    #### Marketing and Promotion
+    - **Social Media Campaigns:** Utilize platforms like Instagram, Facebook, and Twitter for event promotion.
+    - **Partnerships:** Collaborate with local influencers and media outlets for coverage.
+    - **Print Materials:** Distribute flyers and posters in local businesses and community centers.
+    
+    #### Potential Vendors and Partners
+    - **Event Production:** Hire an experienced event production company (e.g., Eventique or Empire Entertainment) to manage logistics and technical aspects.
+    - **Catering Coordination:** Work with a catering coordinator to manage food vendor logistics.
+    - **Sound and Lighting:** Engage a professional AV company (e.g., Frost Productions) for stage and sound setup.
+    
+    ---
+    
+    ### Conclusion
+    
+    Central Park Summer Fest promises to be a memorable event that captures the essence of New York City's vibrant culture. By carefully planning each aspect, from entertainment to logistics, we aim to create a seamless and enjoyable experience for all attendees.
 
+
+## Link with Langfuse Tracing
+
+Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as event-planner", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a [fallback prompt](/docs/prompts/get-started#fallback) is used, no link will be created.
+
+
+```python
+from langfuse import Langfuse
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_openai import ChatOpenAI, OpenAI
+ 
+langfuse = Langfuse()
+ 
+# Text prompts:
+langfuse_text_prompt = langfuse.get_prompt("movie-critic")
+ 
+## Pass the langfuse_text_prompt to the PromptTemplate as metadata to link it to generations that use it
+langchain_text_prompt = PromptTemplate.from_template(
+    langfuse_text_prompt.get_langchain_prompt(),
+    metadata={"langfuse_prompt": langfuse_text_prompt},
+)
+ 
+## Use the text prompt in a Langchain chain
+llm = OpenAI()
+completion_chain = langchain_text_prompt | llm
+ 
+completion_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
+ 
+# Chat prompts:
+langfuse_chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
+ 
+## Manually set the metadata on the langchain_chat_prompt to link it to generations that use it
+langchain_chat_prompt = ChatPromptTemplate.from_messages(
+    langfuse_chat_prompt.get_langchain_prompt()
+)
+langchain_chat_prompt.metadata = {"langfuse_prompt": langfuse_chat_prompt}
+ 
+## or use the ChatPromptTemplate constructor directly.
+## Note that using ChatPromptTemplate.from_template led to issues in the past
+## See: https://github.com/langfuse/langfuse/issues/5374
+langchain_chat_prompt = ChatPromptTemplate(
+    langfuse_chat_prompt.get_langchain_prompt(),
+    metadata={"langfuse_prompt": langfuse_prompt}
+)
+ 
+## Use the chat prompt in a Langchain chain
+chat_llm = ChatOpenAI()
+chat_chain = langchain_chat_prompt | chat_llm
+ 
+chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
+```
+
+
+
+
+    AIMessage(content="As an expert movie critic, I have not personally seen Dune 2 as it has not been released yet. However, I am familiar with Dune (2021), directed by Denis Villeneuve, which is the first installment in the upcoming two-part adaptation of Frank Herbert's novel. Dune (2021) has garnered critical acclaim for its visual storytelling, intricate world-building, and strong performances. I am looking forward to seeing Dune 2 once it is released and offering my expert opinion on it.", additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 105, 'prompt_tokens': 25, 'total_tokens': 130, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-3.5-turbo-0125', 'system_fingerprint': None, 'id': 'chatcmpl-BNJzW0710KB5yXoPXqHiNAfYnccpp', 'finish_reason': 'stop', 'logprobs': None}, id='run-b05e2ebf-dddc-405a-8cba-d7dc4951c104-0', usage_metadata={'input_tokens': 25, 'output_tokens': 105, 'total_tokens': 130, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}})
+
+
+
+**Note:**  If you use the `with_config` method on the PromptTemplate to create a new Langchain Runnable with updated config, please make sure to pass the `langfuse_prompt` in the `metadata` key as well. Set the `langfuse_prompt` metadata key only on PromptTemplates and not additionally on the LLM calls or elsewhere in your chains.
 
 ## View Trace in Langfuse
 
