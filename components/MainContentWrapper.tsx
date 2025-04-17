@@ -1,9 +1,12 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useConfig } from "nextra-theme-docs";
+import config from "../theme.config";
 import { Button } from "./ui/button";
 import {
   Calendar,
+  Copy as CopyIcon,
+  Check as CheckIcon,
   Mail,
   MessageSquare,
   ThumbsDown,
@@ -19,6 +22,123 @@ import IconGithub from "./icons/github";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
+const CopyMarkdownButton = () => {
+  const router = useRouter();
+  const { docsRepositoryBase } = config;
+  const [copyState, setCopyState] = useState<
+    "idle" | "loading" | "copied" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("Error Copying");
+
+  const handleCopy = async () => {
+    setCopyState("loading");
+    setErrorMessage("");
+
+    if (!docsRepositoryBase) {
+      console.error("docsRepositoryBase is not defined in theme config.");
+      setErrorMessage("Config Error");
+      setCopyState("error");
+      setTimeout(() => setCopyState("idle"), 3000);
+      return;
+    }
+
+    let basePath = router.pathname;
+    if (basePath.startsWith("/")) basePath = basePath.substring(1);
+    if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
+    if (!basePath) basePath = "index"; // Handle root index page
+
+    const potentialPaths = [
+      `pages/${basePath}.mdx`,
+      `pages/${basePath}.md`,
+      `pages/${basePath}/index.mdx`,
+      `pages/${basePath}/index.md`,
+    ];
+
+    const fetchPromises = potentialPaths.map(async (filePath) => {
+      const rawUrl = `${docsRepositoryBase
+        ?.replace("https://github.com/", "https://raw.githubusercontent.com/")
+        .replace("/tree/", "/")}/${filePath}`;
+      console.log("Trying to fetch:", rawUrl);
+      const response = await fetch(rawUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Fetch failed for ${filePath}: ${response.status} ${response.statusText}`
+        );
+      }
+      return response.text(); // Return the markdown text on success
+    });
+
+    try {
+      // Use Promise.any to get the first successful fetch
+      const markdown = await Promise.any(fetchPromises);
+
+      await navigator.clipboard.writeText(markdown);
+      setCopyState("copied");
+      setTimeout(() => setCopyState("idle"), 2000);
+    } catch (error: any) {
+      // This error logs only if ALL fetches failed
+      console.error("Failed to copy markdown from any path:", error);
+
+      // Check if it's an AggregateError from Promise.any (all fetches failed)
+      if (error instanceof AggregateError) {
+        // Check if any failure was *not* a 404 before setting specific message
+        const non404Error = error.errors.find(
+          (e) => !e.message?.includes("404 Not Found")
+        );
+        if (non404Error) {
+          setErrorMessage("Fetch Error");
+        } else {
+          setErrorMessage("Source Files Not Found");
+        }
+      } else if (
+        error.name === "NotAllowedError" ||
+        error.name === "SecurityError"
+      ) {
+        setErrorMessage("Clipboard Permission Denied");
+      } else {
+        setErrorMessage("Copy Error"); // Generic error for other issues
+      }
+      setCopyState("error");
+      setTimeout(() => setCopyState("idle"), 3000);
+    }
+  };
+
+  let buttonText = "Copy as Markdown";
+  let ButtonIcon = CopyIcon;
+  if (copyState === "loading") {
+    buttonText = "Copying...";
+  } else if (copyState === "copied") {
+    buttonText = "Copied!";
+    ButtonIcon = CheckIcon;
+  } else if (copyState === "error") {
+    buttonText = errorMessage;
+  }
+
+  const isDisabled = copyState === "loading" || copyState === "copied";
+
+  return (
+    <span
+      role="button"
+      tabIndex={isDisabled ? -1 : 0}
+      onClick={!isDisabled ? handleCopy : undefined}
+      onKeyDown={(e) => {
+        if (!isDisabled && (e.key === "Enter" || e.key === " ")) {
+          handleCopy();
+        }
+      }}
+      className={`inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ${
+        isDisabled
+          ? "opacity-50 cursor-not-allowed"
+          : "cursor-pointer hover:bg-secondary/80"
+      }
+      }`}
+    >
+      {buttonText}
+      <ButtonIcon className="h-3 w-3 ml-1.5" />
+    </span>
+  );
+};
+
 export const MainContentWrapper = (props) => {
   const router = useRouter();
   const { frontMatter } = useConfig();
@@ -28,18 +148,28 @@ export const MainContentWrapper = (props) => {
 
   const versionLabel = frontMatter.label;
 
+  const allowedPrefixes = ["/docs", "/self-hosting", "/guide", "/faq"];
+  const shouldShowCopyButton = allowedPrefixes.some((prefix) =>
+    router.pathname.startsWith(prefix)
+  );
+
   return (
     <>
-      {cookbook ? (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
-      ) : null}
-      {versionLabel && (
-        <div>
-          <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 mt-5 text-xs font-medium text-secondary-foreground">
-            {versionLabel}
-          </span>
+      {(versionLabel || shouldShowCopyButton) && (
+        <div className="flex items-center gap-2 flex-wrap mt-5">
+          {versionLabel && (
+            <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+              {versionLabel}
+            </span>
+          )}
+          {shouldShowCopyButton && <CopyMarkdownButton />}
         </div>
       )}
+
+      {cookbook ? (
+        <NotebookBanner src={cookbook.ipynbPath} className="mb-4 mt-4" />
+      ) : null}
+
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
