@@ -1,9 +1,12 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
+import config from "../theme.config";
 import { Button } from "./ui/button";
 import {
   Calendar,
+  Copy as CopyIcon,
+  Check as CheckIcon,
   Mail,
   MessageSquare,
   ThumbsDown,
@@ -16,8 +19,159 @@ import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import IconGithub from "./icons/github";
+import { cn } from "@/lib/utils";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
+
+const CopyMarkdownButton = () => {
+  const router = useRouter();
+  const { docsRepositoryBase } = config;
+  const [copyState, setCopyState] = useState<
+    "idle" | "loading" | "copied" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("Error Copying");
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
+    };
+  }, []);
+
+  const handleCopy = async () => {
+    // Clear any existing timeout before starting a new operation
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+
+    setCopyState("loading");
+    setErrorMessage("");
+
+    if (!docsRepositoryBase) {
+      console.error("docsRepositoryBase is not defined in theme config.");
+      setErrorMessage("Config Error");
+      setCopyState("error");
+      timeoutIdRef.current = setTimeout(() => {
+        setCopyState("idle");
+        timeoutIdRef.current = null;
+      }, 3000);
+      return;
+    }
+
+    let basePath = router.pathname;
+    if (basePath.startsWith("/")) basePath = basePath.substring(1);
+    if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
+    if (!basePath) basePath = "index"; // Handle root index page
+
+    const potentialPaths = [
+      `pages/${basePath}.mdx`,
+      `pages/${basePath}.md`,
+      `pages/${basePath}/index.mdx`,
+      `pages/${basePath}/index.md`,
+    ];
+
+    const fetchPromises = potentialPaths.map(async (filePath) => {
+      const rawUrl = `${docsRepositoryBase
+        ?.replace("https://github.com/", "https://raw.githubusercontent.com/")
+        .replace("/tree/", "/")}/${filePath}`;
+      const response = await fetch(rawUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Fetch failed for ${filePath}: ${response.status} ${response.statusText}`
+        );
+      }
+      return response.text(); // Return the markdown text on success
+    });
+
+    try {
+      // Use Promise.any to get the first successful fetch
+      const markdown = await Promise.any(fetchPromises);
+
+      await navigator.clipboard.writeText(markdown);
+      setCopyState("copied");
+      timeoutIdRef.current = setTimeout(() => {
+        setCopyState("idle");
+        timeoutIdRef.current = null;
+      }, 2000);
+    } catch (error: any) {
+      // Check if it's an AggregateError from Promise.any (all fetches failed)
+      let all404 = false;
+      if (error instanceof AggregateError) {
+        // Check if *all* failures were 404s
+        all404 = error.errors.every((e) => e.message?.includes("404"));
+        if (!all404) {
+          // Log only if there was a non-404 error
+          console.error(
+            "Failed to copy markdown due to unexpected fetch error:",
+            error
+          );
+          setErrorMessage("Fetch Error");
+        } else {
+          // All were 404s, this is expected
+          console.log(
+            "Source markdown file not found at any potential path for:",
+            router.pathname
+          );
+          setErrorMessage("Source Files Not Found");
+        }
+      } else {
+        // Log other types of errors (clipboard, generic, etc.)
+        console.error("Failed to copy markdown:", error);
+        if (
+          error.name === "NotAllowedError" ||
+          error.name === "SecurityError"
+        ) {
+          setErrorMessage("Clipboard Permission Denied");
+        } else {
+          setErrorMessage("Copy Error"); // Generic error for other issues
+        }
+      }
+
+      setCopyState("error");
+      timeoutIdRef.current = setTimeout(() => {
+        setCopyState("idle");
+        timeoutIdRef.current = null;
+      }, 3000);
+    }
+  };
+
+  let buttonText = "Copy as Markdown";
+  let ButtonIcon = CopyIcon;
+  if (copyState === "loading") {
+    buttonText = "Copying...";
+  } else if (copyState === "copied") {
+    buttonText = "Copied!";
+    ButtonIcon = CheckIcon;
+  } else if (copyState === "error") {
+    buttonText = errorMessage;
+  }
+
+  const isDisabled = copyState === "loading" || copyState === "copied";
+
+  return (
+    <button
+      type="button"
+      disabled={isDisabled || copyState === "error"}
+      onClick={!isDisabled ? handleCopy : undefined}
+      className={cn(
+        "inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground",
+        isDisabled || copyState === "error"
+          ? "opacity-50 cursor-not-allowed"
+          : "cursor-pointer hover:bg-secondary/80",
+        copyState === "error"
+          ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
+          : ""
+      )}
+    >
+      {buttonText}
+      <ButtonIcon className="h-3 w-3 ml-1.5" />
+    </button>
+  );
+};
 
 export const MainContentWrapper = (props) => {
   const router = useRouter();
@@ -28,18 +182,28 @@ export const MainContentWrapper = (props) => {
 
   const versionLabel = frontMatter.label;
 
+  const allowedPrefixes = ["/docs", "/self-hosting", "/guide", "/faq"];
+  const shouldShowCopyButton = allowedPrefixes.some((prefix) =>
+    router.pathname.startsWith(prefix)
+  );
+
   return (
     <>
-      {cookbook ? (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
-      ) : null}
-      {versionLabel && (
-        <div>
-          <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 mt-5 text-xs font-medium text-secondary-foreground">
-            {versionLabel}
-          </span>
+      {(versionLabel || shouldShowCopyButton) && (
+        <div className="flex items-center gap-2 flex-wrap mt-5">
+          {versionLabel && (
+            <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+              {versionLabel}
+            </span>
+          )}
+          {shouldShowCopyButton && <CopyMarkdownButton key={router.pathname} />}
         </div>
       )}
+
+      {cookbook ? (
+        <NotebookBanner src={cookbook.ipynbPath} className="mb-4 mt-4" />
+      ) : null}
+
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
