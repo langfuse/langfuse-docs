@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
 import config from "../theme.config";
 import { Button } from "./ui/button";
@@ -29,8 +29,24 @@ const CopyMarkdownButton = () => {
     "idle" | "loading" | "copied" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string>("Error Copying");
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = async () => {
+    // Clear any existing timeout before starting a new operation
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+
     setCopyState("loading");
     setErrorMessage("");
 
@@ -38,7 +54,10 @@ const CopyMarkdownButton = () => {
       console.error("docsRepositoryBase is not defined in theme config.");
       setErrorMessage("Config Error");
       setCopyState("error");
-      setTimeout(() => setCopyState("idle"), 3000);
+      timeoutIdRef.current = setTimeout(() => {
+        setCopyState("idle");
+        timeoutIdRef.current = null;
+      }, 3000);
       return;
     }
 
@@ -58,7 +77,6 @@ const CopyMarkdownButton = () => {
       const rawUrl = `${docsRepositoryBase
         ?.replace("https://github.com/", "https://raw.githubusercontent.com/")
         .replace("/tree/", "/")}/${filePath}`;
-      console.log("Trying to fetch:", rawUrl);
       const response = await fetch(rawUrl);
       if (!response.ok) {
         throw new Error(
@@ -74,32 +92,49 @@ const CopyMarkdownButton = () => {
 
       await navigator.clipboard.writeText(markdown);
       setCopyState("copied");
-      setTimeout(() => setCopyState("idle"), 2000);
+      timeoutIdRef.current = setTimeout(() => {
+        setCopyState("idle");
+        timeoutIdRef.current = null;
+      }, 2000);
     } catch (error: any) {
-      // This error logs only if ALL fetches failed
-      console.error("Failed to copy markdown from any path:", error);
-
       // Check if it's an AggregateError from Promise.any (all fetches failed)
+      let all404 = false;
       if (error instanceof AggregateError) {
-        // Check if any failure was *not* a 404 before setting specific message
-        const non404Error = error.errors.find(
-          (e) => !e.message?.includes("404 Not Found")
-        );
-        if (non404Error) {
+        // Check if *all* failures were 404s
+        all404 = error.errors.every((e) => e.message?.includes("404"));
+        if (!all404) {
+          // Log only if there was a non-404 error
+          console.error(
+            "Failed to copy markdown due to unexpected fetch error:",
+            error
+          );
           setErrorMessage("Fetch Error");
         } else {
+          // All were 404s, this is expected
+          console.log(
+            "Source markdown file not found at any potential path for:",
+            router.pathname
+          );
           setErrorMessage("Source Files Not Found");
         }
-      } else if (
-        error.name === "NotAllowedError" ||
-        error.name === "SecurityError"
-      ) {
-        setErrorMessage("Clipboard Permission Denied");
       } else {
-        setErrorMessage("Copy Error"); // Generic error for other issues
+        // Log other types of errors (clipboard, generic, etc.)
+        console.error("Failed to copy markdown:", error);
+        if (
+          error.name === "NotAllowedError" ||
+          error.name === "SecurityError"
+        ) {
+          setErrorMessage("Clipboard Permission Denied");
+        } else {
+          setErrorMessage("Copy Error"); // Generic error for other issues
+        }
       }
+
       setCopyState("error");
-      setTimeout(() => setCopyState("idle"), 3000);
+      timeoutIdRef.current = setTimeout(() => {
+        setCopyState("idle");
+        timeoutIdRef.current = null;
+      }, 3000);
     }
   };
 
