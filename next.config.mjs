@@ -147,6 +147,7 @@ const nonPermanentRedirects = [
   ["/discussions", "https://github.com/orgs/langfuse/discussions"],
   ["/gh-discussions", "/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
+  ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
 
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
