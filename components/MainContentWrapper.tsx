@@ -196,7 +196,7 @@ export const MainContentWrapper = (props) => {
               {versionLabel}
             </span>
           )}
-          {shouldShowCopyButton && <CopyMarkdownButton />}
+          {shouldShowCopyButton && <CopyMarkdownButton key={router.pathname} />}
         </div>
       )}
 
