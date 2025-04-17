@@ -77,6 +77,10 @@ type Tier = {
   priceUnit?: string;
   mainFeatures: string[];
   cta: string;
+  ctaCallout?: {
+    text: string;
+    href: string;
+  };
   priceDiscountCta?: {
     name: string;
     href: string;
@@ -165,7 +169,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       name: "Enterprise",
       id: "tier-enterprise",
       href: "/schedule-demo",
-
       featured: false,
       description: "Enterprise-grade support and security features.",
       price: "Custom",
@@ -180,6 +183,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Billing via AWS Marketplace",
       ],
       cta: "Talk to sales",
+      ctaCallout: {
+        text: "Request trial",
+        href: "/request-trial",
+      },
     },
   ],
   selfHosted: [
@@ -219,6 +226,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Chat & Email support",
       ],
       cta: "Subscribe",
+      ctaCallout: {
+        text: "Request trial",
+        href: "/request-trial",
+      },
     },
     {
       name: "Enterprise",
@@ -237,6 +248,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Billing via AWS Marketplace",
       ],
       cta: "Talk to sales",
+      ctaCallout: {
+        text: "Request trial",
+        href: "/request-trial",
+      },
       learnMore: "/enterprise",
     },
   ],
@@ -1343,6 +1358,18 @@ export default function Pricing({
                     >
                       <Link href={tier.href}>{tier.cta}</Link>
                     </Button>
+                    {tier.ctaCallout && (
+                      <div className="mt-2 text-center text-xs">
+                        <Link
+                          href={tier.ctaCallout.href}
+                          className="text-muted-foreground"
+                          target="_blank"
+                        >
+                          {tier.ctaCallout.text}
+                        </Link>
+                      </div>
+                    )}
+                    {!tier.ctaCallout && <div className="mt-2 h-[20px]" />}
                   </CardContent>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
                     <div>
