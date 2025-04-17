@@ -1165,7 +1165,7 @@ def handle_standard_preprocessing(trace_data: Dict[str, Any], parent_span):
     start_time, end_time, duration = timer.check_start_time(
         "handle_standard_preprocessing", trace_data, trace_id
     )
-    print("calling handle_standard_preprocessing", end_time, start_time, duration)
+    logger.debug("calling handle_standard_preprocessing %s %s %s", end_time, start_time, duration)
     preprocessing_trace = trace_data.get("trace", {}).get("preProcessingTrace", {})
 
     # Extract trace ID from preprocessing trace
