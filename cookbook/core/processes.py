@@ -26,7 +26,7 @@ def get_time():
     )
     return end_timestamp, end_time_iso
 
-def get_TraceEventtime(trace_data):
+def get_trace_event_time(trace_data):
     # Get start timestamp from eventTime
     event_time = trace_data.get("eventTime")
     if event_time:
@@ -42,7 +42,7 @@ def get_TraceEventtime(trace_data):
 
 def add_latency(trace_data):
     end_timestamp, end_time_iso = get_time()
-    start_timestamp, start_time_iso = get_TraceEventtime(trace_data)
+    start_timestamp, start_time_iso = get_trace_event_time(trace_data)
     if start_timestamp is None:
         return end_time_iso, end_time_iso, 0
     latency_ms = round((end_timestamp - start_timestamp) * 1000, 3)
