@@ -2,56 +2,123 @@
 description: Langfuse strives to be the most open and transparent LLM toolkit. Learn more about why open source is important to us.
 ---
 
-# Langfuse is Open Source
+# Langfuse's Open-Source Strategy
 
-Langfuse is open source for the following reasons:
+> Langfuse is built in the open. We believe open source and sustainable commercialization can coexist—and this strategy is how we fund continuous, community-driven innovation that's adopted across startups and enterprises.
+>
+> Do you have any questions? Please reach out to the maintainers on [GitHub Discussions](/gh-support).
 
-- To establish complete transparency
-- To enable the community to [self-host](/self-hosting) and [contribute](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
-- To collaborate on integrations with various other open-source tools and frameworks
-- To assure users that Langfuse is open and does not impose lock-in, and that production traces are user data that can be exported/fetched at any time
+<Callout type="info">
 
-Learn more about what's next for Langfuse on our [roadmap](/docs/roadmap).
+All the interfaces and backend services that make up Langfuse's core are released under the permissive MIT license without any usage limits. Peripheral, enterprise-grade capabilities (e.g. advanced human annotation pipelines, enhanced RBAC, audit logging) are available under a commercial license when you self-host Langfuse.
 
-## Langfuse License
+</Callout>
 
-Langfuse is licensed under an MIT license, with the exception of the `/ee` folders of the repository. These directories contain features that are commercially licensed. They are available on Langfuse Cloud and when subscribing to a commercial plan when self-hosting Langfuse. See [License](https://github.com/langfuse/langfuse/blob/main/LICENSE) for more details.
+## Why is Langfuse open source?
 
-The Langfuse core product and all Langfuse-maintained integrations and SDKs are fully open-source and licensed under the MIT license.
+1. **Transparency & Trust**: Developers can inspect every line that handles their data, audit security practices, and avoid vendor lock-in.
+2. **Community Collaboration**: The open source community moves quickly and accelerates [integrations](/docs/integrations/overview) with LangChain, LiteLLM, OpenTelemetry, and the next library you'll build tomorrow. Join our community on [GitHub Discussions](/ideas) to shape the [roadmap](/docs/roadmap).
+3. **Faster Innovation**: Shared ownership means bugs are squashed and features land sooner.
+4. **Sovereignty**: You can run Langfuse anywhere — from your laptop to an air-gapped cluster — without hitting artificial usage caps. [Self-host](/self-hosting) it on your own infrastructure.
+5. **Extensible**: All data is accessible via the public [API](/docs/api) which is fully tested. You can wrap/extend Langfuse or build your own workflows and AI platform around it.
 
-### License FAQ
+## Licensing Overview
 
-- What features are EE and what is MIT-licensed when self-hosting Langfuse? The core of Langfuse is MIT licensed and open-source (tracing, integrations, public API, prompt management). There are no restrictions on usage, modification or deployment of these features when self-hosting Langfuse OSS. The EE features are commercially licensed add-on features on the periphery of the core product that are not required for the core functionality of Langfuse. The documentation and codebase are clearly marked ("Where is this feature available?") to indicate which features are MIT-licensed and which parts are EE (commercially licensed). See a full comparison of features [here](/self-hosting/license-key).
-- Do I risk executing EE code when using Langfuse without a license? No, the EE features are only available when you have a license. You do not risk using EE features if you self-host Langfuse without a license, unless you modify the codebase to circumvent the checks.
-- Do I need to care about the difference between MIT and EE when using Langfuse Cloud? No, depending on which tier of Langfuse Cloud you are on, you will have access to features that are both MIT and EE licensed.
+Self-hosting keeps data on your turf; Cloud offloads ops. Because every deployment runs the same codebase and schema, **you can switch between OSS, Enterprise self-host, and Langfuse Cloud at any time**. Add or remove a license key or switch to the Langfuse Cloud endpoints. No feature flags to untangle, no vendor lock-in, and no downtime.
 
-## Langfuse Repositories
+|                       | OSS Self-Host | Pro / Enterprise Self-Host | Langfuse Cloud |
+| --------------------- | ------------- | -------------------------- | -------------- |
+| All Core features     | ✅            | ✅                         | ✅             |
+| EE add-ons            | -             | ✅                         | ✅             |
+| Fully managed service | -             | -                          | ✅             |
 
-- Langfuse Server (UI and API): [`langfuse/langfuse`](https://github.com/langfuse/langfuse)
-- Langfuse Python SDK and integrations: [`langfuse/langfuse-python`](https://github.com/langfuse/langfuse-python)
-- JS SDK and integrations: [`langfuse/langfuse-js`](https://github.com/langfuse/langfuse-js)
-- Docs: [`langfuse/langfuse-docs`](https://github.com/langfuse/langfuse-docs)
+### MIT Core
 
-## Self-hosting Langfuse vs. Langfuse Cloud
+Langfuse's OSS core includes all core features and has no usage limits. Fork it, extend it, ship it—even in commercial products. All core APIs and backend logic scale horizontally out-of-the-box, so the same deployment can grow from a single-node Docker Compose to a multi-node Kubernetes cluster—without code changes or feature gates. It's the same architecture that powers Langfuse Cloud.
 
-The Langfuse team provides Langfuse Cloud as a managed solution to simplify the initial setup of Langfuse and to minimize the operational overhead of maintaining high availability in production. Get started for free on: https://cloud.langfuse.com.
+### Commercial Extensions
 
-Alternatively, Langfuse can be used [locally](/self-hosting/local) and [self-hosted](/self-hosting).
+Enterprise Edition (EE) modules live in clearly marked `/ee` directories. These are shipped as source code, but require a license key to run. They are optional; the core works 100% without them.
 
-## Contributing
+## Architecture Consistency & Scale
 
-Here are the best ways to contribute to Langfuse via GitHub:
+The Langfuse deployment stack is exactly the same for OSS, Enterprise self-host, and Langfuse Cloud. See our [Self-Hosting Guide](/self-hosting) for instructions on running langfuse locally and deployments at production scale.
 
-1. Submit and vote on [Ideas](/ideas).
-2. Create and comment on [Issues](/issues).
-3. Create a pull request. See see [Contributing.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) to get started.
+<details>
+<summary>Architecture</summary>
 
-## Dependencies
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 
-Langfuse packages use open-source dependencies. Find a complete list in the configuration files across our repositories:
+<ArchitectureDiagram />
+
+import ArchitectureDescription from "@/components-mdx/architecture-description-v3.mdx";
+
+<ArchitectureDescription />
+
+</details>
+
+## Frequently Asked Questions
+
+### Is Langfuse really open source?
+
+Yes. Everything outside the `/ee` folders is MIT-licensed — an OSI-approved license. You get the four freedoms: use, study, modify, distribute.
+
+### Will I accidentally run EE code?
+
+No. EE packages are isolated and gated by the license key check. You can run the core image without a key without running EE code.
+
+### Which self-host licensing options exist?
+
+Langfuse offers two paid tiers atop the free OSS core (see [pricing page](/pricing)):
+
+- **Pro** (self-serve) - an online, pay-as-you-go licence that unlocks all Enterprise Edition (`/ee`) code for small teams. Purchase instantly from the dashboard and cancel anytime.
+- **Enterprise** (custom contract) - the same EE feature set plus advanced SAML/SCIM SSO, extended audit-log retention, priority support & SLAs, red-lined legal terms, and optional professional-services assistance.
+
+Upgrading is as simple as setting `LANGFUSE_EE_LICENSE_KEY` ([docs](/self-hosting/license-key)) in your deployment; containers pick up the change at runtime.
+
+### Does Langfuse rely only on open-source components?
+
+Yes. The entire stack is open source and can be self-hosted. Find a complete list in the configuration files across our repositories:
 
 - Langfuse server: monorepo with [multiple `package.json` files](https://github.com/search?q=repo%3Alangfuse%2Flangfuse%20package.json&type=code)
 - Langfuse Python SDK: main [`pyproject.toml`](https://github.com/langfuse/langfuse-python/blob/main/pyproject.toml)
 - Langfuse JS SDK: monorepo with [multiple `package.json` files](https://github.com/search?q=repo%3Alangfuse%2Flangfuse-js%20package.json&type=code)
 
 As the core Langfuse server is most actively developed, we run an [automated license check](https://github.com/langfuse/langfuse/actions/workflows/licencecheck.yml) on every change to avoid adding dependencies with non-permissive licenses. If you find any issues, please let us know.
+
+### What's the release cadence and how do I stay up to date?
+
+We cut a **GitHub Release multiple times a week** (tagged `vX.Y.Z`) and publish detailed notes in the [changelog](https://github.com/langfuse/langfuse/releases). Langfuse Cloud is always running the latest version; self-host users can pull the identical Docker image tag to stay up to date or upgrade on their own schedule ([docs](/self-hosting/upgrade)).
+
+### Does the OSS build phone home? Can I disable telemetry?
+
+By default, Langfuse sends **anonymous, aggregated usage analytics** to a self-hosted PostHog instance so we know which features matter. **No traces, prompts, or customer data leave your cluster.** Opt-out completely by setting `TELEMETRY_DISABLED=true` in the environment of every service.
+
+### Can I run Langfuse completely offline / air-gapped?
+
+Yes. After the initial image pull, Langfuse **does not require any outbound network calls** to work. Teams in regulated environments run it inside air-gapped Kubernetes clusters; just disable telemetry as above and mirror the Docker registry locally.
+
+### How do I contribute?
+
+Here are the best ways to contribute to Langfuse via GitHub:
+
+1. Submit and vote on [Ideas](/ideas).
+2. Create and comment on [Issues](/issues).
+3. Create a pull request. See [Contributing.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md) to get started.
+
+### I want to see the code!
+
+All our repositories are on [GitHub](https://github.com/langfuse):
+
+- Langfuse Server (UI and API): [`langfuse/langfuse`](https://github.com/langfuse/langfuse)
+- Langfuse Python SDK and integrations: [`langfuse/langfuse-python`](https://github.com/langfuse/langfuse-python)
+- JS SDK and integrations: [`langfuse/langfuse-js`](https://github.com/langfuse/langfuse-js)
+- Docs: [`langfuse/langfuse-docs`](https://github.com/langfuse/langfuse-docs)
+
+### How often are the Langfuse packages installed?
+
+We summarize some public adoption metrics here:
+
+import PublicMetrics from "@/components-mdx/public-metrics.mdx";
+
+<PublicMetrics />
