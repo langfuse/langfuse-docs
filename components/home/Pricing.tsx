@@ -987,6 +987,20 @@ const sections: Section[] = [
           selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
         },
       },
+      {
+        name: "Admin API (project management, SCIM)",
+        href: "/docs/api#org-scoped-routes",
+        tiers: {
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
+      {
+        name: "Organization Management API",
+        href: "/self-hosting/organization-management-api",
+        tiers: {
+          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+        },
+      },
     ],
   },
   {
