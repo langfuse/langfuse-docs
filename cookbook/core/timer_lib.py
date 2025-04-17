@@ -66,7 +66,8 @@ class FunctionTimer:
         duration_ms = (end_time - start_time) * 1000
 
         if duration_ms < 0:
-            duration_ms = -1 * duration_ms
+            logger.warning(f"Negative duration detected: start_time={start_time}, end_time={end_time}")
+            duration_ms = abs(duration_ms)
 
         # Convert timestamps to ISO format
         start_time_iso = self._to_iso_format(start_time)
