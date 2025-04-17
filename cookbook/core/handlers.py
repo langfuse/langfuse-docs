@@ -204,7 +204,7 @@ def update_preprocessing_span(trace_data: Dict[str, Any], preprocessing_span):
             preprocessing_span.set_attribute("model.output", raw_content)
         # Create L4 assessment span as child of LLM span
         with tracer.start_as_current_span(
-            name="pre_proccessing_output",
+            name="pre_processing_output",
             kind=SpanKind.CLIENT,
             attributes={
                 SpanAttributes.OPERATION_NAME: SpanKindValues.TASK,
