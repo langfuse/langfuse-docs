@@ -63,7 +63,7 @@ def create_tracer_provider(
             processor_cls = BatchSpanProcessor if use_batch_processor else SimpleSpanProcessor
             tracer_provider.add_span_processor(processor_cls(otlp_exporter))            
         except Exception as e:
-            print(f"Failed to configure OTLP exporter: {str(e)}")
+            logging.error(f"Failed to configure OTLP exporter: {str(e)}")
     else:
         print("No telemetry endpoint configured, spans will not be exported")
     
