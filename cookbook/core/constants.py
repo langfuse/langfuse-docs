@@ -39,7 +39,7 @@ class SpanAttributes:
     OPERATION_NAME = "gen_ai.operation.name"
 
 class SpanKindValues:
-    """OpenLLMetry span kind values"""
+    """OpenTelemetry span kind values"""
     AGENT = "agent"
     TOOL = "tool"
     TASK = "task"
