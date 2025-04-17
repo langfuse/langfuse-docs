@@ -1363,7 +1363,7 @@ export default function Pricing({
                         <Link
                           href={tier.ctaCallout.href}
                           className="text-muted-foreground"
-                          target="_blank"
+                          target="_blank" rel="noopener noreferrer"
                         >
                           {tier.ctaCallout.text}
                         </Link>
