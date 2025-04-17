@@ -19,6 +19,7 @@ import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import IconGithub from "./icons/github";
+import { cn } from "@/lib/utils";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -152,25 +153,23 @@ const CopyMarkdownButton = () => {
   const isDisabled = copyState === "loading" || copyState === "copied";
 
   return (
-    <span
-      role="button"
-      tabIndex={isDisabled ? -1 : 0}
+    <button
+      type="button"
+      disabled={isDisabled || copyState === "error"}
       onClick={!isDisabled ? handleCopy : undefined}
-      onKeyDown={(e) => {
-        if (!isDisabled && (e.key === "Enter" || e.key === " ")) {
-          handleCopy();
-        }
-      }}
-      className={`inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ${
-        isDisabled
+      className={cn(
+        "inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground",
+        isDisabled || copyState === "error"
           ? "opacity-50 cursor-not-allowed"
-          : "cursor-pointer hover:bg-secondary/80"
-      }
-      }`}
+          : "cursor-pointer hover:bg-secondary/80",
+        copyState === "error"
+          ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
+          : ""
+      )}
     >
       {buttonText}
       <ButtonIcon className="h-3 w-3 ml-1.5" />
-    </span>
+    </button>
   );
 };
 
