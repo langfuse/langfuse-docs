@@ -1,13 +1,7 @@
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
 
-export function ScheduleDemo({
-  className,
-  region,
-}: {
-  className?: string;
-  region: "us" | "eu";
-}) {
+export function ScheduleDemo({ className }: { className?: string }) {
   useEffect(() => {
     (async function () {
       const cal = await getCalApi();
@@ -18,12 +12,9 @@ export function ScheduleDemo({
       });
     })();
   }, []);
-
-  const calLink = region === "us" ? "marc-kl/30" : "clemo/sales";
-
   return (
     <Cal
-      calLink={calLink}
+      calLink="clemo/sales"
       className={className}
       style={{ width: "100%", height: "100%", overflow: "scroll" }}
       config={{ layout: "month_view" }}
