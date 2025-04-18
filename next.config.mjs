@@ -148,6 +148,7 @@ const nonPermanentRedirects = [
   ["/gh-discussions", "/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
+  ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
 
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
