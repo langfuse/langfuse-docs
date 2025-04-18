@@ -6,7 +6,7 @@ description: Langfuse strives to be the most open and transparent LLM toolkit. L
 
 > Langfuse is built in the open. We believe open source and sustainable commercialization can coexist—and this strategy is how we fund continuous, community-driven innovation that's adopted across startups and enterprises.
 >
-> Do you have any questions? Please reach out to the maintainers on [GitHub Discussions](/gh-support).
+> Do you have any questions? Please reach out to the maintainers via [GitHub Discussions](/gh-support).
 
 <Callout type="info">
 
@@ -24,7 +24,7 @@ All the interfaces and backend services that make up Langfuse's core are release
 
 ## Licensing Overview
 
-Self-hosting keeps data on your turf; Cloud offloads ops. Because every deployment runs the same codebase and schema, **you can switch between OSS, Enterprise self-host, and Langfuse Cloud at any time**. Add or remove a license key or switch to the Langfuse Cloud endpoints. No feature flags to untangle, no vendor lock-in, and no downtime.
+Self-hosting keeps data within your infrastructure; Cloud offloads operational overhead. Because every deployment runs the same codebase and schema, **you can switch between OSS, Enterprise self-host, and Langfuse Cloud at any time**. Add or remove a license key or switch to the Langfuse Cloud endpoints. No feature flags to untangle, no vendor lock-in, and no downtime.
 
 |                       | OSS Self-Host | Pro / Enterprise Self-Host | Langfuse Cloud |
 | --------------------- | ------------- | -------------------------- | -------------- |
@@ -42,7 +42,7 @@ Enterprise Edition (EE) modules live in clearly marked `/ee` directories. These 
 
 ## Architecture Consistency & Scale
 
-The Langfuse deployment stack is exactly the same for OSS, Enterprise self-host, and Langfuse Cloud. See our [Self-Hosting Guide](/self-hosting) for instructions on running langfuse locally and deployments at production scale.
+The Langfuse deployment stack is exactly the same for OSS, Enterprise self-host, and Langfuse Cloud. See our [Self-Hosting Guide](/self-hosting) for instructions on running Langfuse locally and deployments at production scale.
 
 <details>
 <summary>Architecture</summary>
@@ -63,7 +63,7 @@ import ArchitectureDescription from "@/components-mdx/architecture-description-v
 
 Yes. Everything outside the `/ee` folders is MIT-licensed — an OSI-approved license. You get the four freedoms: use, study, modify, distribute.
 
-### Will I accidentally run EE code?
+### Will I accidentally use EE features?
 
 No. EE packages are isolated and gated by the license key check. You can run the core image without a key without running EE code.
 
@@ -92,7 +92,7 @@ We cut a **GitHub Release multiple times a week** (tagged `vX.Y.Z`) and publish 
 
 ### Does the OSS build phone home? Can I disable telemetry?
 
-By default, Langfuse sends **anonymous, aggregated usage analytics** to a self-hosted PostHog instance so we know which features matter. **No traces, prompts, or customer data leave your cluster.** Opt-out completely by setting `TELEMETRY_DISABLED=true` in the environment of every service.
+By default, Langfuse reports **aggregated usage analytics** (no personal data) so we know which features matter. **No traces, prompts, or customer data leave your cluster.** You can opt out of this.
 
 ### Can I run Langfuse completely offline / air-gapped?
 
@@ -115,9 +115,9 @@ All our repositories are on [GitHub](https://github.com/langfuse):
 - JS SDK and integrations: [`langfuse/langfuse-js`](https://github.com/langfuse/langfuse-js)
 - Docs: [`langfuse/langfuse-docs`](https://github.com/langfuse/langfuse-docs)
 
-### How often are the Langfuse packages installed?
+### Can you share some public metrics on how widely Langfuse is used?
 
-We summarize some public adoption metrics here:
+Sure, we summarized some statistics in [this blog post](/blog/2024-11-most-used-oss-llmops) and in the dashboard below.
 
 import PublicMetrics from "@/components-mdx/public-metrics.mdx";
 
