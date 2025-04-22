@@ -62,6 +62,13 @@ You can implement lifecycle rules to automatically remove old files from your bl
 We recommend to keep events for as long as you want to access them within the UI or you want to update them.
 For most customers, a default of 30 days is a good choice.
 
+However, this does not apply to the media bucket used for storing uploaded media files. Setting a retention policy on this bucket is not recommended because:
+
+1. Referenced media files in traces would break
+2. Future uploads of the same file would fail since file upload status is tracked by hash in Postgres
+
+Instead, we recommend using the [Langfuse data-retention feature](/docs/data-retention) to manage media files properly and avoid broken references across the product.
+
 ### ClickHouse Disk Usage
 
 To automatically remove data within ClickHouse, you can use the [TTL](https://clickhouse.com/docs/guides/developer/ttl) feature.
