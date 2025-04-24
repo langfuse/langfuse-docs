@@ -1,0 +1,150 @@
+---
+title: How we use LLMs to build and scale Langfuse
+description: Building a fast-growing open-source project with a small team is fun. These are some of the ways how we use LLMs to accelerate.
+ogImage: /images/blog/2025-04-24-how-we-use-llms-to-scale-langfuse/og.png
+tag: update
+date: 2025/04/24
+author: Marc
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="How we use LLMs to scale Langfuse"
+  description="Building a fast-growing open-source project with a small team is fun. These are some of the ways how we use LLMs to accelerate."
+  authors={["marcklingen"]}
+  date="April 24, 2025"
+/>
+
+At [Langfuse](https://langfuse.com) we've built a culture of aggressively adopting AI tooling. Mostly because we really enjoy it, but also because we want to move fast with a lean/excellent team. As a result, friends often ask what AI tools and workflows work best for our team and for me personally.
+
+**This post summarizes what works best for me personally** in a more exhaustive way than what I could ever share via a text message. My goal is to help others discover more applications of AI by highlighting specific workflows. This is very much inspired by Karpathy's [video](https://www.youtube.com/watch?v=EWvNQjAaOHw) "How I use LLMs" which was surprisingly useful to many people.
+
+Based on my experience, applying AI well is a combination of (1) becoming good at using tools like ChatGPT and Cursor and (2) adopting more specialized "wrappers" like Inkeep or Dosu that solve a specific use case way faster. I'll go deep on both aspects below.
+
+I want to learn from you! Please reach out if I'm missing out on something that works really well for you.
+
+This post is not covering how to build applications with LLMs/GenAI (the core focus of Langfuse). Please check out many of our [posts](/blog) on this if that's what you're looking for.
+
+## Email Management
+
+I thought [Superhuman](https://superhuman.com) was for people that did not set up Gmail shortcuts, reply-all, archive and next, and multi-inboxes; I was wrong. I easily save multiple hours every week thanks to Superhuman.
+
+My inbox is important but also a major source of frustration. I get to spend many hours per day on it and I need to be on top of it. Superhuman has been a lifesaver for smart follow-up suggestions, drafting quick responses, and good tab-autocomplete next to a very responsive UI, good keyboard shortcuts and slow-network performance. For example, while "sounds good" might be the core message, it sometimes isn't formal enough for an email chain. `Cmd + J` helps to make it a bit more context aware.
+
+## Global Text Improvement
+
+I'm a big [Raycast](https://raycast.com) fan overall, the global clipboard history alone would be worth tens of dollars a month if there was no free alternative.
+
+Raycast AI Chat (global chatgpt window that opens/closes with low latency) and AI Commands are really nice additions. The feature I use the most is a global keyboard shortcut to improve the writing of any text I've selected; and press enter to replace the selected text with the improved version.
+
+<CloudflareVideo
+  videoId="5160411ef8022f6c9f04c5d1dfb34d66"
+  aspectRatio={1816 / 1080}
+  gifStyle
+  className="max-w-xl"
+/>
+
+It is also easy to add own AI commands, I for example created one to group github release notes based on conventional-commit prefixes.
+
+<CloudflareVideo
+  videoId="5b5cbbe8440670803c6fc90eaa34e7a8"
+  aspectRatio={1644 / 1080}
+  gifStyle
+  className="max-w-xl"
+/>
+
+When creating automations, I usually struggle with the "payback period". It often takes dozens of executions before they actually save time. With AI Commands, however, creating them is so easy and low-risk that they're worth it almost immediately.
+
+## Using ChatGPT well for research and writing
+
+ChatGPT (and Claude et al.) are potentially the most versatile but also underutilized tools as it takes a while to learn how to use them well in daily routines.
+
+ChatGPT **Deep Research** is worth every cent. Multiple times a week, I need to quickly get up to speed on topics I know little about. I think it is one of the most compelling AI applications that I have ever tried and very applicable to my daily work when building Langfuse. See for example this [detailed analysis](https://chatgpt.com/share/67ab3dc9-00c8-8009-97c8-82f539ab71fd) of the party programs ahead of the last general election in Germany.
+
+For long-form writing, the release of **o3 with tools (websearch and canvas)** is huge. Managing the context well has the biggest impact on the quality of the output. My favorite workflows involve generating context in separate threads (to avoid polluting the main conversation) before copying it into a GPT-4o thread:
+
+1. **Deep research**: Usually I record a 1-2 minute voice memo as an initial instruction for deep research. I try to be very specific about the chapters/sections that deep research should go deep on, and I encourage more depth.
+2. **Voice Mode for Brainstorming:** I like to use **ChatGPT voice mode** as it helps to collect my own thoughts on a topic while walking or biking especially when I haven't made up my mind yet but have lots of thoughts. Sometimes the questions asked by it are helpful, but can also be ignored as the main point is the transcript of 10-20 minutes of thinking and talking aloud about a topic. For shorter input, the in-app speech-to-text is excellent, but it has failed on me multiple times, forcing me to re-record, which is frustrating. Voice mode seems more stable to me once it works.
+
+For example, I gathered the initial ideas for this post during a 15-minute voice session. I then created a draft in O3 on Canvas based on the transcript. Afterward, I made significant edits in Cursor, but it was a great way to get started.
+
+<Frame border>
+  ![Example o3 canvas for this blog
+  post](/images/blog/2025-04-24-how-we-use-llms-to-scale-langfuse/o3-canvas.png)
+</Frame>
+
+## Programming Workflow in Cursor
+
+I use Cursor; I've tried Claude Code, OpenAI Codex CLI and many alternatives but I prefer a GUI that (1) lets me @mention additional context easily, and (2) allows me to review changes while applying additional changes to other files at the same time.
+
+My approach to reviewing large diffs involves reviewing changes as they are generated and staging what I like in Git. This approach provides a clear view of reviewed and unreviewed changes. Compared to reviewing the whole diff at once, it helps maintain my flow (no waiting for cursor to finish) and prevents the need to review thousands of lines at once.
+
+Recent realization. Always turn on _MAX_, it is only USD 0.05 / request and subjectively has a positive impact on results. Spending USD 10/h while programming in Cursor would be totally fine and it is difficult to even spend that much.
+
+Cursor has a learning curve. I usually learn something when I watch someone else using Cursor. I believe that those that don't get value out of it, haven't observed someone who uses it well. These are my personal favorites to improve results (not an expert at this though as I only spend about 10-15h/week in Cursor):
+
+- @mention a documentation url
+- I use deep research when planning for a more complex technical change. The deep research output can be broken down with a reasoning model to get to stepwise instructions that I can copy to Cursor. Add deep research project plan to an .md file within the repo and mention it as high-level context for the current task.
+- When working on a linear ticket, I add a couple of notes regarding what I expect (e.g. "add public api, add to openapi spec, add e2e tests") and then copy the whole issue as markdown (cmd-k + "copy issue as markdown") and paste it into Cursor. This way, I have less risk of crafting prompts within Cursor that are lost when needing to reset the Cursor agent session.
+- @mention a PR or current diff with main branch. This especially helps when I created a new abstraction that I now want to use in other files as the diff is a great way to select just the important initial context for a prompt. Same applies when I need to do something similar over and over, often it is easier to implement the first diff myself and then ask Cursor Agent to apply the same change to all other occurrences (e.g., applying a rate limit key to each API route based on its type).
+
+## Documentation & Changelogs
+
+Docs are crucial and one of the main reasons Langfuse can scale to a large community. We maintain hundreds of pages of Langfuse documentation and changelogs ([repo](https://github.com/langfuse/langfuse-docs)).
+
+In the core writing flow, Cursor-tab helps expand them, while `cmd-k` helps make them concise again (less is almost always better).
+
+Recently, I added more cursor rules to simplify prompting for new [changelog posts](https://github.com/langfuse/langfuse-docs/blob/main/.cursor/rules/changelog-posts.mdc) and [adding cross-references](https://github.com/langfuse/langfuse-docs/blob/main/.cursor/rules/available-internal-links.mdc).
+
+Automations and GitHub Actions are a great target for 'vibe-coding', they are at the edge of the application, very much standalone, and thus implementation details of a simple script don't matter too much. I recently added actions to:
+
+1. generate an llms.txt ([source](https://github.com/langfuse/langfuse-docs/blob/main/scripts/generate_llms_txt.js))
+2. check if all internal links actually work ([source](https://github.com/langfuse/langfuse-docs/blob/8eb3a5ffae25b9e95727b7ccd9450c7aff6cbc8a/.github/workflows/ci.yml#L46-L64))
+3. update the cross-reference cursor rule on a schedule ([source](https://github.com/langfuse/langfuse-docs/blob/main/.github/workflows/update-available-internal-links-cursor-rule.yml))
+4. mirror all Langfuse github discussions in a json in order to [render](https://langfuse.com/changelog/2024-09-23-github-discussion-across-documentation) them within the docs without a network call ([source](https://github.com/langfuse/langfuse-docs/blob/main/scripts/load_github_discussions.py))
+
+These automations dramatically increase the quality of our docs and took very little time to implement. If I had to build them myself, they wouldn't have been worth the time investment.
+
+## AI-Assisted Code Reviews
+
+We move fast as a team, thus AI-based PR reviews save us a lot of time. We tried [Greptile](https://greptile.com) and [Ellipsis](https://ellipsis.dev), both are really good. I think they are most helpful in two areas:
+
+1. They catch stupid issues ahead of a more formal review. Examples: comments that should not make it to main, or a setTimeout that was added to an api to test whether the frontend gracefully handles loading states, or a zod type that could be narrowed.
+
+2. They suggest performance and typing improvements, e.g. memoizing some react state. Usually these suggestions can easily be applied by copying the critique into the Cursor agent and directly pushing the change.
+
+<Frame border>
+  ![Example review comments on a PR created by
+  Ellipsis](/images/blog/2025-04-24-how-we-use-llms-to-scale-langfuse/ai-pr-review.png)
+</Frame>
+
+If you want to see more examples for this, check out the [latest merged PRs](https://github.com/langfuse/langfuse/pulls?q=is%3Apr+is%3Amerged)
+in the main Langfuse repo.
+
+## Scaling Community Support
+
+Supporting a fast-growing open-source project (10&nbsp;k GitHub stars and tens of thousands of teams) with a small core team is a good problem to have—but it's still an effort that sometimes keeps us from shipping new features. We're a team of mostly engineers and everyone does support for their features. This is nice as it results in a very tight feedback loop and generally good documentation out of self-interest.
+
+To reduce the manual support overhead (and help us provide high-quality support without burning out), we added three layers of AI-help for common questions that are already covered by the docs:
+
+- [langfuse.com/ask-ai](https://langfuse.com/ask-ai): The [Inkeep](https://inkeep.com) widget sits on every docs page and answers about 2&nbsp;k questions each week straight from our knowledge base.
+- Public Q&A in GitHub Discussions: We encourage community questions in Discussions because they're indexed by search engines. [Dosu](https://dosu.dev) automatically drafts answers by combining our docs, previous issues, and earlier discussions, resolving many threads every week.
+- Private support channels: For shared Slack channels, website chat, and support@ emails, we route everything through [Plain.com](https://plain.com). Plain indexes the docs and github discussions and helps with in-flow AI drafts.
+
+_Example: Dosu resolving a thread in GitHub Discussions_
+
+<Frame border>
+  ![Example Dosu resolving a thread in Github
+  Discussions](/images/blog/2025-04-24-how-we-use-llms-to-scale-langfuse/dosu-answer.png)
+</Frame>
+
+---
+
+Those are some of the highlights of how I'm currently leveraging LLMs. As mentioned earlier, this is by no means an exhaustive list. If you have recommendations or experiences you'd like to share, please reach out—I'd love to hear from you.
+
+In my opinion, **it is difficult to spend too much money on AI "wrappers" and tokens**. They let teams stay small while shipping far more with less coordination overhead, fewer meetings, and clearer individual ownership.
+
+We're all lucky to be building right now as we can assume that the quality of tooling will only improve over the next months/years. When something new, like Deep Research for example, comes out (even when it's USD200/month), it seems like a very good investment for me to try it.
+
+If you're excited about working on oss developer tooling for LLM/Agent Evaluation and about accelerating your own work with AI, consider [joining us](https://langfuse.com/careers) at Langfuse.
