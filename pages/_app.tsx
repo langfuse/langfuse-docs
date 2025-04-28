@@ -43,11 +43,11 @@ export default function App({ Component, pageProps }) {
         <PlainChat />
       </PostHogProvider>
       <Hubspot />
-      <Script
+      {/* <Script
         src="https://app.termly.io/resource-blocker/488cc3b0-ed5a-4e9d-81f2-76014dcae784?autoBlock=on"
         strategy="beforeInteractive"
         type="text/javascript"
-      />
+      /> */}
     </div>
   );
 }
