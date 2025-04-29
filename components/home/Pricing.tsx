@@ -150,7 +150,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited data access",
         "Unlimited annotation queues",
         "High rate limits",
-        "SOC2, ISO27001 reports",
+        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
         "Support via Slack",
       ],
       addOn: {
@@ -1127,6 +1127,17 @@ const sections: Section[] = [
         },
       },
       {
+        name: "HIPAA compliance",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
         name: "InfoSec/legal reviews",
         tiers: {
           cloud: {
@@ -1363,7 +1374,8 @@ export default function Pricing({
                         <Link
                           href={tier.ctaCallout.href}
                           className="text-muted-foreground"
-                          target="_blank" rel="noopener noreferrer"
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           {tier.ctaCallout.text}
                         </Link>
