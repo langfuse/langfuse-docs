@@ -111,7 +111,6 @@ from opentelemetry import trace
 
 trace_provider = TracerProvider()
 trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-trace.set_tracer_provider(trace_provider)
 tracer = trace.get_tracer("my.tracer.name")
 
 # Creates a new parent span and adds additional attributes
@@ -124,11 +123,11 @@ with tracer.start_as_current_span("Pydantic-Ai-Trace") as span:
     # Run the agent
     success_number = 23
     result = roulette_agent.run_sync('Put my money on square eighteen', deps=success_number)
-    print(result.data)
+    print(result.output)
 
     # Optional: Add input and output values to the new parent span
     span.set_attribute("input.value", success_number)
-    span.set_attribute("output.value", result.new_messages_json())
+    span.set_attribute("output.value", result.output)
 ```
 
 ## Step 6: Explore Traces in Langfuse
