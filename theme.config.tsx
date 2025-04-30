@@ -196,17 +196,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "townhall-q2-roadmap-recording",
+    key: "langfuse-community-hour",
     dismissible: true,
     content: (
-      <Link href="https://www.youtube.com/watch?v=uDsnMaaFzho">
+      <Link href="https://lu.ma/4a4kae7p">
         {/* mobile */}
-        <span className="sm:hidden">
-          Watch Town Hall: Demos & Q2 Roadmap →
-        </span>
+        <span className="sm:hidden">Wednesday: Langfuse Community Hour →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Watch Town Hall: Demos of latest features and discussion of Q2 Roadmap →
+          Wednesday: Langfuse Community Hour, 10am PT / 7pm CET →
         </span>
       </Link>
     ),
