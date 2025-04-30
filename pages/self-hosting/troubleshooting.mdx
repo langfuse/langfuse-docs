@@ -62,6 +62,34 @@ Langfuse is engineered to run in the UTC timezone and expects that all infrastru
 Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
 If you would like us to consider supporting other timezones, please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046).
 
+## Clickhouse: Handling Failed Migrations
+
+If you encounter a migration error, the migration tool will prevent you from running additional migrations on the same database. You'll see an error message like "Dirty database version 1. Fix and force version" even after fixing the erred migration. This means your database has been marked as 'dirty'. You need to investigate whether the migration was partially applied or not applied at all. After determining the actual state, force your database to the version that accurately reflects its current state. Once you've forced the correct version and fixed the migration, your database will be 'clean' again, allowing you to proceed with subsequent migrations.
+
+<details>
+<summary>Code Example to fix failed migrations</summary>
+
+Let's assume your migration 16 failed. You have corrected the failed migration. If you try to migrate again, migrate will STILL refuse:
+
+```bash
+error: Dirty database version 16. Fix and force version.
+```
+
+You will have to force your database to the last successful version, which is 15. Make sure to replace the database credentials with your own.
+
+```bash
+migrate -path migrations/ -database clickhouse://test:test@localhost:8123/dummy force 15
+```
+
+If you migrate again, the output will now be:
+
+```bash
+16/u migration_name (12.718637ms)
+```
+
+</details>
+
+
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
