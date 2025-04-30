@@ -226,7 +226,7 @@ Each child call is represented as a sub-span under the top-level **Joke workflow
 
 Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
 
-In this example, we pass a [user_id](https://langfuse.com/docs/tracing-features/users), [session_id](https://langfuse.com/docs/tracing-features/sessions), [trace_tags](https://langfuse.com/docs/tracing-features/tags) and [environment](https://langfuse.com/docs/tracing-features/environments) to Langfuse. You can also use the span attribute `input.value` and `output.value` to set the trace level input and output.
+In this example, we pass a [user_id](https://langfuse.com/docs/tracing-features/users), [session_id](https://langfuse.com/docs/tracing-features/sessions) and [trace_tags](https://langfuse.com/docs/tracing-features/tags) to Langfuse. You can also use the span attribute `input.value` and `output.value` to set the trace level input and output.
 
 
 ```python
@@ -253,7 +253,6 @@ with tracer.start_as_current_span("OpenAI-Agent-Trace") as span:
     span.set_attribute("langfuse.user.id", "user-12345")
     span.set_attribute("langfuse.session.id", "my-agent-session")
     span.set_attribute("langfuse.tags", ["staging", "demo", "OpenAI Agent SDK"])
-    span.set_attribute("langfuse.environment", "local-dev")
  
     async def main(input_query):
         agent = Agent(
