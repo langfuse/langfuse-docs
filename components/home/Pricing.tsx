@@ -1730,7 +1730,7 @@ const faqs = [
   {
     question: "Where is the data stored?",
     answer:
-      "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/docs/data-security-privacy'>security and privacy documentation</a> for more details.",
+      "Langfuse Cloud is hosted on AWS and data is stored in the US or EU depending on your selection. See our <a class='underline' href='/security'>security and privacy documentation</a> for more details.",
   },
   {
     question: "Do you offer discounts?",

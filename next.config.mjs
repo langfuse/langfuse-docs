@@ -139,7 +139,8 @@ const nonPermanentRedirects = [
   // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
 
-  ["/security", "/docs/data-security-privacy"],
+  ["/docs/data-security-privacy", "/security"],
+  ["/baa", "/security/hipaa"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
   ["/new-idea", "/idea"],
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
@@ -237,6 +238,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/openai-agents", "/docs/integrations/openaiagentssdk/openai-agents"],
   ["/docs/integrations/amazon-bedrock", "/docs/integrations/bedrock/amazon-bedrock"],
   ["/docs/open-source", "/open-source"],
+  ["/faq/all/cloud-data-regions", "/security/data-regions"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],

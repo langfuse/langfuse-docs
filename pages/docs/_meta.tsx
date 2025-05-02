@@ -63,7 +63,6 @@ export default {
     title: "More",
   },
   rbac: "Access Control (RBAC)",
-  "data-security-privacy": "Data Security & Privacy",
   "data-retention": "Data Retention",
   "data-deletion": "Data Deletion",
   roadmap: "Roadmap",
