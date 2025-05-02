@@ -78,9 +78,9 @@ const users: User[] = [
 ];
 
 const stats = [
-  { name: "SDK installs / month", value: 6_000_000 },
-  { name: "GitHub stars", value: 10_000 },
-  { name: "Docker pulls", value: 4_800_000 },
+  { name: "SDK installs / month", value: 7_000_000 },
+  { name: "GitHub stars", value: 11_000 },
+  { name: "Docker pulls", value: 5_500_000 },
 ];
 
 export const Usage = () => (
