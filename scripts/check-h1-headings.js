@@ -27,18 +27,30 @@ async function findMarkdownFiles(dir) {
 
 async function checkH1Count(filepath) {
     let h1Count = 0;
+    let inCodeBlock = false;
     try {
         const content = await fs.readFile(filepath, 'utf-8');
         const lines = content.split('\n');
         for (const line of lines) {
-            // Check for lines starting exactly with '# '
-            if (line.startsWith('# ')) {
+            const trimmedLine = line.trim();
+            // Toggle inCodeBlock state if a code fence is found
+            if (trimmedLine.startsWith('```') || trimmedLine.startsWith('~~~')) {
+                inCodeBlock = !inCodeBlock;
+                continue; // Don't check the fence line itself
+            }
+
+            // Only check for H1 if not inside a code block
+            if (!inCodeBlock && line.startsWith('# ')) {
                 h1Count++;
             }
         }
     } catch (e) {
         console.error(`Error reading file ${filepath}: ${e}`);
         return -1; // Indicate error
+    }
+    // Ensure we didn't end mid-block (e.g., unclosed fence)
+    if (inCodeBlock) {
+        console.warn(`Warning: File ${filepath} might have an unclosed code block.`);
     }
     return h1Count;
 }
