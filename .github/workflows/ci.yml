@@ -17,6 +17,23 @@ jobs:
         with:
           do_not_skip: '["workflow_dispatch"]'
 
+  check_h1:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Use a current LTS version
+
+      - name: Run H1 heading check
+        run: node scripts/check-h1-headings.js
+
   build-and-check-links:
     needs:
       - pre-job
