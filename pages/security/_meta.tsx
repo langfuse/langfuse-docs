@@ -12,7 +12,6 @@ export default {
   "responsible-disclosure": "Responsible Disclosure",
   whistleblowing: "Whistleblowing",
   "penetration-testing": "Penetration Testing",
-  subprocessors: "Subprocessors",
   "vulnerability-management": "Vulnerability Management",
   "-- Compliance": {
     type: "separator",
@@ -27,7 +26,22 @@ export default {
     title: "Privacy",
   },
   dpa: "DPA",
+  subprocessors: "Subprocessors",
   gdpr: "GDPR",
   "manage-personal-data": "Managing Personal Data",
   "privacy-faq": "Privacy FAQ",
+  "-- Legal": {
+    type: "separator",
+    title: "Legal",
+  },
+  terms: {
+    title: "Terms of Service ↗",
+    href: "/terms",
+    newWindow: true,
+  },
+  privacy: {
+    title: "Privacy Policy ↗",
+    href: "/privacy",
+    newWindow: true,
+  },
 };
