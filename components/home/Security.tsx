@@ -21,12 +21,12 @@ export default function Security() {
         }
         className="mb-0"
         buttons={[
-          { href: "/docs/data-security-privacy", text: "Security" },
+          { href: "/security", text: "Security" },
           { href: "/enterprise", text: "Enterprise FAQ" },
         ]}
       />
       <div className="grid grid-cols-2 md:grid-cols-4 place-items-center gap-8 sm:gap-10 md:gap-16 mt-10">
-        <Link href="/docs/data-security-privacy#compliance">
+        <Link href="/security/iso27001">
           <Image
             src={IsoSVG}
             alt="ISO 27001"
@@ -35,7 +35,7 @@ export default function Security() {
             className="w-24 h-auto invert dark:invert-0"
           />
         </Link>
-        <Link href="/docs/data-security-privacy#compliance">
+        <Link href="/security/soc2">
           <Image
             src={Soc2SVG}
             alt="SOC 2"
@@ -44,7 +44,7 @@ export default function Security() {
             className="w-24 h-auto invert dark:invert-0"
           />
         </Link>
-        <Link href="/docs/data-security-privacy#compliance">
+        <Link href="/security/gdpr">
           <Image
             src={GdprSVG}
             alt="GDPR"
@@ -53,7 +53,7 @@ export default function Security() {
             className="w-20 h-auto invert dark:invert-0"
           />
         </Link>
-        <Link href="/docs/data-security-privacy#compliance">
+        <Link href="/security/hipaa">
           <Image
             src={HipaaSVG}
             alt="HIPAA"

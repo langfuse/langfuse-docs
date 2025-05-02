@@ -190,16 +190,17 @@ For a zero-downtime upgrade, we recommend that you provision new instances of th
 and move your traffic after validating that the new instances are working as expected.
 
 <Callout type="warning">
-  If you go for the zero-downtime upgrade, we recommend to disable background
-  migrations until you shift traffic to the new instances. Otherwise, the
-  migration may miss events that are ingested after the new instances were
-  started. Set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false` in the environment
-  variables of the new Langfuse web and worker containers until traffic is
-  shifted. Afterwards, remove the overwrite or set to `true`.
+  
+If you go for the zero-downtime upgrade, we recommend to disable background
+migrations until you shift traffic to the new instances. Otherwise, the
+migration may miss events that are ingested after the new instances were
+started. Set `LANGFUSE_ENABLE_BACKGROUND_MIGRATIONS=false` in the environment
+variables of the new Langfuse web and worker containers until traffic is shifted. Afterwards, remove the overwrite or set to `true`.
 
-  In addition, the upgrade is known to work well between v2.92.0 and v3.29.0.
-  Newer versions of v3 remove database entities that v2 still depends on.
-  Therefore, we recommend to use v3.29.0 for parallel operations and upgrade to the latest v3 once the migration is complete.
+In addition, the upgrade is known to work well between v2.92.0 and v3.29.0.
+Newer versions of v3 remove database entities that v2 still depends on.
+Therefore, we recommend to use v3.29.0 for parallel operations and upgrade to the latest v3 once the migration is complete.
+
 </Callout>
 
 ### Upgrade Steps
@@ -270,33 +271,36 @@ If you want to perform a zero-downtime upgrade, you can follow the steps outline
 In case you use an external Postgres instance, you should follow the general guide as well and just start a new v3 deployment which points to your Postgres instance.
 
 <Steps>
-  #### 1. Note the volume name for the Postgres instance
 
-  We assume that you have deployed Langfuse v2 using the docker-compose.yml from the [Langfuse repository](https://github.com/langfuse/langfuse/blob/v2/docker-compose.yml).
-  Take a note of the volume configuration for your database, e.g. `database_data` in the example below.
-  ```yaml
-  volumes:
-    database_data:
-      driver: local
-  ```
+#### 1. Note the volume name for the Postgres instance
 
-  #### 2. Create a copy of the docker-compose.yml from v3
+We assume that you have deployed Langfuse v2 using the docker-compose.yml from the [Langfuse repository](https://github.com/langfuse/langfuse/blob/v2/docker-compose.yml).
+Take a note of the volume configuration for your database, e.g. `database_data` in the example below.
 
-  Create a copy of the Langfuse v3 [docker-compose file](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) on your local machine.
-  Replace the `langfuse_postgres_data` volume name with the one you noted in step 1.
-  Make sure to update the `volumes` and the `postgres` section.
+```yaml
+volumes:
+  database_data:
+    driver: local
+```
 
-  #### 3. Stop the Langfuse v2 deployment (Beginning of downtime)
+#### 2. Create a copy of the docker-compose.yml from v3
 
-  Run `docker compose down` to stop your Langfuse v2 deployment.
-  Make sure to _not_ add `-v` as we want to retain all volumes.
+Create a copy of the Langfuse v3 [docker-compose file](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) on your local machine.
+Replace the `langfuse_postgres_data` volume name with the one you noted in step 1.
+Make sure to update the `volumes` and the `postgres` section.
 
-  #### 4. Start the Langfuse v3 deployment (End of downtime)
+#### 3. Stop the Langfuse v2 deployment (Beginning of downtime)
 
-  Run `docker compose -f docker-compose.v3.yml up -d` to start the Langfuse v3 deployment.
-  Make sure to replace `docker-compose.v3.yml` with the name of the file you created in step 2.
-  You can start to ingest traces and use other features as soon as the new containers are up and running.
-  The deployment will migrate data from your v2 deployment in the background, so you may see some data missing in the UI for a while.
+Run `docker compose down` to stop your Langfuse v2 deployment.
+Make sure to _not_ add `-v` as we want to retain all volumes.
+
+#### 4. Start the Langfuse v3 deployment (End of downtime)
+
+Run `docker compose -f docker-compose.v3.yml up -d` to start the Langfuse v3 deployment.
+Make sure to replace `docker-compose.v3.yml` with the name of the file you created in step 2.
+You can start to ingest traces and use other features as soon as the new containers are up and running.
+The deployment will migrate data from your v2 deployment in the background, so you may see some data missing in the UI for a while.
+
 </Steps>
 
 ## Support
@@ -305,4 +309,4 @@ If you experience any issues, please create an [issue on GitHub](/issues) or con
 
 For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [schedule a demo](/schedule-demo).
 
-Alternatively, you may consider using Langfuse Cloud, which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/docs/data-security-privacy).
+Alternatively, you may consider using Langfuse Cloud, which is a fully managed version of Langfuse. You can find information about its security and privacy [here](/security).
