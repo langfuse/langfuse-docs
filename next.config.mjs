@@ -236,6 +236,7 @@ const nonPermanentRedirects = [
   ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
   ["/docs/integrations/openai-agents", "/docs/integrations/openaiagentssdk/openai-agents"],
   ["/docs/integrations/amazon-bedrock", "/docs/integrations/bedrock/amazon-bedrock"],
+  ["/docs/open-source", "/open-source"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
