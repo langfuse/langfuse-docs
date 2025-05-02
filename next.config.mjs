@@ -139,7 +139,8 @@ const nonPermanentRedirects = [
   // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
 
-  ["/security", "/docs/data-security-privacy"],
+  ["/docs/data-security-privacy", "/security"],
+  ["/baa", "/security/hipaa"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
   ["/new-idea", "/idea"],
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
@@ -162,6 +163,10 @@ const nonPermanentRedirects = [
     "/docs/datasets",
     "/docs/security",
   ].map((path) => [path, path + "/overview"]),
+
+  // Add redirects for security pages
+  ["/security/overview", "/security"],
+  ["/docs/security", "/docs/security/overview"],
 
   // Redirects to bridge all kinds of old links to new links
   ["/docs/admin-api", "/docs/api#org-scoped-routes"],

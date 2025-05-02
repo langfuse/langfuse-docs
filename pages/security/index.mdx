@@ -1,0 +1,78 @@
+---
+description: Langfuse is enterprise-ready with its data privacy and security measures and controls. Langfuse is SOC2 Type2 and ISO 27001 certified.
+---
+
+# Security Overview
+
+**At Langfuse, we prioritize data privacy and security.** We understand that the data you entrust to us is a vital asset to your business, and we treat it with the utmost care.
+
+We take active steps to demonstrate our commitment to data security and privacy such as annual SOC2 Type 2 and ISO27001 audits as well as External Penetration Tests. You can request access to the reports [here](/request-security-docs).
+
+With Langfuse Cloud, we handle:
+
+- Deployment
+- Scaling
+- Upgrades and security patches
+- Ensuring high availability:
+  <iframe
+    src="https://status.langfuse.com/badge?theme=dark"
+    width="250"
+    height="30"
+    className="hidden dark:inline-block -mt-1"
+    style={{
+      colorScheme: "light", // Fixes incompatibility with Tailwind dark mode
+    }}
+  ></iframe>
+  <iframe
+    src="https://status.langfuse.com/badge?theme=light"
+    width="250"
+    height="30"
+    className="inline-block dark:hidden -mt-1"
+    style={{
+      colorScheme: "light", // Fixes incompatibility with Tailwind dark mode
+    }}
+  ></iframe>
+
+## Security Measures
+
+### Langfuse Cloud
+
+- We encrypt all data at rest and in transit using TLS.
+- Our database and application run on AWS infrastructure, partly managed by Clickhouse.
+- We use Point-in-Time Recovery (PITR) with database backups and Write Ahead Log.
+- All users have access to SSO (Single Sign-On) through OAuth 2.0 with Google, GitHub, and Azure. We can enforce SSO for your organization (Team plan and above) to require 2FA (Two-Factor Authentication) and configure any custom SSO provider.
+- We do not use any of your data for model training and treat it confidentially ([terms and conditions](/terms)).
+- For security inquiries, please contact us at security@langfuse.com
+
+### Self-hosted Instances
+
+- For installation and configuration, see: [Self-hosting guide](/self-hosting)
+- For architecture/component diagram, see: [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md)
+- For basic telemetry, see: [README.md](https://github.com/langfuse/langfuse/blob/main/README.md#telemetry)
+- For security inquiries, please contact us at security@langfuse.com
+
+## Privacy Measures
+
+- For our Privacy Policy, see: [Privacy Policy](https://langfuse.com/privacy)
+- For Data Subject Access Request Form, see: [Data Subject Access Request Form](https://app.termly.io/notify/47905712-56e1-4ad0-9bb7-8958f3263f90)
+- We can enter into a DPA (Data Processing Agreement) including a subprocessor list upon request. Please see our DPA Template [here](https://static.langfuse.com/legal/2025-02-17-Public-Langfuse%20DPA.docx.pdf) for your prior review. Please email us at privacy@langfuse.com with a signed copy, we will then counter-sign your request. Please note that we require users to be on a Pro, Team or Enterprise Plan when we enter into DPAs with them.
+- For privacy inquiries, please contact us at privacy@langfuse.com
+
+## Responsible Disclosure of Security Vulnerabilities
+
+We value the security community and prioritize system security. We encourage the disclosure of security vulnerabilities to help us protect the security and privacy of our users. Please send actionable vulnerability reports to security@langfuse.com.
+Please note that we currently do not operate a bug bounty program.
+
+The following users identified security vulnerabilities which led to improvements of Langfuse.
+
+| Reported by                                             | PR with fix                                             | Description                                    |
+| ------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| [Ather Iqbal](https://linkedin.com/in/atheriqbalhacker) | [#4434](https://github.com/langfuse/langfuse/pull/4434) | Password complexity + block links in user name |
+
+## Whistleblowing
+
+We encourage employees and third parties to report breaches to us via email (legal@langfuse.com) or postal mail (address available [here](/imprint)). You can contact us anonymously or request that we protect your privacy. For more information, employees can refer to Langfuse's internal Responsible Disclosure Policy.
+
+## Notifications
+
+If you want to notify Langfuse of any security-related matters. Please reach out to us via security@langfuse.com

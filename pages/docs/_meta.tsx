@@ -63,7 +63,11 @@ export default {
     title: "More",
   },
   rbac: "Access Control (RBAC)",
-  "data-security-privacy": "Data Security & Privacy",
+  "security-section": {
+    title: "Security ↗",
+    href: "/security",
+    newWindow: false,
+  },
   "data-retention": "Data Retention",
   "data-deletion": "Data Deletion",
   "open-source": "Open Source",
