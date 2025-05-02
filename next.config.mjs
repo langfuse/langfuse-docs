@@ -167,6 +167,13 @@ const nonPermanentRedirects = [
   // Add redirects for security pages
   ["/security/overview", "/security"],
   ["/docs/security", "/docs/security/overview"],
+  ["/soc2", "/security/compliance/soc2"],
+  ["/iso27001", "/security/compliance/iso27001"],
+  ["/hipaa", "/security/compliance/hipaa"],
+  ["/gdpr", "/security/compliance/gdpr"],
+  ["/security/soc2", "/security/compliance/soc2"],
+  ["/security/iso27001", "/security/compliance/iso27001"],
+  ["/security/hipaa", "/security/compliance/hipaa"],
 
   // Redirects to bridge all kinds of old links to new links
   ["/docs/admin-api", "/docs/api#org-scoped-routes"],

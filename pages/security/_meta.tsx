@@ -1,8 +1,8 @@
 export default {
   index: "Overview",
+  "security-measures": "Security Measures",
   "data-regions": "Data Regions",
-  "soc2": "SOC2",
-  "iso27001": "ISO 27001",
-  "hipaa": "HIPAA",
   "dependencies": "Dependencies",
+  "compliance": "Compliance",
+  "responsible-disclosure": "Responsible Disclosure",
 };

@@ -1,0 +1,41 @@
+---
+description: Learn about the security measures implemented by Langfuse to protect your data.
+---
+
+# Security Measures
+
+At Langfuse, we implement comprehensive security measures to protect your data and ensure the reliability of our services.
+
+## Langfuse Cloud
+
+We maintain robust security measures for our cloud offering:
+
+- **Encryption**: We encrypt all data at rest and in transit using TLS.
+- **Infrastructure**: Our database and application run on AWS infrastructure, partly managed by Clickhouse.
+- **Backup and Recovery**: We use Point-in-Time Recovery (PITR) with database backups and Write Ahead Log.
+- **Authentication**: 
+  - All users have access to SSO (Single Sign-On) through OAuth 2.0 with Google, GitHub, and Azure.
+  - We can enforce SSO for your organization (Team plan and above) to require 2FA (Two-Factor Authentication).
+  - We support configuration of custom SSO providers.
+- **Data Confidentiality**: We do not use any of your data for model training and treat it confidentially ([terms and conditions](/terms)).
+
+## Self-hosted Instances
+
+For customers who choose to self-host Langfuse:
+
+- **Installation and Configuration**: Detailed guidance is available in our [Self-hosting guide](/self-hosting).
+- **Architecture**: For architecture and component diagrams, see our [CONTRIBUTING.md](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md).
+- **Telemetry**: Information about basic telemetry is available in our [README.md](https://github.com/langfuse/langfuse/blob/main/README.md#telemetry).
+
+## Security Monitoring and Response
+
+We continuously monitor our systems for security threats and have established procedures for responding to security incidents:
+
+- Regular security assessments and penetration testing
+- Automated vulnerability scanning
+- Security incident response plan
+- Regular security training for all staff
+
+## Contact Information
+
+For security inquiries, please contact us at security@langfuse.com.
