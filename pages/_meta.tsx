@@ -177,4 +177,8 @@ export default {
       timestamp: false,
     },
   },
+  security: {
+    type: "page",
+    title: "Security & Compliance",
+  },
 };
