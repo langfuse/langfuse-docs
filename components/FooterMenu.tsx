@@ -3,7 +3,10 @@ import InkeepChatButton from "./inkeep/InkeepChatButton";
 
 const menuItems: {
   heading: string;
-  items: { name: string; href: string; notificationCount?: number }[];
+  items: (
+    | { name: string; href: string; notificationCount?: number }
+    | "separator"
+  )[];
 }[] = [
   {
     heading: "Platform",
@@ -196,6 +199,23 @@ const menuItems: {
         name: "Privacy",
         href: "/privacy",
       },
+      "separator",
+      {
+        name: "SOC 2 Type II",
+        href: "/security/soc2",
+      },
+      {
+        name: "ISO 27001",
+        href: "/security/iso27001",
+      },
+      {
+        name: "GDPR",
+        href: "/security/gdpr",
+      },
+      {
+        name: "HIPAA",
+        href: "/security/hipaa",
+      },
     ],
   },
 ];
@@ -210,21 +230,30 @@ const FooterMenu = () => {
               {menu.heading}
             </p>
             <ul className="flex flex-col gap-3 items-start">
-              {menu.items.map((item) => (
-                <li key={item.name} className="relative flex gap-1">
-                  <Link
-                    href={item.href}
-                    className="text-sm hover:text-primary/80"
-                  >
-                    {item.name}
-                  </Link>
-                  {item.notificationCount > 0 && (
-                    <span className="transform -translate-y-1/4 bg-primary text-primary-foreground rounded-full h-3 w-3 text-[0.6rem] flex items-center justify-center">
-                      {item.notificationCount}
-                    </span>
-                  )}
-                </li>
-              ))}
+              {menu.items.map((item, index) => {
+                if (item === "separator") {
+                  return (
+                    <li key={`separator-${index}`} className="w-4 my-1">
+                      <hr className="border-border/50" />
+                    </li>
+                  );
+                }
+                return (
+                  <li key={item.name} className="relative flex gap-1">
+                    <Link
+                      href={item.href}
+                      className="text-sm hover:text-primary/80"
+                    >
+                      {item.name}
+                    </Link>
+                    {item.notificationCount > 0 && (
+                      <span className="transform -translate-y-1/4 bg-primary text-primary-foreground rounded-full h-3 w-3 text-[0.6rem] flex items-center justify-center">
+                        {item.notificationCount}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
