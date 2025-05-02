@@ -170,6 +170,15 @@ export default {
       timestamp: false,
     },
   },
+  "open-source": {
+    type: "page",
+    title: "Open Source",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
   "404": {
     type: "page",
     theme: {

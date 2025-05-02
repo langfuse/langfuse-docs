@@ -132,7 +132,7 @@ const menuItems: {
       },
       {
         name: "Open Source",
-        href: "/docs/open-source",
+        href: "/open-source",
       },
       { name: "Why Langfuse?", href: "/why" },
       {
