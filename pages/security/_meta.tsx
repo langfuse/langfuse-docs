@@ -1,5 +1,9 @@
 export default {
   index: "Overview",
+  "-- Security": {
+    type: "separator",
+    title: "Security",
+  },
   encryption: "Encryption",
   "data-regions": "Data Regions & Availability",
   dependencies: "Software Dependencies",
