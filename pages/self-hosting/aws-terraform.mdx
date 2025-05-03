@@ -1,0 +1,42 @@
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+
+export const getStaticProps = async () => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/langfuse/langfuse-terraform-azure/refs/heads/main/README.md"
+  );
+  const readmeContent = await res.text();
+  return {
+    props: {
+      ssg: {
+        terraformReadme: readmeContent,
+      },
+    },
+  };
+};
+
+export function TerraformReadme() {
+  const { terraformReadme } = useData();
+  // Basic check to prevent errors if fetching failed or content is empty
+  if (!terraformReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  // Ensure the source prop receives a string
+  const readmeString =
+    typeof terraformReadme === "string"
+      ? terraformReadme
+      : JSON.stringify(terraformReadme);
+  return <Playground source={readmeString} />;
+}
+
+# Deploy Langfuse on AWS with Terraform
+
+You can deploy the Langfuse stack on AWS with Terraform.
+
+Repo: [langfuse/langfuse-terraform-aws](https://github.com/langfuse/langfuse-terraform-aws)
+
+## Readme
+
+<div className="p-6 mt-6 border bg-card rounded-md">
+  <TerraformReadme />
+</div>
