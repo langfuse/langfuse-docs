@@ -239,6 +239,8 @@ const nonPermanentRedirects = [
   ["/docs/integrations/amazon-bedrock", "/docs/integrations/bedrock/amazon-bedrock"],
   ["/docs/open-source", "/open-source"],
   ["/faq/all/cloud-data-regions", "/security/data-regions"],
+  ["/self-hosting/local", "/self-hosting/docker-compose"],
+  ["/self-hosting/docker", "/self-hosting/kubernetes-helm"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],

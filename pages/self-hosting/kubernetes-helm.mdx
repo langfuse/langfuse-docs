@@ -21,7 +21,16 @@ See [Readme](https://github.com/langfuse/langfuse-k8s/blob/main/README.md) for m
   Discussion](https://github.com/orgs/langfuse/discussions/1902).
 </Callout>
 
-Planned: Cloud-specific deployment guides, please upvote and comment on the following threads: [AWS](https://github.com/orgs/langfuse/discussions/4645), [Google Cloud](https://github.com/orgs/langfuse/discussions/4646), [Azure](https://github.com/orgs/langfuse/discussions/4647).
+<Callout type="info">
+
+Alternatively, you can use one of the following cloud-specific deployment guides:
+
+- [AWS (Terraform)](/self-hosting/aws)
+- [Azure (Terraform)](/self-hosting/azure)
+- [GCP (Terraform)](/self-hosting/gcp)
+- [Railway](/self-hosting/railway)
+
+</Callout>
 
 ## Fetch the Helm chart and customize values
 
@@ -67,6 +76,44 @@ The Langfuse UI will be served on a ClusterIP service by default.
 Use `kubectl get services -n langfuse` and search for `langfuse-web` to see the port mapping.
 Create a port-forward via `kubectl port-forward svc/langfuse-web -n langfuse <local-port>:<nodeport>` and access the UI via `http://localhost:<local-port>` in your browser.
 Go ahead and register, create a new organization, project, and explore Langfuse.
+
+## Readme
+
+Source: [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s)
+
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+import { Callout } from "nextra/components";
+
+export const getStaticProps = async () => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/langfuse/langfuse-k8s/refs/heads/main/README.md"
+  );
+  const readmeContent = await res.text();
+  return {
+    props: {
+      ssg: {
+        helmReadme: readmeContent,
+      },
+    },
+  };
+};
+
+export function HelmReadme() {
+  const { helmReadme } = useData();
+  // Basic check to prevent errors if fetching failed or content is empty
+  if (!helmReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  // Ensure the source prop receives a string
+  const readmeString =
+    typeof helmReadme === "string" ? helmReadme : JSON.stringify(helmReadme);
+  return <Playground source={readmeString} />;
+}
+
+<div className="p-6 mt-6 border bg-card rounded-md">
+  <HelmReadme />
+</div>
 
 ## Features
 

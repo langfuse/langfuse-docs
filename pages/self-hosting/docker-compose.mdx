@@ -6,8 +6,9 @@ label: "Version: v3"
 
 # Docker Compose
 
-This guide will walk you through deploying Langfuse on a VM using Docker Compose.
+This guide will walk you through deploying Langfuse locally or on a VM using Docker Compose.
 We will use the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file.
+This is the simplest way to run Langfuse to give it a try.
 
 If you use a cloud provider like AWS, GCP, or Azure, you will need permissions to deploy virtual machines.
 
@@ -15,10 +16,68 @@ For high-availability and high-throughput, we recommend using Kubernetes ([deplo
 The docker compose setup lacks high-availability, scaling capabilities, and backup functionality.
 
 <Callout type="info">
-  Coming from docker-compose v2? See our upgrade guide for [docker compose](/self-hosting/upgrade-guides/upgrade-v2-to-v3#docker-compose).
+  Coming from docker-compose v2? See our upgrade guide for [docker
+  compose](/self-hosting/upgrade-guides/upgrade-v2-to-v3#docker-compose).
 </Callout>
 
+## Walkthrough
+
+Watch this 2:15 minute walkthrough for a step-by-step guide on running Langfuse locally with Docker Compose.
+
+<iframe
+  width="100%"
+  className="aspect-[15.94/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/we52x5-a_Ac?si=2rqAs0LNwqeq767W"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
 ## Get Started
+
+<Tabs items={["Local", "VM"]}>
+
+<Tab>
+
+<Steps>
+
+### Requirements
+
+- git
+- docker & docker compose -> use [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows
+
+### Clone Langfuse Repository
+
+Get a copy of the latest Langfuse repository:
+
+```bash
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+```
+
+### Start the application
+
+Update the secrets in the docker-compose.yml and then run the langfuse docker compose using:
+
+```bash
+docker compose up
+```
+
+Watch the containers being started and the logs flowing in.
+After about 2-3 minutes, the langfuse-web-1 container should log "Ready".
+At this point you can proceed to the next step.
+
+### Done
+
+And you are ready to go! Open `http://localhost:3000` in your browser to access the Langfuse UI.
+
+</Steps>
+
+</Tab>
+
+<Tab>
 
 <Steps>
 
@@ -104,6 +163,10 @@ And you are ready to go! Open `http://<instance-ip>:3000` in your browser to acc
 Depending on your configuration, you might need to open an SSH tunnel to your VM to access the IP. Please refer to your cloud provider's documentation for how to do this.
 
 </Steps>
+
+</Tab>
+
+</Tabs>
 
 ## Features
 
