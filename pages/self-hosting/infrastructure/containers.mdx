@@ -52,3 +52,54 @@ docker build -t langfuse/langfuse -f ./web/Dockerfile .
 # build worker image
 docker build -t langfuse/langfuse-worker -f ./worker/Dockerfile .
 ```
+
+## Run Langfuse Web
+
+See [configuration](/self-hosting/configuration) for more details on the environment variables.
+
+```bash
+docker run --name langfuse-web \
+  -e DATABASE_URL=postgresql://hello \
+  -e NEXTAUTH_URL=http://localhost:3000 \
+  -e NEXTAUTH_SECRET=mysecret \
+  -e SALT=mysalt \
+  -e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \ # generate via: openssl rand -hex 32
+  -e CLICKHOUSE_URL=http://clickhouse:8123 \
+  -e CLICKHOUSE_USER=clickhouse \
+  -e CLICKHOUSE_PASSWORD=clickhouse \
+  -e CLICKHOUSE_MIGRATION_URL=clickhouse://clickhouse:9000 \
+  -e REDIS_HOST=localhost \
+  -e REDIS_PORT=6379 \
+  -e REDIS_AUTH=redis \
+  -e LANGFUSE_S3_EVENT_UPLOAD_BUCKET=my-bucket \
+  -e LANGFUSE_S3_EVENT_UPLOAD_REGION=us-east-1 \
+  -e LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE \
+  -e LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=bPxRfiCYEXAMPLEKEY \
+  -p 3000:3000 \
+  -a STDOUT \
+langfuse/langfuse:3
+```
+
+## Run Langfuse Worker
+
+See [configuration](/self-hosting/configuration) for more details on the environment variables.
+
+```bash
+docker run --name langfuse-worker \
+  -e DATABASE_URL=postgresql://hello \
+  -e SALT=mysalt \
+  -e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \ # generate via: openssl rand -hex 32
+  -e CLICKHOUSE_URL=http://clickhouse:8123 \
+  -e CLICKHOUSE_USER=clickhouse \
+  -e CLICKHOUSE_PASSWORD=clickhouse \
+  -e REDIS_HOST=localhost \
+  -e REDIS_PORT=6379 \
+  -e REDIS_AUTH=redis \
+  -e LANGFUSE_S3_EVENT_UPLOAD_BUCKET=my-bucket \
+  -e LANGFUSE_S3_EVENT_UPLOAD_REGION=us-east-1 \
+  -e LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE \
+  -e LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=bPxRfiCYEXAMPLEKEY \
+  -p 3030:3030 \
+  -a STDOUT \
+langfuse/langfuse-worker:3
+```

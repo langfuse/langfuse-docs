@@ -19,19 +19,24 @@ Some add-on features require a [license key](/self-hosting/license-key).
 
 ## Deployment Options [#deployment-options]
 
-The following options are available:
+### Langfuse Cloud
 
-- Langfuse Cloud ([EU](https://cloud.langfuse.com) / [US](https://us.cloud.langfuse.com)): A fully managed version of Langfuse that is hosted and maintained by the Langfuse team.
-- Self-host Langfuse: Run Langfuse on your own infrastructure.
-  - [Local](/self-hosting/local): Run Langfuse on your own machine in 5 minutes using Docker Compose.
-  - [VM](/self-hosting/docker-compose): Run Langfuse on a single VM using Docker Compose.
-  - [Docker](/self-hosting/docker)
-  - [Kubernetes (Helm)](/self-hosting/kubernetes-helm): Run Langfuse on a Kubernetes cluster using Helm.
-- Cloud-specific deployment guides
-  - [AWS Terraform Template (Github)](https://github.com/langfuse/langfuse-terraform-aws)
-  - [Azure Terraform Template (Github)](https://github.com/langfuse/langfuse-terraform-azure)
-  - [GCP Terraform Template (Github)](https://github.com/langfuse/langfuse-terraform-gcp)
-  - You can provide feedback on these in the following threads: [AWS](https://github.com/orgs/langfuse/discussions/4645), [Google Cloud](https://github.com/orgs/langfuse/discussions/4646), [Azure](https://github.com/orgs/langfuse/discussions/4647).
+[Langfuse Cloud](https://cloud.langfuse.com) is a fully managed version of Langfuse that is hosted and maintained by the Langfuse team. Generally, it is the easiest and fastest way to get started with Langfuse at affordable [pricing](/pricing).
+
+### Low-scale deployments
+
+You can [run Langfuse on a VM or locally using Docker Compose](/self-hosting/docker-compose).
+This is recommended for testing and low-scale deployments and lacks high-availability, scaling capabilities, and backup functionality.
+
+### Production-scale deployments
+
+For production and high-availability deployments, we recommend one of the following options:
+
+- [Kubernetes (Helm)](/self-hosting/kubernetes-helm): Run Langfuse on a Kubernetes cluster using Helm.
+- [AWS (Terraform)](/self-hosting/aws): Run Langfuse on AWS using Terraform.
+- [Azure (Terraform)](/self-hosting/azure): Run Langfuse on Azure using Terraform.
+- [GCP (Terraform)](/self-hosting/gcp): Run Langfuse on GCP using Terraform.
+- [Railway](/self-hosting/railway): Run Langfuse on Railway.
 
 ## Architecture
 
