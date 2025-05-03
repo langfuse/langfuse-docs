@@ -4,6 +4,27 @@ description: Step-by-step guide to run Langfuse on Azure via Terraform.
 label: "Version: v3"
 ---
 
+# Deploy Langfuse on Azure with Terraform
+
+This guide will walk you through the steps to deploy Langfuse on Azure using the official Terraform module ([langfuse/langfuse-terraform-azure](https://github.com/langfuse/langfuse-terraform-azure)).
+You will need access to an Azure account and the Terraform CLI installed on your local machine.
+
+By default, the Terraform module will provision the necessary infrastructure for the Langfuse application containers and data stores ([architecture overview](/self-hosting#architecture)).
+You can optionally configure the module to use existing Azure resources. See the Readme for more details.
+
+Alternatively, you can deploy Langfuse on Kubernetes using the [Helm chart](/self-hosting/kubernetes-helm).
+
+<Callout type="info">
+  If you are interested in contributing to our Terraform deployment guides or
+  modules, please reach out to us on [Discord](/discord), contact the
+  maintainers at support@langfuse.com, or check the [GitHub
+  Repository](https://github.com/langfuse/langfuse-terraform-azure).
+</Callout>
+
+## Readme
+
+Source: [langfuse/langfuse-terraform-azure](https://github.com/langfuse/langfuse-terraform-azure)
+
 import { useData } from "nextra/hooks";
 import { Playground } from "nextra/components";
 import { Callout } from "nextra/components";
@@ -35,23 +56,6 @@ export function TerraformReadme() {
       : JSON.stringify(terraformReadme);
   return <Playground source={readmeString} />;
 }
-
-# Deploy Langfuse on Azure with Terraform
-
-This guide will walk you through the steps to deploy Langfuse on Azure using the official Terraform module ([langfuse/langfuse-terraform-azure](https://github.com/langfuse/langfuse-terraform-azure)).
-You will need access to an Azure account and the Terraform CLI installed on your local machine.
-
-By default, the Terraform module will provision the necessary infrastructure for the Langfuse application containers and data stores ([architecture overview](/self-hosting#architecture)).
-You can optionally configure the module to use existing Azure resources. See the Readme for more details.
-
-<Callout type="info">
-  If you are interested in contributing to our Terraform deployment guides or
-  modules, please reach out to us on [Discord](/discord), contact the
-  maintainers at support@langfuse.com, or check the [GitHub
-  Repository](https://github.com/langfuse/langfuse-terraform-azure).
-</Callout>
-
-## Readme
 
 <div className="p-6 mt-6 border bg-card rounded-md">
   <TerraformReadme />

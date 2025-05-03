@@ -77,6 +77,44 @@ Use `kubectl get services -n langfuse` and search for `langfuse-web` to see the 
 Create a port-forward via `kubectl port-forward svc/langfuse-web -n langfuse <local-port>:<nodeport>` and access the UI via `http://localhost:<local-port>` in your browser.
 Go ahead and register, create a new organization, project, and explore Langfuse.
 
+## Readme
+
+Source: [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s)
+
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+import { Callout } from "nextra/components";
+
+export const getStaticProps = async () => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/langfuse/langfuse-k8s/refs/heads/main/README.md"
+  );
+  const readmeContent = await res.text();
+  return {
+    props: {
+      ssg: {
+        helmReadme: readmeContent,
+      },
+    },
+  };
+};
+
+export function HelmReadme() {
+  const { helmReadme } = useData();
+  // Basic check to prevent errors if fetching failed or content is empty
+  if (!helmReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  // Ensure the source prop receives a string
+  const readmeString =
+    typeof helmReadme === "string" ? helmReadme : JSON.stringify(helmReadme);
+  return <Playground source={readmeString} />;
+}
+
+<div className="p-6 mt-6 border bg-card rounded-md">
+  <HelmReadme />
+</div>
+
 ## Features
 
 Langfuse supports many configuration options and self-hosted features.
