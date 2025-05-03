@@ -18,6 +18,9 @@ export default {
   "docker-compose": "VM (Docker Compose)",
   docker: "Docker",
   "kubernetes-helm": "Kubernetes (Helm)",
+  aws: "AWS (Terraform)",
+  azure: "Azure (Terraform)",
+  gcp: "GCP (Terraform)",
   railway: "Railway",
   infrastructure: "Infrastructure",
   "-- Security": {
