@@ -535,7 +535,7 @@ langfuse.score(
     name="user-feedback",
     value=1,
     comment="This was correct, thank you"
-);
+)
 ```
 
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/08bb7cf3-87c6-4a78-a3fc-72af8959a106
