@@ -94,6 +94,8 @@ import nest_asyncio
 nest_asyncio.apply()
 ```
 
+**Note:** `nest_asyncio.apply()` is not compatible with `uvloop`, which is commonly used with FastAPI to manage the event loop. If your application uses `uvloop` and you require nest_asyncio (e.g., for certain instrumentation or tracing libraries), you'll need to disable `uvloop` in the affected parts of your codebase and fall back to Python’s standard asyncio event loop.
+
 
 ```python
 import logfire
