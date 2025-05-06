@@ -34,5 +34,6 @@ export default {
   "spring-ai": "Spring AI",
   "quarkus-langchain4j": "Quarkus LangChain4j",
   mastra: "Mastra",
+  voltagent: "VoltAgent",
   other: "More Ways to Integrate",
 };
