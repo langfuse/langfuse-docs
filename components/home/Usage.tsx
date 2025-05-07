@@ -6,8 +6,8 @@ import circlebackLight from "./img/circleback_light.png";
 import circlebackDark from "./img/circleback_dark.png";
 import samsaraLight from "./img/samsara_light.png";
 import samsaraDark from "./img/samsara_dark.png";
-import fortoLight from "./img/forto_light.svg";
-import fortoDark from "./img/forto_dark.svg";
+import springernatureLight from "./img/springernature_light.svg";
+import springernatureDark from "./img/springernature_dark.svg";
 import juiceboxLight from "./img/juicebox_light.svg";
 import juiceboxDark from "./img/juicebox_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
@@ -58,10 +58,10 @@ const users: User[] = [
     href: "https://pigment.com",
   },
   {
-    name: "Forto",
-    lightImage: fortoLight,
-    darkImage: fortoDark,
-    href: "https://forto.com",
+    name: "Springer Nature",
+    lightImage: springernatureLight,
+    darkImage: springernatureDark,
+    href: "https://www.springernature.com",
   },
   {
     name: "Juicebox",
