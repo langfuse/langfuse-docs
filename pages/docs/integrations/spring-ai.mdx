@@ -137,6 +137,48 @@ public void testAiCall() {
 }
 ```
 
+## Setting userId and sessionId
+
+This section covers how to associate spans from Spring AI with [users](/docs/tracing-features/users) and [sessions](/docs/tracing-features/sessions).
+Create a custom span and set the Langfuse-specific attributes directly:
+
+```java
+public String processUserRequest(String userInput, String userId) {
+    // Create a new span with user and session attributes
+    Span span = tracer.spanBuilder("user-interaction")
+            .setAttribute("langfuse.user.id", userId)
+            .setAttribute("langfuse.session.id", UUID.randomUUID().toString())
+            .startSpan();
+
+    // Make sure to set the new span as active.
+    try (Scope ignored = span.makeCurrent()) {
+        // Your AI processing logic here
+        // Any spans created within this scope will be children of the parent span
+        String result = performAiOperation(userInput);
+        return result;
+    } finally {
+        span.end();
+    }
+}
+
+private String performAiOperation(String userInput) {
+    // Your Spring AI code here
+    // For example:
+    List<Message> messages = new ArrayList<>();
+    messages.add(new SystemMessage("You are a helpful assistant."));
+    messages.add(new UserMessage(userInput));
+
+    Prompt prompt = new Prompt(messages);
+    ChatResponse response = chatClient.call(prompt);
+    return response.getResult().getOutput().getContent();
+}
+```
+
+<Callout type="info">
+  Note that for proper user tracking in Langfuse, the `langfuse.user.id` and `langfuse.session.id` attributes should ideally be set on the root span.
+  If you're unable to add these attributes to the root span directly, you can use the [Langfuse Java SDK](https://github.com/langfuse/langfuse-java) to update the trace after it has been written.
+</Callout>
+
 ## Troubleshooting
 
 **No Traces:**
