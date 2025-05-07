@@ -155,6 +155,10 @@ const menuItems: {
         name: "🇨🇳 Chinese",
         href: "/cn",
       },
+      {
+        name: "🇻🇳 Vietnamese",
+        href: "/vn",
+      },
     ],
   },
   {
