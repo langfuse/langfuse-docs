@@ -3,7 +3,7 @@ title: Observability for VoltAgent with Langfuse
 description: Learn how to integrate Langfuse with VoltAgent, a TypeScript agent framework, to monitor, debug, and analyze your AI applications.
 ---
 
-#  Observability for VoltAgent with Langfuse
+# Observability for VoltAgent with Langfuse
 
 This guide shows you how to integrate **Langfuse** with **VoltAgent** for observability and tracing. By following these steps, you'll be able to monitor and debug your VoltAgent agents in the Langfuse dashboard.
 
@@ -13,115 +13,124 @@ This guide shows you how to integrate **Langfuse** with **VoltAgent** for observ
 
 <Steps>
 
-  ### Create a VoltAgent project
-  If you don't have a VoltAgent project yet, you can create one using the VoltAgent CLI:
+### Create a VoltAgent project
 
-  ```bash
-  npm create voltagent-app@latest
-  ```
+If you don't have a VoltAgent project yet, you can create one using the VoltAgent CLI:
 
-  Move into the project directory:
+```bash
+npm create voltagent-app@latest
+```
 
-  ```bash
-  cd my-voltagent-app
-  ```
+Move into the project directory:
 
-  You can get the full VoltAgent installation instructions [here](https://voltagent.dev/docs/quick-start/)
+```bash
+cd my-voltagent-app
+```
 
-  ### Set up Langfuse project
-  Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys from the project settings page.
+You can get the full VoltAgent installation instructions [here](https://voltagent.dev/docs/quick-start/)
 
+### Set up Langfuse project
 
-  ### Add environment variables
-  Create or update your `.env.development` file with the following variables:
+Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys from the project settings page.
 
-  ```bash
-  # Your LLM API key
-  OPENAI_API_KEY=your-api-key
+### Add environment variables
 
-  # Langfuse credentials
-  LANGFUSE_SECRET_KEY=sk-lf-...
-  LANGFUSE_PUBLIC_KEY=pk-lf-...
-  LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
-  ```
+Create or update your `.env.development` file with the following variables:
 
-  ### Install the `@voltagent/langfuse-exporter` package
-  Add the `@voltagent/langfuse-exporter` package to your project:
+```bash
+# Your LLM API key
+OPENAI_API_KEY=your-api-key
 
-  ```bash
-  npm install @voltagent/langfuse-exporter
-  ```
+# Langfuse credentials
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
+```
 
-  ### Configure Langfuse Exporter
-  Modify your main application file (e.g., `index.ts` where `VoltAgent` is initialized) to import `LangfuseExporter` and configure it within the `VoltAgent` options:
+### Install the `@voltagent/langfuse-exporter` package
 
-  ```typescript
-  import { VoltAgent, Agent } from "@voltagent/core";
-  import { VercelAIProvider } from "@voltagent/vercel-ai";
-  import { openai } from "@ai-sdk/openai";
+Add the `@voltagent/langfuse-exporter` package to your project:
 
-  import { LangfuseExporter } from "@voltagent/langfuse-exporter";
+```bash
+npm install @voltagent/langfuse-exporter
+```
 
-  const langfuseExporter = new LangfuseExporter({
-    publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-    secretKey: process.env.LANGFUSE_SECRET_KEY,
-    baseUrl: process.env.LANGFUSE_HOST,
-  });
+### Configure Langfuse Exporter
 
-  const agent = new Agent({
-    name: "my-voltagent-app",
-    description: "A helpful assistant that answers questions without using tools",
-    llm: new VercelAIProvider(),
-    model: openai("gpt-4o-mini"),
-  });
+Modify your main application file (e.g., `index.ts` where `VoltAgent` is initialized) to import `LangfuseExporter` and configure it within the `VoltAgent` options:
 
-  new VoltAgent({
-    agents: {
-      agent,
-    },
-    telemetryExporter: langfuseExporter,
-  });
-  ```
+```typescript
+import { VoltAgent, Agent } from "@voltagent/core";
+import { VercelAIProvider } from "@voltagent/vercel-ai";
+import { openai } from "@ai-sdk/openai";
 
-  <Callout type="info">
-  Ensure your agent definition (`new Agent({...})`) and the `VoltAgent` instantiation (`new VoltAgent({...})`) match your project structure. The key change is adding the `LangfuseExporter` and the `telemetryExporter` option.
-  </Callout>
+import { LangfuseExporter } from "@voltagent/langfuse-exporter";
 
-  ### Run your VoltAgent application
-  Start the VoltAgent development server or run your application as usual:
+const langfuseExporter = new LangfuseExporter({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.LANGFUSE_HOST,
+});
 
-  ```bash
-  npm run dev
-  ```
+const agent = new Agent({
+  name: "my-voltagent-app",
+  description: "A helpful assistant that answers questions without using tools",
+  llm: new VercelAIProvider(),
+  model: openai("gpt-4o-mini"),
+});
 
-  When you run the `dev` command, `tsx` will compile and run your code. You should see the VoltAgent server startup message in your terminal:
+new VoltAgent({
+  agents: {
+    agent,
+  },
+  telemetryExporter: langfuseExporter,
+});
+```
 
-  ```bash
-  ══════════════════════════════════════════════════
-    VOLTAGENT SERVER STARTED SUCCESSFULLY
-  ══════════════════════════════════════════════════
-    ✓ HTTP Server: http://localhost:3141
+<Callout type="info">
 
-    Developer Console:    https://console.voltagent.dev
-  ══════════════════════════════════════════════════
-  [VoltAgent] All packages are up to date
-  ```
+Ensure your agent definition (`new Agent({...})`) and the `VoltAgent` instantiation (`new VoltAgent({...})`) match your project structure. The key change is adding the `LangfuseExporter` and the `telemetryExporter` option.
 
-  Your agent is now running! To interact with it:
+</Callout>
 
-  1.  **Open the Console:** Click the [`https://console.voltagent.dev`](https://console.voltagent.dev) link in your terminal output (or copy-paste it into your browser).
-  2.  **Find Your Agent:** On the VoltAgent Console page, you should see your agent listed (e.g., "my-agent").
-  3.  **Open Agent Details:** Click on your agent's name.
-  4.  **Start Chatting:** On the agent detail page, click the chat icon in the bottom right corner to open the chat window.
-  5.  **Send a Message:** Type a message like "Hello" and press Enter.
+### Run your VoltAgent application
 
+Start the VoltAgent development server or run your application as usual:
 
-  ### View traces in Langfuse
-  Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
+```bash
+npm run dev
+```
 
-  Here's an example of a trace:
+When you run the `dev` command, `tsx` will compile and run your code. You should see the VoltAgent server startup message in your terminal:
 
-  ![VoltAgent trace in Langfuse UI](/images/docs/langfuse-voltagent-trace)
+```bash
+══════════════════════════════════════════════════
+  VOLTAGENT SERVER STARTED SUCCESSFULLY
+══════════════════════════════════════════════════
+  ✓ HTTP Server: http://localhost:3141
+
+  Developer Console:    https://console.voltagent.dev
+══════════════════════════════════════════════════
+[VoltAgent] All packages are up to date
+```
+
+Your agent is now running! To interact with it:
+
+1.  **Open the Console:** Click the [`https://console.voltagent.dev`](https://console.voltagent.dev) link in your terminal output (or copy-paste it into your browser).
+2.  **Find Your Agent:** On the VoltAgent Console page, you should see your agent listed (e.g., "my-agent").
+3.  **Open Agent Details:** Click on your agent's name.
+4.  **Start Chatting:** On the agent detail page, click the chat icon in the bottom right corner to open the chat window.
+5.  **Send a Message:** Type a message like "Hello" and press Enter.
+
+### View traces in Langfuse
+
+Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
+
+Here's an example of a trace:
+
+<Frame border>
+  ![VoltAgent trace in Langfuse UI](/images/docs/langfuse-voltagent-trace.png)
+</Frame>
 
 </Steps>
 
