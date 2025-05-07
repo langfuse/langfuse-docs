@@ -195,20 +195,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "langfuse-community-hour",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/4a4kae7p">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Wednesday: Langfuse Community Hour →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         Wednesday: Langfuse Community Hour, 10am PT / 7pm CET →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "langfuse-sf-meetup",
+    dismissible: true,
+    content: (
+      <Link href="https://lu.ma/eydxi5ry">
+        {/* mobile */}
+        <span className="sm:hidden">Monday in SF: Event w/ Samsara & Langfuse →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+        Monday in SF: Bringing agents to production with Samsara and Langfuse →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
