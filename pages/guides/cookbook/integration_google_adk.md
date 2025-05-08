@@ -106,3 +106,5 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
 ## Step 5: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
+
+![Google ADK example trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
