@@ -9,7 +9,7 @@ export default {
   configuration: "Configuration",
   "license-key": "License Key",
   troubleshooting: "Troubleshooting",
-  scaling: "Scaling",
+  scaling: "Sizing & Scaling",
   "-- Deployment": {
     type: "separator",
     title: "Deployment",

@@ -8,6 +8,16 @@ label: "Version: v3"
 
 This guide covers how you can operate your Langfuse deployment at scale and includes best practices and tweaks to get the best performance.
 
+## Minimum Infrastructure Requirements
+
+| Service                                                              | Minimum Requirements                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [Langfuse Web Container](/self-hosting/infrastructure/containers)    | 2 CPU, 4 GiB Memory                                          |
+| [Langfuse Worker Container](/self-hosting/infrastructure/containers) | 2 CPU, 4 GiB Memory                                          |
+| [Redis/Valkey Instance](/self-hosting/infrastructure/cache)          | 1 CPU, 1.5 GiB Memory                                        |
+| [ClickHouse](/self-hosting/infrastructure/clickhouse)                | 2 CPU, 8 GiB Memory                                          |
+| [Blob Storage](/self-hosting/infrastructure/blobstorage)             | Serverless (S3 or compatible) or MinIO (2 CPU, 4 GiB Memory) |
+
 ## Ingestion Throughput
 
 Langfuse is designed to handle a large amount and volume of ingested data.
