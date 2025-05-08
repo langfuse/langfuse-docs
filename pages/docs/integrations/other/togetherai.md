@@ -1,6 +1,7 @@
 ---
 title: "Monitor Together.ai with Langfuse"
 description: "Learn how to integrate Together.ai with Langfuse using the OpenAI drop-in replacement."
+category: Integrations
 ---
 
 # Observability for Together.ai with Langfuse

@@ -1,4 +1,5 @@
 ---
+title: Trace Mistral models with Langfuse
 description: Cookbook with examples of the Langfuse Integration for Mistral SDK (Python).
 category: Integrations
 ---

@@ -1,6 +1,7 @@
 ---
 title: Observability for AutoGen with Langfuse
 description: Learn how to integrate Langfuse with AutoGen via OpenTelemetry using OpenLit
+category: Integrations
 ---
 
 # Integrate Langfuse with AutoGen
