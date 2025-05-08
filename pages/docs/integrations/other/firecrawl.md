@@ -1,6 +1,7 @@
 ---
 title: Monitor Firecrawl Scraper with Langfuse
 description: Learn how to trace Firecrawl operations using Langfuse to capture detailed observability data for your web scraping tasks.
+category: Integrations
 ---
 
 # Firecrawl Integration 🔥🤝🪢

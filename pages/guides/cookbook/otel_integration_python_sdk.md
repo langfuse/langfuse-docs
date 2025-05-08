@@ -1,3 +1,7 @@
+---
+title: Using OpenTelemetry SDK with Langfuse OTel API
+---
+
 # Example: Using OpenTelemetry SDK with Langfuse OTel API
 
 This notebook demonstrates how to use any OpenTelemetry SDK to send traces to Langfuse. [OpenTelemetry](https://opentelemetry.io/) is a CNCF project that provides a standard way to collect distributed traces and metrics from applications.

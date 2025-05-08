@@ -1,6 +1,7 @@
 ---
 title: "Integrate Databricks with Langfuse"
 description: "Learn how to monitor and trace Databricks models with Langfuse to improve and debug your AI applications."
+category: Integrations
 ---
 
 # Observability for Databricks Models with Langfuse

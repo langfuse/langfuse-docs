@@ -1,6 +1,7 @@
 ---
 title: Observability for Google Agent Development Kit with Langfuse
 description: Learn how to instrument Google ADK agents with Langfuse via OpenTelemetry
+category: Integrations
 ---
 
 # Integrate Langfuse with Google's Agent Development Kit

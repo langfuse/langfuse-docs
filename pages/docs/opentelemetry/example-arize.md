@@ -1,6 +1,7 @@
 ---
 title: Tracing using the Arize SDK
 description: Example cookbook on using the Arize AI SDK to trace your application to Langfuse.
+
 ---
 
 # Tracing using the Arize SDK
