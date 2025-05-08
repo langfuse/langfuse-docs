@@ -104,13 +104,9 @@ export default {
       timestamp: false,
     },
   },
-  library: {
-    title: "Library",
+  academy: {
     type: "page",
-    theme: {
-      typesetting: "article",
-      breadcrumb: false,
-    },
+    title: "Academy",
   },
   terms: {
     title: "Terms and Conditions",

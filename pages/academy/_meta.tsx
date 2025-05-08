@@ -5,5 +5,5 @@ export default {
     type: "separator",
     title: <MenuSwitcher />,
   },
-  index: "Library",
+  index: "Overview",
 };
