@@ -1,0 +1,37 @@
+---
+title: Dataset Run Level Scores
+description: Score dataset runs to assess the overall quality of each run
+date: 2025-05-07
+author: Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Langfuse now supports dataset-experiment-run-level scores, enabling comprehensive evaluation of experiment runs.
+
+## What's New
+
+- **Run-Level Scoring**: Create and manage scores at the run level for holistic evaluation of experiment runs
+- **Experiment Metrics Support**: Easily ingest overall experiment metrics such as precision, recall, and F1-scores
+- **Flexible API Design**: Updated APIs to accommodate both trace-level and dataset-experiment-run-level scoring needs
+- **UI Enhancements**: Visual indicators and aggregates for run scores throughout the interface
+
+## API Updates
+
+We have extended our new v2 api and will continue to support the v1 api for the foreseeable future.
+POST and DELETE APIs will support both trace and dataset-experiment-run level scores across v1 and v2.
+
+For GET APIs:
+
+- **V1 API**: Only supports trace level scores, therefore requires `traceId` - to remain backwards compatible
+- **V2 API**: One and one only of `traceId`, `sessionId` or `datasetRunId` is now required when creating scores
+
+## Why Run-Level Scores Matter
+
+Run-level scores are particularly valuable for applications where you need to evaluate experiment performance across multiple custom test cases to find an overall metric or passing score. This enables more accurate evaluation of:
+
+- Overall system performance across dataset runs 
+- Aggregate performance metrics like precision, recall, and F1-scores
+- Comparative analysis between different model versions or parameters
