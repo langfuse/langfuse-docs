@@ -20,6 +20,7 @@ export default {
   langflow: "Langflow",
   bedrock: "Amazon Bedrock",
   "google-vertex-ai": "Google Vertex AI",
+  "google-adk": "Google ADK",
   "mistral-sdk": "Mistral SDK",
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
