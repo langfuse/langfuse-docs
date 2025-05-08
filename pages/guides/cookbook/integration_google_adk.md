@@ -11,7 +11,7 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 > [Google’s Agent Development Kit](https://developers.googleblog.com/en/agent-development-kit-easy-to-build-multi-agent-applications/) streamlines building, orchestrating, and tracing generative-AI agents out of the box, letting you move from prototype to production far faster than wiring everything yourself.
 
 > **Why Langfuse?**  
-> [Langfuse](https://langfuse.com) gives you a detailled dashboard and rich analytics for every prompt, model response, and function call in your agent, making it easy to debug, evaluate, and iterate on LLM apps.
+> [Langfuse](https://langfuse.com) gives you a detailed dashboard and rich analytics for every prompt, model response, and function call in your agent, making it easy to debug, evaluate, and iterate on LLM apps.
 
 ## Step&nbsp;1: Install dependencies
 
