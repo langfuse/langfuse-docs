@@ -186,18 +186,11 @@ Within each batch, there can be multiple events. Each event has a type, an id, a
   availability={{
     hobby: "not-available",
     core: "not-available",
-    pro: "not-available",
-    enterprise: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
     selfHosted: "ee",
   }}
 />
-
-<Callout type="warning">
-
-  The admin API requires an organization-scoped API key pair.
-  Those are restricted to self-hosted instances at this time and will become available on Langfuse Cloud soon.
-
-</Callout>
 
 Langfuse is open and meant to be extended via custom workflows and integrations.
 You can use these endpoints to automate project and user management on your Langfuse organization.
@@ -230,8 +223,7 @@ Use `/api/public/scim` as the base URI for them.
 ### Authentication
 
 Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
-Organization scoped API keys can be created via the [Organization Management API](/self-hosting/organization-management-api).
-In the future, they will be available within the Organization Settings page within Langfuse.
+Organization scoped API keys can be created via the [Organization Management API](/self-hosting/organization-management-api) or in the Organization Settings within the Langfuse UI.
 
 Example:
 
@@ -245,7 +237,7 @@ To create a new user within Langfuse, you can use the SCIM-style endpoints and `
 This will create a new user if the email does not exist yet.
 Then it will add the user to the organization with role `NONE`.
 
-Afterward, the role can be updated using the memberships endpoints either on an organization or a project level.
+Afterward, the role can be updated using the membership endpoints either on an organization or a project level.
 
 To remove a user from an organization, call the `DELETE /Users/{id}` endpoint.
 This will not delete the user itself, only its membership with the organization.
