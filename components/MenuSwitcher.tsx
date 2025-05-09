@@ -2,8 +2,8 @@ import {
   CircleHelp,
   Server,
   LibraryBig,
-  BookOpen,
   FileCode,
+  GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -17,7 +17,7 @@ export const MenuSwitcher = () => {
         { title: "Docs", path: "/docs", Icon: LibraryBig },
         { title: "Self Hosting", path: "/self-hosting", Icon: Server },
         { title: "Guides", path: "/guides", Icon: FileCode },
-        { title: "AI Engineering Library", path: "/library", Icon: BookOpen },
+        { title: "Academy", path: "/academy", Icon: GraduationCap },
         { title: "FAQ", path: "/faq", Icon: CircleHelp },
       ].map((item) =>
         asPath.startsWith(item.path) ? (

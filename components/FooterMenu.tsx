@@ -136,8 +136,8 @@ const menuItems: {
       },
       { name: "Why Langfuse?", href: "/why" },
       {
-        name: "AI Engineering Library",
-        href: "/library",
+        name: "Langfuse Academy",
+        href: "/academy",
       },
       {
         name: "Status",
