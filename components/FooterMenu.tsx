@@ -161,7 +161,7 @@ const menuItems: {
     heading: "About",
     items: [
       { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "/careers", notificationCount: 4 },
+      { name: "Careers", href: "/careers" },
       {
         name: "About us",
         href: "/about",
