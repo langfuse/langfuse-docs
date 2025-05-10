@@ -91,36 +91,10 @@ classDiagram
 
 ## Scores
 
-Traces and observations can be evaluated using [scores](/docs/scores). Scores are flexible objects that store evaluation metrics and can be:
+Traces and observations can be evaluated using [scores](/docs/scores). 
 
-- Numeric, categorical, or boolean values
-- Associated with a trace (required)
-- Linked to a specific observation (optional)
-- Annotated with comments for additional context
-- Validated against a score configuration schema (optional)
+import ScoreDataModel from "@/components-mdx/score-data-model.mdx";
+
+<ScoreDataModel />
 
 Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
-
-<div className="border rounded py-4 mt-6 text-center bg-card">
-
-**Optionally, scores can add evaluation metrics to traces**
-
-```mermaid
-classDiagram
-  namespace Evaluation {
-    class Score
-    class ScoreConfig
-  }
-
-  namespace Tracing {
-    class Trace
-    class Observation
-  }
-
-  Trace *-- Observation
-  Score --> Trace
-  Score --> Observation : optional, reference observation within a trace
-  Score --> ScoreConfig : optional, ensure schema
-```
-
-</div>
