@@ -147,7 +147,7 @@ langfuse_context.flush()
 
 ### Log any LLM call
 
-In addition to the native intgerations with LangChain, LlamaIndex, and OpenAI (details [below](#frameworks)), you can log any LLM call by decorating it with `@observe(as_type="generation")`. **Important:** Make sure the `as_type="generation"` decorated function is called inside another `@observe()`-decorated function for it to have a top-level trace.
+In addition to the native integrations with LangChain, LlamaIndex, and OpenAI (details [below](#frameworks)), you can log any LLM call by decorating it with `@observe(as_type="generation")`. **Important:** Make sure the `as_type="generation"` decorated function is called inside another `@observe()`-decorated function for it to have a top-level trace.
 
 Optionally, you can parse some of the arguments to the LLM call and pass them to [`langfuse_context.update_current_observation`](#additional-attributes) to enrich the trace.
 
@@ -233,7 +233,7 @@ You may also use environment variables to configure the Langfuse client:
 | `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
 | `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
 | `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
-| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seonds for network requests | 20
+| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seconds for network requests | 20
 | `LANGFUSE_SAMPLE_RATE`, `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing. | 1.0
 
 
@@ -354,7 +354,7 @@ main(langfuse_observation_id="my-custom-request-id")
 
 #### Set parent trace ID or parent span ID
 
-If you'd like to nest the the observations created from the decoratored function execution under an existing trace or span, you can pass the ID as a value to the `langfuse_parent_trace_id` or `langfuse_parent_observation_id` keyword argument to your decorated function. In that case, Langfuse will record that execution not under a standalone trace, but nest it under the provided entity.
+If you'd like to nest the observations created from the decorated function execution under an existing trace or span, you can pass the ID as a value to the `langfuse_parent_trace_id` or `langfuse_parent_observation_id` keyword argument to your decorated function. In that case, Langfuse will record that execution not under a standalone trace, but nest it under the provided entity.
 
 This is useful for distributed tracing use-cases, where decorated function executions are running in parallel or in the background and should be associated to single existing trace.
 
@@ -567,7 +567,7 @@ langfuse_client.score(
 
 ### Flush observations [#flush]
 
-The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments such as AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
+The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short-lived environments such as AWS Lambda functions when the Python process is terminated before the SDK sent all events to our backend.
 
 To avoid this, ensure that the `langfuse_context.flush()` method is called before termination. This method is waiting for all tasks to have completed, hence it is blocking.
 
