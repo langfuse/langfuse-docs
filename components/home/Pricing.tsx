@@ -168,7 +168,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-enterprise",
-      href: "/schedule-demo",
+      href: "/talk-to-us",
       featured: false,
       description: "Enterprise-grade support and security features.",
       price: "Custom",
@@ -230,7 +230,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-self-hosted-enterprise",
-      href: "/schedule-demo",
+      href: "/talk-to-us",
       featured: false,
       price: "Custom",
       description: "Enterprise-grade support and security features.",

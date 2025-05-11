@@ -168,8 +168,8 @@ const menuItems: {
       },
       { name: "Support", href: "/support" },
       {
-        name: "Schedule Demo",
-        href: "/schedule-demo",
+        name: "Talk to us",
+        href: "/talk-to-us",
       },
       {
         name: "OSS Friends",
