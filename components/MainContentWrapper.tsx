@@ -257,7 +257,7 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="/schedule-demo" target="_blank">
+          <a href="/talk-to-us" target="_blank">
             <span>Talk to sales</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>

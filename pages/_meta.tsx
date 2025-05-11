@@ -68,9 +68,9 @@ export default {
       timestamp: false,
     },
   },
-  "schedule-demo": {
+  "talk-to-us": {
     type: "page",
-    title: "Schedule demo",
+    title: "Talk to us",
     display: "hidden",
     theme: {
       layout: "raw",

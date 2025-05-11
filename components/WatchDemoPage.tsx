@@ -42,7 +42,7 @@ export function WatchDemoPage() {
               size="sm"
               asChild
             >
-              <Link href="/schedule-demo">Talk to us</Link>
+              <Link href="/talk-to-us">Talk to us</Link>
             </Button>
           </div>
         </div>

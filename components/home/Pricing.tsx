@@ -168,7 +168,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-enterprise",
-      href: "/schedule-demo",
+      href: "/talk-to-us",
       featured: false,
       description: "Enterprise-grade support and security features.",
       price: "Custom",
@@ -183,10 +183,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Billing via AWS Marketplace",
       ],
       cta: "Talk to sales",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
     },
   ],
   selfHosted: [
@@ -234,7 +230,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-self-hosted-enterprise",
-      href: "/schedule-demo",
+      href: "/talk-to-us",
       featured: false,
       price: "Custom",
       description: "Enterprise-grade support and security features.",
@@ -1362,26 +1358,33 @@ export default function Pricing({
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0 px-4 lg:px-6 mb-4">
-                    <Button
-                      className="w-full"
-                      variant={tier.featured ? "default" : "outline"}
-                      asChild
-                    >
-                      <Link href={tier.href}>{tier.cta}</Link>
-                    </Button>
-                    {tier.ctaCallout && (
-                      <div className="mt-2 text-center text-xs">
-                        <Link
-                          href={tier.ctaCallout.href}
-                          className="text-muted-foreground"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                    {tier.ctaCallout ? (
+                      <div className="flex gap-2">
+                        <Button
+                          className="flex-1"
+                          variant={tier.featured ? "default" : "outline"}
+                          asChild
                         >
-                          {tier.ctaCallout.text}
-                        </Link>
+                          <Link href={tier.href}>{tier.cta}</Link>
+                        </Button>
+                        <Button className="flex-1" variant="secondary" asChild>
+                          <Link href={tier.ctaCallout.href}>
+                            {tier.ctaCallout.text}
+                          </Link>
+                        </Button>
                       </div>
+                    ) : (
+                      <>
+                        <Button
+                          className="w-full"
+                          variant={tier.featured ? "default" : "outline"}
+                          asChild
+                        >
+                          <Link href={tier.href}>{tier.cta}</Link>
+                        </Button>
+                        <div className="mt-2 h-[20px]" />
+                      </>
                     )}
-                    {!tier.ctaCallout && <div className="mt-2 h-[20px]" />}
                   </CardContent>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
                     <div>
