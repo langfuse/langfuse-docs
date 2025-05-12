@@ -2,7 +2,9 @@
 
 Having established a strong tracing foundation, it's time to examine **evaluation**—the process of measuring how well your LLM (or agent) performs and how to evolve it over time.
 
+<Frame className="my-10" fullWidth>
 ![Evaluation](/images/academy/m4-evals.png)
+</Frame>
 
 Evaluating LLMs can feel like trying to untangle a giant ball of yarn—there's a lot going on, and it's often not obvious which thread to pull first. From wrangling unpredictable user inputs to picking the right metrics, the process can be overwhelming. But don't panic\! In this post, we'll walk through some tried-and-true best practices, common pitfalls, and handy tips to help you benchmark your LLM's performance. Whether you're just starting out or looking for a quick refresher, these guidelines will keep your evaluation strategy on solid ground.
 
@@ -61,7 +63,9 @@ _Example of a trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj000
 
 ### Evaluation Workflow
 
+<Frame className="my-10" fullWidth>
 ![Continuous Evaluation Loop](/images/academy/m4-evaluation-workflow.png)
+</Frame>
 
 The continuous evaluation loop begins *offline* with building or curating test datasets that range from "happy path" scenarios to adversarial inputs, ensuring robust coverage of potential user interactions. 
 
@@ -82,8 +86,7 @@ Offline evaluation means that you are testing your application during developmen
 The image below shows an example of a dataset in Langfuse with inputs and expected outputs:  
 
 <Frame className="my-10" fullWidth>
-  ![Example of a dataset in
-  Langfuse](/images/blog/2025-03-04-llm-evaluation/dataset-example.png)
+  ![Example of a dataset in Langfuse](/images/blog/2025-03-04-llm-evaluation/dataset-example.png)
 </Frame>
 
 For instance, if you built a math word-problem solving application, you might have a [test dataset](https://huggingface.co/datasets/gsm8k) of 100 problems with known answers which you all feed into your application. Once your agent answered all math questions, you compare the results with the known answers and calculate the accuracy of the agent. You then run this test with different settings (e.g. add calculator tool, chain of thought prompting, larger LLM) and compare the results. 
@@ -103,8 +106,7 @@ Online evaluation often involves collecting implicit and explicit user feedback,
 The image below shows an example of a live LLM-as-a-Judge Evaluator in Langfuse that scores new traces for toxicity:  
 
 <Frame className="my-10" fullWidth>
-  ![Example of a live LLM-as-a-Judge Evaluator in
-  Langfuse](/images/blog/2025-03-04-llm-evaluation/online-eval-example.png)
+  ![Example of a live LLM-as-a-Judge Evaluator in Langfuse](/images/blog/2025-03-04-llm-evaluation/online-eval-example.png)
 </Frame>
 
 ### Common Evaluation Metrics
@@ -138,8 +140,7 @@ Example of user feedback captured in ChatGPT:
 {" "}
 
 <Frame className="frame-lg" fullWidth>
-  ![Example of user feedback in
-  ChatGPT](/images/blog/2025-03-04-llm-evaluation/user-feedback.png)
+  ![Example of user feedback in ChatGPT](/images/blog/2025-03-04-llm-evaluation/user-feedback.png)
 </Frame>
 
 #### **Implicit User Feedback (Human-in-the-Loop):**
@@ -154,8 +155,7 @@ Example of a manual annotation workflow in Langfuse:
 {" "}
 
 <Frame className="my-10" fullWidth>
-  ![Example of a manual annotation workflow in
-  Langfuse](/images/blog/2025-03-04-llm-evaluation/human-annotation-example.png)
+  ![Example of a manual annotation workflow in Langfuse](/images/blog/2025-03-04-llm-evaluation/human-annotation-example.png)
 </Frame>
 
 #### **Automated Evaluation:**
@@ -167,10 +167,8 @@ Using metrics like precision, recall, F1-score, or specialized generative metric
 {" "}
 
 <Frame className="max-w-sm">
-  ![Example of different automated evaluation scores over time in
-  Langfuse](/images/blog/2025-03-04-llm-evaluation/eval-score-example.png)
+  ![Example of different automated evaluation scores over time in Langfuse](/images/blog/2025-03-04-llm-evaluation/eval-score-example.png)
 </Frame>
-
 
 Traces are the underlying thread across all these methods—by systematically logging interactions, you create a structured record that each evaluation technique can draw from.
 
@@ -239,7 +237,9 @@ There are several popular security libraries that can be used to mitigate securi
 
 #### **Asynchronous monitoring and evaluation of security measures with Langfuse**
 
+<Frame className="my-10" fullWidth>
 Use Langfuse [tracing](https://langfuse.com/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
+</Frame>
 
 1. Investigate security issues by manually inspect traces.  
 2. Monitor security scores over time in the Langfuse Dashboard.  

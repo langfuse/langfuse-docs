@@ -3,7 +3,10 @@
 Designing an LLM application is **not** just about picking a model—it's about picking (and often combining) the *right architecture pattern* along a spectrum that runs from a single LLM call to fully-autonomous multi-agent swarms.  
 This choice introduces a fundamental **trade-off between predictability and agency**: the higher you climb, the more freedom your system gains, but the harder it becomes to anticipate or constrain every step.
 
+<Frame className="my-10" fullWidth>
 ![Tradeoffs](/images/academy/m2-tradeoff.png)
+</Frame>
+
 This chapter unifies the perspectives from three excellent deep-dives:
 
 Below is a distilled map, guidance on when to stop at a workflow vs. when to move to an agent, and concrete patterns you can apply in Langfuse-instrumented projects.
@@ -82,8 +85,6 @@ graph TD
 3. When metric plateaus, move to **R2 → R3**.  
 4. Adopt agents **only** if the task *cannot* be expressed as a bounded graph.
 
-> "The hard part of reliable agents is passing the *right context* at every step." — Harrison Chase
-
 Langfuse provides the tracing you need to see that context. Every node/tool invocation you build becomes a traced span that you can later debug, evaluate, and cost-optimise.
 
 
@@ -95,7 +96,9 @@ Langfuse provides the tracing you need to see that context. Every node/tool invo
 * **Add reflection early.** A cheap 2nd-model critique catches many hallucinations.
 * **Cost caps.** Track `usage.total_cost` in traces; autonomy creep is real.
 
+<Frame className="my-10" fullWidth>
 ![Agent Loop](/images/academy/m2-agent-loop.png)
+</Frame>
 
 The diagram above zooms in on **how an agent-environment loop is executed at runtime**. Notice how each iteration cycles through three checkpoints:
 1. **Action** – the agent (LLM call) decides what to do next.

@@ -2,7 +2,9 @@
 
 Having introduced LLMOps and the importance of monitoring in Module 1, let's take a **closer look at tracing** and how it helps you manage multi-step LLM applications.
 
+<Frame className="my-10" fullWidth>
 ![Tracing](/images/academy/m3-tracing.png)
+</Frame>
 
 ### Recap: What is a trace/span and how is it used in LLM applications?
 
@@ -110,7 +112,9 @@ AI agents analytics allows you to capture how users interact with your LLM appli
 
 ### What to Trace?
 
+<Frame className="my-10" fullWidth>
 ![What to Trace](/images/academy/m3-application-tracing.png)
+</Frame>
 
 Modern LLM applications are multi‑layer systems—user requests flow through application logic, optional tool calls, and finally one or more LLM calls. Solid **observability** therefore means capturing metrics at *every* layer and correlating them across requests, users, and releases. The diagram above highlights the main buckets you should instrument; below is an overview what each represents and *why it matters*.
 
@@ -147,8 +151,18 @@ To help you choose the right entry point, here is a **bird's-eye overview** of t
 These approaches are **composable**: combine SDK spans for business metrics, a LangChain callback for prompt-level traces, OTEL for micro-services, and a proxy for legacy binaries—everything converges into one searchable Langfuse trace.
 
 Langfuse supports many popular frameworks:   
-![Langfuse Integrations](/images/academy/m3-integrations.png)  
 
-Check out the [integration documentation](https://langfuse.com/docs/integrations/overview) for a step-by-step guide on enabling Langfuse in your stack.
+<Frame className="my-10" fullWidth>
+![Langfuse Integrations](/images/academy/m3-integrations.png)  
+</Frame>
+
+<Callout type="info" emoji="📚">
+Further reading:
+
+- **Langfuse Integrations**, [docs](https://langfuse.com/docs/integrations/overview)
+- **Traceability and Observability in Multi-Step LLM Systems**, [webinar](/guides/videos/webinar-observability-llm-systems) _by Marc Klingen_
+- **The OSS LLMOps Stack**, [page](https://oss-llmops-stack.com) _by LiteLLM and Langfuse_
+
+</Callout>
 
 Once you have instrumented your LLM application and successfully ingested data to Langfuse, you can use this data to evaluate your application and make it ready for production. 
