@@ -89,3 +89,19 @@
     @apply tracking-tight;
   }
 }
+
+@layer components {
+  /* Highlight the "previous / next" navigation buttons that appear at the
+     bottom of pages inside the /academy section. This keeps the default
+     Nextra layout but swaps the neutral border for a Langfuse-style brand
+     color to draw the reader's attention to continue the course. */
+  /* Matches when the utility classes are emitted with underscore prefix */
+  article.nextra-content div._mb-8._flex._items-center._border-t a[href^="/academy/"] {
+    @apply bg-primary text-primary-foreground rounded-lg shadow hover:bg-primary/80 border border-primary;
+  }
+
+  /* Matches when Nextra uses `nx-` prefixed utility classes (recent versions) */
+  article.nextra-content div.nx-mb-8.nx-flex.nx-items-center.nx-border-t a[href^="/academy/"] {
+    @apply bg-primary text-primary-foreground rounded-lg shadow hover:bg-primary/80 border border-primary;
+  }
+}

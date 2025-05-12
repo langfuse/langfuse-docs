@@ -1,13 +1,12 @@
 ## **Module 2:** Application & Agent Architectures
 
 Designing an LLM application is **not** just about picking a model—it's about picking (and often combining) the *right architecture pattern* along a spectrum that runs from a single LLM call to fully-autonomous multi-agent swarms.  
-This choice introduces a fundamental **trade-off between predictability and agency**: the higher you climb, the more freedom your system gains, but the harder it becomes to anticipate or constrain every step.
+
+This choice introduces a **trade-off between predictability and agency**: the higher you climb, the more freedom your system gains, but the harder it becomes to anticipate or constrain every step.
 
 <Frame className="my-10" fullWidth>
 ![Tradeoffs](/images/academy/m2-tradeoff.png)
 </Frame>
-
-This chapter unifies the perspectives from three excellent deep-dives:
 
 Below is a distilled map, guidance on when to stop at a workflow vs. when to move to an agent, and concrete patterns you can apply in Langfuse-instrumented projects.
 
@@ -16,7 +15,7 @@ Below is a distilled map, guidance on when to stop at a workflow vs. when to mov
 ### The Architecture Ladder
 
 ```mermaid
-flowchart TD
+flowchart LR
   R0["R0  Hard-coded
   code path"]:::low
   R1["R1  Single LLM call"]:::low
@@ -34,36 +33,29 @@ classDef mid fill:#E0F2FE,stroke:#007acc;
 classDef high fill:#C7D2FE,stroke:#4338ca;
 ```
 
-*Rule of thumb – climb only as high as you **need**:*
+*Rule of thumb – only go as far to the right as you **need**:*
 
 * **Workflows (R0-R4)** shine when you value predictability, testability, low latency, and tight context control.
 * **Agents (R5-R6)** shine when the path is unknown a-priori, tooling decisions are dynamic, or the user expects open-ended autonomy.
+
+<Frame className="my-10" fullWidth>
+![Agent Loop](/images/academy/m2-agent-loop.png)
+</Frame>
+
+The diagram above zooms in on **how an agent-environment loop is executed at runtime**. Notice how each iteration cycles through three checkpoints:
+1. **Action** – the agent (LLM call) decides what to do next.
+2. **Environment** – the real or simulated world responds.
+3. **Feedback / Stop** – the system evaluates whether to continue, hand control back to a human, or terminate.
+
+This micro-loop is the operational core of every architecture at the top of the ladder (R5-R6). It is also where the predictability-vs-agency trade-off materialises in practice: with more agency you allow the loop to run longer and mutate state in unforeseen ways, which demands stronger feedback and stop conditions to stay reliable. In Langfuse each pass through this loop becomes a traced span, giving you the visibility to debug, evaluate, and put guardrails around autonomous behaviour.
+
+With this framing in mind, let's zoom in on a **set of canonical patterns** you can lift straight into your own projects. Each pattern is a ready-made blueprint that balances the trade-offs outlined above in a slightly different way — pick the one that maps best to your constraints on cost, latency, and reliability.
 
 ---
 
 ### Canonical Patterns
 
-```mermaid
-graph TD
-  subgraph Workflows
-    A[Prompt Chaining] --> B[Routing / Handoff]
-    B --> C[Parallelisation]
-    C --> D[Evaluator–Optimizer]
-    D --> E[Orchestrator–Workers]
-  end
-
-  subgraph Agents
-    F[Tool-Calling ReAct] --> G[Planning Agent]
-    G --> H[Reflection / Self-Critique]
-    H --> I[Memory-Augmented Agent]
-    I --> J[Multi-Agent Swarm]
-  end
-
-  classDef workflows fill:#E0F2FE,stroke:#007acc;
-  classDef agents fill:#C7D2FE,stroke:#4338ca;
-  class A,B,C,D,E workflows;
-  class F,G,H,I,J agents;
-```
+A good way to reason about these architectures is to treat them as reusable **patterns** – standard blueprints that describe how LLM calls, tool invocations, and memory slots can be composed to solve a recurring class of problems. Patterns provide a shared vocabulary, speed up design by letting you reuse proven approaches, and make the trade-offs (cost, latency, predictability) explicit when moving from a rigid workflow to a more agentic solution.
 
 | Pattern | Typical Use-Case | Key Pros | Key Cons |
 | :-- | :-- | :-- | :-- |
@@ -78,7 +70,11 @@ graph TD
 | **Memory-Augmented** | Long customer sessions | Personalised UX | Memory staleness / cost |
 | **Multi-Agent Swarm** | Brainstorming, negotiation sims | Diverse reasoning | Hardest to debug |
 
+(Source: [Phil Schmid](https://www.philschmid.de/agentic-pattern))
+
 ### Selecting the Right Approach
+
+Choosing between a lightweight workflow and a fully-fledged agent is rarely a one-off decision. Instead, think of it as an **iterative search**: start simple, measure, and only add complexity when the data tells you the current architecture has topped out.
 
 1. **Define "good" first.** Accuracy? Cost? Latency? Trust?  
 2. Prototype as **R1** (single call). Measure offline with Langfuse datasets.  
@@ -86,26 +82,6 @@ graph TD
 4. Adopt agents **only** if the task *cannot* be expressed as a bounded graph.
 
 Langfuse provides the tracing you need to see that context. Every node/tool invocation you build becomes a traced span that you can later debug, evaluate, and cost-optimise.
-
-
-### Implementation Tips
-
-* **Tool schema = prompt.** Document args, edge-cases, examples.
-* **Guardrails hierarchy:** JSON schema → allow-list APIs → max-iterations → human-approval.
-* **Persist state** (checkpoints) for fault-tolerance and to enable offline re-runs in Langfuse.
-* **Add reflection early.** A cheap 2nd-model critique catches many hallucinations.
-* **Cost caps.** Track `usage.total_cost` in traces; autonomy creep is real.
-
-<Frame className="my-10" fullWidth>
-![Agent Loop](/images/academy/m2-agent-loop.png)
-</Frame>
-
-The diagram above zooms in on **how an agent-environment loop is executed at runtime**. Notice how each iteration cycles through three checkpoints:
-1. **Action** – the agent (LLM call) decides what to do next.
-2. **Environment** – the real or simulated world responds.
-3. **Feedback / Stop** – the system evaluates whether to continue, hand control back to a human, or terminate.
-
-This micro-loop is the operational core of every architecture at the top of the ladder (R5-R6). It is also where the predictability-vs-agency trade-off materialises in practice: with more agency you allow the loop to run longer and mutate state in unforeseen ways, which demands stronger feedback and stop conditions to stay reliable. In Langfuse each pass through this loop becomes a traced span, giving you the visibility to debug, evaluate, and put guardrails around autonomous behaviour.
 
 <Callout type="info" emoji="📚">
 Further reading:
