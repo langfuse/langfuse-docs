@@ -1,0 +1,232 @@
+---
+description: Retrieve custom metrics from Langfuse for flexible analytics and reporting.
+---
+
+# Metrics API
+
+```
+GET /api/public/metrics
+```
+
+The **Metrics API** enables you to retrieve customized analytics from your Langfuse data.
+This endpoint allows you to specify dimensions, metrics, filters, and time granularity to build powerful custom reports and dashboards for your LLM applications.
+
+## Overview
+
+The Metrics API supports querying across different views (traces, observations, scores) and allows you to:
+
+- Select specific dimensions to group your data
+- Apply multiple metrics with different aggregation methods
+- Filter data based on metadata, timestamps, and other properties
+- Analyze data across time with customizable granularity
+- Order results according to your needs
+
+## Query Parameters
+
+The API accepts a JSON query object passed as a URL-encoded parameter:
+
+| Parameter | Type        | Description                                                |
+|-----------|-------------|------------------------------------------------------------|
+| `query`   | JSON string | The encoded query object defining what metrics to retrieve |
+
+### Query Object Structure
+
+| Field           | Type   | Required | Description                                                                                                                                                              |
+|-----------------|--------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, or `"scores-categorical"`                                                                      |
+| `dimensions`    | array  | No       | Array of dimension objects to group by, e.g. `[{ "field": "name" }]`                                                                                                     |
+| `metrics`       | array  | Yes      | Array of metric objects to calculate, e.g. `[{ "measure": "latency", "aggregation": "p95" }]`                                                                            |
+| `filters`       | array  | No       | Array of filter objects to narrow results, e.g. `[{ "column": "metadata", "operator": "contains", "key": "customKey", "value": "customValue", "type": "stringObject" }]` |
+| `timeDimension` | object | No       | Configuration for time-based analysis, e.g. `{ "granularity": "day" }`                                                                                                   |
+| `fromTimestamp` | string | Yes      | ISO timestamp for the start of the query period                                                                                                                          |
+| `toTimestamp`   | string | Yes      | ISO timestamp for the end of the query period                                                                                                                            |
+| `orderBy`       | array  | No       | Specification for result ordering, e.g. `[{ "field": "name", "direction": "asc" }]`                                                                                      |
+
+### Dimension Object Structure
+
+```json
+{ "field": "name" }
+```
+
+### Metric Object Structure
+
+```json
+{ "measure": "count", "aggregation": "count" }
+```
+
+Common measure types include:
+- `count` - Count of records
+- `latency` - Duration/latency metrics
+
+Aggregation types include:
+
+- `sum` - Sum of values
+- `avg` - Average of values
+- `count` - Count of records
+- `max` - Maximum value
+- `min` - Minimum value
+- `p50` - 50th percentile
+- `p75` - 75th percentile
+- `p90` - 90th percentile
+- `p95` - 95th percentile
+- `p99` - 99th percentile
+
+### Filter Object Structure
+
+```json
+{
+  "column": "metadata",
+  "operator": "contains",
+  "key": "customKey",
+  "value": "customValue",
+  "type": "stringObject"
+}
+```
+
+### Time Dimension Object
+
+```json
+{
+  "granularity": "day"
+}
+```
+
+Supported granularities include: `hour`, `day`, `week`, `month`, and `auto`.
+
+## Example
+
+Here's an example of querying the number of traces grouped by name:
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  -G \
+  --data-urlencode 'query={
+    "view": "traces",
+    "metrics": [{"measure": "count", "aggregation": "count"}],
+    "dimensions": [{"field": "name"}],
+    "filters": [],
+    "fromTimestamp": "2025-05-01T00:00:00Z",
+    "toTimestamp": "2025-05-13T00:00:00Z"
+  }' \
+  https://cloud.langfuse.com:3000/api/public/metrics
+```
+
+Response:
+
+```json
+{"data":[{"name":"trace-test-2","count_count":"10"},{"name":"trace-test-3","count_count":"5"},{"name":"trace-test-1","count_count":"3"}]}
+```
+
+## Data Model
+
+The Metrics API provides access to several data views, each with its own set of dimensions and metrics you can query. This section outlines the available options for each view.
+
+### Available Views
+
+| View                 | Description                         |
+|----------------------|-------------------------------------|
+| `traces`             | Query data at the trace level       |
+| `observations`       | Query data at the observation level |
+| `scores-numeric`     | Query numeric and boolean scores    |
+| `scores-categorical` | Query categorical (string) scores   |
+
+### Trace Dimensions
+
+| Dimension         | Type     | Description                             |
+|-------------------|----------|-----------------------------------------|
+| `id`              | string   | Trace ID                                |
+| `name`            | string   | Trace name                              |
+| `tags`            | string[] | Trace tags                              |
+| `userId`          | string   | User ID associated with the trace       |
+| `sessionId`       | string   | Session ID associated with the trace    |
+| `release`         | string   | Release tag                             |
+| `version`         | string   | Version tag                             |
+| `environment`     | string   | Environment (e.g., production, staging) |
+| `observationName` | string   | Name of related observations            |
+| `scoreName`       | string   | Name of related scores                  |
+
+### Trace Metrics
+
+| Metric              | Description                         |
+|---------------------|-------------------------------------|
+| `count`             | Count of traces                     |
+| `observationsCount` | Count of observations within traces |
+| `scoresCount`       | Count of scores within traces       |
+| `latency`           | Trace duration in milliseconds      |
+| `totalTokens`       | Total tokens used in the trace      |
+| `totalCost`         | Total cost of the trace             |
+
+### Observation Dimensions
+
+| Dimension             | Type   | Description                             |
+|-----------------------|--------|-----------------------------------------|
+| `id`                  | string | Observation ID                          |
+| `traceId`             | string | Associated trace ID                     |
+| `traceName`           | string | Name of the parent trace                |
+| `environment`         | string | Environment (e.g., production, staging) |
+| `parentObservationId` | string | ID of parent observation                |
+| `type`                | string | Observation type                        |
+| `name`                | string | Observation name                        |
+| `level`               | string | Log level                               |
+| `version`             | string | Version                                 |
+| `providedModelName`   | string | Model name                              |
+| `promptName`          | string | Prompt name                             |
+| `promptVersion`       | string | Prompt version                          |
+| `userId`              | string | User ID from parent trace               |
+| `sessionId`           | string | Session ID from parent trace            |
+| `traceRelease`        | string | Release from parent trace               |
+| `traceVersion`        | string | Version from parent trace               |
+| `scoreName`           | string | Related score name                      |
+
+### Observation Metrics
+
+| Metric             | Description                          |
+|--------------------|--------------------------------------|
+| `count`            | Count of observations                |
+| `latency`          | Observation duration in milliseconds |
+| `totalTokens`      | Total tokens used                    |
+| `totalCost`        | Total cost                           |
+| `timeToFirstToken` | Time to first token in milliseconds  |
+| `countScores`      | Count of related scores              |
+
+### Score Dimensions (Common)
+
+| Dimension                  | Type   | Description                                |
+|----------------------------|--------|--------------------------------------------|
+| `id`                       | string | Score ID                                   |
+| `name`                     | string | Score name                                 |
+| `environment`              | string | Environment                                |
+| `source`                   | string | Score source                               |
+| `dataType`                 | string | Data type                                  |
+| `traceId`                  | string | Related trace ID                           |
+| `traceName`                | string | Related trace name                         |
+| `userId`                   | string | User ID from trace                         |
+| `sessionId`                | string | Session ID from trace                      |
+| `observationId`            | string | Related observation ID                     |
+| `observationName`          | string | Related observation name                   |
+| `observationModelName`     | string | Model used in related observation          |
+| `observationPromptName`    | string | Prompt name used in related observation    |
+| `observationPromptVersion` | string | Prompt version used in related observation |
+| `configId`                 | string | Configuration ID                           |
+
+### Score Metrics
+
+#### Numeric Scores
+
+| Metric  | Description         |
+|---------|---------------------|
+| `count` | Count of scores     |
+| `value` | Numeric score value |
+
+#### Categorical Scores
+
+| Metric  | Description     |
+|---------|-----------------|
+| `count` | Count of scores |
+
+Categorical scores have an additional dimension:
+
+| Dimension     | Type   | Description                           |
+|---------------|--------|---------------------------------------|
+| `stringValue` | string | String value of the categorical score |
