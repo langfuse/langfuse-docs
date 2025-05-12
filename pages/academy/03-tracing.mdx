@@ -2,12 +2,58 @@
 
 Having introduced LLMOps and the importance of monitoring in Module 1, let's take a **closer look at tracing** and how it helps you manage multi-step LLM applications.
 
-![][image3]
+![Tracing](/images/academy/m3-tracing.png)
+
+### Recap: What is a trace/span and how is it used in LLM applications?
+
+A `trace` typically represents a single request or operation.
+It contains the overall input and output of the function, as well as metadata about the request, such as the user, the session, and tags.
+Usually, _a trace corresponds to a single api call of an application_.
+
+Each trace can contain multiple `observations` to log the individual steps of the execution.
+
+- Observations are of different types:
+  - `Events` are the basic building blocks. They are used to track discrete events in a trace.
+  - `Spans` represent durations of units of work in a trace.
+  - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
+- Observations can be nested.
+
+<div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
+
+<div className="border rounded py-4 text-center bg-card">
+
+**Hierarchical structure of traces in Langfuse**
+
+```mermaid
+classDiagram
+    Trace "1" *-- "n" Observation
+    Observation <|-- Event
+    Observation <|-- Span
+    Observation <|-- Generation
+    Observation o-- Observation: Nesting
+```
+
+</div>
+
+<div className="border rounded py-4 text-center block dark:hidden bg-card">
+
+**Example trace in Langfuse UI**
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-light.png)
+
+</div>
+
+<div className="border rounded py-4 text-center bg-background hidden dark:block">
+
+**Example trace in Langfuse UI**
+
+![Trace in Langfuse UI](/images/docs/tracing-observation-tree-dark.png)
+
+</div>
+
+</div>
 
 ### Why is LLM Tracing important?
-
-| Taken from: [https://langfuse.com/blog/2024-10-observability-in-multi-step-llm-systems](https://langfuse.com/blog/2024-10-observability-in-multi-step-llm-systems)  |
-| :---- |
 
 As these systems grow in sophistication, the potential points of failure multiply, impacting quality, cost, and latency. Without a robust LLMOps setup, it becomes nearly impossible to identify and address these issues.
 
@@ -40,30 +86,23 @@ F \--\> G\[Final Output\]
 
 Given the intricate nature of multi-step LLM applications, continuous iteration and improvement are necessary. As new features are added and workloads change, you must frequently revisit and refine your systems.
 
-### Recap: What is a trace/span and how is it used in LLM applications?
-
-![][image4]
-
 ### Why is Agent Tracing important?
-
-| Content from: [https://langfuse.com/blog/2024-07-ai-agent-observability-with-langfuse\#why-ai-agent-observability-is-important](https://langfuse.com/blog/2024-07-ai-agent-observability-with-langfuse#why-ai-agent-observability-is-important)  |
-| :---- |
 
 AI agents often **call multiple tools** or make multiple LLM requests to solve a single task. That complexity amplifies the need for thorough tracing:
 
-#### **Debugging and Edge Cases:**
+**Debugging and Edge Cases:**
 
 Agents use multiple steps to solve complex tasks, and inaccurate intermediary results can cause failures of the entire system. [Tracing](https://langfuse.com/docs/tracing) these intermediate steps and testing your application on known edge cases is essential.
 
 When deploying LLMs, some edge cases will always slip through in initial testing. A proper analytics set-up helps identify these cases, allowing you to add them to future test sets for more robust agent evaluations. With [Datasets](https://langfuse.com/docs/datasets/overview), Langfuse allows you to collect examples of inputs and expected outputs to benchmark new releases before deployment. Datasets can be incrementally updated with new edge cases found in production and integrated with existing CI/CD pipelines.
 
-#### **Tradeoff of Accuracy and Costs:**
+**Tradeoff of Accuracy and Costs:**
 
 LLMs are stochastic by nature, meaning they are a statistical process that can produce errors or hallucinations. Calling language models multiple times while selecting the best or most common answer can increase accuracy. This can be a major advantage of using agentic workflows.
 
 However, this comes with a cost. The tradeoff between accuracy and costs in LLM-based agents is crucial, as higher accuracy often leads to increased operational expenses. Often, the agent decides autonomously how many LLM calls or paid external API calls it needs to make to solve a task, potentially leading to high costs for single-task executions. Therefore, it is important to monitor model usage and costs in real-time.
 
-#### **Understanding User Interactions:**
+**Understanding User Interactions:**
 
 AI agents analytics allows you to capture how users interact with your LLM applications. This information is crucial for refining your AI application and tailoring responses to better meet user needs.
 
@@ -71,7 +110,7 @@ AI agents analytics allows you to capture how users interact with your LLM appli
 
 ### What to Trace?
 
-![][image5]
+![What to Trace](/images/academy/m3-application-tracing.png)
 
 Modern LLM applications are multi‑layer systems—user requests flow through application logic, optional tool calls, and finally one or more LLM calls. Solid **observability** therefore means capturing metrics at *every* layer and correlating them across requests, users, and releases. The diagram above highlights the main buckets you should instrument; below is an overview what each represents and *why it matters*.
 
@@ -108,10 +147,8 @@ To help you choose the right entry point, here is a **bird's-eye overview** of t
 These approaches are **composable**: combine SDK spans for business metrics, a LangChain callback for prompt-level traces, OTEL for micro-services, and a proxy for legacy binaries—everything converges into one searchable Langfuse trace.
 
 Langfuse supports many popular frameworks:   
-![Langfuse Features Overview](/images/academy/langfuse-features-overview.png)
+![Langfuse Integrations](/images/academy/m3-integrations.png)  
 
 Check out the [integration documentation](https://langfuse.com/docs/integrations/overview) for a step-by-step guide on enabling Langfuse in your stack.
-
-![][image7]
 
 Once you have instrumented your LLM application and successfully ingested data to Langfuse, you can use this data to evaluate your application and make it ready for production. 

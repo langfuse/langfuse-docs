@@ -1,6 +1,9 @@
 ## **Module 2:** Application & Agent Architectures
 
 Designing an LLM application is **not** just about picking a model—it's about picking (and often combining) the *right architecture pattern* along a spectrum that runs from a single LLM call to fully-autonomous multi-agent swarms.  
+This choice introduces a fundamental **trade-off between predictability and agency**: the higher you climb, the more freedom your system gains, but the harder it becomes to anticipate or constrain every step.
+
+![Tradeoffs](/images/academy/m2-tradeoff.png)
 This chapter unifies the perspectives from three excellent deep-dives:
 
 Below is a distilled map, guidance on when to stop at a workflow vs. when to move to an agent, and concrete patterns you can apply in Langfuse-instrumented projects.
@@ -8,8 +11,6 @@ Below is a distilled map, guidance on when to stop at a workflow vs. when to mov
 ---
 
 ### The Architecture Ladder
-
-The three sources use slightly different names; we merge them into six rungs of increasing "agency."
 
 ```mermaid
 flowchart TD
@@ -74,8 +75,6 @@ graph TD
 | **Memory-Augmented** | Long customer sessions | Personalised UX | Memory staleness / cost |
 | **Multi-Agent Swarm** | Brainstorming, negotiation sims | Diverse reasoning | Hardest to debug |
 
----
-
 ### Selecting the Right Approach
 
 1. **Define "good" first.** Accuracy? Cost? Latency? Trust?  
@@ -87,9 +86,8 @@ graph TD
 
 Langfuse provides the tracing you need to see that context. Every node/tool invocation you build becomes a traced span that you can later debug, evaluate, and cost-optimise.
 
----
 
-### Implementation Tips (from all three sources)
+### Implementation Tips
 
 * **Tool schema = prompt.** Document args, edge-cases, examples.
 * **Guardrails hierarchy:** JSON schema → allow-list APIs → max-iterations → human-approval.
@@ -97,14 +95,11 @@ Langfuse provides the tracing you need to see that context. Every node/tool invo
 * **Add reflection early.** A cheap 2nd-model critique catches many hallucinations.
 * **Cost caps.** Track `usage.total_cost` in traces; autonomy creep is real.
 
----
+![Agent Loop](/images/academy/m2-agent-loop.png)
 
-### Further Reading
+The diagram above zooms in on **how an agent-environment loop is executed at runtime**. Notice how each iteration cycles through three checkpoints:
+1. **Action** – the agent (LLM call) decides what to do next.
+2. **Environment** – the real or simulated world responds.
+3. **Feedback / Stop** – the system evaluates whether to continue, hand control back to a human, or terminate.
 
-* Harrison Chase, *Agent architectures* (tweet thread)  
-* Anthropic, *Building Effective Agents* (2024-12)  
-* Philipp Schmid, *Zero to One: Learning Agentic Patterns* (2025-05)
-
-These links are the perfect starting points if you want to dive deeper or port the mermaid diagrams above into code (Phil provides full Python snippets, Harrison shows LangGraph recipes, Anthropic offers high-level design guidance).
-
----
+This micro-loop is the operational core of every architecture at the top of the ladder (R5-R6). It is also where the predictability-vs-agency trade-off materialises in practice: with more agency you allow the loop to run longer and mutate state in unforeseen ways, which demands stronger feedback and stop conditions to stay reliable. In Langfuse each pass through this loop becomes a traced span, giving you the visibility to debug, evaluate, and put guardrails around autonomous behaviour.
