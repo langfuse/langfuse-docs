@@ -124,109 +124,109 @@ The Metrics API provides access to several data views, each with its own set of 
 
 ### Available Views
 
-| View | Description |
-|------|-------------|
-| `traces` | Query data at the trace level |
-| `observations` | Query data at the observation level |
-| `scores-numeric` | Query numeric and boolean scores |
-| `scores-categorical` | Query categorical (string) scores |
+| View                 | Description                         |
+|----------------------|-------------------------------------|
+| `traces`             | Query data at the trace level       |
+| `observations`       | Query data at the observation level |
+| `scores-numeric`     | Query numeric and boolean scores    |
+| `scores-categorical` | Query categorical (string) scores   |
 
 ### Trace Dimensions
 
-| Dimension | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Trace ID |
-| `name` | string | Trace name |
-| `tags` | string[] | Trace tags |
-| `userId` | string | User ID associated with the trace |
-| `sessionId` | string | Session ID associated with the trace |
-| `release` | string | Release tag |
-| `version` | string | Version tag |
-| `environment` | string | Environment (e.g., production, staging) |
-| `observationName` | string | Name of related observations |
-| `scoreName` | string | Name of related scores |
+| Dimension         | Type     | Description                             |
+|-------------------|----------|-----------------------------------------|
+| `id`              | string   | Trace ID                                |
+| `name`            | string   | Trace name                              |
+| `tags`            | string[] | Trace tags                              |
+| `userId`          | string   | User ID associated with the trace       |
+| `sessionId`       | string   | Session ID associated with the trace    |
+| `release`         | string   | Release tag                             |
+| `version`         | string   | Version tag                             |
+| `environment`     | string   | Environment (e.g., production, staging) |
+| `observationName` | string   | Name of related observations            |
+| `scoreName`       | string   | Name of related scores                  |
 
 ### Trace Metrics
 
-| Metric | Aggregations | Description |
-|--------|-------------|-------------|
-| `count` | count | Count of traces |
-| `observationsCount` | count | Count of observations within traces |
-| `scoresCount` | count | Count of scores within traces |
-| `latency` | sum, avg, min, max, p95 | Trace duration in milliseconds |
-| `totalTokens` | sum, avg | Total tokens used in the trace |
-| `totalCost` | sum, avg | Total cost of the trace |
+| Metric              | Description                         |
+|---------------------|-------------------------------------|
+| `count`             | Count of traces                     |
+| `observationsCount` | Count of observations within traces |
+| `scoresCount`       | Count of scores within traces       |
+| `latency`           | Trace duration in milliseconds      |
+| `totalTokens`       | Total tokens used in the trace      |
+| `totalCost`         | Total cost of the trace             |
 
 ### Observation Dimensions
 
-| Dimension | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Observation ID |
-| `traceId` | string | Associated trace ID |
-| `traceName` | string | Name of the parent trace |
-| `environment` | string | Environment (e.g., production, staging) |
-| `parentObservationId` | string | ID of parent observation |
-| `type` | string | Observation type |
-| `name` | string | Observation name |
-| `level` | string | Log level |
-| `version` | string | Version |
-| `providedModelName` | string | Model name |
-| `promptName` | string | Prompt name |
-| `promptVersion` | string | Prompt version |
-| `userId` | string | User ID from parent trace |
-| `sessionId` | string | Session ID from parent trace |
-| `traceRelease` | string | Release from parent trace |
-| `traceVersion` | string | Version from parent trace |
-| `scoreName` | string | Related score name |
+| Dimension             | Type   | Description                             |
+|-----------------------|--------|-----------------------------------------|
+| `id`                  | string | Observation ID                          |
+| `traceId`             | string | Associated trace ID                     |
+| `traceName`           | string | Name of the parent trace                |
+| `environment`         | string | Environment (e.g., production, staging) |
+| `parentObservationId` | string | ID of parent observation                |
+| `type`                | string | Observation type                        |
+| `name`                | string | Observation name                        |
+| `level`               | string | Log level                               |
+| `version`             | string | Version                                 |
+| `providedModelName`   | string | Model name                              |
+| `promptName`          | string | Prompt name                             |
+| `promptVersion`       | string | Prompt version                          |
+| `userId`              | string | User ID from parent trace               |
+| `sessionId`           | string | Session ID from parent trace            |
+| `traceRelease`        | string | Release from parent trace               |
+| `traceVersion`        | string | Version from parent trace               |
+| `scoreName`           | string | Related score name                      |
 
 ### Observation Metrics
 
-| Metric | Aggregations | Description |
-|--------|-------------|-------------|
-| `count` | count | Count of observations |
-| `latency` | sum, avg, min, max, p95 | Observation duration in milliseconds |
-| `totalTokens` | sum, avg | Total tokens used |
-| `totalCost` | sum, avg | Total cost |
-| `timeToFirstToken` | sum, avg, min, max, p95 | Time to first token in milliseconds |
-| `countScores` | count | Count of related scores |
+| Metric             | Description                          |
+|--------------------|--------------------------------------|
+| `count`            | Count of observations                |
+| `latency`          | Observation duration in milliseconds |
+| `totalTokens`      | Total tokens used                    |
+| `totalCost`        | Total cost                           |
+| `timeToFirstToken` | Time to first token in milliseconds  |
+| `countScores`      | Count of related scores              |
 
 ### Score Dimensions (Common)
 
-| Dimension | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Score ID |
-| `name` | string | Score name |
-| `environment` | string | Environment |
-| `source` | string | Score source |
-| `dataType` | string | Data type |
-| `traceId` | string | Related trace ID |
-| `traceName` | string | Related trace name |
-| `userId` | string | User ID from trace |
-| `sessionId` | string | Session ID from trace |
-| `observationId` | string | Related observation ID |
-| `observationName` | string | Related observation name |
-| `observationModelName` | string | Model used in related observation |
-| `observationPromptName` | string | Prompt name used in related observation |
+| Dimension                  | Type   | Description                                |
+|----------------------------|--------|--------------------------------------------|
+| `id`                       | string | Score ID                                   |
+| `name`                     | string | Score name                                 |
+| `environment`              | string | Environment                                |
+| `source`                   | string | Score source                               |
+| `dataType`                 | string | Data type                                  |
+| `traceId`                  | string | Related trace ID                           |
+| `traceName`                | string | Related trace name                         |
+| `userId`                   | string | User ID from trace                         |
+| `sessionId`                | string | Session ID from trace                      |
+| `observationId`            | string | Related observation ID                     |
+| `observationName`          | string | Related observation name                   |
+| `observationModelName`     | string | Model used in related observation          |
+| `observationPromptName`    | string | Prompt name used in related observation    |
 | `observationPromptVersion` | string | Prompt version used in related observation |
-| `configId` | string | Configuration ID |
+| `configId`                 | string | Configuration ID                           |
 
 ### Score Metrics
 
 #### Numeric Scores
 
-| Metric | Aggregations | Description |
-|--------|-------------|-------------|
-| `count` | count | Count of scores |
-| `value` | avg, min, max, p95 | Numeric score value |
+| Metric  | Description         |
+|---------|---------------------|
+| `count` | Count of scores     |
+| `value` | Numeric score value |
 
 #### Categorical Scores
 
-| Metric | Aggregations | Description |
-|--------|-------------|-------------|
-| `count` | count | Count of scores |
+| Metric  | Description     |
+|---------|-----------------|
+| `count` | Count of scores |
 
 Categorical scores have an additional dimension:
 
-| Dimension | Type | Description |
-|-----------|------|-------------|
+| Dimension     | Type   | Description                           |
+|---------------|--------|---------------------------------------|
 | `stringValue` | string | String value of the categorical score |
