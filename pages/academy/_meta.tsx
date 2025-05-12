@@ -5,11 +5,11 @@ export default {
     type: "separator",
     title: <MenuSwitcher />,
   },
-  index: "Overview",
   "01-introduction": "1. Introduction",
   "02-application-architectures": "2. Application Architectures",
   "03-tracing": "3. Tracing",
   "04-evaluation": "4. Evaluation",
   "05-prompt-management": "5. Prompt Management",
-  "06-certificate": "6. Certificate"
+  "06-certificate": "6. Certificate",
+  "07-further-reading": "7. Further Reading",
 };
