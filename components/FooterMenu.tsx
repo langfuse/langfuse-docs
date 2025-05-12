@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Twitter, Linkedin } from "lucide-react";
 import InkeepChatButton from "./inkeep/InkeepChatButton";
 
 const menuItems: {
@@ -242,9 +243,15 @@ const FooterMenu = () => {
                   <li key={item.name} className="relative flex gap-1">
                     <Link
                       href={item.href}
-                      className="text-sm hover:text-primary/80"
+                      className="flex items-center gap-1 text-sm hover:text-primary/80"
                     >
-                      {item.name}
+                      {item.name === "Twitter" && (
+                        <Twitter className="h-4 w-4" />
+                      )}
+                      {item.name === "LinkedIn" && (
+                        <Linkedin className="h-4 w-4" />
+                      )}
+                      <span>{item.name}</span>
                     </Link>
                     {item.notificationCount > 0 && (
                       <span className="transform -translate-y-1/4 bg-primary text-primary-foreground rounded-full h-3 w-3 text-[0.6rem] flex items-center justify-center">
