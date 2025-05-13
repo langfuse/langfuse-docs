@@ -1,0 +1,58 @@
+---
+date: 2025-05-12
+title: "Metrics API for custom analytics"
+description: Build custom reports and dashboards with our flexible Metrics API. Query traces, observations, and scores with custom dimensions, metrics, and time granularity.
+author: Steffen
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+## Overview
+
+We're excited to announce our new Metrics API, which allows you to build custom analytics dashboards and reports from your Langfuse data.
+This flexible API enables you to construct queries with:
+
+- Customizable dimensions and metrics
+- Flexible time granularity (hourly, daily, weekly, monthly)
+- Advanced filtering capabilities including metadata filtering
+- Support for both traces and observations views
+
+## Key Features
+
+- **Multiple Dimensions**: Group your data by any available dimension like name, model, or user ID
+- **Flexible Metrics**: Select and aggregate metrics like count, latency (with various aggregations like p95, avg)
+- **Time-Based Analysis**: Apply time dimensions with different granularities
+- **Rich Filtering**: Filter by metadata, timestamps, and other properties
+- **JSON-Based Query Format**: Intuitive query structure for complex analytics needs
+
+## Example
+
+Here's an example of querying the number of traces grouped by name:
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  -G \
+  --data-urlencode 'query={
+    "view": "traces",
+    "metrics": [{"measure": "count", "aggregation": "count"}],
+    "dimensions": [{"field": "name"}],
+    "filters": [],
+    "fromTimestamp": "2025-05-01T00:00:00Z",
+    "toTimestamp": "2025-05-13T00:00:00Z"
+  }' \
+  https://cloud.langfuse.com:3000/api/public/metrics
+```
+
+Response:
+
+```json
+{"data":[{"name":"trace-test-2","count_count":"10"},{"name":"trace-test-3","count_count":"10"},{"name":"trace-test-1","count_count":"10"}]}
+```
+
+## Learn more
+
+- [Metrics API](/docs/analytics/metrics-api)
+- [API Reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/metrics)

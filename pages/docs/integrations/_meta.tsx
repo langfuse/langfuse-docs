@@ -36,5 +36,6 @@ export default {
   "quarkus-langchain4j": "Quarkus LangChain4j",
   mastra: "Mastra",
   voltagent: "VoltAgent",
+  ragflow: "Ragflow",
   other: "More Ways to Integrate",
 };

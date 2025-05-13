@@ -20,6 +20,9 @@ import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import IconGithub from "./icons/github";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import { Dialog, DialogContent } from "./ui/dialog";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
 
@@ -254,7 +257,7 @@ export const DocsSupport = () => {
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="/schedule-demo" target="_blank">
+          <a href="/talk-to-us" target="_blank">
             <span>Talk to sales</span>
             <Calendar className="h-4 w-4 ml-3" />
           </a>
@@ -271,9 +274,24 @@ export const DocsFeedback = () => {
   >(null);
   const [feedbackComment, setFeedbackComment] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [commentSubmitting, setCommentSubmitting] = useState<boolean>(false);
+
+  // Controls the prominent follow-up dialog shown after a negative rating
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const handleFeedbackSelection = (newSelection: "positive" | "negative") => {
+    // If negative feedback, immediately update selected state and open dialog
+    // This makes the dialog appear "snappy"
+    if (newSelection === "negative") {
+      setSelected(newSelection); // Update title to "What can we improve?"
+      setDialogOpen(true); // Open dialog immediately
+      setFeedbackComment(""); // Clear any previous comment
+    }
+
+    // Indicate API call is in progress (disables Yes/No buttons if they were still visible for positive feedback)
+    // And sets submitting state for the subsequent comment submission if negative.
     setSubmitting(true);
+
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
@@ -282,15 +300,25 @@ export const DocsFeedback = () => {
       }),
     })
       .then(() => {
-        setFeedbackComment("");
-        setSelected(newSelection);
-        setSubmitting(false);
+        // If positive feedback, update selected state now.
+        // For negative feedback, 'selected' was already set to 'negative' to show the dialog's context.
+        if (newSelection === "positive") {
+          setSelected(newSelection);
+          setFeedbackComment(""); // Clear comment for positive feedback as well
+        }
+        // Regardless of positive or negative, the initial ping to the API succeeded.
+        setSubmitting(false); // Re-enable buttons or indicate API call finished
       })
-      .catch(() => setSelected(null));
+      .catch(() => {
+        // API call for the initial feedback failed.
+        setSelected(null); // Revert to the initial state ("Was this page useful?")
+        setSubmitting(false);
+      });
   };
 
   const handleFeedbackCommentSubmit = () => {
-    setSubmitting(true);
+    setCommentSubmitting(true);
+
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
@@ -302,9 +330,13 @@ export const DocsFeedback = () => {
       .then(() => {
         setSelected("submitted");
         setFeedbackComment("");
-        setSubmitting(false);
+        setCommentSubmitting(false);
       })
-      .catch(() => setSelected(null));
+      .catch(() => {
+        setSelected(null);
+        setDialogOpen(false);
+        setCommentSubmitting(false);
+      });
   };
 
   return (
@@ -339,14 +371,10 @@ export const DocsFeedback = () => {
             <ThumbsDown className="h-5 w-5 ml-4 text-red-800" />
           </Button>
         </div>
-      ) : selected === "positive" || selected === "negative" ? (
+      ) : selected === "positive" ? (
         <div className="flex flex-col gap-3">
           <Textarea
-            placeholder={
-              selected === "positive"
-                ? "Let us know what you found most useful"
-                : "Let us know what we can improve"
-            }
+            placeholder="Let us know what you found most useful"
             value={feedbackComment}
             onChange={(e) => setFeedbackComment(e.target.value)}
           />
@@ -354,13 +382,13 @@ export const DocsFeedback = () => {
             variant="secondary"
             className="self-start"
             size="lg"
-            disabled={submitting}
+            disabled={commentSubmitting}
             onClick={handleFeedbackCommentSubmit}
           >
-            {submitting ? "Submitting ..." : "Send feedback"}
+            {commentSubmitting ? "Submitting ..." : "Send feedback"}
           </Button>
         </div>
-      ) : (
+      ) : selected === "submitted" ? (
         <div className="flex flex-col gap-3">
           <Button
             variant="outline"
@@ -371,7 +399,97 @@ export const DocsFeedback = () => {
             Send more feedback
           </Button>
         </div>
-      )}
+      ) : null}
+
+      {/* Prominent dialog for detailed feedback after a negative rating */}
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          // If dialog is closed (e.g. by clicking outside or pressing ESC)
+          setDialogOpen(open);
+          // Reset selection if it was 'negative' (meaning feedback form was open)
+          // or 'submitted' (meaning thank you screen was open) to reset the main widget
+          if (!open && (selected === "negative" || selected === "submitted")) {
+            setSelected(null);
+            setFeedbackComment("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          {selected === "submitted" ? (
+            // Thank you view
+            <div className="flex flex-col gap-4 text-center items-center py-4">
+              <ThumbsUp className="h-12 w-12 text-green-500" />
+              <h4 className="text-lg font-semibold">
+                Thank you for your feedback!
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                We appreciate you taking the time to help us improve. Please
+                continue to share your thoughts whenever you have more feedback.
+              </p>
+              <Button
+                variant="outline"
+                size="lg"
+                className="mt-4"
+                onClick={() => {
+                  setDialogOpen(false); // Close the dialog
+                  setSelected(null); // Reset the main page widget
+                }}
+              >
+                Done
+              </Button>
+            </div>
+          ) : (
+            // Feedback input view
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-4 items-start">
+                <Image
+                  src="/images/people/marcklingen.jpg"
+                  alt="Marc Klingen"
+                  width={48}
+                  height={48}
+                  className="rounded-full aspect-square shrink-0"
+                />
+                <p className="text-sm leading-relaxed">
+                  Documentation is super important to us and we genuinely want
+                  to make it better. Could you share what was unclear or missing
+                  on this page? Thank you for any hints! <br />
+                  <span className="inline-block mt-2">
+                    –{" "}
+                    <Link
+                      href="https://www.linkedin.com/in/marcklingen"
+                      className="font-medium underline-offset-4 hover:underline"
+                      target="_blank"
+                    >
+                      Marc Klingen
+                    </Link>
+                    , Co-founder &amp; Docs Lead
+                  </span>
+                </p>
+              </div>
+
+              <Textarea
+                placeholder="Let us know how we can improve. Include your email if you'd like a reply."
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+              />
+
+              <div className="flex justify-end">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  disabled={
+                    commentSubmitting || feedbackComment.trim().length === 0
+                  }
+                  onClick={handleFeedbackCommentSubmit}
+                >
+                  {commentSubmitting ? "Submitting …" : "Send feedback"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

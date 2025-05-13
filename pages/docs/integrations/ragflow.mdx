@@ -1,0 +1,65 @@
+---
+title: Observability and Tracing for Ragflow
+description: Open source observability for Ragflow applications. Automatically capture detailed traces and metrics for every request built with Ragflow.
+category: integrations
+---
+
+# Ragflow Observability & Tracing
+
+**[Ragflow](https://ragflow.io/)** ([GitHub](https://github.com/ragflow-ai/ragflow)) is a no-code / low-code framework to design and run Retrieval-Augmented-Generation (RAG) pipelines.
+
+With the native Langfuse integration you can build complex RAG pipelines in Ragflow and then use Langfuse to monitor, debug and improve them.
+
+The integration works for all execution modes of Ragflow: interactive runs in the UI, scheduled jobs and API calls.
+
+## Integration
+
+<Steps>
+
+### Get Langfuse API keys
+
+<Tabs items={["Langfuse cloud", "local or self-hosted"]}>
+<Tab>
+
+1. Create an account and project on [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy the **public** and **secret** API keys for your project
+
+</Tab>
+<Tab>
+
+1. Follow the [self-hosting guide](/docs/get-started/) to run Langfuse locally or on-prem
+2. Copy the **public** and **secret** API keys for your project
+
+</Tab>
+</Tabs>
+
+### Configure Ragflow
+
+You can configure Langfuse in the Ragflow API settings (scroll to bottom). Please note that you first have to configure an LLM in the Ragflow settings.
+
+<CloudflareVideo
+  videoId="49262579287ddcad92bc6d3dc78aec3e"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+
+### Run your pipeline and inspect traces
+
+Execute a pipeline from the Ragflow UI or trigger it via the API. Ragflow will automatically send structured trace data to Langfuse.
+
+<Frame border fullWidth>
+  ![Example Ragflow trace in Langfuse](/images/docs/ragflow/ragflow-example-trace.png)
+</Frame>
+
+([Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0bde9629-4251-4386-b583-26101b8e7561?timestamp=2025-05-09T19%3A15%3A37.797Z&display=details&observation=823997d8-ac40-40f3-8e7b-8aa6753b499e))
+
+</Steps>
+
+## Version requirements
+
+| Library | Minimum version |
+| --- | --- |
+| Ragflow | `>= 0.3.0` |
+
+If you are on an older Ragflow version please upgrade to benefit from the Langfuse integration.
