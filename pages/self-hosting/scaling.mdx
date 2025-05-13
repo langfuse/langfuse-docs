@@ -90,6 +90,22 @@ You can modify your ClickHouse settings to set a TTL on both tables.
 It is also safe to manually prune them from time to time.
 Check the [ClickHouse documentation](https://clickhouse.com/docs/operations/server-configuration-parameters/settings#trace_log) for details on how to configure a TTL on those tables.
 
+The following query helps to identify the largest tables in Clickhouse:
+
+```sql
+SELECT table, formatReadableSize(size) as size, rows FROM (
+    SELECT
+        table,
+        database,
+        sum(bytes) AS size,
+        sum(rows) AS rows
+    FROM system.parts
+    WHERE active
+    GROUP BY table, database
+    ORDER BY size DESC
+)
+```
+
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
