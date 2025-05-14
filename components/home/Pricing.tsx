@@ -715,8 +715,20 @@ const sections: Section[] = [
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "10 requests / min",
+            Hobby: "30 requests / min",
             Core: "100 requests / min",
+            Pro: "1,000 requests / min",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (datasets api)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / min",
+            Core: "200 requests / min",
             Pro: "1,000 requests / min",
             Enterprise: "Custom",
           },
