@@ -52,3 +52,23 @@ LLM connections are configured in the Langfuse project settings. You can customi
 | `LANGFUSE_UI_DEFAULT_BASE_URL_OPENAI`       | Set the default base URL for OpenAI API in the LLM playground and evals. Example: `https://api.openai.com/v1`                                        |
 | `LANGFUSE_UI_DEFAULT_BASE_URL_ANTHROPIC`    | Set the default base URL for Anthropic API in the LLM playground and evals. Example: `https://api.anthropic.com`                                     |
 | `LANGFUSE_UI_DEFAULT_BASE_URL_AZURE_OPENAI` | Set the default base URL for Azure OpenAI API in the LLM playground and evals. Example: `https://{instanceName}.openai.azure.com/openai/deployments` |
+
+## Product Module Visibility
+
+Control which product modules are visible in the main menu. You can either specify which modules should be visible or which ones should be hidden.
+
+| Variable                              | Description                                                                                                                               |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_UI_VISIBLE_PRODUCT_MODULES` | Comma-separated list of modules that should be visible. All other modules will be hidden. Example: `tracing,evaluation,prompt-management` |
+| `LANGFUSE_UI_HIDDEN_PRODUCT_MODULES`  | Comma-separated list of modules that should be hidden. All other modules will be visible. Example: `playground,datasets`                  |
+
+Available modules:
+
+- `dashboards`: Dashboards except for the default dashboard which is always visible
+- `tracing`: Traces and users
+- `evaluation`: Evaluations and scores
+- `prompt-management`: Prompt management
+- `playground`: LLM playground
+- `datasets`: Datasets
+
+If both variables are set, `LANGFUSE_UI_VISIBLE_PRODUCT_MODULES` takes precedence. If neither is set, all modules are visible by default.
