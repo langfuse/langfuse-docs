@@ -243,6 +243,8 @@ const nonPermanentRedirects = [
   ["/faq/all/cloud-data-regions", "/security/data-regions"],
   ["/self-hosting/local", "/self-hosting/docker-compose"],
   ["/self-hosting/docker", "/self-hosting/kubernetes-helm"],
+  ["/self-hosting/license-key", "/open-source"],
+  ["/faq/all/self-hosting-langfuse.mdx", "/self-hosting"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],

@@ -51,10 +51,10 @@ export default {
   "automated-access-provisioning": "Automated Access Provisioning",
   "custom-base-path": "Custom Base Path",
   "headless-initialization": "Headless Initialization",
-  "organization-creators": "Organization Creators (EE)",
+  "organization-creators": "Organization Creators",
   "transactional-emails": "Transactional Emails",
-  "ui-customization": "UI Customization (EE)",
-  "organization-management-api": "Organization Management API (EE)",
+  "ui-customization": "UI Customization",
+  "organization-management-api": "Organization Management API",
   "-- Upgrade": {
     type: "separator",
     title: "Upgrade",
