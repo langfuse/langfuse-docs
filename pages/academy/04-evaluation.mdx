@@ -224,7 +224,6 @@ LLM Security can be addressed with a combination of:
 * LLM Security libraries for run-time security measures  
 * Langfuse for the ex-post evaluation of the effectiveness of these measures
 
-
 **Run-time security measures with LLM security libraries**
 
 There are several popular security libraries that can be used to mitigate security risks in LLM-based applications. These include: [LLM Guard](https://llm-guard.com/), [Prompt Armor](https://promptarmor.com/), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), [Lakera](https://www.lakera.ai/). These libraries help with security measures in the following ways:
@@ -233,7 +232,6 @@ There are several popular security libraries that can be used to mitigate securi
 2. Redacting sensitive PII before being sending into the model and then un-redacting in the response  
 3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary  
    
-
 **Asynchronous monitoring and evaluation of security measures**
 
 Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
@@ -255,17 +253,6 @@ Exposing Personally Identifiable Information (PII) to models can pose security a
 Run the [end-to-end cookbook](/docs/security/example-python) or check out our [documentation](/docs/security/overview).
 </Callout>
 
-<Callout type="info" emoji="📚">
-Further reading:
-
-- **Evaluating the Effectiveness of LLM-Evaluators (aka LLM-as-Judge)**, [blog post](https://eugeneyan.com/writing/llm-evaluators/), _by Eugene Yan_
-- **AI Agent Observability & Evaluation**, [course](https://huggingface.co/learn/agents-course/bonus-unit2/introduction), _by Hugging Face_
-- **Your AI Product Needs Evals**, [blog post](https://hamel.dev/blog/posts/evals/), _by Hamel Husain_
-- **Creating a LLM-as-a-Judge That Drives Business Results**, [blog post](https://hamel.dev/blog/posts/llm-judge/), _by Hamel Husain_
-- **Evaluating Voice AI Agents**, [blog post](/blog/2025-01-22-evaluating-voice-ai-agents) and [video](https://www.youtube.com/watch?v=hPrPqry1yQQ), _by Marc Klingen and Brooke Hopkins_
-
-</Callout>
-
 ## Get Started with Evaluation
 
 [Evaluations](/docs/scores) are the most important part of the LLM Application development workflow. Langfuse adapts to your needs and supports:
@@ -279,6 +266,16 @@ import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
 
 <div className="h-6" />
 <EvaluationOverview />
+
+<Callout type="info" emoji="📚">
+Further reading:
+- **Evaluating the Effectiveness of LLM-Evaluators (aka LLM-as-Judge)**, [blog post](https://eugeneyan.com/writing/llm-evaluators/), _by Eugene Yan_
+- **AI Agent Observability & Evaluation**, [course](https://huggingface.co/learn/agents-course/bonus-unit2/introduction), _by Hugging Face_
+- **Your AI Product Needs Evals**, [blog post](https://hamel.dev/blog/posts/evals/), _by Hamel Husain_
+- **Creating a LLM-as-a-Judge That Drives Business Results**, [blog post](https://hamel.dev/blog/posts/llm-judge/), _by Hamel Husain_
+- **Evaluating Voice AI Agents**, [blog post](/blog/2025-01-22-evaluating-voice-ai-agents) and [video](https://www.youtube.com/watch?v=hPrPqry1yQQ), _by Marc Klingen and Brooke Hopkins_
+
+</Callout>
 
 Evaluating LLMs is never a one-and-done task. As your model and user base evolve, your evaluation strategies need to keep pace. Next, we'll look at how to build and manage your prompts.
 

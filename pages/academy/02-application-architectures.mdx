@@ -11,14 +11,10 @@ Designing an LLM application is **not** just about picking a model—it's about 
 ![Application Architectures](/images/academy/m2-architecture.png)
 </Frame>
 
-Below is an overview of the architectural patterns and recommendations on when to stop at a workflow vs. when to move to an agent.
 
 ## Architecture Patterns
 
-These seven design patterns form a graduated staircase from rigid pipelines to autonomous, self-correcting agents, giving you reusable blueprints at every rung of complexity.
-
-By recognising where your problem sits on that staircase, you can start with the simplest reliable workflow and introduce additional autonomy only when rising uncertainty, scale, or dynamic goals make model-driven decision-making the smarter trade-off.
-
+The following tables provide an overview of common architecture patterns. We distinguish between deterministic workflow patterns and more flexible agentic patterns.
 
 ### Workflow patterns
 
@@ -26,9 +22,9 @@ These workflows show a **deterministic path** that is easy to reason about and d
 
 | Pattern   | Essence      | When it shines        | Typical examples     |
 | --------------------- | ---------------------------------- | -------------- | --------- |
-| **Prompt Chaining**   | Pipe the output of one LLM call straight into the next to decompose a task into fixed steps.       | Any job that naturally breaks into a “step 1 → step 2 → step 3” script.   | Outline → validate → draft a document; multi-stage data ETL.                             |
-| **Routing / Handoff** | A “router” LLM first classifies the request, then hands it to a specialised prompt / model / agent.  | Heterogeneous traffic where different skills or price-points are optimal. | Customer-support triage, tiered model stacks (cheap vs. premium), content-type dispatch. |
-| **Parallelisation**   | Split independent subtasks or multiple perspectives, run them concurrently, then aggregate.          | Latency-sensitive work or problems that benefit from diversity / voting.  | RAG with query splits, document section summaries, “best-of-N” idea generation.          |
+| **Prompt Chaining**   | Pipe the output of one LLM call straight into the next to decompose a task into fixed steps.       | Any job that naturally breaks into a "step 1 → step 2 → step 3" script.   | Outline → validate → draft a document; multi-stage data ETL.                             |
+| **Routing / Handoff** | A "router" LLM first classifies the request, then hands it to a specialised prompt / model / agent.  | Heterogeneous traffic where different skills or price-points are optimal. | Customer-support triage, tiered model stacks (cheap vs. premium), content-type dispatch. |
+| **Parallelisation**   | Split independent subtasks or multiple perspectives, run them concurrently, then aggregate.          | Latency-sensitive work or problems that benefit from diversity / voting.  | RAG with query splits, document section summaries, "best-of-N" idea generation.          |
 
 ### Agentic patterns
 
@@ -39,7 +35,7 @@ These patterns show a **model-driven path** that is more flexible and can adapt 
 | **Reflection (Evaluator-Optimiser)** | The model critiques its own output and iterates until criteria are met—generation → self-assessment → refine loop.    | Quality-critical tasks where first drafts often miss the mark.          | Code that compiles & passes tests, self-RAG answer checking, polished writing.                                       |
 | **Tool Use (Function Calling)**      | The LLM decides to invoke external functions/APIs, receives the results, then writes the final answer.                                | Anything needing fresh data, side-effects, or capabilities beyond text. | Calendar booking, database look-ups, smart-home control, code execution.                                             |
 | **Planning (Orchestrator-Workers)**  | A planner LLM dynamically drafts a multi-step plan, delegates subtasks to worker agents, and synthesises the results, re-planning if needed.  | Open-ended, multi-phase goals where steps are unknown until you start.  | Feature implementation pipelines, research reports, multi-modal creative projects.                                   |
-| **Multi-Agent Collaboration**        | Multiple agents with distinct roles/personas/toolsets coordinate—via a manager or peer-to-peer—to reach a shared goal.                     | Complex, multifaceted problems that mirror real-world teams or debates. | Software project teams (PM, coder, tester), debate simulators, collaborative story writing, scientific “lab” agents. |
+| **Multi-Agent Collaboration**        | Multiple agents with distinct roles/personas/toolsets coordinate—via a manager or peer-to-peer—to reach a shared goal.                     | Complex, multifaceted problems that mirror real-world teams or debates. | Software project teams (PM, coder, tester), debate simulators, collaborative story writing, scientific "lab" agents. |
 
 *(Source: [Phil Schmid](https://www.philschmid.de/agentic-pattern))*
 
@@ -57,8 +53,6 @@ This choice introduces a **trade-off between predictability and agency**: the hi
 </Frame>
 
 *(source: [Langchain](https://blog.langchain.dev/how-to-think-about-agent-frameworks/))*
-
-With this framing in mind, let's zoom in on a **set of canonical patterns** you can lift straight into your own projects. Each pattern is a ready-made blueprint that balances the trade-offs outlined above in a slightly different way — pick the one that maps best to your constraints on cost, latency, and reliability.
 
 <Callout type="info" emoji="📚">
 For more information on agentic patterns, we recommend the following resources:
