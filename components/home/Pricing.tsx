@@ -13,7 +13,6 @@ import Link from "next/link";
 import { Header } from "../Header";
 import { HomeSection } from "./components/HomeSection";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { useState, useEffect, useRef } from "react";
 import {
   Table,
@@ -30,42 +29,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-
-type DeploymentOption = "cloud" | "selfHosted";
-
-type DeploymentOptionParams = {
-  switch: React.ReactNode;
-  title: string;
-  subtitle: string;
-  href: string;
-};
-
-const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
-  cloud: {
-    switch: (
-      <span className="flex flex-row items-center gap-x-1">
-        Langfuse Cloud
-        <span className="hidden md:block"> (we host)</span>
-      </span>
-    ),
-    title: "Pricing",
-    subtitle:
-      "Get started on the Hobby plan for free. No credit card required.",
-    href: "/pricing",
-  },
-  selfHosted: {
-    switch: (
-      <span className="flex flex-row items-center gap-x-1">
-        Self-hosted
-        <span className="hidden md:block"> (you host)</span>
-      </span>
-    ),
-    title: "Pricing",
-    subtitle:
-      "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise at any time.",
-    href: "/pricing-self-host",
-  },
-};
 
 type Tier = {
   name: string;
@@ -95,163 +58,95 @@ type Tier = {
 
 const TEAMS_ADDON = "Teams add-on";
 
-const tiers: Record<DeploymentOption, Tier[]> = {
-  cloud: [
-    {
-      name: "Hobby",
-      id: "tier-hobby",
-      href: "https://cloud.langfuse.com",
-      featured: false,
-      description:
-        "Get started, no credit card required. Great for hobby projects and POCs.",
-      price: "Free",
-      mainFeatures: [
-        "All platform features (with limits)",
-        "50k events / month included",
-        "30 days data access",
-        "2 users",
-        "Community support (Discord & GitHub)",
-      ],
-      cta: "Sign up",
+const tiers: Tier[] = [
+  {
+    name: "Hobby",
+    id: "tier-hobby",
+    href: "https://cloud.langfuse.com",
+    featured: false,
+    description:
+      "Get started, no credit card required. Great for hobby projects and POCs.",
+    price: "Free",
+    mainFeatures: [
+      "All platform features (with limits)",
+      "50k events / month included",
+      "30 days data access",
+      "2 users",
+      "Community support (Discord & GitHub)",
+    ],
+    cta: "Sign up",
+  },
+  {
+    name: "Core",
+    id: "tier-core",
+    href: "https://cloud.langfuse.com",
+    featured: true,
+    description:
+      "For production projects. Includes access to more history, usage and unlimited users",
+    price: "$59",
+    priceDiscountCta: {
+      name: "Discounts available",
+      href: "/pricing#discounts",
     },
-    {
-      name: "Core",
-      id: "tier-core",
-      href: "https://cloud.langfuse.com",
-      featured: true,
-      description:
-        "For production projects. Includes access to more history, usage and unlimited users.",
-      price: "$59",
-      priceDiscountCta: {
-        name: "Discounts available",
-        href: "/pricing#discounts",
-      },
+    mainFeatures: [
+      "Everything in Hobby",
+      "100k events / month included, additional: $8 / 100k events",
+      "90 days data access",
+      "Unlimited users",
+      "Unlimited evaluators",
+      "Support via Email/Chat",
+    ],
+    cta: "Sign up",
+  },
+  {
+    name: "Pro",
+    id: "tier-pro",
+    href: "https://cloud.langfuse.com",
+    featured: false,
+    price: "$199",
+    description:
+      "For scaling projects. Unlimited history, high rate limits, all features.",
+    mainFeatures: [
+      "Everything in Core",
+      "100k events / month included, additional: $8 / 100k events",
+      "Unlimited data access",
+      "Unlimited annotation queues",
+      "High rate limits",
+      "SOC2 & ISO27001 reports, BAA available (HIPAA)",
+      "Support via Slack",
+    ],
+    addOn: {
+      name: "Teams",
+      price: "$300",
       mainFeatures: [
-        "Everything in Hobby",
-        "100k events / month included, additional: $8 / 100k events",
-        "90 days data access",
-        "Unlimited users",
-        "Unlimited evaluators",
-        "Support via Email/Chat",
+        "Enterprise SSO (e.g. Okta)",
+        "SSO enforcement",
+        "Fine-grained RBAC",
+        "Data retention management",
       ],
-      cta: "Sign up",
     },
-    {
-      name: "Pro",
-      id: "tier-pro",
-      href: "https://cloud.langfuse.com",
-      featured: false,
-      price: "$199",
-      description:
-        "For scaling projects. Unlimited history, high rate limits, all features.",
-      mainFeatures: [
-        "Everything in Core",
-        "100k events / month included, additional: $8 / 100k events",
-        "Unlimited data access",
-        "Unlimited annotation queues",
-        "High rate limits",
-        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
-        "Support via Slack",
-      ],
-      addOn: {
-        name: "Teams",
-        price: "$300",
-        mainFeatures: [
-          "Enterprise SSO (e.g. Okta)",
-          "SSO enforcement",
-          "Fine-grained RBAC",
-          "Data retention management",
-        ],
-      },
-      cta: "Sign up",
-    },
-    {
-      name: "Enterprise",
-      id: "tier-enterprise",
-      href: "/talk-to-us",
-      featured: false,
-      description: "Enterprise-grade support and security features.",
-      price: "Custom",
-      mainFeatures: [
-        "Everything in Team",
-        "Custom rate limits",
-        "Uptime SLA",
-        "Support SLA",
-        "Custom Terms & DPA",
-        "Dedicated support engineer",
-        "Architecture reviews",
-        "Billing via AWS Marketplace",
-      ],
-      cta: "Talk to sales",
-    },
-  ],
-  selfHosted: [
-    {
-      name: "Open Source",
-      id: "tier-self-hosted-oss",
-      href: "/self-hosting",
-      featured: true,
-      description:
-        "Self-host all core Langfuse features for free without any limitations.",
-      price: "Free",
-      mainFeatures: [
-        "MIT License",
-        "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
-        "Scalability of Langfuse Cloud",
-        "Deployment docs & Helm chart",
-        "Enterprise SSO and RBAC",
-        "Community support",
-      ],
-      cta: "Deployment guide",
-    },
-    {
-      name: "Pro",
-      id: "tier-self-hosted-pro",
-      href: "https://buy.stripe.com/aEU6qufIwfJy0CYbIR",
-      featured: false,
-      description:
-        "Get access to additional workflow features to accelerate your team.",
-      price: "$100",
-      priceUnit: "user per month",
-      mainFeatures: [
-        "All Open Source features",
-        "LLM Playground",
-        "Human annotation queues",
-        "LLM-as-a-judge evaluators",
-        "Prompt Experiments",
-        "Chat & Email support",
-      ],
-      cta: "Subscribe",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
-    },
-    {
-      name: "Enterprise",
-      id: "tier-self-hosted-enterprise",
-      href: "/talk-to-us",
-      featured: false,
-      price: "Custom",
-      description: "Enterprise-grade support and security features.",
-      mainFeatures: [
-        "All Open Source / Pro features",
-        "Project-level RBAC",
-        "Enterprise Security Features",
-        "SOC2, ISO27001, and InfoSec reviews",
-        "Dedicated support engineer",
-        "Support SLA",
-        "Billing via AWS Marketplace",
-      ],
-      cta: "Talk to sales",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
-      learnMore: "/enterprise",
-    },
-  ],
-} as const;
+    cta: "Sign up",
+  },
+  {
+    name: "Enterprise",
+    id: "tier-enterprise",
+    href: "/talk-to-us",
+    featured: false,
+    description: "Enterprise-grade support and security features.",
+    price: "Custom",
+    mainFeatures: [
+      "Everything in Team",
+      "Custom rate limits",
+      "Uptime SLA",
+      "Support SLA",
+      "Custom Terms & DPA",
+      "Dedicated support engineer",
+      "Architecture reviews",
+      "Billing via AWS Marketplace",
+    ],
+    cta: "Talk to sales",
+  },
+];
 
 type Section = {
   name: string;
@@ -261,7 +156,7 @@ type Section = {
     name: string;
     description?: string;
     href?: string;
-    tiers: Partial<Record<DeploymentOption, Record<string, boolean | string>>>;
+    tiers: Record<string, boolean | string>;
   }[];
 };
 
@@ -274,68 +169,40 @@ const sections: Section[] = [
         name: "Traces and Graphs (Agents)",
         href: "/docs/tracing",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Session Tracking (Chats/Threads)",
         href: "/docs/tracing-features/sessions",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "User Tracking",
         href: "/docs/tracing-features/users",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Token and Cost Tracking",
         href: "/docs/model-usage-and-cost",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -344,16 +211,20 @@ const sections: Section[] = [
           "Langfuse integrates natively with many LLM providers and agent frameworks such as LangChain, LlamaIndex, LangGraph, CrewAI, Semantic Kernel, ...",
         href: "/docs/integrations/overview",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "SDKs (Python, JavaScript)",
         href: "/docs/sdk/overview",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -362,24 +233,30 @@ const sections: Section[] = [
           "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
         href: "/docs/opentelemetry/get-started",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Proxy-based Logging (via LiteLLM)",
         href: "/docs/integrations/litellm/tracing",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Custom via API",
         href: "/docs/api",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -388,17 +265,10 @@ const sections: Section[] = [
           "Events are the collection of created traces, observations, and scores in Langfuse.",
         href: "/docs/tracing-data-model",
         tiers: {
-          cloud: {
-            Hobby: "50k events",
-            Core: "100k events",
-            Pro: "100k events",
-            Enterprise: "Custom",
-          },
-          selfHosted: {
-            "Open Source": "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
+          Hobby: "50k events",
+          Core: "100k events",
+          Pro: "100k events",
+          Enterprise: "Custom",
         },
       },
       {
@@ -407,52 +277,39 @@ const sections: Section[] = [
           "Events are the collection of created traces, observations, and scores in Langfuse.",
         href: "/docs/tracing-data-model",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "$8 / 100k events",
-            Pro: "$8 / 100k events",
-            Enterprise: "Custom",
-          },
+          Hobby: false,
+          Core: "$8 / 100k events",
+          Pro: "$8 / 100k events",
+          Enterprise: "Custom",
         },
       },
       {
         name: "Multi-modal",
         href: "/docs/tracing-features/multi-modality",
         tiers: {
-          cloud: {
-            Hobby: "Free while in beta",
-            Core: "Free while in beta",
-            Pro: "Free while in beta",
-            Enterprise: "Free while in beta",
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: "Free while in beta",
+          Core: "Free while in beta",
+          Pro: "Free while in beta",
+          Enterprise: "Free while in beta",
         },
       },
       {
         name: "Access to historical data",
         tiers: {
-          cloud: {
-            Hobby: "30 days",
-            Core: "90 days",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
+          Hobby: "30 days",
+          Core: "90 days",
+          Pro: "Unlimited",
+          Enterprise: "Unlimited",
         },
       },
       {
         name: "Ingestion throughput",
         href: "/faq/all/api-limits",
         tiers: {
-          cloud: {
-            Hobby: "1,000 requests / min",
-            Core: "4,000 requests / min",
-            Pro: "20,000 requests / min",
-            Enterprise: "Custom",
-          },
+          Hobby: "1,000 requests / min",
+          Core: "4,000 requests / min",
+          Pro: "20,000 requests / min",
+          Enterprise: "Custom",
         },
       },
     ],
@@ -466,24 +323,19 @@ const sections: Section[] = [
         description: "Manage prompts via UI, API, SDKs",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Prompt Fetching",
         tiers: {
-          cloud: {
-            Hobby: "Unlimited",
-            Core: "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
-          selfHosted: {
-            "Open Source": "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
+          Hobby: "Unlimited",
+          Core: "Unlimited",
+          Pro: "Unlimited",
+          Enterprise: "Unlimited",
         },
       },
       {
@@ -491,8 +343,10 @@ const sections: Section[] = [
         description: "Deploy and rollback prompts to different environments",
         href: "/docs/prompts",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -501,8 +355,10 @@ const sections: Section[] = [
           "Create shared snippets that can be reused in different prompts",
         href: "/docs/prompts/get-started#composability",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -510,8 +366,10 @@ const sections: Section[] = [
         description: "Use prompts with 0 latency and uptime impact",
         href: "/docs/prompts/get-started#caching-in-client-sdks",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -519,8 +377,10 @@ const sections: Section[] = [
         description: "Test prompts in a sandbox environment",
         href: "/docs/playground",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -528,12 +388,10 @@ const sections: Section[] = [
         description: "Run structured experiments on new prompt versions",
         href: "/docs/datasets/prompt-experiments",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: {
-            "Open Source": false,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -542,17 +400,10 @@ const sections: Section[] = [
           "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
         href: "/docs/prompts/get-started#protected-prompt-labels",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: TEAMS_ADDON,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: false,
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: TEAMS_ADDON,
+          Enterprise: true,
         },
       },
     ],
@@ -566,8 +417,10 @@ const sections: Section[] = [
           "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
         href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -576,24 +429,30 @@ const sections: Section[] = [
           "Run custom experiments on your Langfuse datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
         href: "/docs/datasets",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Evaluation Scores (custom)",
         href: "/docs/scores",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "User Feedback Tracking",
         href: "/docs/scores/user-feedback",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -601,8 +460,10 @@ const sections: Section[] = [
         description: "Manually annotate LLM traces in Langfuse",
         href: "/docs/scores/annotation",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -610,25 +471,20 @@ const sections: Section[] = [
         description: "Managed human annotation workflows with queues",
         href: "/docs/scores/annotation#annotation-queues",
         tiers: {
-          cloud: {
-            Hobby: "1 queue",
-            Core: "3 queues",
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: "1 queue",
+          Core: "3 queues",
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "External Evaluation Pipelines",
         href: "/docs/scores/external-evaluation-pipelines",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
@@ -637,17 +493,10 @@ const sections: Section[] = [
           "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
         href: "/docs/scores/model-based-evals",
         tiers: {
-          cloud: {
-            Hobby: "1 evaluator",
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: "1 evaluator",
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
     ],
@@ -658,33 +507,19 @@ const sections: Section[] = [
       {
         name: "Projects",
         tiers: {
-          cloud: {
-            Hobby: "Unlimited",
-            Core: "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
-          selfHosted: {
-            "Open Source": "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
+          Hobby: "Unlimited",
+          Core: "Unlimited",
+          Pro: "Unlimited",
+          Enterprise: "Unlimited",
         },
       },
       {
         name: "Users",
         tiers: {
-          cloud: {
-            Hobby: "2",
-            Core: "Unlimited",
-            Pro: "Unlimited",
-            Enterprise: "Unlimited",
-          },
-          selfHosted: {
-            "Open Source": "Unlimited",
-            Pro: "As licensed",
-            Enterprise: "As licensed",
-          },
+          Hobby: "2",
+          Core: "Unlimited",
+          Pro: "Unlimited",
+          Enterprise: "Unlimited",
         },
       },
     ],
@@ -697,64 +532,49 @@ const sections: Section[] = [
         name: "Extensive Public API",
         href: "/docs/api",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Rate limit (general API routes)",
         href: "/faq/all/api-limits",
         tiers: {
-          cloud: {
-            Hobby: "30 requests / min",
-            Core: "100 requests / min",
-            Pro: "1,000 requests / min",
-            Enterprise: "Custom",
-          },
+          Hobby: "30 requests / min",
+          Core: "100 requests / min",
+          Pro: "1,000 requests / min",
+          Enterprise: "Custom",
         },
       },
       {
         name: "Rate limit (datasets api)",
         href: "/faq/all/api-limits",
         tiers: {
-          cloud: {
-            Hobby: "100 requests / min",
-            Core: "200 requests / min",
-            Pro: "1,000 requests / min",
-            Enterprise: "Custom",
-          },
+          Hobby: "100 requests / min",
+          Core: "200 requests / min",
+          Pro: "1,000 requests / min",
+          Enterprise: "Custom",
         },
       },
       {
         name: "Rate limit (metrics api)",
         href: "/faq/all/api-limits",
         tiers: {
-          cloud: {
-            Hobby: "10 requests / day",
-            Core: "20 requests / day",
-            Pro: "200 requests / day",
-            Enterprise: "Custom",
-          },
+          Hobby: "10 requests / day",
+          Core: "20 requests / day",
+          Pro: "200 requests / day",
+          Enterprise: "Custom",
         },
       },
       {
         name: "SLA",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
     ],
@@ -766,29 +586,30 @@ const sections: Section[] = [
         name: "Batch Export via UI",
         href: "/docs/query-traces#ui",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "PostHog Integration",
         href: "/docs/analytics/posthog",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Scheduled Batch Export to Blob Storage",
         href: "/docs/query-traces#blob-storage",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: TEAMS_ADDON,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: TEAMS_ADDON,
+          Enterprise: true,
         },
       },
     ],
@@ -801,82 +622,64 @@ const sections: Section[] = [
         name: "Ask AI",
         href: "/docs/ask-ai",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Community (GitHub, Discord)",
         tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Chat & Email",
         tiers: {
-          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          Hobby: false,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Private Slack/Discord channel",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: "included at >10 users",
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Dedicated Support Engineer",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
       {
         name: "Support SLA",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: false,
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
       {
         name: "Architectural guidance",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: false,
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
     ],
@@ -888,140 +691,77 @@ const sections: Section[] = [
       {
         name: "Data region",
         tiers: {
-          cloud: {
-            Hobby: "US or EU",
-            Core: "US or EU",
-            Pro: "US or EU",
-            Enterprise: "US or EU",
-          },
+          Hobby: "US or EU",
+          Core: "US or EU",
+          Pro: "US or EU",
+          Enterprise: "US or EU",
         },
       },
       {
         name: "SSO via Google, AzureAD, GitHub",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Organization-level RBAC",
         href: "/docs/rbac",
         tiers: {
-          cloud: {
-            Hobby: true,
-            Core: true,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: true,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "Enterprise SSO (e.g. Okta, AzureAD/EntraID)",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: TEAMS_ADDON,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: TEAMS_ADDON,
+          Enterprise: true,
         },
       },
       {
         name: "SSO enforcement",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: TEAMS_ADDON,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: TEAMS_ADDON,
+          Enterprise: true,
         },
       },
       {
         name: "Project-level RBAC",
         href: "/docs/rbac#project-level-roles",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: TEAMS_ADDON,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: TEAMS_ADDON,
+          Enterprise: true,
         },
       },
       {
         name: "Data retention management",
         href: "/docs/data-retention",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: TEAMS_ADDON,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: false,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "Organization Creators",
-        href: "/self-hosting/organization-creators",
-        tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
-        },
-      },
-      {
-        name: "UI Customization",
-        href: "/self-hosting/ui-customization",
-        tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: TEAMS_ADDON,
+          Enterprise: true,
         },
       },
       {
         name: "Audit Logs",
         href: "/changelog/2025-01-21-audit-logs",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
-        },
-      },
-      {
-        name: "Admin API (project management, SCIM)",
-        href: "/docs/api#org-scoped-routes",
-        tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
-        },
-      },
-      {
-        name: "Organization Management API",
-        href: "/self-hosting/organization-management-api",
-        tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
     ],
@@ -1032,65 +772,37 @@ const sections: Section[] = [
       {
         name: "Subscription management",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Self-serve",
-            Pro: "Self-serve",
-            Enterprise: "Sales",
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: "Self-serve",
-            Enterprise: "Sales",
-          },
+          Hobby: false,
+          Core: "Self-serve",
+          Pro: "Self-serve",
+          Enterprise: "Sales",
         },
       },
       {
         name: "Payment methods",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Credit card",
-            Pro: "Credit card",
-            Enterprise: "Credit card, Invoice",
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: "Credit card",
-            Enterprise: "Credit card, Invoice",
-          },
+          Hobby: false,
+          Core: "Credit card",
+          Pro: "Credit card",
+          Enterprise: "Credit card, Invoice",
         },
       },
       {
         name: "Contract duration",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Monthly",
-            Pro: "Monthly",
-            Enterprise: "Custom",
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: "Monthly",
-            Enterprise: "Custom",
-          },
+          Hobby: false,
+          Core: "Monthly",
+          Pro: "Monthly",
+          Enterprise: "Custom",
         },
       },
       {
         name: "Billing via AWS Marketplace",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: ">10 users",
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
     ],
@@ -1102,59 +814,46 @@ const sections: Section[] = [
       {
         name: "Contracts",
         tiers: {
-          cloud: {
-            Hobby: "Standard T&Cs",
-            Core: "Standard T&Cs & DPA",
-            Pro: "Standard T&Cs & DPA",
-            Enterprise: "Custom",
-          },
-          selfHosted: {
-            "Open Source": false,
-            Pro: "Standard T&Cs",
-            Enterprise: "Custom",
-          },
+          Hobby: "Standard T&Cs",
+          Core: "Standard T&Cs & DPA",
+          Pro: "Standard T&Cs & DPA",
+          Enterprise: "Custom",
         },
       },
       {
         name: "Data processing agreement (GDPR)",
         tiers: {
-          cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: true,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "HIPAA compliance",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: true,
-            Enterprise: true,
-          },
+          Hobby: false,
+          Core: false,
+          Pro: true,
+          Enterprise: true,
         },
       },
       {
         name: "InfoSec/legal reviews",
         tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          Hobby: false,
+          Core: false,
+          Pro: false,
+          Enterprise: true,
         },
       },
     ],
@@ -1163,14 +862,9 @@ const sections: Section[] = [
 
 export default function Pricing({
   isPricingPage = false,
-  initialVariant = "cloud",
 }: {
   isPricingPage?: boolean;
-  initialVariant?: "cloud" | "selfHosted";
 }) {
-  const [localVariant, setLocalVariant] = useState(initialVariant);
-  const variant = isPricingPage ? initialVariant : localVariant;
-  const selectedTiers = tiers[variant];
   const [isHeaderFixed, setIsHeaderFixed] = useState(false);
   const [headerWidth, setHeaderWidth] = useState<number>(0);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
@@ -1304,47 +998,21 @@ export default function Pricing({
         <div className="flow-root pb-16 lg:pb-0">
           <div className="mx-auto max-w-7xl">
             <Header
-              title={deploymentOptions[variant].title}
-              description={deploymentOptions[variant].subtitle}
+              title="Pricing"
+              description="Get started on the Hobby plan for free. No credit card required."
               h="h1"
             />
-
-            {/* Deployment Options Tabs */}
-            <Tabs
-              defaultValue={variant}
-              value={variant}
-              className="mt-4 flex justify-center"
-              onValueChange={(value) => {
-                if (!isPricingPage) {
-                  setLocalVariant(value as "cloud" | "selfHosted");
-                }
-              }}
-            >
-              <TabsList>
-                {Object.keys(deploymentOptions).map((key) => (
-                  <TabsTrigger key={key} value={key} asChild={isPricingPage}>
-                    {isPricingPage ? (
-                      <Link href={deploymentOptions[key].href}>
-                        {deploymentOptions[key].switch}
-                      </Link>
-                    ) : (
-                      deploymentOptions[key].switch
-                    )}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
 
             {/* Pricing Cards Grid */}
             <div
               className={cn(
                 "mt-12 grid sm:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
-                selectedTiers.length === 4 && "md:grid-cols-4",
-                selectedTiers.length === 3 && "md:grid-cols-3",
-                selectedTiers.length === 2 && "md:grid-cols-2"
+                tiers.length === 4 && "md:grid-cols-4",
+                tiers.length === 3 && "md:grid-cols-3",
+                tiers.length === 2 && "md:grid-cols-2"
               )}
             >
-              {selectedTiers.map((tier) => (
+              {tiers.map((tier) => (
                 <Card
                   key={tier.id}
                   className={cn(
@@ -1459,7 +1127,7 @@ export default function Pricing({
                   </h2>
 
                   <div className="mx-auto max-w-2xl space-y-16">
-                    {selectedTiers.map((tier) => (
+                    {tiers.map((tier) => (
                       <div
                         key={tier.id}
                         className="mb-10 bg-card rounded-lg overflow-hidden border p-4"
@@ -1489,26 +1157,22 @@ export default function Pricing({
                                     />
                                   </TableHead>
                                 </TableRow>
-                                {section.features
-                                  .filter((f) => variant in f.tiers)
-                                  .map((feature) => (
-                                    <TableRow key={feature.name}>
-                                      <TableHead className="w-9/12" scope="row">
-                                        {feature.name}
-                                        <FeatureDetails
-                                          description={feature.description}
-                                          href={feature.href}
-                                        />
-                                      </TableHead>
-                                      <TableCell className="w-3/12 text-center">
-                                        <FeatureCell
-                                          value={
-                                            feature.tiers[variant][tier.name]
-                                          }
-                                        />
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
+                                {section.features.map((feature) => (
+                                  <TableRow key={feature.name}>
+                                    <TableHead className="w-9/12" scope="row">
+                                      {feature.name}
+                                      <FeatureDetails
+                                        description={feature.description}
+                                        href={feature.href}
+                                      />
+                                    </TableHead>
+                                    <TableCell className="w-3/12 text-center">
+                                      <FeatureCell
+                                        value={feature.tiers[tier.name]}
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
                               </React.Fragment>
                             ))}
                           </TableBody>
@@ -1550,7 +1214,7 @@ export default function Pricing({
                                       className="text-left font-medium"
                                       scope="col"
                                     ></th>
-                                    {selectedTiers.map((tier, index) => (
+                                    {tiers.map((tier, index) => (
                                       <th
                                         key={tier.id}
                                         style={{
@@ -1580,7 +1244,7 @@ export default function Pricing({
                             className="w-3/12 text-left font-medium"
                             scope="col"
                           ></th>
-                          {selectedTiers.map((tier) => (
+                          {tiers.map((tier) => (
                             <th
                               key={tier.id}
                               className="w-2/12 p-2 text-center text-lg text-foreground font-semibold"
@@ -1603,28 +1267,24 @@ export default function Pricing({
                                 />
                               </TableCell>
                             </TableRow>
-                            {section.features
-                              .filter((f) => variant in f.tiers)
-                              .map((feature) => (
-                                <TableRow key={feature.name}>
-                                  <TableCell>
-                                    {feature.name}
-                                    <FeatureDetails
-                                      description={feature.description}
-                                      href={feature.href}
+                            {section.features.map((feature) => (
+                              <TableRow key={feature.name}>
+                                <TableCell>
+                                  {feature.name}
+                                  <FeatureDetails
+                                    description={feature.description}
+                                    href={feature.href}
+                                  />
+                                </TableCell>
+                                {tiers.map((tier) => (
+                                  <TableCell key={tier.id}>
+                                    <FeatureCell
+                                      value={feature.tiers[tier.name]}
                                     />
                                   </TableCell>
-                                  {selectedTiers.map((tier) => (
-                                    <TableCell key={tier.id}>
-                                      <FeatureCell
-                                        value={
-                                          feature.tiers[variant][tier.name]
-                                        }
-                                      />
-                                    </TableCell>
-                                  ))}
-                                </TableRow>
-                              ))}
+                                ))}
+                              </TableRow>
+                            ))}
                           </React.Fragment>
                         ))}
                       </TableBody>
@@ -1648,10 +1308,7 @@ export default function Pricing({
           <>
             <div className="text-center mt-10">
               For a detailed comparison and FAQ, see our{" "}
-              <Link
-                href={deploymentOptions[variant].href}
-                className="underline"
-              >
+              <Link href="/pricing" className="underline">
                 pricing page
               </Link>
               .
@@ -1751,11 +1408,6 @@ const faqs = [
     question: "Do you offer discounts?",
     answer:
       "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
-  },
-  {
-    question: "How do I activate my self-hosted Pro or Enterprise plan?",
-    answer:
-      "Once you've deployed Langfuse OSS, you can activate your Pro or Enterprise plan by adding the license key you received from the Langfuse team to your deployment.",
   },
   {
     question: "How can I manage my subscription?",
