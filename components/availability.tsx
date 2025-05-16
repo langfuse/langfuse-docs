@@ -5,7 +5,6 @@ const plans = [
   { id: "core", label: "Core" },
   { id: "pro", label: "Pro" },
   { id: "enterprise", label: "Enterprise" },
-  { id: "selfHosted", label: "Self Hosted" },
 ] as const;
 
 const availabilities: {
@@ -14,18 +13,6 @@ const availabilities: {
   shortLabel?: string;
   Icon: any;
 }[] = [
-  {
-    id: "ee",
-    label: "Enterprise Edition",
-    shortLabel: "Enterprise",
-    Icon: Check,
-  },
-  {
-    id: "pro",
-    label: "Pro & Enterprise",
-    shortLabel: "Pro & Enterprise",
-    Icon: Check,
-  },
   {
     id: "team-add-on",
     label: "Team Add-On",

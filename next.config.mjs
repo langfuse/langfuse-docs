@@ -135,6 +135,7 @@ const nonPermanentRedirects = [
   ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
   ["/sticker", "/stickers"],
   ["/ask-ai", "/docs/ask-ai"],
+  ["/pricing-self-host", "/self-hosting"],
 
   // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
@@ -242,6 +243,8 @@ const nonPermanentRedirects = [
   ["/faq/all/cloud-data-regions", "/security/data-regions"],
   ["/self-hosting/local", "/self-hosting/docker-compose"],
   ["/self-hosting/docker", "/self-hosting/kubernetes-helm"],
+  ["/self-hosting/license-key", "/open-source"],
+  ["/faq/all/self-hosting-langfuse.mdx", "/self-hosting"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
