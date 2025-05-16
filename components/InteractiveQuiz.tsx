@@ -12,7 +12,7 @@ interface Question {
 const quizQuestions: Question[] = [
   {
     id: 1,
-    chapter: "Chapter 1: Introduction",
+    chapter: "Chapter 1",
     text: "What is Langfuse primarily designed for?",
     options: [
       { id: "A", text: "General software debugging" },
@@ -24,7 +24,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 2,
-    chapter: "Chapter 1: Introduction",
+    chapter: "Chapter 1",
     text: "Which of these is NOT a core pillar of the Langfuse platform?",
     options: [
       { id: "A", text: "Tracing" },
@@ -36,7 +36,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 3,
-    chapter: "Chapter 2: Application Architectures",
+    chapter: "Chapter 2",
     text: "What does RAG stand for in the context of LLM applications?",
     options: [
       { id: "A", text: "Really Awesome Graphics" },
@@ -48,7 +48,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 4,
-    chapter: "Chapter 2: Application Architectures",
+    chapter: "Chapter 2",
     text: "Why is versioning important for prompts and model configurations in LLM applications?",
     options: [
       { id: "A", text: "It's a legal requirement." },
@@ -60,19 +60,19 @@ const quizQuestions: Question[] = [
   },
   {
     id: 5,
-    chapter: "Chapter 3: Tracing",
+    chapter: "Chapter 3",
     text: "What is a 'trace' in Langfuse?",
     options: [
       { id: "A", text: "A user's click path on a website." },
       { id: "B", text: "A log of server errors." },
-      { id: "C", text: "An end-to-end record of a single execution/call in an LLM application, including inputs, outputs, and intermediate steps." },
+      { id: "C", text: "An end-to-end record of an LLM application execution." },
       { id: "D", text: "A type of chart for visualizing data." },
     ],
     correctAnswerId: "C",
   },
   {
     id: 6,
-    chapter: "Chapter 3: Tracing",
+    chapter: "Chapter 3",
     text: "True or False: Langfuse traces can only capture text data.",
     options: [
       { id: "A", text: "True" },
@@ -82,7 +82,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 7,
-    chapter: "Chapter 4: Evaluation",
+    chapter: "Chapter 4",
     text: "What is the primary purpose of 'scores' in Langfuse?",
     options: [
       { id: "A", text: "To bill users for API usage." },
@@ -94,7 +94,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 8,
-    chapter: "Chapter 4: Evaluation",
+    chapter: "Chapter 4",
     text: "Which of the following is a common approach to LLM evaluation?",
     options: [
       { id: "A", text: "Only manual human review." },
@@ -106,7 +106,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 9,
-    chapter: "Chapter 5: Prompt Management",
+    chapter: "Chapter 5",
     text: "What is a key benefit of using Langfuse for prompt management?",
     options: [
       { id: "A", text: "It automatically writes perfect prompts for you." },
@@ -118,7 +118,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 10,
-    chapter: "Chapter 5: Prompt Management",
+    chapter: "Chapter 5",
     text: "When managing prompts, what does 'linking a prompt to a trace' help with?",
     options: [
       { id: "A", text: "It makes the trace run faster." },
@@ -132,10 +132,158 @@ const quizQuestions: Question[] = [
 
 const passingScore = 8;
 
+// Define props for CertificateDisplay
+interface CertificateDisplayProps {
+  certificateName: string;
+  setCertificateName: (name: string) => void;
+}
+
+// Moved CertificateDisplay outside of InteractiveQuiz
+const CertificateDisplay: React.FC<CertificateDisplayProps> = ({ certificateName, setCertificateName }) => (
+    <div style={{
+      fontFamily: 'Arial, sans-serif',
+      border: '5px solid #7F00FF', // Langfuse purple
+      padding: '40px', 
+      marginTop: '30px',
+      backgroundColor: '#ffffff', 
+      borderRadius: '15px', 
+      boxShadow: '0 10px 25px rgba(0,0,0,0.1)', 
+      textAlign: 'center',
+      maxWidth: '700px', 
+      margin: '30px auto' 
+    }}>
+      {/* Langfuse Logo Image */}
+      <img 
+        src="/langfuse_logo.png" 
+        alt="Langfuse Logo"
+        style={{
+          width: '200px', // Adjust width as needed
+          height: 'auto', // Maintain aspect ratio
+          display: 'block',
+          marginBottom: '30px',
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}
+      />
+
+      <h1 style={{ 
+        color: '#333333', 
+        marginBottom: '20px', 
+        fontSize: '2.4em',
+        fontWeight: 600 
+      }}>
+        🏆 Certificate of Completion 🏆
+      </h1>
+      <p style={{ 
+        fontSize: '1.2em', 
+        marginBottom: '20px',
+        color: '#555555' 
+      }}>
+        This is to certify that:
+      </p>
+      
+      <input 
+        type="text"
+        value={certificateName}
+        onChange={(e) => setCertificateName(e.target.value)}
+        placeholder="Type Your Name Here"
+        aria-label="Enter your name for the certificate"
+        style={{
+          width: '80%',
+          maxWidth: '450px',
+          padding: '15px 20px',
+          marginBottom: '30px', 
+          fontSize: '1.8em', 
+          fontWeight: 'bold',
+          textAlign: 'center',
+          border: `2px solid #7F00FF`, 
+          borderRadius: '8px',
+          color: '#7F00FF', 
+          boxSizing: 'border-box',
+          backgroundColor: '#f8f9fa' 
+        }}
+      />
+
+      <p style={{ 
+        fontSize: '1.15em', 
+        marginBottom: '25px', 
+        color: '#555555',
+        lineHeight: 1.6 
+      }}>
+        Has successfully completed the Langfuse Academy, demonstrating foundational knowledge in LLM Observability and Engineering, including:
+      </p>
+      <ul style={{ 
+        listStyleType: 'none', 
+        paddingLeft: '0',
+        margin: '25px auto', 
+        maxWidth: '500px', 
+        textAlign: 'left', 
+        fontSize: '1.1em', 
+        color: '#444444' 
+      }}>
+        {[
+          "Introduction to Langfuse & Core Concepts",
+          "Understanding LLM Application Architectures",
+          "Effective Tracing with Langfuse",
+          "Comprehensive Evaluation and Scoring",
+          "Advanced Prompt Management Techniques"
+        ].map(item => (
+          <li key={item} style={{ 
+            marginBottom: '12px', 
+            paddingLeft: '1.5em', 
+            position: 'relative' 
+          }}>
+            <span style={{ 
+              position: 'absolute',
+              left: '0',
+              top: '0.1em', 
+              color: '#7F00FF', 
+              fontWeight: 'bold',
+              fontSize: '1.2em' 
+            }}>
+              ✓
+            </span>
+            {item}
+          </li>
+        ))}
+      </ul>
+      <p style={{ 
+        fontSize: '1.1em', 
+        marginTop: '30px', 
+        marginBottom: '25px',
+        color: '#555555'
+      }}>
+        {`Date of Completion: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`}
+      </p>
+      <hr style={{ 
+        margin: '35px auto', 
+        borderColor: '#e0cffc', 
+        borderTop: '2px solid #e0cffc', 
+        width: '85%' 
+      }} />
+      <p style={{ 
+        fontWeight: 600, 
+        fontSize: '1.15em', 
+        color: '#7F00FF', 
+        marginTop: '25px' 
+      }}>
+        Share Your Achievement!
+      </p>
+      <p style={{ 
+        fontSize: '0.95em', 
+        marginBottom: '20px', 
+        color: '#6c757d' 
+      }}>
+        (We recommend taking a screenshot of this certificate to share on LinkedIn or other platforms.)
+      </p>
+    </div>
+  );
+
 export const InteractiveQuiz: React.FC = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [certificateName, setCertificateName] = useState("");
 
   const handleOptionChange = (questionId: number, optionId: string) => {
     if (submitted) return; 
@@ -232,44 +380,6 @@ export const InteractiveQuiz: React.FC = () => {
     return style;
   };
 
-  const CertificateDisplay = () => (
-    <div style={{
-      border: '2px solid #7F00FF',
-      padding: '20px',
-      marginTop: '30px',
-      backgroundColor: '#f3e6ff',
-      borderRadius: '10px',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-    }}>
-      <h2 style={{ textAlign: 'center', color: '#5a00b3', marginBottom: '20px' }}>🏆 Certificate of Completion 🏆</h2>
-      <p style={{ textAlign: 'center', fontSize: '1.2em' }}>This is to certify that:</p>
-      <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.8em', margin: '25px 0', color: '#5a00b3' }}>
-        [Your Name Here]
-      </p>
-      <p style={{ textAlign: 'center', fontSize: '1.1em' }}>
-        Has successfully completed the Langfuse Academy, demonstrating understanding of:
-      </p>
-      <ul style={{ listStyleType: '✔', paddingLeft: '50px', margin: '20px auto', maxWidth: '400px' }}>
-        <li style={{ marginBottom: '8px' }}>Introduction to Langfuse</li>
-        <li style={{ marginBottom: '8px' }}>LLM Application Architectures</li>
-        <li style={{ marginBottom: '8px' }}>Tracing with Langfuse</li>
-        <li style={{ marginBottom: '8px' }}>Evaluation and Scoring</li>
-        <li>Prompt Management</li>
-      </ul>
-      <p style={{ textAlign: 'center', fontSize: '1.1em', marginTop: '20px' }}>{`Date: [Date of Completion - e.g., ${new Date().toLocaleDateString()}]`}</p>
-      <hr style={{ margin: '30px 0', borderColor: '#c5a3ff' }} />
-      <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1em', color: '#5a00b3'}}>Share your achievement on LinkedIn!</p>
-      <p style={{ textAlign: 'center', fontSize: '0.9em'}}>
-        (We recommend taking a screenshot of this certificate or creating your own badge to share.)
-      </p>
-      <div style={{ marginTop: '20px'}}>
-        <Callout type="info">
-          Consider adding "Langfuse Academy Graduate" to your LinkedIn profile's education or licenses & certifications section.
-        </Callout>
-      </div>
-    </div>
-  );
-
   if (submitted) {
     return (
       <div style={quizContainerStyle}>
@@ -298,7 +408,7 @@ export const InteractiveQuiz: React.FC = () => {
           </div>
         ))}
         
-        {score >= passingScore && <CertificateDisplay />}
+        {score >= passingScore && <CertificateDisplay certificateName={certificateName} setCertificateName={setCertificateName} />}
 
         <button onClick={resetQuiz} style={secondaryButtonStyle}>
           Retake Quiz

@@ -1,4 +1,4 @@
-## **Module 5:** Prompt Management / Engineering
+# **Module 5:** Prompt Management / Engineering
 
 After **evaluating** your LLM workflows, you'll often find areas to improve—whether by refining prompts, changing models, or updating tool definitions. In this module, we'll look at how to **apply** those findings through systematic prompt management and iterative experimentation. 
 
@@ -6,11 +6,11 @@ After **evaluating** your LLM workflows, you'll often find areas to improve—wh
 ![Prompt Management](/images/academy/m5-prompt-management.png)
 </Frame>
 
-### Prompt Management
+## Prompt Management
 
-Effective prompt management keeps your LLM application agile, reproducible, and collaboration‑friendly. Without a systematic way to store, version, and experiment with prompts, seemingly minor text tweaks can break customer flows or silently inflate costs. This module shows why prompt management matters, introduces core prompting strategies, and walks through Langfuse's prompt store and experiment features.
+Prompt management keeps your LLM application agile, reproducible, and collaboration‑friendly. Without a systematic way to store, version, and experiment with prompts, seemingly minor text tweaks can break customer flows or silently inflate costs. This module shows why prompt management matters, introduces prompting strategies, and shows how to manage prompts in Langfuse.
 
-#### **Why Prompt Management?**
+### Why Prompt Management?
 
 * **Reproducibility & rollback** – Prompts evolve faster than code; versioning prevents silent regressions and enables instant rollback when quality dips.  
 * **Governance & auditability** – Regulated domains (health, finance, legal) must trace which exact wording produced an output .  
@@ -18,9 +18,18 @@ Effective prompt management keeps your LLM application agile, reproducible, and 
 * **A/B testing & optimisation** – Structured experiments reveal cost/quality trade‑offs and prevent prompt drift.  
 * **Common pitfalls** → brittle hard‑coded strings, shadow prompts living in notebooks, unclear ownership, and uncontrolled temperature/parameter changes.
 
-#### **Introduction to Common Prompting Strategies**
+### **Introduction to Common Prompting Strategies**
 
-If you are new to prompting, here is a rough overview of different strategies that can improve the performance of your application. For more advanced prompting strategies, we collected some high-quality resources [here](https://langfuse.com/library#prompting). 
+If you are new to prompting, here is a rough overview of different strategies that can improve the performance of your application. 
+
+<Callout type="info" emoji="📚">
+For more advanced prompting strategies, we collected some high-quality resources here:
+
+- **Learn Prompting**, [website](https://learnprompting.org/docs)
+- **The Prompt Report: A Systematic Survey of Prompting Techniques**, [paper](https://arxiv.org/pdf/2406.06608), [tweets](https://x.com/learnprompting/status/1800931910404784380)
+- **How to prompt o1** (o1 isn’t a chat model – and that’s the point), [blog post](https://www.latent.space/p/o1-skill-issue)
+
+</Callout>
 
 | Strategy | Core Idea | When to Use | Key Risk |
 | :---- | :---- | :---- | :---- |
@@ -31,38 +40,24 @@ If you are new to prompting, here is a rough overview of different strategies th
 | **Retrieval‑Augmented Generation (RAG)** | Dynamically inject retrieved docs into context  | Fresh, source‑grounded answers | Retrieval latency |
 | **Prefix‑Tuning / System‑Content Split** | Separate stable system message from dynamic user message  | Multi‑turn chat apps | Duplication across turns |
 
-#### **Using Prompt Management in Langfuse**
+### Using Prompt Management in Langfuse
 
-Langfuse offers a **Prompt Store** where prompts live as first‑class versioned entities; each version links to the traces it produced for instant cost/quality analysis. You can:
+[Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started) helps you centrally manage, version control, and collaboratively iterate on your prompts.
 
-1. **Create & edit prompts** via UI, API, or SDK without redeploying the app.  
-2. **Pin versions to environments** (e.g., `prod` vs `staging`) to avoid accidental cross‑contamination.  
-3. **Run A/B experiments** by splitting traffic across prompt versions and comparing metrics directly in Langfuse dashboards.  
-4. **Link prompts to evaluations** so that score regressions surface next to the exact text diff .
+import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
 
+<div className="h-6" />
+<PromptOverview />
+
+<Callout type="info" emoji="🪢">
 To get started managing prompts in Langfuse, check out our [prompt management documentation](https://langfuse.com/docs/prompts/get-started).
-
-#### **Prompt Engineering Loop**
-
-For most LLM applications, it is important to involve domain experts in the design of LLM prompts. 
-
-1. **Define success criteria** – domain stakeholders translate policy/compliance or UX goals into measurable metrics (accuracy, tone, latency).  
-2. **Draft baseline prompt** – engineer assembles initial system \+ user prompt following chosen strategy.  
-3. **Share in Langfuse Prompt Experiments** – non‑technical reviewers comment, annotate token costs, and suggest edits in the UI (no Git access needed) .  
-4. **Run controlled experiment** – split traffic 80/20 between baseline and candidate; Langfuse auto‑collects costs, eval scores, and feedback .  
-5. **Review & decide** – cross‑functional meeting reviews dashboards; if candidate wins on KPIs, promote to `prod`.  
-6. **Post‑mortem & document** – every prompt update auto‑links to traces and eval runs, building an audit trail .
-
-
-<Callout type="info" emoji="📚">
-Further reading:
-
-- **Learn Prompting**, [docs page](https://learnprompting.org/docs)
-- **The Prompt Report: A Systematic Survey of Prompting Techniques**, [paper on arxiv](https://arxiv.org/pdf/2406.06608), [summary in tweets](https://x.com/learnprompting/status/1800931910404784380)
-- **How to prompt o1** (o1 isn’t a chat model – and that’s the point), [blog post](https://www.latent.space/p/o1-skill-issue), _by Ben Hylak_
-
 </Callout>
 
+## Getting Started
+
+Congratulations! You've compleated every module of the Langfuse Academy. This should give you a good overview of common LLMOps pratices to get you started. On the next page, you can get your certificate for completing the academy. 
+
+To start building and improving your LLM applications, you can sign up for a [free Langfuse account](https://cloud.langfuse.com) to start building and improving your LLM applications.
 
 
 
