@@ -1,6 +1,7 @@
 ---
 title: "Integrate Fireworks AI with Langfuse"
 description: "Guide on using Fireworks AI's open-source and proprietary AI models with Langfuse via the OpenAI SDK."
+category: Integrations
 ---
 
 # Observability for Fireworks AI with Langfuse

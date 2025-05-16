@@ -1,6 +1,7 @@
 ---
 title: Observability for smolagents with Langfuse
 description: Learn how to integrate Langfuse with Hugging Face smolagents using OpenTelemetry. This lets you trace and debug your AI agents.
+category: Integrations
 ---
 
 # Integrate Langfuse with smolagents

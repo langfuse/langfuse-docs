@@ -1,6 +1,7 @@
 ---
 title: Observability for CrewAI with Langfuse
 description: Learn how to integrate Langfuse with CrewAI via OpenTelemetry using OpenLit
+category: Integrations
 ---
 
 # Integrate Langfuse with CrewAI

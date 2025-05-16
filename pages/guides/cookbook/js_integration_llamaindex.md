@@ -1,6 +1,7 @@
 ---
 title: "LlamaIndex.TS Integration"
 description: "This guide shows how you can instrument the LlamaIndex.TS package to trace your LLM interactions to Langfuse using the Traceloop OpenTelemetry SDK."
+category: Integrations
 ---
 
 # LlamaIndex.TS Integration

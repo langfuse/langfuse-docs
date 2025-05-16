@@ -11,9 +11,10 @@ This guide covers how you can operate your Langfuse deployment at scale and incl
 ## Minimum Infrastructure Requirements
 
 | Service                                                              | Minimum Requirements                                         |
-| -------------------------------------------------------------------- | ------------------------------------------------------------ |
+|----------------------------------------------------------------------|--------------------------------------------------------------|
 | [Langfuse Web Container](/self-hosting/infrastructure/containers)    | 2 CPU, 4 GiB Memory                                          |
 | [Langfuse Worker Container](/self-hosting/infrastructure/containers) | 2 CPU, 4 GiB Memory                                          |
+| [PostgreSQL Database](/self-hosting/infrastructure/postgres)         | 2 CPU, 4 GiB Memory                                          |
 | [Redis/Valkey Instance](/self-hosting/infrastructure/cache)          | 1 CPU, 1.5 GiB Memory                                        |
 | [ClickHouse](/self-hosting/infrastructure/clickhouse)                | 2 CPU, 8 GiB Memory                                          |
 | [Blob Storage](/self-hosting/infrastructure/blobstorage)             | Serverless (S3 or compatible) or MinIO (2 CPU, 4 GiB Memory) |
@@ -89,6 +90,22 @@ In addition, the `system.trace_log` and `system.text_log` tables within ClickHou
 You can modify your ClickHouse settings to set a TTL on both tables.
 It is also safe to manually prune them from time to time.
 Check the [ClickHouse documentation](https://clickhouse.com/docs/operations/server-configuration-parameters/settings#trace_log) for details on how to configure a TTL on those tables.
+
+The following query helps to identify the largest tables in Clickhouse:
+
+```sql
+SELECT table, formatReadableSize(size) as size, rows FROM (
+    SELECT
+        table,
+        database,
+        sum(bytes) AS size,
+        sum(rows) AS rows
+    FROM system.parts
+    WHERE active
+    GROUP BY table, database
+    ORDER BY size DESC
+)
+```
 
 ## FAQ
 

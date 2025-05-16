@@ -196,15 +196,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-sf-meetup",
+    key: "langfuse-launch-week-3",
     dismissible: true,
     content: (
-      <Link href="https://lu.ma/eydxi5ry">
+      <Link href="/launch">
         {/* mobile */}
-        <span className="sm:hidden">Monday in SF: Event w/ Samsara & Langfuse →</span>
+        <span className="sm:hidden">Upcoming: Launch Week #3 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Monday in SF: Bringing agents to production with Samsara and Langfuse →
+        Upcoming: Langfuse Launch Week #3 - a new feature every single day →
         </span>
       </Link>
     ),

@@ -127,7 +127,7 @@ const nonPermanentRedirects = [
   ["/video", "/watch-demo"],
   ["/docs/video", "/watch-demo"],
   ["/roadmap", "/docs/roadmap"],
-  ["/ph", "https://www.producthunt.com/posts/langfuse-prompt-experiments"],
+  ["/ph", "https://www.producthunt.com/products/langfuse"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/new-issue", "/issue"],
@@ -155,7 +155,7 @@ const nonPermanentRedirects = [
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
 
-  ["/launch", "/blog/2024-11-17-launch-week-2"],
+  ["/launch", "/blog/2025-05-19-launch-week-3"],
 
   // Redirect to overview pages
   ...[
@@ -227,7 +227,8 @@ const nonPermanentRedirects = [
   ["/docs/user-explorer", "/docs/tracing-features/users"],
   ["/docs/sessions", "/docs/tracing-features/sessions"],
   ["/docs/deployment/cloud", "/security"],
-  ["/docs/schedule-demo", "/schedule-demo"],
+  ["/docs/schedule-demo", "/talk-to-us"],
+  ["/schedule-demo", "/talk-to-us"],
   ["/docs/project-sharing", "/docs/rbac"],
   ["/docs/prompts", "/docs/prompts/get-started"],
   ["/changelog/2024-03-03-posthog-integration", "/docs/analytics/posthog"],

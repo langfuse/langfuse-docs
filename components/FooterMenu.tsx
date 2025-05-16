@@ -162,15 +162,15 @@ const menuItems: {
     heading: "About",
     items: [
       { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "/careers", notificationCount: 4 },
+      { name: "Careers", href: "/careers" },
       {
         name: "About us",
         href: "/about",
       },
       { name: "Support", href: "/support" },
       {
-        name: "Schedule Demo",
-        href: "/schedule-demo",
+        name: "Talk to us",
+        href: "/talk-to-us",
       },
       {
         name: "OSS Friends",

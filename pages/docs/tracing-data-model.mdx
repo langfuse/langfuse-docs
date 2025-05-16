@@ -91,19 +91,21 @@ classDiagram
 
 ## Scores
 
-Traces and observations can be evaluated using [scores](/docs/scores). Scores are flexible objects that store evaluation metrics and can be:
+Traces, observations, sessions and dataset runs can be evaluated using [scores](/docs/scores). Scores are flexible objects that store evaluation metrics and can be:
 
 - Numeric, categorical, or boolean values
-- Associated with a trace (required)
-- Linked to a specific observation (optional)
+- Associated with a trace, a session, or a dataset run (one and only one is required)
+- For trace level scores only: Linked to a specific observation within a trace (optional)
 - Annotated with comments for additional context
 - Validated against a score configuration schema (optional)
+
+Typically, session-level scores are used for comprehensive evaluation of conversational experiences across multiple interactions, while trace-level scores are used for evaluation of a single interaction. Dataset run level scores are used for overall evaluation of a dataset run, e.g. precision, recall, F1-score.
 
 Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
 
 <div className="border rounded py-4 mt-6 text-center bg-card">
 
-**Optionally, scores can add evaluation metrics to traces**
+**Optionally, scores can add evaluation metrics to traces, sessions, and dataset runs**
 
 ```mermaid
 classDiagram
@@ -115,10 +117,15 @@ classDiagram
   namespace Tracing {
     class Trace
     class Observation
+    class Session
+    class DatasetRun
   }
 
   Trace *-- Observation
-  Score --> Trace
+  Session "1" o-- "n" Trace
+  Score --> Session : optional
+  Score --> Trace : optional
+  Score --> DatasetRun : optional
   Score --> Observation : optional, reference observation within a trace
   Score --> ScoreConfig : optional, ensure schema
 ```

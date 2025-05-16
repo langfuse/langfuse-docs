@@ -1,6 +1,7 @@
 ---
 title: "Monitor Novita AI with Langfuse"
 description: "Learn how to integrate Novita AI with Langfuse using the OpenAI drop-in replacement."
+category: Integrations
 ---
 
 # Observability for Novita AI with Langfuse

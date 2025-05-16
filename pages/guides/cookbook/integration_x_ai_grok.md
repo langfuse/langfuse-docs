@@ -1,6 +1,7 @@
 ---
 title: "Integrate X.ai (Grok) with Langfuse"
 description: "Guide on integrating xAI's Grok models with Langfuse for observability."
+category: Integrations
 ---
 
 # Observability for xAI / Grok with Langfuse
