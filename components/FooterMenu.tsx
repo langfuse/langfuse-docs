@@ -5,7 +5,12 @@ import InkeepChatButton from "./inkeep/InkeepChatButton";
 const menuItems: {
   heading: string;
   items: (
-    | { name: string; href: string; notificationCount?: number }
+    | {
+        name: string;
+        href: string;
+        notificationCount?: number;
+        icon?: React.ReactNode;
+      }
     | "separator"
   )[];
 }[] = [
@@ -176,13 +181,16 @@ const menuItems: {
         name: "OSS Friends",
         href: "/oss-friends",
       },
+      "separator",
       {
         name: "Twitter",
         href: "https://x.com/langfuse",
+        icon: <Twitter className="h-4 w-4" />,
       },
       {
         name: "LinkedIn",
         href: "https://www.linkedin.com/company/langfuse/",
+        icon: <Linkedin className="h-4 w-4" />,
       },
     ],
   },
@@ -245,12 +253,7 @@ const FooterMenu = () => {
                       href={item.href}
                       className="flex items-center gap-1 text-sm hover:text-primary/80"
                     >
-                      {item.name === "Twitter" && (
-                        <Twitter className="h-4 w-4" />
-                      )}
-                      {item.name === "LinkedIn" && (
-                        <Linkedin className="h-4 w-4" />
-                      )}
+                      {item.icon}
                       <span>{item.name}</span>
                     </Link>
                     {item.notificationCount > 0 && (
