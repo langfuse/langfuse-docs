@@ -1,3 +1,8 @@
+---
+title: Langfuse Academy - Tracing
+description: Overview of tracing in LLM applications, why this is important and how to instrument your application
+---
+
 # **Module 3:** Tracing
 
 Having introduced LLMOps and the importance of monitoring in Module 1, and different architectual patterns in Module 2, let's take a **closer look at tracing** and how it helps you manage multi-step LLM applications.
@@ -116,16 +121,16 @@ Modern LLM applications are multi‑layer systems—user requests flow through a
 
 | Layer | Metric | Why It Matters | Typical Questions Answered |
 | :---- | :---- | :---- | :---- |
-| 🤖 **LLM** | **Input / Output payloads** | Enables root‑cause analysis of hallucinations or policy violations. | *"Did unsafe content originate from user input or the model?"* |
-| 🤖 **LLM** | **Cost / Token usage** | LLM pricing is volume‑based; tracing tokens per request makes optimisation concrete. | *"Which prompts burn the most tokens per session?"* |
-| 🤖⚙️ **LLM / Application** | **Error rate & error taxonomy** | Quantifies reliability and pinpoints whether failures stem from the provider, quota limits, or bad inputs. | *"Are timeout errors spiking after the last prompt change?"* |
-| 🤖⚙️ **LLM / Application** | **Latency (p50 / p95 / p99)** | Directly impacts user experience and cost; long tails often hide in p99. | *"Does adding a tool call increase end-to-end latency beyond 1 s?"* |
-| ⚙️ **Application** | **Tools:** (RAG look‑ups, function calls, DB queries) | Tools often dominate latency and can cascade errors back to the model. | *"Is the vector store behind our RAG pipeline timing out?"* |
-| ⚙️ **Application** | **Custom spans & business KPIs** | Correlates model behaviour with app‑level outcomes (e.g., conversion) and flags regressions early. | *"Did yesterday's deploy hurt onboarding completion?"* |
-| ⚙️ **Application** | **Environment, release version, feature flags** | Makes every trace searchable and comparable across A/B tests. | *"Do we see higher latency only in EU region?"* |
-| 👤 **Users** | **Explicit thumbs‑up/down, implicit dwell‑time** | Feeds human‑in‑the‑loop evaluation and drives continuous improvement. | *"Are users more satisfied after we simplified the prompt?"* |
-| 👤 **Users** | **Multi‑turn conversation context & duration** | Lets you slice metrics by journey stage and detect session‑level anomalies. | *"Which sessions hit the cost guardrail?"* |
-| 👤 **Users** | **Cohorts, frequency, retention** | Maps model performance to real customer impact and prioritises fixes. | *"Do power users experience more errors than newcomers?"* |
+| **LLM** | **Input / Output payloads** | Enables root‑cause analysis of hallucinations or policy violations. | *"Did unsafe content originate from user input or the model?"* |
+| **LLM** | **Cost / Token usage** | LLM pricing is volume‑based; tracing tokens per request makes optimisation concrete. | *"Which prompts burn the most tokens per session?"* |
+| **LLM / Application** | **Error rate & error taxonomy** | Quantifies reliability and pinpoints whether failures stem from the provider, quota limits, or bad inputs. | *"Are timeout errors spiking after the last prompt change?"* |
+| **LLM / Application** | **Latency (p50 / p95 / p99)** | Directly impacts user experience and cost; long tails often hide in p99. | *"Does adding a tool call increase end-to-end latency beyond 1 s?"* |
+| **Application** | **Tools:** (RAG look‑ups, function calls, DB queries) | Tools often dominate latency and can cascade errors back to the model. | *"Is the vector store behind our RAG pipeline timing out?"* |
+| **Application** | **Custom spans & business KPIs** | Correlates model behaviour with app‑level outcomes (e.g., conversion) and flags regressions early. | *"Did yesterday's deploy hurt onboarding completion?"* |
+| **Application** | **Environment, release version, feature flags** | Makes every trace searchable and comparable across A/B tests. | *"Do we see higher latency only in EU region?"* |
+| **Users** | **Explicit thumbs‑up/down, implicit dwell‑time** | Feeds human‑in‑the‑loop evaluation and drives continuous improvement. | *"Are users more satisfied after we simplified the prompt?"* |
+| **Users** | **Multi‑turn conversation context & duration** | Lets you slice metrics by journey stage and detect session‑level anomalies. | *"Which sessions hit the cost guardrail?"* |
+| **Users** | **Cohorts, frequency, retention** | Maps model performance to real customer impact and prioritises fixes. | *"Do power users experience more errors than newcomers?"* |
 
 ## How to Instrument your App?
 
