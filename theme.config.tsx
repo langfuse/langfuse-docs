@@ -195,20 +195,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "langfuse-sf-meetup",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/eydxi5ry">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">Monday in SF: Event w/ Samsara & Langfuse →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //       Monday in SF: Bringing agents to production with Samsara and Langfuse →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "langfuse-launch-week-3",
+    dismissible: true,
+    content: (
+      <Link href="/launch">
+        {/* mobile */}
+        <span className="sm:hidden">Upcoming: Launch Week #3 →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+        Upcoming: Langfuse Launch Week #3 - a new feature every single day →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;
