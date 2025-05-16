@@ -3,15 +3,15 @@ title: Langfuse Academy - Evaluation
 description: Overview of evaluating LLM applications and agents
 ---
 
-# **Module 4:** Evaluation
+# Module 3: Evaluation
 
 Having established a strong tracing foundation, it's time to examine **evaluation**—the process of measuring how well your LLM (or agent) performs and how to evolve it over time.
 
 <Frame className="my-10" fullWidth>
-![Evaluation](/images/academy/m4-evals.png)
+  ![Evaluation](/images/academy/m4-evals.png)
 </Frame>
 
-Evaluating LLMs can feel like trying to untangle a giant ball of yarn—there's a lot going on, and it's often not obvious which thread to pull first. From wrangling unpredictable user inputs to picking the right metrics, the process can be overwhelming. 
+Evaluating LLMs can feel like trying to untangle a giant ball of yarn—there's a lot going on, and it's often not obvious which thread to pull first. From wrangling unpredictable user inputs to picking the right metrics, the process can be overwhelming.
 
 But don't panic! In this section, we'll walk through some tried-and-true best practices, common pitfalls, and handy tips to help you benchmark your LLM's performance. Whether you're just starting out or looking for a quick refresher, these guidelines will keep your evaluation strategy on solid ground.
 
@@ -25,11 +25,11 @@ Because LLMs generate text rather than just classifying it, subjective interpret
 
 And then there's the operational side of evaluation:
 
-- **Cost and Latency:** Testing at scale (especially with human annotators) can run up costs quickly. Automated approaches may be faster, but they're not always reliable enough on their own.  
-- **Trust in Automated Tools:** Automated evaluators (including ones powered by smaller models) can drift or fail in unexpected ways. Keeping them aligned with real human perspectives takes constant upkeep.  
+- **Cost and Latency:** Testing at scale (especially with human annotators) can run up costs quickly. Automated approaches may be faster, but they're not always reliable enough on their own.
+- **Trust in Automated Tools:** Automated evaluators (including ones powered by smaller models) can drift or fail in unexpected ways. Keeping them aligned with real human perspectives takes constant upkeep.
 - **Cross-Team Collaboration:** Getting engineers, data scientists, product managers, and domain experts to work in sync is crucial. Without a clear process or shared vocabulary, you risk chaotic handoffs and scattered efforts.
 
-**Example: Simplified Customer Support RAG Chat**  
+**Example: Simplified Customer Support RAG Chat**
 
 ```mermaid
 graph TD
@@ -62,16 +62,16 @@ _[Example of a trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj00
 ## Evaluation Workflow
 
 <Frame className="my-10" fullWidth>
-![Continuous Evaluation Loop](/images/academy/m4-evaluation-workflow.png)
+  ![Continuous Evaluation Loop](/images/academy/m4-evaluation-workflow.png)
 </Frame>
 
-The continuous evaluation loop begins **offline** with building or curating test datasets that range from *"happy path"* scenarios to adversarial inputs, ensuring good coverage of potential user interactions. 
+The continuous evaluation loop begins **offline** with building or curating test datasets that range from _"happy path"_ scenarios to adversarial inputs, ensuring good coverage of potential user interactions.
 
-Next, teams **run experiments** by iterating on models, prompts, and any relevant tools or logic, followed by an evaluation step. This can include both manual annotation for nuanced judgment  and automated methods for speed and scale. 
+Next, teams **run experiments** by iterating on models, prompts, and any relevant tools or logic, followed by an evaluation step. This can include both manual annotation for nuanced judgment and automated methods for speed and scale.
 
-Once these experiments meet the necessary quality and safety criteria, the **changes are deployed** alongside guardrails that filter inputs or outputs in real time. 
+Once these experiments meet the necessary quality and safety criteria, the **changes are deployed** alongside guardrails that filter inputs or outputs in real time.
 
-Once the application is in production, we **continuously capture data** about actual performance and user behavior, while monitoring tools support debugging and manual review to surface any unexpected issues. 
+Once the application is in production, we **continuously capture data** about actual performance and user behavior, while monitoring tools support debugging and manual review to surface any unexpected issues.
 
 Whenever new problems or edge cases are identified, they are **funneled back into the test dataset** so that future experiments can address them proactively, creating a self-sustaining feedback loop that improves the system with each iteration.
 
@@ -81,42 +81,46 @@ Now let's take a closer look at **offline** and **online** evaluations.
 
 Offline evaluation means that you are testing your application **during development state**. You'll typically run your model on curated datasets—maybe as part of your CI pipeline or local dev tests. Smaller datasets are great for quick, "gut check" experiments; larger ones provide a broader sweep of performance indicators. The main challenge is making sure these test sets stay relevant and actually resemble what you'll see in the wild.
 
-Below is an example of a dataset in Langfuse with inputs and expected outputs:  
+Below is an example of a dataset in Langfuse with inputs and expected outputs:
 
 import DatasetsOverview from "@/components-mdx/datasets-overview-gif.mdx";
 
 <div className="h-6" />
 <DatasetsOverview />
 
-For instance, if you built a math word-problem solving application, you might have a [**test dataset**](https://huggingface.co/datasets/gsm8k) of 100 math problems with known answers which you all feed into your application. Once your application answered all math questions, you compare the results with the known answers and calculate the accuracy of the agent. You then run this test with different settings (e.g. add calculator tool, chain of thought prompting, larger LLM) and compare the results. 
+For instance, if you built a math word-problem solving application, you might have a [**test dataset**](https://huggingface.co/datasets/gsm8k) of 100 math problems with known answers which you all feed into your application. Once your application answered all math questions, you compare the results with the known answers and calculate the accuracy of the agent. You then run this test with different settings (e.g. add calculator tool, chain of thought prompting, larger LLM) and compare the results.
 
 The key challenge with offline eval is ensuring your test dataset is **comprehensive** and **stays relevant** – your application might perform well on a fixed test set but encounter very different queries in production. Therefore, you should keep test sets updated with new edge cases and examples that reflect real-world scenarios​. A mix of small "smoke test" cases and larger evaluation sets is useful: small sets for quick checks and larger ones for broader performance metrics​.
 
 <Callout type="info" emoji="🪢">
-For an end-to-end example on running Dataset experiments in Langfuse, check out [this cookbook](/docs/integrations/langchain/example-langgraph-agents#offline-evaluation).
+  For an end-to-end example on running Dataset experiments in Langfuse, check
+  out [this
+  cookbook](/docs/integrations/langchain/example-langgraph-agents#offline-evaluation).
 </Callout>
 
 ### Online Evaluation:
 
-Besides evaluating your application during development, you can also evaluate your app **while it runs in production**. 
+Besides evaluating your application during development, you can also evaluate your app **while it runs in production**.
 
 For example, you might track success rates, user satisfaction scores, or other metrics on live traffic. The advantage of online evaluation is that it captures things you might not anticipate in a lab setting – you can observe **model drift over time** (if the agent's effectiveness degrades as input patterns shift) and catch **unexpected queries** or **situations** that weren't in your test data​. It provides a true picture of how the agent behaves in the wild.
 
 Online evaluation often involves collecting **implicit and explicit user feedback**, as discussed, and possibly running shadow tests or A/B tests (where a new version of the agent runs in parallel to compare against the old). The challenge is that it can be tricky to get reliable labels or scores for live interactions – you might rely on user feedback or downstream metrics (like did the user click the result).
 
-The image below shows an example of a live LLM-as-a-Judge Evaluator in Langfuse that scores new traces for toxicity:  
+The image below shows an example of a live LLM-as-a-Judge Evaluator in Langfuse that scores new traces for toxicity:
 
 <Frame className="my-10" fullWidth>
-  ![Example of a live LLM-as-a-Judge Evaluator in Langfuse](/images/blog/2025-03-04-llm-evaluation/online-eval-example.png)
+  ![Example of a live LLM-as-a-Judge Evaluator in
+  Langfuse](/images/blog/2025-03-04-llm-evaluation/online-eval-example.png)
 </Frame>
 
 <Callout type="info" emoji="📚">
-Find out how to set up a live LLM-as-a-Judge Evaluator in Langfuse [here](/docs/scores/model-based-evals). 
+  Find out how to set up a live LLM-as-a-Judge Evaluator in Langfuse
+  [here](/docs/scores/model-based-evals).
 </Callout>
 
 ## Common Evaluation Metrics
 
-For both online and offline evaluations, it is important to know which datapoints you would like to collect and use as evaluation metrics. No single method will capture everything about your model's behavior, so it often pays to mix and match. 
+For both online and offline evaluations, it is important to know which datapoints you would like to collect and use as evaluation metrics. No single method will capture everything about your model's behavior, so it often pays to mix and match.
 
 ```mermaid
 graph TD
@@ -133,7 +137,6 @@ graph TD
 
 Below are some of the most common metrics to track:
 
-
 <Tabs items={["User Feedback", "Implicit User Feedback", "Manual Annotation", "Automated Evaluation"]}>
   <Tab value="User Feedback">
     Direct feedback—like user ratings or open-ended comments—offers the clearest signal of whether your LLM is hitting the mark. However, collecting and organizing these insights at scale can be expensive and time-consuming.
@@ -143,6 +146,7 @@ Below are some of the most common metrics to track:
     <Frame border className="frame-lg" fullWidth>
       ![Example of user feedback in ChatGPT](/images/blog/2025-03-04-llm-evaluation/user-feedback.png)
     </Frame>
+
   </Tab>
   <Tab value="Implicit User Feedback">
     Instead of waiting for explicit ratings, you can infer quality from user behavior: Did they ask the same question again? Did they click on recommended links? Though it's usually easier to gather, the signal can be noisy and needs careful interpretation.
@@ -156,6 +160,7 @@ Below are some of the most common metrics to track:
     <Frame border className="my-10" fullWidth>
       ![Example of a manual annotation workflow in Langfuse](/images/blog/2025-03-04-llm-evaluation/human-annotation-example.png)
     </Frame>
+
   </Tab>
   <Tab value="Automated Evaluation">
     Using metrics like precision, recall, F1-score, or specialized generative metrics can give a quick, numerical snapshot of performance. Tools like OpenAI Evals, LangChain Evals, and RAGAS fall in this bucket. These are fast and repeatable but must be validated against human judgment to avoid misleading conclusions.
@@ -167,6 +172,7 @@ Below are some of the most common metrics to track:
     <Frame border className="max-w-sm">
       ![Example of different automated evaluation scores over time in Langfuse](/images/blog/2025-03-04-llm-evaluation/eval-score-example.png)
     </Frame>
+
   </Tab>
 </Tabs>
 
@@ -178,10 +184,17 @@ For certain applications—like extraction and classification tasks—precision,
 
 <Tabs items={["LLM-as-a-Judge Approaches", "Non-model-based Approaches"]}>
   <Tab value="LLM-as-a-Judge Approaches">
-    You can enlist another machine learning model—or even a specialized LLM-based evaluator (sometimes called "model based evals")—to score outputs. These can be flexible, but there's always the risk of propagating the same biases or blind spots. Calibrating them against human-annotated samples helps. Find out more on using LLM-as-a-Judge evals [here](/docs/scores/model-based-evals).
+    You can enlist another machine learning model—or even a specialized
+    LLM-based evaluator (sometimes called "model based evals")—to score outputs.
+    These can be flexible, but there's always the risk of propagating the same
+    biases or blind spots. Calibrating them against human-annotated samples
+    helps. Find out more on using LLM-as-a-Judge evals
+    [here](/docs/scores/model-based-evals).
   </Tab>
   <Tab value="Non-model-based Approaches">
-    In some cases, simpler rule-based checks (like regex patterns) can be surprisingly effective. They're cheap and transparent but won't scale to more nuanced tasks.
+    In some cases, simpler rule-based checks (like regex patterns) can be
+    surprisingly effective. They're cheap and transparent but won't scale to
+    more nuanced tasks.
   </Tab>
 </Tabs>
 
@@ -191,27 +204,46 @@ Ultimately, common toolkits like built in LLM-as-a-Judge evals or external libra
 
 What makes LLM evaluation both fascinating and challenging is how different each use case can be:
 
-<Tabs items={["Retrieval-Augmented Generation (RAG)", "Agent-Based LLM Applications", "Voice Agent Evaluation"]}>
+<Tabs
+  items={[
+    "Retrieval-Augmented Generation (RAG)",
+    "Agent-Based LLM Applications",
+    "Voice Agent Evaluation",
+  ]}
+>
   <Tab value="Retrieval-Augmented Generation (RAG)">
-    Because you're evaluating both the retrieval step and the generative step, it's helpful to measure them separately. For example, you might track relevance and precision for document retrieval, then apply generative metrics (like RAGAS) to the summarized output. (Guide on using RAGAS [here](/guides/cookbook/evaluation_of_rag_with_ragas))
+    Because you're evaluating both the retrieval step and the generative step,
+    it's helpful to measure them separately. For example, you might track
+    relevance and precision for document retrieval, then apply generative
+    metrics (like RAGAS) to the summarized output. (Guide on using RAGAS
+    [here](/guides/cookbook/evaluation_of_rag_with_ragas))
   </Tab>
   <Tab value="Agent-Based LLM Applications">
-    Here, the model isn't just producing text—it's also making decisions or taking actions based on user inputs. Evaluating such agents usually involves simulating interactive conversations and carefully checking each intermediate decision. Human-in-the-loop feedback can be especially helpful to confirm the agent's logic or to flag any odd behavior.
+    Here, the model isn't just producing text—it's also making decisions or
+    taking actions based on user inputs. Evaluating such agents usually involves
+    simulating interactive conversations and carefully checking each
+    intermediate decision. Human-in-the-loop feedback can be especially helpful
+    to confirm the agent's logic or to flag any odd behavior.
   </Tab>
   <Tab value="Voice Agent Evaluation">
-    Voice-based applications bring unique challenges, as they combine speech recognition, synthesis, and interactive dialogue. Evaluating these agents often requires assessing both the conversational dynamics and the audio processing performance. For a comprehensive overview of best practices and challenges in this area, see our dedicated guide: [Evaluating and Monitoring Voice AI Agents](/blog/2025-01-22-evaluating-voice-ai-agents).
+    Voice-based applications bring unique challenges, as they combine speech
+    recognition, synthesis, and interactive dialogue. Evaluating these agents
+    often requires assessing both the conversational dynamics and the audio
+    processing performance. For a comprehensive overview of best practices and
+    challenges in this area, see our dedicated guide: [Evaluating and Monitoring
+    Voice AI Agents](/blog/2025-01-22-evaluating-voice-ai-agents).
   </Tab>
 </Tabs>
 
 ## LLM Red Teaming / Security
 
-Another aspect of evaluation is **Red Teaming**. In the previous section we focused on optimizing your application. This part shows how to secure your application against attacks and edge cases. 
+Another aspect of evaluation is **Red Teaming**. In the previous section we focused on optimizing your application. This part shows how to secure your application against attacks and edge cases.
 
 Protecting against security risks and attacks is becoming increasingly important for ensuring LLM apps are production ready. Not only do LLM applications need to be secure to protect users' private and sensitive information, they also need ensure a level of quality and safety of responses to maintain product standards.
 
 The [OWASP Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) list is a useful resource on the topic. It provides a consensus of the most critical security risks for LLM applications.
 
-In the video below, we walk through an example of how to use the open-source security library LLM Guard, and how to integrate Langfuse to monitor and protect against common security risks.  
+In the video below, we walk through an example of how to use the open-source security library LLM Guard, and how to integrate Langfuse to monitor and protect against common security risks.
 
 <CloudflareVideo
   videoId="3a89dd733399f0c9da4aa5ac9da80d78"
@@ -221,26 +253,26 @@ In the video below, we walk through an example of how to use the open-source sec
 
 LLM Security can be addressed with a combination of:
 
-* LLM Security libraries for run-time security measures  
-* Langfuse for the ex-post evaluation of the effectiveness of these measures
+- LLM Security libraries for run-time security measures
+- Langfuse for the ex-post evaluation of the effectiveness of these measures
 
 **Run-time security measures with LLM security libraries**
 
 There are several popular security libraries that can be used to mitigate security risks in LLM-based applications. These include: [LLM Guard](https://llm-guard.com/), [Prompt Armor](https://promptarmor.com/), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), [Lakera](https://www.lakera.ai/). These libraries help with security measures in the following ways:
 
-1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model  
-2. Redacting sensitive PII before being sending into the model and then un-redacting in the response  
-3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary  
-   
+1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
+2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
+3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
+
 **Asynchronous monitoring and evaluation of security measures**
 
 Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
 
-1. Investigate security issues by manually inspect traces.  
-2. Monitor security scores over time in the Langfuse Dashboard.  
-3. Evaluate effectiveness of security measures. Integrating Langfuse [scores](/docs/scores) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:  
-   * [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.  
-   * [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup.  
+1. Investigate security issues by manually inspect traces.
+2. Monitor security scores over time in the Langfuse Dashboard.
+3. Evaluate effectiveness of security measures. Integrating Langfuse [scores](/docs/scores) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
+   - [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
+   - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup.
 4. Track latency to balance tradeoffs. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help dissect the latencies of these checks within a trace to understand whether the checks are worth the wait.
 
 **Example Workflow: Anonymizing Personally Identifiable Information (PII)**
@@ -250,7 +282,8 @@ We redact and un-redact sensitive information using a security library before an
 Exposing Personally Identifiable Information (PII) to models can pose security and privacy risks, such as violating contractual obligations or regulatory compliance requirements, or mitigating the risks of data leakage or a data breach.
 
 <Callout type="info" emoji="🪢">
-Run the [end-to-end cookbook](/docs/security/example-python) or check out our [documentation](/docs/security/overview).
+  Run the [end-to-end cookbook](/docs/security/example-python) or check out our
+  [documentation](/docs/security/overview).
 </Callout>
 
 ## Get Started with Evaluation
@@ -278,5 +311,3 @@ Further reading:
 </Callout>
 
 Evaluating LLMs is never a one-and-done task. As your model and user base evolve, your evaluation strategies need to keep pace. Next, we'll look at how to build and manage your prompts.
-
-

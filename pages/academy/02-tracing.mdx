@@ -3,12 +3,12 @@ title: Langfuse Academy - Tracing
 description: Overview of tracing in LLM applications, why this is important and how to instrument your application
 ---
 
-# **Module 3:** Tracing
+# Module 2: Tracing
 
 Having introduced LLMOps and the importance of monitoring in Module 1, and different architectural patterns in Module 2, let's take a **closer look at tracing** and how it helps you manage multi-step LLM applications.
 
 <Frame className="my-10" fullWidth>
-![Tracing](/images/academy/m3-tracing.png)
+  ![Tracing](/images/academy/m3-tracing.png)
 </Frame>
 
 ## Recap: What is a trace/span and how is it used in LLM applications?
@@ -23,7 +23,6 @@ Each trace can contain multiple `observations` to log the individual steps of th
   - `Events` are the basic building blocks. They are used to track discrete events in a trace.
   - `Spans` represent durations of units of work in a trace.
   - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
-
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
@@ -70,25 +69,25 @@ By adding observability, you can gain real-time insights into the performance an
 
 In a typical multi-step LLM application, various components interact to deliver a final output, such as:
 
-* Routing  
-* Query extraction  
-* Tool Calls  
-* Document retrieval  
-* Summarization  
-* Security checks
+- Routing
+- Query extraction
+- Tool Calls
+- Document retrieval
+- Summarization
+- Security checks
 
-Each step can become a bottleneck, affecting the overall performance. For example, a delay in query embedding can cascade, increasing the latency of the entire system. This can become even more complex when we look at AI agents with chained reasoning steps and multiple tool calls. 
+Each step can become a bottleneck, affecting the overall performance. For example, a delay in query embedding can cascade, increasing the latency of the entire system. This can become even more complex when we look at AI agents with chained reasoning steps and multiple tool calls.
 
-*Example of a multi-step LLM application:*
+_Example of a multi-step LLM application:_
 
-```mermaid  
+```mermaid
 graph TD
-A[User Input] --> B[Routing]  
-B --> C[Query Extraction]  
-C --> D[Document Retrieval]  
-D --> E[Summarization]  
-E --> F[Security Checks]  
-F --> G[Final Output]  
+A[User Input] --> B[Routing]
+B --> C[Query Extraction]
+C --> D[Document Retrieval]
+D --> E[Summarization]
+E --> F[Security Checks]
+F --> G[Final Output]
 style A fill:#C7D2FE,stroke:#4338ca;
 style G fill:#C7D2FE,stroke:#4338ca;
 ```
@@ -114,30 +113,32 @@ However, this comes with a cost. The tradeoff between accuracy and costs in LLM-
 ## What to Trace?
 
 <Frame className="my-10">
-![What to Trace](/images/academy/m3-application-tracing.png)
+  ![What to Trace](/images/academy/m3-application-tracing.png)
 </Frame>
 
-Modern LLM applications are multi‑layer systems—user requests flow through application logic, optional tool calls, and finally one or more LLM calls. **Observability** therefore means capturing metrics at *every* layer and correlating them across requests, users, and releases. The diagram above highlights the main buckets you should instrument; below is an overview what each represents and *why it matters*.
+Modern LLM applications are multi‑layer systems—user requests flow through application logic, optional tool calls, and finally one or more LLM calls. **Observability** therefore means capturing metrics at _every_ layer and correlating them across requests, users, and releases. The diagram above highlights the main buckets you should instrument; below is an overview what each represents and _why it matters_.
 
-| Layer | Metric | Why It Matters | Typical Questions Answered |
-| :---- | :---- | :---- | :---- |
-| **LLM** | **Input / Output payloads** | Enables root‑cause analysis of hallucinations or policy violations. | *"Did unsafe content originate from user input or the model?"* |
-| **LLM** | **Cost / Token usage** | LLM pricing is volume‑based; tracing tokens per request makes optimisation concrete. | *"Which prompts burn the most tokens per session?"* |
-| **LLM / Application** | **Error rate & error taxonomy** | Quantifies reliability and pinpoints whether failures stem from the provider, quota limits, or bad inputs. | *"Are timeout errors spiking after the last prompt change?"* |
-| **LLM / Application** | **Latency (p50 / p95 / p99)** | Directly impacts user experience and cost; long tails often hide in p99. | *"Does adding a tool call increase end-to-end latency beyond 1 s?"* |
-| **Application** | **Tools:** (RAG look‑ups, function calls, DB queries) | Tools often dominate latency and can cascade errors back to the model. | *"Is the vector store behind our RAG pipeline timing out?"* |
-| **Application** | **Custom spans & business KPIs** | Correlates model behaviour with app‑level outcomes (e.g., conversion) and flags regressions early. | *"Did yesterday's deploy hurt onboarding completion?"* |
-| **Application** | **Environment, release version, feature flags** | Makes every trace searchable and comparable across A/B tests. | *"Do we see higher latency only in EU region?"* |
-| **Users** | **Explicit thumbs‑up/down, implicit dwell‑time** | Feeds human‑in‑the‑loop evaluation and drives continuous improvement. | *"Are users more satisfied after we simplified the prompt?"* |
-| **Users** | **Multi‑turn conversation context & duration** | Lets you slice metrics by journey stage and detect session‑level anomalies. | *"Which sessions hit the cost guardrail?"* |
-| **Users** | **Cohorts, frequency, retention** | Maps model performance to real customer impact and prioritises fixes. | *"Do power users experience more errors than newcomers?"* |
+| Layer                 | Metric                                                | Why It Matters                                                                                             | Typical Questions Answered                                          |
+| :-------------------- | :---------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| **LLM**               | **Input / Output payloads**                           | Enables root‑cause analysis of hallucinations or policy violations.                                        | _"Did unsafe content originate from user input or the model?"_      |
+| **LLM**               | **Cost / Token usage**                                | LLM pricing is volume‑based; tracing tokens per request makes optimisation concrete.                       | _"Which prompts burn the most tokens per session?"_                 |
+| **LLM / Application** | **Error rate & error taxonomy**                       | Quantifies reliability and pinpoints whether failures stem from the provider, quota limits, or bad inputs. | _"Are timeout errors spiking after the last prompt change?"_        |
+| **LLM / Application** | **Latency (p50 / p95 / p99)**                         | Directly impacts user experience and cost; long tails often hide in p99.                                   | _"Does adding a tool call increase end-to-end latency beyond 1 s?"_ |
+| **Application**       | **Tools:** (RAG look‑ups, function calls, DB queries) | Tools often dominate latency and can cascade errors back to the model.                                     | _"Is the vector store behind our RAG pipeline timing out?"_         |
+| **Application**       | **Custom spans & business KPIs**                      | Correlates model behaviour with app‑level outcomes (e.g., conversion) and flags regressions early.         | _"Did yesterday's deploy hurt onboarding completion?"_              |
+| **Application**       | **Environment, release version, feature flags**       | Makes every trace searchable and comparable across A/B tests.                                              | _"Do we see higher latency only in EU region?"_                     |
+| **Users**             | **Explicit thumbs‑up/down, implicit dwell‑time**      | Feeds human‑in‑the‑loop evaluation and drives continuous improvement.                                      | _"Are users more satisfied after we simplified the prompt?"_        |
+| **Users**             | **Multi‑turn conversation context & duration**        | Lets you slice metrics by journey stage and detect session‑level anomalies.                                | _"Which sessions hit the cost guardrail?"_                          |
+| **Users**             | **Cohorts, frequency, retention**                     | Maps model performance to real customer impact and prioritises fixes.                                      | _"Do power users experience more errors than newcomers?"_           |
 
 ## How to Instrument your App?
 
 To gather tracing data, you'll need to **instrument** your code—either by using a **native integration** for your framework or manually sending trace data via Langfuse's SDKs or REST API.
 
 <Callout type="info" emoji="🪢">
-This chapter focuses on what to track and why. For detailed instructions on sending these metrics to Langfuse—via SDKs, OTEL exporters, or the REST API—see the [Langfuse documentation](/docs/integrations/overview).*
+  This chapter focuses on what to track and why. For detailed instructions on
+  sending these metrics to Langfuse—via SDKs, OTEL exporters, or the REST
+  API—see the [Langfuse documentation](/docs/integrations/overview).*
 </Callout>
 
 To help you choose the right entry point, here is an **overview** of the most common ways teams instrument their applications:
@@ -153,10 +154,10 @@ To help you choose the right entry point, here is an **overview** of the most co
 
 These approaches are **composable**: you can combine them to get the best of each approach.
 
-Langfuse supports many popular frameworks:   
+Langfuse supports many popular frameworks:
 
 <Frame className="my-10">
-![Langfuse Integrations](/images/academy/m3-integrations.png)
+  ![Langfuse Integrations](/images/academy/m3-integrations.png)
 </Frame>
 
 ## Get Started with Tracing in Langfuse
@@ -191,4 +192,4 @@ Further reading:
 
 </Callout>
 
-Once you have instrumented your LLM application and successfully ingested data to Langfuse, you can use this data to evaluate your application and make it ready for production. 
+Once you have instrumented your LLM application and successfully ingested data to Langfuse, you can use this data to evaluate your application and make it ready for production.
