@@ -11,7 +11,6 @@ description: How to connect Langfuse with OpenTelemetry to observe LLM applicati
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "full",
   }}
 />
 
@@ -262,7 +261,7 @@ Some of the attributes are only taken into consideration if they are set on the 
 The following Langfuse specific properties are supported:
 
 | OpenTelemetry Attribute   | Langfuse Property | Type       | Root Span only | Description                                                                                                                                                                       |
-|---------------------------|-------------------|------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | ----------------- | ---------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `langfuse.session.id`     | `sessionId`       | `string`   | `true`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                                                |
 | `langfuse.user.id`        | `userId`          | `string`   | `true`         | The [user ID](/docs/tracing-features/users) for the request.                                                                                                                      |
 | `langfuse.public`         | `public`          | `boolean`  | `true`         | Mark the trace as public to be able to [share it via url](/docs/tracing-features/url). This can be changed later in the Langfuse UI.                                              |
@@ -279,7 +278,7 @@ Below, we present a non-exhaustive list of additional mappings that Langfuse app
 These mappings are based on OTel GenAI semantic conventions and vendor-specific implementations that deviate from these conventions:
 
 | OpenTelemetry Attribute       | Langfuse Property   | Description                                                                                                                                                      |
-|-------------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gen_ai.usage.cost`           | `costDetails.total` | The total [cost](/docs/model-usage-and-cost) of the request.                                                                                                     |
 | `gen_ai.usage.*`              | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
 | `llm.token_count.*`           | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`.                   |
