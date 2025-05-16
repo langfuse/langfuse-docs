@@ -2,17 +2,11 @@
 description: Langfuse strives to be the most open and transparent LLM toolkit. Learn more about why open source is important to us.
 ---
 
-# Langfuse's Open-Source Strategy
+# Langfuse is fully open source
 
 > Langfuse is built in the open. We believe open source and sustainable commercialization can coexist—and this strategy is how we fund continuous, community-driven innovation that's adopted across startups and enterprises.
 >
 > Do you have any questions? Please reach out to the maintainers via [GitHub Discussions](/gh-support).
-
-<Callout type="info">
-
-All the interfaces and backend services that make up Langfuse's core are released under the permissive MIT license without any usage limits. Peripheral, enterprise-grade capabilities (e.g. advanced human annotation pipelines, enhanced RBAC, audit logging) are available under a commercial license when you self-host Langfuse.
-
-</Callout>
 
 ## Why is Langfuse open source?
 
@@ -22,27 +16,9 @@ All the interfaces and backend services that make up Langfuse's core are release
 4. **Sovereignty**: You can run Langfuse anywhere — from your laptop to an air-gapped cluster — without hitting artificial usage caps. [Self-host](/self-hosting) it on your own infrastructure.
 5. **Extensible**: All data is accessible via the public [API](/docs/api) which is fully tested. You can wrap/extend Langfuse or build your own workflows and AI platform around it.
 
-## Licensing Overview
-
-Self-hosting keeps data within your infrastructure; Cloud offloads operational overhead. Because every deployment runs the same codebase and schema, **you can switch between OSS, Enterprise self-host, and Langfuse Cloud at any time**. Add or remove a license key or switch to the Langfuse Cloud endpoints. No feature flags to untangle, no vendor lock-in, and no downtime.
-
-|                       | OSS Self-Host | Pro / Enterprise Self-Host | Langfuse Cloud |
-| --------------------- | ------------- | -------------------------- | -------------- |
-| All Core features     | ✅            | ✅                         | ✅             |
-| EE add-ons            | -             | ✅                         | ✅             |
-| Fully managed service | -             | -                          | ✅             |
-
-### MIT Core
-
-Langfuse's OSS core includes all core features and has no usage limits. Fork it, extend it, ship it—even in commercial products. All core APIs and backend logic scale horizontally out-of-the-box, so the same deployment can grow from a single-node Docker Compose to a multi-node Kubernetes cluster—without code changes or feature gates. It's the same architecture that powers Langfuse Cloud.
-
-### Commercial Extensions
-
-Enterprise Edition (EE) modules live in clearly marked `/ee` directories. These are shipped as source code, but require a license key to run. They are optional; the core works 100% without them.
-
 ## Architecture Consistency & Scale
 
-The Langfuse deployment stack is exactly the same for OSS, Enterprise self-host, and Langfuse Cloud. See our [Self-Hosting Guide](/self-hosting) for instructions on running Langfuse locally and deployments at production scale.
+The Langfuse deployment stack is exactly the same when using Langfuse Cloud and when self-hosting Langfuse. See our [Self-Hosting Guide](/self-hosting) for instructions on running Langfuse locally and deployments at production scale.
 
 <details>
 <summary>Architecture</summary>
@@ -61,18 +37,7 @@ import ArchitectureDescription from "@/components-mdx/architecture-description-v
 
 ### Is Langfuse really open source?
 
-Yes. Everything outside the `/ee` folders is MIT-licensed — an OSI-approved license. You get the four freedoms: use, study, modify, distribute.
-
-### Will I accidentally use EE features?
-
-No. EE packages are isolated and gated by the license key check. You can run the core image without a key without running EE code.
-
-### Which self-host licensing options exist?
-
-Langfuse offers two paid tiers atop the free OSS core (see [pricing page](/pricing)):
-
-- **Pro** (self-serve) - an online, pay-as-you-go license that unlocks all Enterprise Edition (`/ee`) code for small teams. Purchase instantly from the dashboard and cancel anytime.
-- **Enterprise** (custom contract) - the same EE feature set plus advanced SAML/SCIM SSO, extended audit-log retention, priority support & SLAs, red-lined legal terms, and optional professional-services assistance.
+Yes. Langfuse is 100% open source using the Apache 2.0 license — an OSI-approved license.
 
 ### Does Langfuse rely only on open-source components?
 
