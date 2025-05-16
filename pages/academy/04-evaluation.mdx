@@ -93,7 +93,7 @@ For instance, if you built a math word-problem solving application, you might ha
 The key challenge with offline eval is ensuring your test dataset is **comprehensive** and **stays relevant** – your application might perform well on a fixed test set but encounter very different queries in production. Therefore, you should keep test sets updated with new edge cases and examples that reflect real-world scenarios​. A mix of small "smoke test" cases and larger evaluation sets is useful: small sets for quick checks and larger ones for broader performance metrics​.
 
 <Callout type="info" emoji="🪢">
-For an end-to-end example on running Dataset experiments in Langfuse, check out [this cookbook](https://langfuse.com/docs/integrations/langchain/example-langgraph-agents#offline-evaluation). 
+For an end-to-end example on running Dataset experiments in Langfuse, check out [this cookbook](/docs/integrations/langchain/example-langgraph-agents#offline-evaluation).
 </Callout>
 
 ### Online Evaluation:
@@ -178,7 +178,7 @@ For certain applications—like extraction and classification tasks—precision,
 
 <Tabs items={["LLM-as-a-Judge Approaches", "Non-model-based Approaches"]}>
   <Tab value="LLM-as-a-Judge Approaches">
-    You can enlist another machine learning model—or even a specialized LLM-based evaluator (sometimes called "model based evals")—to score outputs. These can be flexible, but there's always the risk of propagating the same biases or blind spots. Calibrating them against human-annotated samples helps. Find out more on using LLM-as-a-Judge evals [here](https://langfuse.com/docs/scores/model-based-evals).
+    You can enlist another machine learning model—or even a specialized LLM-based evaluator (sometimes called "model based evals")—to score outputs. These can be flexible, but there's always the risk of propagating the same biases or blind spots. Calibrating them against human-annotated samples helps. Find out more on using LLM-as-a-Judge evals [here](/docs/scores/model-based-evals).
   </Tab>
   <Tab value="Non-model-based Approaches">
     In some cases, simpler rule-based checks (like regex patterns) can be surprisingly effective. They're cheap and transparent but won't scale to more nuanced tasks.
@@ -193,13 +193,13 @@ What makes LLM evaluation both fascinating and challenging is how different each
 
 <Tabs items={["Retrieval-Augmented Generation (RAG)", "Agent-Based LLM Applications", "Voice Agent Evaluation"]}>
   <Tab value="Retrieval-Augmented Generation (RAG)">
-    Because you're evaluating both the retrieval step and the generative step, it's helpful to measure them separately. For example, you might track relevance and precision for document retrieval, then apply generative metrics (like RAGAS) to the summarized output. (Guide on using RAGAS [here](https://langfuse.com/guides/cookbook/evaluation_of_rag_with_ragas))
+    Because you're evaluating both the retrieval step and the generative step, it's helpful to measure them separately. For example, you might track relevance and precision for document retrieval, then apply generative metrics (like RAGAS) to the summarized output. (Guide on using RAGAS [here](/guides/cookbook/evaluation_of_rag_with_ragas))
   </Tab>
   <Tab value="Agent-Based LLM Applications">
     Here, the model isn't just producing text—it's also making decisions or taking actions based on user inputs. Evaluating such agents usually involves simulating interactive conversations and carefully checking each intermediate decision. Human-in-the-loop feedback can be especially helpful to confirm the agent's logic or to flag any odd behavior.
   </Tab>
   <Tab value="Voice Agent Evaluation">
-    Voice-based applications bring unique challenges, as they combine speech recognition, synthesis, and interactive dialogue. Evaluating these agents often requires assessing both the conversational dynamics and the audio processing performance. For a comprehensive overview of best practices and challenges in this area, see our dedicated guide: [Evaluating and Monitoring Voice AI Agents](https://langfuse.com/blog/2025-01-22-evaluating-voice-ai-agents).
+    Voice-based applications bring unique challenges, as they combine speech recognition, synthesis, and interactive dialogue. Evaluating these agents often requires assessing both the conversational dynamics and the audio processing performance. For a comprehensive overview of best practices and challenges in this area, see our dedicated guide: [Evaluating and Monitoring Voice AI Agents](/blog/2025-01-22-evaluating-voice-ai-agents).
   </Tab>
 </Tabs>
 
@@ -236,23 +236,23 @@ There are several popular security libraries that can be used to mitigate securi
 
 **Asynchronous monitoring and evaluation of security measures**
 
-Use Langfuse [tracing](https://langfuse.com/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
+Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
 
 1. Investigate security issues by manually inspect traces.  
 2. Monitor security scores over time in the Langfuse Dashboard.  
-3. Evaluate effectiveness of security measures. Integrating Langfuse [scores](https://langfuse.com/docs/scores) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:  
-   * [Annotations (in UI)](https://langfuse.com/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.  
-   * [Automated evaluations](https://langfuse.com/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.  
+3. Evaluate effectiveness of security measures. Integrating Langfuse [scores](/docs/scores) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:  
+   * [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.  
+   * [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup.  
 4. Track latency to balance tradeoffs. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help dissect the latencies of these checks within a trace to understand whether the checks are worth the wait.
 
 **Example Workflow: Anonymizing Personally Identifiable Information (PII)**
 
-We redact and un-redact sensitive information using a security library before and after it is fed into the model. We wrap the whole process with the Langfuse [observe decorator](https://langfuse.com/docs/sdk/python/decorators) to trace and monitor the security process. In the following example below we use the open source library [LLM Guard](https://llm-guard.com/), an open-source security tool. All examples easily translate to other libraries.
+We redact and un-redact sensitive information using a security library before and after it is fed into the model. We wrap the whole process with the Langfuse [observe decorator](/docs/sdk/python/decorators) to trace and monitor the security process. In the following example below we use the open source library [LLM Guard](https://llm-guard.com/), an open-source security tool. All examples easily translate to other libraries.
 
 Exposing Personally Identifiable Information (PII) to models can pose security and privacy risks, such as violating contractual obligations or regulatory compliance requirements, or mitigating the risks of data leakage or a data breach.
 
 <Callout type="info" emoji="🪢">
-Run the [end-to-end cookbook](https://langfuse.com/docs/security/example-python) or check out our [documentation](https://langfuse.com/docs/security/overview).
+Run the [end-to-end cookbook](/docs/security/example-python) or check out our [documentation](/docs/security/overview).
 </Callout>
 
 <Callout type="info" emoji="📚">
@@ -268,7 +268,7 @@ Further reading:
 
 ## Get Started with Evaluation
 
-[Evaluations](https://langfuse.com/docs/scores) are the most important part of the LLM Application development workflow. Langfuse adapts to your needs and supports:
+[Evaluations](/docs/scores) are the most important part of the LLM Application development workflow. Langfuse adapts to your needs and supports:
 
 - **LLM-as-a-judge:** Fully managed evaluators run on production or development traces within Langfuse
 - **User feedback:** Collect feedback from your users and add it to traces in Langfuse
