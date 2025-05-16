@@ -7,7 +7,6 @@ export default {
   },
   index: "Overview",
   configuration: "Configuration",
-  "license-key": "License Key",
   troubleshooting: "Troubleshooting",
   scaling: "Sizing & Scaling",
   "-- Deployment": {
