@@ -135,6 +135,7 @@ const nonPermanentRedirects = [
   ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
   ["/sticker", "/stickers"],
   ["/ask-ai", "/docs/ask-ai"],
+  ["/library", "/academy"],
 
   // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
