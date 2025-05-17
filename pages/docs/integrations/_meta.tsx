@@ -4,6 +4,7 @@ export default {
   openaiagentssdk: "OpenAI Agents SDK",
   langchain: "Langchain",
   "llama-index": "LlamaIndex",
+  "strands-agents": "AWS Strands Agents",
   haystack: "Haystack",
   litellm: "LiteLLM",
   "vercel-ai-sdk": "Vercel AI SDK",
