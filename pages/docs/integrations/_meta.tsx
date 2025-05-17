@@ -7,6 +7,7 @@ export default {
   haystack: "Haystack",
   litellm: "LiteLLM",
   "vercel-ai-sdk": "Vercel AI SDK",
+  "strands-agents": "AWS Strands Agents",
   autogen: "AutoGen",
   "semantic-kernel": "Semantic Kernel",
   "pydantic-ai": "Pydantic AI",
