@@ -60,7 +60,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 5,
-    chapter: "Module 3",
+    chapter: "Module 2",
     text: "Within a trace, which observation type extends span semantics with model-specific attributes such as prompt, completion, and token usage?",
     options: [
       { id: "A", text: "Event" },
@@ -72,7 +72,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 6,
-    chapter: "Module 3",
+    chapter: "Module 2",
     text: "Recording the p99 latency at the LLM layer primarily helps answer which of the following questions?",
     options: [
       { id: "A", text: "Which sessions hit the cost guard-rail?" },
@@ -84,7 +84,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 7,
-    chapter: "Module 4",
+    chapter: "Module 3",
     text: "In the continuous evaluation loop, what is the step that follows the creation or curation of test datasets?",
     options: [
       { id: "A", text: "Deploy changes directly to production" },
@@ -96,7 +96,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 8,
-    chapter: "Module 4",
+    chapter: "Module 3",
     text: "Which of the following is an example of implicit user feedback that can be used for online evaluation?",
     options: [
       { id: "A", text: "Thumbs-up / thumbs-down rating" },
@@ -108,7 +108,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 9,
-    chapter: "Module 5",
+    chapter: "Module 4",
     text: "Which prompting strategy intentionally includes 1-5 example interactions to guide the model's style or structure?",
     options: [
       { id: "A", text: "Zero-shot" },
@@ -120,7 +120,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 10,
-    chapter: "Module 5",
+    chapter: "Module 4",
     text: "What is the PRIMARY reason for versioning prompts in production environments?",
     options: [
       { id: "A", text: "To reduce token usage through compression" },
@@ -132,7 +132,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 11,
-    chapter: "Module 4",
+    chapter: "Module 3",
     text: "Why must automated evaluators powered by smaller LLMs be periodically calibrated against human-annotated samples?",
     options: [
       { id: "A", text: "They are deterministic and never change" },
@@ -144,7 +144,7 @@ const quizQuestions: Question[] = [
   },
   {
     id: 12,
-    chapter: "Module 3",
+    chapter: "Module 2",
     text: "In a multi-step LLM pipeline, which layer is MOST likely to dominate end-to-end latency if not instrumented properly?",
     options: [
       { id: "A", text: "LLM token generation" },
