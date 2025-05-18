@@ -34,6 +34,23 @@ jobs:
       - name: Run H1 heading check
         run: node scripts/check-h1-headings.js
 
+  check_title_case:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run title case check
+        run: python scripts/check_titlecase.py
+
   build-and-check-links:
     needs:
       - pre-job
