@@ -24,11 +24,13 @@ Langfuse is an open-source LLM engineering platform. It includes features such a
 - **Correlate Feedback with Behavior**: See how user feedback captured in Langfuse correlates with user behavior in PostHog.
 - **Monitor LLM Performance**: Track and analyze metrics such as model cost, latency, and user feedback to optimize LLM performance.
 
+
 ## How to build a Simple RAG app with LlamaIndex and Mistral
 
 In this example, we create a chat app that answers questions about how to care for hedgehogs. LlamaIndex vectorizes a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) using the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). Then, all model generations are traced using Langfuse's [LLamaIndex integration](https://langfuse.com/docs/integrations/llama-index/get-started).
 
 Lastly, the [PostHog integration](https://langfuse.com/docs/analytics/integrations/posthog) enables you to view detailed analytics about your hedgehog app directly in PostHog.
+
 
 ### Step 1: Set up LlamaIndex and Mistral
 
@@ -36,9 +38,11 @@ First, we set our Mistral API key as an environment variable. If you haven't alr
 
 Then, we use LlamaIndex to initialize both a Mistral language model and an embedding model. We then set these models in the LlamaIndex `Settings` object:
 
+
 ```python
 %pip install llama-index llama-index-llms-mistralai llama-index-embeddings-mistralai nest_asyncio --upgrade
 ```
+
 
 ```python
 # Set the Mistral API key
@@ -67,9 +71,11 @@ Settings.embed_model = embed_model
 
 Next, we initialize the Langfuse client. [Sign up](https://cloud.langfuse.com/auth/sign-up) for Langfuse if you haven't already. Copy your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from your project settings and add them to your environment.
 
+
 ```python
 %pip install langfuse
 ```
+
 
 ```python
 import os
@@ -85,6 +91,7 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
+
 ```python
 from langfuse import Langfuse
 
@@ -94,6 +101,7 @@ langfuse = Langfuse()
 Lastly, we register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager` at the root of the app.
 
 Find out more about the Langfuse's LlamaIndex integration [here](https://langfuse.com/docs/integrations/llama-index/get-started).
+
 
 ```python
 from llama_index.core import Settings
@@ -108,6 +116,7 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
 We download the file we want to use for RAG. In this example, we use a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) pdf file to enable the language model to answer questions about caring for hedgehogs 🦔.
 
+
 ```python
 !wget 'https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf' -O './hedgehog.pdf'
 ```
@@ -118,12 +127,15 @@ We download the file we want to use for RAG. In this example, we use a [hedgehog
     HTTP request sent, awaiting response... 200 OK
     Length: 1160174 (1.1M) [application/pdf]
     Saving to: ‘./hedgehog.pdf’
-
-    ./hedgehog.pdf      100%[===================>]   1.11M  2.03MB/s    in 0.5s
-
+    
+    ./hedgehog.pdf      100%[===================>]   1.11M  2.03MB/s    in 0.5s    
+    
     2024-09-20 13:16:40 (2.03 MB/s) - ‘./hedgehog.pdf’ saved [1160174/1160174]
+    
+
 
 Next, we load the pdf using the LlamaIndex [`SimpleDirectoryReader`](https://docs.llamaindex.ai/en/stable/module_guides/loading/simpledirectoryreader/).
+
 
 ```python
 from llama_index.core import SimpleDirectoryReader
@@ -135,6 +147,7 @@ hedgehog_docs = SimpleDirectoryReader(input_files=["./hedgehog.pdf"]).load_data(
 
 Next, we create vector embeddings of the hedgehog document using [`VectorStoreIndex`](https://docs.llamaindex.ai/en/stable/module_guides/indexing/vector_store_index/) and then convert it into a [queryable engine](https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/) to retrieve information based on queries.
 
+
 ```python
 from llama_index.core import VectorStoreIndex
 
@@ -144,12 +157,14 @@ hedgehog_query_engine = hedgehog_index.as_query_engine(similarity_top_k=5)
 
 Finally, to put everything together, we query the engine and print a response:
 
+
 ```python
 response = hedgehog_query_engine.query("Which hedgehogs require help?")
 print(response)
 ```
 
     Hedgehogs that require help are those that are sick, injured, and helpless, such as orphaned hoglets. These hedgehogs in need may be temporarily taken into human care and must be released into the wild as soon as they can survive there independently.
+
 
 All steps of the LLM chain are now tracked in Langfuse.
 
@@ -164,6 +179,7 @@ To monitor the quality of your hedgehog chat application, you can use [Langfuse 
 Scores are used to evaluate single observations or entire traces. You can create them via the annotation workflow in the Langfuse UI, run model-based evaluation or ingest via the SDK as we do it in this example.
 
 To get the context of the current observation, we use the [`observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) and apply it to the hedgehog_helper() function.
+
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -199,6 +215,8 @@ langfuse.score(
 
     <langfuse.client.StatefulClient at 0x7c7cd656e2f0>
 
+
+
 ### Step 6: See your data in PostHog
 
 Finally, we connect PostHog to our Langfuse account. Below is a summary of the steps to take (or see the [docs](https://posthog.com/docs/ai-engineering/langfuse-posthog) for full details):
@@ -209,7 +227,7 @@ Finally, we connect PostHog to our Langfuse account. Below is a summary of the s
 4. Click **Configure** and paste in your PostHog host and project API key (you can find these in your [PostHog project settings](https://us.posthog.com/settings/project)).
 5. Click **Enabled** and then **Save**.
 
-Langfuse will then begin exporting your data to PostHog once a day.
+ Langfuse will then begin exporting your data to PostHog once a day.
 
 **Using the Langfuse dashboard template:**
 
@@ -228,7 +246,6 @@ To create your own dashboard from a template:
 ![Posthog Dashboard with latency and cost of AI application](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-2.png)
 
 ## Feedback
-
 ---
 
 If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your idea with the community on [Discord](https://discord.langfuse.com/).
