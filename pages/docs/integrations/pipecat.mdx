@@ -1,0 +1,47 @@
+---
+title: Pipecat Integration
+description: Trace real-time voice and multimodal conversations built with Pipecat using Langfuse.
+---
+
+# Observability for Pipecat with Langfuse
+
+Pipecat is an open-source Python framework for building real-time voice and multimodal conversational AI agents. Developed by Daily, it provides developers with tools to create interactive voice applications with features like noise cancellation through Krisp integration. Pipecat enables fully programmable AI voice agents and supports multimodal interactions, positioning itself as a flexible solution for developers looking to build conversational AI systems.
+
+<CloudflareVideo
+  videoId="TODO_VIDEO_ID"
+  aspectRatio={16 / 9}
+  title="Pipecat demo"
+/>
+
+This page shows how to connect Pipecat with Langfuse using OpenTelemetry. Follow the steps below or check the [end-to-end example](https://github.com/pipecat-ai/pipecat/tree/main/examples/open-telemetry-tracing-langfuse) in the Pipecat repository.
+
+<Steps>
+
+### Obtain Langfuse API keys
+
+Create a project in [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting/overview) Langfuse and copy your API keys.
+
+### Configure Pipecat for tracing
+
+Clone the [Pipecat repository](https://github.com/pipecat-ai/pipecat) and navigate to the `examples/open-telemetry-tracing-langfuse` folder. Copy the `env.example` file to `.env` and fill in your Langfuse credentials and service API keys.
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run the demo
+
+Start the example bot to generate traces:
+
+```bash
+python bot.py
+```
+
+You can now interact with the bot and see your traces in Langfuse.
+
+</Steps>
+
+For more integrations, see the [integration overview](/docs/integrations/overview).
+

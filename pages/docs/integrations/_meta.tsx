@@ -37,6 +37,7 @@ export default {
   "quarkus-langchain4j": "Quarkus LangChain4j",
   mastra: "Mastra",
   voltagent: "VoltAgent",
+  pipecat: "Pipecat",
   ragflow: "Ragflow",
   other: "More Ways to Integrate",
 };
