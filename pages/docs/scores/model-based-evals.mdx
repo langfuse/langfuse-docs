@@ -11,7 +11,6 @@ description: Langfuse (open source) helps run model-based evaluations (llm-as-a-
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "pro",
   }}
 />
 
@@ -106,7 +105,9 @@ Currently, LLM-as-a-judge templates only support `numeric` scores. Support for `
 
 </Callout>
 
-<Frame border>![Langfuse](/images/docs/llm-as-a-judge/evaluator-template.png)</Frame>
+<Frame border>
+  ![Langfuse](/images/docs/llm-as-a-judge/evaluator-template.png)
+</Frame>
 
 ### Set up an evaluator
 
@@ -135,9 +136,7 @@ Here we need to configure the following aspects:
 
 ✨ Done! You have created an evaluator which will now automatically be executed on all data that matches the selected trigger.
 
-<Frame border>
-  ![Langfuse](/images/docs/llm-as-a-judge/eval-score.png)
-</Frame>
+<Frame border>![Langfuse](/images/docs/llm-as-a-judge/eval-score.png)</Frame>
 
 </Callout>
 
@@ -145,13 +144,11 @@ Here we need to configure the following aspects:
 
 Each evaluator has its own log page where you can view the progress and logs to potentially debug any issues.
 
-<Frame border>
-  ![Langfuse](/images/docs/llm-as-a-judge/evals-log.png)
-</Frame>
+<Frame border>![Langfuse](/images/docs/llm-as-a-judge/evals-log.png)</Frame>
 
 ## Troubleshooting
 
-### LLM proxies 
+### LLM proxies
 
 You can use an LLM proxy to power LLM-as-a-judge in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
 
