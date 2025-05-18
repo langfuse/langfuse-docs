@@ -170,7 +170,7 @@ export default {
       timestamp: false,
     },
   },
-  "open-source": {
+  "open source": {
     type: "page",
     title: "Open Source",
     display: "hidden",

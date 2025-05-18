@@ -18,7 +18,7 @@ import Link from "next/link";
   image="/images/blog/2024-12-langfuse-v3-infrastructure-evolution/og.png"
 />
 
-Langfuse, the open-source LLM observability platform, emerged from the Y Combinator Winter 2023 batch. After building many LLM applications ourselves and realizing that it is hard to go from demo to production, we worked closely with a few of our batchmates to quickly develop a v0 LLM observability platform.
+Langfuse, the open source LLM observability platform, emerged from the Y Combinator Winter 2023 batch. After building many LLM applications ourselves and realizing that it is hard to go from demo to production, we worked closely with a few of our batchmates to quickly develop a v0 LLM observability platform.
 
 Initially, we focused on getting a few core features right: SDKs were asynchronous, Langfuse was based on tracing, and all components were open source and easily self-hostable. The first version was written on NextJs, Vercel, and Postgres. Little did we know we would rapidly evolve from an experiment to processing tens of thousands of events per minute.
 
@@ -69,12 +69,12 @@ Our initial database choice of Postgres served us well in the early days, but as
 
 > Goal: Langfuse must be easy to self-host, but also scalable with little operational effort.
 
-Building Langfuse as an open-source project was a deliberate choice. Our vision was simple: anyone should be able to explore Langfuse with a simple `docker-compose up`, but at the same time Langfuse must be able to serve enterprise-scale deployments with hundreds of users and thousands of LLM interactions per minute. This approach reflects our own preferences as developers - we value solutions that are easy to evaluate and deploy.
+Building Langfuse as an open source project was a deliberate choice. Our vision was simple: anyone should be able to explore Langfuse with a simple `docker-compose up`, but at the same time Langfuse must be able to serve enterprise-scale deployments with hundreds of users and thousands of LLM interactions per minute. This approach reflects our own preferences as developers - we value solutions that are easy to evaluate and deploy.
 
-However, building a production-grade open-source observability platform comes with distinct challenges:
+However, building a production-grade open source observability platform comes with distinct challenges:
 
 - Universal Deployability: Our infrastructure needs to work seamlessly across diverse environments, from a developer's laptop to deployments on different hyperscalers
-- Open-Source Dependencies: We're committed to using only open-source components to ensure unrestricted self-hosting capabilities
+- Open Source Dependencies: We're committed to using only open source components to ensure unrestricted self-hosting capabilities
 - Zero-Touch Operations: Enterprise users require automated maintenance and upgrade paths - manual intervention is too error prone and not scalable.
 
 This balance between simplicity and enterprise-readiness has shaped our architectural decisions, pushing us to create a solution that's both accessible and scalable.

@@ -10,7 +10,7 @@ Langfuse offers the feature to score your traces and spans. They can be used in 
 2. Segment all execution traces by scores to e.g. find all traces with a low-quality score
 3. Analytics: Detailed score reporting with drill downs into use cases and user segments
 
-Ragas is an open-source tool that can help you run [Model-Based Evaluation](https://langfuse.com/docs/scores/model-based-evals) on your traces/spans, especially for RAG pipelines. Ragas can perform reference-free evaluations of various aspects of your RAG pipeline. Because it is reference-free you don't need ground-truths when running the evaluations and can run it on production traces that you've collected with Langfuse.
+Ragas is an open source tool that can help you run [Model-Based Evaluation](https://langfuse.com/docs/scores/model-based-evals) on your traces/spans, especially for RAG pipelines. Ragas can perform reference-free evaluations of various aspects of your RAG pipeline. Because it is reference-free you don't need ground-truths when running the evaluations and can run it on production traces that you've collected with Langfuse.
 
 ## The Environment
 

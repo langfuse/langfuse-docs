@@ -1,5 +1,5 @@
 ---
-description: Open-source observability for Haystack, a popular library to build RAG applications.
+description: Open source observability for Haystack, a popular library to build RAG applications.
 category: Integrations
 ---
 
@@ -9,7 +9,7 @@ We're excited to highlight a Langfuse integration with Haystack ([docs](https://
 
 ## What is Haystack?
 
-[Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
+[Haystack](https://haystack.deepset.ai/) is the open source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
 
 Big thanks to the team at deepset for developing the integration. You can read their write up [here](https://haystack.deepset.ai/blog/langfuse-integration).
 

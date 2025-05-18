@@ -16,11 +16,11 @@ Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implement
 
 ### What is Gradio?
 
-[Gradio](https://github.com/gradio-app/gradio) is an open-source Python library that enables quick creation of web interfaces for machine learning models, APIs, and Python functions. It allows developers to wrap any Python function with an interactive UI that can be easily shared or embedded, making it ideal for demos, prototypes, and ML model deployment. See [docs](https://www.gradio.app/docs) for more details.
+[Gradio](https://github.com/gradio-app/gradio) is an open source Python library that enables quick creation of web interfaces for machine learning models, APIs, and Python functions. It allows developers to wrap any Python function with an interactive UI that can be easily shared or embedded, making it ideal for demos, prototypes, and ML model deployment. See [docs](https://www.gradio.app/docs) for more details.
 
 ### What is Langfuse?
 
-[Langfuse](https://github.com/langfuse/langfuse) is an open-source LLM engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
+[Langfuse](https://github.com/langfuse/langfuse) is an open source LLM engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
 
 ### Walkthrough
 

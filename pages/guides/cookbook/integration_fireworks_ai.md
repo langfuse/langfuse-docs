@@ -1,6 +1,6 @@
 ---
 title: "Integrate Fireworks AI with Langfuse"
-description: "Guide on using Fireworks AI's open-source and proprietary AI models with Langfuse via the OpenAI SDK."
+description: "Guide on using Fireworks AI's open source and proprietary AI models with Langfuse via the OpenAI SDK."
 category: Integrations
 ---
 
@@ -8,7 +8,7 @@ category: Integrations
 
 This guide shows you how to integrate Fireworks AI with Langfuse. Fireworks AI's API endpoints are fully [compatible](https://docs.fireworks.ai/tools-sdks/openai-compatibility) with the OpenAI SDK, allowing you to trace and monitor your AI applications seamlessly.
 
-> **What is Fireworks AI?** [Fireworks AI](https://fireworks.ai/) is a platform that provides API access to state-of-the-art open-source and proprietary AI models with OpenAI-compatible endpoints.
+> **What is Fireworks AI?** [Fireworks AI](https://fireworks.ai/) is a platform that provides API access to state-of-the-art open source and proprietary AI models with OpenAI-compatible endpoints.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
 

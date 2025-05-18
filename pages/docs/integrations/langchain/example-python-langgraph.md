@@ -9,7 +9,7 @@ category: Integrations
 
 ## What is LangGraph?
 
-[LangGraph](https://langchain-ai.github.io/langgraph/) is an open-source framework by the LangChain team for building complex, stateful, multi-agent applications using large language models (LLMs). LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
+[LangGraph](https://langchain-ai.github.io/langgraph/) is an open source framework by the LangChain team for building complex, stateful, multi-agent applications using large language models (LLMs). LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
 
 <br>
 

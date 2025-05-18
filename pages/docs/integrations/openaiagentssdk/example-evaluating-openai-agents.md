@@ -391,7 +391,7 @@ display(widgets.HBox([thumbs_up, thumbs_down]))
     13:54:41.574 OpenAI Agents trace: Agent workflow
     13:54:41.575   Agent run: 'WebSearchAgent'
     13:54:41.577     Responses API with 'gpt-4o'
-    Langfuse is an open-source engineering platform designed to enhance the development, monitoring, and optimization of Large Language Model (LLM) applications. It offers a suite of tools that provide observability, prompt management, evaluations, and metrics, facilitating the debugging and improvement of LLM-based solutions. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
+    Langfuse is an open source engineering platform designed to enhance the development, monitoring, and optimization of Large Language Model (LLM) applications. It offers a suite of tools that provide observability, prompt management, evaluations, and metrics, facilitating the debugging and improvement of LLM-based solutions. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
     
     **Key Features of Langfuse:**
     
@@ -405,9 +405,9 @@ display(widgets.HBox([thumbs_up, thumbs_down]))
     
     - **Integration Capabilities:** Langfuse integrates seamlessly with various tools and frameworks, including LlamaIndex, LangChain, OpenAI SDK, LiteLLM, and more, enhancing its functionality and allowing for the development of complex applications. ([toolerific.ai](https://toolerific.ai/ai-tools/opensource/langfuse-langfuse?utm_source=openai))
     
-    - **Open Source and Self-Hosting:** Being open-source, Langfuse allows developers to customize and extend the platform according to their specific needs. It can be self-hosted, providing full control over infrastructure and data. ([vafion.com](https://www.vafion.com/blog/unlocking-power-language-models-langfuse/?utm_source=openai))
+    - **Open Source and Self-Hosting:** Being open source, Langfuse allows developers to customize and extend the platform according to their specific needs. It can be self-hosted, providing full control over infrastructure and data. ([vafion.com](https://www.vafion.com/blog/unlocking-power-language-models-langfuse/?utm_source=openai))
     
-    Langfuse is particularly valuable for developers and researchers working with LLMs, offering a comprehensive set of tools to improve the performance and reliability of LLM applications. Its flexibility, integration capabilities, and open-source nature make it a robust choice for those seeking to enhance their LLM projects. 
+    Langfuse is particularly valuable for developers and researchers working with LLMs, offering a comprehensive set of tools to improve the performance and reliability of LLM applications. Its flexibility, integration capabilities, and open source nature make it a robust choice for those seeking to enhance their LLM projects. 
     How did you like the agent response?
 
 

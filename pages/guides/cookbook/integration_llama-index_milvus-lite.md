@@ -7,7 +7,7 @@ category: Integrations
 
 This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/docs/integrations/llama-index/get-started). It uses Milvus Lite to store the documents and Query.
 
-[Milvus Lite](https://github.com/milvus-io/milvus-lite/) is the lightweight version of Milvus, an open-source vector database that powers AI applications with vector embeddings and similarity search.
+[Milvus Lite](https://github.com/milvus-io/milvus-lite/) is the lightweight version of Milvus, an open source vector database that powers AI applications with vector embeddings and similarity search.
 
 ## Setup
 

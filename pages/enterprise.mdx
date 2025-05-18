@@ -6,7 +6,7 @@ description: FAQ and deployment options for Langfuse in an enterprise environmen
 
 Langfuse addresses key challenges when deploying LLM-based applications within an enterprise. As an [open source](/open-source) project, Langfuse is the ideal platform **to address data security and privacy concerns by self-hosting.** This document outlines common queries related to using Langfuse in an enterprise setting.
 
-Langfuse is licensed as an open-core project. It's core product (tracing, observability, evals, prompt management and API/SDK endpoints) is MIT-licensed and freely available (also without limitation for commercial use). Some Langfuse features on the periphery of the core product are not available in the open-source version and cannot be used out of the box. As of today, these are either a) quality of life features (such as LLM-as-a-judge service, prompt playground) or b) security & compliance features (e.g. SSO enforcement, data retention)
+Langfuse is licensed as an open-core project. It's core product (tracing, observability, evals, prompt management and API/SDK endpoints) is MIT-licensed and freely available (also without limitation for commercial use). Some Langfuse features on the periphery of the core product are not available in the open source version and cannot be used out of the box. As of today, these are either a) quality of life features (such as LLM-as-a-judge service, prompt playground) or b) security & compliance features (e.g. SSO enforcement, data retention)
 
 Please refer to our [feature overview](/pricing-self-host) and the Enterprise Edition FAQ [here](/open-source#enterprise-edition-ee-faq). Please reach out to enterprise@langfuse.com to discuss an enterprise license (self-hosted or cloud) for your team.
 
@@ -96,11 +96,11 @@ We are happy to introduce prospects to our contact at Shakudo and GAO for more i
 1. Managed Cloud (cloud.langfuse.com), see [Pricing](/pricing) and [Security](/security) page for details.
 2. [Self-hosted](/self-hosting) on your own infrastructure. Contact us if you are interested in additional support.
 
-### What is the difference between Langfuse Cloud and the open-source version?
+### What is the difference between Langfuse Cloud and the open source version?
 
 The Langfuse team provides Langfuse Cloud as a managed solution to simplify the initial setup of Langfuse and to minimize the operational overhead of maintaining high availability in production. You can chose to self-host Langfuse on your own infrastructure.
 
-Some features are not available in the open-source version. Please refer to the overview [here](/pricing-self-host).
+Some features are not available in the open source version. Please refer to the overview [here](/pricing-self-host).
 
 ### How does Authentication and RBAC work in Langfuse?
 
@@ -122,14 +122,14 @@ If you require security and compliance features to run a POC, please reach out t
 
 Langfuse aims to address the challenges of debugging, monitoring, and continuously improving LLM-based applications. It focuses on observability, evaluation, and prompt management.
 
-Langfuse is often deployed alongside a central LLM Gateway that provides schema translation, rate limiting, and PII redaction. The LLM Gateway can be an internal service or an open-source project like LiteLLM. If you use LiteLLM, you can leverage the native integration ([docs](/docs/integrations/litellm/tracing)).
+Langfuse is often deployed alongside a central LLM Gateway that provides schema translation, rate limiting, and PII redaction. The LLM Gateway can be an internal service or an open source project like LiteLLM. If you use LiteLLM, you can leverage the native integration ([docs](/docs/integrations/litellm/tracing)).
 
 ```mermaid
 graph LR
   LLM["<strong>LLM</strong><br/>API or service"]
   App["<strong>Application</strong>"]
   LF["<strong>Langfuse</strong><br/>Tracing/Observability<br/>Evaluation<br/>Prompt Management<br/>Cost Tracking<br/>Security Monitoring<br/>Experiments<br/>... (see docs)"]
-  Gateway["<strong>LLM Gateway (optional)</strong><br/>Internal or Open-source (e.g. LiteLLM)<br/>Schema translation<br/>Rate limiting<br/>PII redaction"]
+  Gateway["<strong>LLM Gateway (optional)</strong><br/>Internal or Open source (e.g. LiteLLM)<br/>Schema translation<br/>Rate limiting<br/>PII redaction"]
 
   App -->|async tracing|LF
   LF -->|prompt management| App

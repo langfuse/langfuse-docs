@@ -8,7 +8,7 @@ category: Integrations
 
 This guide shows you how to integrate Together.ai with Langfuse. Together's API endpoints for chat, language and code, images, and embeddings are fully compatible with OpenAI's API. This allows us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
 
-> **What is Together.ai?** [Together.ai](https://docs.together.ai/docs/openai-api-compatibility) empowers developers and researchers to train, fine-tune, and deploy generative AI models, offering access to over 100 open-source models on both serverless and dedicated instances. The platform emphasizes decentralized cloud services, enabling organizations of all sizes to customize AI solutions using their own data.
+> **What is Together.ai?** [Together.ai](https://docs.together.ai/docs/openai-api-compatibility) empowers developers and researchers to train, fine-tune, and deploy generative AI models, offering access to over 100 open source models on both serverless and dedicated instances. The platform emphasizes decentralized cloud services, enabling organizations of all sizes to customize AI solutions using their own data.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
 

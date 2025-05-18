@@ -14,7 +14,7 @@ LlamaIndex [(GitHub)](https://github.com/run-llama/llama_index) is a data framew
 
 ## What is Langfuse?
 
-Langfuse is an open-source LLM engineering platform. It includes features such as [traces](https://langfuse.com/docs/tracing), [evals](https://langfuse.com/docs/scores/overview), and [prompt management](https://langfuse.com/docs/prompts/get-started) to help you debug and improve your LLM app.
+Langfuse is an open source LLM engineering platform. It includes features such as [traces](https://langfuse.com/docs/tracing), [evals](https://langfuse.com/docs/scores/overview), and [prompt management](https://langfuse.com/docs/prompts/get-started) to help you debug and improve your LLM app.
 
 ## What is PostHog?
 

@@ -1,6 +1,6 @@
 ---
 title: "The Agent Deep Dive: David Zhang’s Open Deep Research"
-description: "Exploring Zhang’s open-source Deep Research. We look at the prompting, search executions, and report creation, and compare it to both OpenAI’s and Perplexity’s Deep Research solutions."
+description: "Exploring Zhang’s open source Deep Research. We look at the prompting, search executions, and report creation, and compare it to both OpenAI’s and Perplexity’s Deep Research solutions."
 ogImage: /images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/the-agent-deep-dive.png
 tag: agents
 date: 2025/02/20
@@ -11,12 +11,12 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="The Agent Deep Dive: David Zhang’s Open Deep Research"
-  description="This blog post explores David Zhang’s open-source framework for iterative AI research. We look at the system’s query process, parallel search executions, and markdown report creation, and compare it to both OpenAI’s and Perplexity’s research solutions."
+  description="This blog post explores David Zhang’s open source framework for iterative AI research. We look at the system’s query process, parallel search executions, and markdown report creation, and compare it to both OpenAI’s and Perplexity’s research solutions."
   authors={["jannikmaierhoefer"]}
   image="/images/blog/2025-02-20-the-agent-deep-dive-open-deep-research/the-agent-deep-dive.png"
 />
 
-AI-driven research is evolving fast. While Google pioneered Deep Research, OpenAI popularized it and Perplexity and Grok followed, open-source alternatives are just as exciting and help to understand how one of the first forms of autonomous _useful_ agents works. In this post, I take a closer look at the inner workings of open [deep-research](https://github.com/dzhng/deep-research) by David Zhang ([dzhng](https://github.com/dzhng))—a lightweight, transparent framework for iterative AI research.
+AI-driven research is evolving fast. While Google pioneered Deep Research, OpenAI popularized it and Perplexity and Grok followed, open source alternatives are just as exciting and help to understand how one of the first forms of autonomous _useful_ agents works. In this post, I take a closer look at the inner workings of open [deep-research](https://github.com/dzhng/deep-research) by David Zhang ([dzhng](https://github.com/dzhng))—a lightweight, transparent framework for iterative AI research.
 
 At under 500 lines of code, `deep-research` packs a surprising punch. It runs recursive research loops, refining queries based on the information it finds—no hidden logic, no unnecessary dependencies, just a clean, modular setup that’s easy to hack or extend.
 
@@ -26,7 +26,7 @@ I decided to put it to the test. With [Langfuse](https://github.com/langfuse/lan
 
 ## Why I Like This Agent
 
-- **Simple** – Minimalist design, easy to modify, and fully open-source.
+- **Simple** – Minimalist design, easy to modify, and fully open source.
 - **Iterative Research** – Runs deep research loops, refining its queries at each step.
 - **Control Depth & Breadth** – Users define how far (depth) and wide (breadth) the research should go.
 - **Parallel Execution** – Fires off multiple queries at once, speeding up research.
@@ -131,7 +131,7 @@ Thanks to the instrumentation we added above, all these steps are tracked in Lan
 
 ## Comparison With Other AI Research Tools
 
-Although `deep-research` is a small, open-source project, I wanted to see how it fares alongside two well-known AI tools: OpenAI’s ChatGPT (with advanced research features or higher usage tiers) and Perplexity Pro.
+Although `deep-research` is a small, open source project, I wanted to see how it fares alongside two well-known AI tools: OpenAI’s ChatGPT (with advanced research features or higher usage tiers) and Perplexity Pro.
 
 To keep it fair, I ran the **same** question on all three:
 
@@ -159,7 +159,7 @@ To keep it fair, I ran the **same** question on all three:
 
 ## Takeaways
 
-- `deep-research` is impressively agile for a lean, open-source tool.
+- `deep-research` is impressively agile for a lean, open source tool.
 - Perplexity’s product can pull in a larger number of sources quickly, leveraging its specialization on web search.
 - OpenAI’s Deep Research produced a lengthy report, utilized more sources, and conducted a thorough investigation based on follow-up searches. Overall, the reasoning capabilities (o3, post-training for this use case) are significantly stronger than those of the other contestants.
 

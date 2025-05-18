@@ -1677,7 +1677,7 @@ const discounts = [
     description: "Up to 100% off, limits apply",
   },
   {
-    name: "Open-source projects",
+    name: "Open source projects",
     description: "USD 300 in credits, first year",
   },
 ];
@@ -1750,7 +1750,7 @@ const faqs = [
   {
     question: "Do you offer discounts?",
     answer:
-      "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
+      "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
     question: "How do I activate my self-hosted Pro or Enterprise plan?",

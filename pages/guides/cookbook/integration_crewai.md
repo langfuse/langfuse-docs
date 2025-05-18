@@ -10,7 +10,7 @@ This notebook demonstrates how to integrate **Langfuse** with **CrewAI** using O
 
 > **What is CrewAI?** [CrewAI](https://github.com/crewAIInc/crewAI) is a framework for orchestrating autonomous AI agents. CrewAI enables you to create AI teams where each agent has specific roles, tools, and goals, working together to accomplish complex tasks. Each member (agent) brings unique skills and expertise, collaborating seamlessly to achieve your objectives.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It provides tracing and monitoring capabilities for LLM applications, helping developers debug, analyze, and optimize their AI systems. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and APIs/SDKs.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform. It provides tracing and monitoring capabilities for LLM applications, helping developers debug, analyze, and optimize their AI systems. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and APIs/SDKs.
 
 ## Get Started
 

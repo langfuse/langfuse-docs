@@ -12,11 +12,11 @@ In this cookbook, we will show you how to trace local language models with Ollam
 
 ## What is Ollama?
 
-Ollama ([GitHub](https://github.com/ollama/ollama)) is an open-source platform that allows you to run large language models (LLMs) locally on your machine, supporting a variety of models including [Llama 3.1](https://ollama.com/library/llama3.1) and [Mistral 7B](https://ollama.com/library/mistral). It optimizes setup and configuration by bundling model weights, configuration, and data into a single package defined by a Modelfile.
+Ollama ([GitHub](https://github.com/ollama/ollama)) is an open source platform that allows you to run large language models (LLMs) locally on your machine, supporting a variety of models including [Llama 3.1](https://ollama.com/library/llama3.1) and [Mistral 7B](https://ollama.com/library/mistral). It optimizes setup and configuration by bundling model weights, configuration, and data into a single package defined by a Modelfile.
 
 ## What is Langfuse?
 
-Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source LLM engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications via tracing, prompt management and evaluations.
+Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open source LLM engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications via tracing, prompt management and evaluations.
 
 ### Local Deployment of Langfuse
 
