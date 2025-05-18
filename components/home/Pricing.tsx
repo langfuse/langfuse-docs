@@ -772,7 +772,7 @@ const sections: Section[] = [
       },
       {
         name: "PostHog Integration",
-        href: "/docs/analytics/posthog",
+        href: "/docs/analytics/integrations/posthog",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
