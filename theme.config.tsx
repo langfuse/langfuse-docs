@@ -196,15 +196,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-launch-week-3",
+    key: "lw3-1",
     dismissible: true,
     content: (
-      <Link href="/launch">
+      <Link href="/changelog/2025-05-19-full-text-search">
         {/* mobile */}
-        <span className="sm:hidden">Upcoming: Launch Week #3 →</span>
+        <span className="sm:hidden">LW3 Day 1: Full Text Search →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Upcoming: Langfuse Launch Week #3 - a new feature every single day →
+          Launch Week #3, Day 1: Full Text Search →
         </span>
       </Link>
     ),
