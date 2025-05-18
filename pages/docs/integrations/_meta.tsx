@@ -9,6 +9,7 @@ export default {
   "vercel-ai-sdk": "Vercel AI SDK",
   "strands-agents": "AWS Strands Agents",
   autogen: "AutoGen",
+  pipecat: "Pipecat",
   "semantic-kernel": "Semantic Kernel",
   "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",
@@ -37,7 +38,6 @@ export default {
   "quarkus-langchain4j": "Quarkus LangChain4j",
   mastra: "Mastra",
   voltagent: "VoltAgent",
-  pipecat: "Pipecat",
   ragflow: "Ragflow",
   other: "More Ways to Integrate",
 };
