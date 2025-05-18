@@ -242,6 +242,8 @@ const nonPermanentRedirects = [
   ["/faq/all/cloud-data-regions", "/security/data-regions"],
   ["/self-hosting/local", "/self-hosting/docker-compose"],
   ["/self-hosting/docker", "/self-hosting/kubernetes-helm"],
+  ["/docs/analytics/posthog", "/docs/analytics/integrations/posthog"],
+  ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
