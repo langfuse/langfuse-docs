@@ -103,7 +103,6 @@ exporter = OTLPSpanExporter()
 setup_tracing(
     service_name="pipecat-demo",
     exporter=exporter,
-    console_export=os.getenv("OTEL_CONSOLE_EXPORT", "false").lower() == "true",
 )
 
 # Enable tracing in your PipelineTask
