@@ -8,7 +8,7 @@ category: Integrations
 
 This notebook demonstrates how to monitor and debug your AWS Strands agent effectively using **Langfuse**. By following this guide, you will be able to trace your agent's operations, gaining insights into its behavior and performance.
 
-> **What is the Strands Agents SDK?** The Strands Agents SDK is a toolkit for building AI agents that can interact with various tools and services, including AWS Bedrock.
+> **What is the Strands Agents SDK?** The Strands Agents SDK ([docs](https://strandsagents.com)) is a toolkit for building AI agents that can interact with various tools and services, including AWS Bedrock.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It provides robust tracing, debugging, evaluation, and monitoring capabilities for AI agents and LLM applications. Langfuse integrates seamlessly with multiple tools and frameworks through native integrations, OpenTelemetry, and its SDKs.
 
@@ -161,5 +161,5 @@ After running the agent, you can navigate to your Langfuse project to view the d
 ## Learn More
 For more detailed information, refer to the official documentation and other examples:
 
-- Strands Agents Documentation: [https://strandsagents.com/0.1.x/](https://strandsagents.com/0.1.x/)
+- Strands Agents Documentation: [https://strandsagents.com](https://strandsagents.com)
 - Strands Agents GitHub Cookbook (Tracing and Evaluation): [https://github.com/strands-agents/samples/blob/main/01-getting-started/10-agent-observability-and-evaluation/Observability-and-Evaluation-sample.ipynb](https://github.com/strands-agents/samples/blob/main/01-getting-started/10-agent-observability-and-evaluation/Observability-and-Evaluation-sample.ipynb)
