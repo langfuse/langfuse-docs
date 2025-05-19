@@ -31,6 +31,7 @@ export const PlainChat = () => {
           hideLauncher: !shouldShowChat, // Show launcher if URL parameter is present
           hideBranding: true,
           requireAuthentication: true,
+          hideThreadRefs: true,
           style: {
             brandColor: {
               light: "#000000",
