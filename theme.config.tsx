@@ -196,15 +196,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-launch-week-3",
+    key: "lw3-2",
     dismissible: true,
     content: (
-      <Link href="/launch">
+      <Link href="/changelog/2025-05-20-save-table-views">
         {/* mobile */}
-        <span className="sm:hidden">Upcoming: Launch Week #3 →</span>
+        <span className="sm:hidden">LW3 Day 2: Save and share table views →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Upcoming: Langfuse Launch Week #3 - a new feature every single day →
+        Langfuse Launch Week #3, Day 2: Save and share table views →
         </span>
       </Link>
     ),
