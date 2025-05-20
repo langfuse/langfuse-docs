@@ -120,8 +120,116 @@ class LangFuseDSPYCallback(BaseCallback):
         self.current_span.set(span_obj)
 
     def on_lm_end(self, call_id, outputs, exception, **kwargs):
-        # ... [Implementation details for on_lm_end remain the same as in your code]
-        pass
+        completion_content = None
+        model_name_for_span = None
+        usage_for_span = None
+        level = "DEFAULT"
+        status_message = None
+        span = self.current_span.get(None)
+        system_prompt = self.current_system_prompt.get(None)
+        prompt = self.current_prompt.get(None)
+        model_name_for_span = self.model_name_at_span_creation.get(None)
+        # Use the model name stored at span creation as the primary source
+        if exception:
+            level = "ERROR"
+            status_message = str(exception)
+        elif outputs is None:
+            level = "ERROR"
+            status_message = "LM call returned None outputs without an explicit exception."
+        elif isinstance(outputs, list):
+            if outputs:
+                completion_content = outputs[0]
+            else:
+                level = "WARNING"
+                status_message = "LM call returned an empty list as outputs."
+        else:
+            try:
+                if hasattr(outputs, "model") and outputs.model is not None:
+                    model_name_for_span = outputs.model
+                if (
+                    outputs.choices
+                    and outputs.choices[0]
+                    and outputs.choices[0].message
+                ):
+                    completion_content = outputs.choices[0].message.content
+                else:
+                    level = "WARNING"
+                    status_message = "LM output structure did not contain expected choices or message."
+            except AttributeError as e:
+                level = "ERROR"
+                status_message = f"Error processing LM output structure: {e}. Output: {str(outputs)[:200]}"
+            except Exception as e:
+                level = "ERROR"
+                status_message = f"Unexpected error processing LM output: {e}. Output: {str(outputs)[:200]}"
+        # Calculate usage if we have the necessary information
+        if (
+            completion_content
+            and system_prompt is not None
+            and prompt is not None
+            and model_name_for_span
+        ):
+            try:
+                if hasattr(outputs, "usage"):
+                    prompt_tokens = outputs.usage.prompt_tokens
+                    completion_tokens = outputs.usage.completion_tokens
+                    total_tokens = outputs.usage.total_tokens
+                else:
+                    prompt_tokens = len(system_prompt + prompt)
+                    completion_tokens = len(completion_content)
+                    total_tokens = prompt_tokens + completion_tokens
+                total_cost = completion_cost(
+                    model=model_name_for_span,
+                    prompt=system_prompt + prompt,
+                    completion=completion_content,
+                )
+                if span:
+                    span.update(
+                        usage_details={
+                            "input": prompt_tokens,
+                            "output": completion_tokens,
+                            "cache_read_input_tokens": 0,
+                            "total": total_tokens,
+                        },
+                        cost_details={
+                            "input": total_cost * (prompt_tokens / total_tokens) if total_tokens else 0,
+                            "output": total_cost * (completion_tokens / total_tokens) if total_tokens else 0,
+                            "cache_read_input_tokens": 0.0,
+                            "total": total_cost,
+                        },
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to calculate usage/cost: {str(e)}")
+                level = "WARNING"
+                status_message = f"Usage/cost calculation failed: {str(e)}"
+        else:
+            missing_info = []
+            if not completion_content:
+                missing_info.append("completion content")
+            if not system_prompt:
+                missing_info.append("system prompt")
+            if not prompt:
+                missing_info.append("user prompt")
+            if not model_name_for_span:
+                missing_info.append("model name")
+            logger.warning(
+                f"Missing required information for usage/cost calculation: {', '.join(missing_info)}"
+            )
+        if span:
+            end_args = {
+                "output": completion_content,
+                "model": model_name_for_span,
+                "level": level,
+                "status_message": status_message,
+            }
+            final_end_args = {
+                k: v
+                for k, v in end_args.items()
+                if v is not None or k in ["output", "model", "level", "status_message"]
+            }
+            span.end(**final_end_args)
+            self.current_span.set(None)
+        if level == "OK" and completion_content is not None:
+            self.current_completion.set(completion_content)
 ```
 
 ## Step 3: Using the Callback with DSPy
