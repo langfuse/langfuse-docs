@@ -1,0 +1,138 @@
+---
+title: "How we Built Scalable & Customizable Dashboards"
+date: 2025/05/21
+description: "A technical deep dive into how we built Langfuse's flexible, real-time dashboard system for LLM monitoring."
+tag: engineering
+ogImage: /images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png
+author: Steffen
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="How we Built Scalable & Customizable Dashboards"
+  description="A technical deep dive into how we built Langfuse's flexible, real-time dashboard system for LLM monitoring"
+  authors={["steffenschmitz"]}
+  image="/images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png"
+  date="May 21, 2025"
+/>
+
+On Day 3 of [Langfuse Launch Week 3](/blog/2025-05-19-launch-week-3), we introduce **customizable dashboards** ([docs](/docs/analytics/custom-dashboards.mdx)): a powerful way to visualize LLM usage directly within the Langfuse UI. Whether you want to track latency trends, monitor user feedback, or correlate cost with performance, our new dashboards let you build the charts you need - right where you need them. And for those who prefer working in their own analytics stack, we've made the same querying capabilities available via our API ([docs](/pages/docs/analytics/metrics-api.mdx)).
+
+In this post, I'll take you behind the scenes: from our product thinking to the technical implementation, testing, and rollout—and share the lessons we learned in building flexible, real-time insights into your LLM pipelines.
+
+> TODO: add launch week demo video
+
+## Motivation
+
+Customizable dashboards were among the [most requested](https://github.com/orgs/langfuse/discussions/1011) features within Langfuse. Early on, we had the home screen dashboard that showed users metrics we believed to be relevant and accurate. We expanded that over time based on feedback about the charts users wanted to see.
+
+Over time, this list grew quite long, and we found that the dashboards we were presenting were often relevant but not necessarily to the same kind of users. A product manager wants to understand which score specific traces receive, while a developer wants to see latencies, error rates, and other relevant metrics.
+
+While exploring custom dashboards, we found that within our data model and constraints, this would become quite complex. We introduced ClickHouse back in November of last year, and this was the first unlock we needed to get this done (learn more about this change in our [v3 infra blog post](/blog/2024-12-langfuse-v3-infrastructure-evolution)). The second challenge was figuring out the data model and how to generate queries reliably while staying flexible.
+
+Within our data model, we often see that observations need to be aggregated at the trace, user, or session level. In the typical OLAP cube model - common across visualization tools - those **multi-level aggregations** are not natively supported or are complex to define.
+
+In addition, the dashboard must be **responsive**, and look good all the time. We need a good data model to represent the individual charts and the overall dashboard, making a good trade-off between reuse and understandability of how things work.
+
+Langfuse is developing rapidly, so we need to ensure that the created dashboards are **decoupled from the data model**. This will prevent the charts from breaking as we modify the underlying data layer.
+
+We included custom dashboards as part of the Superday in our interview process and had many candidates design their version of the dashboard and share their thoughts. That's how this became the most specced feature we have ever had at Langfuse. Early in March, I set out to finally implement a prototype for it and today, I'll take you on the journey showing how I completed the feature that we are launching today.
+
+## Goals: Flexibility, Performance, Maintainability
+
+The hardest challenge around the dashboards, and something we knew right away, was **getting the query builder right**. I think representing dashboard configurations within the database is a solved problem, as is having charts on the front end that render nicely, are responsive, and look good on different screens (s/o to all the great libraries for this).
+
+The query builder involved building a lot of logic in TypeScript and creating components there, as well as covering as much as possible in SQL. Here we started with the user interface. We thought about how we would query this endpoint. The typical OLAP cube model came in really handy here, and we tried to stick to it as much as possible. See the example below for how the request to our backend looks and what the input to create a query is.
+
+```ts filename="Query Language"
+{
+  "view": string,
+  "dimensions": [
+    {
+      "field": string
+    }
+  ],
+  "metrics": [
+    {
+      "measure": string,
+      "aggregation": string
+    }
+  ],
+  "filters": [],
+  "timeDimension": {
+    "granularity": string
+  },
+  "fromTimestamp": string,
+  "toTimestamp": string,
+  "orderBy": []
+}
+```
+
+After multiple attempts, we developed a multi-layered aggregation that pre-computes the necessary metrics at the entity level and then performs an additional set of aggregations on the entity to produce the final result.
+
+````ts filename="Query Builder Prompt"
+/**
+ * We want to build a ClickHouse query based on the query provided and the viewDeclaration that was selected.
+ * The final query should always follow this pattern:
+ * ```
+ *   SELECT
+ *     <...dimensions>,
+ *     <...metrics.map(metric => `${metric.aggregation}(${metric.alias})`>
+ *   FROM (
+ *      SELECT
+ *        <baseCte>.project_id,
+ *        <baseCte>.id
+ *        <...dimensions.map(dimension => `any(${dimension.sql}) as ${dimension.alias}`>,
+ *        <...metrics.map(metric => `${metric.sql} as ${metric.alias || metric.sql}`>
+ *      FROM <baseCte>
+ *      (...tableRelations.joinConditionSql)
+ *      WHERE <...filters>
+ *      GROUP BY <baseCte>.project_id, <baseCte>.id
+ *   )
+ *   GROUP BY <...dimensions>
+ *   ORDER BY <fields with directions>
+ * ```
+ */
+````
+
+To test this, we created our own query playground, which looked like the typical Langfuse playground, where you could input a JSON statement and it would compile and execute a corresponding query. Using these features, we started to replace the queries we used for our legacy/static home screen dashboard to verify that the query builder was sufficiently flexible and performant.
+
+We saw that the queries would execute at scale with a lot of flexibility. Given that we had already covered a lot of ground within those dashboards, seeing them run well and scale effectively even across longer time horizons gave us the confidence that we were on the right track and could proceed to build the remaining features.
+
+At this point, the power of ClickHouse came in really handy because initially, we optimized for development speed, focusing on understanding what is going on within the query builder. We had a previous one running on Postgres that covered a lot of edge cases and grew to more than 1,000 lines of code handling special cases. With the new query builder, we wanted to start with a small core and expand it once we saw the need. For most queries, the native case worked perfectly fine, which is why we stuck to it and decided to proceed with building and getting the feature into the hands of our users to gather feedback and develop in the direction that provides the most value to customers.
+
+In addition, we had to decide whether we wanted to embed all the widgets within the dashboards, meaning that they only live and exist within the scope of a single dashboard, or if we wanted to allow some reuse between the widgets. We found that the reuse option seemed very tempting, as it allows you to have a single source of truth on charts. The one expert who created a score can create a corresponding score widget, which can then be reused across multiple dashboards. I have seen in the past, with many companies, that the replication of things across dashboards either led to a lack of maintenance where items would get out of date or where a misunderstanding of the metric created multiple widgets with separate meaning.
+
+## How We Built It
+
+Based on the specification we created above, we started vibe-coding an initial version of the feature. Tools like Claude Code, Cursor, and Windsurf came in really handy in creating the necessary functionality. We had a clear idea of what the final query should look like, what the test cases should cover, and how the interface should be designed. In this situation, prompting works really well.
+
+Overall, this is something we frequently use here at Langfuse (see [post on how we use LLMs](/blog/2025-04-24-how-we-use-llms-to-scale-langfuse)). We understand the topic deeply, create a design or mental model of how it should work, and then have AI help us write the code for it. This approach allows our team of eight people to scale to tens of thousands of users and billions of events.
+
+Our next use of the AI agent was toward creating unit tests. Initially, we focused on creating valid queries. Then, we wanted to create correct queries, meaning that we created a known set of test data and validated that they produce the correct results. After that, we compared the results to our existing dashboard logic to reproduce our home dashboard functionality. Finally, we went deep on SQL injection tests to ensure that any variety of user inputs are caught and not forwarded to the database if the input might be malicious. This is fundamental for a feature like custom dashboards and a non-negotiable for us. If you want to see the total size of the tests we created, which are much larger than the feature overall, head over to our [repo](https://github.com/langfuse/langfuse/blob/main/web/src/__tests__/queryBuilderDashboards.servertest.ts).
+
+Once the backend powered our home dashboards, we began building the UI. Here, we reused as many fully functional libraries as possible, giving a shout-out to the Shadcn/charts, Recharts, and React Grid Layout. We started with a basic prototype of how the widget builder can work \- focusing on its responsiveness, rendering, and ensuring that a single component functions well and that users can understand the flow. From there, we explored how to render multiple components and how to save the configurations within the database.
+
+Even though I am historically more of a backend and platform developer, it was easy enough to get into it and flesh this out end-to-end, and the reviews from the other maintainers helped me avoid the biggest mistakes. We see AI as a significant enabler for engineers to be faster and build more things across a wider domain (embrace end-to-end product engineering). However, we still recognize the need for human interaction and expert reviews to prevent creating excessive technical debt. It is always important to understand what you are doing and what is happening in order to keep the management model intact.
+
+## Test and Launch
+
+With this early version in place, we decided to create a beta release and share custom dashboards with our users on the cloud product. Why cloud only and not for self-hosted deployments, you may ask? Because here we were confident that we could still change the data model, the interface, and how we store dashboards, in the worst case, manually. We didn't want to risk users having to mutate data within Postgres and ClickHouse on their own if necessary.
+
+After seeing the data from the first week and confirming that the behavior worked well, we also pushed the release for our open-source self-hosters so they could get started building their dashboards.
+
+Right after the launch, feedback started coming in about which charts users wanted to see, what other functionality they wanted to use, and which parts of the dashboards were unintuitive. Fortunately for us, performance was rarely a concern. The focus was more on seeing more, visualizing more, and overall making the feature more complete.
+
+Many of the features that users wished for are included in today's release. These include:
+
+- Additional chart components.
+- Resizable and movable widgets within the dashboard screen.
+- The ability to rename components.
+- More tooling support when creating a new widget to reduce friction.
+
+In addition, we are launching **Langfuse-managed Dashboards**, which consists of topic-focused dashboards that we believe are useful given the data users have. You can use them as they are and receive the latest updates with each new release, or clone them into your repository and modify them to your liking.
+
+## Try it Today
+
+We're excited to see what users will build using the new dashboarding functionality. In the coming days and weeks, we will release additional chart types, with tables and pivot tables high on our list. Please share any feedback you might have with us on [GitHub](https://github.com/orgs/langfuse/discussions/1011). We will also continue adding improvements, more metrics, and more data to the dashboards. One likely candidate for future development is the experiments feature. This will allow you to observe your offline activities together with your online evaluations and cross-correlate the results. Stay tuned.
