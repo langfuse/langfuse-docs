@@ -163,7 +163,7 @@ print(response.entities)
 
 After running your DSPy application, you can inspect the traced events in Langfuse:
 
-![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-dspy/dspy-example-trace.png)
+![Example trace in Langfuse](https://github.com/user-attachments/assets/4d8dc110-80df-411f-b642-8a62628cf3fb)
 
 The traces will include:
 - Input and output values for each module
