@@ -100,7 +100,7 @@ We settled onto the following input format:
 After multiple iterations, we settled on a generic query pattern that pre-computes the necessary metrics at the entity level and then performs an additional set of aggregations on the entity to produce the final result.
 Schematically the query looks like this:
 
-````ts filename="Target Query Schema"
+```ts filename="Target Query Schema"
 SELECT
   <...dimensions>,
   <...metrics.map(metric => `${metric.aggregation}(${metric.alias})`>
@@ -117,7 +117,7 @@ FROM (
 )
 GROUP BY <...dimensions>
 ORDER BY <fields with directions>
-````
+```
 
 Within our execution flow, we transformed the input in multiple steps to consistently arrive at the valid, final query.
 
@@ -269,19 +269,20 @@ Stay tuned.
 
 <Steps>
 
-  ### We are hiring
+### We are hiring
 
-  We are hiring in Berlin! If you are interested in solving similar challenges with us - [apply here](/careers).
+We are hiring in Berlin! If you are interested in solving similar challenges with us - [apply here](/careers).
 
-  <Frame className="max-w-80">![Team](/images/people/team.jpg)</Frame>
+{" "}
+<Frame className="max-w-80">![Team](/images/people/team.jpg)</Frame>
 
-  ### Channels
+### Channels
 
-  [Twitter](https://x.com/langfuse) and [LinkedIn](https://www.linkedin.com/company/langfuse/) will be our main channels for launching a new feature every day.
+[Twitter](https://x.com/langfuse) and [LinkedIn](https://www.linkedin.com/company/langfuse/) will be our main channels for launching a new feature every day.
 
-  ### Chat with the community on Discord
+### Chat with the community on Discord
 
-  Join the community of over 2,000 members on [Discord](/discord) for banter and to talk directly to the team.
+Join the community of over 2,000 members on [Discord](/discord) for banter and to talk directly to the team.
 
 </Steps>
 
