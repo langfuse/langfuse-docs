@@ -17,9 +17,9 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   date="May 21, 2025"
 />
 
-On Day 3 of [Langfuse Launch Week 3](/blog/2025-05-19-launch-week-3), we introduce **customizable dashboards** ([docs](/docs/analytics/custom-dashboards.mdx)): a powerful way to visualize LLM usage directly within the Langfuse UI.
+On Day 3 of [Langfuse Launch Week 3](/blog/2025-05-19-launch-week-3), we introduce **customizable dashboards** ([docs](/docs/analytics/custom-dashboards)): a powerful way to visualize LLM usage directly within the Langfuse UI.
 Whether you want to track latency trends, monitor user feedback, or correlate cost with performance, our new dashboards let you build the charts you need - right where you need them.
-And for those who prefer working in their own analytics stack, we've made the same querying capabilities available via our API ([docs](/pages/docs/analytics/metrics-api.mdx)).
+And for those who prefer working in their own analytics stack, we've made the same querying capabilities available via our API ([docs](/pages/docs/analytics/metrics-api)).
 
 <div className="bg-card p-4 rounded w-full border my-3">
 
@@ -118,7 +118,7 @@ flowchart TD
 
 Before we could start the dashboard, we had to decide how to abstract our data model.
 Directly exposing our database felt like the wrong move as this would lock us from updating the data model and may not fit the mental model of our customers.
-Therefore, we decided to build custom dashboards around the [tracing data model](/docs/tracing-data-model.mdx).
+Therefore, we decided to build custom dashboards around the [tracing data model](/docs/tracing-data-model).
 
 For this purpose, we created a virtual data model that contains the full definition of what we expose.
 It is used to fill the frontend, including units and documentation, and also used for validations on the backend.
