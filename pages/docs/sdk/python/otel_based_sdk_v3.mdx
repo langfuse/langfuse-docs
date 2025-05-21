@@ -43,9 +43,9 @@ from langfuse import Langfuse
 
 # Initialize with constructor arguments
 # langfuse = Langfuse(
-#   public_key="YOUR_PUBLIC_KEY",
-#   secret_key="YOUR_SECRET_KEY",
-#   host="YOUR_LANGFUSE_HOST_OR_CLOUD_REGION" # e.g., https://us.cloud.langfuse.com
+#   public_key="YOUR_PUBLIC_KEY",
+#   secret_key="YOUR_SECRET_KEY",
+#   host="YOUR_LANGFUSE_HOST_OR_CLOUD_REGION" # e.g., https://us.cloud.langfuse.com
 # )
 
 # Or initialize with environment variables (LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_HOST)
@@ -53,9 +53,9 @@ langfuse = Langfuse()
 
 # Verify connection
 if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
+    print("Langfuse client is authenticated and ready!")
 else:
-    print("Authentication failed. Please check your credentials and host.")
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
 Key configuration options:
@@ -156,32 +156,73 @@ with langfuse.start_as_current_span(
     # Root span ends automatically here
 ```
 
-If you need to create an observation without immediately making it the current one in the context (e.g., for parallel operations where context might be managed differently), you can use:
+### Manual Observations
 
-- `langfuse.start_span()`
-- `langfuse.start_generation()`
+For scenarios where you need to create an observation (a span or generation) without altering the currently active OpenTelemetry context, you can use `langfuse.start_span()` or `langfuse.start_generation()`.
 
-These methods return a `LangfuseSpan` or `LangfuseGeneration` object that you **must manually end** using its `.end()` method.
+**Key Characteristics:**
+
+- **No Context Shift**: Unlike their `start_as_current_...` counterparts, these methods **do not** set the new observation as the active one in the OpenTelemetry context. The previously active span (if any) remains the current context for subsequent operations in the main execution flow.
+- **Parenting**: The observation created by `start_span()` or `start_generation()` will still be a child of the span that was active in the context at the moment of its creation.
+- **Manual Lifecycle**: These observations are not managed by a `with` block and therefore **must be explicitly ended** by calling their `.end()` method.
+- **Nesting Children**:
+  - Subsequent observations created using the global `langfuse.start_as_current_span()` (or similar global methods) will _not_ be children of these "manual" observations. Instead, they will be parented by the original active span.
+  - To create children directly under a "manual" observation, you would use methods _on that specific observation object_ (e.g., `manual_span.start_as_current_span(...)`).
+
+**When to Use:**
+
+This approach is useful when you need to:
+
+- Record work that is self-contained or happens in parallel to the main execution flow but should still be part of the same overall trace (e.g., a background task initiated by a request).
+- Manage the observation's lifecycle explicitly, perhaps because its start and end are determined by non-contiguous events.
+- Obtain an observation object reference before it's tied to a specific context block.
+
+**Example:**
 
 ```python
-# Create a span that does not become the current context
-manual_span = langfuse.start_span(name="background-task-prep")
-# ... do some work ...
-manual_span.update(output="preparation complete")
-manual_span.end() # Explicitly end the span
+# This outer span establishes an active context.
+with langfuse.start_as_current_span(name="main-operation") as main_operation_span:
+    # 'main_operation_span' is the current active context.
 
-# Create a generation that does not become the current context
-manual_generation = langfuse.start_generation(name="text-summarization-llm")
-# ... call LLM ...
-manual_generation.update(output="summary...", model="claude-3-opus")
-manual_generation.end() # Explicitly end the generation
+    # 1. Create a "manual" span using langfuse.start_span().
+    #    - It becomes a child of 'main_operation_span'.
+    #    - Crucially, 'main_operation_span' REMAINS the active context.
+    #    - 'manual_side_task' does NOT become the active context.
+    manual_side_task = langfuse.start_span(name="manual-side-task")
+    manual_side_task.update(input="Data for side task")
+
+    # 2. Start another operation that DOES become the active context.
+    #    This will be a child of 'main_operation_span', NOT 'manual_side_task',
+    #    because 'manual_side_task' did not alter the active context.
+    with langfuse.start_as_current_span(name="core-step-within-main") as core_step_span:
+        # 'core_step_span' is now the active context.
+        # 'manual_side_task' is still open but not active in the global context.
+        core_step_span.update(input="Data for core step")
+        # ... perform core step logic ...
+        core_step_span.update(output="Core step finished")
+    # 'core_step_span' ends. 'main_operation_span' is the active context again.
+
+    # 3. Complete and end the manual side task.
+    # This could happen at any point after its creation, even after 'core_step_span'.
+    manual_side_task.update(output="Side task completed")
+    manual_side_task.end() # Manual end is crucial for 'manual_side_task'
+
+    main_operation_span.update(output="Main operation finished")
+# 'main_operation_span' ends automatically here.
+
+# Expected trace structure in Langfuse:
+# - main-operation
+#   |- manual-side-task
+#   |- core-step-within-main
+#     (Note: 'core-step-within-main' is a sibling to 'manual-side-task', both children of 'main-operation')
 ```
 
 <Callout type="warning" title="Manual Ending Required">
-  If you use `start_span()` or `start_generation()` (without `_as_current_`),
-  you are responsible for calling `.end()` on the returned object. Failure to do
-  so will result in incomplete or missing observations in Langfuse. Context
-  managers (`with ... as ...:`) handle this automatically.
+  If you use `langfuse.start_span()` or `langfuse.start_generation()`, you are
+  responsible for calling `.end()` on the returned observation object. Failure
+  to do so will result in incomplete or missing observations in Langfuse. Their
+  `start_as_current_...` counterparts used with a `with` statement handle this
+  automatically.
 </Callout>
 
 ### Nesting Observations
@@ -570,14 +611,14 @@ langfuse = Langfuse()
 # Fetch an existing dataset
 dataset = langfuse.get_dataset(name="my-eval-dataset")
 for item in dataset.items:
-  print(f"Input: {item.input}, Expected: {item.expected_output}")
+    print(f"Input: {item.input}, Expected: {item.expected_output}")
 
 # Briefly: Creating a dataset and an item
 new_dataset = langfuse.create_dataset(name="new-summarization-tasks")
 langfuse.create_dataset_item(
-    dataset_name="new-summarization-tasks",
-    input={"text": "Long article..."},
-    expected_output={"summary": "Short summary."}
+    dataset_name="new-summarization-tasks",
+    input={"text": "Long article..."},
+    expected_output={"summary": "Short summary."}
 )
 ```
 
@@ -613,15 +654,15 @@ current_run_name = "qna_model_v3_run_05_20" # Identifies this specific evaluatio
 
 # Assume 'my_qna_app' is your instrumented application function
 def my_qna_app(question: str, context: str, item_id: str, run_name: str):
-    with langfuse.start_as_current_generation(
-        name="qna-llm-call",
-        input={"question": question, "context": context},
-        metadata={"item_id": item_id, "run": run_name}, # Example metadata for the generation
-        model="gpt-4o"
-    ) as generation:
-        # Simulate LLM call
-        answer = f"Answer to '{question}' using context." # Replace with actual LLM call
-        generation.update(output={"answer": answer})
+    with langfuse.start_as_current_generation(
+        name="qna-llm-call",
+        input={"question": question, "context": context},
+        metadata={"item_id": item_id, "run": run_name}, # Example metadata for the generation
+        model="gpt-4o"
+    ) as generation:
+        # Simulate LLM call
+        answer = f"Answer to '{question}' using context." # Replace with actual LLM call
+        generation.update(output={"answer": answer})
 
         # Update the trace with the input and output
         generation.update_trace(
@@ -629,7 +670,7 @@ def my_qna_app(question: str, context: str, item_id: str, run_name: str):
             output={"answer": answer},
         )
 
-        return answer
+        return answer
 
 dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
 
@@ -691,8 +732,8 @@ langfuse = Langfuse(mask=pii_masker)
 
 # Now, any input/output/metadata will be passed through pii_masker
 with langfuse.start_as_current_span(name="user-query", input={"email": "test@example.com", "query": "..."}) as span:
-    # The 'email' field in the input will be masked.
-    pass
+    # The 'email' field in the input will be masked.
+    pass
 ```
 
 ### Logging
