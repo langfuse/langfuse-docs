@@ -23,7 +23,15 @@ And for those who prefer working in their own analytics stack, we've made the sa
 
 In this post, I'll take you behind the scenes: from our product thinking to the technical implementation, testing, and rollout—and share the lessons we learned in building flexible, real-time insights into your LLM pipelines.
 
-> TODO: add launch week demo video
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/1vO5cZWpwiI"
+  title="Custom Dashboard Launch Video"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
 
 ## Motivation
 
@@ -47,12 +55,56 @@ Langfuse is developing rapidly, so we need to ensure that the created dashboards
 This will prevent the charts from breaking as we modify the underlying data layer.
 
 We included custom dashboards as part of the Superday in our interview process and had many candidates design their version of the dashboard and share their thoughts.
-That's how this became the most specced feature we have ever had at Langfuse. Early in March, I set out to finally implement a prototype for it and today, I'll take you on the journey showing how I completed the feature that we are launching today.
+That's how this became the most specced feature we have ever had at Langfuse.
+Early in March, I set out to finally implement a prototype for it and today, I'll take you on the journey showing how I completed the feature that we are launching today.
 
 ## Goals: Flexibility, Performance, Maintainability
 
 The hardest challenge around the dashboards, and something we knew right away, was **getting the query builder right**.
 I think representing dashboard configurations within the database is a solved problem, as is having charts on the front end that render nicely, are responsive, and look good on different screens (s/o to all the great libraries for this).
+
+```mermaid
+flowchart TD
+  %% ────────────────────  Frontend ────────────────────
+  subgraph Client
+    subgraph Frontend
+      Dashboard["Dashboard"]
+      WidgetN["Widget 1-N"]
+      Dashboard -->|contains| WidgetN
+    end
+
+    PublicAPI["GET /api/public/metrics"]
+  end
+
+  %% ─────────────────────── Backend ───────────────────────
+  subgraph Backend
+    PublicAPI -->|Query| ExecQuery
+    WidgetN -->|Query| ExecQuery["Query Executor"]
+
+    ExecQuery -->|1: Build| Validate
+
+    subgraph QueryBuilder["Query Builder"]
+      Validate["1. Validate request"]
+      FromJoin["2. Build FROM + JOIN"]
+      Filters["3. Add filters"]
+      InnerPart["4. Inner dims & metrics"]
+      InnerQ["5. Build inner query"]
+      OuterQ["6. Build outer query"]
+      OrderFill["7. Order BY & WITH FILL"]
+      Validate --> FromJoin --> Filters --> InnerPart --> InnerQ --> OuterQ --> OrderFill --> FinalSQL["⇢ Final SQL"]
+    end
+  end
+
+  subgraph Database
+    FinalSQL -->|SQL| ExecQuery
+    ExecQuery -->|2: Run| ClickHouse[(ClickHouse)]
+  end
+
+  %% ───────────  STYLE OVERRIDES  ───────────
+  style Client fill:#f3f4f6,stroke:#888,stroke-width:1px,color:#000
+  style Backend fill:#f3f4f6,stroke:#888,stroke-width:1px,color:#000
+  style Database fill:#f3f4f6,stroke:#888,stroke-width:1px,color:#000
+```
 
 The query builder involved building a lot of logic in TypeScript and creating components there, as well as covering as much as possible in SQL.
 Here we started with the user interface.
