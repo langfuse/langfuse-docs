@@ -108,7 +108,55 @@ Supported formats:
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
 
-<Tabs items={["Python", "JS/TS"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse, observe, get_client
+from langfuse.media import LangfuseMedia
+
+# Create a LangfuseMedia object from a file
+with open("static/bitcoin.pdf", "rb") as pdf_file:
+    pdf_bytes = pdf_file.read()
+
+# Wrap media in LangfuseMedia class
+pdf_media = LangfuseMedia(content_bytes=pdf_bytes, content_type="application/pdf")
+
+# Using with the decorator
+@observe()
+def process_document():
+    langfuse = get_client()
+
+    # Update the current trace with the media file
+    langfuse.update_current_trace(
+        metadata={"document": pdf_media}
+    )
+
+    # Or update the current span
+    langfuse.update_current_span(
+        input={"document": pdf_media}
+    )
+
+# Using with context managers
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="analyze-document") as span:
+    # Include media in the span input, output, or metadata
+    span.update(
+        input={"document": pdf_media},
+        metadata={"file_size": len(pdf_bytes)}
+    )
+
+    # Process document...
+
+    # Add results with media to the output
+    span.update(output={
+        "summary": "This document explains Bitcoin...",
+        "original": pdf_media
+    })
+```
+
+</Tab>
 <Tab>
 
 ```python
@@ -234,7 +282,39 @@ Based on this token, the Langfuse UI can automatically detect the `mediaId` and 
 
 When dealing with traces, observations, or dataset items that include media references, you can convert them back to their base64 data URI format using the `resolve_media_references` utility method provided by the Langfuse client. This is particularly useful for reinserting the original content during fine-tuning, dataset runs, or replaying a generation. The utility method traverses the parsed object and returns a deep copy with all media reference strings replaced by the corresponding base64 data URI representations.
 
-<Tabs items={["Python", "JS/TS"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
+# Example object with media references
+obj = {
+    "image": "@@@langfuseMedia:type=image/jpeg|id=some-uuid|source=bytes@@@",
+    "nested": {
+        "pdf": "@@@langfuseMedia:type=application/pdf|id=some-other-uuid|source=bytes@@@"
+    }
+}
+
+# Resolve media references to base64 data URIs
+resolved_obj = langfuse.resolve_media_references(
+    obj=obj,
+    resolve_with="base64_data_uri"
+)
+
+# Result:
+# {
+#     "image": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+#     "nested": {
+#         "pdf": "data:application/pdf;base64,JVBERi0xLjcK..."
+#     }
+# }
+```
+
+</Tab>
 <Tab>
 
 ```python

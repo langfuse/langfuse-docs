@@ -12,7 +12,76 @@ In addition to the level, you can also include a `statusMessage` to provide addi
   ![Trace log level and statusMessage](/images/docs/trace-log-level.png)
 </Frame>
 
-<Tabs items={["Python", "JS/TS", "OpenAI SDK", "Langchain", "LlamaIndex"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI SDK", "Langchain", "LlamaIndex"]}>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+
+@observe()
+def my_function():
+    # ... processing logic ...
+    # Update the current span with a warning level
+    langfuse.update_current_span(
+        level="WARNING",
+        status_message="This is a warning"
+    )
+```
+
+When creating spans or generations directly:
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Using context managers (recommended)
+with langfuse.start_as_current_span(name="my-operation") as span:
+    # Set level and status message on creation
+    with span.start_as_current_span(
+        name="potentially-risky-operation",
+        level="WARNING",
+        status_message="Operation may fail"
+    ) as risky_span:
+        # ... do work ...
+
+        # Or update level and status message later
+        risky_span.update(
+            level="ERROR",
+            status_message="Operation failed with unexpected input"
+        )
+
+# You can also update the currently active span without a direct reference
+with langfuse.start_as_current_span(name="another-operation"):
+    # ... some processing ...
+    langfuse.update_current_span(
+        level="DEBUG",
+        status_message="Processing intermediate results"
+    )
+```
+
+Levels can also be set when creating generations:
+
+```python
+with langfuse.start_as_current_generation(
+    name="llm-call",
+    model="gpt-4o",
+    level="DEFAULT"  # Default level
+) as generation:
+    # ... make LLM call ...
+
+    if error_detected:
+        generation.update(
+            level="ERROR",
+            status_message="Model returned malformed output"
+        )
+```
+
+</Tab>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):

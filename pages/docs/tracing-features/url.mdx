@@ -11,7 +11,46 @@ Each trace has a unique URL that you can use to share it with others or to acces
 
 Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tab>
+
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe
+
+@observe()
+def process_data():
+    from langfuse import get_client
+    langfuse = get_client()
+
+    # Get the URL of the current trace
+    trace_url = langfuse.get_trace_url()
+    print(f"View trace at: {trace_url}")
+
+    # or pass the trace id
+    trace_id = langfuse.get_current_trace_id()
+    trace_url = langfuse.get_trace_url(trace_id=trace_id)
+```
+
+When using context managers:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+with langfuse.start_as_current_span(name="process-request") as span:
+    # Get the URL of this trace
+    trace_url = langfuse.get_trace_url()
+    print(f"View trace at: {trace_url}")
+
+    # or pass the trace id
+    trace_id = langfuse.get_current_trace_id()
+    trace_url = langfuse.get_trace_url(trace_id=trace_id)
+```
+
+</Tab>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -105,7 +144,7 @@ You can make a trace `public` to share it via a public link. This allows others 
 
 _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99_
 
-<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
+<Tabs items={["Langfuse UI", "Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
 <Tab>
 
 <CloudflareVideo
@@ -117,7 +156,40 @@ _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d
 </Tab>
 <Tab>
 
-Decorators
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def process_data():
+    # Make the current trace public
+    langfuse.update_current_trace(public=True)
+```
+
+When using context managers:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+with langfuse.start_as_current_span(name="process-request") as span:
+    # Make this trace public
+    span.update_trace(public=True)
+
+    # Get the URL to share
+    trace_id = langfuse.get_current_trace_id()
+    trace_url = langfuse.get_trace_url(trace_id=trace_id)
+    print(f"Share this trace at: {trace_url}")
+```
+
+</Tab>
+<Tab>
+
+When using the `@observe()` decorator:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -131,7 +203,7 @@ def fn():
 fn()
 ```
 
-Low-level SDK
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```diff
 trace = langfuse.trace(

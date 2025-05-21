@@ -25,7 +25,7 @@ import EnvJs from "@/components-mdx/env-js.mdx";
 import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
 import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
 
-<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","Python (low-level)","API"]}>
+<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","Python SDK (v3)","Python SDK (v2)","API"]}>
 
 <Tab>
 {/* Decorator + OpenAI */}
@@ -84,6 +84,10 @@ Example usage, most of the parameters are optional and depend on the use case. F
 The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
 
 ```bash
+# For v3 (OpenTelemetry-based SDK - beta)
+pip install "langfuse>=3.0.0b1"
+
+# For v2
 pip install langfuse
 ```
 
@@ -165,9 +169,71 @@ Traces and metrics from your LlamaIndex application are now automatically tracke
 
 </Tab>
 <Tab>
-{/* Python low-level */}
+{/* Python SDK (v3) */}
 
-The [low-level SDK](/docs/sdk/python/low-level-sdk) gives you full control over the traces logged to Langfuse. For a less verbose integration, consider using the `@observe()` decorator.
+The [OpenTelemetry-based SDK (v3)](/docs/sdk/python/otel_based_sdk_v3) is the latest generation of the Python SDK with improved developer experience and enhanced ease of use.
+
+```bash
+pip install "langfuse>=3.0.0b1"
+```
+
+<EnvPython />
+
+Example usage of the v3 SDK using context managers:
+
+```python filename="server.py"
+from langfuse import Langfuse
+
+# Create Langfuse client
+langfuse = Langfuse()
+
+# Create a trace with a root span
+with langfuse.start_as_current_span(
+    name="user-request-pipeline",
+    input={"user_query": "Summarize the Q3 OKR documents"}
+) as root_span:
+    # Add trace attributes
+    root_span.update_trace(
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["summary", "okr"]
+    )
+
+    # Create a nested generation for the LLM call
+    with langfuse.start_as_current_generation(
+        name="summary-generation",
+        model="gpt-4o",
+        model_parameters={"temperature": 0.7, "max_tokens": 1000},
+        input=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}
+        ]
+    ) as generation:
+        # Simulate an LLM call
+        llm_response = "The Q3 OKRs contain goals for multiple teams..."
+        token_usage = {"input_tokens": 50, "output_tokens": 120}
+
+        # Update the generation with results
+        generation.update(
+            output=llm_response,
+            usage_details=token_usage
+        )
+
+    # Update the root span with final output
+    root_span.update(output={"summary": llm_response})
+
+# The SDK executes network requests in the background.
+# To ensure that all requests are sent before the process exits, call flush()
+langfuse.flush()
+```
+
+For more information, see the [Python SDK v3 documentation](/docs/sdk/python/otel_based_sdk_v3).
+
+</Tab>
+<Tab>
+{/* Python SDK (v2) */}
+
+The [low-level SDK (v2)](/docs/sdk/python/low-level-sdk) gives you full control over the traces logged to Langfuse. For a less verbose integration, consider using the `@observe()` decorator or the v3 SDK.
 
 ```bash
 pip install langfuse
@@ -175,7 +241,7 @@ pip install langfuse
 
 <EnvPython />
 
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python).
+Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python/low-level-sdk).
 
 ```python filename="server.py"
 from langfuse import Langfuse
@@ -278,7 +344,13 @@ import IconOpenai from "@/components/icons/openai";
   />
   <Card
     icon={<IconPython />}
-    title="Python low-level SDK"
+    title="Python SDK (v3)"
+    href="/docs/sdk/python/otel_based_sdk_v3"
+    arrow
+  />
+  <Card
+    icon={<IconPython />}
+    title="Python SDK (v2)"
     href="/docs/sdk/python/low-level-sdk"
     arrow
   />
