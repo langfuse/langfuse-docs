@@ -98,6 +98,69 @@ flowchart TD
 
 </div>
 
+### Database Abstraction
+
+Before we could start the dashboard, we had to decide how to abstract our data model.
+Directly exposing our database felt like the wrong move as this would lock us from updating the data model and may not fit the mental model of our customers.
+Therefore, we decided to build custom dashboards around the [tracing data model](/docs/tracing-data-model.mdx).
+
+For this purpose, we created a virtual data model that contains the full definition of what we expose.
+It is used to fill the frontend, including units and documentation, and also used for validations on the backend.
+Below, you can find an excerpt of the Trace definition.
+
+```ts filename="Virtual Data Model"
+export const traceView: ViewDeclarationType = {
+  name: "traces",
+  description:
+    "Traces represent a group of observations and typically represent a single request or operation.",
+  dimensions: {
+    name: {
+      sql: "name",
+      type: "string",
+      description:
+        "Name assigned to the trace (often the endpoint or operation).",
+    },
+    userId: {
+      sql: "user_id",
+      alias: "userId",
+      type: "string",
+      description: "Identifier of the user triggering the trace.",
+    },
+  },
+  measures: {
+    count: {
+      sql: "count(*)",
+      alias: "count",
+      type: "integer",
+      description: "Total number of traces.",
+      unit: "traces",
+    },
+    latency: {
+      sql: "date_diff('millisecond', min(observations.start_time), max(observations.end_time))",
+      alias: "latency",
+      type: "integer",
+      relationTable: "observations",
+      description:
+        "Elapsed time between the first and last observation inside the trace.",
+      unit: "millisecond",
+    },
+  },
+  tableRelations: {
+    observations: {
+      name: "observations",
+      joinConditionSql:
+        "ON traces.id = observations.trace_id AND traces.project_id = observations.project_id",
+      timeDimension: "start_time",
+    },
+  },
+  segments: [],
+  timeDimension: "timestamp",
+  baseCte: `traces FINAL`,
+};
+```
+
+This declarative definition helps us to decouple the database from the request schema and enables us to quickly define new measures and dimensions.
+
 ### Query Builder
 
 The hardest challenge around the dashboards, and something we knew right away, was **getting the query builder right**.
