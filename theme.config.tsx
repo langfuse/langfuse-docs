@@ -14,8 +14,9 @@ import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
-// import InkeepCustomTrigger from "./components/inkeep/InkeepCustomTrigger";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
+import Image from "next/image";
+import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -196,15 +197,32 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-3",
-    dismissible: true,
+    key: "ph-prompt-experiments",
+    dismissible: false,
     content: (
       <Link href="/ph">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse live on Product Hunt: Custom Dashboards →</span>
+        <span className="sm:hidden">
+          ✨ Today: Support us on{" "}
+          <Image
+            src={ProductHuntWhiteImage}
+            alt="Product Hunt"
+            height={25}
+            className="inline mx-1"
+          />{" "}
+          ✨
+        </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        On Product Hunt: Custom Dashboards →
+          ✨ Today: Support <span className="font-bold">Custom Dashboards</span>{" "}
+          on{" "}
+          <Image
+            src={ProductHuntWhiteImage}
+            alt="Product Hunt"
+            height={25}
+            className="inline mx-1"
+          />{" "}
+          ✨
         </span>
       </Link>
     ),
