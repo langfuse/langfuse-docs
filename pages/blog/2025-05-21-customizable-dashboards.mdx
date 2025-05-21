@@ -1,9 +1,9 @@
 ---
 title: "How we Built Scalable & Customizable Dashboards"
 date: 2025/05/21
-description: "A technical deep dive into how we built Langfuse's flexible, real-time dashboard system for LLM monitoring."
+description: "A technical deep dive into the core abstractions and architecture"
 tag: engineering
-ogImage: /images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png
+ogImage: /images/blog/2025-05-21-customizable-dashboards/og.png
 author: Steffen
 ---
 
@@ -11,9 +11,9 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="How we Built Scalable & Customizable Dashboards"
-  description="A technical deep dive into how we built Langfuse's flexible, real-time dashboard system for LLM monitoring"
+  description="A technical deep dive into the core abstractions and architecture"
   authors={["steffenschmitz"]}
-  image="/images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png"
+  image="/images/blog/2025-05-21-customizable-dashboards/og.png"
   date="May 21, 2025"
 />
 
@@ -21,7 +21,9 @@ On Day 3 of [Langfuse Launch Week 3](/blog/2025-05-19-launch-week-3), we introdu
 Whether you want to track latency trends, monitor user feedback, or correlate cost with performance, our new dashboards let you build the charts you need - right where you need them.
 And for those who prefer working in their own analytics stack, we've made the same querying capabilities available via our API ([docs](/pages/docs/analytics/metrics-api.mdx)).
 
-In this post, I'll take you behind the scenes: from our product thinking to the technical implementation, testing, and rollout—and share the lessons we learned in building flexible, real-time insights into your LLM pipelines.
+<div className="bg-card p-4 rounded w-full border my-3">
+
+For context: quick demo of the finished product
 
 <iframe
   width="100%"
@@ -29,9 +31,13 @@ In this post, I'll take you behind the scenes: from our product thinking to the 
   title="Custom Dashboard Launch Video"
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  className="aspect-video rounded border mt-6"
+  className="aspect-video rounded border mt-3"
   allowFullScreen
 ></iframe>
+
+</div>
+
+In this post, I'll take you behind the scenes: from our product thinking to the technical implementation, testing, and rollout—and share the lessons we learned in building flexible, real-time insights into your LLM pipelines.
 
 ## Motivation
 
@@ -51,7 +57,17 @@ Early in March, I set out to finally implement it and now, I'll take you on the 
 
 ## Architecture: Building for Flexibility, Performance, Maintainability
 
-<div className="bg-card p-4 rounded w-full border max-w-lg">
+Dashboards are built on top of 3 major components:
+
+1. Database/metrics Abstraction
+2. Query Builder
+3. Dashboard Builder
+
+Let's dive into each of these and show how we can use them to build the dashboards.
+
+<div className="bg-card p-4 rounded w-full border max-w-lg mx-auto mt-10 mb-3">
+
+**Architecture diagram**
 
 ```mermaid
 flowchart TD
@@ -117,6 +133,7 @@ export const traceView: ViewDeclarationType = {
     name: {
       sql: "name",
       type: "string",
+      // include documentation
       description:
         "Name assigned to the trace (often the endpoint or operation).",
     },
@@ -129,17 +146,17 @@ export const traceView: ViewDeclarationType = {
   },
   measures: {
     count: {
-      sql: "count(*)",
+      sql: "count(*)", // measures can be columns or expressions
       alias: "count",
       type: "integer",
       description: "Total number of traces.",
-      unit: "traces",
+      unit: "traces", // units used for charts and documentation
     },
     latency: {
       sql: "date_diff('millisecond', min(observations.start_time), max(observations.end_time))",
       alias: "latency",
       type: "integer",
-      relationTable: "observations",
+      relationTable: "observations", // indicates that join is needed
       description:
         "Elapsed time between the first and last observation inside the trace.",
       unit: "millisecond",
@@ -150,7 +167,7 @@ export const traceView: ViewDeclarationType = {
       name: "observations",
       joinConditionSql:
         "ON traces.id = observations.trace_id AND traces.project_id = observations.project_id",
-      timeDimension: "start_time",
+      timeDimension: "start_time", // all tables are filtered by time for performance
     },
   },
   segments: [],
