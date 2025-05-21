@@ -1,12 +1,12 @@
 ---
 title: Observability for CrewAI with Langfuse
-description: Learn how to integrate Langfuse with CrewAI via OpenTelemetry using OpenLit
+description: Learn how to integrate Langfuse with CrewAI via OpenTelemetry using MLflow
 category: Integrations
 ---
 
 # Integrate Langfuse with CrewAI
 
-This notebook demonstrates how to integrate **Langfuse** with **CrewAI** using OpenTelemetry via the **OpenLit** SDK. By the end of this notebook, you will be able to trace your CrewAI applications with Langfuse for improved observability and debugging.
+This notebook demonstrates how to integrate **Langfuse** with **CrewAI** using OpenTelemetry via the **MLflow** SDK. By the end of this notebook, you will be able to trace your CrewAI applications with Langfuse for improved observability and debugging.
 
 > **What is CrewAI?** [CrewAI](https://github.com/crewAIInc/crewAI) is a framework for orchestrating autonomous AI agents. CrewAI enables you to create AI teams where each agent has specific roles, tools, and goals, working together to accomplish complex tasks. Each member (agent) brings unique skills and expertise, collaborating seamlessly to achieve your objectives.
 
@@ -14,14 +14,13 @@ This notebook demonstrates how to integrate **Langfuse** with **CrewAI** using O
 
 ## Get Started
 
-We'll walk through a simple example of using CrewAI and integrating it with Langfuse via OpenTelemetry using OpenLit.
+We'll walk through a simple example of using CrewAI and integrating it with Langfuse via OpenTelemetry using MLflow.
 
 ### Step 1: Install Dependencies
 
 
 ```python
-%pip install langfuse crewai crewai_tools transformers
-%pip install openlit=="1.33"
+%pip install mlflow crewai -q
 ```
 
 ### Step 2: Set Up Environment Variables
@@ -33,27 +32,28 @@ Set your Langfuse API keys and configure OpenTelemetry export settings to send t
 import os
 import base64
 
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_SECRET_KEY = "sk-lf-..."
 LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+os.environ["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel/v1/traces"  # 🇪🇺 EU data region
+# os.environ["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel/v1/traces"  # 🇺🇸 US data region
+os.environ["OTEL_EXPORTER_OTLP_TRACES_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+os.environ['OTEL_EXPORTER_OTLP_TRACES_PROTOCOL']= "http/protobuf"
 
 # your openai key
 os.environ["OPENAI_API_KEY"] = "sk-..."
 ```
 
-### Step 3: Initialize OpenLit
+### Step 3: Initialize MLflow
 
-Initialize the OpenLit OpenTelemetry instrumentation SDK to start capturing OpenTelemetry traces.
+Initialize the [MLflow OpenTelemetry instrumentation SDK](https://mlflow.org/docs/latest/api_reference/python_api/mlflow.crewai.html) to start capturing OpenTelemetry traces.
 
 
 ```python
-import openlit
+import mlflow
 
-openlit.init()
+mlflow.crewai.autolog()
 ```
 
 ### Step 4: Create a Simple CrewAI Application
@@ -100,6 +100,7 @@ _[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj
 
 - [Langfuse OpenTelemetry Docs](https://langfuse.com/docs/opentelemetry/get-started)
 - [CrewAI Documentation](https://docs.crewai.com/introduction)
+- [MLflow Documentation](https://mlflow.org/docs/latest/api_reference/python_api/mlflow.crewai.html)
 
 
 

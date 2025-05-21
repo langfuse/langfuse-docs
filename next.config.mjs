@@ -127,7 +127,7 @@ const nonPermanentRedirects = [
   ["/video", "/watch-demo"],
   ["/docs/video", "/watch-demo"],
   ["/roadmap", "/docs/roadmap"],
-  ["/ph", "https://www.producthunt.com/products/langfuse"],
+  ["/ph", "https://www.producthunt.com/posts/langfuse-analytics"],
   ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/new-issue", "/issue"],

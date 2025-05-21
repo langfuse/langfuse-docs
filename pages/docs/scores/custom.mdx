@@ -137,6 +137,18 @@ await langfuse.score({
 
 </Tabs>
 
+### Update an existing score
+
+When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
+
+If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter when initially creating the score.
+
+### Prevent duplicated scores via an idempotency key
+
+By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
+
+In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an idempotency key on the score and add this as an `id` when creating the score, e.g. `<trace_id>-<score_name>`.
+
 ### How to ensure your scores comply with a certain schema
 
 Given your scores are required to follow a specific schema such as data range, name or data type, you can define and reference a [`score configuration (config)`](/docs/scores/custom#creating-score-config-object-in-langfuse) on your scores. Configs are helpful when you want to standardize your scores for future analysis. They can be defined in the Langfuse UI or via our API.
