@@ -244,6 +244,7 @@ const nonPermanentRedirects = [
   ["/self-hosting/docker", "/self-hosting/kubernetes-helm"],
   ["/docs/analytics/posthog", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
+  ["/docs/analytics/daily-metrics-api", "/docs/analytics/metrics-api#daily-metrics"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
