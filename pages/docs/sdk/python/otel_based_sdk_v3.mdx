@@ -397,6 +397,44 @@ with langfuse.start_as_current_span(
     pass
 ```
 
+## Client Management
+
+### `flush()`
+
+Manually triggers the sending of all buffered observations (spans, generations, scores, media metadata) to the Langfuse API. This is useful in short-lived scripts or before exiting an application to ensure all data is persisted.
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+# ... create traces and observations ...
+langfuse.flush() # Ensures all pending data is sent
+```
+
+The `flush()` method blocks until the queued data is processed by the respective background threads.
+
+### `shutdown()`
+
+Gracefully shuts down the Langfuse client. This includes:
+
+1.  Flushing all buffered data (similar to `flush()`).
+2.  Waiting for background threads (for data ingestion and media uploads) to finish their current tasks and terminate.
+
+It's crucial to call `shutdown()` before your application exits to prevent data loss and ensure clean resource release. The SDK automatically registers an `atexit` hook to call `shutdown()` on normal program termination, but manual invocation is recommended in scenarios like:
+
+- Long-running daemons or services when they receive a shutdown signal.
+- Applications where `atexit` might not reliably trigger (e.g., certain serverless environments or forceful terminations).
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+# ... application logic ...
+
+# Before exiting:
+langfuse.shutdown()
+```
+
 ## `@observe` Decorator
 
 The `@observe()` decorator provides a convenient way to automatically trace function executions, including capturing their inputs, outputs, execution time, and any errors. It supports both synchronous and asynchronous functions.
@@ -525,6 +563,12 @@ The callback handler maps various Langchain events to Langfuse observations:
 
 Langfuse attempts to parse model names, usage, and other relevant details from the information provided by Langchain. The `metadata` argument in Langchain calls can be used to pass additional information to Langfuse, including `langfuse_prompt` to link with managed prompts.
 
+### Third-party integrations
+
+The Langfuse SDK seamlessly integrates with any third-party library that uses OpenTelemetry instrumentation. When these libraries emit spans, they are automatically captured and properly nested within your trace hierarchy. This enables unified tracing across your entire application stack without requiring any additional configuration.
+
+For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
+
 ## Scoring
 
 Scores are used to evaluate traces or individual observations (spans/generations). They can represent metrics like quality, user feedback, or automated evaluations.
@@ -624,7 +668,7 @@ langfuse.create_dataset_item(
 
 ### Linking Traces to Dataset Items for Runs
 
-The most powerful way to use datasets is by linking your application's executions (traces) to specific dataset items when performing an evaluation run. The `DatasetItemClient.run()` method provides a context manager to streamline this process.
+The most powerful way to use datasets is by linking your application's executions (traces) to specific dataset items when performing an evaluation run. See our [datasets documentation](/docs/datasets) for more details. The `DatasetItemClient.run()` method provides a context manager to streamline this process.
 
 **How `item.run()` works:**
 
@@ -765,46 +809,6 @@ If a trace is not sampled, none of its observations (spans, generations) or asso
 langfuse_sampled = Langfuse(sample_rate=0.2)
 ```
 
----
-
-## Client Management
-
-### `flush()`
-
-Manually triggers the sending of all buffered observations (spans, generations, scores, media metadata) to the Langfuse API. This is useful in short-lived scripts or before exiting an application to ensure all data is persisted.
-
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-# ... create traces and observations ...
-langfuse.flush() # Ensures all pending data is sent
-```
-
-The `flush()` method blocks until the queued data is processed by the respective background threads.
-
-### `shutdown()`
-
-Gracefully shuts down the Langfuse client. This includes:
-
-1.  Flushing all buffered data (similar to `flush()`).
-2.  Waiting for background threads (for data ingestion and media uploads) to finish their current tasks and terminate.
-
-It's crucial to call `shutdown()` before your application exits to prevent data loss and ensure clean resource release. The SDK automatically registers an `atexit` hook to call `shutdown()` on normal program termination, but manual invocation is recommended in scenarios like:
-
-- Long-running daemons or services when they receive a shutdown signal.
-- Applications where `atexit` might not reliably trigger (e.g., certain serverless environments or forceful terminations).
-
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-# ... application logic ...
-
-# Before exiting:
-langfuse.shutdown()
-```
-
 ## Upgrade from v2
 
 The v3 SDK introduces significant improvements and changes compared to v2. It is **not fully backward compatible**. Here's a summary of key differences and migration steps:
@@ -879,6 +883,10 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 
 10. **LlamaIndex Integration**:
     - There is no Langfuse-specific integration for LlamaIndex. Please use any third-party OTEL-based LlamaIndex instrumentations to get Langfuse traces for your LlamaIndex applications.
+
+### Future support for v2
+
+We will continue to support the v2 SDK for the foreseeable future with critical bug fixes and security patches. We will not be adding any new features to the v2 SDK.
 
 ## Troubleshooting
 
