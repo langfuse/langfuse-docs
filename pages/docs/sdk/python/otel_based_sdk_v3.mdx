@@ -14,13 +14,17 @@ The v3 SDK introduces several key benefits:
 - **Unified Context Sharing**: Seamlessly hook into the tracing context of the current span to update it or create child spans. This is particularly beneficial for integrating with other instrumented libraries.
 - **Broad Third-Party Integrations**: Any library instrumented with OpenTelemetry will work out-of-the-box with the Langfuse SDK. Spans from these libraries are automatically captured and correctly nested within your Langfuse traces.
 
+<Callout type="info">
+
 The SDK is currently in **beta**. We highly value your feedback\! If you encounter any issues or have suggestions, please let us know on [GitHub](https://github.com/langfuse/langfuse/issues).
+
+</Callout>
 
 ## Setup
 
 ### Installation
 
-The v3 SDK is available as a beta release on PyPI. To install it, run:
+The v3 SDK is available as a beta release. To install it, run:
 
 ```bash
 pip install "langfuse>=3.0.0b1"
@@ -32,7 +36,7 @@ Begin by initializing the `Langfuse` client. You must provide your Langfuse publ
 
 If you are self-hosting Langfuse or using a data region other than the default (EU, `https://cloud.langfuse.com`), ensure you configure the `host` argument or the `LANGFUSE_HOST` environment variable.
 
-You can verify your credentials and connectivity to the Langfuse server using `langfuse.auth_check()`.
+You can verify your credentials and connectivity to the Langfuse server using `langfuse.auth_check()`. We do not recommend using this in production as this adds latency to your application.
 
 ```python
 from langfuse import Langfuse
