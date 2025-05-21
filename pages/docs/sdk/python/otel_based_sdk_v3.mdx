@@ -264,6 +264,14 @@ child_gen.end()
 parent.end()
 ```
 
+Resulting trace in Langfuse:
+
+```
+- manual-parent
+  |- manual-child-span
+  |- manual-child-generation
+```
+
 ### Updating Observations
 
 You can update observations with new information as your code executes.
@@ -636,9 +644,11 @@ Scores are used to evaluate traces or individual observations (spans/generations
 | `comment`        | `Optional[str]`           | Optional comment or explanation for the score.                                                                         |
 | `config_id`      | `Optional[str]`           | Optional ID of a pre-defined score configuration in Langfuse.                                                          |
 
+See [Scoring](/docs/scores/overview) for more details.
+
 ## Datasets
 
-Langfuse Datasets are essential for evaluating and testing your LLM applications by allowing you to manage collections of inputs and their expected outputs.
+[Langfuse Datasets](/docs/datasets/overview) are essential for evaluating and testing your LLM applications by allowing you to manage collections of inputs and their expected outputs.
 
 ### Interacting with Datasets
 
