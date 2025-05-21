@@ -61,7 +61,7 @@ else:
 Key configuration options:
 
 | Constructor Argument        | Environment Variable                 | Description                                                                                                                           | Default value                  |
-| :-------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------- |
+| --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | `public_key`                | `LANGFUSE_PUBLIC_KEY`                | Your Langfuse project's public API key. **Required.**                                                                                 |                                |
 | `secret_key`                | `LANGFUSE_SECRET_KEY`                | Your Langfuse project's secret API key. **Required.**                                                                                 |                                |
 | `host`                      | `LANGFUSE_HOST`                      | The API host for your Langfuse instance.                                                                                              | `"https://cloud.langfuse.com"` |
@@ -72,7 +72,7 @@ Key configuration options:
 | `flush_at`                  | `LANGFUSE_FLUSH_AT`                  | Number of spans to batch before sending to the API.                                                                                   | `512`                          |
 | `flush_interval`            | `LANGFUSE_FLUSH_INTERVAL`            | Time in seconds between batch flushes.                                                                                                | `5`                            |
 | `environment`               | `LANGFUSE_TRACING_ENVIRONMENT`       | Environment name for tracing (e.g., "development", "staging", "production"). Must be lowercase alphanumeric with hyphens/underscores. | `"default"`                    |
-| `release`                   | `LANGFUSE_RELEASE`                   | Release version/hash of your application. Used for grouping analytics.                                                                |                                |
+| `release`                   | `LANGFUSE_RELEASE`                   | [Release](/docs/tracing-features/releases-and-versioning) version/hash of your application. Used for grouping analytics.              |                                |
 | `media_upload_thread_count` | `LANGFUSE_MEDIA_UPLOAD_THREAD_COUNT` | Number of background threads for handling media uploads.                                                                              | `1`                            |
 | `sample_rate`               | `LANGFUSE_SAMPLE_RATE`               | Sampling rate for traces (float between 0.0 and 1.0). `1.0` means 100% of traces are sampled.                                         | `1.0`                          |
 | `mask`                      | -                                    | A function `(data: Any) -> Any` to mask sensitive data in traces before sending to the API.                                           |                                |
