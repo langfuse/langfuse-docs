@@ -109,7 +109,7 @@ curl \
     "fromTimestamp": "2025-05-01T00:00:00Z",
     "toTimestamp": "2025-05-13T00:00:00Z"
   }' \
-  https://cloud.langfuse.com:3000/api/public/metrics
+  https://cloud.langfuse.com/api/public/metrics
 ```
 
 Response:
@@ -230,3 +230,104 @@ Categorical scores have an additional dimension:
 | Dimension     | Type   | Description                           |
 |---------------|--------|---------------------------------------|
 | `stringValue` | string | String value of the categorical score |
+
+## Daily Metrics API (Legacy) [#daily-metrics]
+
+
+<Callout type="warning">
+
+  This API is a legacy API. For new use cases, please use the [Metrics API](/docs/analytics/metrics-api) instead.
+  It has higher rate-limits and offers more flexibility.
+
+</Callout>
+
+```
+GET /api/public/metrics/daily
+```
+
+Via the **Daily Metrics API**, you can retrieve aggregated daily usage and cost metrics from Langfuse for downstream use, e.g., in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags for tailored data retrieval.
+
+See [API reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/metrics/daily) for more details.
+
+### Overview
+
+Returned data includes daily timeseries of:
+
+- [Cost](/docs/model-usage-and-cost) in USD
+- Trace and observation count
+- Break down by model name
+- Usage (e.g. tokens) broken down by input and output usage
+- [Cost](/docs/model-usage-and-cost) in USD
+- Trace and observation count
+
+Optional filters:
+
+- `traceName` to commonly filter by the application type, depending on how you use `name` in your traces
+- `userId` to filter by [user](/docs/tracing-features/users)
+- `tags` to filter by [tags](/docs/tracing-features/tags)
+- `fromTimestamp`
+- `toTimestamp`
+
+Missing a key metric or filter? Request it via our [idea board](/ideas).
+
+### Example
+
+```
+GET /api/public/metrics/daily?traceName=my-copilot&userId=john&limit=2
+```
+
+```json
+{
+  "data": [
+    {
+      "date": "2024-02-18",
+      "countTraces": 1500,
+      "countObservations": 3000,
+      "totalCost": 102.19,
+      "usage": [
+        {
+          "model": "llama2",
+          "inputUsage": 1200,
+          "outputUsage": 1300,
+          "totalUsage": 2500,
+          "countTraces": 1000,
+          "countObservations": 2000,
+          "totalCost": 50.19
+        },
+        {
+          "model": "gpt-4",
+          "inputUsage": 500,
+          "outputUsage": 550,
+          "totalUsage": 1050,
+          "countTraces": 500,
+          "countObservations": 1000,
+          "totalCost": 52.0
+        }
+      ]
+    },
+    {
+      "date": "2024-02-17",
+      "countTraces": 1250,
+      "countObservations": 2500,
+      "totalCost": 250.0,
+      "usage": [
+        {
+          "model": "llama2",
+          "inputUsage": 1000,
+          "outputUsage": 1100,
+          "totalUsage": 2100,
+          "countTraces": 1250,
+          "countObservations": 2500,
+          "totalCost": 250.0
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 2,
+    "totalItems": 60,
+    "totalPages": 30
+  }
+}
+```

@@ -7,6 +7,7 @@ export default {
   auth: "Authentication & Authorization",
   encryption: "Encryption",
   "data-regions": "Data Regions & Availability",
+  networking: "Networking",
   dependencies: "Software Dependencies",
   "incident-and-breach": "Incident & Breach",
   "responsible-disclosure": "Responsible Disclosure",
