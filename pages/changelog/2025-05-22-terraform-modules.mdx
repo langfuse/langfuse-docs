@@ -1,0 +1,221 @@
+---
+date: 2025-05-22
+title: "Terraform Modules for AWS, Azure and GCP"
+description: Deploy Langfuse on AWS, GCP, or Azure using our new Terraform modules.
+badge: Launch Week 3 🚀
+author: Steffen
+ogImage: /images/changelog/2025-05-22-hyperscaler-terraform-modules/hyperscaler-templates.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+<iframe
+  width="100%"
+  src="https://www.youtube.com/embed/fJqLIVgxink"
+  title="Terraform Modules for AWS, Azure and GCP"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+## Overview
+
+**Day 4 of [Launch Week #3](/blog/2025-05-19-launch-week-3)** makes it even easier for our self-hosters to run Langfuse on their infrastructure.
+In addition to our [Kubernetes Helm Chart](https://github.com/langfuse/langfuse-k8s) we are adding Terraform modules that let you deploy Langfuse on [AWS](https://github.com/langfuse/langfuse-terraform-aws), [GCP](https://github.com/langfuse/langfuse-terraform-gcp), and [Azure](https://github.com/langfuse/langfuse-terraform-azure).
+Create your own scalable Langfuse environment within minutes on your favorite hyperscaler.
+
+## Key Features
+
+- **Native Services**: The Terraform modules use native services wherever possible like RDS, S3, and ElastiCache for AWS.
+- **Scalable**: The Terraform modules deploy highly-available, scalable clusters by default.
+- **Batteries included**: The Terraform modules include everything you need from VPC, to storage, to services.
+
+## Get Started
+
+Use the following snippets to include the respective module in your Terraform code and deploy Langfuse.
+
+  <Tabs items={["AWS", "GCP","Azure"]}>
+
+    <Tab>
+
+      Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-aws) for the full deployment guide.
+
+      ```terraform
+      module "langfuse" {
+        source = "github.com/langfuse/langfuse-terraform-aws?ref=0.2.3"
+
+        domain = "langfuse.example.com"
+
+        # Optional use a different name for your installation
+        # e.g. when using the module multiple times on the same AWS account
+        name   = "langfuse"
+
+        # Optional: Configure the VPC
+        vpc_cidr = "10.0.0.0/16"
+        use_single_nat_gateway = false  # Using a single NAT gateway decreases costs, but is less resilient
+
+        # Optional: Configure the Kubernetes cluster
+        kubernetes_version = "1.32"
+        fargate_profile_namespaces = ["kube-system", "langfuse", "default"]
+
+        # Optional: Configure the database instances
+        postgres_instance_count = 2
+        postgres_min_capacity = 0.5
+        postgres_max_capacity = 2.0
+
+        # Optional: Configure the cache
+        cache_node_type = "cache.t4g.small"
+        cache_instance_count = 2
+      }
+
+      provider "kubernetes" {
+        host                   = module.langfuse.cluster_host
+        cluster_ca_certificate = module.langfuse.cluster_ca_certificate
+        token                  = module.langfuse.cluster_token
+
+        exec {
+          api_version = "client.authentication.k8s.io/v1beta1"
+          command     = "aws"
+          args        = ["eks", "get-token", "--cluster-name", module.langfuse.cluster_name]
+        }
+      }
+
+      provider "helm" {
+        kubernetes {
+          host                   = module.langfuse.cluster_host
+          cluster_ca_certificate = module.langfuse.cluster_ca_certificate
+          token                  = module.langfuse.cluster_token
+
+          exec {
+            api_version = "client.authentication.k8s.io/v1beta1"
+            command     = "aws"
+            args        = ["eks", "get-token", "--cluster-name", module.langfuse.cluster_name]
+          }
+        }
+      }
+      ```
+
+    </Tab>
+
+    <Tab>
+
+      Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-gcp) for the full deployment guide.
+
+      ```terraform
+      module "langfuse" {
+        source = "github.com/langfuse/langfuse-terraform-gcp?ref=0.1.0"
+
+        domain = "langfuse.example.com"
+
+        # Optional use a different name for your installation
+        # e.g. when using the module multiple times on the same GCP project
+        name   = "langfuse"
+
+        # Optional: Configure the VPC
+        subnetwork_cidr = "10.0.0.0/16"
+      }
+
+      provider "kubernetes" {
+        host                   = module.langfuse.cluster_host
+        cluster_ca_certificate = module.langfuse.cluster_ca_certificate
+        token                  = module.langfuse.cluster_token
+      }
+
+      provider "helm" {
+        kubernetes {
+          host                   = module.langfuse.cluster_host
+          cluster_ca_certificate = module.langfuse.cluster_ca_certificate
+          token                  = module.langfuse.cluster_token
+        }
+      }
+      ```
+
+    </Tab>
+
+    <Tab>
+
+      Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-azure) for the full deployment guide.
+
+      ```terraform
+      module "langfuse" {
+        source = "github.com/langfuse/langfuse-terraform-azure?ref=0.1.0"
+
+        domain              = "langfuse.example.com"
+        location            = "westeurope"  # Optional: defaults to westeurope
+
+        # Optional use a different name for your installation
+        # e.g. when using the module multiple times on the same Azure subscription
+        name = "langfuse"
+
+        # Optional: Configure the Virtual Network
+        virtual_network_address_prefix = "10.224.0.0/12"
+        aks_subnet_address_prefix     = "10.224.0.0/16"
+        app_gateway_subnet_address_prefix = "10.225.0.0/16"
+        db_subnet_address_prefix      = "10.226.0.0/24"
+        redis_subnet_address_prefix   = "10.226.1.0/24"
+        storage_subnet_address_prefix = "10.226.2.0/24"
+
+        # Optional: Configure the Kubernetes cluster
+        kubernetes_version = "1.32"
+        aks_service_cidr   = "192.168.0.0/20"
+        aks_dns_service_ip = "192.168.0.10"
+        node_pool_vm_size  = "Standard_D8s_v6"
+        node_pool_min_count = 2
+        node_pool_max_count = 10
+
+        # Optional: Configure the database instances
+        postgres_instance_count = 2
+        postgres_ha_mode       = "SameZone"
+        postgres_sku_name      = "GP_Standard_D2s_v3"
+        postgres_storage_mb    = 32768
+
+        # Optional: Configure the cache
+        redis_sku_name = "Basic"
+        redis_family   = "C"
+        redis_capacity = 1
+
+        # Optional: Configure Application Gateway
+        app_gateway_capacity = 1
+
+        # Optional: Security features
+        use_encryption_key = false
+        use_ddos_protection = true
+      }
+
+      provider "kubernetes" {
+        host                   = module.langfuse.aks_cluster_host
+        client_certificate     = base64decode(module.langfuse.aks_cluster_client_certificate)
+        client_key             = base64decode(module.langfuse.aks_cluster_client_key)
+        cluster_ca_certificate = base64decode(module.langfuse.aks_cluster_ca_certificate)
+      }
+
+      provider "helm" {
+        kubernetes {
+          host                   = module.langfuse.aks_cluster_host
+          client_certificate     = base64decode(module.langfuse.aks_cluster_client_certificate)
+          client_key             = base64decode(module.langfuse.aks_cluster_client_key)
+          cluster_ca_certificate = base64decode(module.langfuse.aks_cluster_ca_certificate)
+        }
+      }
+      ```
+
+    </Tab>
+
+  </Tabs>
+
+## Learn More
+
+Refer to our [self-hosting docs](/self-hosting) for more information or view the cloud specific deployment guides:
+
+- [Kubernetes](/self-hosting/kubernetes-helm)
+- [AWS](/self-hosting/aws)
+- [GCP](/self-hosting/gcp)
+- [Azure](/self-hosting/azure)
+
+## Questions or feedback?
+
+Please open an issue within the respective repositories if you encounter any problems.
