@@ -722,6 +722,68 @@ The Langfuse SDK seamlessly integrates with any third-party library that uses Op
 
 For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
 
+<Tabs items={["Example Anthropic", "Example LlamaIndex"]}>
+
+<Tab>
+You can use any third-party, OTEL-based instrumentation library for Anthropic to automatically trace all your Anthropic API calls in Langfuse. 
+
+In this example, we are using the [`opentelemetry-instrumentation-anthropic` library](https://pypi.org/project/opentelemetry-instrumentation-anthropic/).
+
+```python
+from anthropic import Anthropic
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+
+from langfuse import get_client
+
+# This will automatically emit OTEL-spans for all Anthropic API calls
+AnthropicInstrumentor().instrument()
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+
+with langfuse.start_as_current_span(name="myspan"):
+    # This will be traced as a Langfuse generation nested under the current span
+    message = anthropic_client.messages.create(
+        model="claude-3-7-sonnet-20250219",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello, Claude"}],
+    )
+
+    print(message.content)
+
+# Flush events to Langfuse in short-lived applications
+langfuse.flush()
+```
+</Tab>
+
+<Tab>
+You can use any the third-party, OTEL-based instrumentation library for LlamaIndex to automatically trace your LlamaIndex calls in Langfuse. 
+
+In this example, we are using the [`openinference-instrumentation-llama-index` library](https://pypi.org/project/openinference-instrumentation-llama-index/).
+
+```python
+from llama_index.core.llms.openai import OpenAI
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+
+from langfuse import get_client
+
+LlamaIndexInstrumentor().instrument()
+
+langfuse = get_client()
+llm = OpenAI(model="gpt-4o")
+
+with langfuse.start_as_current_span(name="myspan"):
+    response = llm.complete("Hello, world!")
+    print(response)
+
+langfuse.flush()
+```
+
+</Tab>
+
+
+</Tabs>
+
 ## Scoring traces and observations
 
 
@@ -1005,7 +1067,7 @@ graph TD
 - **Langfuse Observation**: In Langfuse terminology, an "observation" is a Langfuse-specific representation of an OTEL span. It can be a generic span (Langfuse-span) or a specialized "generation" (Langfuse-generation) or a point in time event (Langfuse-event)
     - **Langfuse Span**: A Langfuse-span is a generic OTEL-span in Langfuse, designed for non-LLM operations.
     - **Langfuse Generation**: A Langfuse-generation is a specialized type of OTEL-span in Langfuse, designed specifically for Large Language Model (LLM) calls. It includes additional fields like `model`, `model_parameters`, `usage_details` (tokens), and `cost_details`.
-    - **Langfuse Event**: A Langfuse-event tracks a point-in-time action. 
+    - **Langfuse Event**: A Langfuse-event is tracks a point in time action. 
 - **Context Propagation**: OpenTelemetry automatically handles the propagation of the current trace and span context. This means when you call another function (whether it's also traced by Langfuse, an OTEL-instrumented library, or a manually created span), the new span will automatically become a child of the currently active span, forming a correct trace hierarchy.
 
 The Langfuse SDK provides wrappers around OTEL spans (`LangfuseSpan`, `LangfuseGeneration`) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTEL spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes.
@@ -1063,7 +1125,7 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
       - To update the _currently active_ observation without a direct reference, use `langfuse.update_current_span()` or `langfuse.update_current_generation()`.
       - For trace-level attributes, use `span_obj.update_trace()` or `langfuse.update_current_trace()`.
       - Trace tags are only merged server-side if delivered on different OTEL spans.
-      - Trace metadata is merged server-side when delivered via different spans.
+      - Trace metadata is merged server-side when delivered on different OTEL spans.
       - Metadata for both traces and observations are merged even within same span update calls if they are dicts and on different keys (only first level).
 
 7.  **Decorator (`@observe`)**:
@@ -1084,7 +1146,7 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
     - **v3**: Trace attributes must now be managed in an enclosing span.
 
 10. **LlamaIndex Integration**:
-    - There is no Langfuse-specific integration for LlamaIndex. Please use any third-party OTEL-based LlamaIndex instrumentations to get Langfuse traces for your LlamaIndex applications.
+    - There is no Langfuse-specific integration for LlamaIndex. Please use any third-party OTEL-based LlamaIndex instrumentations to get Langfuse traces for your LlamaIndex applications. See the [third-party integrations](#third-party-integrations) section for more information.
 
 ### Future support for v2
 
