@@ -197,15 +197,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-4",
+    key: "lw3-5",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-05-22-terraform-modules">
+      <Link href="/changelog/2025-05-23-otel-based-python-sdk">
         {/* mobile */}
-        <span className="sm:hidden">LW3 Day 4: Hyperscaler Terraform Modules →</span>
+        <span className="sm:hidden">LW3 Day 5: OTEL-based Python SDK →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Langfuse Launch Week #3, Day 4: Hyperscaler Terraform Modules →
+        Langfuse Launch Week #3, Day 5: OTEL-based Python SDK →
         </span>
       </Link>
     ),
