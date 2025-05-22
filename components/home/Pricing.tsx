@@ -739,9 +739,9 @@ const sections: Section[] = [
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "10 requests / day",
-            Core: "20 requests / day",
-            Pro: "200 requests / day",
+            Hobby: "100 requests / day",
+            Core: "200 requests / day",
+            Pro: "2000 requests / day",
             Enterprise: "Custom",
           },
         },

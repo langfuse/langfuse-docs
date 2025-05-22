@@ -14,8 +14,9 @@ import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
-// import InkeepCustomTrigger from "./components/inkeep/InkeepCustomTrigger";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
+import Image from "next/image";
+import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -196,15 +197,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-2",
+    key: "lw3-4",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-05-20-save-table-views">
+      <Link href="/changelog/2025-05-22-terraform-modules">
         {/* mobile */}
-        <span className="sm:hidden">LW3 Day 2: Save and share table views →</span>
+        <span className="sm:hidden">LW3 Day 4: Hyperscaler Terraform Modules →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Langfuse Launch Week #3, Day 2: Save and share table views →
+        Langfuse Launch Week #3, Day 4: Hyperscaler Terraform Modules →
         </span>
       </Link>
     ),

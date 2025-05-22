@@ -136,7 +136,6 @@ with tracer.start_as_current_span("AutoGen-Trace") as span:
     span.set_attribute("langfuse.user.id", "user-123")
     span.set_attribute("langfuse.session.id", "123456789")
     span.set_attribute("langfuse.tags", ["semantic-kernel", "demo"])
-    span.set_attribute("langfuse.prompt.name", "test-1")
 
     # Start the chat
     user_proxy.initiate_chat(
