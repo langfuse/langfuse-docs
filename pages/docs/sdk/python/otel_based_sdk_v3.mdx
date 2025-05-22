@@ -212,7 +212,51 @@ client = get_client()
 
 Langfuse provides flexible ways to create and manage traces and their constituent observations (spans and generations).
 
-### Creating Observations
+### `@observe` Decorator
+
+The `@observe()` decorator provides a convenient way to automatically trace function executions, including capturing their inputs, outputs, execution time, and any errors. It supports both synchronous and asynchronous functions.
+
+```python
+from langfuse import observe
+
+@observe()
+def my_data_processing_function(data, parameter):
+    # ... processing logic ...
+    return {"processed_data": data, "status": "ok"}
+
+@observe(name="llm-call", as_type="generation")
+async def my_async_llm_call(prompt_text):
+    # ... async LLM call ...
+    return "LLM response"
+```
+
+**Parameters:**
+
+- `name: Optional[str]`: Custom name for the created span/generation. Defaults to the function name.
+- `as_type: Optional[Literal["generation"]]`: If set to `"generation"`, a Langfuse generation object is created, suitable for LLM calls. Otherwise, a regular span is created.
+- `capture_input: bool`: Whether to capture function arguments as input. Defaults to `True`.
+- `capture_output: bool`: Whether to capture function return value as output. Defaults to `True`.
+- `transform_to_string: Optional[Callable[[Iterable], str]]`: For functions that return generators (sync or async), this callable can be provided to transform the collected chunks into a single string for the `output` field. If not provided, and all chunks are strings, they will be concatenated. Otherwise, the list of chunks is stored.
+
+**Trace Context and Special Keyword Arguments:**
+
+The `@observe` decorator automatically propagates the OTEL trace context. If a decorated function is called from within an active Langfuse span (or another OTEL span), the new observation will be nested correctly.
+
+You can also pass special keyword arguments to a decorated function to control its tracing behavior:
+
+- `langfuse_trace_id: str`: Explicitly set the trace ID for this function call. Must be a valid W3C Trace Context trace ID (32-char hex). If you have a trace ID from an external system, you can use `Langfuse.create_trace_id(seed=external_trace_id)` to generate a valid deterministic ID.
+- `langfuse_parent_observation_id: str`: Explicitly set the parent observation ID. Must be a valid W3C Trace Context span ID (16-char hex).
+
+```python
+@observe()
+def my_function(a, b):
+    return a + b
+
+# Call with a specific trace context
+my_function(1, 2, langfuse_trace_id="1234567890abcdef1234567890abcdef")
+```
+
+### Context Managers
 
 You can create spans or generations anywhere in your application. The primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
 
@@ -220,9 +264,9 @@ You can create spans or generations anywhere in your application. The primary wa
 - `langfuse.start_as_current_generation()`: Similar to the above, but creates a specialized "generation" observation for LLM calls.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 with langfuse.start_as_current_span(
     name="user-request-pipeline",
@@ -544,9 +588,9 @@ with langfuse.start_as_current_span(
 Manually triggers the sending of all buffered observations (spans, generations, scores, media metadata) to the Langfuse API. This is useful in short-lived scripts or before exiting an application to ensure all data is persisted.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 # ... create traces and observations ...
 langfuse.flush() # Ensures all pending data is sent
 ```
@@ -566,59 +610,15 @@ It's crucial to call `shutdown()` before your application exits to prevent data 
 - Applications where `atexit` might not reliably trigger (e.g., certain serverless environments or forceful terminations).
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 # ... application logic ...
 
 # Before exiting:
 langfuse.shutdown()
 ```
 
-## `@observe` Decorator
-
-The `@observe()` decorator provides a convenient way to automatically trace function executions, including capturing their inputs, outputs, execution time, and any errors. It supports both synchronous and asynchronous functions.
-
-```python
-from langfuse import observe
-
-@observe()
-def my_data_processing_function(data, parameter):
-    # ... processing logic ...
-    return {"processed_data": data, "status": "ok"}
-
-@observe(name="custom_llm_call_name", as_type="generation")
-async def my_async_llm_call(prompt_text):
-    # ... async LLM call ...
-    return "LLM response"
-```
-
-**Parameters:**
-
-- `name: Optional[str]`: Custom name for the created span/generation. Defaults to the function name.
-- `as_type: Optional[Literal["generation"]]`: If set to `"generation"`, a Langfuse generation object is created, suitable for LLM calls. Otherwise, a regular span is created.
-- `capture_input: bool`: Whether to capture function arguments as input. Defaults to `True`.
-- `capture_output: bool`: Whether to capture function return value as output. Defaults to `True`.
-- `transform_to_string: Optional[Callable[[Iterable], str]]`: For functions that return generators (sync or async), this callable can be provided to transform the collected chunks into a single string for the `output` field. If not provided, and all chunks are strings, they will be concatenated. Otherwise, the list of chunks is stored.
-
-**Trace Context and Special Keyword Arguments:**
-
-The `@observe` decorator automatically propagates the OTEL trace context. If a decorated function is called from within an active Langfuse span (or another OTEL span), the new observation will be nested correctly.
-
-You can also pass special keyword arguments to a decorated function to control its tracing behavior:
-
-- `langfuse_trace_id: str`: Explicitly set the trace ID for this function call.
-- `langfuse_parent_observation_id: str`: Explicitly set the parent observation ID.
-- `langfuse_public_key: str`: Use a specific Langfuse project client (useful in multi-project setups).
-
-```python
-@observe()
-def my_function(a, b):
-    return a + b
-
-# Call with a specific trace context
-my_function(1, 2, langfuse_trace_id="my_custom_trace_id_123")
-```
 
 ## Integrations
 
@@ -652,19 +652,26 @@ The integration is fully interoperable with `@observe` and manual tracing method
 You can pass Langfuse-specific arguments directly to OpenAI client methods. These will be used to enrich the trace data.
 
 ```python
+from langfuse import get_client
 from langfuse.openai import openai
+
+langfuse = get_client()
 
 client = openai.OpenAI()
 
-response = client.chat.completions.create(
-    name="qna-bot-openai",  # Custom name for this generation in Langfuse
-    metadata={"user_tier": "premium", "request_source": "web_api"}, # will be added to the Langfuse generation
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "What is OpenTelemetry?"}],
-)
+with langfuse.start_as_current_span(name="qna-bot-openai") as span:
+    langfuse.update_current_trace(tags=["qna-bot-openai"])
+
+    # This will be traced as a Langfuse generation
+    response = client.chat.completions.create(
+        name="qna-bot-openai",  # Custom name for this generation in Langfuse
+        metadata={"user_tier": "premium", "request_source": "web_api"}, # will be added to the Langfuse generation
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "What is OpenTelemetry?"}],
+    )
 ```
 
-Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`, `langfuse_public_key`.
+Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`
 
 ### Langchain Integration
 
@@ -675,9 +682,12 @@ Langfuse provides a callback handler for Langchain to trace its operations.
 Initialize the `CallbackHandler` and add it to your Langchain calls, either globally or per-call.
 
 ```python
+from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI # Example LLM
 from langchain_core.prompts import ChatPromptTemplate
+
+langfuse = get_client()
 
 # Initialize the Langfuse handler
 langfuse_handler = CallbackHandler()
@@ -687,8 +697,11 @@ llm = ChatOpenAI(model_name="gpt-4o")
 prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
-response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-print(response)
+with langfuse.start_as_current_span(name="joke-chain") as span:
+    langfuse.update_current_trace(tags=["joke-chain"])
+
+    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+    print(response)
 ```
 
 **What's captured:**
@@ -709,35 +722,12 @@ The Langfuse SDK seamlessly integrates with any third-party library that uses Op
 
 For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
 
-## Scoring
+## Scoring traces and observations
 
-Scores are used to evaluate traces or individual observations (spans/generations). They can represent metrics like quality, user feedback, or automated evaluations.
 
-**Scoring Traces vs. Observations:**
+<Tabs items={["LangfuseSpan / LangfuseGeneration object methods", "Context-aware methods", "Low-level method"]}>
 
-- **Observation Score**: Associated with a specific span or generation (e.g., relevance of an LLM's response).
-- **Trace Score**: Associated with the entire trace (e.g., overall user satisfaction for a multi-step process).
-
-**Methods for Creating Scores:**
-
-1.  **`langfuse.create_score()`**:
-
-    - Creates a score for a specified `trace_id` and optionally `observation_id`.
-    - Useful when IDs are known, or for scoring after the trace/observation has completed.
-
-    ```python
-    langfuse.create_score(
-        name="fact_check_accuracy",
-        value=0.95, # Can be float for NUMERIC/BOOLEAN, string for CATEGORICAL
-        trace_id="trace_abc_123",
-        observation_id="obs_def_456", # Optional: if scoring a specific observation
-        data_type="NUMERIC", # "NUMERIC", "BOOLEAN", "CATEGORICAL"
-        comment="Source verified for 95% of claims."
-    )
-    ```
-
-2.  **`LangfuseSpan` / `LangfuseGeneration` object methods:**
-
+<Tab>
     - `span_or_generation_obj.score()`: Scores the specific observation object.
     - `span_or_generation_obj.score_trace()`: Scores the entire trace to which the object belongs.
 
@@ -750,9 +740,9 @@ Scores are used to evaluate traces or individual observations (spans/generations
         # Score the overall trace
         gen.score_trace(name="user_feedback_rating", value="positive", data_type="CATEGORICAL")
     ```
+</Tab>
 
-3.  **Context-aware methods:**
-
+<Tab>
     - `langfuse.score_current_span()`: Scores the currently active observation in the context.
     - `langfuse.score_current_trace()`: Scores the trace of the currently active observation.
 
@@ -764,6 +754,25 @@ Scores are used to evaluate traces or individual observations (spans/generations
         if task_is_fully_successful:
              langfuse.score_current_trace(name="overall_success", value=1.0, data_type="NUMERIC")
     ```
+</Tab>
+
+<Tab>
+    - Creates a score for a specified `trace_id` and optionally `observation_id`.
+    - Useful when IDs are known, or for scoring after the trace/observation has completed.
+
+    ```python
+    langfuse.create_score(
+        name="fact_check_accuracy",
+        value=0.95, # Can be float for NUMERIC/BOOLEAN, string for CATEGORICAL
+        trace_id="abcdef1234567890abcdef1234567890",
+        observation_id="1234567890abcdef", # Optional: if scoring a specific observation
+        data_type="NUMERIC", # "NUMERIC", "BOOLEAN", "CATEGORICAL"
+        comment="Source verified for 95% of claims."
+    )
+    ```
+</Tab>
+
+</Tabs>
 
 **Score Parameters:**
 
@@ -790,9 +799,9 @@ See [Scoring](/docs/scores/overview) for more details.
 - **Creating**: You can programmatically create new datasets with `langfuse.create_dataset(...)` and add items to them using `langfuse.create_dataset_item(...)`.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Fetch an existing dataset
 dataset = langfuse.get_dataset(name="my-eval-dataset")
@@ -832,9 +841,9 @@ When you use `with item.run(run_name="your_eval_run_name") as root_span:`:
 **Example:**
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 dataset_name = "qna-eval"
 current_run_name = "qna_model_v3_run_05_20" # Identifies this specific evaluation run
 
@@ -1027,9 +1036,8 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
     - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`. These were distinct objects.
     - **v3**:
       - A trace is implicitly created by the first (root) span or generation. There is no direct `langfuse.trace()` method.
-      - Use `langfuse.start_as_current_span()`, `langfuse.start_as_current_generation()` (context managers) or `langfuse.start_span()`, `langfuse.start_generation()` (manual `end()`).
+      - Use `langfuse.start_as_current_span()`, `langfuse.start_as_current_generation()` (context managers) or `langfuse.start_span()`, `langfuse.start_generation()` (manual `end()`) and `langfuse.create_event()` (for events).
       - The `name` parameter is now **required** for all spans and generations and cannot be updated later (only via attributes that must be parsed server-side).
-      - The Langfuse Event observation type has been dropped.
 
 4.  **Ending Observations**:
 
@@ -1066,7 +1074,9 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 8.  **Langchain Integration**:
 
     - **v2**: `CallbackHandler` allowed setting trace attributes.
-    - **v3**: Trace attributes must now be managed in an enclosing span.
+    - **v3**:
+      - Trace attributes must now be managed in an enclosing span.
+      - Import changed to `from langfuse.langchain import CallbackHandler`
 
 9.  **OpenAI Integration**:
 
