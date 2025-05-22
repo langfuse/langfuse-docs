@@ -197,32 +197,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "ph-prompt-experiments",
-    dismissible: false,
+    key: "lw3-4",
+    dismissible: true,
     content: (
-      <Link href="/ph">
+      <Link href="/changelog/2025-05-22-terraform-modules">
         {/* mobile */}
-        <span className="sm:hidden">
-          ✨ Today: Support us on{" "}
-          <Image
-            src={ProductHuntWhiteImage}
-            alt="Product Hunt"
-            height={25}
-            className="inline mx-1"
-          />{" "}
-          ✨
-        </span>
+        <span className="sm:hidden">LW3 Day 4: Hyperscaler Terraform Modules →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          ✨ Today: Support <span className="font-bold">Custom Dashboards</span>{" "}
-          on{" "}
-          <Image
-            src={ProductHuntWhiteImage}
-            alt="Product Hunt"
-            height={25}
-            className="inline mx-1"
-          />{" "}
-          ✨
+        Langfuse Launch Week #3, Day 4: Hyperscaler Terraform Modules →
         </span>
       </Link>
     ),
