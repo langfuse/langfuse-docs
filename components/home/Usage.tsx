@@ -8,8 +8,8 @@ import samsaraLight from "./img/samsara_light.png";
 import samsaraDark from "./img/samsara_dark.png";
 import springernatureLight from "./img/springernature_light.svg";
 import springernatureDark from "./img/springernature_dark.svg";
-import juiceboxLight from "./img/juicebox_light.svg";
-import juiceboxDark from "./img/juicebox_dark.svg";
+// import juiceboxLight from "./img/juicebox_light.svg";
+// import juiceboxDark from "./img/juicebox_dark.svg";
 import khanacademyLight from "./img/khanacademy_light.png";
 import khanacademyDark from "./img/khanacademy_dark.png";
 import NumberTicker from "@/components/ui/number-ticker";
@@ -17,6 +17,8 @@ import twilioLight from "./img/twilio_light.svg";
 import twilioDark from "./img/twilio_dark.svg";
 import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
+import telusLight from "./img/telus_light.png";
+import telusDark from "./img/telus_dark.png";
 
 type User = {
   name: string;
@@ -64,10 +66,10 @@ const users: User[] = [
     href: "https://www.springernature.com",
   },
   {
-    name: "Juicebox",
-    lightImage: juiceboxLight,
-    darkImage: juiceboxDark,
-    href: "https://juicebox.ai/",
+    name: "Telus",
+    lightImage: telusLight,
+    darkImage: telusDark,
+    href: "https://telus.com",
   },
   {
     name: "Circleback",
