@@ -94,6 +94,73 @@ In this example:
 - Spans are automatically nested due to OTEL's context propagation.
 - Trace and span updates can be done contextually.
 
+**Seamless third-party integrations**
+
+The Langfuse SDK seamlessly integrates with any third-party library that uses OpenTelemetry instrumentation. When these libraries emit spans, they are automatically captured and properly nested within your trace hierarchy. This enables unified tracing across your entire application stack without requiring any additional configuration.
+
+For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
+
+<Tabs items={["Example Anthropic", "Example LlamaIndex"]}>
+
+<Tab>
+You can use any third-party, OTEL-based instrumentation library for Anthropic to automatically trace all your Anthropic API calls in Langfuse.
+
+In this example, we are using the [`opentelemetry-instrumentation-anthropic` library](https://pypi.org/project/opentelemetry-instrumentation-anthropic/).
+
+```python
+from anthropic import Anthropic
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+
+from langfuse import get_client
+
+# This will automatically emit OTEL-spans for all Anthropic API calls
+AnthropicInstrumentor().instrument()
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+
+with langfuse.start_as_current_span(name="myspan"):
+    # This will be traced as a Langfuse generation nested under the current span
+    message = anthropic_client.messages.create(
+        model="claude-3-7-sonnet-20250219",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello, Claude"}],
+    )
+
+    print(message.content)
+
+# Flush events to Langfuse in short-lived applications
+langfuse.flush()
+```
+</Tab>
+
+<Tab>
+You can use the third-party, OTEL-based instrumentation library for LlamaIndex to automatically trace your LlamaIndex calls in Langfuse.
+
+In this example, we are using the [`openinference-instrumentation-llama-index` library](https://pypi.org/project/openinference-instrumentation-llama-index/).
+
+```python
+from llama_index.core.llms.openai import OpenAI
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+
+from langfuse import get_client
+
+LlamaIndexInstrumentor().instrument()
+
+langfuse = get_client()
+llm = OpenAI(model="gpt-4o")
+
+with langfuse.start_as_current_span(name="myspan"):
+    response = llm.complete("Hello, world!")
+    print(response)
+
+langfuse.flush()
+```
+
+</Tab>
+
+
+</Tabs>
 **Key Changes and Improvements:**
 
 - **Context Management**: OpenTelemetry now handles context propagation automatically, reducing the need to manually pass IDs.
