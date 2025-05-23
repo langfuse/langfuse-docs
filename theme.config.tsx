@@ -200,12 +200,14 @@ const config: DocsThemeConfig = {
     key: "lw3-6",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-05-24-langfuse-evaluation-library">
+      <Link href="/changelog/2025-05-24-langfuse-evaluator-library">
         {/* mobile */}
-        <span className="sm:hidden">LW3 Day 6: Langfuse Evaluation Library →</span>
+        <span className="sm:hidden">
+          LW3 Day 6: Langfuse Evaluation Library →
+        </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Langfuse Launch Week #3, Day 6: Langfuse Evaluation Library →
+          Langfuse Launch Week #3, Day 6: Langfuse Evaluation Library →
         </span>
       </Link>
     ),
