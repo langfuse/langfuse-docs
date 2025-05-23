@@ -1,0 +1,147 @@
+---
+date: 2025-05-22
+title: "Terraform Modules for AWS, Azure and GCP"
+description: Deploy Langfuse on AWS, GCP, or Azure using our new Terraform modules.
+badge: Launch Week 3 🚀
+author: Steffen
+ogImage: /images/changelog/2025-05-22-hyperscaler-terraform-modules/hyperscaler-templates.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+
+export const getStaticProps = async () => {
+  const [awsRes, gcpRes, azureRes] = await Promise.all([
+    fetch(
+      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-aws/refs/heads/main/README.md"
+    ),
+    fetch(
+      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-gcp/main/README.md"
+    ),
+    fetch(
+      "https://raw.githubusercontent.com/langfuse/langfuse-terraform-azure/main/README.md"
+    ),
+  ]);
+  const [awsReadme, gcpReadme, azureReadme] = await Promise.all([
+    awsRes.text(),
+    gcpRes.text(),
+    azureRes.text(),
+  ]);
+  return {
+    props: {
+      ssg: {
+        awsTerraformReadme: awsReadme,
+        gcpTerraformReadme: gcpReadme,
+        azureTerraformReadme: azureReadme,
+      },
+    },
+  };
+};
+
+export function AwsTerraformReadme() {
+  const { awsTerraformReadme } = useData();
+  if (!awsTerraformReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  const readmeString =
+    typeof awsTerraformReadme === "string"
+      ? awsTerraformReadme
+      : JSON.stringify(awsTerraformReadme);
+  return <Playground source={readmeString} />;
+}
+
+export function GcpTerraformReadme() {
+  const { gcpTerraformReadme } = useData();
+  if (!gcpTerraformReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  const readmeString =
+    typeof gcpTerraformReadme === "string"
+      ? gcpTerraformReadme
+      : JSON.stringify(gcpTerraformReadme);
+  return <Playground source={readmeString} />;
+}
+
+export function AzureTerraformReadme() {
+  const { azureTerraformReadme } = useData();
+  if (!azureTerraformReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  const readmeString =
+    typeof azureTerraformReadme === "string"
+      ? azureTerraformReadme
+      : JSON.stringify(azureTerraformReadme);
+  return <Playground source={readmeString} />;
+}
+
+<ChangelogHeader />
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/EwMRnknjNxU"
+  title="Terraform Modules for AWS, Azure and GCP"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+## Overview
+
+**Day 4 of [Launch Week #3](/blog/2025-05-19-launch-week-3)** makes it even easier for our self-hosters to run Langfuse on their infrastructure.
+In addition to our [Kubernetes Helm Chart](https://github.com/langfuse/langfuse-k8s) we are adding Terraform modules that let you deploy Langfuse on [AWS](https://github.com/langfuse/langfuse-terraform-aws), [GCP](https://github.com/langfuse/langfuse-terraform-gcp), and [Azure](https://github.com/langfuse/langfuse-terraform-azure).
+Create your own scalable Langfuse environment within minutes on your favorite hyperscaler.
+
+## Key Features
+
+- **Native Services**: The Terraform modules use native services wherever possible like RDS, S3, and ElastiCache for AWS.
+- **Scalable**: The Terraform modules deploy highly-available, scalable clusters by default.
+- **Batteries included**: The Terraform modules include everything you need from VPC, to storage, to services.
+
+## Get Started
+
+Use the following snippets to include the respective module in your Terraform code and deploy Langfuse.
+
+<Tabs items={["AWS", "GCP","Azure"]}>
+  <Tab>
+    Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-aws) for the full deployment guide.
+
+    <div className="p-6 mt-6 border bg-card rounded-md">
+      <AwsTerraformReadme />
+    </div>
+
+  </Tab>
+
+  <Tab>
+    Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-gcp) for the full deployment guide.
+
+    <div className="p-6 mt-6 border bg-card rounded-md">
+      <GcpTerraformReadme />
+    </div>
+
+  </Tab>
+
+  <Tab>
+    Checkout the [Readme](https://github.com/langfuse/langfuse-terraform-azure) for the full deployment guide.
+
+    <div className="p-6 mt-6 border bg-card rounded-md">
+      <AzureTerraformReadme />
+    </div>
+
+  </Tab>
+</Tabs>
+
+## Learn More
+
+Refer to our [self-hosting docs](/self-hosting) for more information or view the cloud specific deployment guides:
+
+- [Kubernetes](/self-hosting/kubernetes-helm)
+- [AWS](/self-hosting/aws)
+- [GCP](/self-hosting/gcp)
+- [Azure](/self-hosting/azure)
+
+## Questions or feedback?
+
+Please open an issue within the respective repositories if you encounter any problems.
