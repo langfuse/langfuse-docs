@@ -10,7 +10,7 @@ Environments allow you to organize your traces, observations, and scores from di
 - Filter and analyze data by environment
 - Reuse datasets and prompts across environments
 
-You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization.
+You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable (recommended) or by using the `environment` parameter in the client initialization.
 If both are specified, the initialization parameter takes precedence.
 If nothing is specified, the default environment is `default`.
 
@@ -34,7 +34,37 @@ This means:
 
 ## Usage
 
-<Tabs items={["Python", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
+<Tab>
+
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+```python
+from langfuse import Langfuse, observe
+
+# Either set the environment variable or the constructor parameter. The latter takes precedence.
+os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
+
+# Configure the client
+langfuse = Langfuse(environment="production")
+
+# All operations will now be associated with the "production" environment
+with langfuse.start_as_current_span(name="my-operation") as span:
+    # Your code here
+    pass
+
+@observe
+def main():
+    return "Hello"
+
+main()
+```
+
+</Tab>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -114,7 +144,37 @@ with tracer.start_as_current_span("my-operation") as span:
 </Tab>
 <Tab>
 
+<Callout type="info">
+
+When using the **Python SDK v3**, the environment provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+See the Python SDK v3 tab for more details.
+
+</Callout>
+
 When using the [OpenAI SDK Integration](/docs/integrations/openai)
+
+Python SDK v3:
+
+```python
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# Either set the environment variable or configure the Langfuse client
+os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
+
+langfuse = Langfuse(environment="production")
+
+# the integration will use the instantiated client under the hood
+completion = openai.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+)
+```
+
+Python SDK v2:
 
 ```python
 from langfuse.openai import openai
@@ -154,7 +214,13 @@ See [OpenAI Integration (JS/TS)](/docs/integrations/openai/js/get-started) for m
 
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing)
+<Callout type="info">
+
+When using the **Python SDK v3**, the environment provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+See the Python SDK v3 tab for more details.
+
+</Callout>
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -201,6 +267,12 @@ export function register() {
 </Tab>
 
 <Tab>
+
+<Callout type="info">
+
+The LlamaIndex integration is not supported in the Python SDK v3. Please use a community-maintained OTEL-based integration instead.
+
+</Callout>
 
 When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started)
 

@@ -166,10 +166,39 @@ You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
 
-<Tabs items={["Python","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
+<Tabs items={["Python SDK (v3)","Python SDK (v2)","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
 
 <Tab>
-{/* Python */}
+{/* Python SDK v3 */}
+
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+```python
+from langfuse import langfuse, get_client
+
+langfuse = Langfuse()
+
+# or access the client directly
+langfuse = get_client()
+
+# Flush all pending observations
+langfuse.flush()
+```
+
+If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
+
+```python
+langfuse.shutdown()
+```
+
+</Tab>
+
+<Tab>
+{/* Python SDK v2 */}
 
 ```python
 # Decorator
@@ -224,6 +253,26 @@ export async function POST(req, res) {
 <Tab>
 {/* OpenAI SDK (Python) */}
 
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+For Python SDK v3
+
+```python
+from langfuse import get_client
+
+# or access the client directly
+langfuse = get_client()
+
+# Flush all pending observations
+langfuse.flush()
+```
+
+For Python SDK v2
+
 ```python
 from langfuse.openai import openai
 openai.flush_langfuse()
@@ -232,6 +281,28 @@ openai.flush_langfuse()
 </Tab>
 <Tab>
 {/* Langchain (Python) */}
+
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+For Python SDK v3
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.flush()
+
+# or access the client directly
+langfuse_handler.client.flush()
+
+```
+
+For Python SDK v2
 
 ```python
 langfuse_handler.flush()
@@ -256,6 +327,7 @@ await langfuseHandler.shutdownAsync();
 {/* LlamaIndex */}
 
 ```python
+# For Python SDK v2
 langfuse_handler.flush()
 ```
 

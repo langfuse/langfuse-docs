@@ -14,7 +14,63 @@ The Users view provides an overview of all users. It also offers an in-depth loo
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tab>
+
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def process_user_request(user_query):
+    # Add user_id to the current trace
+    langfuse.update_current_trace(user_id="user_12345")
+
+    # ...your processing logic...
+    return result
+```
+
+When creating spans directly:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# You can set the user_id when creating the root span via update_trace
+with langfuse.start_as_current_span(
+    name="process-user-request"
+) as root_span:
+    # Add user_id to the trace
+    root_span.update_trace(user_id="user_12345")
+
+    # All spans in this trace will be associated with this user
+    with root_span.start_as_current_generation(
+        name="generate-response",
+        model="gpt-4o"
+    ) as gen:
+        # ...generate response...
+        pass
+```
+
+You can also update the user_id of the current trace without a direct reference to a span:
+
+```python
+with langfuse.start_as_current_span(name="handle-user-interaction"):
+    # Add user_id to the current trace
+    langfuse.update_current_trace(user_id="user_12345")
+```
+
+</Tab>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
@@ -200,6 +256,12 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 <Tab>
 
+<Callout type="info">
+
+The LlamaIndex integration is not supported in the Python SDK v3. Please use a community-maintained OTEL-based integration instead.
+
+</Callout>
+
 When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `user_id` via the `instrumentor.observe()` context manager:
 
 ```python
@@ -252,6 +314,12 @@ def llama_index_fn(question: str):
 </Tab>
 
 <Tab>
+
+<Callout type="info">
+
+The LlamaIndex callback integration is not supported in the Python SDK v3. Please use a community-maintained OTEL-based integration instead.
+
+</Callout>
 
 When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated-llama-index-callback), set the `user_id` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `user_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated-llama-index-callback#set-trace-params).
 

@@ -20,7 +20,77 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
+<Tab>
+
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+```python
+def masking_function(data: any, **kwargs) -> any:
+    """Function to mask sensitive data before sending to Langfuse."""
+    if isinstance(data, str) and data.startswith("SECRET_"):
+        return "REDACTED"
+
+    # For more complex data structures
+    elif isinstance(data, dict):
+        return {k: masking_function(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [masking_function(item) for item in data]
+
+    return data
+```
+
+Apply the masking function when initializing the Langfuse client:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(mask=masking_function)
+```
+
+With the decorator:
+
+```python
+from langfuse import observe
+
+langfuse = Langfuse(mask=masking_function)
+
+
+@observe()
+def my_function():
+    # This data will be masked before being sent to Langfuse
+    return "SECRET_DATA"
+
+result = my_function()
+print(result)  # Original: "SECRET_DATA"
+
+# The trace output in Langfuse will have the output masked as "REDACTED"
+```
+
+Using context managers:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(mask=masking_function)
+
+with langfuse.start_as_current_span(
+    name="sensitive-operation",
+    input="SECRET_INPUT_DATA"
+) as span:
+    # ... processing ...
+    span.update(output="SECRET_OUTPUT_DATA")
+
+# Both input and output will be masked as "REDACTED" in Langfuse
+```
+
+</Tab>
 <Tab>
 
 Define a masking function:
@@ -95,7 +165,15 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai), set `openai.langfuse_mask` to the masking function:
+<Callout type="info">
+
+When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+See the Python SDK v3 tab for more details.
+
+</Callout>
+
+When using the [OpenAI SDK Integration](/docs/integrations/openai) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
 
 ```python
 from langfuse.openai import openai
@@ -150,6 +228,13 @@ fn()
 
 </Tab>
 <Tab>
+<Callout type="info">
+
+When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+See the Python SDK v3 tab for more details.
+
+</Callout>
 
 When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `mask` as a keyword argument:
 
@@ -214,6 +299,12 @@ const handler = new CallbackHandler({
 </Tab>
 
 <Tab>
+
+<Callout type="info">
+
+The LlamaIndex integration is not supported in the Python SDK v3. Please use a community-maintained OTEL-based integration instead.
+
+</Callout>
 
 When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `mask` via the `instrumentor.observe()` context manager:
 

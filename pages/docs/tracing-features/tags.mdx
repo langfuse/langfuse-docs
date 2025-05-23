@@ -6,7 +6,57 @@ description: Tags help to filter and organize traces in Langfuse based on use ca
 
 Tags allow you to categorize and filter traces. You can tag traces (1) when they are created using the Langfuse SDKs and integrations or (2) from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
-<Tabs items={["Python", "JS/TS", "OpenAI", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", ]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)" ]}>
+<Tab>
+
+<Callout type="info">
+
+The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
+
+</Callout>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def my_function():
+    # ... processing logic ...
+    # Add tags to the trace
+    langfuse.update_current_trace(tags=["tag-1", "tag-2"])
+```
+
+When creating spans or generations directly:
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Add tags when creating the root span
+with langfuse.start_as_current_span(
+    name="my-operation"
+) as root_span:
+    # Add tags to the trace
+    root_span.update_trace(tags=["tag-1", "tag-2"])
+
+    # You can add more tags later from any span in the same trace
+    with root_span.start_as_current_generation(name="llm-call", model="gpt-4o") as gen:
+        # Processing...
+        gen.update_trace(tags=["llm-gen"])  # Adds another tag to the same trace
+```
+
+You can also update the tags of the current trace without a direct reference to a span:
+
+```python
+with langfuse.start_as_current_span(name="another-operation"):
+    # ... processing ...
+    langfuse.update_current_trace(tags=["processing", "beta-feature"])
+```
+
+</Tab>
 <Tab>
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
