@@ -48,6 +48,16 @@ When the ingestion load is high, the Langfuse web interface and API calls may be
 In this case, splitting the langfuse-web deployment into one ingestion handling and one user interface handling deployment can help to keep the user interface responsive.
 You can create a new identical replica of the langfuse-web deployment and route all traffic to `/api/public/ingestion*`, `/api/public/media*`, and `/api/public/otel*` to the new deployment.
 
+### Increasing S3 (Blobstorage) Write Concurrency
+
+The blob storage backend is used to store raw events, multi-modal inputs, batch exports, and other files.
+In very high throughput scenarios the number of allowed sockets from the S3 client library may be exhausted and requests are being throttled.
+If this happens, we usually observe an increase in memory usage on the web container that processes ingestion and media workloads.
+The corresponding log message looks like this: `@smithy/node-http-handler:WARN - socket usage at capacity=150 and 387 additional requests are enqueued.`.
+
+In this situation, we recommend to increase the number of concurrent writes by setting `LANGFUSE_S3_CONCURRENT_WRITES` to a value larger than 50 (the default).
+Each additional write socker comes with a small memory overhead, so we recommend to increase the value gradually and observe the behaviour of your service.
+
 ## Slow UI queries or API calls
 
 If you notice long-loading screens within the UI or slow API calls, it is usually related to insufficient resources on the ClickHouse database or missing time filters.
