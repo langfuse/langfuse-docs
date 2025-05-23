@@ -39,11 +39,12 @@ The new SDK aims to make tracing more straightforward. Here's an example of how 
 
 ```python
 # main_app.py
-from langfuse import Langfuse, observe
+from langfuse import get_client, observe
 import other_module
 
-# Initialize once, perhaps at your application's entry point
-langfuse = Langfuse()
+# If no client is initialized, it will be initialized with the default configuration
+# from the environment variables
+langfuse = get_client()
 
 @observe(name="user-request-pipeline")
 def handle_user_request(user_query: str, user_id: str):
