@@ -197,15 +197,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-5",
+    key: "lw3-6",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-05-23-otel-based-python-sdk">
+      <Link href="/changelog/2025-05-24-langfuse-evaluation-library">
         {/* mobile */}
-        <span className="sm:hidden">LW3 Day 5: OTEL-based Python SDK →</span>
+        <span className="sm:hidden">LW3 Day 6: Langfuse Evaluation Library →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Langfuse Launch Week #3, Day 5: OTEL-based Python SDK →
+        Langfuse Launch Week #3, Day 6: Langfuse Evaluation Library →
         </span>
       </Link>
     ),
