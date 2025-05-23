@@ -4,7 +4,7 @@ description: Making LLM evaluation easier, more powerful, and production-ready i
 date: 2025-05-24
 author: Marlies
 badge: Launch Week 3 🚀
-ogImage: /images/changelog/lw3-6-evaluator-library.png
+ogImage: /images/changelog/2025-05-24-langfuse-evaluator-library.png
 showOgInHeader: false
 ---
 
@@ -12,16 +12,58 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-It includes Langfuse- and [RAGAS](https://docs.ragas.io/en/stable/)-managed evaluators to measure context relevance, SQL semantic equivalence, hallucinations, and other key dimensions. You can also define custom evaluators tailored to your needs. Stay ahead with evaluators kept up to date with the latest research, benefit from broad metric coverage, and enjoy a streamlined UX for setup and execution.
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/md_TKMmNz28"
+  title="Langfuse Evaluator Library"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
 
-## Key Features:
+On Day 6 of our [Launch Week #3](/blog/2025-05-19-launch-week-3), we're introducing the Langfuse Evaluator Library and major improvements to the evaluator UX.
 
-- Stay current with evaluators that are regularly updated based on the latest research
-- Broad metric coverage including faithfulness, correctness, topic adherence, and more
-- A smoother UX for setting up and running evaluations in Langfuse
+Evaluation is core to monitor and continuously improve LLM applications. There are many ways to eval LLM applications/agents and you can flexibly record these evals as [scores](/docs/scores/overview) in Langfuse.
 
-We've also improved the evaluator UX, making setup and configuration within Langfuse simpler and more intuitive than ever. We'd love your feedback!
+## Langfuse Evaluator Library
+
+The Langfuse LLM-as-a-Judge runner is all about making it easy to:
+
+1. manage evaluation templates,
+2. using your own models,
+3. defining when these evals shall be run by being able to filter and sample your production and development data, and
+4. interactively working with the results to improve your application.
+
+Today, we introduce a larger library of prebuilt evaluators in partnership with [RAGAS](https://docs.ragas.io/en/stable/) to measure context relevance, SQL semantic equivalence, hallucinations, and other key dimensions.
+While you can bring your own evaluation templates, the expanded library makes it easier to get started.
+
+> picture of library
+
+## Revamped Evaluator UX
+
+Langfuse LLM-as-a-Judge is very flexble (see above) but also a bit complex to configure. Thus, we introduced some core UX changes to make it easier to get started:
+
+### 1. Standard Eval Model
+
+A "standard eval model" can be configured that applies to all evals (unless you override it).
+
+> picture of eval model selection
+
+### 2. Preview of traces that match filter conditions
+
+Langfuse allows you to filter traces by various conditions. We now show a preview of historical traces that match the filter conditions.
+
+> picture of preview of traces that match filter conditions
+
+### 3. Preview of inserted variables
+
+When you insert variables into your eval, we now show a preview of the variables that will be inserted.
+
+> picture of preview of inserted variables
 
 ## Getting Started
 
-To get started, check out the [LLM-as-a-Judge Docs](/docs/scores/model-based-evals).
+To get started, check out the [LLM-as-a-Judge Docs](/docs/scores/model-based-evals) or the walkthrough above.
+
+Do you have any feedback? Please let us know via [GitHub](/issues)!
