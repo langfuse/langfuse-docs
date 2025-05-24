@@ -1,0 +1,82 @@
+---
+title: Langfuse Evaluator Library
+description: "Introducing the Langfuse Evaluator Library with prebuilt evaluators. Plus, enjoy a revamped UX with trace and variable previews for easier LLM evaluation."
+date: 2025-05-24
+author: Marlies
+badge: Launch Week 3 🚀
+ogImage: /images/changelog/2025-05-24-langfuse-evaluator-library.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/KTRz9Tv4CEE"
+  title="Langfuse Evaluator Library"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+On Day 6 of our [Launch Week #3](/blog/2025-05-19-launch-week-3), we're introducing the Langfuse Evaluator Library and major improvements to the evaluator UX.
+
+Evaluation is core to monitor and continuously improve LLM applications. There are many ways to eval LLM applications/agents and you can flexibly record these evals as [scores](/docs/scores/overview) in Langfuse.
+
+## Langfuse Evaluator Library
+
+The Langfuse LLM-as-a-Judge runner is all about making it easy to:
+
+1. manage evaluation templates,
+2. using your own models,
+3. defining when these evals shall be run by being able to filter and sample your production and development data, and
+4. interactively working with the results to improve your application.
+
+Today, we introduce a larger library of prebuilt evaluators in partnership with [RAGAS](https://docs.ragas.io/en/stable/) to measure context relevance, SQL semantic equivalence, hallucinations, and other key dimensions.
+While you can bring your own evaluation templates, the expanded library makes it easier to get started.
+
+<Frame>
+  ![Langfuse Evaluator
+  Library](/images/changelog/2025-05-24-langfuse-evaluator-library/eval-library.png)
+</Frame>
+
+## Revamped Evaluator UX
+
+Langfuse LLM-as-a-Judge is flexible (see above) but also a bit complex to configure. Thus, we introduced some core UX changes to make it easier to get started:
+
+### 1. Standard Eval Model
+
+A "standard eval model" can be configured that applies to all evals (unless you override it).
+
+<Frame>
+  ![Standard Eval
+  Model](/images/changelog/2025-05-24-langfuse-evaluator-library/default-eval-model.png)
+</Frame>
+
+### 2. Preview of traces that match filter conditions
+
+Langfuse allows you to filter traces by various conditions. We now show a preview of historical traces that match the filter conditions.
+
+<Frame>
+  ![Preview of traces that match filter
+  conditions](/images/changelog/2025-05-24-langfuse-evaluator-library/trace-examples.png)
+</Frame>
+
+### 3. Preview of inserted variables
+
+When you insert variables into your eval, we now show a preview of the variables that will be inserted.
+
+<CloudflareVideo
+  videoId="11d2a0eb6516ee4887715e07b94a7349"
+  aspectRatio={2500 / 1034}
+  gifStyle
+/>
+
+## Getting Started
+
+To get started, check out the [LLM-as-a-Judge Docs](/docs/scores/model-based-evals) or the walkthrough above.
+
+Do you have any feedback? Please let us know via [GitHub](/issues)!
