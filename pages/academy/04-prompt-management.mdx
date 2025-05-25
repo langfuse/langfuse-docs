@@ -1,0 +1,64 @@
+---
+title: Langfuse Academy - Prompt Management
+description: Overview of prompt management in LLM applications, why this is important and how to manage prompts in Langfuse
+---
+
+# Module 4: Prompt Management / Engineering
+
+After **evaluating** your LLM workflows, you'll often find areas to improve—whether by refining prompts, changing models, or updating tool definitions. In this module, we'll look at how to **apply** those findings through systematic prompt management and iterative experimentation.
+
+<Frame className="my-10" fullWidth>
+  ![Prompt Management](/images/academy/m5-prompt-management.png)
+</Frame>
+
+## Prompt Management
+
+Prompt management keeps your LLM application agile, reproducible, and collaboration‑friendly. Without a systematic way to store, version, and experiment with prompts, seemingly minor text tweaks can break customer flows or silently inflate costs. This module shows why prompt management matters, introduces prompting strategies, and shows how to manage prompts in Langfuse.
+
+### Why Prompt Management?
+
+- **Reproducibility & rollback** – Prompts evolve faster than code; versioning prevents silent regressions and enables instant rollback when quality dips.
+- **Governance & auditability** – Regulated domains (health, finance, legal) must trace which exact wording produced an output .
+- **Collaboration across teams** – Product managers and domain experts often iterate on prompts; a central prompt store avoids "prompt spaghetti" in codebases.
+- **A/B testing & optimisation** – Structured experiments reveal cost/quality trade‑offs and prevent prompt drift.
+- **Common pitfalls** → brittle hard‑coded strings, shadow prompts living in notebooks, unclear ownership, and uncontrolled temperature/parameter changes.
+
+### Common Prompting Strategies
+
+If you are new to prompting, here is a rough overview of different strategies that can improve the performance of your application.
+
+| Strategy                                 | Core Idea                                                 | When to Use                           | Key Risk                    |
+| :--------------------------------------- | :-------------------------------------------------------- | :------------------------------------ | :-------------------------- |
+| **Zero‑Shot**                            | Provide only task instructions; rely on model generality  | Fast prototyping                      | Ambiguous outputs           |
+| **Few‑Shot / In‑Context**                | Add 1‑5 examples to steer style or structure              | Structured outputs, data‑sparse tasks | Higher token cost           |
+| **Chain‑of‑Thought (CoT)**               | Ask model to reason step‑by‑step before final answer      | Complex reasoning tasks               | Latency, leak chain to user |
+| **Role Prompting**                       | Assign the model a persona or professional role           | Tone control, empathy                 | Over‑constrained style      |
+| **Retrieval‑Augmented Generation (RAG)** | Dynamically inject retrieved docs into context            | Fresh, source‑grounded answers        | Retrieval latency           |
+| **Prefix‑Tuning / System‑Content Split** | Separate stable system message from dynamic user message  | Multi‑turn chat apps                  | Duplication across turns    |
+
+<Callout type="info" emoji="📚">
+For more advanced prompting strategies, we collected some high-quality resources here:
+
+- **Learn Prompting**, [website](https://learnprompting.org/docs)
+- **The Prompt Report: A Systematic Survey of Prompting Techniques**, [paper](https://arxiv.org/pdf/2406.06608), [tweets](https://x.com/learnprompting/status/1800931910404784380)
+- **How to prompt o1** (o1 isn't a chat model – and that's the point), [blog post](https://www.latent.space/p/o1-skill-issue)
+
+</Callout>
+
+### Using Prompt Management in Langfuse
+
+[Langfuse Prompt Management](/docs/prompts/get-started) helps you centrally manage, version control, and collaboratively iterate on your prompts.
+
+import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
+
+<div className="h-6" />
+<PromptOverview />
+
+<Callout type="info" emoji="🪢">
+  To get started managing prompts in Langfuse, check out our [prompt management
+  documentation](/docs/prompts/get-started).
+</Callout>
+
+## Getting Started
+
+**Congratulations**! You've completed every module of the Langfuse Academy. This should give you a good overview of common LLMOps practices to get you started. On the next page, you can get your certificate for completing the academy.
