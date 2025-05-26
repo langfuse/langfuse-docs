@@ -11,4 +11,5 @@ export default {
   "fireworks-ai": "Fireworks AI",
   novitaai: "Novita AI",
   cleanlab: "Cleanlab",
+  "agno-agents": "Agno Agents",
 };
