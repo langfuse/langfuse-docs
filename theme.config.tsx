@@ -197,17 +197,17 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-6",
+    key: "lw3-all",
     dismissible: true,
     content: (
-      <Link href="/changelog/2025-05-24-langfuse-evaluator-library">
+      <Link href="/blog/2025-05-19-launch-week-3">
         {/* mobile */}
         <span className="sm:hidden">
-          LW3 Day 6: Langfuse Evaluation Library →
+          LW3: See All Launches →
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week #3, Day 6: Langfuse Evaluation Library →
+          Langfuse Launch Week #3: See All Launches →
         </span>
       </Link>
     ),
