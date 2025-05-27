@@ -240,8 +240,8 @@ async def my_async_llm_call(prompt_text):
 
 - `name: Optional[str]`: Custom name for the created span/generation. Defaults to the function name.
 - `as_type: Optional[Literal["generation"]]`: If set to `"generation"`, a Langfuse generation object is created, suitable for LLM calls. Otherwise, a regular span is created.
-- `capture_input: bool`: Whether to capture function arguments as input. Defaults to `True`.
-- `capture_output: bool`: Whether to capture function return value as output. Defaults to `True`.
+- `capture_input: bool`: Whether to capture function arguments as input. Defaults to env var `LANGFUSE_OBSERVE_DECORATOR_IO_CAPTURE_ENABLED` or `True` if not set.
+- `capture_output: bool`: Whether to capture function return value as output. Defaults to env var `LANGFUSE_OBSERVE_DECORATOR_IO_CAPTURE_ENABLED` or `True` if not set.
 - `transform_to_string: Optional[Callable[[Iterable], str]]`: For functions that return generators (sync or async), this callable can be provided to transform the collected chunks into a single string for the `output` field. If not provided, and all chunks are strings, they will be concatenated. Otherwise, the list of chunks is stored.
 
 **Trace Context and Special Keyword Arguments:**
@@ -261,6 +261,12 @@ def my_function(a, b):
 # Call with a specific trace context
 my_function(1, 2, langfuse_trace_id="1234567890abcdef1234567890abcdef")
 ```
+
+<Callout type='info'>
+
+The observe decorator is capturing the args, kwargs and return value of decorated functions by default. This may lead to performance issues in your application if you have large or deeply nested objects there. To avoid this, explicitly disable function IO capture on the decorated function by passing `capture_input / capture_output` with value `False` or globally by setting the environment variable `LANGFUSE_OBSERVE_DECORATOR_IO_CAPTURE_ENABLED=False`.
+
+</Callout>
 
 ### Context Managers
 
