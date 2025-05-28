@@ -37,7 +37,7 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 ## Get started
 
-It is easy to use instructor with Langfuse. We use the [Langfuse OpenAI intgeration](https://langfuse.com/docs/integrations/openai) and simply patch the client with instructor. This works with both synchronous and asynchronous clients.
+It is easy to use instructor with Langfuse. We use the [Langfuse OpenAI intgeration](https://langfuse.com/docs/integrations/openai/get-started) and simply patch the client with instructor. This works with both synchronous and asynchronous clients.
 
 ### Langfuse-Instructor integration with sychnronous OpenAI client
 
