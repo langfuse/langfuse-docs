@@ -20,7 +20,6 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { CheckIcon, MinusIcon } from "lucide-react";
@@ -1704,9 +1703,9 @@ const faqs = [
       "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
-    question: "How do I activate my self-hosted Pro or Enterprise plan?",
+    question: "How do I activate my self-hosted Enterprise plan?",
     answer:
-      "Once you've deployed Langfuse OSS, you can activate your Pro or Enterprise plan by adding the license key you received from the Langfuse team to your deployment.",
+      "Once you've deployed Langfuse OSS, you can activate your Enterprise plan by adding the <a class='underline' href='/self-hosting/license-key'>license key</a> you received from the Langfuse team to your deployment.",
   },
   {
     question: "How can I manage my subscription?",
