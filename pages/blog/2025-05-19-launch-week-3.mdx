@@ -14,7 +14,6 @@ import { Cards } from "nextra/components";
 import {
   FileCode,
   BookOpen,
-  Video,
   Users,
   Joystick,
   Star,
@@ -24,6 +23,7 @@ import {
 } from "lucide-react";
 import { Frame } from "@/components/Frame";
 import { StartCard } from "@/components/cards";
+import { Video } from "@/components/Video";
 
 <BlogHeader
   title="Langfuse Launch Week #3"
@@ -36,6 +36,7 @@ import { StartCard } from "@/components/cards";
     "hassiebpakzad",
     "jannikmaierhoefer",
     "steffenschmitz",
+    "felixkrauth",
   ]}
   image="/images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png"
 />
@@ -61,63 +62,113 @@ Stay tuned for the daily reveals 👇
 
 <Steps>
 
-## 🔎&nbsp;&nbsp;&nbsp;Day&nbsp;1: ???
+### 🔎&nbsp;&nbsp;&nbsp;Day&nbsp;1: Full text search
 
-## 📌&nbsp;&nbsp;&nbsp;Day&nbsp;2: ???
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/9gPDNtQj1uU"
+  title="Full Text Search Tutorial"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
 
-## 📊&nbsp;&nbsp;&nbsp;Day&nbsp;3: ???
+This feature has received one of the highest numbers of upvotes in our [feature requests](https://github.com/orgs/langfuse/discussions/939), and we are thrilled to make it available. Finding all occurrences of a specific keyword or phrase across your Langfuse traces and observations can be extremely helpful.
 
-## 🏅&nbsp;&nbsp;&nbsp;Day&nbsp;4: ???
+See the video above for a quick tutorial.
 
-## 🔭&nbsp;&nbsp;&nbsp;Day&nbsp;5: ???
+### 📌&nbsp;&nbsp;&nbsp;Day&nbsp;2: Save and share table views
 
-## 📦&nbsp;&nbsp;&nbsp;Day&nbsp;6: ???
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/KOZ5qUFpw80"
+  title="Saved Table Views Tutorial"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+Save your most-used table configurations and instantly share them with teammates. Create custom views for different workflows—like filtering for failed traces or high-cost runs — and access them with a single click. Every saved view gets a unique permalink, making it easy to collaborate viewing the same data without having to recreate complex filters and sorting.
+
+Available across all major tables in Langfuse: Traces, Observations, Scores, Sessions, and Datasets.
+
+👉 **Read the full changelog → [Save & share table views](/changelog/2025-05-20-save-table-views)**
+
+### 📊&nbsp;&nbsp;&nbsp;Day&nbsp;3: Custom Dashboards
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/z6g9xmciaBE"
+  title="Custom Dashboards"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+Create your own custom dashboards to analyze and understand your AI application deeply.
+Turn raw data into insights with a wide range of chart types, flexible metrics, and rich filtering options.
+Choose from our curated dashboards focused on Latency, Cost, and Langfuse usage to quickly get started, or build your own to visualize exactly what matters to your team.
+
+👉 **Read the full changelog → [Custom Dashboards](/changelog/2025-05-21-custom-dashboards)**
+
+Interested in how we built this? Check out the [technical deep dive](/blog/2025-05-21-customizable-dashboards).
+
+### 🏅 Day 4 — Hyperscaler Terraform Modules
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/EwMRnknjNxU"
+  title="Terraform Modules for AWS, Azure and GCP"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Deploy Langfuse on your own infrastructure in minutes using our new Terraform modules for **AWS**, **GCP**, and **Azure**. The modules provision everything you need—networking, databases, storage, and a production-ready Kubernetes cluster—so you can focus on building, not managing infrastructure.
+
+👉 **Read the full changelog → [Hyperscaler Terraform Modules](/changelog/2025-05-22-terraform-modules)**
+
+### 🔭&nbsp;&nbsp;&nbsp;Day&nbsp;5: OTEL-based Python SDK&nbsp;(beta)
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/md_TKMmNz28"
+  title="OTEL-based Python SDK (beta)"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Meet the next generation **Langfuse Python SDK** built on the [OpenTelemetry](https://opentelemetry.io/) standard! This big update simplifies tracing with unified context propagation that automatically nests operations, even across threads or async tasks. Instrument your code using three flexible styles: the `@observe` decorator, context managers, or manual observations, which can be mixed and matched.
+
+The SDK ships today in **public beta** (pip install `langfuse>=3.0.0b2`). We can't wait to hear your feedback!
+
+👉 **Read the full changelog → [OTEL-based Python SDK](/changelog/2025-05-23-otel-based-python-sdk)**
+
+### 📐 &nbsp;&nbsp;&nbsp;Day&nbsp;6: Langfuse Evaluator Library
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/KTRz9Tv4CEE"
+  title="Langfuse Evaluator Library"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Making LLM evaluation easier, more powerful, and production-ready is now possible with the new Langfuse Evaluator Library that includes more prebuilt templates. It ships with **RAGAS evaluators** (context relevance, goal accuracy, SQL semantic equivalence, and more), Langfuse-managed evaluators, and the ability to build custom ones.
+
+In addition, we've revamped the setup flow when creating a new eval to make it easier to get started and understand how the different configurations work.
+
+👉 **Read the full changelog → [Langfuse Evaluator Library](/changelog/2025-05-24-langfuse-evaluator-library)**
 
 </Steps>
-
-## Don't Miss Out
-
-<Cards num={2} className="gap-6">
-  <Cards.Card
-    title="Star on GitHub"
-    href="https://github.com/langfuse/langfuse"
-    icon={<Star className="w-6 h-6" />}
-    arrow
-  >
-    <p className="ml-4">Follow our project and star us for updates!</p>
-      <img
-    alt="Langfuse GitHub stars"
-    src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
-    className="mt-4 w-32 ml-4"
-    />
-  </Cards.Card>
- 
-  <Cards.Card
-    title="x.com/langfuse"
-    icon={<Twitter className="w-6 h-6" />}
-    href="https://x.com/langfuse"
-  >
-    <p className="ml-4">Follow us on social media for daily updates during the launch week:</p>
-  </Cards.Card>
-  
-  <Cards.Card
-    title="Virtual Community Hour"
-    href="https://lu.ma/1q57o5ok"
-    icon={<CalendarDays className="w-6 h-6" />}
-    arrow
-  >
-    <p className="ml-4">Join our virtual community hour on Wednesday, May 21st.</p>
-  </Cards.Card>
-  
-  <Cards.Card
-    title="Product Hunt Launch"
-    href="https://langfuse.com/ph"
-    icon={<Rocket className="w-6 h-6" />}
-    arrow
-  >
-    <p className="ml-4">We're launching on Product Hunt (again!) on Wednesday, May 21st.</p>
-  </Cards.Card>
-</Cards>
 
 ## Learn More About Langfuse
 

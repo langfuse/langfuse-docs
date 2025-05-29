@@ -29,7 +29,7 @@ Langfuse is an open-source LLM engineering platform. It includes features such a
 
 In this example, we create a chat app that answers questions about how to care for hedgehogs. LlamaIndex vectorizes a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) using the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). Then, all model generations are traced using Langfuse's [LLamaIndex integration](https://langfuse.com/docs/integrations/llama-index/get-started).
 
-Lastly, the [PostHog integration](https://langfuse.com/docs/analytics/posthog) enables you to view detailed analytics about your hedgehog app directly in PostHog.
+Lastly, the [PostHog integration](https://langfuse.com/docs/analytics/integrations/posthog) enables you to view detailed analytics about your hedgehog app directly in PostHog.
 
 
 ### Step 1: Set up LlamaIndex and Mistral

@@ -3,7 +3,7 @@ description: Langfuse Python SDK - a decorators-based integration to give you po
 category: SDKs
 ---
 
-# Cookbook: Python Decorators
+# Cookbook: Python Decorators (v2)
 
 The Langfuse Python SDK uses decorators for you to effortlessly integrate observability into your LLM applications. It supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs and outputs. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code.
 

@@ -739,9 +739,9 @@ const sections: Section[] = [
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
-            Hobby: "10 requests / day",
-            Core: "20 requests / day",
-            Pro: "200 requests / day",
+            Hobby: "100 requests / day",
+            Core: "200 requests / day",
+            Pro: "2000 requests / day",
             Enterprise: "Custom",
           },
         },
@@ -772,7 +772,7 @@ const sections: Section[] = [
       },
       {
         name: "PostHog Integration",
-        href: "/docs/analytics/posthog",
+        href: "/docs/analytics/integrations/posthog",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Pro: true, Enterprise: true },

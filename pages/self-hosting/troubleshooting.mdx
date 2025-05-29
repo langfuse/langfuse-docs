@@ -76,6 +76,7 @@ error: Dirty database version 16. Fix and force version.
 ```
 
 You will have to force your database to the last successful version, which is 15. Make sure to replace the database credentials with your own.
+Before running the command below, make sure you have golang-migrate installed. If you do not, please follow the guide linked in our [contributing guide](https://github.com/langfuse/langfuse/blob/main/CONTRIBUTING.md#development-setup). Then, navigate to the root of your Langfuse project folder in your terminal. Then run the following command:
 
 ```bash
 migrate -path migrations/ -database clickhouse://test:test@localhost:8123/dummy force 15

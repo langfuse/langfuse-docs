@@ -1,5 +1,5 @@
 ---
-title: Python SDK (Low-level)
+title: Python SDK (Low-level, v2)
 description: Fully async and typed Python SDK. Uses Pydantic objects for data verification.
 category: SDKs
 ---

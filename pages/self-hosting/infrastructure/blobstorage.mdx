@@ -119,6 +119,36 @@ Ensure that both entities have the necessary permissions to access the bucket:
 
 </Callout>
 
+#### Using AWS KMS Encryption
+
+Amazon S3 provides server-side encryption (SSE) options to encrypt your data at rest.
+Langfuse supports AWS KMS encryption for all S3 interactions through the following environment variables:
+
+| Variable                                  | Required / Default | Description                                                                                                         |
+|-------------------------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------|
+| `LANGFUSE_S3_EVENT_UPLOAD_SSE`            |                    | Server-side encryption algorithm to use. Set to `aws:kms` to use AWS KMS or `AES256` to use server-side encryption. |
+| `LANGFUSE_S3_EVENT_UPLOAD_SSE_KMS_KEY_ID` |                    | ID of the KMS key to use for encryption. Required when `LANGFUSE_S3_EVENT_UPLOAD_SSE` is set to `aws:kms`.          |
+| `LANGFUSE_S3_MEDIA_UPLOAD_SSE`            |                    | Server-side encryption algorithm to use. Set to `aws:kms` to use AWS KMS or `AES256` to use server-side encryption. |
+| `LANGFUSE_S3_MEDIA_UPLOAD_SSE_KMS_KEY_ID` |                    | ID of the KMS key to use for encryption. Required when `LANGFUSE_S3_MEDIA_UPLOAD_SSE` is set to `aws:kms`.          |
+| `LANGFUSE_S3_BATCH_EXPORT_SSE`            |                    | Server-side encryption algorithm to use. Set to `aws:kms` to use AWS KMS or `AES256` to use server-side encryption. |
+| `LANGFUSE_S3_BATCH_EXPORT_SSE_KMS_KEY_ID` |                    | ID of the KMS key to use for encryption. Required when `LANGFUSE_S3_BATCH_EXPORT_SSE` is set to `aws:kms`.          |
+
+When using AWS KMS for encryption, ensure your IAM role or user has the necessary permissions to use the specified KMS key:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+      "Effect": "Allow",
+      "Resource": "arn:aws:kms:region:account-id:key/key-id",
+      "Sid": "AllowUseOfKMSKey"
+    }
+  ]
+}
+```
+
 #### Example Configuration
 
 Set the following environment variables if you authenticate using an IAM role:

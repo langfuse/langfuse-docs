@@ -14,8 +14,9 @@ import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
-// import InkeepCustomTrigger from "./components/inkeep/InkeepCustomTrigger";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
+import Image from "next/image";
+import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -196,15 +197,17 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "langfuse-launch-week-3",
+    key: "lw3-all",
     dismissible: true,
     content: (
-      <Link href="/launch">
+      <Link href="/blog/2025-05-19-launch-week-3">
         {/* mobile */}
-        <span className="sm:hidden">Upcoming: Launch Week #3 →</span>
+        <span className="sm:hidden">
+          LW3: See All Launches →
+        </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Upcoming: Langfuse Launch Week #3 - a new feature every single day →
+          Langfuse Launch Week #3: See All Launches →
         </span>
       </Link>
     ),
