@@ -61,8 +61,7 @@ const deploymentOptions: Record<DeploymentOption, DeploymentOptionParams> = {
       </span>
     ),
     title: "Pricing",
-    subtitle:
-      "Deploy Langfuse OSS today. Upgrade to Pro or Enterprise at any time.",
+    subtitle: "Deploy Langfuse OSS today. Upgrade to Enterprise at any time.",
     href: "/pricing-self-host",
   },
 };
@@ -205,29 +204,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       cta: "Deployment guide",
     },
     {
-      name: "Pro",
-      id: "tier-self-hosted-pro",
-      href: "https://buy.stripe.com/aEU6qufIwfJy0CYbIR",
-      featured: false,
-      description:
-        "Get access to additional workflow features to accelerate your team.",
-      price: "$100",
-      priceUnit: "user per month",
-      mainFeatures: [
-        "All Open Source features",
-        "LLM Playground",
-        "Human annotation queues",
-        "LLM-as-a-judge evaluators",
-        "Prompt Experiments",
-        "Chat & Email support",
-      ],
-      cta: "Subscribe",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
-    },
-    {
       name: "Enterprise",
       id: "tier-self-hosted-enterprise",
       href: "/talk-to-us",
@@ -235,7 +211,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom",
       description: "Enterprise-grade support and security features.",
       mainFeatures: [
-        "All Open Source / Pro features",
+        "All Open Source features",
         "Project-level RBAC",
         "Enterprise Security Features",
         "SOC2, ISO27001, and InfoSec reviews",
@@ -282,7 +258,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -299,7 +274,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -316,7 +290,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -333,7 +306,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -345,7 +317,7 @@ const sections: Section[] = [
         href: "/docs/integrations/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -353,7 +325,7 @@ const sections: Section[] = [
         href: "/docs/sdk/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -363,7 +335,7 @@ const sections: Section[] = [
         href: "/docs/opentelemetry/get-started",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -371,7 +343,7 @@ const sections: Section[] = [
         href: "/docs/integrations/litellm/tracing",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -379,7 +351,7 @@ const sections: Section[] = [
         href: "/docs/api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -396,7 +368,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": "Unlimited",
-            Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
         },
@@ -427,7 +398,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -467,7 +437,7 @@ const sections: Section[] = [
         href: "/docs/prompts",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -481,7 +451,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": "Unlimited",
-            Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
         },
@@ -492,7 +461,7 @@ const sections: Section[] = [
         href: "/docs/prompts",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -502,7 +471,7 @@ const sections: Section[] = [
         href: "/docs/prompts/get-started#composability",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -511,7 +480,7 @@ const sections: Section[] = [
         href: "/docs/prompts/get-started#caching-in-client-sdks",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -520,7 +489,7 @@ const sections: Section[] = [
         href: "/docs/playground",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -530,8 +499,7 @@ const sections: Section[] = [
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
-            "Open Source": false,
-            Pro: true,
+            "Open Source": true,
             Enterprise: true,
           },
         },
@@ -550,7 +518,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: false,
             Enterprise: true,
           },
         },
@@ -567,7 +534,7 @@ const sections: Section[] = [
         href: "/docs/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -577,7 +544,7 @@ const sections: Section[] = [
         href: "/docs/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -585,7 +552,7 @@ const sections: Section[] = [
         href: "/docs/scores",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -593,7 +560,7 @@ const sections: Section[] = [
         href: "/docs/scores/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -602,7 +569,7 @@ const sections: Section[] = [
         href: "/docs/scores/annotation",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -617,8 +584,7 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: {
-            "Open Source": false,
-            Pro: true,
+            "Open Source": true,
             Enterprise: true,
           },
         },
@@ -628,7 +594,7 @@ const sections: Section[] = [
         href: "/docs/scores/external-evaluation-pipelines",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -644,8 +610,7 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: {
-            "Open Source": false,
-            Pro: true,
+            "Open Source": true,
             Enterprise: true,
           },
         },
@@ -666,7 +631,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": "Unlimited",
-            Pro: "Unlimited",
             Enterprise: "Unlimited",
           },
         },
@@ -682,7 +646,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": "Unlimited",
-            Pro: "As licensed",
             Enterprise: "As licensed",
           },
         },
@@ -705,7 +668,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -767,7 +729,7 @@ const sections: Section[] = [
         href: "/docs/query-traces#ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -775,7 +737,7 @@ const sections: Section[] = [
         href: "/docs/analytics/integrations/posthog",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -788,7 +750,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
     ],
@@ -802,21 +764,21 @@ const sections: Section[] = [
         href: "/docs/ask-ai",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
         name: "Community (GitHub, Discord)",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
         name: "Chat & Email",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -830,7 +792,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "included at >10 users",
             Enterprise: true,
           },
         },
@@ -844,7 +805,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -858,7 +819,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: false,
             Enterprise: true,
           },
         },
@@ -874,7 +834,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: false,
             Enterprise: true,
           },
         },
@@ -907,7 +866,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -924,7 +882,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
-            Pro: true,
             Enterprise: true,
           },
         },
@@ -938,7 +895,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -950,7 +907,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
@@ -963,7 +920,7 @@ const sections: Section[] = [
             Pro: TEAMS_ADDON,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -978,7 +935,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: false,
             Enterprise: true,
           },
         },
@@ -987,14 +943,14 @@ const sections: Section[] = [
         name: "Organization Creators",
         href: "/self-hosting/organization-creators",
         tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "UI Customization",
         href: "/self-hosting/ui-customization",
         tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1007,21 +963,21 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Admin API (project management, SCIM)",
         href: "/docs/api#org-scoped-routes",
         tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "Organization Management API",
         href: "/self-hosting/organization-management-api",
         tiers: {
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
@@ -1040,7 +996,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "Self-serve",
             Enterprise: "Sales",
           },
         },
@@ -1056,7 +1011,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "Credit card",
             Enterprise: "Credit card, Invoice",
           },
         },
@@ -1072,7 +1026,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "Monthly",
             Enterprise: "Custom",
           },
         },
@@ -1088,7 +1041,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: ">10 users",
             Enterprise: true,
           },
         },
@@ -1110,7 +1062,6 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": false,
-            Pro: "Standard T&Cs",
             Enterprise: "Custom",
           },
         },
@@ -1119,7 +1070,7 @@ const sections: Section[] = [
         name: "Data processing agreement (GDPR)",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1131,7 +1082,7 @@ const sections: Section[] = [
             Pro: true,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1154,7 +1105,7 @@ const sections: Section[] = [
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: { "Open Source": false, Pro: false, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
     ],
