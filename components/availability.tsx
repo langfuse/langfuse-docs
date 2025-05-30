@@ -21,12 +21,6 @@ const availabilities: {
     Icon: Check,
   },
   {
-    id: "pro",
-    label: "Pro & Enterprise",
-    shortLabel: "Pro & Enterprise",
-    Icon: Check,
-  },
-  {
     id: "team-add-on",
     label: "Team Add-On",
     shortLabel: "Team",
