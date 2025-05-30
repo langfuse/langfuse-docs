@@ -58,7 +58,7 @@ langfuse = Langfuse()
 | `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings |
 | `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"` |
 | no env, `enabled` | Optional. Manually enable/disable tracing. | If keys are provided, enabled defaults to `True`, otherwise `False` |
-| `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3)
+| `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py)
 | `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
 | `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
 | `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
@@ -373,7 +373,7 @@ langfuse.flush()
 
 Track `releases` in Langfuse to relate traces in Langfuse with the versioning of your application. This can be done by either providing the environment variable `LANGFUSE_RELEASE`, instantiating the client with the release, or setting it as a trace parameter.
 
-If no release is set, this defaults to [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/environment.py#L3).
+If no release is set, this defaults to [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py).
 
 
 ```python

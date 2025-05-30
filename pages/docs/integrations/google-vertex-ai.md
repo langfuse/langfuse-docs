@@ -22,7 +22,7 @@ There are a few ways through which you can capture traces and metrics for Google
 
    - [Langchain](https://langfuse.com/docs/integrations/langchain)
    - [Llama Index](https://langfuse.com/docs/integrations/llama-index) 
-   - [Haystack](https://langfuse.com/docs/integrations/haystack)
+   - [Haystack](https://langfuse.com/docs/integrations/haystack/get-started)
    - [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk)
 
 2. via a Proxy such as [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing)

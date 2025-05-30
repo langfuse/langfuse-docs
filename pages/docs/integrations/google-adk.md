@@ -6,7 +6,7 @@ category: Integrations
 
 # Integrate Langfuse with Google's Agent Development Kit
 
-This notebook demonstrates how to capture detailed traces from a [Google Agent Development Kit](https://github.com/google-generative-ai/agent-development-kit) (ADK) application with **[Langfuse](https://langfuse.com)** using the OpenTelemetry (OTel) protocol.
+This notebook demonstrates how to capture detailed traces from a [Google Agent Development Kit](https://github.com/google/adk-python) (ADK) application with **[Langfuse](https://langfuse.com)** using the OpenTelemetry (OTel) protocol.
 
 > **Why Agent Development Kit?**  
 > [Google’s Agent Development Kit](https://developers.googleblog.com/en/agent-development-kit-easy-to-build-multi-agent-applications/) streamlines building, orchestrating, and tracing generative-AI agents out of the box, letting you move from prototype to production far faster than wiring everything yourself.

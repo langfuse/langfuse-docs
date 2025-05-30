@@ -119,7 +119,7 @@ prompt.config
 
 ### Create example function
 
-In this example we use the native [Langfuse OpenAI integration](https://langfuse.com/docs/integrations/openai) by importing from `langfuse.openai`. This enables [tracing](https://langfuse.com/docs/tracing) in Langfuse and is not required for using Langfuse prompts management.
+In this example we use the native [Langfuse OpenAI integration](https://langfuse.com/docs/integrations/openai/get-started) by importing from `langfuse.openai`. This enables [tracing](https://langfuse.com/docs/tracing) in Langfuse and is not required for using Langfuse prompts management.
 
 
 ```python
