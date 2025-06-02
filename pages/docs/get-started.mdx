@@ -144,7 +144,26 @@ pip install langfuse openai
 
 <EnvPython />
 
-<GetStartedDecoratorOpenai />
+```python /@observe()/ /from langfuse.openai import openai/ filename="main.py"
+from langfuse import observe
+from langfuse.openai import openai # OpenAI integration
+
+@observe()
+def story():
+    return openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+          {"role": "system", "content": "You are a great storyteller."},
+          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
+        ],
+    ).choices[0].message.content
+
+@observe()
+def main():
+    return story()
+
+main()
+```
 
 </Tab>
 <Tab>
@@ -155,7 +174,26 @@ pip install langfuse openai
 
 <EnvPython />
 
-<GetStartedDecoratorOpenai />
+```python /@observe()/ /from langfuse.openai import openai/ filename="main.py"
+from langfuse.decorators import observe
+from langfuse.openai import openai # OpenAI integration
+
+@observe()
+def story():
+    return openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+          {"role": "system", "content": "You are a great storyteller."},
+          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
+        ],
+    ).choices[0].message.content
+
+@observe()
+def main():
+    return story()
+
+main()
+```
 
 </Tab>
 </Tabs>

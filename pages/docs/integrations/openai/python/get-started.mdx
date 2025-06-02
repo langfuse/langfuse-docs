@@ -101,9 +101,23 @@ openai.api_key = "sk-..."
 
 Optional, checks the SDK connection with the server. Not recommended for production usage.
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+```python
+from langfuse import get_client
+
+get_client().auth_check()
+```
+
+</Tab>
+
+<Tab>
+
 ```python
 openai.langfuse_auth_check()
 ```
+</Tab>
+</Tabs>
 
 ### Use OpenAI SDK as usual
 
@@ -136,6 +150,24 @@ The Langfuse SDKs queue and batches events in the background to reduce the numbe
 
 If you are running a short-lived application, you need to flush Langfuse to ensure that all events are flushed before the application exits.
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from langfuse.openai import openai
+
+# Flush via global client
+langfuse = get_client()
+langfuse.flush()
+
+# OR flush via OpenAI integration
+openai.flush_langfuse()
+```
+
+</Tab>
+<Tab>
+
 ```python
 from langfuse.openai import openai
 
@@ -143,6 +175,9 @@ from langfuse.openai import openai
 
 openai.flush_langfuse()
 ```
+
+</Tab>
+</Tabs>
 
 Learn more about queuing and batching of events [here](/docs/tracing).
 
@@ -154,15 +189,57 @@ Tracing of the assistants api is not supported by this integration as OpenAI Ass
 
 If you are having issues with the integration, you can enable debug mode to get more information about the requests and responses.
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# Enable debug via global client
+langfuse = Langfuse(debug=True)
+```
+
+Alternatively, you can set the environment variable:
+
+```sh
+export LANGFUSE_DEBUG=true
+```
+
+</Tab>
+<Tab>
+
 ```python
 from langfuse.openai import openai
 
 openai.langfuse_debug = True
 ```
 
+</Tab>
+</Tabs>
+
 ### Sampling
 
 [Sampling](/docs/tracing-features/sampling) can be used to control the volume of traces collected by the Langfuse server.
+
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# Set sampling via global client (default is 1.0)
+langfuse = Langfuse(sample_rate=0.1)
+```
+
+Alternatively, you can set the environment variable:
+```sh
+export LANGFUSE_SAMPLE_RATE=0.1
+```
+
+</Tab>
+<Tab>
 
 ```python
 from langfuse.openai import openai
@@ -170,15 +247,41 @@ from langfuse.openai import openai
 openai.langfuse_sample_rate = 0.1 # send only 10% of traces to Langfuse servers
 ```
 
+</Tab>
+</Tabs>
+
 ### Disable tracing
 
-You may disable sending traces to Langfuse by setting the `langfuse_enabled` flag on the `openai` module level client at the top of your application.
+You may disable sending traces to Langfuse by setting the appropriate flag.
+
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+from langfuse.openai import openai
+
+# Disable via global client
+langfuse = Langfuse(tracing_enabled=False)
+```
+
+Alternatively, you can set the environment variable:
+
+```sh
+export LANGFUSE_TRACING_ENABLED=false
+```
+
+</Tab>
+<Tab>
 
 ```python
 from langfuse.openai import openai
 
 openai.langfuse_enabled = False # disable tracing
 ```
+
+</Tab>
+</Tabs>
 
 ## Advanced usage
 
@@ -281,10 +384,10 @@ You can use any of the following options:
 <Tabs items={["Python SDK v3", "Python SDK v2"]}>
 <Tab>
 
-**Option 1: Python Decorator (works with both v3 and v2)**
+**Option 1: Python Decorator (v3)**
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 from langfuse.openai import openai
 
 @observe()
@@ -345,7 +448,7 @@ with langfuse.start_as_current_span(name="capital-poem-generator") as span:
 </Tab>
 <Tab>
 
-**Option 1: Python Decorator (works with both v3 and v2)**
+**Option 1: Python Decorator (v2)**
 
 ```python
 from langfuse.decorators import observe
@@ -455,6 +558,38 @@ OpenAI returns the token usage on streamed responses only when in `stream_option
   `choices` list without checking if it is non-empty.
 </Callout>
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python /stream_options={"include_usage": True}/
+from langfuse import get_client
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+stream = client.chat.completions.create(
+  model="gpt-4o",
+  messages=[{"role": "user", "content": "How are you?"}],
+  stream=True,
+  stream_options={"include_usage": True},
+)
+
+result = ""
+
+for chunk in stream:
+  # Check if chunk choices are not empty. OpenAI returns token usage in a final chunk with an empty choices list.
+  if chunk.choices:
+    result += chunk.choices[0].delta.content or ""
+
+# Flush via global client or OpenAI integration
+langfuse = get_client()
+langfuse.flush()
+# OR: openai.flush_langfuse()
+```
+
+</Tab>
+<Tab>
+
 ```python /stream_options={"include_usage": True}/
 from langfuse.openai import openai
 
@@ -477,6 +612,9 @@ for chunk in stream:
 openai.flush_langfuse()
 ```
 
+</Tab>
+</Tabs>
+
 ### OpenAI Beta APIs
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
@@ -487,7 +625,11 @@ For **structured output parsing**, please use the `response_format` argument to 
 
 If you rely on parsing Pydantic defintions for your `response_format`, you may leverage the `type_to_response_format_param` utility function from the OpenAI Python SDK to convert the Pydantic definition to a `response_format` dictionary. This is the same function the OpenAI Beta API uses to convert Pydantic definitions to `response_format` dictionaries.
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
 ```python
+from langfuse import get_client
 from langfuse.openai import openai
 from openai.lib._parsing._completions import type_to_response_format_param
 from pydantic import BaseModel
@@ -497,6 +639,38 @@ class CalendarEvent(BaseModel):
   date: str
   participants: list[str]
 
+completion = openai.chat.completions.create(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "system", "content": "Extract the event information."},
+        {
+            "role": "user",
+            "content": "Alice and Bob are going to a science fair on Friday.",
+        },
+    ],
+    response_format=type_to_response_format_param(CalendarEvent),
+)
+
+print(completion)
+
+# Flush via global client or OpenAI integration
+langfuse = get_client()
+langfuse.flush()
+# OR: openai.flush_langfuse()
+```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse.openai import openai
+from openai.lib._parsing._completions import type_to_response_format_param
+from pydantic import BaseModel
+
+class CalendarEvent(BaseModel):
+  name: str
+  date: str
+  participants: list[str]
 
 completion = openai.chat.completions.create(
     model="gpt-4o-2024-08-06",
@@ -514,6 +688,9 @@ print(completion)
 
 openai.flush_langfuse()
 ```
+
+</Tab>
+</Tabs>
 
 #### Assistants API
 
