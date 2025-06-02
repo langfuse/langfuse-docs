@@ -9,6 +9,7 @@ export default {
   "vercel-ai-sdk": "Vercel AI SDK",
   "strands-agents": "Strands Agents",
   autogen: "AutoGen",
+  pipecat: "Pipecat",
   "semantic-kernel": "Semantic Kernel",
   "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",

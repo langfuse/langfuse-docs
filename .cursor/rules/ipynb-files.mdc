@@ -1,0 +1,55 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor Rules for Handling Jupyter Notebooks
+
+## Overview
+This file contains rules and prompts for handling Jupyter Notebook (.ipynb) files in Cursor IDE, which currently doesn't have native support for .ipynb files.
+
+## System Rules
+
+1. When a user requests to create or edit a .ipynb file:
+   - Use template.py as the base for generating the notebook
+   - Create a Python file that uses the template functions to generate the desired notebook
+   - Execute the Python file to generate the .ipynb file
+
+2. For notebook creation:
+   - Create a new Python file using the template functions
+   - Define the notebook structure using add_markdown_cell() and add_code_cell()
+   - Use save_notebook() to generate the .ipynb file
+
+3. For notebook editing:
+   - Load the existing .ipynb file using load_notebook()
+   - Make the requested modifications
+   - Save the updated notebook using save_notebook()
+
+4. For notebook to Python conversion:
+   - Use notebook_to_python() function to convert .ipynb to .py
+   - This is useful for version control and editing in Cursor
+
+## Example Prompts
+
+1. Creating a new notebook:
+   "Please create a new Jupyter notebook with a markdown cell explaining the project and a code cell with a simple plot."
+
+2. Editing an existing notebook:
+   "Please modify the existing notebook to add a new code cell that performs data analysis."
+
+3. Converting a notebook:
+   "Please convert this notebook to a Python file so I can edit it in Cursor."
+
+## Implementation Notes
+
+1. Always use the template.py functions for notebook manipulation
+2. Keep the Python file and .ipynb file in sync
+3. Use proper error handling when working with files
+4. Maintain consistent formatting in the generated notebooks
+
+## Best Practices
+
+1. Document all notebook cells with clear markdown explanations
+2. Use proper code organization in code cells
+3. Include necessary imports at the beginning of the notebook
+4. Save intermediate results when working with large datasets

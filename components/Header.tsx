@@ -26,7 +26,7 @@ export const Header = ({
       )}
     >
       {title && (
-        <TitleTag className="mt-2 text-4xl font-bold tracking-tight sm:text-7xl text-balance font-mono">
+        <TitleTag className="mt-2 text-4xl font-bold tracking-tight sm:text-7xl text-balance font-mono text-foreground">
           {title}
         </TitleTag>
       )}

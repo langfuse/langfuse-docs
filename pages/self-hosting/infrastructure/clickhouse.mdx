@@ -77,6 +77,7 @@ CLICKHOUSE_MIGRATION_SSL=true
 #### Troubleshooting
 
 - **'error: driver: bad connection in line 0' during migration**: If you see the previous error message during startup of your web container, ensure that the `CLICKHOUSE_MIGRATION_SSL` flag is set and that Langfuse Web can access your ClickHouse environment. Review the IP whitelisting if applicable and whether the instance has access to the Private Link.
+- **Code: 80. DB::Exception: It's not initial query. ON CLUSTER is not allowed for Replicated database. (INCORRECT_QUERY)** (on ClickHouse Cloud Azure): ClickHouse Cloud Azure does not seem to handle the ON CLUSTER and Replicated settings well. We recommend to set `CLICKHOUSE_CLUSTER_ENABLED=false` for now. This should not make any difference on performance or high availability.
 
 ### ClickHouse on Kubernetes (Helm)
 
