@@ -237,7 +237,7 @@ res = eval_llm.evaluate(
 )
 ```
 
-Add the `trace_id` back the dataset as it was omitted in the previous step to be compatible with UpTrain.
+Add the `trace_id` back to the dataset as it was omitted in the previous step to be compatible with UpTrain.
 
 
 ```python
