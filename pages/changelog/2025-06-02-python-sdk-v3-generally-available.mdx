@@ -1,0 +1,165 @@
+---
+title: Python SDK v3 Generally Available
+description: The OpenTelemetry-based Python SDK v3 is now stable and ready for production use.
+date: 2025-06-02
+author: Hassieb
+badge: Generally Available
+ogImage: /images/changelog/2025-05-23-otel-based-python-sdk.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/md_TKMmNz28"
+  title="Python SDK v3 Generally Available"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Following extensive testing and community feedback, we're excited to announce that **Langfuse Python SDK v3 is now generally available** and ready for production use.
+
+This major release brings the power of OpenTelemetry (OTEL) to LLM observability, providing a more robust and standards-compliant foundation for tracing your AI applications.
+
+## What's New in v3
+
+**OpenTelemetry Foundation**
+
+The v3 SDK is built on the [OpenTelemetry standard](https://opentelemetry.io/), bringing significant improvements:
+
+- **Automatic Context Propagation**: OTEL handles trace and span context automatically, ensuring proper nesting without manual ID management
+- **Third-Party Compatibility**: Seamless integration with any OpenTelemetry-instrumented library
+- **Industry Standard**: Built on proven observability standards used across the software industry
+
+**Simplified Developer Experience**
+
+The new SDK makes tracing more intuitive with global client access and automatic context management:
+
+```python
+# main_app.py
+from langfuse import get_client, observe
+import other_module
+
+# Global client initialization from environment variables
+langfuse = get_client()
+
+@observe(name="user-request-pipeline")
+def handle_user_request(user_query: str, user_id: str):
+    # Enrich the trace with user information
+    langfuse.update_current_trace(user_id=user_id, tags=["production"])
+
+    # Call function from another module - context propagates automatically
+    processed_data = other_module.process_data(user_query)
+
+    langfuse.update_current_span(output={"final_result": processed_data})
+    return processed_data
+
+handle_user_request("Generate a summary", "user_123")
+```
+
+```python
+# other_module.py
+from langfuse import get_client, observe
+
+# Access the same global client instance
+langfuse_client = get_client()
+
+@observe(name="data-processing-step")
+def process_data(query: str):
+    # This span automatically becomes a child of "user-request-pipeline"
+    
+    with langfuse_client.start_as_current_generation(
+        name="llm-call",
+        model="gpt-4o",
+        input=[{"role": "user", "content": query}]
+    ) as generation:
+        # Simulate LLM call
+        result = "Generated summary..."
+        generation.update(
+            output=result, 
+            usage_details={"input_tokens": 10, "output_tokens": 25}
+        )
+
+    return result
+```
+
+**Enhanced Third-Party Integration**
+
+The SDK seamlessly integrates with OpenTelemetry-instrumented libraries. For example, using Anthropic with automatic tracing:
+
+```python
+from anthropic import Anthropic
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+from langfuse import get_client
+
+# Enable automatic OTEL instrumentation for Anthropic
+AnthropicInstrumentor().instrument()
+
+langfuse = get_client()
+anthropic_client = Anthropic()
+
+with langfuse.start_as_current_span(name="anthropic-analysis"):
+    # Automatically traced as a nested generation
+    message = anthropic_client.messages.create(
+        model="claude-3-7-sonnet-20250219",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Analyze this data"}],
+    )
+```
+
+## Key Architectural Changes
+
+**Important for Existing Users**:
+
+1. **Trace Attributes**: User ID, session ID, and tags must now be set on enclosing spans rather than directly on integration calls
+2. **Trace Input/Output**: Now derived from the root observation by default. For LLM-as-a-judge evaluations, set explicitly via `span.update_trace()`
+3. **Context Managers**: Use `with langfuse.start_as_current_span()` instead of manual object creation
+4. **LlamaIndex**: Now uses third-party OTEL instrumentation instead of Langfuse-specific callbacks
+
+## Migration Support
+
+We've updated all documentation to show both v3 and v2 patterns, and we provide comprehensive migration guides for:
+
+- Direct SDK users
+- OpenAI integration users  
+- LangChain integration users
+- LlamaIndex integration users
+- `@observe` decorator users
+
+**v2 SDK Support**: We'll continue supporting Python SDK v2 with critical bug fixes and security patches for the foreseeable future.
+
+## Getting Started
+
+**Installation**:
+```bash
+pip install langfuse>=3.0.0
+```
+
+**Basic Usage**:
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="my-application") as span:
+    span.update_trace(user_id="user_123")
+    
+    # Your application logic here
+    result = "Hello, World!"
+    
+    span.update(output={"result": result})
+```
+
+## Learn More
+
+- [Python SDK v3 Documentation](/docs/sdk/python/sdk-v3)
+- [Migration Guide](/docs/sdk/python/sdk-v3#migration-from-v2-to-v3)
+- [OpenTelemetry Integration Examples](/docs/sdk/python/sdk-v3#third-party-integrations)
+- [GitHub Discussions](https://github.com/orgs/langfuse/discussions/6993)
+
+The Python SDK v3 represents a significant step forward in LLM observability, bringing enterprise-grade standards and improved developer experience to production AI applications. We look forward to seeing what you build with it!
