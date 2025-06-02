@@ -36,9 +36,9 @@ def process_request():
 When creating spans directly:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # You can set the session_id when creating the root span
 with langfuse.start_as_current_span(

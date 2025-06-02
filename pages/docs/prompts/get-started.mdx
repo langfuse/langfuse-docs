@@ -133,6 +133,37 @@ At runtime, you can fetch the latest production version from Langfuse.
 <Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+
+# Get current `production` version of a text prompt
+prompt = langfuse.get_prompt("movie-critic")
+
+# Insert variables into prompt template
+compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> "As an expert movie critic, do you like Dune 2?"
+```
+
+Chat prompts
+
+```python
+# Get current `production` version of a chat prompt
+chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg infers the prompt type (default is 'text')
+
+# Insert variables into chat prompt template
+compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
+```
+
+</Tab>
+<Tab>
+
 ```python
 from langfuse import Langfuse
 
@@ -157,6 +188,9 @@ chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg i
 compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
+
+</Tab>
+</Tabs>
 
 Optional parameters
 

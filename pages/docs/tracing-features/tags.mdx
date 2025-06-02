@@ -25,8 +25,8 @@ def my_function():
 When creating spans or generations directly:
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Add tags when creating the root span
 with langfuse.start_as_current_span(

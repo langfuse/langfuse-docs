@@ -19,11 +19,10 @@ When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 ```python
 from langfuse import observe, get_client
 
-langfuse = get_client()
-
-
 @observe()
 def my_function():
+    langfuse = get_client()
+    
     # ... processing logic ...
     # Update the current span with a warning level
     langfuse.update_current_span(
@@ -35,8 +34,9 @@ def my_function():
 When creating spans or generations directly:
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+
+langfuse = get_client()
 
 # Using context managers (recommended)
 with langfuse.start_as_current_span(name="my-operation") as span:
@@ -66,6 +66,8 @@ with langfuse.start_as_current_span(name="another-operation"):
 Levels can also be set when creating generations:
 
 ```python
+langfuse = get_client()
+
 with langfuse.start_as_current_generation(
     name="llm-call",
     model="gpt-4o",

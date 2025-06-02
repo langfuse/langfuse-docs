@@ -184,6 +184,50 @@ openai.langfuse_enabled = False # disable tracing
 
 ### Custom trace properties
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+**Important**: In Python SDK v3, trace attributes (`session_id`, `user_id`, `tags`) must be set on an **enclosing span**, not directly on the OpenAI call.
+
+You can add the following properties to the openai method:
+
+| Property                | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `name`                  | Set `name` to identify a specific type of generation.                        |
+| `metadata`              | Set `metadata` with additional information that you want to see in Langfuse. |
+| `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
+| `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
+
+For trace attributes, use an enclosing span:
+
+```python
+from langfuse import get_client
+from langfuse.openai import openai
+
+langfuse = get_client()
+
+# Trace attributes must be set on enclosing span
+with langfuse.start_as_current_span(name="calculator-request") as span:
+    span.update_trace(
+        session_id="session_123",
+        user_id="user_456", 
+        tags=["calculator"]
+    )
+    
+    result = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a very accurate calculator."},
+            {"role": "user", "content": "1 + 1 = "}
+        ],
+        name="test-chat",
+        metadata={"someMetadataKey": "someValue"},
+    )
+```
+
+</Tab>
+<Tab>
+
 You can add the following properties to the openai method, e.g. `openai.chat.completions.create()`, to use additional Langfuse features:
 
 | Property                | Description                                                                  |
@@ -206,8 +250,14 @@ openai.chat.completions.create(
       {"role": "user", "content": "1 + 1 = "}],
     name="test-chat",
     metadata={"someMetadataKey": "someValue"},
+    session_id="session_123",
+    user_id="user_456",
+    tags=["calculator"]
 )
 ```
+
+</Tab>
+</Tabs>
 
 ### Use Traces
 
@@ -223,36 +273,22 @@ openai.chat.completions.create(
   basic concepts.
 </Callout>
 
-You can use any of the following three options:
+You can use any of the following options:
 
-1. [Python `@observe()` decorator](/docs/sdk/python/decorators)
-2. Set `trace_id` property, best if you have an existing id from your application.
-3. Use the [low-level SDK](/docs/sdk/python/low-level-sdk) to create traces manually and add OpenAI calls to it.
+1. [Python `@observe()` decorator](/docs/sdk/python/decorators) - works with both v2 and v3
+2. Use explicit span management - differs between v3 and v2
 
-<Tabs items={["Python Decorator", "Set trace_id", "Low-level SDK"]}>
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
 <Tab>
 
-<Tabs items={["Trace", "Trace and nested spans"]}>
-<Tab>
+**Option 1: Python Decorator (works with both v3 and v2)**
 
-Desired trace structure:
-
-```
-TRACE: capital_poem_generator(input="Bulgaria")
-|
-|-- GENERATION: get-capital
-|
-|-- GENERATION: generate-poem
-```
-
-Implementation:
-
-```python /@observe()/
+```python
 from langfuse.decorators import observe
 from langfuse.openai import openai
 
 @observe()
-def capital_poem_generator(country)
+def capital_poem_generator(country):
   capital = openai.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
@@ -273,33 +309,50 @@ def capital_poem_generator(country)
 capital_poem_generator("Bulgaria")
 ```
 
+**Option 2: Context Managers (v3 approach)**
+
+```python
+from langfuse import get_client
+from langfuse.openai import openai
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="capital-poem-generator") as span:
+    # Set trace attributes
+    span.update_trace(
+        user_id="user_123",
+        session_id="session_456",
+        tags=["poetry", "capital"]
+    )
+    
+    capital = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "What is the capital of the country?"},
+            {"role": "user", "content": "Bulgaria"}],
+        name="get-capital",
+    ).choices[0].message.content
+
+    poem = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a poet. Create a poem about this city."},
+            {"role": "user", "content": capital}],
+        name="generate-poem",
+    ).choices[0].message.content
+```
+
 </Tab>
 <Tab>
-Desired trace structure:
 
-```
-TRACE: poems(input=["Bulgaria", "France"])
-|
-|-- SPAN: capital_poem_generator(input="Bulgaria")
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-|
-|-- SPAN: capital_poem_generator(input="France")
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-```
+**Option 1: Python Decorator (works with both v3 and v2)**
 
-Implementation
-
-```python /@observe()/
+```python
+from langfuse.decorators import observe
 from langfuse.openai import openai
 
 @observe()
-def capital_poem_generator(country)
+def capital_poem_generator(country):
   capital = openai.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
@@ -317,23 +370,14 @@ def capital_poem_generator(country)
   ).choices[0].message.content
   return poem
 
-@observe()
-def poems(countries):
-    for country in countries:
-        capital_poem_generator(country)
-
-poems(["Bulgaria", "France"])
+capital_poem_generator("Bulgaria")
 ```
 
-</Tab>
-</Tabs>
+**Option 2: Set trace_id (v2 approach)**
 
-</Tab>
-<Tab>
+If you want to group multiple openai calls into a single trace, you can use the `trace_id` property:
 
-Usually, this integration creates a single trace in Langfuse for each openai call. If you want to group multiple openai calls into a single trace, you can use the `trace_id` property. This can be either a random id or an existing id from your application that will be unique to this execution.
-
-```python {3,14,23}
+```python
 from langfuse.openai import openai
 from uuid import uuid4
 trace_id = str(uuid4())
@@ -347,7 +391,10 @@ capital = openai.chat.completions.create(
       {"role": "user", "content": country}],
   temperature=0,
   name="get-capital",
-  trace_id=trace_id
+  trace_id=trace_id,
+  session_id="session_123",
+  user_id="user_456",
+  tags=["poetry"]
 ).choices[0].message.content
 
 poem = openai.chat.completions.create(
@@ -360,37 +407,9 @@ poem = openai.chat.completions.create(
 ).choices[0].message.content
 ```
 
-Now both generations are grouped in the same trace with the `trace_id` assigned by you.
+**Option 3: Low-level SDK (v2 approach)**
 
-```
-TRACE (id: trace_id)
-|
-|-- GENERATION: get-capital
-|
-|-- GENERATION: generate-poem
-```
-
-If you want more control over the trace structure, use the Decorator or Low-level SDK.
-
-</Tab>
-<Tab>
-
-<Tabs items={["Trace", "Trace and nested spans"]}>
-<Tab>
-
-Desired trace structure:
-
-```
-TRACE: capital-poem-generator
-|
-|-- GENERATION: get-capital
-|
-|-- GENERATION: generate-poem
-```
-
-Implementation:
-
-```python {5,8,20,29}
+```python
 from langfuse import Langfuse
 from langfuse.openai import openai
 
@@ -399,8 +418,6 @@ langfuse = Langfuse()
 
 # create trace and add params
 trace = langfuse.trace(name="capital-poem-generator")
-
-# create multiple completions, pass trace_id to each
 
 country = "Bulgaria"
 
@@ -422,71 +439,6 @@ poem = openai.chat.completions.create(
   trace_id=trace.id
 ).choices[0].message.content
 ```
-
-</Tab>
-<Tab>
-Desired trace structure:
-
-```
-TRACE: capital-poem-generator
-|
-|-- SPAN: Bulgaria
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-|
-|-- SPAN: France
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-```
-
-Implementation
-
-```python showLineNumbers {5,8,12,20-21,30-31,35}
-from langfuse import Langfuse
-from langfuse.openai import openai
-
-# initialize SDK
-langfuse = Langfuse()
-
-# create trace and add params
-trace = langfuse.trace(name="capital-poem-generator")
-
-for country in ["Bulgaria", "France"]:
-  # create span
-  span = trace.span(name=country)
-
-  capital = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "What is the capital of the country?"},
-        {"role": "user", "content": country}],
-    name="get-capital",
-    trace_id=trace.id,
-    parent_observation_id=span.id,
-  ).choices[0].message.content
-
-  poem = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a poet. Create a poem about this city."},
-        {"role": "user", "content": capital}],
-    name="generate-poem",
-    trace_id=trace.id,
-    parent_observation_id=span.id,
-  ).choices[0].message.content
-
-  # End span to get span-level latencies
-  span.end()
-```
-
-_Note that you need to provide `trace_id` and `parent_observation_id` to each generation._
-
-</Tab>
-</Tabs>
 
 </Tab>
 </Tabs>

@@ -44,7 +44,12 @@ Apply the masking function when initializing the Langfuse client:
 ```python
 from langfuse import Langfuse
 
+# Initialize with masking function
 langfuse = Langfuse(mask=masking_function)
+
+# Then get the client
+from langfuse import get_client
+langfuse = get_client()
 ```
 
 With the decorator:

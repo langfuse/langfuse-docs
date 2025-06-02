@@ -36,9 +36,9 @@ def process_data():
 When creating spans directly:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Add metadata at trace level
 with langfuse.start_as_current_span(
