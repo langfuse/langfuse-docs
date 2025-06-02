@@ -163,7 +163,7 @@ for topic in topics:
     print(f"Answer: {explain_concept(topic)} \n")
 ```
 
-Now you should see in the the *Traces* section of the langfuse UI the traces you just added.
+Now you should see in the *Traces* section of the langfuse UI the traces you just added.
 ![Trace with RAGAS scores](https://langfuse.com/images/cookbook/example-external-evaluation-pipelines/traces.png)
 
 Remember, the goal of this tutorial is to show you how to build an external evaluation pipeline. These pipelines will run in your CI/CD environment, or be run in a different orchestrated container service. No matter the environment you choose, three key steps always apply:

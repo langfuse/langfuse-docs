@@ -594,7 +594,7 @@ names_to_functions = {
 }
 ```
 
-The *check_transaction_status* function demonstrates the use of Mistral's function-calling capabilities. The function's result is then incorporated into the LLM's response, which is logged and traced in Langfuse. This example illustrates how external function calls can be seamlessly integrated into a Langfuse by using the the wrapped *mistral_completion* function, ensuring that every step — from tool selection to final output - is captured for thorough observability.
+The *check_transaction_status* function demonstrates the use of Mistral's function-calling capabilities. The function's result is then incorporated into the LLM's response, which is logged and traced in Langfuse. This example illustrates how external function calls can be seamlessly integrated into a Langfuse by using the wrapped *mistral_completion* function, ensuring that every step — from tool selection to final output - is captured for thorough observability.
 
 
 ```python
