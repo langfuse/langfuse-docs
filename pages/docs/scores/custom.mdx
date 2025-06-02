@@ -73,7 +73,26 @@ with langfuse.start_as_current_span(name="my-operation") as span:
         value=0.95,
         data_type="NUMERIC"
     )
+
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_span(name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="correctness",
+        value=0.9,
+        data_type="NUMERIC",
+        comment="Factually correct"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value=0.95,
+        data_type="NUMERIC"
+    )
 ```
+
 
 </Tab>
 <Tab>
@@ -139,6 +158,30 @@ with langfuse.start_as_current_span(name="my-operation") as span:
         value="partially correct",
         data_type="CATEGORICAL",
         comment="Some factual errors"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value="partially correct",
+        data_type="CATEGORICAL"
+    )
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_span(name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="accuracy",
+        value="partially correct",
+        data_type="CATEGORICAL",
+        comment="Some factual errors"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value="partially correct",
+        data_type="CATEGORICAL"
     )
 ```
 
@@ -206,6 +249,29 @@ with langfuse.start_as_current_span(name="my-operation") as span:
         value=1, # 0 or 1
         data_type="BOOLEAN",
         comment="Very helpful response"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value=1, # 0 or 1
+        data_type="BOOLEAN"
+    )
+# Method 3: Score via the current context
+with langfuse.start_as_current_span(name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="helpfulness",
+        value=1, # 0 or 1
+        data_type="BOOLEAN",
+        comment="Very helpful response"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value=1, # 0 or 1
+        data_type="BOOLEAN"
     )
 ```
 

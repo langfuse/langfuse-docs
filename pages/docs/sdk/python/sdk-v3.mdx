@@ -520,11 +520,29 @@ Trace-level attributes apply to the entire trace, not just a single observation.
 | `tags`       | `Optional[List[str]]` | List of tags to categorize the trace.                            |
 | `public`     | `Optional[bool]`      | Whether the trace should be publicly accessible (if configured). |
 
-### Important: Trace Input/Output Behavior
+**Example: Setting Multiple Trace Attributes**
 
-**Key Change from v2**: In v3, trace input and output are automatically set from the **root observation** (first span/generation) by default. This differs from v2 where integrations could set trace-level inputs/outputs directly.
+```python
+with langfuse.start_as_current_span(name="initial-operation") as span:
+    # Set trace attributes early
+    span.update_trace(
+        user_id="user_xyz",
+        session_id="session_789",
+        tags=["beta-feature", "llm-chain"]
+    )
+    # ...
+    # Later, from another span in the same trace:
+    with span.start_as_current_generation(name="final-generation") as gen:
+        # ...
+        langfuse.update_current_trace(output={"final_status": "success"}, public=True)
+```
+### Trace Input/Output Behavior
+
+In v3, trace input and output are automatically set from the **root observation** (first span/generation) by default. This differs from v2 where integrations could set trace-level inputs/outputs directly.
 
 #### Default Behavior
+
+
 ```python
 with langfuse.start_as_current_span(
     name="user-request", 
@@ -578,22 +596,6 @@ def process_user_query(user_question: str):
     return answer
 ```
 
-**Example: Setting Multiple Trace Attributes**
-
-```python
-with langfuse.start_as_current_span(name="initial-operation") as span:
-    # Set trace attributes early
-    span.update_trace(
-        user_id="user_xyz",
-        session_id="session_789",
-        tags=["beta-feature", "llm-chain"]
-    )
-    # ...
-    # Later, from another span in the same trace:
-    with span.start_as_current_generation(name="final-generation") as gen:
-        # ...
-        langfuse.update_current_trace(output={"final_status": "success"}, public=True)
-```
 
 ### Trace and Observation IDs
 
@@ -1152,7 +1154,7 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 
 ### Step-by-Step Migration by Integration Type
 
-#### 1. **OpenAI Integration Users**
+#### 1. OpenAI Integration Users
 
 **v2 Pattern:**
 ```python
@@ -1198,7 +1200,7 @@ with langfuse.start_as_current_span(name="chat-request") as span:
     span.update_trace(output={"response": response.choices[0].message.content})
 ```
 
-#### 2. **LangChain Integration Users**
+#### 2. LangChain Integration Users
 
 **v2 Pattern:**
 ```python
@@ -1236,7 +1238,7 @@ with langfuse.start_as_current_span(name="langchain-request") as span:
     span.update_trace(output={"response": response})
 ```
 
-#### 3. **LlamaIndex Integration Users**
+#### 3. LlamaIndex Integration Users
 
 **v2 Pattern:**
 ```python
@@ -1269,7 +1271,7 @@ with langfuse.start_as_current_span(name="llamaindex-query") as span:
     span.update_trace(output={"response": str(response)})
 ```
 
-#### 4. **Low-Level SDK Users**
+#### 4. Low-Level SDK Users
 
 **v2 Pattern:**
 ```python
@@ -1314,7 +1316,7 @@ with langfuse.start_as_current_span(
     root_span.update_trace(output={"response": "Response"})
 ```
 
-#### 5. **@observe Decorator Users**
+#### 5. `@observe` Decorator Users
 
 **v2 Pattern:**
 ```python
@@ -1347,31 +1349,27 @@ def my_function():
 
 ### Key Migration Checklist
 
-<Callout type="warning">
-**Critical Changes to Address:**
-</Callout>
-
-1. **✅ Update Imports**:
+1. **Update Imports**:
    - Replace `from langfuse import Langfuse` with `from langfuse import get_client`
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
-2. **✅ Trace Attributes Pattern**:
+2. **Trace Attributes Pattern**:
    - Move all `user_id`, `session_id`, `tags` from integration calls to enclosing spans
    - Use `span.update_trace()` or `langfuse.update_current_trace()`
 
-3. **✅ Trace Input/Output**:
+3. **Trace Input/Output**:
    - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
    - Don't rely on automatic derivation from root observation if you need specific values
 
-4. **✅ Context Managers**:
+4. **Context Managers**:
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers
    - Use `with langfuse.start_as_current_span()` instead
 
-5. **✅ LlamaIndex Migration**:
+5. **LlamaIndex Migration**:
    - Replace Langfuse callback with third-party OTEL instrumentation
    - Install: `pip install openinference-instrumentation-llama-index`
 
-6. **✅ Initialization**:
+6. **Initialization**:
    - Replace constructor parameters:
      - `enabled` → `tracing_enabled`
      - `threads` → `media_upload_thread_count`
