@@ -190,7 +190,7 @@ with langfuse.start_as_current_span(name="my-operation"):
 
 ```python
 langfuse.score(
-    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
     name="accuracy",
