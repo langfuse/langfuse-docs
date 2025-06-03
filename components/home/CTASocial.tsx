@@ -10,7 +10,7 @@ import { YCLogo } from "./img/ycLogo";
 
 export function CTASocial() {
   return (
-    <section className="pt-0 pb-20 lg:pb-32 mx-auto max-w-7xl px-5 sm:px-7 xl:px-10 flex flex-col items-center">
+    <section className="py-20 lg:py-32 mx-auto max-w-7xl px-5 sm:px-7 xl:px-10 flex flex-col items-center">
       {/* Social/Award Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-4 items-center justify-items-center my-4 flex-wrap">
         <div>
@@ -54,7 +54,7 @@ export function CTASocial() {
       </div>
       {/* Headline */}
       <h2 className="mt-4 mb-4 text-4xl font-bold tracking-tight sm:text-7xl text-balance font-mono text-foreground text-center">
-        Start building on Langfuse today.
+        Start building with Langfuse today.
       </h2>
       {/* CTA Button */}
       <div className="mt-4 mb-0">
@@ -62,7 +62,6 @@ export function CTASocial() {
           <Link href="https://cloud.langfuse.com">Start building</Link>
         </Button>
       </div>
-      
     </section>
   );
-} 
+}
