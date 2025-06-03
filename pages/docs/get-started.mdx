@@ -202,7 +202,7 @@ main()
 <Tab>
 {/* Decorator + Any LLM */}
 
-The [`@observe()` decorator](/docs/sdk/python/decorators) works with both SDK versions. If you do not use any of our native integrations, you can trace any LLM call via `@observe(as_type="generation")`.
+The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. If you do not use any of our native integrations, you can trace any LLM call via `@observe(as_type="generation")`.
 
 <Tabs items={["Python SDK v3", "Python SDK v2"]}>
 <Tab>
@@ -213,7 +213,54 @@ pip install langfuse anthropic
 
 <EnvPython />
 
-<GetStartedDecoratorAnyLlm />
+```python /@observe(as_type="generation")/ /@observe()/ filename="main.py"
+from langfuse import observe, get_client
+import anthropic
+
+langfuse = get_client()
+anthopic_client = anthropic.Anthropic()
+
+# Wrap LLM function with decorator
+@observe(as_type="generation")
+def anthropic_completion(**kwargs):
+  # optional, extract some fields from kwargs
+  kwargs_clone = kwargs.copy()
+  input = kwargs_clone.pop('messages', None)
+  model = kwargs_clone.pop('model', None)
+  langfuse.update_current_generation(
+      input=input,
+      model=model,
+      metadata=kwargs_clone
+  )
+
+  response = anthopic_client.messages.create(**kwargs)
+
+  # See docs for more details on token counts and usd cost in Langfuse
+  # https://langfuse.com/docs/model-usage-and-cost
+  langfuse.update_current_generation(
+      usage_details={
+          "input": response.usage.input_tokens,
+          "output": response.usage.output_tokens
+      }
+  )
+
+  # return result
+  return response.content[0].text
+
+@observe()
+def main():
+  return anthropic_completion(
+      model="claude-3-opus-20240229",
+      max_tokens=1024,
+      messages=[
+          {"role": "user", "content": "Hello, Claude"}
+      ]
+  )
+
+main()
+```
+
+You may alternatively use a third-party OTEL-based instrumentation library for your LLM. See our [docs](/docs/sdk/python/sdk-v3#third-party-integrations) for more details.
 
 </Tab>
 <Tab>
@@ -362,10 +409,6 @@ const res = await openai.chat.completions.create({
 
 The [integration](/docs/integrations/langchain) uses the Langchain callback system. **Note**: Trace attributes must be set on an enclosing span in v3.
 
-<GetStartedLangchainPythonArgs />
-
-Example with trace attributes:
-
 ```python
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
@@ -388,6 +431,10 @@ with langfuse.start_as_current_span(name="joke-chain") as span:
     )
 
     response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+
+# The SDK executes network requests in the background.
+# To ensure that all requests are sent before the process exits, call flush()
+langfuse.flush()
 ```
 
 </Tab>
@@ -460,109 +507,6 @@ Traces and metrics from your LlamaIndex application are now automatically tracke
 
 </Tab>
 </Tabs>
-
-</Tab>
-<Tab>
-{/* Python SDK (v3) */}
-The [OpenTelemetry-based SDK (v3)](/docs/sdk/python/sdk-v3) is the latest generation of the Python SDK with improved developer experience and enhanced ease of use.
-
-```bash
-pip install langfuse
-```
-
-<EnvPython />
-
-Example usage of the v3 SDK using context managers:
-
-```python filename="server.py"
-from langfuse import get_client
-
-# Create Langfuse client
-langfuse = get_client()
-
-# Create a trace with a root span
-with langfuse.start_as_current_span(
-    name="user-request-pipeline",
-    input={"user_query": "Summarize the Q3 OKR documents"}
-) as root_span:
-    # Add trace attributes
-    root_span.update_trace(
-        user_id="user_123",
-        session_id="session_abc",
-        tags=["summary", "okr"]
-    )
-
-    # Create a nested generation for the LLM call
-    with langfuse.start_as_current_generation(
-        name="summary-generation",
-        model="gpt-4o",
-        model_parameters={"temperature": 0.7, "max_tokens": 1000},
-        input=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}
-        ]
-    ) as generation:
-        # Simulate an LLM call
-        llm_response = "The Q3 OKRs contain goals for multiple teams..."
-        token_usage = {"input_tokens": 50, "output_tokens": 120}
-
-        # Update the generation with results
-        generation.update(
-            output=llm_response,
-            usage_details=token_usage
-        )
-
-    # Update the root span with final output
-    root_span.update(output={"summary": llm_response})
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-langfuse.flush()
-```
-
-For more information, see the [Python SDK v3 documentation](/docs/sdk/python/sdk-v3).
-
-</Tab>
-<Tab>
-{/* Python SDK (v2) */}
-
-The [low-level SDK (v2)](/docs/sdk/python/low-level-sdk) gives you full control over the traces logged to Langfuse. For a less verbose integration, consider using the `@observe()` decorator or the v3 SDK.
-
-```bash
-pip install langfuse
-```
-
-<EnvPython />
-
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python/low-level-sdk).
-
-```python filename="server.py"
-from langfuse import Langfuse
-
-# Create Langfuse client
-langfuse = Langfuse()
-
-# Create generation in Langfuse
-generation = langfuse.generation(
-    name="summary-generation",
-    model="gpt-4o",
-    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
-    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
-    metadata={"interface": "whatsapp"}
-)
-
-# Execute model, mocked here
-# chat_completion = openai.ChatCompletion.create(model="gpt-4o", messages=[{"role": "user", "content": "Hello world"}])
-chat_completion = "completion":"The Q3 OKRs contain goals for multiple teams..."
-
-# Update span and sets end_time
-generation.end(output=chat_completion)
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-# Not necessary in long-running production code
-langfuse.flush()
-```
 
 </Tab>
 <Tab>

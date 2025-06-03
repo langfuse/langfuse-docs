@@ -87,7 +87,7 @@ def process_data(query: str):
 
 In this example:
 
-- `Langfuse` is initialized once.
+- Langfuse resources are initialized once under the hood by the `get_client()` function. It can be accessed globally via `langfuse = get_client()`.
 - The `@observe` decorator creates spans for `handle_user_request` and `process_data`.
 - `other_module.py` accesses the same client instance via `get_client()`.
 - Spans are automatically nested due to OTEL's context propagation.
