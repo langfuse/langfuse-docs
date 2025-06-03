@@ -313,10 +313,10 @@ langfuse = get_client()
 with langfuse.start_as_current_span(name="calculator-request") as span:
     span.update_trace(
         session_id="session_123",
-        user_id="user_456", 
+        user_id="user_456",
         tags=["calculator"]
     )
-    
+
     result = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -427,7 +427,7 @@ with langfuse.start_as_current_span(name="capital-poem-generator") as span:
         session_id="session_456",
         tags=["poetry", "capital"]
     )
-    
+
     capital = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
