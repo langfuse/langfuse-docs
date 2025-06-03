@@ -160,9 +160,6 @@ from langfuse.openai import openai
 # Flush via global client
 langfuse = get_client()
 langfuse.flush()
-
-# OR flush via OpenAI integration
-openai.flush_langfuse()
 ```
 
 </Tab>
@@ -581,10 +578,8 @@ for chunk in stream:
   if chunk.choices:
     result += chunk.choices[0].delta.content or ""
 
-# Flush via global client or OpenAI integration
-langfuse = get_client()
-langfuse.flush()
-# OR: openai.flush_langfuse()
+# Flush via global client
+get_client().flush()
 ```
 
 </Tab>
@@ -653,10 +648,8 @@ completion = openai.chat.completions.create(
 
 print(completion)
 
-# Flush via global client or OpenAI integration
-langfuse = get_client()
-langfuse.flush()
-# OR: openai.flush_langfuse()
+# Flush via global client
+get_client().flush()
 ```
 
 </Tab>
