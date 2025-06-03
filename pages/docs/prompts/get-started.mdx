@@ -449,10 +449,53 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 
 This is currently unavailable when using the LlamaIndex integration.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
-Decorators
+**Decorators**
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe(as_type="generation")
+def nested_generation():
+    prompt = langfuse.get_prompt("movie-critic")
+
+    langfuse.update_current_generation(
+        prompt=prompt,
+    )
+
+@observe()
+def main():
+  nested_generation()
+
+main()
+```
+
+**Context Managers**
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+prompt = langfuse.get_prompt("movie-critic")
+
+with langfuse.start_as_current_generation(
+    name="movie-generation",
+    model="gpt-4o",
+    prompt=prompt
+) as generation:
+    # Your LLM call here
+    generation.update(output="LLM response")
+```
+
+</Tab>
+<Tab>
+
+**Decorators**
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -472,7 +515,7 @@ def main():
 main()
 ```
 
-Low-level SDK
+**Low-level SDK**
 
 ```diff
 langfuse.generation(
