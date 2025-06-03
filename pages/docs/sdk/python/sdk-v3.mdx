@@ -1149,7 +1149,7 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 **Core Changes:**
 - **OpenTelemetry Foundation**: v3 is built on OpenTelemetry standards
 - **Trace Input/Output**: Now derived from root observation by default
-- **Trace Attributes**: Must be set via enclosing spans, not directly on integrations
+- **Trace Attributes**: Must be set via enclosing spans, not directly on integrations (OpenAI, Langchain)
 - **Context Management**: Automatic OTEL context propagation
 
 ### Step-by-Step Migration by Integration Type
@@ -1350,7 +1350,8 @@ def my_function():
 ### Key Migration Checklist
 
 1. **Update Imports**:
-   - Replace `from langfuse import Langfuse` with `from langfuse import get_client`
+   - Use `from langfuse import get_client` to access global client instance configured via environment variables
+   - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
 2. **Trace Attributes Pattern**:
@@ -1369,7 +1370,22 @@ def my_function():
    - Replace Langfuse callback with third-party OTEL instrumentation
    - Install: `pip install openinference-instrumentation-llama-index`
 
-6. **Initialization**:
+6. **ID Management**:
+   - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
+   - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
+   - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
+   ```python
+   # v3: Generate deterministic trace ID from external system
+   external_request_id = "req_12345"
+   trace_id = Langfuse.create_trace_id(seed=external_request_id)
+   
+   @observe(langfuse_trace_id=trace_id)
+   def my_function():
+       # This trace will have the deterministic ID
+       pass
+   ```
+
+7. **Initialization**:
    - Replace constructor parameters:
      - `enabled` → `tracing_enabled`
      - `threads` → `media_upload_thread_count`
