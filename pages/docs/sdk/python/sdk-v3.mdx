@@ -545,10 +545,10 @@ In v3, trace input and output are automatically set from the **root observation*
 
 ```python
 with langfuse.start_as_current_span(
-    name="user-request", 
+    name="user-request",
     input={"query": "What is the capital of France?"}  # This becomes the trace input
 ) as root_span:
-    
+
     with langfuse.start_as_current_generation(
         name="llm-call",
         model="gpt-4o",
@@ -557,7 +557,7 @@ with langfuse.start_as_current_span(
         response = "Paris is the capital of France."
         gen.update(output=response)
         # LLM generation input/output are separate from trace input/output
-    
+
     root_span.update(output={"answer": "Paris"})  # This becomes the trace output
 ```
 
@@ -568,13 +568,13 @@ If you need different trace inputs/outputs than the root observation, explicitly
 with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
     # Root span has its own input/output
     root_span.update(input="Step 1 data", output="Step 1 result")
-    
+
     # But trace should have different input/output (e.g., for LLM-as-a-judge)
     root_span.update_trace(
         input={"original_query": "User's actual question"},
         output={"final_answer": "Complete response", "confidence": 0.95}
     )
-    
+
     # Now trace input/output are independent of root span input/output
 ```
 
@@ -586,13 +586,13 @@ LLM-as-a-judge and evaluation features typically rely on trace-level inputs and 
 def process_user_query(user_question: str):
     # LLM processing...
     answer = call_llm(user_question)
-    
+
     # Explicitly set trace input/output for evaluation features
     langfuse.update_current_trace(
         input={"question": user_question},
         output={"answer": answer}
     )
-    
+
     return answer
 ```
 
@@ -1144,17 +1144,15 @@ The Langfuse SDK provides wrappers around OTEL spans (`LangfuseSpan`, `LangfuseG
 
 The v3 SDK introduces significant improvements and changes compared to v2. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
 
-### Migration Overview
-
-**Core Changes:**
+**Core Changes to SDK v2:**
 - **OpenTelemetry Foundation**: v3 is built on OpenTelemetry standards
 - **Trace Input/Output**: Now derived from root observation by default
-- **Trace Attributes**: Must be set via enclosing spans, not directly on integrations (OpenAI, Langchain)
+- **Trace Attributes** (`user_id`, `session_id`, etc.) Must be set via enclosing spans, not directly on integrations (OpenAI call, Langchain invocation)
 - **Context Management**: Automatic OTEL context propagation
 
-### Step-by-Step Migration by Integration Type
+### Migration Path by Integration Type
 
-#### 1. OpenAI Integration Users
+#### OpenAI Integration Users
 
 **v2 Pattern:**
 ```python
@@ -1165,7 +1163,7 @@ response = openai.chat.completions.create(
     messages=[{"role": "user", "content": "Hello"}],
     # Trace attributes directly on the call
     user_id="user_123",
-    session_id="session_456", 
+    session_id="session_456",
     tags=["chat"],
     metadata={"source": "app"}
 )
@@ -1188,19 +1186,19 @@ with langfuse.start_as_current_span(name="chat-request") as span:
         # Explicit trace input/output for LLM-as-a-judge features
         input={"query": "Hello"},
     )
-    
+
     response = openai.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": "Hello"}],
         # Only generation-specific metadata allowed here
         metadata={"source": "app"}
     )
-    
+
     # Set trace output explicitly
     span.update_trace(output={"response": response.choices[0].message.content})
 ```
 
-#### 2. LangChain Integration Users
+#### LangChain Integration Users
 
 **v2 Pattern:**
 ```python
@@ -1226,19 +1224,19 @@ langfuse = get_client()
 with langfuse.start_as_current_span(name="langchain-request") as span:
     span.update_trace(
         user_id="user_123",
-        session_id="session_456", 
+        session_id="session_456",
         tags=["langchain"],
         input={"query": "Hello"}  # Explicit trace input
     )
-    
+
     handler = CallbackHandler()  # No trace attributes in constructor
     response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
-    
+
     # Set trace output explicitly
     span.update_trace(output={"response": response})
 ```
 
-#### 3. LlamaIndex Integration Users
+#### LlamaIndex Integration Users
 
 **v2 Pattern:**
 ```python
@@ -1265,13 +1263,13 @@ with langfuse.start_as_current_span(name="llamaindex-query") as span:
         user_id="user_123",
         input={"query": "Hello"}
     )
-    
+
     response = index.as_query_engine().query("Hello")
-    
+
     span.update_trace(output={"response": str(response)})
 ```
 
-#### 4. Low-Level SDK Users
+#### Low-Level SDK Users
 
 **v2 Pattern:**
 ```python
@@ -1293,6 +1291,11 @@ generation.end(output="Response")
 ```
 
 **v3 Migration:**
+
+<Callout type='info'>
+In v3, all spans / generations must be ended by calling `.end()` on the returned object.
+</Callout>
+
 ```python
 from langfuse import get_client
 
@@ -1305,18 +1308,18 @@ with langfuse.start_as_current_span(
 ) as root_span:
     # Set trace attributes
     root_span.update_trace(user_id="user_123")
-    
+
     with langfuse.start_as_current_generation(
         name="llm-call",
         model="gpt-4o"
     ) as generation:
         generation.update(output="Response")
-    
+
     # If needed, override trace output
     root_span.update_trace(output={"response": "Response"})
 ```
 
-#### 5. `@observe` Decorator Users
+#### `@observe` Decorator Users
 
 **v2 Pattern:**
 ```python
@@ -1331,13 +1334,13 @@ def my_function():
 
 **v3 Migration:**
 ```python
-from langfuse import observe, get_client
+from langfuse import observe, get_client # new import
 
 @observe()
 def my_function():
     # This is now the root span, not the trace
     langfuse = get_client()
-    
+
     # Update trace explicitly
     langfuse.update_current_trace(
         user_id="user_123",
@@ -1352,6 +1355,7 @@ def my_function():
 1. **Update Imports**:
    - Use `from langfuse import get_client` to access global client instance configured via environment variables
    - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
+   - Use `from langfuse import observe` to import the observe decorator
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
 2. **Trace Attributes Pattern**:
@@ -1378,7 +1382,7 @@ def my_function():
    # v3: Generate deterministic trace ID from external system
    external_request_id = "req_12345"
    trace_id = Langfuse.create_trace_id(seed=external_request_id)
-   
+
    @observe(langfuse_trace_id=trace_id)
    def my_function():
        # This trace will have the deterministic ID
