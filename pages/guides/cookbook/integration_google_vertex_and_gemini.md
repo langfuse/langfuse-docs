@@ -136,7 +136,7 @@ def vertex_generate_content(input, model_name = "gemini-pro"):
 ```python
 @observe()
 def assemble_prompt():
-  return "please generate a small poem adressing the size of the sun and its importance for humanity"
+  return "please generate a small poem addressing the size of the sun and its importance for humanity"
 
 @observe()
 def poem():
@@ -165,7 +165,7 @@ Here, we'll use the [LangChain integration](https://langfuse.com/docs/integratio
 
 
 ```python
-# Intialize callback handler
+# Initialize callback handler
 from langfuse.callback import CallbackHandler
 langfuse_handler = CallbackHandler()
 ```
