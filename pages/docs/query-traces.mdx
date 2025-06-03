@@ -25,15 +25,45 @@ New data is typically available for querying within 15-30 seconds of ingestion, 
 
 Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
 
+
+<Tabs items={["Python SDK  v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+```python
+from langfuse import get_client
+langfuse = get_client() # uses environment variables to authenticate
+
+# Fetch list of traces, supports filters and pagination
+traces = langfuse.api.trace.list()
+
+# Fetch a single trace by ID
+trace = langfuse.api.trace.get("traceId")
+
+# Fetch list of observations, supports filters and pagination
+observations = langfuse.api.observations.get_many()
+
+# Fetch a single observation by ID
+observation = langfuse.api.observations.get("observationId")
+
+# Fetch list of sessions
+sessions = langfuse.api.sessions.list()
+
+# Explore more entities via Intellisense
+langfuse.api.*
+```
+
+</Tab>
+<Tab>
+
 <Callout type="info">
 
 The dedicated `fetch*` methods for core entities are covered by tests and semantic versioning. The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities.
 
 </Callout>
-
-<Tabs items={["Python", "JS/TS"]}>
-<Tab>
-
 ```bash
 pip install langfuse
 ```
@@ -85,6 +115,12 @@ Python SDK reference including all available filters:
 
 </Tab>
 <Tab>
+
+<Callout type="info">
+
+The dedicated `fetch*` methods for core entities are covered by tests and semantic versioning. The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities.
+
+</Callout>
 
 ```bash
 npm install langfuse

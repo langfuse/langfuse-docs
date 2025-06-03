@@ -4,7 +4,7 @@ description: Learn how to use Langfuse for open source observability/tracing in 
 category: Integrations
 ---
 
-# Cookbook: LangGraph Integration
+# Cookbook: LangGraph Integration (SDK v2)
 
 
 ## What is LangGraph?
