@@ -3,6 +3,7 @@ import { Hero } from "./Hero";
 import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
+import { CTASocial } from "./CTASocial";
 
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
@@ -27,6 +28,7 @@ export const Home = () => (
       <OpenSource />
       <Security />
       <Pricing />
+      <CTASocial />
       {/* <FromTheBlog /> */}
       {/* <CTA /> */}
       {/* <Footer /> */}
