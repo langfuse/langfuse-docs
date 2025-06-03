@@ -34,7 +34,7 @@ Steps after updating notebooks:
 
 ### Images
 
-We store all images in the `public/images/` directory. To use them in the markdown files, use the abslute path `/images/your-image.png`.
+We store all images in the `public/images/` directory. To use them in the markdown files, use the absolute path `/images/your-image.png`.
 
 ### Videos / Gifs
 
