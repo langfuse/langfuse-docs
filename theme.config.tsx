@@ -200,14 +200,14 @@ const config: DocsThemeConfig = {
     key: "lw3-all",
     dismissible: true,
     content: (
-      <Link href="/blog/2025-05-19-launch-week-3">
+      <Link href="/blog/2025-06-04-open-sourcing-langfuse-product">
         {/* mobile */}
         <span className="sm:hidden">
-          LW3: See All Launches →
+          Doubling Down on Open Source →
         </span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Launch Week #3: See All Launches →
+          Doubling Down on Open Source: All Product Features Now in Self-Hosted →
         </span>
       </Link>
     ),
