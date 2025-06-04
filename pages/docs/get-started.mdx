@@ -90,9 +90,6 @@ message = Anthropic().messages.create(
 )
 
 print(message.content)
-
-# Flush events to Langfuse in short-lived applications
-langfuse.flush()
 ```
 
 **Alternative**: Manual tracing with `@observe(as_type="generation")` for custom implementations. See [decorator documentation](/docs/sdk/python/decorators) for details.
@@ -138,29 +135,18 @@ Alternative imports:
 + from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
-Use the OpenAI SDK as you would normally. **Note**: Trace attributes (user_id, session_id, tags) must be set on an enclosing span:
+Use the OpenAI SDK as you would normally.
 
 ```python
-from langfuse import get_client
 from langfuse.openai import openai
 
-langfuse = get_client()
-
-# Trace attributes must be set on enclosing span
-with langfuse.start_as_current_span(name="openai-call") as span:
-    span.update_trace(
-        user_id="user_123",
-        session_id="session_abc",
-        tags=["calculator"]
-    )
-
-    completion = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a very accurate calculator."},
-            {"role": "user", "content": "1 + 1 = "}
-        ],
-    )
+completion = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a very accurate calculator."},
+        {"role": "user", "content": "1 + 1 = "}
+    ],
+)
 ```
 
 </Tab>
@@ -191,31 +177,18 @@ const res = await openai.chat.completions.create({
 The [integration](/docs/integrations/langchain) uses the Langchain callback system. **Note**: Trace attributes must be set on an enclosing span.
 
 ```python
-from langfuse import get_client
 from langfuse.langchain import CallbackHandler
+
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-langfuse = get_client()
 langfuse_handler = CallbackHandler()
 
 llm = ChatOpenAI(model_name="gpt-4o")
 prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
-# Trace attributes must be set on enclosing span
-with langfuse.start_as_current_span(name="joke-chain") as span:
-    span.update_trace(
-        user_id="user_123",
-        session_id="session_abc",
-        tags=["joke-chain"]
-    )
-
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-langfuse.flush()
+response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
 ```
 
 For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
@@ -243,21 +216,18 @@ pip install langfuse llama-index openinference-instrumentation-llama-index
 <EnvPython />
 
 ```python
+from langfuse import get_client
+
 from llama_index.core.llms.openai import OpenAI
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
-from langfuse import get_client
 
 # Enable OTEL-based instrumentation
 LlamaIndexInstrumentor().instrument()
 
+# Initialize Langfuse
 langfuse = get_client()
-llm = OpenAI(model="gpt-4o")
 
-with langfuse.start_as_current_span(name="llamaindex-query"):
-    response = llm.complete("Hello, world!")
-    print(response)
-
-langfuse.flush()
+response = OpenAI(model="gpt-4o").complete("Hello, world!")
 ```
 
 </Tab>
