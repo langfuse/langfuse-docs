@@ -71,10 +71,11 @@ For more advanced use cases with manual control, see the [Python SDK v3 document
 In this example, we are using the [`opentelemetry-instrumentation-anthropic` library](https://pypi.org/project/opentelemetry-instrumentation-anthropic/).
 
 ```python
+from langfuse import get_client
+
 from anthropic import Anthropic
 from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
-from langfuse import get_client
 
 # This will automatically emit OTEL-spans for all Anthropic API calls
 AnthropicInstrumentor().instrument()
