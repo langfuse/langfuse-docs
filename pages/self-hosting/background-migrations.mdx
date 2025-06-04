@@ -43,3 +43,25 @@ We can circumvent the issue by loading fewer rows at the same time.
 To do so, adjust the batchSize of your migration by editing the `background_migrations` table.
 Add `{ "batchSize": 2500 }` to the `args` column of the migration you want to adjust.
 Afterward, restart the migration via the UI.
+
+### Migrations Stuck on Single Date
+
+If you observe repeated log lines that refer to the same date, e.g.
+```
+langfuse-worker-1    | 2025-06-03T08:38:21.918Z info      [Background Migration] Acquired lock for background migration 20241024_1730_migrate_traces_from_pg_to_ch
+langfuse-worker-1    | 2025-06-03T08:38:21.949Z info      Migrating traces from postgres to clickhouse with {}
+langfuse-worker-1    | 2025-06-03T08:38:22.429Z info      Got 1000 records from Postgres in 475ms
+langfuse-worker-1    | 2025-06-03T08:38:22.914Z info      Inserted 1000 traces into Clickhouse in 485ms
+langfuse-worker-1    | 2025-06-03T08:38:22.919Z info      Processed batch in 965ms. Oldest record in batch: 2025-06-03T08:34:15.231Z
+langfuse-worker-1    | 2025-06-03T08:38:23.391Z info      Got 1000 records from Postgres in 472ms
+langfuse-worker-1    | 2025-06-03T08:38:23.811Z info      Inserted 1000 traces into Clickhouse in 420ms
+langfuse-worker-1    | 2025-06-03T08:38:23.815Z info      Processed batch in 896ms. Oldest record in batch: 2025-06-03T08:34:15.231Z
+langfuse-worker-1    | 2025-06-03T08:38:24.256Z info      Got 1000 records from Postgres in 441ms
+langfuse-worker-1    | 2025-06-03T08:38:24.638Z info      Inserted 1000 traces into Clickhouse in 382ms
+```
+this might be due to a couple of reasons:
+- You have many events that were created at exactly the same time.
+- Your instance was created before 2024-05-03 and rarely updated since.
+
+In both cases, you can try to adjust the `batchSize` as described above.
+If this does not resolve the problem, you can customize the migration scripts (see langfuse-repo `/worker/src/backgroundMigrations/`) to use the `timestamp` or `start_time` instead of `created_at` as a cursor.
