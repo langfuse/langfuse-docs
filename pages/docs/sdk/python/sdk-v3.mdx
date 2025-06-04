@@ -30,7 +30,7 @@ The `@observe` decorator is the simplest way to instrument your application. It 
 It sets the current span in the context for automatic nesting of child spans and automatically ends it when the function returns. It also automatically captures the function name, arguments, and return value.
 
 ```python
-from langfuse import get_client, observe
+from langfuse import observe, get_client
 
 @observe
 def my_function():
@@ -447,6 +447,10 @@ with langfuse.start_as_current_span(name="outer-process") as outer_span:
 If you are creating observations manually (not `_as_current_`), you can use the methods on the parent `LangfuseSpan` or `LangfuseGeneration` object to create children. These children will _not_ become the current context unless their `_as_current_` variants are used.
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 parent = langfuse.start_span(name="manual-parent")
 
 child_span = parent.start_span(name="manual-child-span")
@@ -489,6 +493,10 @@ You can update observations with new information as your code executes.
 | `prompt`                | `Optional[PromptClient]`        | Associated `PromptClient` object from Langfuse prompt management.     | Generation |
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 with langfuse.start_as_current_generation(name="llm-call", model="gpt-3.5-turbo") as gen:
     gen.update(input={"prompt": "Why is the sky blue?"})
     # ... make LLM call ...
@@ -531,6 +539,10 @@ Trace-level attributes apply to the entire trace, not just a single observation.
 **Example: Setting Multiple Trace Attributes**
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 with langfuse.start_as_current_span(name="initial-operation") as span:
     # Set trace attributes early
     span.update_trace(
@@ -552,6 +564,10 @@ In v3, trace input and output are automatically set from the **root observation*
 #### Default Behavior
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 with langfuse.start_as_current_span(
     name="user-request",
     input={"query": "What is the capital of France?"}  # This becomes the trace input
@@ -574,6 +590,10 @@ with langfuse.start_as_current_span(
 If you need different trace inputs/outputs than the root observation, explicitly set them:
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
     # Root span has its own input/output
     root_span.update(input="Step 1 data", output="Step 1 result")
@@ -592,6 +612,10 @@ with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
 LLM-as-a-judge and evaluation features typically rely on trace-level inputs and outputs. Make sure to set these appropriately:
 
 ```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
 @observe()
 def process_user_query(user_question: str):
     # LLM processing...
@@ -624,6 +648,10 @@ For scenarios where you need to generate IDs outside of an active trace (e.g., t
 - `Langfuse.create_trace_id(seed: Optional[str] = None)`(static method): Generates a new trace ID. If a `seed` is provided, the ID is deterministic. Use the same seed to get the same ID. This is useful for correlating external IDs with Langfuse traces.
 
 ```python
+from langfuse import get_client, Langfuse
+
+langfuse = get_client()
+
 # Get current IDs
 with langfuse.start_as_current_span(name="my-op") as current_op:
     trace_id = langfuse.get_current_trace_id()
@@ -642,6 +670,10 @@ print(f"Deterministic Trace ID for {external_request_id}: {deterministic_trace_i
 If you have a `trace_id` (and optionally a `parent_span_id`) from an external source (e.g., another service, a batch job), you can link new observations to it using the `trace_context` parameter. Note that OpenTelemetry offers native cross-service context propagation, so this is not necessarily required for calls between services that are instrumented with OTEL.
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 existing_trace_id = "abcdef1234567890abcdef1234567890" # From an upstream service
 existing_parent_span_id = "fedcba0987654321" # Optional parent span in that trace
 
@@ -869,6 +901,10 @@ langfuse.flush()
     - `span_or_generation_obj.score_trace()`: Scores the entire trace to which the object belongs.
 
     ```python
+    from langfuse import get_client
+
+    langfuse = get_client()
+
     with langfuse.start_as_current_generation(name="summary_generation") as gen:
         # ... LLM call ...
         gen.update(output="summary text...")
@@ -885,6 +921,10 @@ langfuse.flush()
     - `langfuse.score_current_trace()`: Scores the trace of the currently active observation.
 
     ```python
+    from langfuse import get_client
+
+    langfuse = get_client()
+
     with langfuse.start_as_current_span(name="complex_task") as task_span:
         # ... perform task ...
         langfuse.score_current_span(name="task_component_quality", value=True, data_type="BOOLEAN")
@@ -900,6 +940,10 @@ langfuse.flush()
     - Useful when IDs are known, or for scoring after the trace/observation has completed.
 
     ```python
+    from langfuse import get_client
+
+    langfuse = get_client()
+
     langfuse.create_score(
         name="fact_check_accuracy",
         value=0.95, # Can be float for NUMERIC/BOOLEAN, string for CATEGORICAL
@@ -1096,6 +1140,8 @@ You can configure the SDK to sample traces by setting the `sample_rate` paramete
 If a trace is not sampled, none of its observations (spans, generations) or associated scores will be sent to Langfuse.
 
 ```python
+from langfuse import Langfuse
+
 # Sample approximately 20% of traces
 langfuse_sampled = Langfuse(sample_rate=0.2)
 ```
@@ -1407,6 +1453,8 @@ def my_function():
    - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
 
    ```python
+   from langfuse import Langfuse, observe
+
    # v3: Generate deterministic trace ID from external system
    external_request_id = "req_12345"
    trace_id = Langfuse.create_trace_id(seed=external_request_id)
