@@ -245,6 +245,7 @@ const nonPermanentRedirects = [
   ["/docs/analytics/posthog", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/daily-metrics-api", "/docs/analytics/metrics-api#daily-metrics"],
+  ["/docs/opentelemetry/example-opentelemetry-collector", "/docs/opentelemetry/get-started#export-from-opentelemetry-collector"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
