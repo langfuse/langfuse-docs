@@ -25,29 +25,28 @@ There are three main ways of instrumenting your application with the new Langfus
 <Tabs items={["Observe Decorator", "Context Managers", "Manual Observations"]}>
 
 <Tab>
-The `@langfuse.observe` decorator is the simplest way to instrument your application. It is a function decorator that can be applied to any function.
+The `@observe` decorator is the simplest way to instrument your application. It is a function decorator that can be applied to any function.
 
 It sets the current span in the context for automatic nesting of child spans and automatically ends it when the function returns. It also automatically captures the function name, arguments, and return value.
 
 ```python
 from langfuse import get_client, observe
 
-langfuse = get_client()
-
 @observe
 def my_function():
-    langfuse.update_current_span(output="Hello, world!")
+    return "Hello, world!" # Input/output and timings are automatically captured
 
 my_function()
 
 # Flush events in short-lived applications
+langfuse = get_client()
 langfuse.flush()
 ```
 
 </Tab>
 
 <Tab>
-Context managers are the recommended way to instrument chunks of work in your application as they automatically handle the start and end of spans, and set the current span in the context for automatic nesting of child spans.
+Context managers are the recommended way to instrument chunks of work in your application as they automatically handle the start and end of spans, and set the current span in the context for automatic nesting of child spans. They provide more control than the `@observe` decorator.
 
 ```python
 from langfuse import get_client
@@ -105,7 +104,6 @@ langfuse.flush()
 </Tab>
 </Tabs>
 
-
 ## Setup
 
 ### Installation
@@ -122,8 +120,6 @@ Begin by initializing the `Langfuse` client. You must provide your Langfuse publ
 
 If you are self-hosting Langfuse or using a data region other than the default (EU, `https://cloud.langfuse.com`), ensure you configure the `host` argument or the `LANGFUSE_HOST` environment variable (recommended).
 
-You can verify your credentials and connectivity to the Langfuse server using `langfuse.auth_check()`. We do not recommend using this in production as this adds latency to your application.
-
 <Tabs items={["via Environment Variables (recommended)", "via Constructor Arguments"]}>
 <Tab>
 ```bash filename=".env"
@@ -132,36 +128,20 @@ LANGFUSE_SECRET_KEY="sk-lf-..."
 LANGFUSE_HOST="https://cloud.langfuse.com" # US region: https://us.cloud.langfuse.com
 ```
 
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
-```
-
 </Tab>
 
 <Tab>
-```python
+
+```python filename="Initialize client"
 from langfuse import Langfuse
 
 # Initialize with constructor arguments
-langfuse = Langfuse(
-  public_key="YOUR_PUBLIC_KEY",
-  secret_key="YOUR_SECRET_KEY",
-  host="https://cloud.langfuse.com" # US region: https://us.cloud.langfuse.com
-)
 
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
+langfuse = Langfuse(
+    public_key="YOUR_PUBLIC_KEY",
+    secret_key="YOUR_SECRET_KEY",
+    host="https://cloud.langfuse.com" # US region: https://us.cloud.langfuse.com
+)
 ```
 
 <Callout type="info">
@@ -173,6 +153,27 @@ If you are reinstantiating Langfuse client with different constructor arguments 
 </Tab>
 
 </Tabs>
+
+<details>
+<summary>
+Verify connection with `langfuse.auth_check()`
+</summary>
+
+You can also verify your connection to the Langfuse server using `langfuse.auth_check()`. We do not recommend using this in production as this adds latency to your application.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Verify connection, do not use in production as this is a synchronous call
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+</details>
 
 Key configuration options:
 
@@ -206,7 +207,6 @@ from langfuse import get_client
 # Get the default client
 client = get_client()
 ```
-
 
 ## Basic Tracing
 
@@ -264,7 +264,7 @@ The observe decorator is capturing the args, kwargs and return value of decorate
 
 ### Context Managers
 
-You can create spans or generations anywhere in your application. The primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
+You can create spans or generations anywhere in your application. If you need more control than the `@observe` decorator, the primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
 
 - `langfuse.start_as_current_span()`: Creates a new span and sets it as the currently active observation in the OTEL context for its duration. Any new observations created within this block will be its children.
 - `langfuse.start_as_current_generation()`: Similar to the above, but creates a specialized "generation" observation for LLM calls.
@@ -350,6 +350,10 @@ This approach is useful when you need to:
 **Example with more complex nesting:**
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 # This outer span establishes an active context.
 with langfuse.start_as_current_span(name="main-operation") as main_operation_span:
     # 'main_operation_span' is the current active context.
@@ -389,7 +393,6 @@ with langfuse.start_as_current_span(name="main-operation") as main_operation_spa
 
 ### Nesting Observations
 
-
 <Tabs items={["Observe Decorator", "Context Managers", "Manual"]}>
 <Tab>
 The function call hierarchy is automatically captured by the `@observe` decorator reflected in the trace.
@@ -414,6 +417,10 @@ def main_function(data, parameter):
 Nesting is handled automatically by OpenTelemetry's context propagation. When you create a new observation (span or generation) using `start_as_current_span` or `start_as_current_generation`, it becomes a child of the observation that was active in the context when it was created.
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 with langfuse.start_as_current_span(name="outer-process") as outer_span:
     # outer_span is active
 
@@ -433,6 +440,7 @@ with langfuse.start_as_current_span(name="outer-process") as outer_span:
 
     outer_span.update(output="Outer process finished")
 ```
+
 </Tab>
 
 <Tab>
@@ -536,12 +544,12 @@ with langfuse.start_as_current_span(name="initial-operation") as span:
         # ...
         langfuse.update_current_trace(output={"final_status": "success"}, public=True)
 ```
+
 ### Trace Input/Output Behavior
 
 In v3, trace input and output are automatically set from the **root observation** (first span/generation) by default. This differs from v2 where integrations could set trace-level inputs/outputs directly.
 
 #### Default Behavior
-
 
 ```python
 with langfuse.start_as_current_span(
@@ -562,6 +570,7 @@ with langfuse.start_as_current_span(
 ```
 
 #### Override Default Behavior
+
 If you need different trace inputs/outputs than the root observation, explicitly set them:
 
 ```python
@@ -579,6 +588,7 @@ with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
 ```
 
 #### Critical for LLM-as-a-Judge Features
+
 LLM-as-a-judge and evaluation features typically rely on trace-level inputs and outputs. Make sure to set these appropriately:
 
 ```python
@@ -595,7 +605,6 @@ def process_user_query(user_question: str):
 
     return answer
 ```
-
 
 ### Trace and Observation IDs
 
@@ -686,7 +695,6 @@ langfuse = get_client()
 # Before exiting:
 langfuse.shutdown()
 ```
-
 
 ## Integrations
 
@@ -822,6 +830,7 @@ with langfuse.start_as_current_span(name="myspan"):
 # Flush events to Langfuse in short-lived applications
 langfuse.flush()
 ```
+
 </Tab>
 
 <Tab>
@@ -849,11 +858,9 @@ langfuse.flush()
 
 </Tab>
 
-
 </Tabs>
 
 ## Scoring traces and observations
-
 
 <Tabs items={["LangfuseSpan / LangfuseGeneration object methods", "Context-aware methods", "Low-level method"]}>
 
@@ -870,6 +877,7 @@ langfuse.flush()
         # Score the overall trace
         gen.score_trace(name="user_feedback_rating", value="positive", data_type="CATEGORICAL")
     ```
+
 </Tab>
 
 <Tab>
@@ -884,6 +892,7 @@ langfuse.flush()
         if task_is_fully_successful:
              langfuse.score_current_trace(name="overall_success", value=1.0, data_type="NUMERIC")
     ```
+
 </Tab>
 
 <Tab>
@@ -900,6 +909,7 @@ langfuse.flush()
         comment="Source verified for 95% of claims."
     )
     ```
+
 </Tab>
 
 </Tabs>
@@ -1133,9 +1143,9 @@ graph TD
 - **OTEL Span**: A span represents a single unit of work or operation within a trace. Spans have a start and end time, a name, and can have attributes (key-value pairs of metadata). Spans can be nested to create a hierarchy, showing parent-child relationships between operations.
 - **Langfuse Trace**: A Langfuse trace collects observations and holds trace attributes such as `session_id`, `user_id` as well as overall input and outputs. It shares the same ID as the OTEL trace and its attributes are set via specific OTEL span attributes that are automatically propagated to the Langfuse trace.
 - **Langfuse Observation**: In Langfuse terminology, an "observation" is a Langfuse-specific representation of an OTEL span. It can be a generic span (Langfuse-span) or a specialized "generation" (Langfuse-generation) or a point in time event (Langfuse-event)
-    - **Langfuse Span**: A Langfuse-span is a generic OTEL-span in Langfuse, designed for non-LLM operations.
-    - **Langfuse Generation**: A Langfuse-generation is a specialized type of OTEL-span in Langfuse, designed specifically for Large Language Model (LLM) calls. It includes additional fields like `model`, `model_parameters`, `usage_details` (tokens), and `cost_details`.
-    - **Langfuse Event**: A Langfuse-event tracks a point in time action.
+  - **Langfuse Span**: A Langfuse-span is a generic OTEL-span in Langfuse, designed for non-LLM operations.
+  - **Langfuse Generation**: A Langfuse-generation is a specialized type of OTEL-span in Langfuse, designed specifically for Large Language Model (LLM) calls. It includes additional fields like `model`, `model_parameters`, `usage_details` (tokens), and `cost_details`.
+  - **Langfuse Event**: A Langfuse-event tracks a point in time action.
 - **Context Propagation**: OpenTelemetry automatically handles the propagation of the current trace and span context. This means when you call another function (whether it's also traced by Langfuse, an OTEL-instrumented library, or a manually created span), the new span will automatically become a child of the currently active span, forming a correct trace hierarchy.
 
 The Langfuse SDK provides wrappers around OTEL spans (`LangfuseSpan`, `LangfuseGeneration`) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTEL spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes.
@@ -1145,6 +1155,7 @@ The Langfuse SDK provides wrappers around OTEL spans (`LangfuseSpan`, `LangfuseG
 The v3 SDK introduces significant improvements and changes compared to v2. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
 
 **Core Changes to SDK v2:**
+
 - **OpenTelemetry Foundation**: v3 is built on OpenTelemetry standards
 - **Trace Input/Output**: Now derived from root observation by default
 - **Trace Attributes** (`user_id`, `session_id`, etc.) Must be set via enclosing spans, not directly on integrations (OpenAI call, Langchain invocation)
@@ -1155,6 +1166,7 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 #### OpenAI Integration Users
 
 **v2 Pattern:**
+
 ```python
 from langfuse.openai import openai
 
@@ -1170,6 +1182,7 @@ response = openai.chat.completions.create(
 ```
 
 **v3 Migration:**
+
 ```python
 from langfuse import get_client
 from langfuse.openai import openai
@@ -1201,6 +1214,7 @@ with langfuse.start_as_current_span(name="chat-request") as span:
 #### LangChain Integration Users
 
 **v2 Pattern:**
+
 ```python
 from langfuse.callback import CallbackHandler
 
@@ -1214,6 +1228,7 @@ response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
 ```
 
 **v3 Migration:**
+
 ```python
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
@@ -1239,6 +1254,7 @@ with langfuse.start_as_current_span(name="langchain-request") as span:
 #### LlamaIndex Integration Users
 
 **v2 Pattern:**
+
 ```python
 from langfuse.llama_index import LlamaIndexCallbackHandler
 
@@ -1249,6 +1265,7 @@ response = index.as_query_engine().query("Hello")
 ```
 
 **v3 Migration:**
+
 ```python
 from langfuse import get_client
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
@@ -1272,6 +1289,7 @@ with langfuse.start_as_current_span(name="llamaindex-query") as span:
 #### Low-Level SDK Users
 
 **v2 Pattern:**
+
 ```python
 from langfuse import Langfuse
 
@@ -1292,8 +1310,9 @@ generation.end(output="Response")
 
 **v3 Migration:**
 
-<Callout type='info'>
-In v3, all spans / generations must be ended by calling `.end()` on the returned object.
+<Callout type="info">
+  In v3, all spans / generations must be ended by calling `.end()` on the
+  returned object.
 </Callout>
 
 ```python
@@ -1322,6 +1341,7 @@ with langfuse.start_as_current_span(
 #### `@observe` Decorator Users
 
 **v2 Pattern:**
+
 ```python
 from langfuse.decorators import langfuse_context, observe
 
@@ -1333,6 +1353,7 @@ def my_function():
 ```
 
 **v3 Migration:**
+
 ```python
 from langfuse import observe, get_client # new import
 
@@ -1353,31 +1374,38 @@ def my_function():
 ### Key Migration Checklist
 
 1. **Update Imports**:
+
    - Use `from langfuse import get_client` to access global client instance configured via environment variables
    - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
    - Use `from langfuse import observe` to import the observe decorator
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
 2. **Trace Attributes Pattern**:
+
    - Move all `user_id`, `session_id`, `tags` from integration calls to enclosing spans
    - Use `span.update_trace()` or `langfuse.update_current_trace()`
 
 3. **Trace Input/Output**:
+
    - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
    - Don't rely on automatic derivation from root observation if you need specific values
 
 4. **Context Managers**:
+
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers
    - Use `with langfuse.start_as_current_span()` instead
 
 5. **LlamaIndex Migration**:
+
    - Replace Langfuse callback with third-party OTEL instrumentation
    - Install: `pip install openinference-instrumentation-llama-index`
 
 6. **ID Management**:
+
    - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
    - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
    - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
+
    ```python
    # v3: Generate deterministic trace ID from external system
    external_request_id = "req_12345"
@@ -1397,24 +1425,29 @@ def my_function():
 ### Detailed Change Summary
 
 1.  **Core Change: OpenTelemetry Foundation**
+
     - Built on OpenTelemetry standards for better ecosystem compatibility
 
 2.  **Trace Input/Output Behavior**
+
     - **v2**: Integrations could set trace input/output directly
     - **v3**: Trace input/output derived from root observation by default
     - **Migration**: Explicitly set via `span.update_trace(input=..., output=...)`
 
 3.  **Trace Attributes Location**
+
     - **v2**: Could be set directly on integration calls
     - **v3**: Must be set on enclosing spans
     - **Migration**: Wrap integration calls with `langfuse.start_as_current_span()`
 
 4.  **Creating Observations**:
+
     - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`
     - **v3**: `langfuse.start_as_current_span()`, `langfuse.start_as_current_generation()`
     - **Migration**: Use context managers, ensure `.end()` is called or use `with` statements
 
 5.  **IDs and Context**:
+
     - **v3**: W3C Trace Context format, automatic context propagation
     - **Migration**: Use `langfuse.get_current_trace_id()` instead of `get_trace_id()`
 
