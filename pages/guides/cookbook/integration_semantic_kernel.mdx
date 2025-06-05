@@ -7,26 +7,21 @@ category: Integrations
 
 # Integrate Langfuse with Semantic Kernel
 
-This notebook provides a step-by-step guide on integrating **Langfuse** with **Semantic Kernel** to achieve superior observability and debugging for your Large Language Model (LLM) applications. By following this tutorial, you will learn how to effectively trace your Semantic Kernel applications using Langfuse, gaining deeper insights into their performance and behavior.
+This notebook provides a step-by-step guide on integrating **Langfuse** with **Semantic Kernel** to achieve observability and debugging for your LLM applications. By following this tutorial, you will learn how to trace your Semantic Kernel applications using Langfuse, manage your prompts in one place and evaluate your application to make it production ready.
 
 > **What is Semantic Kernel?** [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) ([GitHub](https://github.com/microsoft/semantic-kernel)) is a powerful open-source SDK from Microsoft. It facilitates the combination of LLMs with popular programming languages like C#, Python, and Java. Semantic Kernel empowers developers to build sophisticated AI applications by seamlessly integrating AI services, data sources, and custom logic, accelerating the delivery of enterprise-grade AI solutions.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is a leading open-source platform dedicated to LLM observability. It offers robust tracing and monitoring capabilities tailored for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
-<Callout type="info" emoji="ℹ️">
 _**Note:** This guide focuses on the Python implementation. However, the principles of this Langfuse integration apply to other languages supported by Semantic Kernel, including [C#](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-csharp) and [Java](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-java)._
-</Callout>
 
 ## Getting Started
 
 Let's walk through a practical example of using Semantic Kernel and integrating it with Langfuse for comprehensive tracing.
 
-<Steps>
 ### Step 1: Install Dependencies
 
-<Callout type="info" emoji="⚠️">
 _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, a previous version of this guide is available [here](https://github.com/langfuse/langfuse-docs/blob/4bba7985939469dab76b04513221995a203ac3c7/cookbook/integration_semantic_kernel.ipynb#L4)._
-</Callout>
 
 
 ```python
@@ -36,9 +31,7 @@ _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of 
 
 ### Step 2: Configure Langfuse SDK
 
-Next, set up your Langfuse API keys. You can obtain these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
-
-The code below demonstrates how to set these environment variables. Remember to replace the placeholder values with your actual Langfuse public key, secret key, and host, as well as your OpenAI API key and desired model ID.
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
 
 ```python
@@ -55,8 +48,7 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 os.environ["OPENAI_CHAT_MODEL_ID"] = "gpt-4o"
 ```
 
-With the environment variables set, we can now initialize the Langfuse client. This client will be used to interact with the Langfuse API.
-The `get_client()` function initializes the Langfuse client using the credentials provided in the environment variables.
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
@@ -76,9 +68,7 @@ else:
 
 ### Step 3: Initialize OpenLit for Instrumentation
 
-Now, we initialize the [OpenLit instrumentation SDK](https://docs.openlit.io/latest/sdk-configuration). OpenLit automatically instruments Semantic Kernel and exports OpenTelemetry (OTel) spans to Langfuse. This allows for seamless tracing of your Semantic Kernel operations.
-
-The `openlit.init()` function is configured to use the Langfuse OTel tracer and disables batching (`disable_batch=True`) to ensure traces are processed and sent immediately, which is useful for development and debugging.
+Now, we initialize the [OpenLit instrumentation SDK](https://docs.openlit.io/latest/sdk-configuration). OpenLit automatically instruments Semantic Kernel and exports OpenTelemetry (OTel) spans to Langfuse.
 
 
 ```python
@@ -141,24 +131,20 @@ summary = await kernel.invoke(summarize, input=input_text)
 print(summary)
 ```
 
-    Langfuse is a tool designed for monitoring and observability specifically in AI systems. It helps organizations keep track of machine learning models, natural language processing systems, or any AI-driven applications. Langfuse typically provides features like real-time monitoring, logging, and analytics to understand how AI models are performing, diagnose issues, and ensure reliability and efficiency in AI operations. By offering insights into the behavior of AI systems, Langfuse aids developers and data scientists in optimizing and maintaining their models effectively.
-
-
 
 ### Step 6: View Traces in Langfuse
 
-After executing the Semantic Kernel application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, inputs, outputs, and performance metrics. Below is an example screenshot illustrating how a trace appears in Langfuse:
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, inputs, outputs, and performance metrics. Below is an example screenshot illustrating how a trace appears in Langfuse:
 
 ![Langfuse Trace of Semantic Kernel Application](https://langfuse.com/images/cookbook/integration-semantic-kernel/sematric-kernel-example-trace.png)
 
 For a live example, you can explore this public trace: [Langfuse Semantic Kernel Trace Example](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/51d7ea51af5cf9048f607ac6abb79b4f?timestamp=2025-06-04T08:17:14.026Z&display=details)
-</Steps>
 
 ## Add Additional Attributes
 
-Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for effective analysis, debugging, and monitoring of your application's behavior across different users or sessions.
+Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
-The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. This allows you to log specific inputs, outputs, and other relevant information directly to Langfuse.
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
 
 → Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).
 
@@ -188,9 +174,6 @@ with langfuse.start_as_current_span(
 # Flush events in short-lived applications
 langfuse.flush()
 ```
-
-    Langfuse is a developer tool designed for monitoring, debugging, and continuously improving applications that utilize Large Language Models (LLMs). It allows developers to track and analyze API requests to natural language processing (NLP) services such as OpenAI, Anthropic, and others. By using Langfuse, developers can gain insights into the performance and effectiveness of their language models, identify any issues or errors, and refine the application's functionality to optimize results. The tool provides metrics and visualizations to facilitate better understanding and decision-making in the context of AI-driven applications.
-
 
 ## Score Traces and Spans
 
@@ -222,14 +205,11 @@ with langfuse.start_as_current_span(
 langfuse.flush()
 ```
 
-    Langfuse is a platform designed to help developers and businesses monitor and troubleshoot their large language model (LLM) applications. It provides tools for observability and performance tracking, enabling users to understand how their applications are interacting with language models and performing in real-time. By offering insights into model use, error analysis, and user interactions, Langfuse aims to enhance the efficiency and reliability of applications that depend on LLMs.
-
-
 ## Manage Prompts with Langfuse
 
 Langfuse Prompt Management allows you to collaboratively create, version, and deploy prompts. You can manage prompts either through the Langfuse SDK or directly within the Langfuse UI. These managed prompts can then be fetched into your application at runtime and automatically linked to the traces that utilize them, ensuring traceability and facilitating A/B testing or version control.
 
-The code below illustrates fetching a prompt named `answer-question` from Langfuse, compiling it with an input variable (`country`), and then using this compiled prompt in our Semantic Kernel application. The resulting generation is then linked back to the specific Langfuse prompt version used.
+The code below illustrates fetching a prompt named `answer-question` from Langfuse, compiling it with an input variable (`country`), and then using this compiled prompt in the application. The resulting generation is then linked back to the specific Langfuse prompt version used.
 
 → Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).
 
