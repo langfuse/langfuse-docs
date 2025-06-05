@@ -5,7 +5,10 @@ description: Langfuse tracks usage and cost of LLM generations for various model
 
 # Model Usage & Cost Tracking
 
-![Model cost breakdown in Langfuse UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
+<Frame border>
+  ![Model cost breakdown in Langfuse
+  UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
+</Frame>
 
 Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types.
 
@@ -45,7 +48,104 @@ If available in the LLM response, ingesting usage and/or cost is the most accura
 
 Many of the Langfuse integrations automatically capture usage details and cost details data from the LLM response. If this does not work as expected, please create an [issue](/issue) on GitHub.
 
-<Tabs items={["Python (Decorator)", "Python (low-level SDK)", "JS"]}>
+<Tabs items={["Python SDK v3 (Decorator)", "Python SDK v3 (Manual)", "Python SDK v2 (Decorator)", "Python SDK v2 (low-level)", "JS"]}>
+<Tab>
+
+```python
+from langfuse import observe, get_client
+import anthropic
+
+langfuse = get_client()
+anthropic_client = anthropic.Anthropic()
+
+@observe(as_type="generation")
+def anthropic_completion(**kwargs):
+  # optional, extract some fields from kwargs
+  kwargs_clone = kwargs.copy()
+  input = kwargs_clone.pop('messages', None)
+  model = kwargs_clone.pop('model', None)
+  langfuse.update_current_generation(
+      input=input,
+      model=model,
+      metadata=kwargs_clone
+  )
+
+  response = anthropic_client.messages.create(**kwargs)
+
+  langfuse.update_current_generation(
+      usage_details={
+          "input": response.usage.input_tokens,
+          "output": response.usage.output_tokens,
+          "cache_read_input_tokens": response.usage.cache_read_input_tokens
+          # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+        },
+      # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
+      cost_details={
+          # Here we assume the input and output cost are 1 USD each and half the price for cached tokens.
+          "input": 1,
+          "cache_read_input_tokens": 0.5,
+          "output": 1,
+          # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
+      }
+  )
+
+  # return result
+  return response.content[0].text
+
+@observe()
+def main():
+  return anthropic_completion(
+      model="claude-3-opus-20240229",
+      max_tokens=1024,
+      messages=[
+          {"role": "user", "content": "Hello, Claude"}
+      ]
+  )
+
+main()
+```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse import get_client
+import anthropic
+
+langfuse = get_client()
+anthropic_client = anthropic.Anthropic()
+
+with langfuse.start_as_current_generation(
+    name="anthropic-completion",
+    model="claude-3-opus-20240229",
+    input=[{"role": "user", "content": "Hello, Claude"}]
+) as generation:
+    response = anthropic_client.messages.create(
+        model="claude-3-opus-20240229",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello, Claude"}]
+    )
+
+    generation.update(
+        output=response.content[0].text,
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+            "cache_read_input_tokens": response.usage.cache_read_input_tokens
+            # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+        },
+        # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
+        cost_details={
+            # Here we assume the input and output cost are 1 USD each and half the price for cached tokens.
+            "input": 1,
+            "cache_read_input_tokens": 0.5,
+            "output": 1,
+            # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
+        }
+    )
+```
+
+</Tab>
 <Tab>
 
 ```python
@@ -120,6 +220,8 @@ generation = langfuse.generation(
 )
 ```
 
+You can also update the usage and cost via `generation.update()` and `generation.end()`.
+
 </Tab>
 <Tab>
 
@@ -144,16 +246,48 @@ const generation = langfuse.generation({
 });
 ```
 
+You can also update the usage and cost via `generation.update()` and `generation.end()`.
+
 </Tab>
 </Tabs>
-
-You can also update the usage and cost via `generation.update()` and `generation.end()`.
 
 ### Compatibility with OpenAI
 
 For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
 
-<Tabs items={["Python", "JS"]}>
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_generation(
+    name="openai-style-generation",
+    model="gpt-4o"
+) as generation:
+    # Simulate LLM call
+    # response = openai_client.chat.completions.create(...)
+
+    generation.update(
+        usage_details={
+            # usage (OpenAI-style schema)
+            "prompt_tokens": 10,
+            "completion_tokens": 25,
+            "total_tokens": 35,
+            "prompt_tokens_details": {
+                "cached_tokens": 5,
+                "audio_tokens": 2,
+            },
+            "completion_tokens_details": {
+                "reasoning_tokens": 15,
+            },
+        }
+    )
+```
+
+</Tab>
 <Tab>
 
 ```python

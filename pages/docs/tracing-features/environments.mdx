@@ -34,23 +34,19 @@ This means:
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
 <Tab>
 
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 ```python
-from langfuse import Langfuse, observe
+from langfuse import get_client, observe
+import os
 
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
+# Set the environment variable
+# Alternatively, set via .env file and load via dotenv
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 
-# Configure the client
-langfuse = Langfuse(environment="production")
+# Get the client (will use environment variable)
+langfuse = get_client()
 
 # All operations will now be associated with the "production" environment
 with langfuse.start_as_current_span(name="my-operation") as span:
@@ -73,6 +69,7 @@ When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 from langfuse.decorators import langfuse_context, observe
 
 # Either set the environment variable or configure the decorator. The latter takes precedence.
+# Alternatively, set via .env file and load via dotenv
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 
 # Configure the decorator

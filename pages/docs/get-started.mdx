@@ -25,36 +25,75 @@ import EnvJs from "@/components-mdx/env-js.mdx";
 import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
 import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
 
-<Tabs items={["Python Decorator + OpenAI","Python Decorator + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","Python SDK (v3)","Python SDK (v2)","API"]}>
+<Tabs items={["Python SDK","Python SDK + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","API"]}>
 
 <Tab>
-{/* Decorator + OpenAI */}
-
-The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. In this quickstart we also use the Langfuse [OpenAI integration](/docs/integrations/openai) to automatically capture all model parameters.
-
-Not using OpenAI? Switch to the _"Python Decorator + any LLM"_ tab.
+{/* Python SDK + Decorator */}
+The [`@observe()` decorator](/docs/sdk/python/sdk-v3#observe-decorator) is the recommended way to get started with Langfuse. It automatically captures traces with minimal code changes and works with any LLM provider.
 
 ```bash
-pip install langfuse openai
+pip install langfuse
 ```
 
 <EnvPython />
 
-<GetStartedDecoratorOpenai />
+```python /@observe()/ /from langfuse.openai import openai/ filename="main.py"
+from langfuse import observe, get_client
+from langfuse.openai import openai # OpenAI integration
+
+@observe()
+def story():
+    return openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+          {"role": "system", "content": "You are a great storyteller."},
+          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
+        ],
+    ).choices[0].message.content
+
+@observe()
+def main():
+    return story()
+
+main()
+```
+
+For more advanced use cases with manual control, see the [Python SDK v3 documentation](/docs/sdk/python/sdk-v3).
 
 </Tab>
 <Tab>
-{/* Decorator + Any LLM */}
+{/* Python SDK + any LLM */}
 
-The [`@observe()` decorator](/docs/sdk/python/decorators) makes it easy to trace any Python LLM application. If you do not use any of our native integrations, you can trace any LLM call via `@observe(as_type="generation")`. Below find an example using the Anthropic SDK.
-
-```bash
-pip install langfuse anthropic
-```
+**Recommended approach**: Use third-party, OTEL-based instrumentation packages for automatic tracing with popular LLM providers and frameworks. The Langfuse SDK will pick up emitted spans and process them accordingly.
 
 <EnvPython />
 
-<GetStartedDecoratorAnyLlm />
+In this example, we are using the [`opentelemetry-instrumentation-anthropic` library](https://pypi.org/project/opentelemetry-instrumentation-anthropic/).
+
+```python
+from langfuse import get_client
+
+from anthropic import Anthropic
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+
+
+# This will automatically emit OTEL-spans for all Anthropic API calls
+AnthropicInstrumentor().instrument()
+
+# Initialize Langfuse
+langfuse = get_client()
+
+# This will be traced as a Langfuse generation nested under the current span
+message = Anthropic().messages.create(
+    model="claude-3-7-sonnet-20250219",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello, Claude"}],
+)
+
+print(message.content)
+```
+
+**Alternative**: Manual tracing with `@observe(as_type="generation")` for custom implementations. See [decorator documentation](/docs/sdk/python/decorators) for details.
 
 </Tab>
 <Tab>
@@ -84,10 +123,6 @@ Example usage, most of the parameters are optional and depend on the use case. F
 The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
 
 ```bash
-# For v3 (OpenTelemetry-based SDK - beta)
-pip install "langfuse>=3.0.0b2"
-
-# For v2
 pip install langfuse
 ```
 
@@ -101,14 +136,17 @@ Alternative imports:
 + from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
 ```
 
-Use the OpenAI SDK as you would normally. Example:
+Use the OpenAI SDK as you would normally.
 
 ```python
+from langfuse.openai import openai
+
 completion = openai.chat.completions.create(
-  model="gpt-4o",
-  messages=[
-      {"role": "system", "content": "You are a very accurate calculator."},
-      {"role": "user", "content": "1 + 1 = "}],
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a very accurate calculator."},
+        {"role": "user", "content": "1 + 1 = "}
+    ],
 )
 ```
 
@@ -137,9 +175,22 @@ const res = await openai.chat.completions.create({
 <Tab>
 {/* LangChain */}
 
-The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+The [integration](/docs/integrations/langchain) uses the Langchain callback system. **Note**: Trace attributes must be set on an enclosing span.
 
-<GetStartedLangchainPythonArgs />
+```python
+from langfuse.langchain import CallbackHandler
+
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+langfuse_handler = CallbackHandler()
+
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+
+response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+```
 
 For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
 
@@ -157,124 +208,27 @@ For more details, see the [Langchain integration docs](/docs/integrations/langch
 <Tab>
 {/* LlamaIndex */}
 
-The [integration](/docs/integrations/llama-index) uses the LlamaIndex callback system to automatically capture detailed traces of your LlamaIndex executions.
+Use third-party OTEL-based instrumentation for LlamaIndex. In this example, we use the [`openinference-instrumentation-llama-index` library](https://pypi.org/project/openinference-instrumentation-llama-index/).
 
 ```bash
-pip install llama-index langfuse
-```
-
-<GetStartedLlamaindexPythonArgs />
-
-Traces and metrics from your LlamaIndex application are now automatically tracked in Langfuse. If you construct a new index or query an LLM with your documents in context, your traces and metrics are immediately visible in the Langfuse UI.
-
-</Tab>
-<Tab>
-{/* Python SDK (v3) */}
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
-The [OpenTelemetry-based SDK (v3)](/docs/sdk/python/sdk-v3) is the latest generation of the Python SDK with improved developer experience and enhanced ease of use.
-
-```bash
-pip install "langfuse>=3.0.0b2"
+pip install langfuse llama-index openinference-instrumentation-llama-index
 ```
 
 <EnvPython />
 
-Example usage of the v3 SDK using context managers:
+```python
+from langfuse import get_client
 
-```python filename="server.py"
-from langfuse import Langfuse
+from llama_index.core.llms.openai import OpenAI
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
-# Create Langfuse client
-langfuse = Langfuse()
+# Enable OTEL-based instrumentation
+LlamaIndexInstrumentor().instrument()
 
-# Create a trace with a root span
-with langfuse.start_as_current_span(
-    name="user-request-pipeline",
-    input={"user_query": "Summarize the Q3 OKR documents"}
-) as root_span:
-    # Add trace attributes
-    root_span.update_trace(
-        user_id="user_123",
-        session_id="session_abc",
-        tags=["summary", "okr"]
-    )
+# Initialize Langfuse
+langfuse = get_client()
 
-    # Create a nested generation for the LLM call
-    with langfuse.start_as_current_generation(
-        name="summary-generation",
-        model="gpt-4o",
-        model_parameters={"temperature": 0.7, "max_tokens": 1000},
-        input=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}
-        ]
-    ) as generation:
-        # Simulate an LLM call
-        llm_response = "The Q3 OKRs contain goals for multiple teams..."
-        token_usage = {"input_tokens": 50, "output_tokens": 120}
-
-        # Update the generation with results
-        generation.update(
-            output=llm_response,
-            usage_details=token_usage
-        )
-
-    # Update the root span with final output
-    root_span.update(output={"summary": llm_response})
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-langfuse.flush()
-```
-
-For more information, see the [Python SDK v3 documentation](/docs/sdk/python/sdk-v3).
-
-</Tab>
-<Tab>
-{/* Python SDK (v2) */}
-
-The [low-level SDK (v2)](/docs/sdk/python/low-level-sdk) gives you full control over the traces logged to Langfuse. For a less verbose integration, consider using the `@observe()` decorator or the v3 SDK.
-
-```bash
-pip install langfuse
-```
-
-<EnvPython />
-
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [python docs](/docs/sdk/python/low-level-sdk).
-
-```python filename="server.py"
-from langfuse import Langfuse
-
-# Create Langfuse client
-langfuse = Langfuse()
-
-# Create generation in Langfuse
-generation = langfuse.generation(
-    name="summary-generation",
-    model="gpt-4o",
-    model_parameters={"maxTokens": "1000", "temperature": "0.9"},
-    input=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Please generate a summary of the following documents \nThe engineering department defined the following OKR goals...\nThe marketing department defined the following OKR goals..."}],
-    metadata={"interface": "whatsapp"}
-)
-
-# Execute model, mocked here
-# chat_completion = openai.ChatCompletion.create(model="gpt-4o", messages=[{"role": "user", "content": "Hello world"}])
-chat_completion = "completion":"The Q3 OKRs contain goals for multiple teams..."
-
-# Update span and sets end_time
-generation.end(output=chat_completion)
-
-# The SDK executes network requests in the background.
-# To ensure that all requests are sent before the process exits, call flush()
-# Not necessary in long-running production code
-langfuse.flush()
+response = OpenAI(model="gpt-4o").complete("Hello, world!")
 ```
 
 </Tab>
@@ -352,12 +306,6 @@ import IconOpenai from "@/components/icons/openai";
     icon={<IconPython />}
     title="Python SDK (v3)"
     href="/docs/sdk/python/sdk-v3"
-    arrow
-  />
-  <Card
-    icon={<IconPython />}
-    title="Python SDK (v2)"
-    href="/docs/sdk/python/low-level-sdk"
     arrow
   />
   <Card

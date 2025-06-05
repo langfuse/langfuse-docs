@@ -13,21 +13,13 @@ Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe
+from langfuse import observe, get_client
 
 @observe()
 def process_data():
-    from langfuse import get_client
     langfuse = get_client()
 
     # Get the URL of the current trace
@@ -42,9 +34,9 @@ def process_data():
 When using context managers:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-request") as span:
     # Get the URL of this trace
@@ -167,10 +159,10 @@ When using the `@observe()` decorator:
 ```python
 from langfuse import observe, get_client
 
-langfuse = get_client()
-
 @observe()
 def process_data():
+    langfuse = get_client()
+    
     # Make the current trace public
     langfuse.update_current_trace(public=True)
 ```
@@ -178,9 +170,9 @@ def process_data():
 When using context managers:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 with langfuse.start_as_current_span(name="process-request") as span:
     # Make this trace public
