@@ -1,0 +1,320 @@
+---
+title: Backup Strategies for Langfuse
+description: Comprehensive guide to backing up your self-hosted Langfuse deployment including ClickHouse, Postgres, and MinIO.
+label: "Version: v3"
+---
+
+# Backup Strategies
+
+This guide covers backup strategies for self-hosted Langfuse deployments.
+Follow one of the [deployment guides](/self-hosting#deployment-options) to get started.
+
+Proper backup strategies are essential for protecting your Langfuse data and ensuring business continuity.
+This guide covers backup approaches for all components of your self-hosted Langfuse deployment.
+
+## ClickHouse
+
+ClickHouse stores your observability data including traces, observations, and scores.
+Backup strategies vary depending on whether you use a managed service or self-hosted deployment.
+
+### ClickHouse Cloud (Managed Service)
+
+**Automatic Backups**: ClickHouse Cloud automatically manages backups for you with:
+- Continuous incremental backups
+- Point-in-time recovery capabilities
+- Cross-region replication options
+- Enterprise-grade durability guarantees
+
+**No Action Required**: If you're using ClickHouse Cloud, backups are handled automatically.
+Refer to the [ClickHouse Cloud documentation](https://clickhouse.com/docs/en/cloud/manage/backups) for backup retention policies and recovery procedures.
+
+### Self-Hosted ClickHouse
+
+For self-hosted ClickHouse instances, you need to implement your own backup strategy.
+
+#### Kubernetes Deployments
+
+**1. Volume Snapshots (Recommended)**
+
+Most cloud providers support volume snapshots for persistent volumes.
+Ensure that you're also adding snapshots for the clickhouse zookeeper volumes.
+
+```bash
+# Create a VolumeSnapshot for each ClickHouse replica
+kubectl apply -f - <<EOF
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: clickhouse-backup-$(date +%Y%m%d-%H%M%S)
+  namespace: langfuse
+spec:
+  source:
+    persistentVolumeClaimName: data-langfuse-clickhouse-0
+  volumeSnapshotClassName: csi-hostpath-snapclass
+EOF
+```
+
+**2. Velero for Complete Cluster Backups**
+
+[Velero](https://velero.io/) provides comprehensive Kubernetes backup solutions:
+
+```bash
+# Install Velero
+velero install --provider aws --plugins velero/velero-plugin-for-aws:v1.8.0 \
+  --bucket langfuse-backups --secret-file ./credentials-velero
+
+# Create a backup schedule
+velero schedule create langfuse-daily \
+  --schedule="0 2 * * *" \
+  --include-namespaces langfuse \
+  --ttl 720h0m0s
+```
+
+**3. ClickHouse Native Backups**
+
+Use ClickHouse's built-in backup functionality.
+Follow the [ClickHouse backup guide](https://clickhouse.com/docs/en/operations/backup) for all details.
+
+```sql
+-- Create a backup
+BACKUP DATABASE default TO S3('s3://backup-bucket/clickhouse-backup-{timestamp}', 'access_key', 'secret_key');
+
+-- Restore from backup
+RESTORE DATABASE default FROM S3('s3://backup-bucket/clickhouse-backup-{timestamp}', 'access_key', 'secret_key');
+```
+
+#### Docker Deployments
+
+For Docker-based deployments, implement regular volume backups:
+
+```bash
+#!/bin/bash
+# Backup script for ClickHouse Docker volumes
+
+BACKUP_DIR="/backups/clickhouse"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+CONTAINER_NAME="clickhouse-server"
+
+# Create backup directory
+mkdir -p "$BACKUP_DIR"
+
+# Stop ClickHouse temporarily for consistent backup
+docker stop "$CONTAINER_NAME"
+
+# Create tar archive of data volume
+docker run --rm \
+  -v clickhouse_data:/source:ro \
+  -v "$BACKUP_DIR":/backup \
+  alpine tar czf "/backup/clickhouse-backup-$TIMESTAMP.tar.gz" -C /source .
+
+# Restart ClickHouse
+docker start "$CONTAINER_NAME"
+
+# Clean up old backups (keep last 7 days)
+find "$BACKUP_DIR" -name "clickhouse-backup-*.tar.gz" -mtime +7 -delete
+```
+
+## Postgres
+
+Postgres stores critical transactional data including users, organizations, projects, and API keys.
+We strongly recommend using managed database services for production deployments.
+
+### Managed Database Services (Recommended)
+
+**Cloud Provider Services**: Use managed PostgreSQL services which provide automatic backups.
+
+### Self-Hosted Postgres Backups
+
+If you must self-host Postgres, implement comprehensive backup strategies.
+
+#### Kubernetes Generic Backup Solution
+
+**1. pg_dump with CronJob**
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: langfuse
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: postgres-backup
+            image: postgres:15
+            env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            command:
+            - /bin/bash
+            - -c
+            - |
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+              pg_dump -h postgres-service -U langfuse -d langfuse > /backup/langfuse-backup-$TIMESTAMP.sql
+
+              # Upload to S3 (optional)
+              aws s3 cp /backup/langfuse-backup-$TIMESTAMP.sql s3://langfuse-backups/postgres/
+
+              # Clean up local files older than 3 days
+              find /backup -name "langfuse-backup-*.sql" -mtime +3 -delete
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: postgres-backup-pvc
+          restartPolicy: OnFailure
+```
+
+**2. Volume Snapshots**
+
+```bash
+# Create snapshot of Postgres PVC
+kubectl apply -f - <<EOF
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: postgres-backup-$(date +%Y%m%d-%H%M%S)
+  namespace: langfuse
+spec:
+  source:
+    persistentVolumeClaimName: postgres-data-pvc
+  volumeSnapshotClassName: csi-hostpath-snapclass
+EOF
+```
+
+#### Docker Deployments
+
+```bash
+#!/bin/bash
+# Postgres backup script for Docker
+
+BACKUP_DIR="/backups/postgres"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+CONTAINER_NAME="postgres"
+DB_NAME="langfuse"
+DB_USER="langfuse"
+
+mkdir -p "$BACKUP_DIR"
+
+# Create SQL dump
+docker exec "$CONTAINER_NAME" pg_dump -U "$DB_USER" "$DB_NAME" > "$BACKUP_DIR/langfuse-backup-$TIMESTAMP.sql"
+
+# Compress backup
+gzip "$BACKUP_DIR/langfuse-backup-$TIMESTAMP.sql"
+
+# Upload to cloud storage (optional)
+aws s3 cp "$BACKUP_DIR/langfuse-backup-$TIMESTAMP.sql.gz" s3://langfuse-backups/postgres/
+
+# Clean up old backups
+find "$BACKUP_DIR" -name "langfuse-backup-*.sql.gz" -mtime +7 -delete
+```
+
+## MinIO
+
+<Callout type="info">
+
+**MinIO is Obsolete with Cloud Storage**: If you're using cloud storage services like AWS S3, Azure Blob Storage, or Google Cloud Storage, MinIO is not needed and backup strategies should focus on your cloud storage provider's native backup features.
+
+</Callout>
+
+MinIO is only relevant for self-hosted deployments that don't use cloud storage services.
+For most production deployments, we recommend using managed cloud storage instead.
+
+### When MinIO is Used
+
+MinIO is typically used in:
+- Air-gapped environments
+- On-premises deployments without cloud access
+- Development environments
+- Specific compliance requirements
+
+### MinIO Backup Strategies
+
+#### Cloud Storage Replication (Recommended)
+
+Configure MinIO to replicate to cloud storage:
+
+```bash
+# Configure MinIO client
+mc alias set myminio http://localhost:9000 minio miniosecret
+mc alias set s3backup https://s3.amazonaws.com ACCESS_KEY SECRET_KEY
+
+# Set up bucket replication
+mc replicate add myminio/langfuse --remote-bucket s3backup/langfuse-backup
+```
+
+#### Kubernetes MinIO Backups
+
+**1. Volume Snapshots**
+
+```bash
+# Snapshot MinIO data volumes
+kubectl apply -f - <<EOF
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: minio-backup-$(date +%Y%m%d-%H%M%S)
+  namespace: langfuse
+spec:
+  source:
+    persistentVolumeClaimName: data-minio-0
+  volumeSnapshotClassName: csi-hostpath-snapclass
+EOF
+```
+
+**2. Scheduled Sync to External Storage**
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: minio-backup-sync
+  namespace: langfuse
+spec:
+  schedule: "0 3 * * *"  # Daily at 3 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: minio-backup
+            image: minio/mc:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              mc alias set source http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+              mc alias set backup s3://backup-bucket $AWS_ACCESS_KEY $AWS_SECRET_KEY
+              mc mirror source/langfuse backup/langfuse-backup/$(date +%Y%m%d)
+            env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: secret-key
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: access-key
+            - name: AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: secret-key
+          restartPolicy: OnFailure
+```

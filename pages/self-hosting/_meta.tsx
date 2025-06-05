@@ -10,6 +10,7 @@ export default {
   "license-key": "License Key",
   troubleshooting: "Troubleshooting",
   scaling: "Sizing & Scaling",
+  backups: "Backups",
   "-- Deployment": {
     type: "separator",
     title: "Deployment",
