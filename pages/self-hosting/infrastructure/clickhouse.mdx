@@ -138,6 +138,56 @@ CLICKHOUSE_USER=default
 CLICKHOUSE_PASSWORD=changeme
 ```
 
+#### Troubleshooting
+
+- **NOT_ENOUGH_SPACE error**: This error occurs when ClickHouse runs out of disk space. In Kubernetes environments, this typically means the persistent volume claims (PVCs) need to be expanded. Here's how to resolve it:
+
+  **1. Check current disk usage:**
+  ```bash
+  # Check PVC status
+  kubectl get pvc -l app.kubernetes.io/name=clickhouse
+
+  # Check disk usage inside ClickHouse pods
+  kubectl exec -it <clickhouse-pod-name> -- df -h /var/lib/clickhouse
+  ```
+
+  **2. Expand the PVC (requires storage class with allowVolumeExpansion: true):**
+  ```bash
+  # Edit the PVC directly
+  kubectl edit pvc data-<chart-name>-clickhouse-0
+
+  # Or patch all ClickHouse PVCs at once
+  kubectl patch pvc data-<chart-name>-clickhouse-0 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
+  kubectl patch pvc data-<chart-name>-clickhouse-1 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
+  kubectl patch pvc data-<chart-name>-clickhouse-2 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
+  ```
+
+  **3. Alternative: Update Helm values and upgrade:**
+  ```yaml
+  # values.yaml
+  clickhouse:
+    persistence:
+      size: 200Gi  # Increase from previous size
+  ```
+  ```bash
+  helm upgrade <release-name> <chart-name> -f values.yaml
+  ```
+
+  **4. Monitor expansion progress:**
+  ```bash
+  # Watch PVC status
+  kubectl get pvc -w
+
+  # Check if pods recognize the new space
+  kubectl exec -it <clickhouse-pod-name> -- df -h /var/lib/clickhouse
+  ```
+
+  **Prevention tips:**
+  - Set up monitoring alerts for disk usage (recommend alerting at 80% capacity)
+  - Use storage classes with `allowVolumeExpansion: true` (default for most cloud providers)
+  - Consider implementing automatic PVC expansion using tools like [volume-autoscaler](https://github.com/DevOps-Nirvana/Kubernetes-Volume-Autoscaler)
+  - For high-growth environments, consider using [blob storage as disk](#blob-storage-as-disk) for automatic scaling
+
 ### Docker
 
 You can run ClickHouse in a single [Docker](https://hub.docker.com/r/clickhouse/clickhouse-server) container for development purposes.

@@ -10,7 +10,7 @@ description: Langfuse strives to be the most open and transparent LLM toolkit. L
 
 <Callout type="info">
 
-All the interfaces and backend services that make up Langfuse's core are released under the permissive MIT license without any usage limits. Peripheral, enterprise-grade capabilities (e.g. advanced human annotation pipelines, enhanced RBAC, audit logging) are available under a commercial license when you self-host Langfuse.
+All product capabilities—tracing, evaluations, prompt management, experiments, annotation, the playground, and more—are MIT licensed without any usage limits. Enterprise modules such as SCIM, audit logging, and data retention policies require a commercial license when you self-host Langfuse.
 
 </Callout>
 
@@ -26,19 +26,19 @@ All the interfaces and backend services that make up Langfuse's core are release
 
 Self-hosting keeps data within your infrastructure; Cloud offloads operational overhead. Because every deployment runs the same codebase and schema, **you can switch between OSS, Enterprise self-host, and Langfuse Cloud at any time**. Add or remove a license key or switch to the Langfuse Cloud endpoints. No feature flags to untangle, no vendor lock-in, and no downtime.
 
-|                       | OSS Self-Host | Pro / Enterprise Self-Host | Langfuse Cloud |
-| --------------------- | ------------- | -------------------------- | -------------- |
-| All Core features     | ✅            | ✅                         | ✅             |
-| EE add-ons            | -             | ✅                         | ✅             |
-| Fully managed service | -             | -                          | ✅             |
+|                       | OSS Self-Host | Enterprise Self-Host | Langfuse Cloud |
+| --------------------- | ------------- | -------------------- | -------------- |
+| All Product Features  | ✅            | ✅                   | ✅             |
+| Enterprise Add-ons    | -             | ✅                   | ✅             |
+| Fully Managed Service | -             | -                    | ✅             |
 
-### MIT Core
+### Langfuse OSS
 
-Langfuse's OSS core includes all core features and has no usage limits. Fork it, extend it, ship it—even in commercial products. All core APIs and backend logic scale horizontally out-of-the-box, so the same deployment can grow from a single-node Docker Compose to a multi-node Kubernetes cluster—without code changes or feature gates. It's the same architecture that powers Langfuse Cloud.
+Langfuse's OSS includes all product features and has no usage limits. Fork it, extend it, ship it—even in commercial products. All core APIs and backend logic scale horizontally out-of-the-box, so the same deployment can grow from a single-node Docker Compose to a multi-node Kubernetes cluster—without code changes or feature gates. It's the same architecture that powers Langfuse Cloud.
 
 ### Commercial Extensions
 
-Enterprise Edition (EE) modules live in clearly marked `/ee` directories. These are shipped as source code, but require a license key to run. They are optional; the core works 100% without them.
+Enterprise Edition (EE) modules live in clearly marked `/ee` directories. These are shipped as source code, but require a [license key](/self-hosting/license-key) to run. They are optional; the core works 100% without them.
 
 ## Architecture Consistency & Scale
 
@@ -69,10 +69,7 @@ No. EE packages are isolated and gated by the license key check. You can run the
 
 ### Which self-host licensing options exist?
 
-Langfuse offers two paid tiers atop the free OSS core (see [pricing page](/pricing)):
-
-- **Pro** (self-serve) - an online, pay-as-you-go license that unlocks all Enterprise Edition (`/ee`) code for small teams. Purchase instantly from the dashboard and cancel anytime.
-- **Enterprise** (custom contract) - the same EE feature set plus advanced SAML/SCIM SSO, extended audit-log retention, priority support & SLAs, red-lined legal terms, and optional professional-services assistance.
+All product features are freely available under the MIT license. A commercial **Enterprise** license is only required for advanced security capabilities such as SCIM, extended audit logging, and data retention policies (see [pricing page](/pricing)).
 
 Upgrading is as simple as setting `LANGFUSE_EE_LICENSE_KEY` ([docs](/self-hosting/license-key)) in your deployment; containers pick up the change at runtime.
 
