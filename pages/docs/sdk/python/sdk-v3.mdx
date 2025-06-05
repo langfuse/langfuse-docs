@@ -1211,7 +1211,40 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 
 ### Migration Path by Integration Type
 
-#### OpenAI Integration Users
+#### `@observe` Decorator Users
+
+**v2 Pattern:**
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def my_function():
+    # This was the trace
+    langfuse_context.update_current_trace(user_id="user_123")
+    return "result"
+```
+
+**v3 Migration:**
+
+```python
+from langfuse import observe, get_client # new import
+
+@observe()
+def my_function():
+    # This is now the root span, not the trace
+    langfuse = get_client()
+
+    # Update trace explicitly
+    langfuse.update_current_trace(
+        user_id="user_123",
+        input={"query": "input"},     # Explicit trace input
+        output={"result": "result"}   # Explicit trace output
+    )
+    return "result"
+```
+
+#### OpenAI Integration
 
 **v2 Pattern:**
 
@@ -1230,6 +1263,10 @@ response = openai.chat.completions.create(
 ```
 
 **v3 Migration:**
+
+If you do not set additional trace attributes, no changes are needed.
+
+If you set additional trace attributes, you need to wrap the OpenAI call with an enclosing span and set the trace attributes on the enclosing span:
 
 ```python
 from langfuse import get_client
@@ -1259,7 +1296,7 @@ with langfuse.start_as_current_span(name="chat-request") as span:
     span.update_trace(output={"response": response.choices[0].message.content})
 ```
 
-#### LangChain Integration Users
+#### LangChain Integration
 
 **v2 Pattern:**
 
@@ -1384,39 +1421,6 @@ with langfuse.start_as_current_span(
 
     # If needed, override trace output
     root_span.update_trace(output={"response": "Response"})
-```
-
-#### `@observe` Decorator Users
-
-**v2 Pattern:**
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def my_function():
-    # This was the trace
-    langfuse_context.update_current_trace(user_id="user_123")
-    return "result"
-```
-
-**v3 Migration:**
-
-```python
-from langfuse import observe, get_client # new import
-
-@observe()
-def my_function():
-    # This is now the root span, not the trace
-    langfuse = get_client()
-
-    # Update trace explicitly
-    langfuse.update_current_trace(
-        user_id="user_123",
-        input={"query": "input"},     # Explicit trace input
-        output={"result": "result"}   # Explicit trace output
-    )
-    return "result"
 ```
 
 ### Key Migration Checklist
