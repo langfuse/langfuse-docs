@@ -90,6 +90,165 @@ If you migrate again, the output will now be:
 
 </details>
 
+## Queue Management with BullMQ Admin API
+
+Langfuse uses BullMQ for managing background job queues. The BullMQ admin endpoint allows you to monitor queue lengths, replay failed events, and remove unwanted events from the queue. This is particularly useful for troubleshooting event processing issues and managing queue backlogs.
+
+<Callout type="warning">
+  This API is meant for administrative purpose by instance owners and may change at any point in time.
+  We recommend not to develop against this API or build significant logic around it.
+</Callout>
+
+### Authentication Setup
+
+<Steps>
+
+  ### Configure an `ADMIN_API_KEY`
+
+  Configure an `ADMIN_API_KEY` in your environment configuration:
+
+  ```bash filename="Environment"
+  ADMIN_API_KEY=your-admin-api-key
+  ```
+
+  ### Authenticate with the API
+
+  Then, authenticate with the API by setting the Authorization header:
+
+  ```bash
+  Authorization: Bearer $ADMIN_API_KEY
+  ```
+</Steps>
+
+### Monitoring Queue Lengths
+
+To check the current status and job counts across all queues, make a GET request to the admin endpoint:
+
+```bash
+curl -X GET "https://your-langfuse-instance.com/api/admin/bullmq" \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY"
+```
+
+This will return job counts for all queues, helping you identify bottlenecks or failed jobs that need attention.
+
+### Replaying Failed Events
+
+To retry failed jobs in specific queues, use the POST endpoint with the `retry` action:
+
+```bash
+curl -X POST "https://your-langfuse-instance.com/api/admin/bullmq" \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "retry",
+    "queueNames": ["ingestion-queue", "evaluation-queue"]
+  }'
+```
+
+### Removing Events from Queue
+
+To remove jobs with a specific status from queues, use the POST endpoint with the `remove` action:
+
+```bash
+curl -X POST "https://your-langfuse-instance.com/api/admin/bullmq" \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "remove",
+    "queueNames": ["ingestion-queue"],
+    "bullStatus": "failed"
+  }'
+```
+
+Available status options: `completed`, `failed`, `active`, `delayed`, `prioritized`, `paused`, `wait`.
+
+### API Specification
+
+<details>
+  <summary>Complete BullMQ Admin API Specification</summary>
+
+  ```yaml
+  openapi: 3.0.1
+  info:
+    title: Langfuse Admin BullMQ API
+    description: API for managing BullMQ jobs in Langfuse
+    version: '1.0.0'
+  paths:
+    /api/admin/bullmq:
+      get:
+        summary: Get job counts for all queues
+        operationId: bullmq_getCounts
+        tags:
+          - BullMQ
+        responses:
+          '200':
+            description: Job counts for all queues
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      queueName:
+                        type: string
+                      jobCount:
+                        type: object
+                        additionalProperties:
+                          type: number
+      post:
+        summary: Manage BullMQ jobs
+        operationId: bullmq_manageJobs
+        tags:
+          - BullMQ
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    required:
+                      - action
+                      - queueNames
+                    properties:
+                      action:
+                        type: string
+                        enum: [retry]
+                      queueNames:
+                        type: array
+                        items:
+                          type: string
+                  - type: object
+                    required:
+                      - action
+                      - queueNames
+                      - bullStatus
+                    properties:
+                      action:
+                        type: string
+                        enum: [remove]
+                      queueNames:
+                        type: array
+                        items:
+                          type: string
+                      bullStatus:
+                        type: string
+                        enum: [completed, failed, active, delayed, prioritized, paused, wait]
+        responses:
+          '200':
+            description: Jobs successfully managed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+  ```
+
+</details>
+
 
 ## FAQ
 
