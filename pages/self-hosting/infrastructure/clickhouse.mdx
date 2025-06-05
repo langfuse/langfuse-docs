@@ -369,13 +369,3 @@ volumes:
 ```
 
 This will store ClickHouse data within the Azurite bucket.
-
-## Backups
-
-ClickHouse Cloud manages backups automatically for you.
-For self-hosted ClickHouse instances, you need to create backups on your own.
-We recommend following the [ClickHouse backup guide](https://clickhouse.com/docs/en/operations/backup) for more details.
-In addition, the ClickHouse state can be restored based on the data in S3.
-While this is computationally expensive and may take a long time, it is an alternative safety measure to prevent data loss.
-
-For Kubernetes based deployments Bitnami recommends to use [Velero](https://velero.io/) to backup the persistent disks.
