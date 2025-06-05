@@ -17,22 +17,16 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 When using the `@observe()` decorator:
 
 ```python
 from langfuse import observe, get_client
 
-langfuse = get_client()
-
 @observe()
 def process_request():
+    # Get the client
+    langfuse = get_client()
+
     # Add to the current trace
     langfuse.update_current_trace(session_id="your-session-id")
 
@@ -43,9 +37,9 @@ def process_request():
 When creating spans directly:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # You can set the session_id when creating the root span
 with langfuse.start_as_current_span(

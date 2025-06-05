@@ -110,15 +110,8 @@ If you want to have more control or your media is not base64 encoded, you can up
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 ```python
-from langfuse import Langfuse, observe, get_client
+from langfuse import get_client, observe
 from langfuse.media import LangfuseMedia
 
 # Create a LangfuseMedia object from a file
@@ -292,10 +285,10 @@ When dealing with traces, observations, or dataset items that include media refe
 <Tab>
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
 # Initialize Langfuse client
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Example object with media references
 obj = {

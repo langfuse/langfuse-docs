@@ -4,7 +4,7 @@ description: This guide shows how to natively integrate Langfuse with LangChain'
 category: Integrations
 ---
 
-# Cookbook: Langserve Integration
+# Cookbook: Langserve Integration (SDK v2)
 
 [Langserve](https://python.langchain.com/docs/langserve/) (Python)
 > LangServe helps developers deploy LangChain runnables and chains as a REST API.

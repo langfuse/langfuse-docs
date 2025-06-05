@@ -133,6 +133,37 @@ At runtime, you can fetch the latest production version from Langfuse.
 <Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
 
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+
+# Get current `production` version of a text prompt
+prompt = langfuse.get_prompt("movie-critic")
+
+# Insert variables into prompt template
+compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> "As an expert movie critic, do you like Dune 2?"
+```
+
+Chat prompts
+
+```python
+# Get current `production` version of a chat prompt
+chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg infers the prompt type (default is 'text')
+
+# Insert variables into chat prompt template
+compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
+# -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
+```
+
+</Tab>
+<Tab>
+
 ```python
 from langfuse import Langfuse
 
@@ -157,6 +188,9 @@ chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg i
 compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
+
+</Tab>
+</Tabs>
 
 Optional parameters
 
@@ -415,10 +449,53 @@ Add the prompt object to the `generation` call in the SDKs to link the generatio
 
 This is currently unavailable when using the LlamaIndex integration.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
-Decorators
+**Decorators**
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe(as_type="generation")
+def nested_generation():
+    prompt = langfuse.get_prompt("movie-critic")
+
+    langfuse.update_current_generation(
+        prompt=prompt,
+    )
+
+@observe()
+def main():
+  nested_generation()
+
+main()
+```
+
+**Context Managers**
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+prompt = langfuse.get_prompt("movie-critic")
+
+with langfuse.start_as_current_generation(
+    name="movie-generation",
+    model="gpt-4o",
+    prompt=prompt
+) as generation:
+    # Your LLM call here
+    generation.update(output="LLM response")
+```
+
+</Tab>
+<Tab>
+
+**Decorators**
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -438,7 +515,7 @@ def main():
 main()
 ```
 
-Low-level SDK
+**Low-level SDK**
 
 ```diff
 langfuse.generation(
