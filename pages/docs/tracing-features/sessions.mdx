@@ -22,10 +22,11 @@ When using the `@observe()` decorator:
 ```python
 from langfuse import observe, get_client
 
-langfuse = get_client()
-
 @observe()
 def process_request():
+    # Get the client
+    langfuse = get_client()
+
     # Add to the current trace
     langfuse.update_current_trace(session_id="your-session-id")
 

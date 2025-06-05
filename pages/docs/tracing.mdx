@@ -170,19 +170,27 @@ If you want to send a batch immediately, you can call the `flush` method on the 
 
 <Tab>
 {/* Python SDK v3 */}
+
 ```python
 from langfuse import get_client
 
 # access the client directly
+
 langfuse = get_client()
 
 # Flush all pending observations
+
 langfuse.flush()
+
 ```
 
 If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 langfuse.shutdown()
 ```
 

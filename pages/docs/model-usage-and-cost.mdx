@@ -5,7 +5,10 @@ description: Langfuse tracks usage and cost of LLM generations for various model
 
 # Model Usage & Cost Tracking
 
-![Model cost breakdown in Langfuse UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
+<Frame border>
+  ![Model cost breakdown in Langfuse
+  UI](https://static.langfuse.com/250108_model_cost_breakdown.gif)
+</Frame>
 
 Langfuse tracks the usage and costs of your LLM generations and provides breakdowns by usage types.
 
@@ -217,6 +220,8 @@ generation = langfuse.generation(
 )
 ```
 
+You can also update the usage and cost via `generation.update()` and `generation.end()`.
+
 </Tab>
 <Tab>
 
@@ -241,10 +246,10 @@ const generation = langfuse.generation({
 });
 ```
 
+You can also update the usage and cost via `generation.update()` and `generation.end()`.
+
 </Tab>
 </Tabs>
-
-You can also update the usage and cost via `generation.update()` and `generation.end()`.
 
 ### Compatibility with OpenAI
 
@@ -264,7 +269,7 @@ with langfuse.start_as_current_generation(
 ) as generation:
     # Simulate LLM call
     # response = openai_client.chat.completions.create(...)
-    
+
     generation.update(
         usage_details={
             # usage (OpenAI-style schema)

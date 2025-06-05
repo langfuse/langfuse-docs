@@ -22,6 +22,7 @@ This approach ensures that you have complete control over the event input and ou
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
 <Tab>
+
 Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
 
 ```python
@@ -390,10 +391,10 @@ Langfuse's masking feature allows you to define a custom masking function with p
 
 ```python
 import re
-from langfuse.decorators import langfuse_context, observe
+from langfuse import Langfuse, observe, get_client
 
 # Step 2: Define the masking function
-def masking_function(data):
+def masking_function(data, **kwargs):
     if isinstance(data, str):
         # Regular expression to match credit card numbers (Visa, MasterCard, AmEx, etc.)
         pattern = r'\b(?:\d[ -]*?){13,19}\b'
@@ -401,7 +402,7 @@ def masking_function(data):
     return data
 
 # Step 3: Configure the masking function
-langfuse_context.configure(mask=masking_function)
+langfuse = Langfuse(mask=masking_function)
 
 # Step 4: Create a sample function with sensitive data
 @observe()
@@ -415,6 +416,9 @@ result = process_payment()
 
 print(result)
 # Output: Customer paid with card number [REDACTED CREDIT CARD].
+
+# Flush events in short-lived applications
+langfuse.flush()
 ```
 
 <Frame border>
@@ -444,7 +448,7 @@ pip install llm-guard
 ```
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import Langfuse, observe, get_client
 from llm_guard.vault import Vault
 from llm_guard.input_scanners import Anonymize
 from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
@@ -461,7 +465,7 @@ def create_anonymize_scanner():
     return scanner
 
 # Step 4: Define the masking function
-def masking_function(data):
+def masking_function(data, **kwargs):
     if isinstance(data, str):
         scanner = create_anonymize_scanner()
         # Scan and redact the data
@@ -470,7 +474,7 @@ def masking_function(data):
     return data
 
 # Step 5: Configure the masking function
-langfuse_context.configure(mask=masking_function)
+langfuse = Langfuse(mask=masking_function)
 
 # Step 6: Create a sample function with PII
 @observe()
@@ -484,6 +488,9 @@ result = generate_report()
 
 print(result)
 # Output: [REDACTED_PERSON] met with [REDACTED_PERSON] to discuss the project.
+
+# Flush events in short-lived applications
+langfuse.flush()
 ```
 
 <Frame border>
@@ -498,9 +505,9 @@ You can extend the masking function to redact other types of PII such as email a
 
 ```python
 import re
-from langfuse.decorators import langfuse_context, observe
+from langfuse import Langfuse, observe, get_client
 
-def masking_function(data):
+def masking_function(data, **kwargs):
     if isinstance(data, str):
         # Mask email addresses
         data = re.sub(r'\b[\w.-]+?@\w+?\.\w+?\b', '[REDACTED EMAIL]', data)
@@ -508,7 +515,7 @@ def masking_function(data):
         data = re.sub(r'\b\d{3}[-. ]?\d{3}[-. ]?\d{4}\b', '[REDACTED PHONE]', data)
     return data
 
-langfuse_context.configure(mask=masking_function)
+langfuse = Langfuse(mask=masking_function)
 
 @observe()
 def contact_customer():
@@ -519,6 +526,9 @@ result = contact_customer()
 
 print(result)
 # Output: Please contact John at [REDACTED EMAIL] or call [REDACTED PHONE].
+
+# Flush events in short-lived applications
+langfuse.flush()
 ```
 
 <Frame border>

@@ -4,9 +4,9 @@ description: Configure sampling to control the volume of traces collected by the
 
 # Sampling
 
-Sampling can be used to control the volume of traces collected by the Langfuse server.
+Sampling can be used to control the volume of traces collected by Langfuse. Sampling is handled client-side.
 
-You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate` parameter in the constructors of the Python SDK. The value has to be between 0 and 1.
+You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate`/`sampleRate` constructor parameter. The value has to be between 0 and 1.
 
 The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 

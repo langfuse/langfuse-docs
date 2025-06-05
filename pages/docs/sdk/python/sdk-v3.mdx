@@ -196,12 +196,14 @@ Key configuration options:
 
 ### Accessing the Client Globally
 
-Once initialized, the `Langfuse` client instance can be retrieved anywhere in your application using the `get_client` function. This is useful for accessing the client from different modules or within decorators without passing the instance around.
+The Langfuse client is a singleton. It can be accessed anywhere in your application using the `get_client` function.
+
+Optionally, you can initialize the client via `Langfuse()` in order to pass in configuration options (see above). Otherwise, it is created automatically when you call `get_client()` based on environment variables.
 
 ```python
 from langfuse import get_client
 
-# Assuming a client was initialized earlier, possibly in a different module:
+# Optionally, initialize the client with configuration options
 # langfuse = Langfuse(public_key="pk-lf-...", secret_key="sk-lf-...")
 
 # Get the default client
