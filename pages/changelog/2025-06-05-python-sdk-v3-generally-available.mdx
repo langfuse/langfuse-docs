@@ -1,7 +1,7 @@
 ---
-title: Python SDK v3 is generally available
+title: Python SDK v3 is now Generally Available
 description: The OpenTelemetry-based Python SDK v3 is now stable and ready for production use.
-date: 2025-06-03
+date: 2025-06-05
 author: Hassieb
 ogImage: /images/changelog/2025-05-23-otel-based-python-sdk.png
 showOgInHeader: false
@@ -25,14 +25,16 @@ Following extensive testing and community feedback, we're excited to announce th
 
 This major release brings the power of OpenTelemetry (OTEL) to LLM observability, providing a more robust and standards-compliant foundation for tracing your AI applications.
 
-**OpenTelemetry Foundation**
+## What's new?
+
+### OpenTelemetry Foundation
 
 The foundation of the v3 SDK is OpenTelemetry, which brings several practical advantages:
 
 - **Standardized Context Propagation**: OTEL automatically handles the propagation of trace and span context. This means when you create a new span or generation, it correctly nests under the currently active operation.
 - **Third-Party Library Compatibility**: Libraries already instrumented with OpenTelemetry will integrate with the Langfuse SDK, with their spans being captured and correctly nested within your Langfuse traces.
 
-**Simplified Tracing and Global Client Access**
+### Simplified Tracing and Global Client Access
 
 The new SDK aims to make tracing more straightforward. Here's an example of how tracing can be implemented across different modules, leveraging automatic context propagation and global client access:
 
@@ -93,7 +95,7 @@ In this example:
 - Spans are automatically nested due to OTEL's context propagation.
 - Trace and span updates can be done contextually.
 
-**Seamless third-party integrations**
+### Seamless third-party integrations
 
 The Langfuse SDK seamlessly integrates with any third-party library that uses OpenTelemetry instrumentation. When these libraries emit spans, they are automatically captured and properly nested within your trace hierarchy. This enables unified tracing across your entire application stack without requiring any additional configuration.
 
@@ -131,6 +133,7 @@ with langfuse.start_as_current_span(name="myspan"):
 # Flush events to Langfuse in short-lived applications
 langfuse.flush()
 ```
+
 </Tab>
 
 <Tab>
@@ -158,9 +161,9 @@ langfuse.flush()
 
 </Tab>
 
-
 </Tabs>
-**Key Changes and Improvements:**
+
+## Key Changes
 
 - **Context Management**: OpenTelemetry now handles context propagation automatically, reducing the need to manually pass IDs.
 - **API for Observations**:
@@ -178,7 +181,7 @@ langfuse.flush()
 
 We encourage you to try the new Python SDK v3 beta and welcome your feedback on [GitHub](https://github.com/orgs/langfuse/discussions/6993).
 
-**Learn more**
+## Learn more
 
 - [Complete Migration Guide](/docs/sdk/python/sdk-v3#migration-from-v2-to-v3)
 - [Python SDK v3 Documentation](/docs/sdk/python/sdk-v3)
