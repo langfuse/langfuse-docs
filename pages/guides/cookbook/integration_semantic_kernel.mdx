@@ -13,15 +13,20 @@ This notebook provides a step-by-step guide on integrating **Langfuse** with **S
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is a leading open-source platform dedicated to LLM observability. It offers robust tracing and monitoring capabilities tailored for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
+<Callout type="info" emoji="ℹ️">
 _**Note:** This guide focuses on the Python implementation. However, the principles of this Langfuse integration apply to other languages supported by Semantic Kernel, including [C#](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-csharp) and [Java](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-java)._
+</Callout>
 
 ## Getting Started
 
 Let's walk through a practical example of using Semantic Kernel and integrating it with Langfuse for comprehensive tracing.
 
+<Steps>
 ### Step 1: Install Dependencies
 
+<Callout type="info" emoji="⚠️">
 _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, a previous version of this guide is available [here](https://github.com/langfuse/langfuse-docs/blob/4bba7985939469dab76b04513221995a203ac3c7/cookbook/integration_semantic_kernel.ipynb#L4)._
+</Callout>
 
 
 ```python
@@ -41,7 +46,7 @@ import os
 
 # Get keys for your project from the project settings page at https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -136,7 +141,7 @@ summary = await kernel.invoke(summarize, input=input_text)
 print(summary)
 ```
 
-    Langfuse is a platform designed to help developers and companies monitor, debug, and improve applications that utilize large language models (LLMs) and generative AI. It provides features for tracking the performance of LLM applications, analyzing their behavior during production, and collecting data for continued model improvement. Langfuse facilitates better understanding and management of AI applications by offering insights and tools tailored to the needs of modern AI products.
+    Langfuse is a tool designed for monitoring and observability specifically in AI systems. It helps organizations keep track of machine learning models, natural language processing systems, or any AI-driven applications. Langfuse typically provides features like real-time monitoring, logging, and analytics to understand how AI models are performing, diagnose issues, and ensure reliability and efficiency in AI operations. By offering insights into the behavior of AI systems, Langfuse aids developers and data scientists in optimizing and maintaining their models effectively.
 
 
 
@@ -147,6 +152,7 @@ After executing the Semantic Kernel application, navigate to your Langfuse Trace
 ![Langfuse Trace of Semantic Kernel Application](https://langfuse.com/images/cookbook/integration-semantic-kernel/sematric-kernel-example-trace.png)
 
 For a live example, you can explore this public trace: [Langfuse Semantic Kernel Trace Example](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/51d7ea51af5cf9048f607ac6abb79b4f?timestamp=2025-06-04T08:17:14.026Z&display=details)
+</Steps>
 
 ## Add Additional Attributes
 
@@ -183,7 +189,7 @@ with langfuse.start_as_current_span(
 langfuse.flush()
 ```
 
-    Langfuse is a platform designed for observability of LLM (Large Language Model) applications. It allows developers and organizations to monitor, debug, and gain insights into their AI applications that utilize large language models. By providing tools for tracking application performance, errors, and user interactions, Langfuse aims to enhance the development and maintenance of AI-driven projects. Additionally, it helps in understanding the behavior of language models in production environments, ensuring that they operate efficiently and effectively.
+    Langfuse is a developer tool designed for monitoring, debugging, and continuously improving applications that utilize Large Language Models (LLMs). It allows developers to track and analyze API requests to natural language processing (NLP) services such as OpenAI, Anthropic, and others. By using Langfuse, developers can gain insights into the performance and effectiveness of their language models, identify any issues or errors, and refine the application's functionality to optimize results. The tool provides metrics and visualizations to facilitate better understanding and decision-making in the context of AI-driven applications.
 
 
 ## Score Traces and Spans
@@ -279,20 +285,20 @@ langfuse = get_client()
 # Fetch an existing dataset
 dataset = langfuse.get_dataset(name="capital_cities_11")
 for item in dataset.items:
-    print(f"Input: {item.input}, Expected: {item.expected_output}")
+    print(f"Input: {item.input["country"]}, Expected Output: {item.expected_output}")
 ```
 
-    Input: {'country': 'USA'}, Expected: Washington, D.C.
-    Input: {'country': 'Egypt'}, Expected: Cairo
-    Input: {'country': 'South Africa'}, Expected: Pretoria
-    Input: {'country': 'Argentina'}, Expected: Buenos Aires
-    Input: {'country': 'South Korea'}, Expected: Seoul
-    Input: {'country': 'Canada'}, Expected: Ottawa
-    Input: {'country': 'India'}, Expected: New Delhi
-    Input: {'country': 'Japan'}, Expected: Tokyo
-    Input: {'country': 'Brazil'}, Expected: Brasília
-    Input: {'country': 'Spain'}, Expected: Madrid
-    Input: {'country': 'Italy'}, Expected: Rome
+    Input: USA, Expected Output: Washington, D.C.
+    Input: Egypt, Expected Output: Cairo
+    Input: South Africa, Expected Output: Pretoria
+    Input: Argentina, Expected Output: Buenos Aires
+    Input: South Korea, Expected Output: Seoul
+    Input: Canada, Expected Output: Ottawa
+    Input: India, Expected Output: New Delhi
+    Input: Japan, Expected Output: Tokyo
+    Input: Brazil, Expected Output: Brasília
+    Input: Spain, Expected Output: Madrid
+    Input: Italy, Expected Output: Rome
 
 
 Next, we iterate through each item in the dataset, run our Semantic Kernel application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
@@ -305,7 +311,7 @@ from langfuse import get_client
  
 langfuse = get_client()
 dataset_name = "capital_cities_11"
-current_run_name = "capital_cities_run_01" # Identifies this specific evaluation run
+current_run_name = "capital_cities_run_02" # Identifies this specific evaluation run
 current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7},
 current_run_description="Evaluation run for Q&A model on June 4th"
  
@@ -327,7 +333,7 @@ async def your_application(question):
 dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
  
 for item in dataset.items:
-    print(f"Running evaluation for item: {item.id} (Input: {item.input})")
+    print(f"Running evaluation for item: {item.id} (Input: {item.input["country"]})")
  
     # Use the item.run() context manager
     with item.run(
@@ -338,11 +344,7 @@ for item in dataset.items:
         # All subsequent langfuse operations within this block are part of this trace.
         generated_answer = await your_application(
             question="What is the capital of " + item.input["country"] + "? Just answer with the name of the city.",
-            item_id=item.id,
-            run_name=current_run_name
         )
- 
-        print(f"  Item {item.id} processed. Trace ID: {root_span.trace_id}")
  
         # Optionally, score the result against the expected output
         if item.expected_output and generated_answer == item.expected_output:
@@ -353,30 +355,19 @@ for item in dataset.items:
 print(f"\nFinished processing dataset '{dataset_name}' for run '{current_run_name}'.")
 ```
 
-    Running evaluation for item: cm3mzglxi011hrnvfsumtkkzx (Input: {'country': 'USA'})
-      Item cm3mzglxi011hrnvfsumtkkzx processed. Trace ID: ff9cc54daee1aeac7d7f619348c31a37
-    Running evaluation for item: f7d97f1a-e2ba-4e32-9f85-974f81e36614 (Input: {'country': 'Egypt'})
-      Item f7d97f1a-e2ba-4e32-9f85-974f81e36614 processed. Trace ID: 7b19329266b4338a728a28869524b8fa
-    Running evaluation for item: b8cb5991-3384-48cd-9bd1-160d8233c687 (Input: {'country': 'South Africa'})
-      Item b8cb5991-3384-48cd-9bd1-160d8233c687 processed. Trace ID: f2b3dbe1aaf23f510beb0db2129fe420
-    Running evaluation for item: 96c7d3c8-9aa7-46c7-a4b9-85640694660b (Input: {'country': 'Argentina'})
-      Item 96c7d3c8-9aa7-46c7-a4b9-85640694660b processed. Trace ID: 97a860f42fb2f77f84bf351b00757c5d
-    Running evaluation for item: 3de354e6-4c8d-4ea7-98ab-f2794233d6d7 (Input: {'country': 'South Korea'})
-      Item 3de354e6-4c8d-4ea7-98ab-f2794233d6d7 processed. Trace ID: bd90a77c101ebf2c5a6c172648e6b386
-    Running evaluation for item: 5bb3cecd-ab56-4d53-ba46-eb27f0b82755 (Input: {'country': 'Canada'})
-      Item 5bb3cecd-ab56-4d53-ba46-eb27f0b82755 processed. Trace ID: 0ed8f7066775607a4631af6921cfd7a1
-    Running evaluation for item: 46dc47db-6f77-42b0-b0cf-48cb42a3cb26 (Input: {'country': 'India'})
-      Item 46dc47db-6f77-42b0-b0cf-48cb42a3cb26 processed. Trace ID: 07ef85a26bcaa5ebb48c9e5f1879ca06
-    Running evaluation for item: 5d08adbd-b013-4e00-81ea-2359544f81d7 (Input: {'country': 'Japan'})
-      Item 5d08adbd-b013-4e00-81ea-2359544f81d7 processed. Trace ID: aaf9678592d05504a4ec0bb6787d159a
-    Running evaluation for item: 70384a90-3163-4eaa-9769-0218ad39375d (Input: {'country': 'Brazil'})
-      Item 70384a90-3163-4eaa-9769-0218ad39375d processed. Trace ID: 820aa7d40ad174b86890c840a1ac95b1
-    Running evaluation for item: 7f03c37f-71ed-4e9a-8de8-573503a49710 (Input: {'country': 'Spain'})
-      Item 7f03c37f-71ed-4e9a-8de8-573503a49710 processed. Trace ID: 92a77a446df2888a1515b69a9a6639eb
-    Running evaluation for item: d66bb581-4e76-4e41-9c89-2e9ec4ec32f8 (Input: {'country': 'Italy'})
-      Item d66bb581-4e76-4e41-9c89-2e9ec4ec32f8 processed. Trace ID: 5217b77af4c77cead6f573661c3aea46
+    Running evaluation for item: cm3mzglxi011hrnvfsumtkkzx (Input: USA)
+    Running evaluation for item: f7d97f1a-e2ba-4e32-9f85-974f81e36614 (Input: Egypt)
+    Running evaluation for item: b8cb5991-3384-48cd-9bd1-160d8233c687 (Input: South Africa)
+    Running evaluation for item: 96c7d3c8-9aa7-46c7-a4b9-85640694660b (Input: Argentina)
+    Running evaluation for item: 3de354e6-4c8d-4ea7-98ab-f2794233d6d7 (Input: South Korea)
+    Running evaluation for item: 5bb3cecd-ab56-4d53-ba46-eb27f0b82755 (Input: Canada)
+    Running evaluation for item: 46dc47db-6f77-42b0-b0cf-48cb42a3cb26 (Input: India)
+    Running evaluation for item: 5d08adbd-b013-4e00-81ea-2359544f81d7 (Input: Japan)
+    Running evaluation for item: 70384a90-3163-4eaa-9769-0218ad39375d (Input: Brazil)
+    Running evaluation for item: 7f03c37f-71ed-4e9a-8de8-573503a49710 (Input: Spain)
+    Running evaluation for item: d66bb581-4e76-4e41-9c89-2e9ec4ec32f8 (Input: Italy)
     
-    Finished processing dataset 'capital_cities_11' for run 'capital_cities_run_01'.
+    Finished processing dataset 'capital_cities_11' for run 'capital_cities_run_02'.
 
 
 ## Explore More Langfuse Features

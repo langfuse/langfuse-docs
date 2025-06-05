@@ -86,49 +86,27 @@ def transform_content_to_mdx(markdown_content):
         return f"<Callout{props_string}>\n{content_of_callout}\n</Callout>"
     content_for_processing = callout_block_pattern.sub(replace_callout_block_match, content_for_processing)
 
-    # --- Stage 4: Steps Transformation ---
-    steps_main_pattern = re.compile(
+    # --- Stage 4: Steps Transformation (Simplified) ---
+    # This pattern will find blocks starting with <!-- STEPS_START -->
+    # and ending with <!-- STEPS_END -->, capturing the content in between.
+    steps_simplified_pattern = re.compile(
         r"<!--\s*STEPS_START\s*-->(.*?)<!--\s*STEPS_END\s*-->",
         re.DOTALL | re.MULTILINE
     )
-    step_item_pattern = re.compile(
-        r"<!--\s*STEP\s*-->(.*?)<!--\s*/STEP\s*-->",
-        re.DOTALL | re.MULTILINE
-    )
-    def replace_steps_block_match(main_match_obj):
+    def replace_steps_simplified_match(match_obj):
         nonlocal was_transformed_overall
-        # The STEPS_START/END block itself means a transformation is intended.
         was_transformed_overall = True 
-        inner_content = main_match_obj.group(1)
-        step_mdx_parts = []
+        # Group 1 is the content between STEPS_START and STEPS_END
+        inner_content = match_obj.group(1).strip() 
+        # The inner_content is directly placed inside <Steps>
+        # If your <Steps> component in MDX expects child <Step> components,
+        # you would need to ensure the Markdown content *within* the STEPS_START/END
+        # is structured in a way that MDX can interpret as individual steps,
+        # or that the <Steps> component itself handles raw Markdown children appropriately.
+        # For this transformation, we are just wrapping the block.
+        return f"<Steps>\n{inner_content}\n</Steps>"
         
-        # Search for individual STEP blocks within the STEPS_START/END block
-        last_pos = 0
-        has_inner_steps = False
-        for step_match in step_item_pattern.finditer(inner_content):
-            has_inner_steps = True
-            # Add any non-step content before this step (should ideally be minimal/whitespace)
-            # This part might be removed if structure is strict (only steps inside steps)
-            # pre_step_content = inner_content[last_pos:step_match.start()].strip()
-            # if pre_step_content: # If there's significant non-step content, it might be an issue
-            #     print(f"Warning: Non-STEP content found inside STEPS block: '{pre_step_content[:50]}...'")
-                # For now, we'll ignore it unless it becomes a problem.
-            
-            step_content = step_match.group(1).strip()
-            step_mdx_parts.append(f"  <Step>\n    {step_content}\n  </Step>")
-            last_pos = step_match.end()
-
-        # Optional: Handle content after the last step but before STEPS_END
-        # post_step_content = inner_content[last_pos:].strip()
-        # if post_step_content:
-        #     print(f"Warning: Content found after last STEP inside STEPS block: '{post_step_content[:50]}...'")
-
-        if not has_inner_steps:
-            print("Warning: STEPS_START/STEPS_END block found but no STEP/.../STEP children. Generating empty <Steps>.")
-            return "<Steps>\n</Steps>" # Or just "" if preferred for empty steps
-
-        return f"<Steps>\n" + "\n".join(step_mdx_parts) + "\n</Steps>"
-    content_for_processing = steps_main_pattern.sub(replace_steps_block_match, content_for_processing)
+    content_for_processing = steps_simplified_pattern.sub(replace_steps_simplified_match, content_for_processing)
     
     # --- Stage 5: Component Transformation ---
     component_comment_pattern = re.compile(
