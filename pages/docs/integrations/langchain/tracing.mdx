@@ -621,11 +621,9 @@ If you want to flush events synchronously at a certain point, you can use the `f
 {/* Python SDK v3 */}
 
 ```python
-# For the main Langfuse client
-langfuse.flush()
+from langfuse import get_client
 
-# For the callback handler
-langfuse_handler.flush()
+get_client().flush()
 ```
 
 </Tab>

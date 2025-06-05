@@ -1236,11 +1236,7 @@ def my_function():
     langfuse = get_client()
 
     # Update trace explicitly
-    langfuse.update_current_trace(
-        user_id="user_123",
-        input={"query": "input"},     # Explicit trace input
-        output={"result": "result"}   # Explicit trace output
-    )
+    langfuse.update_current_trace(user_id="user_123")
     return "result"
 ```
 
