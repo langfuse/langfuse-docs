@@ -1,0 +1,84 @@
+---
+title: "Doubling Down on Open Source"
+date: 2025/06/04
+description: "Open Sourcing all Product Features in Langfuse under the MIT license"
+tag: announcement
+ogImage: /images/blog/2025-06-04-open-sourcing-langfuse-product/langfuse-open-source-og.png
+author: Clemens, Marc, Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Doubling Down on Open Source"
+  description="Today we are open sourcing all remaining Product Features in Langfuse under the MIT license"
+  authors={["marcklingen", "clemensrawert", "maxdeichmann"]}
+  date="June 4, 2025"
+/>
+
+The LLM landscape is changing rapidly and so are the workflows used to build and improve LLM apps. Today, **we are open sourcing all Product Features in Langfuse** to enable our community to iterate on their applications faster and provide our project with feedback on where to go next.
+
+Newly open sourced features include managed [LLM-as-a-judge evaluations](/docs/scores/model-based-evals), [annotation queues](/docs/scores/annotation), [prompt experiments](/docs/datasets/prompt-experiments) and [the playground](/docs/playground), all of which are now freely available to self-host under the MIT license.
+
+<Frame border fullWidth>
+  ![OSS Change
+  Comparison](/images/blog/2025-06-04-open-sourcing-langfuse-product/change-visual.png)
+</Frame>
+
+_If you are self-hosting Langfuse already today, **upgrade your deployment to the [latest version](/self-hosting/upgrade)**. You will find a more powerful version of Langfuse._
+
+## Why are we doing this?
+
+Langfuse is building the **open source LLM Engineering Platform**. We are building _the_ platform to observe and improve LLM applications.
+
+We are constantly shipping to be the technology of choice for our community. This requires trust, feedback and buy-in from our community.
+
+We re-visited the gated features in our Enterprise Edition. If we want to be the first choice in the market, we need to allow our community to **cover the entire dev cycle in our FOSS version**. Features like LLM-as-a-Judge, Evals, or our Playground are market standard at this point and should be freely available. **But why stop there?**
+
+The best platform for developers has to be open at its core. By **removing commercial barriers from our product features**, we're fostering deeper trust, collaborating on contributions, accelerating adoption, gathering richer community feedback, and iterating faster than ever.
+
+## Our Open Source Journey
+
+**Langfuse was [launched](/blog/product-analytics-for-LLM-apps) as an open source project.** This was based on a few [core beliefs](/why):
+
+- Data captured by Langfuse should be freely accessible
+- The AI landscape changes every week – Langfuse must integrate agnostically with all models and application stacks
+- Great teams deserve the flexibility to extend the platform to support custom workflows
+
+**This positioning resonates and today we are doubling down on it.**
+
+Langfuse has been an open core company from the start. **Our core just expanded significantly** and our periphery shrunk. Commercially licensed code is now limited to features for Enterprise Security and Platform Teams (e.g. SCIM, Audit Logs, Data Retention Policies – regular [SSO](/self-hosting/authentication-and-sso) is and continues to be MIT licensed).
+
+### Langfuse's Open Core Model
+
+| Area                       | Then       | Now           |
+| -------------------------- | ---------- | ------------- |
+| Core Platform              | OSS (MIT)  | OSS (MIT) ✅  |
+| LLM-as-a-Judge Evaluations | Commercial | OSS (MIT) ✅  |
+| Playground                 | Commercial | OSS (MIT) ✅  |
+| Prompt Experiments         | Commercial | OSS (MIT) ✅  |
+| Annotation/Data Labeling   | Commercial | OSS (MIT) ✅  |
+| Enterprise Security        | Commercial | Commercial 🔒 |
+| Enterprise Support         | Commercial | Commercial 🔒 |
+
+As we open source previously commercial features, we are fully investing our commercial focus in Langfuse Cloud and Enterprise platform teams in self-hosting.
+
+## Thousands of Langfuse Deployments
+
+Besides >7,000,000 monthly SDK installs and >5,500,000 Docker pulls, there are >8,000 monthly active self-hosted instances of Langfuse out in the wild. This boggles our minds.
+
+We expect that today's changes solidify Langfuse as the first choice for a powerful and truly open source platform in LLMOps.
+
+Today is the day to start self-hosting Langfuse. Head over to [our self hosting docs](/self-hosting) and use the new [terraform modules](/changelog/2025-05-22-terraform-modules) for deploying Langfuse at production-scale.
+
+**Some additional public metrics:**
+
+import PublicMetrics from "@/components-mdx/public-metrics.mdx";
+
+<PublicMetrics />
+
+## How can you follow and contribute to Langfuse?
+
+- [🤩 Star us on Github](https://github.com/langfuse/langfuse)
+- [🙋 Upvote or Contribute requests/feedback on Github Discussions](/ideas)
+- [🚗 Langfuse Roadmap](/roadmap)
