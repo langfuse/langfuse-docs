@@ -1,0 +1,131 @@
+---
+description: Comprehensive audit logging in Langfuse tracks all system activities with detailed state capture and user attribution for enterprise security and compliance requirements.
+---
+
+# Audit Logs
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Langfuse's audit logging system provides comprehensive tracking of all system activities, capturing detailed information about who performed what actions, when they occurred, and what changes were made.
+This feature is essential for enterprise security, compliance requirements, and incident investigation.
+
+## What are Audit Logs?
+
+Audit logs are immutable records of all significant activities within your Langfuse organization and projects.
+They capture:
+
+- **Who**: User or API key that performed the action
+- **What**: The specific action taken (create, update, delete)
+- **When**: Precise timestamp of the action
+- **Where**: Organization and project context
+- **Details**: Complete before/after state for modifications
+
+These logs provide a complete audit trail for security monitoring, compliance reporting, and forensic analysis.
+
+## Auditable Resources
+
+Langfuse tracks specific actions across all system resources.
+The following table shows the exact resource types and actions that are logged:
+
+| Resource                     | Actions                                               |
+|------------------------------|-------------------------------------------------------|
+| **Annotation Queue**         | create, delete, update                                |
+| **Annotation Queue Item**    | complete, create, delete                              |
+| **API Key**                  | create, delete, update                                |
+| **Batch Action**             | create, delete                                        |
+| **Batch Export**             | create                                                |
+| **Blob Storage Integration** | update                                                |
+| **Comment**                  | create, delete                                        |
+| **Dataset**                  | create, delete, update                                |
+| **Dataset Item**             | create, delete, update                                |
+| **Dataset Run**              | delete                                                |
+| **Evaluation Template**      | create                                                |
+| **Job**                      | create, delete, update                                |
+| **LLM API Key**              | create, delete                                        |
+| **Membership**               | create, delete                                        |
+| **Membership Invitation**    | create, delete                                        |
+| **Model**                    | create, delete, update                                |
+| **Organization**             | create, delete, update                                |
+| **Organization Membership**  | create, delete, update                                |
+| **PostHog Integration**      | delete, update                                        |
+| **Project**                  | create, delete, transfer, update                      |
+| **Project Membership**       | create, delete, update                                |
+| **Prompt**                   | create, delete, promote, setLabel, update, updateTags |
+| **Prompt Protected Label**   | create                                                |
+| **Score**                    | create, delete, update                                |
+| **Score Config**             | create, update                                        |
+| **Session**                  | bookmark, publish                                     |
+| **Stripe Checkout Session**  | create                                                |
+| **Trace**                    | bookmark, delete, publish, updateTags                 |
+
+## Event Types and Data Capture
+
+### State Capture
+For update operations, Langfuse captures:
+- **Before State**: Complete resource state prior to modification
+- **After State**: Complete resource state after modification
+
+States are stored as JSON, providing full context for any modifications made to your data.
+
+## User Attribution
+
+### Identity Sources
+
+Audit logs distinguish between different types of actors:
+
+- **User Actions** (`USER` type): Actions performed by authenticated users through the web interface
+- **API Key Actions** (`API_KEY` type): Programmatic actions via API keys
+
+### Context Information
+
+Each entry includes:
+- **User ID**: For user-initiated actions
+- **API Key ID**: For programmatic actions
+- **Organization ID**: Organizational context
+- **Role Context**: User's organizational and project roles at the time of action
+
+## Viewing Audit Logs
+
+The audit log viewer is available in the Enterprise Edition and provides:
+
+<Frame className="my-6">
+  ![Audit Logs Interface](/images/changelog/2025-01-21-audit-logs.png)
+</Frame>
+
+### Access Control
+
+- Available to users with `auditLogs:read` permission
+- Typically accessible to project OWNERs and ADMINs
+- Controlled through Langfuse's role-based access control system
+
+### Filtering and Navigation
+
+- **Time-based filtering**: View logs for specific time periods
+- **Project filtering**: Focus on specific project activities
+- **Pagination**: Efficient browsing of large audit trails
+
+## Getting Started
+
+To access audit logs in your Langfuse instance:
+
+1. Ensure you have an Enterprise or Teams plan
+2. Verify you have the appropriate permissions (`auditLogs:read`)
+3. Navigate to your project settings
+4. Access the "Audit Logs" section
+5. Use filters to focus on specific time periods or activities
+
+Audit logs provide powerful visibility into your Langfuse usage and are an essential tool for maintaining security, compliance, and operational excellence in enterprise environments.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-audit-logs"]} />
