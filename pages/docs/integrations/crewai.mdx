@@ -158,7 +158,7 @@ langfuse.flush()
 
 ## Score Traces and Spans
 
-Langfuse lets you can ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
+Langfuse lets you ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
 
 In the example below, we demonstrate how to score a specific span for `relevance` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
 
@@ -270,7 +270,7 @@ from crewai import Agent, Task, Crew
  
 dataset_name = "capital_cities_11"
 current_run_name = "dev_tasks_run-crewai_03" # Identifies this specific evaluation run
-current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7},
+current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
 current_run_description="Evaluation run for CrewAI model on June 4th"
  
 # Assume 'your_application' is your instrumented application function
@@ -281,7 +281,7 @@ def your_application(country):
         geography_expert = Agent(
             role='Geography Expert',
             goal='Answer questions about geography',
-            backstory='An expert geography with a keen eye for geography.',
+            backstory='A geography expert with a keen eye for details.',
         )
 
         # Create tasks for your agents
