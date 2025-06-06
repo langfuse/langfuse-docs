@@ -11,7 +11,7 @@ This notebook provides a step-by-step guide on integrating **Langfuse** with **P
 
 > **About PydanticAI:** [PydanticAI](https://pydantic-ai.readthedocs.io/en/latest/) is a Python agent framework designed to simplify the development of production-grade generative AI applications. It brings the same type-safety, ergonomic API design, and developer experience found in FastAPI to the world of GenAI app development. 
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is a an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and Pydantic AIs through native integrations, OpenTelemetry, and dedicated SDKs.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and Pydantic AIs through native integrations, OpenTelemetry, and dedicated SDKs.
 
 ## Getting Started
 
@@ -21,7 +21,7 @@ Let's walk through a practical example of using Pydantic AI and integrating it w
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy Pydantic AI integration guide](https://langfuse.com/docs/integrations/Pydantic AI)._
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy Pydantic AI integration guide](https://github.com/langfuse/langfuse-docs/blob/fdea27dd5d3f4a110a4f79c0ec1b7b381b48d091/cookbook/integration_pydantic_ai.ipynb)._
 </Callout>
 
 
@@ -40,13 +40,13 @@ Next, set up your Langfuse API keys. You can get these keys by signing up for a 
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # Replace with your actual public key
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # Replace with your actual secret key
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your OpenAI key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..." # Replace with your actual OpenAI API key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
@@ -115,7 +115,7 @@ print(result.output)
 
 ### Step 5: View Traces in Langfuse
 
-After executing the application, navigate to your [Langfuse Trace Table](https://cloud.lagfuse.com). You will find detailed traces of the application's execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics. 
+After executing the application, navigate to your [Langfuse Trace Table](https://cloud.langfuse.com). You will find detailed traces of the application's execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics. 
 
 ![Example Trace in Langfuse](https://langfuse.com/images/cookbook/otel-integration-pydantic-ai/pydanticai-openai-trace-tree.png)
 
