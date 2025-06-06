@@ -38,7 +38,63 @@ You can add scores via the Langfuse SDKs or API. Scores can take one of three da
 <Tab>
 Numeric score values must be provided as float.
 
-Python SDK example
+SDK examples
+
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="correctness",
+    value=0.9,
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="NUMERIC", # optional, inferred if not provided
+    comment="Factually correct", # optional
+)
+
+# Method 2: Score current span/generation (within context)
+with langfuse.start_as_current_span(name="my-operation") as span:
+    # Score the current span
+    span.score(
+        name="correctness",
+        value=0.9,
+        data_type="NUMERIC",
+        comment="Factually correct"
+    )
+    
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value=0.95,
+        data_type="NUMERIC"
+    )
+
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_span(name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="correctness",
+        value=0.9,
+        data_type="NUMERIC",
+        comment="Factually correct"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value=0.95,
+        data_type="NUMERIC"
+    )
+```
+
+</Tab>
+<Tab>
 
 ```python
 langfuse.score(
@@ -52,7 +108,8 @@ langfuse.score(
 )
 ```
 
-JavaScript/TypeScript SDK example
+</Tab>
+<Tab>
 
 ```ts
 await langfuse.score({
@@ -67,25 +124,84 @@ await langfuse.score({
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
 
 <Tab>
 Categorical score values must be provided as strings.
 
-Python SDK example
+SDK examples
+
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="accuracy",
+    value="partially correct",
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="CATEGORICAL", # optional, inferred if not provided
+    comment="Some factual errors", # optional
+)
+
+# Method 2: Score current span/generation (within context)
+with langfuse.start_as_current_span(name="my-operation") as span:
+    # Score the current span
+    span.score(
+        name="accuracy",
+        value="partially correct",
+        data_type="CATEGORICAL",
+        comment="Some factual errors"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value="partially correct",
+        data_type="CATEGORICAL"
+    )
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_span(name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="accuracy",
+        value="partially correct",
+        data_type="CATEGORICAL",
+        comment="Some factual errors"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value="partially correct",
+        data_type="CATEGORICAL"
+    )
+```
+
+</Tab>
+<Tab>
 
 ```python
 langfuse.score(
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
     name="accuracy",
     value="partially correct",
-    data_type="CATEGORICAL" # optional, inferred if not provided
+    data_type="CATEGORICAL", # optional, inferred if not provided
     comment="Factually correct", # optional
 )
 ```
 
-JavaScript/TypeScript SDK example
+</Tab>
+<Tab>
 
 ```ts
 await langfuse.score({
@@ -100,25 +216,83 @@ await langfuse.score({
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
 
 <Tab>
 Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
-Python SDK example
+SDK examples
+
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="helpfulness",
+    value=0, # 0 or 1
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="BOOLEAN", # required, numeric values without data type would be inferred as NUMERIC
+    comment="Incorrect answer", # optional
+)
+
+# Method 2: Score current span/generation (within context)
+with langfuse.start_as_current_span(name="my-operation") as span:
+    # Score the current span
+    span.score(
+        name="helpfulness",
+        value=1, # 0 or 1
+        data_type="BOOLEAN",
+        comment="Very helpful response"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value=1, # 0 or 1
+        data_type="BOOLEAN"
+    )
+# Method 3: Score via the current context
+with langfuse.start_as_current_span(name="my-operation"):
+    # Score the current span
+    langfuse.score_current_span(
+        name="helpfulness",
+        value=1, # 0 or 1
+        data_type="BOOLEAN",
+        comment="Very helpful response"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value=1, # 0 or 1
+        data_type="BOOLEAN"
+    )
+```
+
+</Tab>
+<Tab>
 
 ```python
 langfuse.score(
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
     name="helpfulness",
     value=0, # 0 or 1
-    data_type="BOOLEAN" # required, numeric values without data type would be inferred as NUMERIC
+    data_type="BOOLEAN", # required, numeric values without data type would be inferred as NUMERIC
     comment="Incorrect answer", # optional
 )
 ```
 
-JavaScript/TypeScript SDK example
+</Tab>
+<Tab>
 
 ```ts
 await langfuse.score({
@@ -131,6 +305,9 @@ await langfuse.score({
   comment: "Incorrect answer", // optional
 });
 ```
+
+</Tab>
+</Tabs>
 
 </Tab>
 → More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
@@ -168,6 +345,40 @@ Whenever you provide a config, the score data will be validated against the conf
 
 <Tab>
 When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
+
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="accuracy",
+    value=0.9,
+    comment="Factually correct", # optional
+    score_id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    config_id="78545-6565-3453654-43543", # optional, to ensure that the score follows a specific min/max value range
+    data_type="NUMERIC" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_span(name="my-operation") as span:
+    span.score(
+        name="accuracy",
+        value=0.9,
+        comment="Factually correct",
+        config_id="78545-6565-3453654-43543",
+        data_type="NUMERIC"
+    )
+```
+
+</Tab>
+<Tab>
+
 ```python
 langfuse.score(
     trace_id=message.trace_id,
@@ -180,6 +391,9 @@ langfuse.score(
     data_type="NUMERIC" # optional, possibly inferred
 )
 ```
+
+</Tab>
+<Tab>
 
 ```ts
 await langfuse.score({
@@ -195,9 +409,46 @@ await langfuse.score({
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
 
 <Tab>
-Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories. 
+Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
+
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="correctness",
+    value="correct",
+    comment="Factually correct", # optional
+    score_id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    config_id="12345-6565-3453654-43543", # optional, to ensure that the score maps to a specific category defined in a score config
+    data_type="CATEGORICAL" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_span(name="my-operation") as span:
+    span.score(
+        name="correctness",
+        value="correct",
+        comment="Factually correct",
+        config_id="12345-6565-3453654-43543",
+        data_type="CATEGORICAL"
+    )
+```
+
+</Tab>
+<Tab>
+
 ```python
 langfuse.score(
     trace_id=message.trace_id,
@@ -210,6 +461,9 @@ langfuse.score(
     data_type="CATEGORICAL" # optional, possibly inferred
 )
 ```
+
+</Tab>
+<Tab>
 
 ```ts
 await langfuse.score({
@@ -225,8 +479,44 @@ await langfuse.score({
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
 <Tab>
 When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
+
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="helpfulness",
+    value=1,
+    comment="Factually correct", # optional
+    score_id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    config_id="93547-6565-3453654-43543", # optional, can be used to infer the score data type and validate the score value
+    data_type="BOOLEAN" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_span(name="my-operation") as span:
+    span.score(
+        name="helpfulness",
+        value=1,
+        comment="Factually correct",
+        config_id="93547-6565-3453654-43543",
+        data_type="BOOLEAN"
+    )
+```
+
+</Tab>
+<Tab>
 
 ```python
 langfuse.score(
@@ -241,6 +531,9 @@ langfuse.score(
 )
 ```
 
+</Tab>
+<Tab>
+
 ```ts
 await langfuse.score({
   traceId: message.traceId,
@@ -253,6 +546,9 @@ await langfuse.score({
   dataType: "BOOLEAN", // optional, possibly inferred
 });
 ```
+
+</Tab>
+</Tabs>
 
 </Tab>
 → More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.

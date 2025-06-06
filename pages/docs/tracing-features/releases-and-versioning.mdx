@@ -41,10 +41,11 @@ The SDKs look for a `release` in the following order:
 The Python SDK v3 allows you to set the release when initializing the client:
 
 ```python
-from langfuse import Langfuse
+from langfuse import Langfuse, get_client
 
 # Set the release when initializing the client
 langfuse = Langfuse(release="v2.1.24")
+client = get_client()
 ```
 
 You can also update the trace's release after creation:
@@ -60,6 +61,7 @@ def process_data():
     # ...
 
 # With context managers
+langfuse = get_client()
 with langfuse.start_as_current_span(name="my-operation") as span:
     span.update_trace(release="v2.1.24")
 ```
@@ -162,22 +164,15 @@ The `version` parameter can be added to `traces` and all observation types (`spa
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 When using the `@observe()` decorator:
 
 ```python
 from langfuse import observe, get_client
 
-langfuse = get_client()
-
 @observe()
 def process_data():
+    langfuse = get_client()
+    
     # Set version at trace level
     langfuse.update_current_trace(version="1.0")
 
@@ -188,9 +183,9 @@ def process_data():
 When creating spans directly:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Set version when creating a span
 with langfuse.start_as_current_span(

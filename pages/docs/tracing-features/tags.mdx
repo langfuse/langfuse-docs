@@ -8,13 +8,6 @@ Tags allow you to categorize and filter traces. You can tag traces (1) when they
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)" ]}>
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
@@ -32,8 +25,8 @@ def my_function():
 When creating spans or generations directly:
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Add tags when creating the root span
 with langfuse.start_as_current_span(

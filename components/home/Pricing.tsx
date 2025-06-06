@@ -954,7 +954,7 @@ const sections: Section[] = [
       },
       {
         name: "Audit Logs",
-        href: "/changelog/2025-01-21-audit-logs",
+        href: "/docs/audit-logs",
         tiers: {
           cloud: {
             Hobby: false,
