@@ -9,7 +9,7 @@ category: Integrations
 
 This notebook provides a step-by-step guide on integrating **Langfuse** with **LlamaIndex** to achieve observability and debugging for your LLM applications.
 
-> **What is LlamaIndex?** [LlamaIndex](https://www.llamaindex.ai/) ([GitHub](https://github.com/run-llama/llama_index)) is an advanced "data framework" tailored for augmenting LLMs with private data. It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs. Designed for both beginners and experts, LlamaIndex provides a user-friendly high-level API for easy data ingestion and querying, alongside customizable lower-level APIs for detailed module adaptation.
+> **What is LlamaIndex?** [LlamaIndex](https://www.llamaindex.ai/) ([GitHub](https://github.com/run-llama/llama_index)) is an advanced "data framework" tailored for augmenting LLMs with private data. It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is a an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
@@ -107,13 +107,15 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 
 [Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/12ea412956f99347b0503c1144acd0ec?timestamp=2025-06-05T15:45:52.971Z&display=details)
 </Steps>
+
 ## Add Additional Attributes
 
 Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
 The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
 
-→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).
+**→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
+
 
 
 ```python
@@ -141,13 +143,15 @@ with langfuse.start_as_current_span(
 langfuse.flush()
 
 ```
+
 ## Score Traces and Spans
 
 Langfuse lets you can ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
 
 In the example below, we demonstrate how to score a specific span for `relevance` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
 
-→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).
+**→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
+
 
 
 ```python
@@ -170,13 +174,15 @@ with langfuse.start_as_current_span(
 langfuse.flush()
 
 ```
+
 ## Manage Prompts with Langfuse
 
 Langfuse Prompt Management allows you to collaboratively create, version, and deploy prompts. You can manage prompts either through the Langfuse SDK or directly within the Langfuse UI. These managed prompts can then be fetched into your application at runtime.
 
 The code below illustrates fetching a prompt named `answer-question` from Langfuse, compiling it with an input variable (`country`), and then using this compiled prompt in the application. 
 
-→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).
+**→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
+
 
 
 ```python
@@ -210,7 +216,7 @@ Offline evaluation using datasets is a critical part of the LLM development life
 
 The following example demonstrates how to use a pre-existing dataset containing countries and their capitals to run an experiment.
 
-→ Learn more about [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview).
+**→ Learn more about [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview).**
 
 
 
