@@ -1,6 +1,8 @@
 ---
-title: Observability for LlamaIndex Workflows with Langfuse  
-description: Learn how to monitor LlamaIndex Workflows with Langfuse. This cookbook shows you how to trace AI workflows, improve observability, and debug LLM applications.  
+source: Jupyter Notebook
+title: Observability for LlamaIndex with Langfuse Integration
+description: Discover how to integrate Langfuse with LlamaIndex for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
+category: Integrations
 ---
 
 # Observability for LlamaIndex Workflows
@@ -15,7 +17,12 @@ This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain r
 
 We'll walk through a simple example of using LlamaIndex Workflows and integrating it with Langfuse.
 
+<Steps>
 ### Step 1: Install Dependencies
+
+<Callout type="info" emoji="⚠️">
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy LlamaIndex integration guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
+</Callout>
 
 
 ```python
@@ -30,10 +37,8 @@ Configure your Langfuse API keys. You can get them by signing up for [Langfuse C
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
@@ -42,16 +47,32 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
-### Step 3: Initialize the `LlamaIndexInstrumentor`
-
-At the root of your LlamaIndex application, register Langfuse’s `LlamaIndexInstrumentor`. When instantiating `LlamaIndexInstrumentor`, make sure to configure your Langfuse API keys and the Host URL correctly via environment variables or constructor arguments.
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
-from langfuse.llama_index import LlamaIndexInstrumentor
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 
-# Get your keys from the Langfuse project settings page and set them as environment variables or pass them as arguments when initializing the instrumentor
-instrumentor = LlamaIndexInstrumentor()
+```
+
+### Step 3: Initialize LlamaIndex Instrumentation
+
+Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
+
+
+```python
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
 ```
 
 ### Step 4: Create a Simple LlamaIndex Workflows Application
@@ -60,8 +81,6 @@ In LlamaIndex Workflows, you build event-driven AI agents by defining steps with
 
 
 ```python
-instrumentor.start()
-
 from llama_index.core.workflow import (
     Event,
     StartEvent,
@@ -98,19 +117,7 @@ class JokeFlow(Workflow):
 w = JokeFlow(timeout=60, verbose=False)
 result = await w.run(topic="pirates")
 print(str(result))
-
-instrumentor.flush()
 ```
-
-    Trace ID is not set. Creating generation client with new trace id.
-
-
-    Analysis:
-    This joke plays on the pun of "fish and ships" sounding like "fish and chips," a popular dish at seafood restaurants. The joke also incorporates the pirate theme by mentioning a pirate going to a seafood restaurant, which adds an element of humor and surprise.
-    
-    Critique:
-    Overall, this joke is light-hearted and playful, making it suitable for a general audience. The use of wordplay is clever and adds an element of wit to the punchline. However, the joke may be considered somewhat predictable as the punchline is somewhat expected once the pirate theme is introduced. Additionally, the humor may not be particularly sophisticated or original, as puns involving food and wordplay are common in comedy. Overall, while this joke may elicit a chuckle or a smile, it may not be particularly memorable or groundbreaking in terms of humor.
-
 
 ### Step 5: View Traces in Langfuse
 
@@ -118,10 +125,13 @@ After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to
 
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-llamaindex-workflows/llamaindex-workflows-example-trace.png)
 
-_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f2bb3e13-aafb-41a0-a852-efd20f12a4f4?timestamp=2025-02-13T16%3A03%3A09.705Z)_
+_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7b96398452b54e01ffd3490c4558cce0?timestamp=2025-06-06T09%3A16%3A00.842Z&display=details)_
+</Steps>
+
+<Callout type="info" emoji="ℹ️">
+_**Note:** To add additional trace attributes like tags or metadata or use LlamaIndex Workflows together with other Langfuse features please refer to [this guide](https://langfuse.com/docs/integrations/llama-index/get-started)._
+</Callout>
 
 ## References
 
 - [LlamaIndex Workflows Documentation](https://docs.llamaindex.ai/en/stable/module_guides/workflow/)  
-
-

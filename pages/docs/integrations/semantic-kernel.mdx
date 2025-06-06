@@ -1,0 +1,366 @@
+---
+source: Jupyter Notebook
+title: Observability for Semantic Kernel with Langfuse Integration
+description: Discover how to integrate Langfuse with Semantic Kernel for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
+category: Integrations
+---
+
+# Integrate Langfuse with Semantic Kernel
+
+This notebook provides a step-by-step guide on integrating **Langfuse** with **Semantic Kernel** to achieve observability and debugging for your LLM applications. By following this tutorial, you will learn how to trace your Semantic Kernel applications using Langfuse, manage your prompts in one place and evaluate your application to make it production ready.
+
+> **What is Semantic Kernel?** [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) ([GitHub](https://github.com/microsoft/semantic-kernel)) is a powerful open-source SDK from Microsoft. It facilitates the combination of LLMs with popular programming languages like C#, Python, and Java. Semantic Kernel empowers developers to build sophisticated AI applications by seamlessly integrating AI services, data sources, and custom logic, accelerating the delivery of enterprise-grade AI solutions.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source platform dedicated to LLM observability. It offers robust tracing and monitoring capabilities tailored for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+
+<Callout type="info" emoji="ℹ️">
+_**Note:** This guide focuses on the Python implementation. However, the principles of this Langfuse integration apply to other languages supported by Semantic Kernel, including [C#](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-csharp) and [Java](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-java)._
+</Callout>
+
+## Getting Started
+
+Let's walk through a practical example of using Semantic Kernel and integrating it with Langfuse for comprehensive tracing.
+
+<Steps>
+### Step 1: Install Dependencies
+
+<Callout type="info" emoji="⚠️">
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, a previous version of this guide is available [here](https://github.com/langfuse/langfuse-docs/blob/4bba7985939469dab76b04513221995a203ac3c7/cookbook/integration_semantic_kernel.ipynb#L4)._
+</Callout>
+
+
+```python
+%pip install langfuse openlit semantic-kernel
+```
+
+
+### Step 2: Configure Langfuse SDK
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+
+# Your OpenAI key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ["OPENAI_CHAT_MODEL_ID"] = "gpt-4o"
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+    Langfuse client is authenticated and ready!
+
+
+### Step 3: Initialize OpenLit for Instrumentation
+
+Now, we initialize the [OpenLit instrumentation SDK](https://docs.openlit.io/latest/sdk-configuration). OpenLit automatically instruments Semantic Kernel and exports OpenTelemetry (OTel) spans to Langfuse.
+
+
+```python
+import openlit
+
+# Initialize OpenLIT instrumentation. The disable_batch flag is set to true to process traces immediately. Also set the langfuse tracer to use the langfuse tracer.
+openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
+```
+
+### Step 4: Basic Semantic Kernel Application
+
+Let's create a straightforward Semantic Kernel application. In this example, an Assistant agent will answer a user's question. This will serve as the foundation for demonstrating Langfuse tracing.
+
+
+```python
+from semantic_kernel import Kernel
+from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
+
+kernel = Kernel()
+
+kernel.add_service(
+    OpenAIChatCompletion(),
+)
+```
+
+
+```python
+from semantic_kernel.prompt_template import InputVariable, PromptTemplateConfig
+
+prompt = """{{$input}}
+Answer the question above.
+"""
+
+prompt_template_config = PromptTemplateConfig(
+    template=prompt,
+    name="summarize",
+    template_format="semantic-kernel",
+    input_variables=[
+        InputVariable(name="input", description="The user input", is_required=True),
+    ]
+)
+
+summarize = kernel.add_function(
+    function_name="summarizeFunc",
+    plugin_name="summarizePlugin",
+    prompt_template_config=prompt_template_config,
+)
+```
+
+### Step 5: Run the Application
+
+With the Semantic Kernel application set up, let's invoke it with a sample question and print the response. OpenLit will automatically capture this interaction and send the trace data to Langfuse.
+
+
+```python
+input_text = "What is Langfuse?"
+
+summary = await kernel.invoke(summarize, input=input_text)
+
+print(summary)
+```
+
+
+### Step 6: View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, inputs, outputs, and performance metrics. Below is an example screenshot illustrating how a trace appears in Langfuse:
+
+![Langfuse Trace of Semantic Kernel Application](https://langfuse.com/images/cookbook/integration-semantic-kernel/sematric-kernel-example-trace.png)
+
+For a live example, you can explore this public trace: [Langfuse Semantic Kernel Trace Example](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/51d7ea51af5cf9048f607ac6abb79b4f?timestamp=2025-06-04T08:17:14.026Z&display=details)
+</Steps>
+
+## Add Additional Attributes
+
+Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
+
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
+
+**→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
+
+
+```python
+with langfuse.start_as_current_span(
+    name="semantic-kernel-trace",
+    ) as span:
+    
+    # Run your application here
+    question = "What is Langfuse?"
+    response = await kernel.invoke(summarize, input=question)
+    response = response.value[0].items[0].text
+    print(response)
+
+    # Pass additional attributes to the span
+    span.update_trace(
+        input=question,
+        output=response,
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["agent", "semantic-kernel"],
+        metadata={"email": "user@langfuse.com"},
+        version="1.0.0"
+        )
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+## Score Traces and Spans
+
+Langfuse lets you can ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
+
+In the example below, we demonstrate how to score a specific span for `conciseness` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
+
+**→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
+
+
+```python
+with langfuse.start_as_current_span(
+    name="semantic-kernel-trace",
+    ) as span:
+    
+    # Run your application here
+    question = "What is Langfuse?"
+    response = await kernel.invoke(summarize, input=question)
+    response = response.value[0].items[0].text
+    print(response)
+    
+    # Score this specific span
+    span.score(name="conciseness", value=0.8, data_type="NUMERIC")
+
+    # Score the overall trace
+    span.score_trace(name="feedback", value="positive", data_type="CATEGORICAL")
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+## Manage Prompts with Langfuse
+
+Langfuse Prompt Management allows you to collaboratively create, version, and deploy prompts. You can manage prompts either through the Langfuse SDK or directly within the Langfuse UI. These managed prompts can then be fetched into your application at runtime.
+
+The code below illustrates fetching a prompt named `answer-question` from Langfuse, compiling it with an input variable (`country`), and then using this compiled prompt in the application. 
+
+**→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
+
+
+```python
+# Fetch the prompt from langfuse
+langfuse_prompt = langfuse.get_prompt(name="answer-question")
+
+# Compile the prompt with the input
+compiled_prompt = langfuse_prompt.compile(country = "France")
+
+# Run your application
+with langfuse.start_as_current_generation(
+    name="semantic-kernel-trace",
+    ) as generation:
+    
+    # Run your application here
+    print("question:", compiled_prompt)
+    response = await kernel.invoke(summarize, input=compiled_prompt)
+    response = response.value[0].items[0].text
+    print("response:", response)
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+    question: What is the capital of France?
+    response: The capital of France is Paris.
+
+
+## Dataset Experiments
+
+Offline evaluation using datasets is a critical part of the LLM development lifecycle. Langfuse supports this through Dataset Experiments. The typical workflow involves:
+
+1.  **Benchmark Dataset**: Defining a dataset with input prompts and their corresponding expected outputs.
+2.  **Application Run**: Running your LLM application against each item in the dataset.
+3.  **Evaluation**: Comparing the generated outputs against the expected results or using other scoring mechanisms (e.g., model-based evaluation) to assess performance.
+
+The following example demonstrates how to use a pre-existing dataset containing countries and their capitals to run an experiment.
+
+**→ Learn more about [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview).**
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Fetch an existing dataset
+dataset = langfuse.get_dataset(name="capital_cities_11")
+for item in dataset.items:
+    print(f"Input: {item.input["country"]}, Expected Output: {item.expected_output}")
+```
+
+    Input: USA, Expected Output: Washington, D.C.
+    Input: Egypt, Expected Output: Cairo
+    Input: South Africa, Expected Output: Pretoria
+    Input: Argentina, Expected Output: Buenos Aires
+    Input: South Korea, Expected Output: Seoul
+    Input: Canada, Expected Output: Ottawa
+    Input: India, Expected Output: New Delhi
+    Input: Japan, Expected Output: Tokyo
+    Input: Brazil, Expected Output: Brasília
+    Input: Spain, Expected Output: Madrid
+    Input: Italy, Expected Output: Rome
+
+
+Next, we iterate through each item in the dataset, run our Semantic Kernel application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
+
+The `item.run()` context manager is used to create a new trace for each dataset item processed in the experiment. Optionally you can score the dataset runs. 
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+dataset_name = "capital_cities_11"
+current_run_name = "capital_cities_run_02" # Identifies this specific evaluation run
+current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7},
+current_run_description="Evaluation run for Q&A model on June 4th"
+ 
+# Assume 'your_application' is your instrumented application function
+async def your_application(question):
+    with langfuse.start_as_current_span(name="semantic-kernel-trace") as span:
+
+        answer = await kernel.invoke(summarize, input=question)
+        answer = answer.value[0].items[0].text
+ 
+        # Update the trace with the input and output
+        span.update_trace(
+            input=  question,
+            output= answer,
+        )
+ 
+        return answer
+ 
+dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
+ 
+for item in dataset.items:
+    print(f"Running evaluation for item: {item.id} (Input: {item.input["country"]})")
+ 
+    # Use the item.run() context manager
+    with item.run(
+        run_name=current_run_name,
+        run_metadata=current_run_metadata,
+        run_description=current_run_description
+    ) as root_span: 
+        # All subsequent langfuse operations within this block are part of this trace.
+        generated_answer = await your_application(
+            question="What is the capital of " + item.input["country"] + "? Just answer with the name of the city.",
+        )
+ 
+        # Optionally, score the result against the expected output
+        if item.expected_output and generated_answer == item.expected_output:
+            root_span.score_trace(name="exact_match", value=1.0)
+        else:
+            root_span.score_trace(name="exact_match", value=0.0)
+ 
+print(f"\nFinished processing dataset '{dataset_name}' for run '{current_run_name}'.")
+```
+
+    Running evaluation for item: cm3mzglxi011hrnvfsumtkkzx (Input: USA)
+    Running evaluation for item: f7d97f1a-e2ba-4e32-9f85-974f81e36614 (Input: Egypt)
+    Running evaluation for item: b8cb5991-3384-48cd-9bd1-160d8233c687 (Input: South Africa)
+    Running evaluation for item: 96c7d3c8-9aa7-46c7-a4b9-85640694660b (Input: Argentina)
+    Running evaluation for item: 3de354e6-4c8d-4ea7-98ab-f2794233d6d7 (Input: South Korea)
+    Running evaluation for item: 5bb3cecd-ab56-4d53-ba46-eb27f0b82755 (Input: Canada)
+    Running evaluation for item: 46dc47db-6f77-42b0-b0cf-48cb42a3cb26 (Input: India)
+    Running evaluation for item: 5d08adbd-b013-4e00-81ea-2359544f81d7 (Input: Japan)
+    Running evaluation for item: 70384a90-3163-4eaa-9769-0218ad39375d (Input: Brazil)
+    Running evaluation for item: 7f03c37f-71ed-4e9a-8de8-573503a49710 (Input: Spain)
+    Running evaluation for item: d66bb581-4e76-4e41-9c89-2e9ec4ec32f8 (Input: Italy)
+    
+    Finished processing dataset 'capital_cities_11' for run 'capital_cities_run_02'.
+
+
+## Explore More Langfuse Features
+
+Langfuse offers more features to enhance your LLM development and observability workflow:
+
+- [LLM-as-a-Judge Evaluators](https://langfuse.com/docs/scores/model-based-evals)
+- [Custom Dashboards](https://langfuse.com/docs/analytics/custom-dashboards)
+- [LLM Playground](https://langfuse.com/docs/playground)
+- [Prompt Management](https://langfuse.com/docs/prompts/get-started)
+- [Prompt Experiments](https://langfuse.com/docs/datasets/prompt-experiments)
+- [More Integrations](https://langfuse.com/docs/integrations/overview)
