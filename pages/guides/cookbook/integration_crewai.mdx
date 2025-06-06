@@ -1,34 +1,32 @@
 ---
 source: Jupyter Notebook
-title: Observability for LlamaIndex with Langfuse Integration
-description: Discover how to integrate Langfuse with LlamaIndex for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
+title: Observability for CrewAI with Langfuse Integration
+description: Discover how to integrate Langfuse with CrewAI for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
 category: Integrations
 ---
 
-# Integrate Langfuse with LlamaIndex
+# Integrate Langfuse with CrewAI
 
-This notebook provides a step-by-step guide on integrating **Langfuse** with **LlamaIndex** to achieve observability and debugging for your LLM applications.
+This notebook provides a step-by-step guide on integrating **Langfuse** with **CrewAI** to achieve observability and debugging for your LLM applications.
 
-> **What is LlamaIndex?** [LlamaIndex](https://www.llamaindex.ai/) ([GitHub](https://github.com/run-llama/llama_index)) is an advanced "data framework" tailored for augmenting LLMs with private data. It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs.
+> **What is CrewAI?** [CrewAI](https://github.com/crewAIInc/crewAI) ([GitHub](https://github.com/crewAIInc/crewAI)) is a framework for orchestrating autonomous AI agents. CrewAI enables you to create AI teams where each agent has specific roles, tools, and goals, working together to accomplish complex tasks. Each member (agent) brings unique skills and expertise, collaborating seamlessly to achieve your objectives.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is a an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
 ## Getting Started
 
-Let's walk through a practical example of using LlamaIndex and integrating it with Langfuse for comprehensive tracing.
+Let's walk through a practical example of using CrewAI and integrating it with Langfuse for comprehensive tracing.
 
 <Steps>
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy LlamaIndex integration guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy CrewAI integration guide](https://github.com/langfuse/langfuse-docs/blob/26a3aa9e935a0325b463e3fa585772fd20c23642/cookbook/integration_crewai.ipynb)._
 </Callout>
 
 
-
 ```python
-%pip install langfuse openinference-instrumentation-llama-index llama-index-llms-openai llama-index -U
-
+%pip install langfuse crewai openlit
 ```
 
 ### Step 2: Configure Langfuse SDK
@@ -36,24 +34,20 @@ _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
+
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
-
 ```
-
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
-
 
 
 ```python
@@ -69,44 +63,62 @@ else:
 
 ```
 
-### Step 3: Initialize LlamaIndex Instrumentation
+### Step 3: Initialize CrewAI Instrumentation
 
-Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
+Now, we initialize the [OpenLit OpenTelemetry instrumentation SDK](https://docs.openlit.io/latest/integrations/crewai) to automatically capture CrewAI operations and export OpenTelemetry (OTel) spans to Langfuse.
 
 
 ```python
-from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+import openlit
 
-# Initialize LlamaIndex instrumentation
-LlamaIndexInstrumentor().instrument()
+# Initialize OpenLIT instrumentation. The disable_batch flag is set to true to process traces immediately. Also set the langfuse tracer to use the langfuse tracer.
+openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
 ```
 
-### Step 4: Basic LlamaIndex Application
+### Step 4: Basic CrewAI Application
 
-Let's create a straightforward LlamaIndex application. In this example, we'll create a simple query engine that can answer questions. This will serve as the foundation for demonstrating Langfuse tracing.
-
+Let's create a straightforward CrewAI application. In this example, we'll create a simple crew with agents that can collaborate to complete tasks. This will serve as the foundation for demonstrating Langfuse tracing.
 
 
 ```python
-from llama_index.llms.openai import OpenAI
+from crewai import Agent, Task, Crew
 
-llm = OpenAI(model="gpt-4o")
- 
-with langfuse.start_as_current_span(name="llama-index-trace"):
-    response = llm.complete("Hello, world!")
-    print(response)
- 
+# Define your agents with roles and goals
+coder = Agent(
+    role='Software developer',
+    goal='Write clear, concise code on demand',
+    backstory='An expert coder with a keen eye for software trends.',
+)
+
+# Create tasks for your agents
+task1 = Task(
+    description="Define the HTML for making a simple website with heading- Hello World! Langfuse monitors your CrewAI agent!",
+    expected_output="A clear and concise HTML code",
+    agent=coder
+)
+
+# Instantiate your crew
+crew = Crew(
+    agents=[coder],
+    tasks=[task1],
+)
+
+with langfuse.start_as_current_span(name="crewai-index-trace"):
+    result = crew.kickoff()
+    print(result)
+
 langfuse.flush()
 ```
 
 ### Step 5: View Traces in Langfuse
 
-After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics. The trace will show the complete flow from query processing through document retrieval to response generation.
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, agent operations, inputs, outputs, and performance metrics. The trace will show the complete flow from task processing through agent collaboration to response generation.
 
-![Example Trace in Langfuse](https://langfuse.com/images/cookbook/integration_llama-index/llama-index-example-trace.png)
+![CrewAI example trace in Langfuse](https://langfuse.com/images/cookbook/integration_crewai/crewai-example-trace.png)
 
-[Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/12ea412956f99347b0503c1144acd0ec?timestamp=2025-06-05T15:45:52.971Z&display=details)
+[Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a082747f3146d0083179421fdb8ad2b5?timestamp=2025-06-06T13%3A23%3A42.208Z&display=details)
 </Steps>
+
 
 ## Add Additional Attributes
 
@@ -120,21 +132,21 @@ The following code demonstrates how to start a custom span with `langfuse.start_
 
 ```python
 with langfuse.start_as_current_span(
-    name="llama-index-trace",
+    name="crewai-index-trace",
     ) as span:
     
     # Run your application here
-    question = "What is Langfuse?"
-    response = llm.complete(question)
-    print(response)
+    task_description = "Define the HTML for making a simple website with heading- Hello World! Langfuse monitors your CrewAI agent!"
+    result = crew.kickoff()
+    print(result)
 
     # Pass additional attributes to the span
     span.update_trace(
-        input=question,
-        output=response.text,
+        input=task_description,
+        output=str(result),
         user_id="user_123",
         session_id="session_abc",
-        tags=["rag", "llama-index"],
+        tags=["dev", "crewai"],
         metadata={"email": "user@langfuse.com"},
         version="1.0.0"
         )
@@ -156,13 +168,12 @@ In the example below, we demonstrate how to score a specific span for `relevance
 
 ```python
 with langfuse.start_as_current_span(
-    name="llama-index-trace",
+    name="crewai-index-trace",
     ) as span:
     
     # Run your application here
-    question = "What is Langfuse?"
-    response = llm.complete(question)
-    print(response)
+    result = crew.kickoff()
+    print(result)
     
     # Score this specific span
     span.score(name="relevance", value=0.9, data_type="NUMERIC")
@@ -179,7 +190,7 @@ langfuse.flush()
 
 Langfuse Prompt Management allows you to collaboratively create, version, and deploy prompts. You can manage prompts either through the Langfuse SDK or directly within the Langfuse UI. These managed prompts can then be fetched into your application at runtime.
 
-The code below illustrates fetching a prompt named `answer-question` from Langfuse, compiling it with an input variable (`country`), and then using this compiled prompt in the application. 
+The code below illustrates fetching a prompt named `crewai-task` from Langfuse, compiling it with an input variable (`task_type`), and then using this compiled prompt in the CrewAI application. 
 
 **→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
 
@@ -190,19 +201,32 @@ _**Note:** Linking the Langfuse Prompt and the Generation is currently not possi
 
 ```python
 # Fetch the prompt from langfuse
-langfuse_prompt = langfuse.get_prompt(name="answer-question")
+langfuse_prompt = langfuse.get_prompt(name = "crewai-task")
 
 # Compile the prompt with the input
-compiled_prompt = langfuse_prompt.compile(country = "France")
+compiled_prompt = langfuse_prompt.compile(task_type = "HTML website")
+
+# Create a task with the managed prompt
+task_with_prompt = Task(
+    description=compiled_prompt,
+    expected_output="A clear and concise HTML code",
+    agent=coder
+)
+
+# Update crew with new task
+crew_with_prompt = Crew(
+    agents=[coder],
+    tasks=[task_with_prompt],
+)
 
 # Run your application
 with langfuse.start_as_current_span(
-    name="llama-index-trace",
+    name="crewai-index-trace",
     ) as span:
     
     # Run your application here
-    response = llm.complete(compiled_prompt)
-    print(response)
+    result = crew_with_prompt.kickoff()
+    print(result)
 
 # Flush events in short-lived applications
 langfuse.flush()
@@ -217,7 +241,7 @@ Offline evaluation using datasets is a critical part of the LLM development life
 2.  **Application Run**: Running your LLM application against each item in the dataset.
 3.  **Evaluation**: Comparing the generated outputs against the expected results or using other scoring mechanisms (e.g., model-based evaluation) to assess performance.
 
-The following example demonstrates how to use a pre-existing dataset containing countries and their capitals to run an experiment.
+The following example demonstrates how to use a pre-existing dataset containing development tasks to run an experiment with your CrewAI application.
 
 **→ Learn more about [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview).**
 
@@ -234,39 +258,61 @@ for item in dataset.items:
     print(f"Input: {item.input['country']}, Expected Output: {item.expected_output}")
 
 ```
-Next, we iterate through each item in the dataset, run our LlamaIndex application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
+
+Next, we iterate through each item in the dataset, run our CrewAI application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
 
 The `item.run()` context manager is used to create a new trace for each dataset item processed in the experiment. Optionally you can score the dataset runs.
 
 
+
 ```python
-from langfuse import get_client
+from crewai import Agent, Task, Crew
  
-langfuse = get_client()
 dataset_name = "capital_cities_11"
-current_run_name = "capital_cities_run-llama-index_01" # Identifies this specific evaluation run
+current_run_name = "dev_tasks_run-crewai_03" # Identifies this specific evaluation run
 current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
-current_run_description="Evaluation run for Q&A model on June 4th"
+current_run_description="Evaluation run for CrewAI model on June 4th"
  
 # Assume 'your_application' is your instrumented application function
-def your_application(question):
-    with langfuse.start_as_current_span(name="llama-index-trace") as span:
+def your_application(country):
+    with langfuse.start_as_current_span(name="crewai-trace") as span:
 
-        response = llm.complete(question)
-        print(response)
- 
+        # Define your agents with roles and goals
+        geography_expert = Agent(
+            role='Geography Expert',
+            goal='Answer questions about geography',
+            backstory='A geography expert with a keen eye for details.',
+        )
+
+        # Create tasks for your agents
+        task1 = Task(
+            description = f"What is the capital of {country}?",
+            expected_output="The name of the capital in one word.",
+            agent=geography_expert
+        )
+
+        # Instantiate your crew
+        crew = Crew(
+            agents=[geography_expert],
+            tasks=[task1],
+        )
+
+        # Run the crew
+        result = crew.kickoff()
+        print(result)
+
         # Update the trace with the input and output
         span.update_trace(
-            input=question,
-            output=response.text,
+            input = task1.description,
+            output = result.raw,
         )
  
-        return response.text
+    return str(result)
  
 dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
  
 for item in dataset.items:
-    print(f"Running evaluation for item: {item.id} (Input: {item.input['country']})")
+    print(f"Running evaluation for item: {item.id} (Input: {item.input})")
  
     # Use the item.run() context manager
     with item.run(
@@ -276,7 +322,7 @@ for item in dataset.items:
     ) as root_span: 
         # All subsequent langfuse operations within this block are part of this trace.
         generated_answer = your_application(
-            question="What is the capital of " + item.input["country"] + "? Just answer with the name of the city.",
+            country=item.input["country"],
         )
  
         # Optionally, score the result against the expected output
@@ -288,6 +334,7 @@ for item in dataset.items:
 print(f"\nFinished processing dataset '{dataset_name}' for run '{current_run_name}'.")
 
 ```
+
 ## Explore More Langfuse Features
 
 Langfuse offers more features to enhance your LLM development and observability workflow:
@@ -298,3 +345,4 @@ Langfuse offers more features to enhance your LLM development and observability 
 - [Prompt Management](https://langfuse.com/docs/prompts/get-started)
 - [Prompt Experiments](https://langfuse.com/docs/datasets/prompt-experiments)
 - [More Integrations](https://langfuse.com/docs/integrations/overview)
+

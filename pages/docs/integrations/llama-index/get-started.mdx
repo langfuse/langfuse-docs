@@ -146,7 +146,7 @@ langfuse.flush()
 
 ## Score Traces and Spans
 
-Langfuse lets you can ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
+Langfuse lets you ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
 
 In the example below, we demonstrate how to score a specific span for `relevance` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
 
@@ -183,6 +183,9 @@ The code below illustrates fetching a prompt named `answer-question` from Langfu
 
 **→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
 
+<Callout type="info" emoji="🔗">
+_**Note:** Linking the Langfuse Prompt and the Generation is currently not possible. This is on our roadmap and we are tracking this [here](https://github.com/orgs/langfuse/discussions/7180)._
+</Callout>
 
 
 ```python
@@ -242,7 +245,7 @@ from langfuse import get_client
 langfuse = get_client()
 dataset_name = "capital_cities_11"
 current_run_name = "capital_cities_run-llama-index_01" # Identifies this specific evaluation run
-current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7},
+current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
 current_run_description="Evaluation run for Q&A model on June 4th"
  
 # Assume 'your_application' is your instrumented application function

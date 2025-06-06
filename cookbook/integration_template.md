@@ -1,33 +1,28 @@
----
-source: Jupyter Notebook
-title: Observability for LlamaIndex with Langfuse Integration
-description: Discover how to integrate Langfuse with LlamaIndex for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
-category: Integrations
----
+<!-- NOTEBOOK_METADATA source: "Jupyter Notebook" title: "Observability for FRAMEWORK with Langfuse Integration" description: "Discover how to integrate Langfuse with FRAMEWORK for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today." category: "Integrations" -->
 
-# Integrate Langfuse with LlamaIndex
+# Integrate Langfuse with FRAMEWORK
 
-This notebook provides a step-by-step guide on integrating **Langfuse** with **LlamaIndex** to achieve observability and debugging for your LLM applications.
+This notebook provides a step-by-step guide on integrating **Langfuse** with **FRAMEWORK** to achieve observability and debugging for your LLM applications.
 
-> **What is LlamaIndex?** [LlamaIndex](https://www.llamaindex.ai/) ([GitHub](https://github.com/run-llama/llama_index)) is an advanced "data framework" tailored for augmenting LLMs with private data. It streamlines the integration of diverse data sources and formats (APIs, PDFs, docs, SQL, etc.) through versatile data connectors and structures data into indices and graphs for LLM compatibility. The platform offers a sophisticated retrieval/query interface for enriching LLM inputs with context-specific outputs.
+> **What is FRAMEWORK?** [FRAMEWORK](https://www.FRAMEWORK.com) ([GitHub](https://github.com/FRAMEWORK/FRAMEWORK)) is ...
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is a an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
 ## Getting Started
 
-Let's walk through a practical example of using LlamaIndex and integrating it with Langfuse for comprehensive tracing.
+Let's walk through a practical example of using FRAMEWORK and integrating it with Langfuse for comprehensive tracing.
 
-<Steps>
+<!-- STEPS_START -->
 ### Step 1: Install Dependencies
 
-<Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy LlamaIndex integration guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
-</Callout>
+<!-- CALLOUT_START type: "info" emoji: "⚠️" -->
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy FRAMEWORK integration guide](https://langfuse.com/docs/integrations/FRAMEWORK)._
+<!-- CALLOUT_END -->
 
 
 
 ```python
-%pip install langfuse openinference-instrumentation-llama-index llama-index-llms-openai llama-index -U
+%pip install langfuse FRAMEWORK FRAMEWORK-INSTRUMENTATION -U
 
 ```
 
@@ -49,7 +44,6 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
-
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
@@ -69,31 +63,31 @@ else:
 
 ```
 
-### Step 3: Initialize LlamaIndex Instrumentation
+### Step 3: Initialize FRAMEWORK Instrumentation
 
-Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
+Now, we initialize the [FRAMEWORK-INSTRUMENTATION-MODULE](https://). This third-party instrumentation automatically captures FRAMEWORK operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
 
 ```python
-from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+from openinference.instrumentation.FRAMEWORK import FRAMEWORKInstrumentor
 
-# Initialize LlamaIndex instrumentation
-LlamaIndexInstrumentor().instrument()
+# Initialize FRAMEWORK instrumentation
+FRAMEWORKInstrumentor().instrument()
 ```
 
-### Step 4: Basic LlamaIndex Application
+### Step 4: Basic FRAMEWORK Application
 
-Let's create a straightforward LlamaIndex application. In this example, we'll create a simple query engine that can answer questions. This will serve as the foundation for demonstrating Langfuse tracing.
+Let's create a straightforward FRAMEWORK application. In this example, we'll create a simple query engine that can answer questions. This will serve as the foundation for demonstrating Langfuse tracing.
 
 
 
 ```python
-from llama_index.llms.openai import OpenAI
+from FRAMEWORK import FRAMEWORK
 
-llm = OpenAI(model="gpt-4o")
+llm = FRAMEWORK(model="gpt-4o")
  
-with langfuse.start_as_current_span(name="llama-index-trace"):
-    response = llm.complete("Hello, world!")
+with langfuse.start_as_current_span(name="FRAMEWORK-index-trace"):
+    response = FRAMEWORK.complete("Hello, world!")
     print(response)
  
 langfuse.flush()
@@ -106,7 +100,7 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 ![Example Trace in Langfuse](https://langfuse.com/images/cookbook/integration_llama-index/llama-index-example-trace.png)
 
 [Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/12ea412956f99347b0503c1144acd0ec?timestamp=2025-06-05T15:45:52.971Z&display=details)
-</Steps>
+<!-- STEPS_END -->
 
 ## Add Additional Attributes
 
@@ -120,12 +114,12 @@ The following code demonstrates how to start a custom span with `langfuse.start_
 
 ```python
 with langfuse.start_as_current_span(
-    name="llama-index-trace",
+    name="FRAMEWORK-index-trace",
     ) as span:
     
     # Run your application here
     question = "What is Langfuse?"
-    response = llm.complete(question)
+    response = FRAMEWORK.complete(question)
     print(response)
 
     # Pass additional attributes to the span
@@ -134,7 +128,7 @@ with langfuse.start_as_current_span(
         output=response.text,
         user_id="user_123",
         session_id="session_abc",
-        tags=["rag", "llama-index"],
+        tags=["dev", "FRAMEWORK"],
         metadata={"email": "user@langfuse.com"},
         version="1.0.0"
         )
@@ -156,12 +150,12 @@ In the example below, we demonstrate how to score a specific span for `relevance
 
 ```python
 with langfuse.start_as_current_span(
-    name="llama-index-trace",
+    name="FRAMEWORK-index-trace",
     ) as span:
     
     # Run your application here
     question = "What is Langfuse?"
-    response = llm.complete(question)
+    response = FRAMEWORK.complete(question)
     print(response)
     
     # Score this specific span
@@ -183,9 +177,9 @@ The code below illustrates fetching a prompt named `answer-question` from Langfu
 
 **→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
 
-<Callout type="info" emoji="🔗">
+<!-- CALLOUT_START type: "info" emoji: "🔗" -->
 _**Note:** Linking the Langfuse Prompt and the Generation is currently not possible. This is on our roadmap and we are tracking this [here](https://github.com/orgs/langfuse/discussions/7180)._
-</Callout>
+<!-- CALLOUT_END -->
 
 
 ```python
@@ -197,7 +191,7 @@ compiled_prompt = langfuse_prompt.compile(country = "France")
 
 # Run your application
 with langfuse.start_as_current_span(
-    name="llama-index-trace",
+    name="FRAMEWORK-index-trace",
     ) as span:
     
     # Run your application here
@@ -234,7 +228,7 @@ for item in dataset.items:
     print(f"Input: {item.input['country']}, Expected Output: {item.expected_output}")
 
 ```
-Next, we iterate through each item in the dataset, run our LlamaIndex application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
+Next, we iterate through each item in the dataset, run our FRAMEWORK application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
 
 The `item.run()` context manager is used to create a new trace for each dataset item processed in the experiment. Optionally you can score the dataset runs.
 
@@ -244,13 +238,13 @@ from langfuse import get_client
  
 langfuse = get_client()
 dataset_name = "capital_cities_11"
-current_run_name = "capital_cities_run-llama-index_01" # Identifies this specific evaluation run
+current_run_name = "capital_cities_run-FRAMEWORK_01" # Identifies this specific evaluation run
 current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
 current_run_description="Evaluation run for Q&A model on June 4th"
  
 # Assume 'your_application' is your instrumented application function
 def your_application(question):
-    with langfuse.start_as_current_span(name="llama-index-trace") as span:
+    with langfuse.start_as_current_span(name="FRAMEWORK-trace") as span:
 
         response = llm.complete(question)
         print(response)
