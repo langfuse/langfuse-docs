@@ -119,7 +119,7 @@ Now, we will add then [Langfuse callback handler for LangChain](https://langfuse
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
@@ -177,7 +177,7 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 class State(TypedDict):
   messages: Annotated[list, add_messages]
@@ -389,7 +389,7 @@ Add [Langfuse handler](https://langfuse.com/docs/integrations/langchain/tracing)
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
@@ -609,7 +609,7 @@ graph = graph_builder.compile()
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
