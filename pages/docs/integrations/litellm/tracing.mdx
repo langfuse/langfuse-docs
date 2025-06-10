@@ -79,8 +79,16 @@ You can add additional Langfuse attributes to the requests in order to group req
 
 Instead of the proxy, you can also use the native LiteLLM Python client. You can find more in-depth documentation in the [LiteLLM docs](https://litellm.vercel.app/docs/observability/langfuse_integration).
 
+<Callout type="warning">
+  LiteLLM relies on the <strong>Langfuse Python SDK v2</strong>. It is currently
+  <strong>not compatible</strong> with the newer
+  <strong>[Python SDK v3](/docs/sdk/python/sdk-v3)</strong>. Please refer to the
+  [v2 documentation](/docs/sdk/python/low-level-sdk) and pin the SDK version
+  during installation:
+</Callout>
+
 ```
-pip install langfuse>=2.0.0 litellm
+pip install "langfuse>=2,<3" litellm
 ```
 
 ```python filename="main.py"
