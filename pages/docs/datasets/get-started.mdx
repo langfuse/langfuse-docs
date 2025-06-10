@@ -121,7 +121,50 @@ Optionally, the output of the application can be evaluated to compare different 
 - Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
 
 <div className="mt-6" />
-<Tabs items={["Python (decorator)", "Python (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)", "Vercel AI SDK"]}>
+<Tabs items={["Python SDK v3", "Python SDK v2 (decorator)", "Python SDK v2 (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)", "Vercel AI SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Use the item.run() context manager for automatic trace linking
+    with item.run(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as root_span:
+        # All operations within this block are part of the trace for this dataset item
+        
+        # Call your application logic - this can use any combination of decorators, 
+        # context managers, or manual observations
+        with langfuse.start_as_current_generation(
+            name="llm-call",
+            model="gpt-4o",
+            input=item.input
+        ) as generation:
+            # Your LLM application logic here
+            output = my_llm_application.run(item.input)
+            generation.update(output=output)
+
+        # Optionally, score the result against the expected output
+        root_span.score_trace(
+            name="<example_eval>",
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+_See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTelemetry-based SDK._
+
+</Tab>
 <Tab>
 
 ```python
@@ -188,7 +231,7 @@ for item in dataset.items:
 langfuse.flush()
 ```
 
-_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
+_See [Python SDK v2 low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
 
 </Tab>
 <Tab>

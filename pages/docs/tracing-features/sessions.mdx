@@ -17,22 +17,16 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 When using the `@observe()` decorator:
 
 ```python
 from langfuse import observe, get_client
 
-langfuse = get_client()
-
 @observe()
 def process_request():
+    # Get the client
+    langfuse = get_client()
+
     # Add to the current trace
     langfuse.update_current_trace(session_id="your-session-id")
 
@@ -43,9 +37,9 @@ def process_request():
 When creating spans directly:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # You can set the session_id when creating the root span
 with langfuse.start_as_current_span(
@@ -259,11 +253,11 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 <Callout type="info">
 
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a community-maintained OTEL-based integration instead.
+The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
 
 </Callout>
 
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `session_id` via the `instrumentor.observe()` context manager:
+When using the [LlamaIndex Integration](/docs/integrations/llama-index/deprecated/get-started), set the `session_id` via the `instrumentor.observe()` context manager:
 
 ```python
 from langfuse.llama_index import LlamaIndexInstrumentor
@@ -278,7 +272,7 @@ with instrumentor.observe(session_id="my-session"):
 instrumentor.flush()
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the session_id via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated/get-started#interoperability-with-langfuse-sdk)), set the session_id via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -322,7 +316,7 @@ The LlamaIndex callback integration is not supported in the Python SDK v3. Pleas
 
 </Callout>
 
-When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated-llama-index-callback), set the `session_id` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `session_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated-llama-index-callback#set-trace-params).
+When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback), set the `session_id` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `session_id`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback#set-trace-params).
 
 ```python
 from llama_index.core import Settings
@@ -338,7 +332,7 @@ langfuse_callback_handler.set_trace_params(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated-llama-index-callback#interoperability-with-langfuse-sdk)), set the session_id via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback#interoperability-with-langfuse-sdk)), set the session_id via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe

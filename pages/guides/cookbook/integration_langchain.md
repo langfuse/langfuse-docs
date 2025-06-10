@@ -3,7 +3,7 @@ description: Cookbook with examples of the Langfuse Integration for Langchain (P
 category: Integrations
 ---
 
-# Cookbook: Langchain Integration
+# Cookbook: Langchain Integration (SDK v2)
 
 This is a cookbook with examples of the Langfuse Integration for Langchain (Python).
 

@@ -8,13 +8,6 @@ Tags allow you to categorize and filter traces. You can tag traces (1) when they
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)" ]}>
 <Tab>
-
-<Callout type="info">
-
-The v3 SDK is currently in **beta**. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for more details.
-
-</Callout>
-
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
@@ -32,8 +25,8 @@ def my_function():
 When creating spans or generations directly:
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Add tags when creating the root span
 with langfuse.start_as_current_span(
@@ -233,7 +226,7 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 <Tab>
 
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `tags` via the `instrumentor.observe()` context manager:
+When using the [LlamaIndex Integration](/docs/integrations/llama-index/deprecated/get-started), set the `tags` via the `instrumentor.observe()` context manager:
 
 ```python
 from langfuse.llama_index import LlamaIndexInstrumentor
@@ -248,7 +241,7 @@ with instrumentor.observe(tags=["tag-1", "tag-2"]):
 instrumentor.flush()
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated/get-started#interoperability-with-langfuse-sdk)), set the tags via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -286,7 +279,7 @@ def llama_index_fn(question: str):s
 
 <Tab>
 
-When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated-llama-index-callback), set the `tags` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated-llama-index-callback#set-trace-params).
+When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback), set the `tags` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `tags`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback#set-trace-params).
 
 ```python
 from llama_index.core import Settings
@@ -302,7 +295,7 @@ langfuse_callback_handler.set_trace_params(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated-llama-index-callback#interoperability-with-langfuse-sdk)), set the tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback#interoperability-with-langfuse-sdk)), set the tags via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe

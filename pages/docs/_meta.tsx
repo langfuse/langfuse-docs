@@ -63,6 +63,7 @@ export default {
     title: "More",
   },
   rbac: "Access Control (RBAC)",
+  "audit-logs": "Audit Logs",
   "data-retention": "Data Retention",
   "data-deletion": "Data Deletion",
   roadmap: "Roadmap",
