@@ -5,25 +5,12 @@ description: Learn how to use Langfuse for open source observability/tracing in 
 category: Integrations
 ---
 
-# Cookbook: LangGraph Integration (SDK v2)
+# Cookbook: LangGraph Integration
 
 
 ## What is LangGraph?
 
 [LangGraph](https://langchain-ai.github.io/langgraph/) is an open-source framework by the LangChain team for building complex, stateful, multi-agent applications using large language models (LLMs). LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
-
-<br>
-
-
-<div style="position: relative; padding-top: 69.85769728331177%;">
-  <iframe
-    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/dbe2ea8e8d64f27126a3734fa51cd0e7/iframe?muted=true&loop=true&autoplay=true&poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2Fdbe2ea8e8d64f27126a3734fa51cd0e7%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false"
-    loading="lazy"
-    style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
-    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-    allowfullscreen="true"
-  ></iframe>
-</div>
 
 ## Goal of this Cookbook
 
@@ -40,34 +27,48 @@ This cookbook demonstrates how [Langfuse](https://langfuse.com/docs) helps to de
 
 ## Initialize Langfuse
 
-**Note:** You need to run at least Python 3.11 ([GitHub Issue](https://github.com/langfuse/langfuse/issues/1926)).
-
 Initialize the Langfuse client with your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from the project settings in the Langfuse UI and add them to your environment.
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse SDK v2 and will be updated shortly. Please refere to [this guide](https://langfuse.com/docs/integrations/langchain/tracing) to see how to use the LangChain Callback handler with the OTel Python SDK v3._
+_**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of Python SDK v2, please refer to our [legacy LangGraph integration guide](https://github.com/langfuse/langfuse-docs/blob/662509b3296daddcddb292f14b10a62e7c39407d/cookbook/integration_langgraph.ipynb)._
+</Callout>
+
+<Callout type="info" emoji="ℹ️">
+_**Note:** You need to run at least Python 3.11 ([GitHub Issue](https://github.com/langfuse/langfuse/issues/1926))._
 </Callout>
 
 
 ```python
-# This notebook utilizes the Langfuse SDK v2 and will be updated shortly.
-%pip install "langfuse<=2.60.8"
-
-%pip install langchain langgraph langchain_openai langchain_community
+%pip install langfuse langchain langgraph langchain_openai langchain_community
 ```
 
 
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # your openai key
-os.environ["OPENAI_API_KEY"] = "***"
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
 ## Example 1: Simple chat app with LangGraph
@@ -126,7 +127,7 @@ Now, we will add then [Langfuse callback handler for LangChain](https://langfuse
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
@@ -136,12 +137,9 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
     print(s)
 ```
 
-    {'chatbot': {'messages': [AIMessage(content='Langfuse is a tool designed to help developers monitor and observe the performance of their Large Language Model (LLM) applications. It provides detailed insights into how these applications are functioning, allowing for better debugging, optimization, and overall management. Langfuse offers features such as tracking key metrics, visualizing data, and identifying potential issues in real-time, making it easier for developers to maintain and improve their LLM-based solutions.', response_metadata={'token_usage': {'completion_tokens': 86, 'prompt_tokens': 13, 'total_tokens': 99}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-9a0c97cb-ccfe-463e-902c-5a5900b796b4-0', usage_metadata={'input_tokens': 13, 'output_tokens': 86, 'total_tokens': 99})]}}
-
-
 ### View traces in Langfuse
 
-Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d109e148-d188-4d6e-823f-aac0864afbab
+Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/85b0c53c4414f22ed8bfc9eb35f917c4
 
 
 ![Trace view of chat app in Langfuse](https://langfuse.com/images/cookbook/integration-langgraph/integration_langgraph_chatapp_trace.png)
@@ -184,7 +182,7 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 class State(TypedDict):
   messages: Annotated[list, add_messages]
@@ -219,7 +217,7 @@ graph = graph_builder.compile().with_config({"callbacks": [langfuse_handler]})
 
 
 ```python
-%pip install langgraph langchain langchain_openai langchain_experimental pandas wikipedia
+%pip install langfuse langgraph langchain langchain_openai langchain_experimental pandas wikipedia
 ```
 
 ### Create tools
@@ -396,7 +394,7 @@ Add [Langfuse handler](https://langfuse.com/docs/integrations/langchain/tracing)
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
@@ -409,14 +407,6 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "How does photosynt
     print("----")
 ```
 
-    {'supervisor': {'next': 'Researcher'}}
-    ----
-    {'Researcher': {'messages': [HumanMessage(content="Photosynthesis is a biological process by which photosynthetic organisms, such as most plants, algae, and cyanobacteria, convert light energy, usually from sunlight, into chemical energy. This energy is stored in the form of organic compounds like sugars, which fuel their metabolism.\n\n### Key Points of Photosynthesis:\n\n1. **Light Absorption**:\n    - The process begins when light energy is absorbed by reaction centers, which are proteins containing photosynthetic pigments (e.g., chlorophyll in plants).\n\n2. **Light-Dependent Reactions**:\n    - In these reactions, light energy is used to strip electrons from substances like water, producing oxygen gas.\n    - The hydrogen from water is used to create NADPH (reduced nicotinamide adenine dinucleotide phosphate) and ATP (adenosine triphosphate).\n\n3. **Light-Independent Reactions (Calvin Cycle)**:\n    - These reactions do not require light and occur in the stroma of chloroplasts.\n    - Carbon dioxide is incorporated into organic compounds like ribulose bisphosphate (RuBP).\n    - Using ATP and NADPH from the light-dependent reactions, these compounds are reduced to form carbohydrates such as glucose.\n\n### Types of Photosynthesis:\n- **Oxygenic Photosynthesis**:\n    - Produces oxygen and is performed by plants, algae, and cyanobacteria.\n- **Anoxygenic Photosynthesis**:\n    - Does not produce oxygen and is performed by some bacteria using substances like hydrogen sulfide instead of water.\n\n### Importance of Photosynthesis:\n- It produces and maintains the oxygen content of the Earth's atmosphere.\n- Supplies most of the biological energy necessary for complex life.\n- Captures carbon dioxide from the atmosphere, playing a critical role in climate processes.\n\n### Evolution and Discovery:\n- The first photosynthetic organisms used reducing agents other than water, such as hydrogen or hydrogen sulfide.\n- Cyanobacteria, which evolved later, contributed to the oxygenation of the Earth.\n- Photosynthesis was discovered in 1779 by Jan Ingenhousz, who demonstrated that plants need light to perform the process.\n\n### Global Impact:\n- The average rate of energy captured by global photosynthesis is about 130 terawatts.\n- Photosynthetic organisms convert around 100–115 billion tons of carbon into biomass each year.\n\nPhotosynthesis is crucial for life on Earth, providing the oxygen we breathe and the energy base for nearly all ecosystems.", name='Researcher')]}}
-    ----
-    {'supervisor': {'next': 'FINISH'}}
-    ----
-
-
 
 ```python
 # Add Langfuse handler as callback: config={"callbacks": [langfuse_handler]}
@@ -426,20 +416,12 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "What time is it?")
     print("----")
 ```
 
-    {'supervisor': {'next': 'CurrentTime'}}
-    ----
-    {'CurrentTime': {'messages': [HumanMessage(content='The current time is 9:34 AM on July 25, 2024.', name='CurrentTime')]}}
-    ----
-    {'supervisor': {'next': 'FINISH'}}
-    ----
-
-
 ### See traces in Langfuse
 
 Example traces in Langfuse:
 
-1. [How does photosynthesis work?](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)
-2. [What time is it?](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ee5d5828-e983-4372-8e7f-04dfbe3e19d4)
+1. [How does photosynthesis work?](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)
+2. [What time is it?](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/3a69fe4998df50d42054f8944bd6a8d9)
 
 ![Trace view of multi agent in Langfuse](https://langfuse.com/images/cookbook/integration-langgraph/integration_langgraph_multiagent_traces.png)
 
@@ -473,58 +455,55 @@ graph TD;
 
 ## Adding scores to traces as scores
 
-[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. You can create them via our annotation workflow in the Langfuse UI, run model-based evaluation or ingest via the SDK as we do it in this example.
+[Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. They enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
 
-You can attach a score to the current observation context by calling `langfuse_context.score_current_observation`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse_context.score_current_trace`.
+In the example below, we demonstrate how to score a specific span for `relevance` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
 
-To get the context of the current observation, we use the [`observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) and apply it to the `main()` function. By default it captures:
-
-*   nesting via context vars
-*   timings/durations
-*   function name
-*   args and kwargs as input dict
-*   returned values as output
-
-The decorator will automatically create a trace for the top-level function and spans for any nested functions.
-
+**→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
-
-# Langfuse observe() decorator to automatically create a trace for the top-level function and spans for any nested functions.
-@observe()
-def research_agent(user_message):
-    # Get callback handler scoped to this observed function
-    lf_handler = langfuse_context.get_current_langchain_handler()
-
-    # Trace langchain run via the Langfuse CallbackHandler
-    response = graph_2.invoke({"messages": [HumanMessage(content=user_message)]},
-                        config={"callbacks": [lf_handler]})
-
-    # Score the entire trace e.g. to add user feedback
-    langfuse_context.score_current_trace(
-        name = "user-explicit-feedback",
-        value = 1,
-        comment = "The time is correct!"
-        )
-
-    return response
-research_agent("What time is it?")
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Option 1: Use the yielded span object from the context manager
+with langfuse.start_as_current_span(
+    name="langgraph-request") as span:
+    # ... LangGraph execution ...
+ 
+    # Score using the span object
+    span.score_trace(
+        name="user-feedback",
+        value=1,
+        data_type="NUMERIC",
+        comment="This was correct, thank you"
+    )
+ 
+# Option 2: Use langfuse.score_current_trace() if still in context
+with langfuse.start_as_current_span(name="langgraph-request") as span:
+    # ... LangGraph execution ...
+ 
+    # Score using current context
+    langfuse.score_current_trace(
+        name="user-feedback",
+        value=1,
+        data_type="NUMERIC"
+    )
+ 
+# Option 3: Use create_score() with trace ID (when outside context)
+langfuse.create_score(
+    trace_id=predefined_trace_id,
+    name="user-feedback",
+    value=1,
+    data_type="NUMERIC",
+    comment="This was correct, thank you"
+)
 ```
-
-
-
-
-    {'messages': [HumanMessage(content='What time is it?'),
-      HumanMessage(content='The current date and time is 2024-07-25T09:54:57.', name='CurrentTime')],
-     'next': 'FINISH'}
-
-
 
 ### View trace with score in Langfuse
 
-Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/23338c52-350d-4efb-89ca-82d759828b1d
+Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e60a078b828d4fdc7ea22c73193b0fe4
 
 ![Trace view including added score](https://langfuse.com/images/cookbook/integration-langgraph/integration_langgraph_score.png)
 
@@ -542,10 +521,9 @@ In this example, we create a system prompt for an assistant that translates ever
 
 
 ```python
-from langfuse import Langfuse
-
-# Initialize Langfuse client (prompt management)
-langfuse = Langfuse()
+from langfuse import get_client
+ 
+langfuse = get_client()
 
 langfuse.create_prompt(
     name="translator_system-prompt",
@@ -553,13 +531,6 @@ langfuse.create_prompt(
     labels=["production"]
 )
 ```
-
-
-
-
-    <langfuse.model.TextPromptClient at 0x7f68ade50fa0>
-
-
 
 ![View prompt in Langfuse UI](https://langfuse.com/images/cookbook/integration-langgraph/integration_langgraph_prompt_example.png)
 
@@ -577,7 +548,7 @@ langchain_system_prompt = langfuse_system_prompt.get_langchain_prompt()
 print(langchain_system_prompt)
 ```
 
-    You are a translator that translates every input text into Spanish. 
+    You are a translator that translates every input text into Spanish.
 
 
 Now we can use the new system prompt string to update our assistant.
@@ -616,7 +587,7 @@ graph = graph_builder.compile()
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
@@ -627,24 +598,6 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
     print(s)
 ```
 
-    {'chatbot': {'messages': [AIMessage(content='¿Qué es Langfuse?', response_metadata={'token_usage': {'completion_tokens': 6, 'prompt_tokens': 30, 'total_tokens': 36}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-1f419fe3-73e2-4413-aa6c-96560bbd09c8-0', usage_metadata={'input_tokens': 30, 'output_tokens': 6, 'total_tokens': 36})]}}
-
-
-## Add session and user id to LangGraph traces
-
-You can add a session and user id to LangGraph traces while initializing the Langfuse CallbackHandler to see how different users interact with your application.
-
-
-```python
-# Create a callback handler with a session and user id
-langfuse_handler = CallbackHandler(session_id="conversation_chain",
-                                   user_id="user_123")
-```
-
 ## Add custom spans to a LangGraph trace
 
 Sometimes it is helpful to add custom spans to a LangGraph trace. This [GitHub discussion thread](https://github.com/orgs/langfuse/discussions/2988#discussioncomment-11634600) provides an example of how to do this.
-
-## Feedback
-
-If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your idea with the community on [Discord](https://langfuse.com/discord).

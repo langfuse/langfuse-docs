@@ -16,6 +16,18 @@ This guide covers **online** and **offline** evaluation metrics used by teams to
 - Monitoring costs and performance in real-time
 - Improving reliability and safety through continuous feedback
 
+<br>
+
+<div style="position: relative; padding-top: 69.85769728331177%;">
+  <iframe
+    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/3fae2f3517ce426d0f02b090d4258dc6/iframe?muted=true&loop=true&autoplay=true&poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2F3fae2f3517ce426d0f02b090d4258dc6%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false"
+    loading="lazy"
+    style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
+    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+    allowfullscreen="true"
+  ></iframe>
+</div>
+
 ## Step 0: Install the Required Libraries
 
 Below we install the `langgraph` library, `langfuse` and the Hugging Face `datasets` library
@@ -105,9 +117,8 @@ for s in graph.stream(
     print(s)
 ```
 
-```text
     {'chatbot': {'messages': [AIMessage(content='Langfuse is a tool designed to help developers and businesses monitor and debug applications that use large language models (LLMs). It provides observability features specifically tailored for AI-driven applications, allowing users to track, analyze, and optimize the performance of their language model integrations. Langfuse offers capabilities such as logging interactions, visualizing data flows, and identifying issues in real-time, which can be crucial for maintaining the reliability and efficiency of applications that rely on complex AI models.', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 96, 'prompt_tokens': 13, 'total_tokens': 109, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-2024-08-06', 'system_fingerprint': 'fp_90d33c15d4', 'id': 'chatcmpl-BEbNebiL1dVZmqIm2G2mgnLHO8Wfw', 'finish_reason': 'stop', 'logprobs': None}, id='run-16477a3d-365a-4551-8ea2-e86516d49041-0', usage_metadata={'input_tokens': 13, 'output_tokens': 96, 'total_tokens': 109, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}})]}}
-```
+
 
 Check your [Langfuse Traces Dashboard](https://cloud.langfuse.com/traces) to confirm that the spans and logs have been recorded.
 
@@ -259,9 +270,9 @@ email_graph.add_node("notify_mr_wayne", notify_mr_wayne) # same logic
 
 
 
-```text
+
     <langgraph.graph.state.StateGraph at 0x112007890>
-```
+
 
 
 
@@ -290,9 +301,9 @@ email_graph.add_edge("notify_mr_wayne", END) # after notifyinf Me wayne, we can 
 
 
 
-```text
+
     <langgraph.graph.state.StateGraph at 0x112007890>
-```
+
 
 
 
@@ -350,7 +361,7 @@ spam_result = compiled_graph.invoke(
 ) 
 ```
 
-```text
+    
     Processing legitimate email...
     Alfred is processing an email from Joker with subject: Found you Batman ! 
     ham
@@ -379,7 +390,7 @@ spam_result = compiled_graph.invoke(
     spam
     Alfred has marked the email as spam.
     The email has been moved to the spam folder.
-```
+
 
 ### Trace Structure
 
@@ -517,13 +528,13 @@ spam_result = compiled_graph.invoke(
 ) 
 ```
 
-```text
+    
     Processing spam email...
     Alfred is processing an email from Crypto bro with subject: The best investment of 2025
     spam
     Alfred has marked the email as spam.
     The email has been moved to the spam folder.
-```
+
 
 You can see that the answer of this example is judged as "not toxic".
 
@@ -560,7 +571,6 @@ print("First few rows of search-dataset:")
 print(df.head())
 ```
 
-```text
     First few rows of search-dataset:
                                          id  \
     0  20caf138-0c81-4ef9-be60-fe919e0d68d4   
@@ -585,7 +595,7 @@ print(df.head())
 
 
 Next, we create a dataset entity in Langfuse to track the runs. Then, we add each item from the dataset to the system.
-```
+
 
 ```python
 from langfuse import Langfuse
@@ -604,9 +614,11 @@ langfuse.create_dataset(
 )
 ```
 
-```text
+
+
+
     Dataset(id='cm8n3xati009sad07js1umaa1', name='qa-dataset_langgraph-agent', description='q&a dataset uploaded from Hugging Face', metadata={'date': '2025-03-21', 'type': 'benchmark'}, project_id='cloramnkj0002jz088vzn1ja4', created_at=datetime.datetime(2025, 3, 24, 13, 33, 3, 366000, tzinfo=datetime.timezone.utc), updated_at=datetime.datetime(2025, 3, 24, 13, 33, 3, 366000, tzinfo=datetime.timezone.utc))
-```
+
 
 
 
