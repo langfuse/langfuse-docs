@@ -19,7 +19,7 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
   const posts = useMemo(
     () =>
       (getPagesUnderRoute("/blog") as Array<Page & { frontMatter: any }>)
-        .filter((page) => page.frontMatter?.showInBlogIndex !== false)
+        .filter((page) => page.frontMatter?.showInBlogIndex !== false && page.frontMatter?.date)
         .sort(
           (a, b) =>
             new Date(b.frontMatter.date).getTime() -

@@ -29,7 +29,7 @@ export const BlogHeader = ({
         />
       )}
       <span className="text-primary/60">{date ?? frontMatter.date}</span>
-      <h1 className="font-bold leading-snug text-balance">{title}</h1>
+      <h1 className="font-bold leading-snug text-balance text-foreground">{title}</h1>
       <p className="text-primary/60 text-xl text-balance">{description}</p>
       <Authors authors={authors} />
     </div>
