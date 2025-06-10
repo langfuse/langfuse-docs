@@ -1,4 +1,5 @@
 ---
+source: Jupyter Notebook
 title: Open Source Observability for LangGraph
 description: Learn how to use Langfuse for open source observability/tracing in your LangGraph application (Python).
 category: Integrations
@@ -43,9 +44,15 @@ This cookbook demonstrates how [Langfuse](https://langfuse.com/docs) helps to de
 
 Initialize the Langfuse client with your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from the project settings in the Langfuse UI and add them to your environment.
 
+<Callout type="info" emoji="⚠️">
+_**Note:** This notebook utilizes the Langfuse SDK v2 and will be updated shortly. Please refere to [this guide](https://langfuse.com/docs/integrations/langchain/tracing) to see how to use the LangChain Callback handler with the OTel Python SDK v3._
+</Callout>
+
 
 ```python
-%pip install langfuse
+# This notebook utilizes the Langfuse SDK v2 and will be updated shortly.
+%pip install "langfuse<=2.60.8"
+
 %pip install langchain langgraph langchain_openai langchain_community
 ```
 

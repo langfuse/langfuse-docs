@@ -1,4 +1,5 @@
 ---
+source: Jupyter Notebook
 title: Open Source Observability for LangGraph
 description: Learn how to use Langfuse for open source observability/tracing in your LangGraph application (Python).
 category: Integrations
@@ -10,19 +11,6 @@ category: Integrations
 ## What is LangGraph?
 
 [LangGraph](https://langchain-ai.github.io/langgraph/) is an open-source framework by the LangChain team for building complex, stateful, multi-agent applications using large language models (LLMs). LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
-
-<br>
-
-
-<div style="position: relative; padding-top: 69.85769728331177%;">
-  <iframe
-    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/dbe2ea8e8d64f27126a3734fa51cd0e7/iframe?muted=true&loop=true&autoplay=true&poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2Fdbe2ea8e8d64f27126a3734fa51cd0e7%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false"
-    loading="lazy"
-    style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
-    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-    allowfullscreen="true"
-  ></iframe>
-</div>
 
 ## Goal of this Cookbook
 
@@ -43,9 +31,15 @@ This cookbook demonstrates how [Langfuse](https://langfuse.com/docs) helps to de
 
 Initialize the Langfuse client with your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from the project settings in the Langfuse UI and add them to your environment.
 
+<Callout type="info" emoji="⚠️">
+_**Note:** This notebook utilizes the Langfuse SDK v2 and will be updated shortly. Please refere to [this guide](https://langfuse.com/docs/integrations/langchain/tracing) to see how to use the LangChain Callback handler with the OTel Python SDK v3._
+</Callout>
+
 
 ```python
-%pip install langfuse
+# This notebook utilizes the Langfuse SDK v2 and will be updated shortly.
+%pip install "langfuse<=2.60.8"
+
 %pip install langchain langgraph langchain_openai langchain_community
 ```
 
@@ -129,8 +123,9 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
     print(s)
 ```
 
+```text
     {'chatbot': {'messages': [AIMessage(content='Langfuse is a tool designed to help developers monitor and observe the performance of their Large Language Model (LLM) applications. It provides detailed insights into how these applications are functioning, allowing for better debugging, optimization, and overall management. Langfuse offers features such as tracking key metrics, visualizing data, and identifying potential issues in real-time, making it easier for developers to maintain and improve their LLM-based solutions.', response_metadata={'token_usage': {'completion_tokens': 86, 'prompt_tokens': 13, 'total_tokens': 99}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-9a0c97cb-ccfe-463e-902c-5a5900b796b4-0', usage_metadata={'input_tokens': 13, 'output_tokens': 86, 'total_tokens': 99})]}}
-
+```
 
 ### View traces in Langfuse
 
@@ -402,13 +397,14 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "How does photosynt
     print("----")
 ```
 
+```text
     {'supervisor': {'next': 'Researcher'}}
     ----
     {'Researcher': {'messages': [HumanMessage(content="Photosynthesis is a biological process by which photosynthetic organisms, such as most plants, algae, and cyanobacteria, convert light energy, usually from sunlight, into chemical energy. This energy is stored in the form of organic compounds like sugars, which fuel their metabolism.\n\n### Key Points of Photosynthesis:\n\n1. **Light Absorption**:\n    - The process begins when light energy is absorbed by reaction centers, which are proteins containing photosynthetic pigments (e.g., chlorophyll in plants).\n\n2. **Light-Dependent Reactions**:\n    - In these reactions, light energy is used to strip electrons from substances like water, producing oxygen gas.\n    - The hydrogen from water is used to create NADPH (reduced nicotinamide adenine dinucleotide phosphate) and ATP (adenosine triphosphate).\n\n3. **Light-Independent Reactions (Calvin Cycle)**:\n    - These reactions do not require light and occur in the stroma of chloroplasts.\n    - Carbon dioxide is incorporated into organic compounds like ribulose bisphosphate (RuBP).\n    - Using ATP and NADPH from the light-dependent reactions, these compounds are reduced to form carbohydrates such as glucose.\n\n### Types of Photosynthesis:\n- **Oxygenic Photosynthesis**:\n    - Produces oxygen and is performed by plants, algae, and cyanobacteria.\n- **Anoxygenic Photosynthesis**:\n    - Does not produce oxygen and is performed by some bacteria using substances like hydrogen sulfide instead of water.\n\n### Importance of Photosynthesis:\n- It produces and maintains the oxygen content of the Earth's atmosphere.\n- Supplies most of the biological energy necessary for complex life.\n- Captures carbon dioxide from the atmosphere, playing a critical role in climate processes.\n\n### Evolution and Discovery:\n- The first photosynthetic organisms used reducing agents other than water, such as hydrogen or hydrogen sulfide.\n- Cyanobacteria, which evolved later, contributed to the oxygenation of the Earth.\n- Photosynthesis was discovered in 1779 by Jan Ingenhousz, who demonstrated that plants need light to perform the process.\n\n### Global Impact:\n- The average rate of energy captured by global photosynthesis is about 130 terawatts.\n- Photosynthetic organisms convert around 100–115 billion tons of carbon into biomass each year.\n\nPhotosynthesis is crucial for life on Earth, providing the oxygen we breathe and the energy base for nearly all ecosystems.", name='Researcher')]}}
     ----
     {'supervisor': {'next': 'FINISH'}}
     ----
-
+```
 
 
 ```python
@@ -419,13 +415,14 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "What time is it?")
     print("----")
 ```
 
+```text
     {'supervisor': {'next': 'CurrentTime'}}
     ----
     {'CurrentTime': {'messages': [HumanMessage(content='The current time is 9:34 AM on July 25, 2024.', name='CurrentTime')]}}
     ----
     {'supervisor': {'next': 'FINISH'}}
     ----
-
+```
 
 ### See traces in Langfuse
 
@@ -508,11 +505,11 @@ research_agent("What time is it?")
 
 
 
-
+```text
     {'messages': [HumanMessage(content='What time is it?'),
       HumanMessage(content='The current date and time is 2024-07-25T09:54:57.', name='CurrentTime')],
      'next': 'FINISH'}
-
+```
 
 
 ### View trace with score in Langfuse
@@ -549,9 +546,9 @@ langfuse.create_prompt(
 
 
 
-
+```text
     <langfuse.model.TextPromptClient at 0x7f68ade50fa0>
-
+```
 
 
 ![View prompt in Langfuse UI](https://langfuse.com/images/cookbook/integration-langgraph/integration_langgraph_prompt_example.png)
@@ -620,8 +617,9 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
     print(s)
 ```
 
+```
     {'chatbot': {'messages': [AIMessage(content='¿Qué es Langfuse?', response_metadata={'token_usage': {'completion_tokens': 6, 'prompt_tokens': 30, 'total_tokens': 36}, 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'finish_reason': 'stop', 'logprobs': None}, id='run-1f419fe3-73e2-4413-aa6c-96560bbd09c8-0', usage_metadata={'input_tokens': 30, 'output_tokens': 6, 'total_tokens': 36})]}}
-
+```
 
 ## Add session and user id to LangGraph traces
 

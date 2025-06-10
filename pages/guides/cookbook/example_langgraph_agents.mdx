@@ -1,4 +1,5 @@
 ---
+source: Jupyter Notebook
 title: Example - Trace and Evaluate LangGraph Agents
 description: This guide shows how to evaluate LangGraph Agents with Langfuse using online and offline evaluation methods.
 category: Integrations
@@ -31,9 +32,15 @@ This guide covers **online** and **offline** evaluation metrics used by teams to
 
 Below we install the `langgraph` library, `langfuse` and the Hugging Face `datasets` library
 
+<Callout type="info" emoji="⚠️">
+_**Note:** This notebook utilizes the Langfuse SDK v2 and will be updated shortly. Please refere to [this guide](https://langfuse.com/docs/integrations/langchain/tracing) to see how to use the LangChain Callback handler with the OTel Python SDK v3._
+</Callout>
+
 
 ```python
-%pip install langfuse
+# This notebook utilizes the Langfuse SDK v2 and will be updated shortly.
+%pip install "langfuse<=2.60.8"
+
 %pip install langchain langgraph langchain_openai langchain_community langchain_huggingface
 ```
 
