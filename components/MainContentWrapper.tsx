@@ -15,7 +15,6 @@ import { Textarea } from "./ui/textarea";
 import { showChat } from "./supportChat";
 import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
-import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -217,15 +216,6 @@ export const MainContentWrapper = (props) => {
       ) : null}
       <Background />
     </>
-  );
-};
-
-export const DocsSubscribeToUpdates = () => {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-medium">Subscribe to updates:</span>
-      <ProductUpdateSignup source="docs-footer" small />
-    </div>
   );
 };
 
