@@ -5,6 +5,11 @@ export default {
     title: "Security",
   },
   auth: "Authentication & Authorization",
+  "audit-logs": {
+    title: "Audit Logs ↗",
+    href: "/docs/audit-logs",
+    newWindow: true,
+  },
   encryption: "Encryption",
   "data-regions": "Data Regions & Availability",
   networking: "Networking",

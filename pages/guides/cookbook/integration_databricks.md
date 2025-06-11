@@ -32,7 +32,7 @@ Before you begin, install the necessary packages in your Python environment:
 
 
 ```python
-%pip install openai langfuse databricks-langchain llama-index llama-index-llms-databricks
+%pip install openai langfuse databricks-langchain llama-index llama-index-llms-databricks openinference-instrumentation-llama-index
 ```
 
 ## 2. Set Up Environment Variables
@@ -132,14 +132,22 @@ Databricks models can also be used via LangChain. The [`ChatDatabricks`](https:/
 
 
 ```python
-from langfuse.callback import CallbackHandler
+import os
 
-# Initialize the Langfuse callback handler
-langfuse_handler = CallbackHandler(
-    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
-    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
-    host=os.environ.get("LANGFUSE_HOST")
-)
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+```
+
+
+```python
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler()
 ```
 
 
@@ -205,22 +213,26 @@ llm = Databricks(
 
 
 ```python
-from langfuse.llama_index import LlamaIndexInstrumentor
-from llama_index.core.llms import ChatMessage
+import os
+from langfuse import get_client
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+ 
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+ 
+langfuse = get_client()
 
-# Initialize the LlamaIndexInstrumentor to trace LlamaIndex operations
-instrumentor = LlamaIndexInstrumentor(
-    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
-    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
-    host=os.environ.get("LANGFUSE_HOST")
-)
-
-# Start automatic tracing
-instrumentor.start()
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
 ```
 
 
 ```python
+from llama_index.core.llms import ChatMessage
+
 messages = [
     ChatMessage(role="system", content="You are a helpful assistant."),
     ChatMessage(role="user", content="What is Databricks?")
@@ -228,9 +240,6 @@ messages = [
 
 response = llm.chat(messages)
 print(response)
-
-# Flush any pending events to Langfuse
-instrumentor.flush()
 ```
 
     Trace ID is not set. Creating generation client with new trace id.
