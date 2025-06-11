@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { CustomerStoryCTA } from "./blog/CustomerStoryCTA";
+import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 
 const pathsWithoutFooterWidgets = ["/imprint", "/blog", "/customers"];
 const isCustomerStory = (pathname: string) =>
@@ -212,7 +212,10 @@ export const MainContentWrapper = (props) => {
 
       {props.children}
       {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
-      {!pathsWithoutFooterWidgets.some(path => router.pathname === path || router.pathname.startsWith(path + "/")) ? (
+      {!pathsWithoutFooterWidgets.some(
+        (path) =>
+          router.pathname === path || router.pathname.startsWith(path + "/")
+      ) ? (
         <div
           className="flex flex-col gap-10 pt-14 border-t dark:border-neutral-800 mb-20"
           id="docs-feedback"
