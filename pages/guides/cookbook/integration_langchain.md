@@ -3,7 +3,7 @@ description: Cookbook with examples of the Langfuse Integration for Langchain (P
 category: Integrations
 ---
 
-# Cookbook: Langchain Integration (SDK v2)
+# Cookbook: Langchain Integration
 
 This is a cookbook with examples of the Langfuse Integration for Langchain (Python).
 
@@ -22,35 +22,31 @@ Initialize the Langfuse client with your API keys from the project settings in t
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "sk-proj-.."
 ```
 
 
 ```python
-from langfuse.callback import CallbackHandler
-
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
-```
-
-
-```python
-# Tests the SDK connection with the server
-langfuse_handler.auth_check()
 ```
 
 ## Examples
 
 ### Sequential Chain in Langchain Expression Language (LCEL)
 
-![Trace of Langchain LCEL](https://langfuse.com/images/docs/langchain_LCEL.png)
+![Trace of Langchain LCEL](https://langfuse.com/images/cookbook/integration_langchain/langchain_LCEL.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/dbe646b2b67957d22e8780c429b2d20f?timestamp=2025-06-11T09%3A09%3A58.823Z&display=details)
 
 
 ```python
@@ -77,6 +73,13 @@ chain2 = (
 chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[langfuse_handler]})
 ```
 
+
+
+
+    'Barack Obama es de la ciudad de Chicago, Illinois, en los Estados Unidos.'
+
+
+
 #### Runnable methods
 
 Runnables are units of work that can be invoked, batched, streamed, transformed and composed.
@@ -84,9 +87,7 @@ Runnables are units of work that can be invoked, batched, streamed, transformed 
 The examples below show how to use the following methods with Langfuse:
 
 - invoke/ainvoke: Transforms a single input into an output.
-
 - batch/abatch: Efficiently transforms multiple inputs into outputs.
-
 - stream/astream: Streams output from a single input as it’s produced.
 
 
@@ -110,56 +111,16 @@ async for chunk in chain2.astream({"person": "bill gates", "language": "english"
 
 ```
 
-### ConversationChain
-
-We'll use a [session](https://langfuse.com/docs/tracing-features/sessions) in Langfuse to track this conversation with each invocation being a single trace.
-
-In addition to the traces of each run, you also get a conversation view of the entire session:
-
-![Session view of ConversationChain in Langfuse](https://langfuse.com/images/docs/langchain_session.png)
-
-
-```python
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain_openai import OpenAI
-
-llm = OpenAI(temperature=0)
-
-conversation = ConversationChain(
-    llm=llm, memory=ConversationBufferMemory()
-)
-```
-
-
-```python
-# Create a callback handler with a session
-langfuse_handler = CallbackHandler(session_id="conversation_chain")
-```
-
-
-```python
-conversation.predict(input="Hi there!", callbacks=[langfuse_handler])
-```
-
-
-```python
-conversation.predict(input="How to build great developer tools?", callbacks=[langfuse_handler])
-```
-
-
-```python
-conversation.predict(input="Summarize your last response", callbacks=[langfuse_handler])
-```
-
 ### RetrievalQA
 
-![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/docs/langchain_qa_retrieval.jpg)
+![Trace of Langchain QA Retrieval in Langfuse](https://langfuse.com/images/cookbook/integration_langchain/langchain_qa_retrieval.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/84e1ac07dedbce3b2a236b6ece6950d9?timestamp=2025-06-11T09:29:10.248Z&display=details)
 
 
 ```python
 import os
-os.environ["SERPAPI_API_KEY"] = ""
+os.environ["SERPAPI_API_KEY"] = "..."
 ```
 
 
@@ -196,29 +157,13 @@ chain = RetrievalQA.from_chain_type(
 chain.invoke(query, config={"callbacks":[langfuse_handler]})
 ```
 
-### Agent
 
 
-```python
-%pip install google-search-results
-```
+
+    {'query': 'What did the president say about Ketanji Brown Jackson',
+     'result': " The president nominated her to serve on the United States Supreme Court and praised her as one of the nation's top legal minds who will continue the legacy of retiring Justice Stephen Breyer."}
 
 
-```python
-from langchain.agents import AgentExecutor, load_tools, create_openai_functions_agent
-from langchain_openai import ChatOpenAI
-from langchain import hub
-
-langfuse_handler = CallbackHandler()
-
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
-tools = load_tools(["serpapi"])
-prompt = hub.pull("hwchase17/openai-functions-agent")
-agent = create_openai_functions_agent(llm, tools, prompt)
-agent_executor = AgentExecutor(agent=agent, tools=tools)
-
-agent_executor.invoke({"input": "What is Langfuse?"}, config={"callbacks":[langfuse_handler]})
-```
 
 ### AzureOpenAI
 
@@ -234,7 +179,9 @@ os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
 ```python
 from langchain_openai import AzureChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 
 prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
@@ -246,296 +193,3 @@ chain = prompt | model
 
 chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]})
 ```
-
-### Sequential Chain [Legacy]
-
-![Trace of Langchain Sequential Chain in Langfuse](https://langfuse.com/images/docs/langchain_chain.jpg)
-
-
-```python
-# further imports
-from langchain_openai import OpenAI
-from langchain.chains import LLMChain, SimpleSequentialChain
-from langchain.prompts import PromptTemplate
-
-llm = OpenAI()
-template = """You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
-    Title: {title}
-    Playwright: This is a synopsis for the above play:"""
-prompt_template = PromptTemplate(input_variables=["title"], template=template)
-synopsis_chain = LLMChain(llm=llm, prompt=prompt_template)
-template = """You are a play critic from the New York Times. Given the synopsis of play, it is your job to write a review for that play.
-    Play Synopsis:
-    {synopsis}
-    Review from a New York Times play critic of the above play:"""
-prompt_template = PromptTemplate(input_variables=["synopsis"], template=template)
-review_chain = LLMChain(llm=llm, prompt=prompt_template)
-overall_chain = SimpleSequentialChain(
-    chains=[synopsis_chain, review_chain],
-)
-
-# invoke
-review = overall_chain.invoke("Tragedy at sunset on the beach", {"callbacks":[langfuse_handler]}) # add the handler to the run method
-# run [LEGACY]
-review = overall_chain.run("Tragedy at sunset on the beach", callbacks=[langfuse_handler])# add the handler to the run method
-```
-
-## Customize trace names via run_name
-
-By default, Langfuse uses the Langchain run_name as trace/observation names. For more complex/custom chains, it can be useful to customize the names via own run_names.
-
-![Custom LangChain Run Names](https://langfuse.com/images/cookbook/integration-langchain/custom_langchain_run_names.png)
-
-**Example without custom run names**
-
-
-```python
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-chain = prompt1 | model | StrOutputParser()
-chain.invoke({"person": "Grace Hopper"}, config={
-      "callbacks":[langfuse_handler]
-  })
-```
-
-### Via Runnable Config
-
-
-```python
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?").with_config(run_name="Famous Person Prompt")
-model = ChatOpenAI().with_config(run_name="Famous Person LLM")
-output_parser = StrOutputParser().with_config(run_name="Famous Person Output Parser")
-chain = (prompt1 | model | output_parser).with_config(run_name="Famous Person Locator")
-
-chain.invoke({"person": "Grace Hopper"}, config={
-    "callbacks":[langfuse_handler]
-})
-```
-
-Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ec9fcc46-ca38-4bdb-9482-eb06a5f90944
-
-### Via Run Config
-
-
-```python
-
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-chain = prompt1 | model | StrOutputParser()
-chain.invoke({"person": "Grace Hopper"}, config={
-    "run_name": "Famous Person Locator",
-    "callbacks":[langfuse_handler]
-  })
-```
-
-Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b48204e2-fd48-487b-8f66-015e3f10613d
-
-## Interoperability with Langfuse Python SDK
-
-You can use this integration in combination with the `observe()` decorator from the Langfuse Python SDK. Thereby, you can trace non-Langchain code, combine multiple Langchain invocations in a single trace, and use the full functionality of the Langfuse Python SDK.
-
-The `langfuse_context.get_current_langchain_handler()` method exposes a LangChain callback handler in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/sdk/python/decorators#langchain).
-
-
-### How it works
-
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-# Create a trace via Langfuse decorators and get a Langchain Callback handler for it
-@observe() # automtically log function as a trace to Langfuse
-def main():
-    # update trace attributes (e.g, name, session_id, user_id)
-    langfuse_context.update_current_trace(
-        name="custom-trace",
-        session_id="user-1234",
-        user_id="session-1234",
-    )
-    # get the langchain handler for the current trace
-    langfuse_context.get_current_langchain_handler()
-
-    # use the handler to trace langchain runs ...
-
-main()
-```
-
-### Example
-
-We'll run the same chain multiple times at different places within the hierarchy of a trace.
-
-```
-TRACE: person-locator
-|
-|-- SPAN: Chain (Alan Turing)
-|
-|-- SPAN: Physics
-|   |
-|   |-- SPAN: Chain (Albert Einstein)
-|   |
-|   |-- SPAN: Chain (Isaac Newton)
-|   |
-|   |-- SPAN: Favorites
-|   |   |
-|   |   |-- SPAN: Chain (Richard Feynman)
-```
-
-Setup chain
-
-
-```python
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-
-chain = prompt | model
-```
-
-Invoke it multiple times as part of a nested trace.
-
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-# On span "Physics"."Favorites"
-@observe()  # decorator to automatically log function as sub-span to Langfuse
-def favorites():
-    # get the langchain handler for the current sub-span
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-    # invoke chain with langfuse handler
-    chain.invoke({"person": "Richard Feynman"},
-                 config={"callbacks": [langfuse_handler]})
-
-# On span "Physics"
-@observe()  # decorator to automatically log function as span to Langfuse
-def physics():
-    # get the langchain handler for the current span
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-    # invoke chains with langfuse handler
-    chain.invoke({"person": "Albert Einstein"},
-                 config={"callbacks": [langfuse_handler]})
-    chain.invoke({"person": "Isaac Newton"},
-                 config={"callbacks": [langfuse_handler]})
-    favorites()
-
-# On trace
-@observe()  # decorator to automatically log function as trace to Langfuse
-def main():
-    # get the langchain handler for the current trace
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-    # invoke chain with langfuse handler
-    chain.invoke({"person": "Alan Turing"},
-                 config={"callbacks": [langfuse_handler]})
-    physics()
-
-main()
-```
-
-View it in Langfuse
-
-![Trace of Nested Langchain Runs in Langfuse](https://langfuse.com/images/docs/langchain_python_trace_interoperability.png)
-
-## Adding evaluation/feedback scores to traces
-
-Evaluation results and user feedback are recorded as [scores](https://langfuse.com/docs/scores) in Langfuse.
-
-To add a score to a trace, you need to know the trace_id. There are two options to achieve this when using LangChain:
-
-1. Provide a predefined LangChain run_id
-2. Use the Langfuse Decorator to get the trace_id
-
-![Langchain Trace in Langfuse with Score](https://langfuse.com/images/cookbook/integration-langchain/langchain_trace_with_score.png)
-
-### Predefined LangChain `run_id`
-
-Langfuse uses the LangChain run_id as a trace_id. Thus you can provide a custom run_id to the runnable config in order to later add scores to the trace.
-
-
-```python
-from operator import itemgetter
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-import uuid
-
-predefined_run_id = str(uuid.uuid4())
-
-langfuse_handler = CallbackHandler()
-
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-chain = prompt1 | model | StrOutputParser()
-
-chain.invoke({"person": "Ada Lovelace"}, config={
-    "run_id": predefined_run_id,
-    "callbacks":[langfuse_handler]
-})
-```
-
-
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-langfuse.score(
-    trace_id=predefined_run_id,
-    name="user-feedback",
-    value=1,
-    comment="This was correct, thank you"
-);
-```
-
-Example Trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9860fffa-02ed-4278-bcf7-c856c569cead
-
-### Via Langfuse Decorator
-
-Alternatively, you can use the LangChain integration together with the [Langfuse @observe-decorator](https://langfuse.com/docs/sdk/python/decorators) for Python.
-
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from operator import itemgetter
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-import uuid
-
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-chain = prompt1 | model | StrOutputParser()
-
-@observe()
-def main(person):
-
-  langfuse_handler = langfuse_context.get_current_langchain_handler()
-
-  response = chain.invoke({"person": person}, config={
-      "callbacks":[langfuse_handler]
-  })
-
-  trace_id = langfuse_context.get_current_trace_id()
-
-  return trace_id, response
-
-
-trace_id, response = main("Ada Lovelace")
-```
-
-
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-langfuse.score(
-    trace_id=trace_id,
-    name="user-feedback",
-    value=1,
-    comment="This was correct, thank you"
-)
-```
-
-Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/08bb7cf3-87c6-4a78-a3fc-72af8959a106
