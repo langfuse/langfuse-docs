@@ -1,12 +1,12 @@
 ---
 title: Observability for Agno with Langfuse
-description: Learn how to integrate Langfuse with Agno via OpenTelemetry using OpenInference or OpenLIT
+description: Learn how to integrate Langfuse with Agno via OpenTelemetry
 category: Integrations
 ---
 
 # Integrate Langfuse with Agno
 
-This notebook demonstrates how to integrate **Langfuse** with **Agno** using OpenTelemetry via **OpenInference** or the **OpenLIT** SDK. By the end of this notebook, you will be able to trace your Agno applications with Langfuse for improved observability and debugging.
+This notebook demonstrates how to integrate **Langfuse** with **Agno** using OpenTelemetry via the **OpenLIT** instrumentation. By the end of this notebook, you will be able to trace your Agno applications with Langfuse for improved observability and debugging.
 
 > **What is Agno?** [Agno](https://docs.agno.com/) is a platform for building and managing AI agents.
 
@@ -21,19 +21,16 @@ We'll walk through examples of using Agno and integrating it with Langfuse.
 
 
 ```python
-%pip install agno openai langfuse opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-agno yfinance openlit
+%pip install agno openai langfuse yfinance openlit
 ```
 
 ### Step 2: Set Up Environment Variables
 
-Set your Langfuse API keys and configure OpenTelemetry export settings to send traces to Langfuse. Please refer to the [Langfuse OpenTelemetry Docs](https://langfuse.com/docs/opentelemetry/get-started) for more information on the Langfuse OpenTelemetry endpoint `/api/public/otel` and authentication.
-
-You'll also need your OpenAI API key.
+Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).You'll also need your OpenAI API key.
 
 
 ```python
 import os
-import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
@@ -41,83 +38,39 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-LANGFUSE_AUTH = base64.b64encode(
-    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
-).decode()
-
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
 # your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
-### Step 3: Sending Traces to Langfuse
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-#### Example 1: Using Langfuse with OpenInference
-
-This example demonstrates how to instrument your Agno agent with OpenInference and send traces to Langfuse.
 
 
 ```python
-import base64
-import os
-
-from agno.agent import Agent
-from agno.models.openai import OpenAIChat
-from agno.tools.yfinance import YFinanceTools
-from openinference.instrumentation.agno import AgnoInstrumentor
-from opentelemetry import trace as trace_api
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-# Configure the tracer provider
-tracer_provider = TracerProvider()
-tracer_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-trace_api.set_tracer_provider(tracer_provider=tracer_provider)
-
-# Start instrumenting agno
-AgnoInstrumentor().instrument()
-
-# Create and configure the agent
-agent = Agent(
-    name="Stock Price Agent",
-    model=OpenAIChat(id="gpt-4o-mini"),
-    tools=[YFinanceTools()],
-    instructions="You are a stock price agent. Answer questions in the style of a stock analyst.",
-    debug_mode=True,
-)
-
-# Use the agent
-agent.print_response("What is the current price of Tesla?")
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
-#### Example 2: Using Langfuse with OpenLIT
+### Step 3: Sending Traces to Langfuse
 
-This example demonstrates how to use Langfuse via OpenLIT to trace model calls.
+This example demonstrates how to use the OpenLit instrumentation library to ingfe
 
 
 ```python
-import base64
-import os
-
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 from agno.tools.duckduckgo import DuckDuckGoTools
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry import trace
-
-# Configure the tracer provider
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-trace.set_tracer_provider(trace_provider)
 
 # Initialize OpenLIT instrumentation
 import openlit
-openlit.init(tracer=trace.get_tracer(__name__), disable_batch=True)
+openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
 
 # Create and configure the agent
 agent = Agent(
@@ -131,21 +84,759 @@ agent = Agent(
 agent.print_response("What is currently trending on Twitter?")
 ```
 
+    {
+        "resource_metrics": [
+            {
+                "resource": {
+                    "attributes": {
+                        "telemetry.sdk.language": "python",
+                        "telemetry.sdk.name": "openlit",
+                        "telemetry.sdk.version": "1.33.1",
+                        "service.name": "default",
+                        "deployment.environment": "default"
+                    },
+                    "schema_url": ""
+                },
+                "scope_metrics": [
+                    {
+                        "scope": {
+                            "name": "openlit.otel.metrics",
+                            "version": "0.1.0",
+                            "schema_url": "",
+                            "attributes": null
+                        },
+                        "metrics": [
+                            {
+                                "name": "gen_ai.client.token.usage",
+                                "description": "Measures number of input and output tokens used",
+                                "unit": "{token}",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559112000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "count": 2,
+                                            "sum": 1071,
+                                            "bucket_counts": [
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                1,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                1,
+                                                4,
+                                                16,
+                                                64,
+                                                256,
+                                                1024,
+                                                4096,
+                                                16384,
+                                                65536,
+                                                262144,
+                                                1048576,
+                                                4194304,
+                                                16777216,
+                                                67108864
+                                            ],
+                                            "min": 183,
+                                            "max": 888,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            },
+                            {
+                                "name": "gen_ai.client.operation.duration",
+                                "description": "GenAI operation duration",
+                                "unit": "s",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559190000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "count": 2,
+                                            "sum": 5.745627164840698,
+                                            "bucket_counts": [
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                                1,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                0.01,
+                                                0.02,
+                                                0.04,
+                                                0.08,
+                                                0.16,
+                                                0.32,
+                                                0.64,
+                                                1.28,
+                                                2.56,
+                                                5.12,
+                                                10.24,
+                                                20.48,
+                                                40.96,
+                                                81.92
+                                            ],
+                                            "min": 0.9523701667785645,
+                                            "max": 4.793256998062134,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            },
+                            {
+                                "name": "gen_ai.server.time_to_first_token",
+                                "description": "Time to generate first token for successful responses",
+                                "unit": "s",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559238000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "count": 2,
+                                            "sum": 5.745627164840698,
+                                            "bucket_counts": [
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                                1,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                0.001,
+                                                0.005,
+                                                0.01,
+                                                0.02,
+                                                0.04,
+                                                0.06,
+                                                0.08,
+                                                0.1,
+                                                0.25,
+                                                0.5,
+                                                0.75,
+                                                1.0,
+                                                2.5,
+                                                5.0,
+                                                7.5,
+                                                10.0
+                                            ],
+                                            "min": 0.9523701667785645,
+                                            "max": 4.793256998062134,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            },
+                            {
+                                "name": "gen_ai.total.requests",
+                                "description": "Number of requests to GenAI",
+                                "unit": "1",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559759000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "value": 2,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2,
+                                    "is_monotonic": true
+                                }
+                            },
+                            {
+                                "name": "gen_ai.usage.output_tokens",
+                                "description": "Number of completion tokens processed.",
+                                "unit": "1",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559799000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "value": 245,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2,
+                                    "is_monotonic": true
+                                }
+                            },
+                            {
+                                "name": "gen_ai.usage.input_tokens",
+                                "description": "Number of prompt tokens processed.",
+                                "unit": "1",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559818000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "value": 826,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2,
+                                    "is_monotonic": true
+                                }
+                            },
+                            {
+                                "name": "gen_ai.usage.cost",
+                                "description": "The distribution of GenAI request costs.",
+                                "unit": "USD",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559840000,
+                                            "time_unix_nano": 1749653425848669000,
+                                            "count": 2,
+                                            "sum": 0.00027089999999999997,
+                                            "bucket_counts": [
+                                                0,
+                                                2,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                0.0,
+                                                5.0,
+                                                10.0,
+                                                25.0,
+                                                50.0,
+                                                75.0,
+                                                100.0,
+                                                250.0,
+                                                500.0,
+                                                750.0,
+                                                1000.0,
+                                                2500.0,
+                                                5000.0,
+                                                7500.0,
+                                                10000.0
+                                            ],
+                                            "min": 3.645e-05,
+                                            "max": 0.00023444999999999998,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            }
+                        ],
+                        "schema_url": ""
+                    }
+                ],
+                "schema_url": ""
+            }
+        ]
+    }
+    {
+        "resource_metrics": [
+            {
+                "resource": {
+                    "attributes": {
+                        "telemetry.sdk.language": "python",
+                        "telemetry.sdk.name": "openlit",
+                        "telemetry.sdk.version": "1.33.1",
+                        "service.name": "default",
+                        "deployment.environment": "default"
+                    },
+                    "schema_url": ""
+                },
+                "scope_metrics": [
+                    {
+                        "scope": {
+                            "name": "openlit.otel.metrics",
+                            "version": "0.1.0",
+                            "schema_url": "",
+                            "attributes": null
+                        },
+                        "metrics": [
+                            {
+                                "name": "gen_ai.client.token.usage",
+                                "description": "Measures number of input and output tokens used",
+                                "unit": "{token}",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559112000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "count": 2,
+                                            "sum": 1071,
+                                            "bucket_counts": [
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                1,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                1,
+                                                4,
+                                                16,
+                                                64,
+                                                256,
+                                                1024,
+                                                4096,
+                                                16384,
+                                                65536,
+                                                262144,
+                                                1048576,
+                                                4194304,
+                                                16777216,
+                                                67108864
+                                            ],
+                                            "min": 183,
+                                            "max": 888,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            },
+                            {
+                                "name": "gen_ai.client.operation.duration",
+                                "description": "GenAI operation duration",
+                                "unit": "s",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559190000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "count": 2,
+                                            "sum": 5.745627164840698,
+                                            "bucket_counts": [
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                                1,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                0.01,
+                                                0.02,
+                                                0.04,
+                                                0.08,
+                                                0.16,
+                                                0.32,
+                                                0.64,
+                                                1.28,
+                                                2.56,
+                                                5.12,
+                                                10.24,
+                                                20.48,
+                                                40.96,
+                                                81.92
+                                            ],
+                                            "min": 0.9523701667785645,
+                                            "max": 4.793256998062134,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            },
+                            {
+                                "name": "gen_ai.server.time_to_first_token",
+                                "description": "Time to generate first token for successful responses",
+                                "unit": "s",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559238000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "count": 2,
+                                            "sum": 5.745627164840698,
+                                            "bucket_counts": [
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                                1,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                0.001,
+                                                0.005,
+                                                0.01,
+                                                0.02,
+                                                0.04,
+                                                0.06,
+                                                0.08,
+                                                0.1,
+                                                0.25,
+                                                0.5,
+                                                0.75,
+                                                1.0,
+                                                2.5,
+                                                5.0,
+                                                7.5,
+                                                10.0
+                                            ],
+                                            "min": 0.9523701667785645,
+                                            "max": 4.793256998062134,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            },
+                            {
+                                "name": "gen_ai.total.requests",
+                                "description": "Number of requests to GenAI",
+                                "unit": "1",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559759000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "value": 2,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2,
+                                    "is_monotonic": true
+                                }
+                            },
+                            {
+                                "name": "gen_ai.usage.output_tokens",
+                                "description": "Number of completion tokens processed.",
+                                "unit": "1",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559799000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "value": 245,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2,
+                                    "is_monotonic": true
+                                }
+                            },
+                            {
+                                "name": "gen_ai.usage.input_tokens",
+                                "description": "Number of prompt tokens processed.",
+                                "unit": "1",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559818000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "value": 826,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2,
+                                    "is_monotonic": true
+                                }
+                            },
+                            {
+                                "name": "gen_ai.usage.cost",
+                                "description": "The distribution of GenAI request costs.",
+                                "unit": "USD",
+                                "data": {
+                                    "data_points": [
+                                        {
+                                            "attributes": {
+                                                "telemetry.sdk.name": "openlit",
+                                                "service.name": "default",
+                                                "deployment.environment": "default",
+                                                "gen_ai.operation.name": "chat",
+                                                "gen_ai.system": "openai",
+                                                "gen_ai.request.model": "gpt-4o-mini",
+                                                "server.address": "api.openai.com",
+                                                "server.port": 443,
+                                                "gen_ai.response.model": "gpt-4o-mini-2024-07-18"
+                                            },
+                                            "start_time_unix_nano": 1749650493559840000,
+                                            "time_unix_nano": 1749653485854488000,
+                                            "count": 2,
+                                            "sum": 0.00027089999999999997,
+                                            "bucket_counts": [
+                                                0,
+                                                2,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "explicit_bounds": [
+                                                0.0,
+                                                5.0,
+                                                10.0,
+                                                25.0,
+                                                50.0,
+                                                75.0,
+                                                100.0,
+                                                250.0,
+                                                500.0,
+                                                750.0,
+                                                1000.0,
+                                                2500.0,
+                                                5000.0,
+                                                7500.0,
+                                                10000.0
+                                            ],
+                                            "min": 3.645e-05,
+                                            "max": 0.00023444999999999998,
+                                            "exemplars": []
+                                        }
+                                    ],
+                                    "aggregation_temporality": 2
+                                }
+                            }
+                        ],
+                        "schema_url": ""
+                    }
+                ],
+                "schema_url": ""
+            }
+        ]
+    }
+
+
 ### Step 4: See Traces in Langfuse
 
 After running the agent examples above, you can view the traces generated by your Agno agent in Langfuse. 
 
-**Openinference Instrumentation:**
-
-![Agno Agents OpenInference Instrumentation](https://langfuse.com/images/cookbook/integration-agno-agents/agno-agents-openinference.png)
-
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8405ef8c640e146680d10f14560b0123?display=preview%3Ftimestamp%3D2025-05-26T12%3A04%3A55.692Z%3Ftimestamp%3D2025-05-26T12%3A04%3A33.072Z%3Ftimestamp%3D2025-05-26T12%3A04%3A55.692Z?timestamp=2025-05-26T12%3A04%3A33.072Z)
-
-**OpenLit Instrumentation:**
-
 ![Agno Agents OpenLit Instrumentation](https://langfuse.com/images/cookbook/integration-agno-agents/agno-agents-openlit.png)
 
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/556248fcb1ab657d0dddbc200c690449?display=preview%3Ftimestamp%3D2025-05-26T12%3A04%3A55.692Z&observation=e16fdc48043554b1)
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/080130871f53145aecf7c29d5dfb6e4c?timestamp=2025-06-11T14:01:32.598Z&display=details)
 
 ## References
 
