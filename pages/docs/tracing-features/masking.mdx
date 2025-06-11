@@ -43,7 +43,7 @@ def masking_function(data: any, **kwargs) -> any:
 Apply the masking function when initializing the Langfuse client:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
 # Initialize with masking function
 langfuse = Langfuse(mask=masking_function)
@@ -75,7 +75,7 @@ print(result)  # Original: "SECRET_DATA"
 Using context managers:
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
 langfuse = Langfuse(mask=masking_function)
 
@@ -124,7 +124,7 @@ langfuse.flush()
 Use with the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
 langfuse = Langfuse(mask=masking_function)
 

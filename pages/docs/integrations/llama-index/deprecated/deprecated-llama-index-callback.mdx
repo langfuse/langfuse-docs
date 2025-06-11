@@ -150,10 +150,11 @@ If you have an existing Langfuse trace or span object, you can set it as the roo
 ```python {14,17,22}
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-from langfuse import Langfuse
+from langfuse import get_client
 
 # Instantiate a Langfuse Client
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
 langfuse_callback_handler = LlamaIndexCallbackHandler()

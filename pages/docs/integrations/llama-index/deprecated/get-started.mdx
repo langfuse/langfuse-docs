@@ -200,11 +200,12 @@ def llama_index_fn(question: str):
 If you have an existing Langfuse trace or span object, you can set it as the root observation for your `LlamaIndexInstrumentor`.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from langfuse.llama_index import LlamaIndexInstrumentor
 
 # Instantiate a Langfuse Client
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Instantiate a new LlamaIndexInstrumentor and register it in the LlamaIndex Settings
 instrumentor = LlamaIndexInstrumentor()

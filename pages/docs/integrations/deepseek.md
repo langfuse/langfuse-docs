@@ -199,9 +199,10 @@ Add [scores](https://langfuse.com/docs/scores) to the trace to record user feedb
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 @observe()
 def generate_and_score():

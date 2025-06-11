@@ -612,8 +612,9 @@ main()
 
 **Low-level Approach (v2):**
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+from langfuse import get_client
+langfuse = get_client()
 
 # Get Langchain handler for a trace
 trace = langfuse.trace()

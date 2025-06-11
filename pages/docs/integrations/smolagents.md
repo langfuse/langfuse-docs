@@ -166,8 +166,9 @@ Next, we create a dataset entity in Langfuse to track the runs. Then, we add eac
 
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+from langfuse import get_client
+langfuse = get_client()
 
 langfuse_dataset_name = "gsm8k_dataset_huggingface"
 

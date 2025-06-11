@@ -148,7 +148,7 @@ from enum import Enum
 import asyncio
 import instructor
 
-from langfuse import Langfuse
+from langfuse import get_client
 from langfuse.openai import AsyncOpenAI
 from langfuse import observe, get_client
 langfuse = get_client()
@@ -162,7 +162,8 @@ client = AsyncOpenAI()
 client = instructor.patch(client, mode=instructor.Mode.TOOLS)
 
 # Initialize Langfuse (needed for scoring)
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Rate limit the number of requests
 sem = asyncio.Semaphore(5)

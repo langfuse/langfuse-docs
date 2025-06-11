@@ -80,9 +80,10 @@ os.environ["OPENAI_API_KEY"] = ""
 import gradio as gr
 import json
 import uuid
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 ```
 
 ## Implementation of Chat functions

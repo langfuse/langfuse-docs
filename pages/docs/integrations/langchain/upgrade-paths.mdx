@@ -80,8 +80,9 @@ TRACE_2
 If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+from langfuse import get_client
+langfuse = get_client()
 
 # Get Langchain handler for a trace
 trace = langfuse.trace()

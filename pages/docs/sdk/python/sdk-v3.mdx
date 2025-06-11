@@ -133,7 +133,7 @@ LANGFUSE_HOST="https://cloud.langfuse.com" # US region: https://us.cloud.langfus
 <Tab>
 
 ```python filename="Initialize client"
-from langfuse import Langfuse
+from langfuse import get_client
 
 # Initialize with constructor arguments
 
@@ -1096,7 +1096,7 @@ If your trace data (inputs, outputs, metadata) might contain sensitive informati
 The `mask` function should accept `data` as a keyword argument and return the masked data. The returned data must be JSON-serializable.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 import re
 
 def pii_masker(data: any, **kwargs) -> any:
@@ -1142,7 +1142,7 @@ You can configure the SDK to sample traces by setting the `sample_rate` paramete
 If a trace is not sampled, none of its observations (spans, generations) or associated scores will be sent to Langfuse.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
 # Sample approximately 20% of traces
 langfuse_sampled = Langfuse(sample_rate=0.2)
@@ -1373,9 +1373,10 @@ with langfuse.start_as_current_span(name="llamaindex-query") as span:
 **v2 Pattern:**
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 trace = langfuse.trace(
     name="my-trace",

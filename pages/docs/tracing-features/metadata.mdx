@@ -106,8 +106,9 @@ fn()
 When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+from langfuse import get_client
+langfuse = get_client()
 
 trace = langfuse.trace(
     metadata={"key":"value"}

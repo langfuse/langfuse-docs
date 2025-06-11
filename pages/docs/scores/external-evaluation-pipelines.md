@@ -190,7 +190,7 @@ The `fetch_traces()` function has arguments to filter the traces by tags, timest
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from datetime import datetime, timedelta
 
 BATCH_SIZE = 10
