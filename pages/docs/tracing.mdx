@@ -218,23 +218,23 @@ langfuse.shutdown()
 {/* Python SDK v2 */}
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from langfuse.decorators import langfuse_context
 
 # Decorator
 langfuse_context.flush()
 
 # Low-level SDK
-langfuse = Langfuse()
+langfuse = get_client()
 langfuse.flush()
 ```
 
 If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 langfuse.shutdown()
 ```
 
