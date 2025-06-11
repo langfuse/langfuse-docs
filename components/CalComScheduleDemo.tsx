@@ -19,7 +19,7 @@ export function ScheduleDemo({
     })();
   }, []);
 
-  const calLink = region === "us" ? "clemo/us-sales" : "clemo/sales";
+  const calLink = region === "us" ? "team/langfuse/intro" : "team/langfuse/intro-eu";
 
   return (
     <Cal
