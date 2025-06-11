@@ -364,7 +364,9 @@ The decorator approach is recommended when you want to:
 <Tab>
 
 ```ts
-import { CallbackHandler } from "langfuse-langchain";
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+
+const langfuse = new Langfuse();
 
 // Create a trace with custom ID
 const trace = langfuse.trace({ id: "special-id" });
