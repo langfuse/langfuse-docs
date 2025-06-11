@@ -82,7 +82,7 @@ Two utility methods:
 - `langfuse.update_current_span`: Update the trace/span of the current function scope
 - `langfuse.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
 
-For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)
+For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_span)
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
@@ -126,7 +126,7 @@ On the Langfuse platform the trace now shows with the updated name from the `dee
 
 ## Log an LLM Call using `as_type="generation"`
 
-Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)). 
+Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_span)). 
 
 This works with any LLM provider/SDK. In this example, we'll use Anthropic.
 
@@ -206,7 +206,7 @@ stealth_fn("Super secret content")
 
 > **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6bdeb443-ef8c-41d8-a8a1-68fe75639428
 
-Alternatively, you can **override input and output** via `update_current_observation` (or `update_current_trace`):
+Alternatively, you can **override input and output** via `update_current_span` (or `update_current_trace`):
 
 
 ```python
@@ -277,7 +277,7 @@ from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 
 doc1 = Document(text="""
-Maxwell "Max" Silverstein, a lauded movie director, screenwriter, and producer, was born on October 25, 1978, in Boston, Massachusetts. A film enthusiast from a young age, his journey began with home movies shot on a Super 8 camera. His passion led him to the University of Southern California (USC), majoring in Film Production. Eventually, he started his career as an assistant director at Paramount Pictures. Silverstein's directorial debut, “Doors Unseen,” a psychological thriller, earned him recognition at the Sundance Film Festival and marked the beginning of a successful directing career.
+Maxwell "Max" Silverstein, a lauded movie director, screenwriter, and producer, was born on October 25, 1978, in Boston, Massachusetts. A film enthusiast from a young age, his journey began with home movies shot on a Super 8 camera. His passion led him to the University of Southern California (USC), majoring in Film Production. Eventually, he started his career as an assistant director at Paramount Pictures. Silverstein's directorial debut, "Doors Unseen," a psychological thriller, earned him recognition at the Sundance Film Festival and marked the beginning of a successful directing career.
 """)
 doc2 = Document(text="""
 Throughout his career, Silverstein has been celebrated for his diverse range of filmography and unique narrative technique. He masterfully blends suspense, human emotion, and subtle humor in his storylines. Among his notable works are "Fleeting Echoes," "Halcyon Dusk," and the Academy Award-winning sci-fi epic, "Event Horizon's Brink." His contribution to cinema revolves around examining human nature, the complexity of relationships, and probing reality and perception. Off-camera, he is a dedicated philanthropist living in Los Angeles with his wife and two children.

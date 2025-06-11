@@ -82,7 +82,7 @@ Two utility methods:
 - `langfuse.update_current_span`: Update the trace/span of the current function scope
 - `langfuse.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
 
-For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)
+For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_span)
 
 Below is an example demonstrating how to enrich traces and observations with custom parameters:
 
@@ -126,7 +126,7 @@ On the Langfuse platform the trace now shows with the updated name from the `dee
 
 ## Log an LLM Call using `as_type="generation"`
 
-Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)). 
+Model calls are represented by `generations` in Langfuse and allow you to add additional attributes. Use the `as_type="generation"` flag to mark a function as a generation. Optionally, you can extract additional generation specific attributes ([reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_span)). 
 
 This works with any LLM provider/SDK. In this example, we'll use Anthropic.
 
@@ -206,7 +206,7 @@ stealth_fn("Super secret content")
 
 > **Example trace**: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6bdeb443-ef8c-41d8-a8a1-68fe75639428
 
-Alternatively, you can **override input and output** via `update_current_observation` (or `update_current_trace`):
+Alternatively, you can **override input and output** via `update_current_span` (or `update_current_trace`):
 
 
 ```python
