@@ -6,7 +6,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 
-export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
+export const BlogIndex = ({
+  maxItems,
+  path = "/blog",
+}: {
+  maxItems?: number;
+  path?: string;
+}) => {
   const router = useRouter();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
@@ -18,14 +24,12 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
 
   const posts = useMemo(
     () =>
-      (getPagesUnderRoute("/blog") as Array<Page & { frontMatter: any }>)
+      (getPagesUnderRoute(path) as Array<Page & { frontMatter: any }>)
         .filter((page) => page.frontMatter?.showInBlogIndex !== false)
         .sort(
-          (a, b) => {
-            const dateA = a.frontMatter?.date ? new Date(a.frontMatter.date).getTime() : 0;
-            const dateB = b.frontMatter?.date ? new Date(b.frontMatter.date).getTime() : 0;
-            return dateB - dateA;
-          }
+          (a, b) =>
+            new Date(b.frontMatter.date).getTime() -
+            new Date(a.frontMatter.date).getTime()
         )
         .slice(0, maxItems),
     [maxItems]
