@@ -406,12 +406,12 @@ The decorators expose the trace_id and observation_id which are necessary to add
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from langfuse import observe, get_client
 langfuse = get_client()
 
 # Initialize the Langfuse client
-langfuse_client = Langfuse()
+langfuse_client = get_client()
 
 @observe()
 def nested_fn():

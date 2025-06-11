@@ -31,11 +31,11 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from langfuse.callback import CallbackHandler
 
 # Initialize Langfuse client (prompt management)
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_callback_handler = CallbackHandler()

@@ -65,9 +65,9 @@ Initialize the Langfuse Python SDK, more information [here](https://langfuse.com
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 langfuse.auth_check()
 ```

@@ -86,8 +86,8 @@ Initialize the Langfuse client:
 
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 ```
 
 #### Optional: Create dummy trace data
@@ -419,7 +419,7 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-langfuse = Langfuse()
+langfuse = get_client()
 ```
 
 ### 1. Fetch traces from Langfuse

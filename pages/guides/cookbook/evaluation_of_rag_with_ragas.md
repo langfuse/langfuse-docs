@@ -138,9 +138,9 @@ Now lets init a Langfuse client SDK to instrument you app.
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 ```
 
 

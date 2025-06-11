@@ -43,11 +43,11 @@ os.environ["OPENAI_API_KEY"] = ""
 
 ```python
 # import
-from langfuse import Langfuse
+from langfuse import get_client
 import openai
 
 # init
-langfuse = Langfuse()
+langfuse = get_client()
 ```
 
 ## Create a dataset

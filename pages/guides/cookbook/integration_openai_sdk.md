@@ -364,11 +364,11 @@ The score is associated to the trace using the `trace_id`.
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 from langfuse import observe, get_client
 langfuse = get_client()
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 @observe() # decorator to automatically create trace and nest generations
 def main():

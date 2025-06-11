@@ -38,7 +38,7 @@ We'll use OpenAI's API in a simple loop to create synthetic questions for an air
 
 ```python
 import os
-from langfuse import Langfuse
+from langfuse import get_client
 
 # Get keys for your project from the project settings page: # https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
@@ -89,7 +89,7 @@ df = pd.DataFrame({"Question": airline_questions})
 
 
 ```python
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Create a new dataset in Langfuse
 dataset_name = "openai_synthetic_dataset"
@@ -160,7 +160,7 @@ df = dataset.to_pandas()
 
 ```python
 # 5. Push the RAGAS-generated testset to Langfuse
-langfuse = Langfuse()
+langfuse = get_client()
 langfuse.create_dataset(
     name="ragas_generated_testset",
     description="Synthetic RAG test set (RAGAS)",
@@ -189,7 +189,7 @@ for _, row in df.iterrows():
 
 ```python
 import os
-from langfuse import Langfuse
+from langfuse import get_client
 from deepeval.synthesizer import Synthesizer
 from deepeval.synthesizer.config import StylingConfig
 ```
@@ -217,7 +217,7 @@ synthetic_goldens = synthesizer.synthetic_goldens
 
 
 ```python
-langfuse = Langfuse()
+langfuse = get_client()
 
 # 5. Create a Langfuse dataset
 deepeval_dataset_name = "deepeval_synthetic_data"

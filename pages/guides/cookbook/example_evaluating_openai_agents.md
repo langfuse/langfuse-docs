@@ -330,9 +330,9 @@ from agents import Agent, Runner, WebSearchTool
 from opentelemetry.trace import format_trace_id
 import ipywidgets as widgets
 from IPython.display import display
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Define your agent with the web search tool
 agent = Agent(
@@ -544,8 +544,8 @@ Next, we create a dataset entity in Langfuse to track the runs. Then, we add eac
 
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 langfuse_dataset_name = "search-dataset_huggingface_openai-agent"
 
