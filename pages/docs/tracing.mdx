@@ -30,6 +30,27 @@ LLM applications use increasingly complex abstractions, such as chains, agents w
 
 </details>
 
+## Installation
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install langfuse
+# or
+yarn add langfuse
+```
+
+</Tab>
+</Tabs>
+
 import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
 
 <TracingOverview />
@@ -174,14 +195,11 @@ If you want to send a batch immediately, you can call the `flush` method on the 
 ```python
 from langfuse import get_client
 
-# access the client directly
-
+# Access the client directly
 langfuse = get_client()
 
 # Flush all pending observations
-
 langfuse.flush()
-
 ```
 
 If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
@@ -200,17 +218,23 @@ langfuse.shutdown()
 {/* Python SDK v2 */}
 
 ```python
-# Decorator
+from langfuse import Langfuse
 from langfuse.decorators import langfuse_context
+
+# Decorator
 langfuse_context.flush()
 
-# low-level SDK
+# Low-level SDK
+langfuse = Langfuse()
 langfuse.flush()
 ```
 
 If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
 
 ```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
 langfuse.shutdown()
 ```
 
@@ -219,12 +243,20 @@ langfuse.shutdown()
 {/* JS/TS */}
 
 ```javascript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
 await langfuse.flushAsync();
 ```
 
 If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
 
 ```javascript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
 await langfuse.shutdownAsync();
 ```
 
@@ -236,6 +268,9 @@ npm i @vercel/functions
 
 ```javascript
 import { waitUntil } from "@vercel/functions";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
 
 export async function POST(req, res) {
   // your code involving langfuse
@@ -256,7 +291,7 @@ For Python SDK v3
 ```python
 from langfuse import get_client
 
-# access the client directly
+# Access the client directly
 langfuse = get_client()
 
 # Flush all pending observations
@@ -267,6 +302,7 @@ For Python SDK v2
 
 ```python
 from langfuse.openai import openai
+
 openai.flush_langfuse()
 ```
 
@@ -282,14 +318,16 @@ langfuse = get_client()
 
 langfuse.flush()
 
-# access the client directly
+# Access the client directly
 langfuse_handler.client.flush()
-
 ```
 
 For Python SDK v2
 
 ```python
+from langfuse.callback import CallbackHandler
+
+langfuse_handler = CallbackHandler()
 langfuse_handler.flush()
 ```
 
@@ -298,12 +336,20 @@ langfuse_handler.flush()
 {/* Langchain (JS) */}
 
 ```javascript
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
 await langfuseHandler.flushAsync();
 ```
 
 If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
 
 ```javascript
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
 await langfuseHandler.shutdownAsync();
 ```
 
@@ -312,7 +358,11 @@ await langfuseHandler.shutdownAsync();
 {/* LlamaIndex */}
 
 ```python
+from llama_index.core.callbacks import CallbackManager
+from llama_index.callbacks.langfuse import LangfuseCallbackHandler
+
 # For Python SDK v2
+langfuse_handler = LangfuseCallbackHandler()
 langfuse_handler.flush()
 ```
 

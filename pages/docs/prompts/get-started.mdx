@@ -7,6 +7,27 @@ description: Manage and version your prompts in Langfuse (open source). When ret
 
 Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is a **Prompt CMS** (Content Management System).
 
+## Installation
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install langfuse
+# or
+yarn add langfuse
+```
+
+</Tab>
+</Tabs>
+
 import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
 
 <PromptOverview />
@@ -195,6 +216,11 @@ compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 Optional parameters
 
 ```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+
 # Get specific version
 prompt = langfuse.get_prompt("movie-critic", version=1)
 
@@ -217,6 +243,12 @@ prompt = langfuse.get_prompt("movie-critic", fetch_timeout_seconds=3)
 Attributes
 
 ```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+prompt = langfuse.get_prompt("movie-critic")
+
 # Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
 prompt.prompt
 
@@ -231,7 +263,7 @@ prompt.config
 ```ts
 import { Langfuse } from "langfuse";
 
-// Iniitialize the Langfuse client
+// Initialize the Langfuse client
 const langfuse = new Langfuse();
 
 // Get current `production` version
@@ -248,6 +280,11 @@ const compiledPrompt = prompt.compile({
 Chat prompts
 
 ```ts
+import { Langfuse } from "langfuse";
+
+// Initialize the Langfuse client
+const langfuse = new Langfuse();
+
 // Get current `production` version of a chat prompt
 const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
   type: "chat",
@@ -264,6 +301,11 @@ const compiledChatPrompt = chatPrompt.compile({
 Optional parameters
 
 ```ts
+import { Langfuse } from "langfuse";
+
+// Initialize the Langfuse client
+const langfuse = new Langfuse();
+
 // Get specific version of a prompt (here version 1)
 const prompt = await langfuse.getPrompt("movie-critic", 1);
 
@@ -281,29 +323,17 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
 });
-
-// Number of retries on fetching prompts from the server. Default is 2.
-const promptWithMaxRetries = await langfuse.getPrompt(
-  "movie-critic",
-  undefined,
-  {
-    maxRetries: 5,
-  }
-);
-
-// Timeout per call to the Langfuse API in milliseconds. Default is 10 seconds.
-const promptWithFetchTimeout = await langfuse.getPrompt(
-  "movie-critic",
-  undefined,
-  {
-    fetchTimeoutMs: 5000,
-  }
-);
 ```
 
 Attributes
 
 ```ts
+import { Langfuse } from "langfuse";
+
+// Initialize the Langfuse client
+const langfuse = new Langfuse();
+const prompt = await langfuse.getPrompt("movie-critic");
+
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
 prompt.prompt;
 
@@ -337,6 +367,12 @@ langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchai
 Chat prompts
 
 ```python
+from langfuse import Langfuse
+from langchain_core.prompts import ChatPromptTemplate
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
 # Get current `production` version of a chat prompt
 langfuse_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
 
@@ -347,6 +383,11 @@ langchain_prompt = ChatPromptTemplate.from_messages(langfuse_prompt.get_langchai
 Optional parameters
 
 ```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
 # Get specific version
 prompt = langfuse.get_prompt("movie-critic", version=1)
 
@@ -363,6 +404,12 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 Attributes
 
 ```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+prompt = langfuse.get_prompt("movie-critic")
+
 # Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
 prompt.prompt
 
@@ -394,6 +441,11 @@ const promptTemplate = PromptTemplate.fromTemplate(
 Chat prompts
 
 ```ts
+import { Langfuse } from "langfuse";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new Langfuse();
+
 // Get current `production` version of a chat prompt
 const langfusePrompt = await langfuse.getPrompt(
   "movie-critic-chat",
@@ -410,6 +462,10 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 Optional parameters
 
 ```ts
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
 // Get specific version of a prompt (here version 1)
 const prompt = await langfuse.getPrompt("movie-critic", 1);
 
@@ -432,6 +488,11 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 Attributes
 
 ```ts
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+const prompt = await langfuse.getPrompt("movie-critic");
+
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
 prompt.prompt;
 
@@ -926,6 +987,11 @@ The caching duration is configurable if you wish to reduce network overhead of t
 <Tab>
 
 ```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
 # Get current `production` prompt version and cache for 5 minutes
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 ```
@@ -935,6 +1001,11 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 <Tab>
 
 ```ts
+import { Langfuse } from "langfuse";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse();
+
 // Get current `production` version and cache prompt for 5 minutes
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 300,
@@ -953,6 +1024,11 @@ You can disable caching by setting the `cacheTtlSeconds` to `0`. This will ensur
 <Tab>
 
 ```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
 prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0)
 
 # Common in non-production environments, no cache + latest version
@@ -964,6 +1040,11 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0, label="latest"
 <Tab>
 
 ```ts
+import { Langfuse } from "langfuse";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse();
+
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   cacheTtlSeconds: 0,
 });
@@ -983,6 +1064,11 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 We measured the execution time of the following snippet with fully disabled caching.
 
 ```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
 prompt = langfuse.get_prompt("perf-test")
 prompt.compile(input="test")
 ```
@@ -1089,6 +1175,7 @@ fetchPromptsOnStartup();
 
 ```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
 from langfuse import Langfuse
+
 langfuse = Langfuse()
 
 # Get `text` prompt with fallback
@@ -1113,6 +1200,7 @@ prompt.is_fallback
 
 ```ts /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
 import { Langfuse } from "langfuse";
+
 const langfuse = new Langfuse();
 
 // Get `text` prompt with fallback
