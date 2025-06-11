@@ -16,32 +16,18 @@ This guide covers **online** and **offline** evaluation metrics used by teams to
 - Monitoring costs and performance in real-time
 - Improving reliability and safety through continuous feedback
 
-<br>
-
-<div style="position: relative; padding-top: 69.85769728331177%;">
-  <iframe
-    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/3fae2f3517ce426d0f02b090d4258dc6/iframe?muted=true&loop=true&autoplay=true&poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2F3fae2f3517ce426d0f02b090d4258dc6%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false"
-    loading="lazy"
-    style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
-    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-    allowfullscreen="true"
-  ></iframe>
-</div>
 
 ## Step 0: Install the Required Libraries
 
 Below we install the `langgraph` library, `langfuse` and the Hugging Face `datasets` library
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse SDK v2 and will be updated shortly. Please refere to [this guide](https://langfuse.com/docs/integrations/langchain/tracing) to see how to use the LangChain Callback handler with the OTel Python SDK v3._
+_**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of Python SDK v2, please refer to our [legacy LangGraph integration guide](https://github.com/langfuse/langfuse-docs/blob/662509b3296daddcddb292f14b10a62e7c39407d/pages/docs/integrations/langchain/example-langgraph-agents.md#L4)._
 </Callout>
 
 
 ```python
-# This notebook utilizes the Langfuse SDK v2 and will be updated shortly.
-%pip install "langfuse<=2.60.8"
-
-%pip install langchain langgraph langchain_openai langchain_community langchain_huggingface
+%pip install langfuse langchain langgraph langchain_openai langchain_community langchain_huggingface
 ```
 
 ## Step 1: Set Environment Variables
@@ -53,14 +39,28 @@ Get your Langfuse API keys by signing up for Langfuse cloud or self-hosting Lang
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-
 # Set your OpenAI API Key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
 ## Step 2: Test Your Instrumentation
@@ -106,8 +106,8 @@ graph = graph_builder.compile()
 
 
 ```python
-from langfuse.callback import CallbackHandler
- 
+from langfuse.langchain import CallbackHandler
+
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
  
@@ -116,9 +116,6 @@ for s in graph.stream(
     config={"callbacks": [langfuse_handler]}):
     print(s)
 ```
-
-    {'chatbot': {'messages': [AIMessage(content='Langfuse is a tool designed to help developers and businesses monitor and debug applications that use large language models (LLMs). It provides observability features specifically tailored for AI-driven applications, allowing users to track, analyze, and optimize the performance of their language model integrations. Langfuse offers capabilities such as logging interactions, visualizing data flows, and identifying issues in real-time, which can be crucial for maintaining the reliability and efficiency of applications that rely on complex AI models.', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 96, 'prompt_tokens': 13, 'total_tokens': 109, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-2024-08-06', 'system_fingerprint': 'fp_90d33c15d4', 'id': 'chatcmpl-BEbNebiL1dVZmqIm2G2mgnLHO8Wfw', 'finish_reason': 'stop', 'logprobs': None}, id='run-16477a3d-365a-4551-8ea2-e86516d49041-0', usage_metadata={'input_tokens': 13, 'output_tokens': 96, 'total_tokens': 109, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}})]}}
-
 
 Check your [Langfuse Traces Dashboard](https://cloud.langfuse.com/traces) to confirm that the spans and logs have been recorded.
 
@@ -269,13 +266,6 @@ email_graph.add_node("notify_mr_wayne", notify_mr_wayne) # same logic
 ```
 
 
-
-
-    <langgraph.graph.state.StateGraph at 0x112007890>
-
-
-
-
 ```python
 # Add edges
 email_graph.add_edge(START, "read_email") # After starting we go to the "read_email" node
@@ -298,13 +288,6 @@ email_graph.add_edge("drafting_response", "notify_mr_wayne")
 email_graph.add_edge("notify_mr_wayne", END) # after notifyinf Me wayne, we can end  too
 
 ```
-
-
-
-
-    <langgraph.graph.state.StateGraph at 0x112007890>
-
-
 
 
 ```python
@@ -331,8 +314,8 @@ spam_email = {
 
 
 ```python
-from langfuse.callback import CallbackHandler
- 
+from langfuse.langchain import CallbackHandler
+
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 
@@ -360,37 +343,6 @@ spam_result = compiled_graph.invoke(
     config={"callbacks": [langfuse_handler]}
 ) 
 ```
-
-    
-    Processing legitimate email...
-    Alfred is processing an email from Joker with subject: Found you Batman ! 
-    ham
-    
-    ==================================================
-    Sir, you've received an email from Joker.
-    Subject: Found you Batman ! 
-    
-    I've prepared a draft response for your review:
-    --------------------------------------------------
-    Subject: Re: Found you Batman!
-    
-    Dear Mr. Joker,
-    
-    Thank you for reaching out. Your message has been received and noted. Mr. Wayne is currently unavailable, but rest assured, your concerns will be addressed in due course.
-    
-    Kind regards,
-    
-    Alfred Pennyworth  
-    Wayne Manor Estate
-    ==================================================
-    
-    
-    Processing spam email...
-    Alfred is processing an email from Crypto bro with subject: The best investment of 2025
-    spam
-    Alfred has marked the email as spam.
-    The email has been moved to the spam folder.
-
 
 ### Trace Structure
 
@@ -437,61 +389,46 @@ _[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja
 
 #### 3. User Feedback
 
-If your agent is embedded into a user interface, you can record direct user feedback (like a thumbs-up/down in a chat UI). Below is an example using `IPython.display` for simple feedback mechanism.
-
-In the code snippet below, when a user sends a chat message, we capture the OpenTelemetry trace ID. If the user likes/dislikes the last answer, we attach a score to the trace.
+If your agent is embedded into a user interface, you can record direct user feedback (like a thumbs-up/down in a chat UI). 
 
 
 ```python
-import ipywidgets as widgets
-from IPython.display import display
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-def on_feedback(button,trace):
-    if button.icon == "thumbs-up":
-      trace.score(
-            value=1,
-            name="user-feedback",
-            comment="This was a good answer"
-        )
-    elif button.icon == "thumbs-down":
-      trace.score(
-            value=0,
-            name="user-feedback",
-            comment="This was a bad answer"
-        )
-    print("Scored the trace in Langfuse")
-
-# Run agent
-def qa_agent(question):
-    
-    trace = langfuse.trace()
-    langfuse_handler_trace = trace.get_langchain_handler(
-    update_parent=True # add i/o to trace itself as well
-    )
-
-    response = graph.invoke(
-        input={"messages": [HumanMessage(content = question)]},
-        config={"callbacks": [langfuse_handler_trace]}
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Option 1: Use the yielded span object from the context manager
+with langfuse.start_as_current_span(
+    name="langgraph-request") as span:
+    # ... LangGraph execution ...
+ 
+    # Score using the span object
+    span.score_trace(
+        name="user-feedback",
+        value=1,
+        data_type="NUMERIC",
+        comment="This was correct, thank you"
     )
  
-    return trace,response
-
-user_input = input("Enter your question: ")
-trace,response = qa_agent(user_input)
-
-# Get feedback
-print("How did you like the agent response?")
-
-thumbs_up = widgets.Button(description="👍", icon="thumbs-up")
-thumbs_down = widgets.Button(description="👎", icon="thumbs-down")
-
-thumbs_up.on_click(on_feedback(trace))
-thumbs_down.on_click(on_feedback(trace))
-
-display(widgets.HBox([thumbs_up, thumbs_down]))
+# Option 2: Use langfuse.score_current_trace() if still in context
+with langfuse.start_as_current_span(name="langgraph-request") as span:
+    # ... LangGraph execution ...
+ 
+    # Score using current context
+    langfuse.score_current_trace(
+        name="user-feedback",
+        value=1,
+        data_type="NUMERIC"
+    )
+ 
+# Option 3: Use create_score() with trace ID (when outside context)
+langfuse.create_score(
+    trace_id=predefined_trace_id,
+    name="user-feedback",
+    value=1,
+    data_type="NUMERIC",
+    comment="This was correct, thank you"
+)
 ```
 
 User feedback is then captured in Langfuse:
@@ -528,14 +465,6 @@ spam_result = compiled_graph.invoke(
 ) 
 ```
 
-    
-    Processing spam email...
-    Alfred is processing an email from Crypto bro with subject: The best investment of 2025
-    spam
-    Alfred has marked the email as spam.
-    The email has been moved to the spam folder.
-
-
 You can see that the answer of this example is judged as "not toxic".
 
 ![LLM-as-a-Judge Evaluation Score](https://langfuse.com/images/cookbook/example-langgraph-evaluation/llm-as-a-judge-score.png)
@@ -571,29 +500,6 @@ print("First few rows of search-dataset:")
 print(df.head())
 ```
 
-    First few rows of search-dataset:
-                                         id  \
-    0  20caf138-0c81-4ef9-be60-fe919e0d68d4   
-    1  1f37d9fd-1bcc-4f79-b004-bc0e1e944033   
-    2  76173a7f-d645-4e3e-8e0d-cca139e00ebe   
-    3  5f5ef4ca-91fe-4610-a8a9-e15b12e3c803   
-    4  64dbed0d-d91b-4acd-9a9c-0a7aa83115ec   
-    
-                                                question  \
-    0                 steve jobs statue location budapst   
-    1  Why is the Battle of Stalingrad considered a t...   
-    2  In what year did 'The Birth of a Nation' surpa...   
-    3  How many Russian soldiers surrendered to AFU i...   
-    4   What event led to the creation of Google Images?   
-    
-                                         expected_answer       category       area  
-    0  The Steve Jobs statue is located in Budapest, ...           Arts  Knowledge  
-    1  The Battle of Stalingrad is considered a turni...   General News       News  
-    2  This question is based on a false premise. 'Th...  Entertainment       News  
-    3  About 300 Russian soldiers surrendered to the ...   General News       News  
-    4  Jennifer Lopez's appearance in a green Versace...     Technology       News  
-
-
 Next, we create a dataset entity in Langfuse to track the runs. Then, we add each item from the dataset to the system.
 
 
@@ -613,13 +519,6 @@ langfuse.create_dataset(
     }
 )
 ```
-
-
-
-
-    Dataset(id='cm8n3xati009sad07js1umaa1', name='qa-dataset_langgraph-agent', description='q&a dataset uploaded from Hugging Face', metadata={'date': '2025-03-21', 'type': 'benchmark'}, project_id='cloramnkj0002jz088vzn1ja4', created_at=datetime.datetime(2025, 3, 24, 13, 33, 3, 366000, tzinfo=datetime.timezone.utc), updated_at=datetime.datetime(2025, 3, 24, 13, 33, 3, 366000, tzinfo=datetime.timezone.utc))
-
-
 
 
 ```python
@@ -674,27 +573,52 @@ Then, we define a helper function `my_agent()` that:
 
 
 ```python
-def my_agent(question):
-
-    trace = langfuse.trace()
-    langfuse_handler_trace = trace.get_langchain_handler(
-    update_parent=True # add i/o to trace itself as well
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+langfuse = get_client()
+ 
+# Create a trace via Langfuse spans and use Langchain within it
+with langfuse.start_as_current_span(name="multi-step-process") as root_span:
+    # Update trace attributes
+    root_span.update_trace(
+        session_id="session-1234",
+        user_id="user-5678",
+        input={"user_query": "Explain quantum computing"}
     )
-
+ 
+    # Initialize the Langfuse handler
+    langfuse_handler = CallbackHandler()
+ 
+    # Step 1: Initial processing (custom logic)
+    with langfuse.start_as_current_span(name="input-preprocessing") as prep_span:
+        processed_input = "Simplified: Explain quantum computing"
+        prep_span.update(output={"processed_query": processed_input})
+ 
+    # Step 2: LangChain processing
     response = graph.invoke(
-        input={"messages": [HumanMessage(content = question)]},
-        config={"callbacks": [langfuse_handler_trace]}
+    input={"messages": [HumanMessage(content = question)]},
+    config={"callbacks": [langfuse_handler]}
     )
-    
-    return trace, response["messages"][-1].content
+ 
+    # Step 3: Post-processing (custom logic)
+    with langfuse.start_as_current_span(name="output-postprocessing") as post_span:
+        final_result = f"Response: {result.content}"
+        post_span.update(output={"final_response": final_result})
+ 
+    # Update trace output
+    root_span.update_trace(output={"final_answer": final_result})
 ```
 
 Finally, we loop over each dataset item, run the agent, and link the trace to the dataset item. We can also attach a quick evaluation score if desired.
 
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+ 
+langfuse = get_client()
 
 dataset = langfuse.get_dataset('qa-dataset_langgraph-agent')
 for item in dataset.items:
