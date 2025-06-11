@@ -62,6 +62,7 @@ os.environ["OPENAI_API_KEY"] = ""
 
 ```python
 from langfuse.openai import openai
+from langfuse import get_client
 import base64
 
 client = openai.OpenAI()
@@ -101,7 +102,9 @@ response = client.chat.completions.create(
 
 print(response.__dict__)
 
-openai.flush_langfuse()
+# Flush via global client
+langfuse = get_client()
+langfuse.flush()
 ```
 
     {'id': 'chatcmpl-AVgfcbLDSfqWKWTZoFHyjnZuEgXcF', 'choices': [Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='The image shows a dog with a curly coat, interacting with a person by placing its front paws on their lap. In the background, there are some people standing, and the setting appears to be a cozy interior with wooden flooring and a patterned rug. The dog looks happy and friendly.', refusal=None, role='assistant', audio=None, function_call=None, tool_calls=None))], 'created': 1732115556, 'model': 'gpt-4o-mini-2024-07-18', 'object': 'chat.completion', 'service_tier': None, 'system_fingerprint': 'fp_3de1288069', 'usage': CompletionUsage(completion_tokens=57, prompt_tokens=25514, total_tokens=25571, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)), '_request_id': 'req_701836bd3ee49571c4aeb9600273cbda'}
@@ -135,7 +138,9 @@ response = client.chat.completions.create(
 
 print(response.__dict__)
 
-openai.flush_langfuse()
+# Flush via global client
+langfuse = get_client()
+langfuse.flush()
 ```
 
     {'id': 'chatcmpl-AVgfgHKaVpqPK3HzJwV7kvhDC2CuY', 'choices': [Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content=None, refusal=None, role='assistant', audio=ChatCompletionAudio(id='audio_673dfc6a54048190976c16d98c11dcd7', data=<langfuse.media.LangfuseMedia object at 0x78c13b074ac0>, expires_at=1732119162, transcript='Why do Berliners always carry a pencil? \n\nIn case they need to draw the line at a German comedy show!'), function_call=None, tool_calls=None))], 'created': 1732115560, 'model': 'gpt-4o-audio-preview-2024-10-01', 'object': 'chat.completion', 'service_tier': None, 'system_fingerprint': 'fp_6e2d124157', 'usage': CompletionUsage(completion_tokens=151, prompt_tokens=66, total_tokens=217, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=115, reasoning_tokens=0, rejected_prediction_tokens=0, text_tokens=36), prompt_tokens_details=PromptTokensDetails(audio_tokens=49, cached_tokens=0, text_tokens=17, image_tokens=0)), '_request_id': 'req_59902b4718abb9dbc82b83b40a8eda72'}
