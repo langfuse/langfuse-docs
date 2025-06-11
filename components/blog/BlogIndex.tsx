@@ -6,7 +6,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 
-export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
+export const BlogIndex = ({
+  maxItems,
+  path = "/blog",
+}: {
+  maxItems?: number;
+  path?: string;
+}) => {
   const router = useRouter();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
@@ -18,7 +24,7 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
 
   const posts = useMemo(
     () =>
-      (getPagesUnderRoute("/blog") as Array<Page & { frontMatter: any }>)
+      (getPagesUnderRoute(path) as Array<Page & { frontMatter: any }>)
         .filter((page) => page.frontMatter?.showInBlogIndex !== false)
         .sort(
           (a, b) =>
