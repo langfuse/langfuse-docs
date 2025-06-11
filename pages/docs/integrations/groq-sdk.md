@@ -159,7 +159,8 @@ We are integrating the Groq SDK with Langfuse using the [`@observe` decorator](h
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Function to handle Groq chat completion calls, wrapped with @observe to log the LLM interaction
 @observe(as_type="generation")
@@ -183,7 +184,7 @@ def groq_chat_completion(**kwargs):
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
     # Log the input and model parameters before calling the LLM
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         input=messages,
         model=model,
         model_parameters=model_parameters,
@@ -195,7 +196,7 @@ def groq_chat_completion(**kwargs):
 
     # Log the usage details and output content after the LLM call
     choice = response.choices[0]
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         usage_details={
             "input": len(str(messages)),
             "output": len(choice.message.content)
@@ -244,7 +245,8 @@ This example demonstrates chaining multiple LLM calls using the `@observe()` dec
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def find_best_painting_from(country="France"):
@@ -290,7 +292,8 @@ The following example demonstrates how to handle streaming responses from the Gr
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe(as_type="generation")
 def stream_groq_chat_completion(**kwargs):
@@ -308,7 +311,7 @@ def stream_groq_chat_completion(**kwargs):
     }
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         input=messages,
         model=model,
         model_parameters=model_parameters,
@@ -322,7 +325,7 @@ def stream_groq_chat_completion(**kwargs):
         final_response += content
         yield content
 
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         usage_details={
             "total_tokens": len(final_response.split())
         },

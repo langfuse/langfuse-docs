@@ -113,7 +113,7 @@ In addition we use the [openai integration](https://langfuse.com/docs/integratio
 
 ```python
 # Langfuse decorator
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, langfuse
 # Optional: automated instrumentation via OpenAI SDK integration
 # See note above regarding alternative implementations
 from langfuse.openai import openai
@@ -121,7 +121,7 @@ from langfuse.openai import openai
 # Global reference for the current trace_id which is used to later add user feedback
 current_trace_id = None
 
-# Add decorator here to capture overall timings, input/output, and manipulate trace metadata via `langfuse_context`
+# Add decorator here to capture overall timings, input/output, and manipulate trace metadata via `langfuse`
 @observe()
 async def create_response(
     prompt: str,
@@ -129,11 +129,11 @@ async def create_response(
 ):
     # Save trace id in global var to add feedback later
     global current_trace_id
-    current_trace_id = langfuse_context.get_current_trace_id()
+    current_trace_id = langfuse.get_current_trace_id()
 
     # Add session_id to Langfuse Trace to enable session tracking
     global session_id
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="gradio_demo_chat",
         session_id=session_id,
         input=prompt,
@@ -155,7 +155,7 @@ async def create_response(
     response["content"] = oai_response.choices[0].message.content or ""
 
     # Customize trace ouput for better readability in Langfuse Sessions
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         output=response["content"],
     )
 

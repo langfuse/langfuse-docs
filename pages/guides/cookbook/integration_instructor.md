@@ -150,7 +150,8 @@ import instructor
 
 from langfuse import Langfuse
 from langfuse.openai import AsyncOpenAI
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -208,7 +209,7 @@ async def classify_feedback(feedback: str) -> Tuple[FeedbackClassification, floa
         )
 
         # Retrieve observation_id of current span
-        observation_id = langfuse_context.get_current_observation_id()
+        observation_id = langfuse.get_current_observation_id()
 
         return feedback, response, observation_id
 
@@ -238,13 +239,13 @@ async def main(feedbacks: List[str]):
         results.append(result)
 
         # Retrieve trace_id of current trace
-        trace_id = langfuse_context.get_current_trace_id()
+        trace_id = langfuse.get_current_trace_id()
 
         # Score the relevance of the feedback in Langfuse
         score_relevance(trace_id, observation_id, classification.relevance_score)
 
     # Flush observations to Langfuse
-    langfuse_context.flush()
+    langfuse.flush()
     return results
 
 feedback_messages = [

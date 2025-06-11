@@ -73,11 +73,12 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 Decorators
 
 ```python /release="<release_tag>"/
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def fn():
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         release="<release_tag>"
     )
 
@@ -213,17 +214,18 @@ The version parameter can be included in both spans and generations, and can be 
 Decorators
 
 ```python /version="1.0"/
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def fn():
     # trace level
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         version="1.0",
     )
 
     # observation level
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         version="1.0",
     )
 fn()

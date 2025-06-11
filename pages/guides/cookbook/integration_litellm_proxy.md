@@ -120,7 +120,7 @@ Let's have a look at a simple example which uses all three models we have set up
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 from langfuse.openai import openai
 
 @observe()

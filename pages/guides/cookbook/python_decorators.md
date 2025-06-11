@@ -49,7 +49,8 @@ By default it captures:
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 import time
 
 @observe()
@@ -78,8 +79,8 @@ Voilà! ✨ Langfuse will generate a trace with a nested span for you.
 In addition to the attributes automatically captured by the decorator, you can add others to use the full features of Langfuse.
 
 Two utility methods:
-- `langfuse_context.update_current_observation`: Update the trace/span of the current function scope
-- `langfuse_context.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
+- `langfuse.update_current_span`: Update the trace/span of the current function scope
+- `langfuse.update_current_trace`: Update the trace itself, can also be called within any deeply nested span within the trace
 
 For details on available attributes, have a look at the [reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.update_current_observation)
 
@@ -87,16 +88,17 @@ Below is an example demonstrating how to enrich traces and observations with cus
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe(as_type="generation")
 def deeply_nested_llm_call():
     # Enrich the current observation with a custom name, input, and output
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         name="Deeply nested LLM call", input="Ping?", output="Pong!"
     )
     # Set the parent trace's name from within a nested observation
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="Trace name set from deeply_nested_llm_call",
         session_id="1234",
         user_id="5678",
@@ -107,7 +109,7 @@ def deeply_nested_llm_call():
 @observe()
 def nested_span():
     # Update the current span with a custom name and level
-    langfuse_context.update_current_observation(name="Nested Span", level="WARNING")
+    langfuse.update_current_span(name="Nested Span", level="WARNING")
     deeply_nested_llm_call()
 
 @observe()
@@ -150,7 +152,7 @@ def anthropic_completion(**kwargs):
   kwargs_clone = kwargs.copy()
   input = kwargs_clone.pop('messages', None)
   model = kwargs_clone.pop('model', None)
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       input=input,
       model=model,
       metadata=kwargs_clone
@@ -160,7 +162,7 @@ def anthropic_completion(**kwargs):
 
   # See docs for more details on token counts and usd cost in Langfuse
   # https://langfuse.com/docs/model-usage-and-cost
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       usage_details={
           "input": response.usage.input_tokens,
           "output": response.usage.output_tokens
@@ -193,7 +195,7 @@ By default, input/ouput of a function are captured by `@observe()`.
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe(capture_input=False, capture_output=False)
 def stealth_fn(input: str):
@@ -208,11 +210,12 @@ Alternatively, you can **override input and output** via `update_current_observa
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def fn_2():
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         input="Table?", output="Tennis!"
     )
     # Logic for a deeply nested LLM call
@@ -220,7 +223,7 @@ def fn_2():
 
 @observe()
 def main_fn():
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         input="Ping?", output="Pong!"
     )
     fn_2()
@@ -248,7 +251,7 @@ The [OpenAI integration](https://langfuse.com/docs/integrations/openai/python/ge
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe()
 def openai_fn(calc: str):
@@ -263,11 +266,12 @@ def openai_fn(calc: str):
 
 #### LlamaIndex
 
-Via `Settings.callback_manager` you can configure the callback to use for tracing of the subsequent LlamaIndex executions. `langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `llama_index_fn()`.
+Via `Settings.callback_manager` you can configure the callback to use for tracing of the subsequent LlamaIndex executions. `langfuse.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `llama_index_fn()`.
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 from llama_index.core import Document, VectorStoreIndex
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
@@ -282,7 +286,7 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 @observe()
 def llama_index_fn(question: str):
     # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
-    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    langfuse_handler = langfuse.get_current_llama_index_handler()
     Settings.callback_manager = CallbackManager([langfuse_handler])
 
     # Run application
@@ -293,7 +297,7 @@ def llama_index_fn(question: str):
 
 #### LangChain
 
-`langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `langchain_fn()`. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
+`langfuse.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `langchain_fn()`. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
 
 
 ```python
@@ -301,7 +305,7 @@ from operator import itemgetter
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
-from langfuse.decorators import observe
+from langfuse import observe
  
 prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
 model = ChatOpenAI()
@@ -310,7 +314,7 @@ chain = prompt | model | StrOutputParser()
 @observe()
 def langchain_fn(person: str):
     # Get Langchain Callback Handler scoped to the current trace context
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
 
     # Pass handler to invoke
     chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
@@ -320,7 +324,7 @@ def langchain_fn(person: str):
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe()
 def main():
@@ -340,7 +344,7 @@ main();
 
 The Langfuse SDK executes network requests in the background on a separate thread for better performance of your application. This can lead to lost events in short lived environments such as AWS Lambda functions when the Python process is terminated before the SDK sent all events to the Langfuse API.
 
-Make sure to call `langfuse_context.flush()` before exiting to prevent this. This method waits for all tasks to finish.
+Make sure to call `langfuse.flush()` before exiting to prevent this. This method waits for all tasks to finish.
 
 ## Additional features
 
@@ -357,21 +361,22 @@ Make sure to call `langfuse_context.flush()` before exiting to prevent this. Thi
 
 #### Within the decorated function
 
-You can attach a score to the current observation context by calling `langfuse_context.score_current_observation`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse_context.score_current_trace`:
+You can attach a score to the current observation context by calling `langfuse.score_current_span`. You can also score the entire trace from anywhere inside the nesting hierarchy by calling `langfuse.score_current_trace`:
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def nested_span():
-    langfuse_context.score_current_observation(
+    langfuse.score_current_span(
         name="feedback-on-span",
         value=1,
         comment="I like how personalized the response is",
     )
 
-    langfuse_context.score_current_trace(
+    langfuse.score_current_trace(
         name="feedback-on-trace-from-nested-span",
         value=1,
         comment="I like how personalized the response is",
@@ -381,7 +386,7 @@ def nested_span():
 # This will create a new trace
 @observe()
 def main():
-    langfuse_context.score_current_trace(
+    langfuse.score_current_trace(
         name="feedback-on-trace",
         value=1,
         comment="I like how personalized the response is",
@@ -402,17 +407,18 @@ The decorators expose the trace_id and observation_id which are necessary to add
 
 ```python
 from langfuse import Langfuse
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Initialize the Langfuse client
 langfuse_client = Langfuse()
 
 @observe()
 def nested_fn():
-    span_id = langfuse_context.get_current_observation_id()
+    span_id = langfuse.get_current_observation_id()
 
     # can also be accessed in main
-    trace_id = langfuse_context.get_current_trace_id()
+    trace_id = langfuse.get_current_trace_id()
 
     return "foo_bar", trace_id, span_id
 
@@ -426,7 +432,7 @@ def main():
 
 
 # Flush the trace to send it to the Langfuse platform
-langfuse_context.flush()
+langfuse.flush()
 
 # Execute the main function to generate a trace
 _, trace_id, span_id = main()
@@ -461,7 +467,8 @@ To dynamically set a custom ID for a trace or observation, simply pass a keyword
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 import uuid
 
 @observe()
@@ -495,13 +502,14 @@ Enable debug mode to get verbose logs. Set the debug mode via the environment va
 
 ### Authentication check
 
-Use `langfuse_context.auth_check()` to verify that your host and API credentials are valid.
+Use `langfuse.auth_check()` to verify that your host and API credentials are valid.
 
 
 ```python
-from langfuse.decorators import langfuse_context
+from langfuse import get_client
+langfuse = get_client()
 
-assert langfuse_context.auth_check()
+assert langfuse.auth_check()
 ```
 
 ## Learn more

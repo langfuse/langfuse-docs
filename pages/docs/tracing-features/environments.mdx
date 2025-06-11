@@ -66,14 +66,15 @@ main()
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Either set the environment variable or configure the decorator. The latter takes precedence.
 # Alternatively, set via .env file and load via dotenv
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 
 # Configure the decorator
-langfuse_context.configure(environment="production")
+langfuse.configure(environment="production")
 
 @observe()
 def fn():

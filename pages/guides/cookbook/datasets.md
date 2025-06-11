@@ -100,7 +100,7 @@ This an example production application that we want to evaluate. It is instrumen
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, langfuse
 
 @observe()
 def run_my_custom_llm_app(input, system_prompt):
@@ -158,7 +158,8 @@ Now we can easily run experiments with different configurations to explore which
 
 
 ```python
-from langfuse.decorators import langfuse_context
+from langfuse import get_client
+langfuse = get_client()
 
 run_experiment(
     "famous_city",
@@ -178,7 +179,7 @@ run_experiment(
 )
 
 # Assert that all events were sent to the Langfuse API
-langfuse_context.flush()
+langfuse.flush()
 langfuse.flush()
 ```
 

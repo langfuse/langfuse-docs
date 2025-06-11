@@ -46,7 +46,7 @@ Instead of importing `openai` directly, import it from `langfuse.openai`. Also, 
 ```python
 # Instead of: import openai
 from langfuse.openai import OpenAI
-from langfuse.decorators import observe
+from langfuse import observe
 ```
 
 ### Initialize the OpenAI Client for Hugging Face Models

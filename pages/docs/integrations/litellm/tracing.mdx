@@ -139,11 +139,12 @@ print(cohere_response)
 
 ### Use within decorated function
 
-If you want to use the LiteLLM SDK within a decorated function ([observe() decorator](/docs/sdk/python/decorators)), you can use the `langfuse_context.get_current_trace_id()` and `langfuse_context.get_current_observation_id()` methods to pass the correct nesting information to the LiteLLM SDK.
+If you want to use the LiteLLM SDK within a decorated function ([observe() decorator](/docs/sdk/python/decorators)), you can use the `langfuse.get_current_trace_id()` and `langfuse.get_current_observation_id()` methods to pass the correct nesting information to the LiteLLM SDK.
 
 ```python filename="main.py"
 from litellm import completion
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def fn():
@@ -154,8 +155,8 @@ def fn():
       {"role": "user", "content": "Hi 👋 - i'm openai"}
     ],
     metadata={
-        "existing_trace_id": langfuse_context.get_current_trace_id(),   # set langfuse trace ID
-        "parent_observation_id": langfuse_context.get_current_observation_id(),
+        "existing_trace_id": langfuse.get_current_trace_id(),   # set langfuse trace ID
+        "parent_observation_id": langfuse.get_current_observation_id(),
     },
   )
 

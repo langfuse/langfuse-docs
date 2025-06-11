@@ -52,7 +52,7 @@ Check out our [OpenAI integration docs](https://langfuse.com/docs/integrations/o
 ```python
 # Instead of: import openai
 from langfuse.openai import OpenAI
-from langfuse.decorators import observe
+from langfuse import observe
 ```
 
 ### Initialize the OpenAI Client for DeepSeek Models
@@ -154,11 +154,12 @@ print(completion_with_attributes.choices[0].message.content)
 
 ### Utilize Langfuse Context to Update Trace Attributes
 
-You can modify trace attributes within a function using `langfuse_context`.
+You can modify trace attributes within a function using `langfuse`.
 
 
 ```python
-from langfuse.decorators import langfuse_context
+from langfuse import get_client
+langfuse = get_client()
 
 @observe()
 def technical_explanation():
@@ -172,7 +173,7 @@ def technical_explanation():
     ).choices[0].message.content
 
     # Update the current trace with additional information
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="Blockchain Explanation",
         session_id="session_xyz789",
         user_id="user_tech_42",
@@ -205,7 +206,7 @@ langfuse = Langfuse()
 @observe()
 def generate_and_score():
     # Get the trace_id of the current trace
-    trace_id = langfuse_context.get_current_trace_id()
+    trace_id = langfuse.get_current_trace_id()
     
     # Generate content
     content = client.chat.completions.create(

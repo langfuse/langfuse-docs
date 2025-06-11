@@ -182,14 +182,15 @@ To get the context of the current observation, we use the [`observe()` decorator
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Langfuse observe() decorator to automatically create a trace for the top-level function and spans for any nested functions.
 @observe()
 def hedgehog_helper(user_message):
 
     response = hedgehog_query_engine.query(user_message)
-    trace_id = langfuse_context.get_current_trace_id()
+    trace_id = langfuse.get_current_trace_id()
 
     print(response)
 

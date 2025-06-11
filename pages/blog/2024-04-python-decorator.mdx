@@ -116,7 +116,7 @@ def main():
 All complexity is abstracted away and you can focus on your business logic. The OpenAI SDK wrapper is aware that it is run within a decorated function and automatically adds its logs to the trace.
 
 ```python /@observe()/
-from langfuse.decorators import observe
+from langfuse import observe
 from langfuse.openai import openai # OpenAI integration
 
 @observe()
@@ -152,7 +152,7 @@ Example ([cookbook](/guides/cookbook/python_decorators#interoperability-with-oth
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe()
 def openai_fn(calc: str):
@@ -167,7 +167,7 @@ def openai_fn(calc: str):
 @observe()
 def llama_index_fn(question: str):
     # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
-    langfuse_handler = langfuse_context.get_current_llama_index_handler()
+    langfuse_handler = langfuse.get_current_llama_index_handler()
     Settings.callback_manager = CallbackManager([langfuse_handler])
 
     # Run application
@@ -178,7 +178,7 @@ def llama_index_fn(question: str):
 @observe()
 def langchain_fn(person: str):
     # Get Langchain Callback Handler scoped to the current trace context
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
 
     # Pass handler to invoke method of chain/agent
     chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})

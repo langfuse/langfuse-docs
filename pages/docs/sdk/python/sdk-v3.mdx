@@ -1216,12 +1216,13 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 **v2 Pattern:**
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe()
 def my_function():
     # This was the trace
-    langfuse_context.update_current_trace(user_id="user_123")
+    langfuse.update_current_trace(user_id="user_123")
     return "result"
 ```
 

@@ -62,7 +62,8 @@ We are integrating the Mistral AI SDK with Langfuse using the [@observe decorato
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Function to handle Mistral completion calls, wrapped with @observe to log the LLM interaction
 @observe(as_type="generation")
@@ -88,7 +89,7 @@ def mistral_completion(**kwargs):
   model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
   # Log the input and model parameters before calling the LLM
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       input=input,
       model=model,
       model_parameters=model_parameters,
@@ -100,7 +101,7 @@ def mistral_completion(**kwargs):
   res = mistral_client.chat.complete(**kwargs)
 
   # Log the usage details and output content after the LLM call
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       usage_details={
           "input": res.usage.prompt_tokens,
           "output": res.usage.completion_tokens
@@ -118,7 +119,7 @@ Optionally, other functions (api handlers, retrieval functions, ...) can be also
 
 In the following example, we also added the decorator to the top-level function `find_best_painter_from`. This function calls the mistral_completion function, which is decorated with @observe(as_type="generation"). This hierarchical setup hels to trace more complex applications which involve multiple LLM calls and other non-llm methods which are decorated with @observe.
 
-You can use langfuse_context.update_current_observation or langfuse_context.update_current_trace to add additional details such as input, output, and model parameters to the trace.
+You can use langfuse.update_current_span or langfuse.update_current_trace to add additional details such as input, output, and model parameters to the trace.
 
 
 ```python
@@ -220,7 +221,7 @@ def stream_mistral_completion(**kwargs):
     }
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         input=input,
         model=model,
         model_parameters=model_parameters,
@@ -235,7 +236,7 @@ def stream_mistral_completion(**kwargs):
         yield content
 
         if chunk.data.choices[0].finish_reason == "stop":
-            langfuse_context.update_current_observation(
+            langfuse.update_current_span(
                 usage_details={
                     "input": chunk.data.usage.prompt_tokens,
                     "output": chunk.data.usage.completion_tokens
@@ -339,7 +340,7 @@ async def async_mistral_completion(**kwargs):
     }
   model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       input=input,
       model=model,
       model_parameters=model_parameters,
@@ -349,7 +350,7 @@ async def async_mistral_completion(**kwargs):
 
   res = await mistral_client.chat.complete_async(**kwargs)
 
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       usage_details={
           "input": res.usage.prompt_tokens,
           "output": res.usage.completion_tokens
@@ -412,7 +413,7 @@ async def async_stream_mistral_completion(**kwargs):
     }
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-    langfuse_context.update_current_observation(
+    langfuse.update_current_span(
         input=input,
         model=model,
         model_parameters=model_parameters,
@@ -427,7 +428,7 @@ async def async_stream_mistral_completion(**kwargs):
         yield content
 
         if chunk.data.choices[0].finish_reason == "stop":
-            langfuse_context.update_current_observation(
+            langfuse.update_current_span(
                 usage_details={
                     "input": chunk.data.usage.prompt_tokens,
                     "output": chunk.data.usage.completion_tokens

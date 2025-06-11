@@ -159,7 +159,7 @@ with langfuse.start_as_current_span(name="analyze-document") as span:
 <Tab>
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, langfuse
 from langfuse.media import LangfuseMedia
 
 with open("static/bitcoin.pdf", "rb") as pdf_file:
@@ -175,7 +175,7 @@ wrapped_obj.obj
 
 @observe()
 def main():
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
       input=wrapped_obj,
       metadata={
           "context": wrapped_obj

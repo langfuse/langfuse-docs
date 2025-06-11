@@ -52,7 +52,7 @@ Use the `client.beta.assistants.create` method to create a new assistant. Altern
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 from openai import OpenAI
 
 @observe()
@@ -113,7 +113,8 @@ Retrieve the assistant's response from the thread:
 
 ```python
 import json
-from langfuse.decorators import langfuse_context
+from langfuse import get_client
+langfuse = get_client()
 
 @observe()
 def get_response(thread_id, run_id):
@@ -135,11 +136,11 @@ def get_response(thread_id, run_id):
 
     # log internal generation within the openai assistant as a separate child generation to langfuse
     # get langfuse client used by the decorator, uses the low-level Python SDK
-    langfuse_client = langfuse_context.client_instance
+    langfuse_client = langfuse.client_instance
     # pass trace_id and current observation ids to the newly created child generation
     langfuse_client.generation(
-        trace_id=langfuse_context.get_current_trace_id(),
-        parent_observation_id=langfuse_context.get_current_observation_id(),
+        trace_id=langfuse.get_current_trace_id(),
+        parent_observation_id=langfuse.get_current_observation_id(),
         model=run.model,
         usage_details=run.usage,
         input=input_messages,

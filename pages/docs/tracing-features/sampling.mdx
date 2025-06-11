@@ -50,7 +50,8 @@ If a trace is not sampled, none of its observations (spans or generations) or as
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
 

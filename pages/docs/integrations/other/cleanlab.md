@@ -69,7 +69,8 @@ NOTE: TLM requires the entire input to the LLM to be provided. This includes any
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 from openai import OpenAI
 
 openai = OpenAI()
@@ -91,7 +92,7 @@ def generate_answers(trivia_question):
     system_prompt = "You are a trivia master."
 
     # Update the trace with the question    
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name=f"Answering question: '{trivia_question}'",
         tags=["TLM_eval_pipeline"],
         metadata={"system_prompt": system_prompt}

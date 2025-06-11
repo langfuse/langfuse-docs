@@ -87,17 +87,18 @@ await langfuse.async_api.*
 You can also access the Langfuse client instance when using the [decorator-based integration](/docs/sdk/python/decorators):
 
 ```python
-from langfuse.decorators import langfuse_context
+from langfuse import get_client
+langfuse = get_client()
 
 # fetch a trace
-langfuse_context.client_instance.api.trace.get(trace_id)
+langfuse.client_instance.api.trace.get(trace_id)
 
 # async client via asyncio
-await langfuse_context.client_instance.async_api.trace(trace_id)
+await langfuse.client_instance.async_api.trace(trace_id)
 
 # explore more endpoints via Intellisense
-langfuse_context.client_instance.api.*
-await langfuse_context.client_instance.async_api.*
+langfuse.client_instance.api.*
+await langfuse.client_instance.async_api.*
 ```
 
 </Tab>

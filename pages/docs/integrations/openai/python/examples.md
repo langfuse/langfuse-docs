@@ -260,7 +260,7 @@ Many applications require more than one OpenAI call. The `@observe()` decorator 
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe() # decorator to automatically create trace and nest generations
 def main(country: str, user_id: str, **kwargs) -> str:
@@ -308,7 +308,8 @@ Some of the functionality enabled by custom traces:
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe() # decorator to automatically create trace and nest generations
 def main(country: str, user_id: str, **kwargs) -> str:
@@ -334,7 +335,7 @@ def main(country: str, user_id: str, **kwargs) -> str:
     ).choices[0].message.content
 
     # rename trace and set attributes (e.g., medatata) as needed
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="City poem generator",
         session_id="1234",
         user_id=user_id,
@@ -364,14 +365,15 @@ The score is associated to the trace using the `trace_id`.
 
 ```python
 from langfuse import Langfuse
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 langfuse = Langfuse()
 
 @observe() # decorator to automatically create trace and nest generations
 def main():
     # get trace_id of current trace
-    trace_id = langfuse_context.get_current_trace_id()
+    trace_id = langfuse.get_current_trace_id()
 
     # rest of your application ...
 

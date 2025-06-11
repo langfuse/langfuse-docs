@@ -334,26 +334,27 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 You can use this integration in combination with the `observe()` decorator from the Langfuse Python SDK. Thereby, you can trace non-Langchain code, combine multiple Langchain invocations in a single trace, and use the full functionality of the Langfuse Python SDK.
 
-The `langfuse_context.get_current_langchain_handler()` method exposes a LangChain callback handler in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/sdk/python/decorators#langchain).
+The `langfuse.get_current_langchain_handler()` method exposes a LangChain callback handler in the context of a trace or span when using `decorators`. Learn more about Langfuse Tracing [here](https://langfuse.com/docs/tracing) and this functionality [here](https://langfuse.com/docs/sdk/python/decorators#langchain).
 
 
 ### How it works
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Create a trace via Langfuse decorators and get a Langchain Callback handler for it
 @observe() # automtically log function as a trace to Langfuse
 def main():
     # update trace attributes (e.g, name, session_id, user_id)
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="custom-trace",
         session_id="user-1234",
         user_id="session-1234",
     )
     # get the langchain handler for the current trace
-    langfuse_context.get_current_langchain_handler()
+    langfuse.get_current_langchain_handler()
 
     # use the handler to trace langchain runs ...
 
@@ -397,13 +398,14 @@ Invoke it multiple times as part of a nested trace.
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # On span "Physics"."Favorites"
 @observe()  # decorator to automatically log function as sub-span to Langfuse
 def favorites():
     # get the langchain handler for the current sub-span
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
     # invoke chain with langfuse handler
     chain.invoke({"person": "Richard Feynman"},
                  config={"callbacks": [langfuse_handler]})
@@ -412,7 +414,7 @@ def favorites():
 @observe()  # decorator to automatically log function as span to Langfuse
 def physics():
     # get the langchain handler for the current span
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
     # invoke chains with langfuse handler
     chain.invoke({"person": "Albert Einstein"},
                  config={"callbacks": [langfuse_handler]})
@@ -424,7 +426,7 @@ def physics():
 @observe()  # decorator to automatically log function as trace to Langfuse
 def main():
     # get the langchain handler for the current trace
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
     # invoke chain with langfuse handler
     chain.invoke({"person": "Alan Turing"},
                  config={"callbacks": [langfuse_handler]})
@@ -496,7 +498,8 @@ Alternatively, you can use the LangChain integration together with the [Langfuse
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 from operator import itemgetter
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -510,13 +513,13 @@ chain = prompt1 | model | StrOutputParser()
 @observe()
 def main(person):
 
-  langfuse_handler = langfuse_context.get_current_langchain_handler()
+  langfuse_handler = langfuse.get_current_langchain_handler()
 
   response = chain.invoke({"person": person}, config={
       "callbacks":[langfuse_handler]
   })
 
-  trace_id = langfuse_context.get_current_trace_id()
+  trace_id = langfuse.get_current_trace_id()
 
   return trace_id, response
 

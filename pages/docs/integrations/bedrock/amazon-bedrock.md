@@ -101,7 +101,7 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, langfuse
 from botocore.exceptions import ClientError
 
 @observe(as_type="generation", name="Bedrock Converse")
@@ -114,7 +114,7 @@ def wrapped_bedrock_converse(**kwargs):
       **kwargs_clone.pop('inferenceConfig', {}),
       **kwargs_clone.pop('additionalModelRequestFields', {})
   }
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
     input=input,
     model=modelId,
     model_parameters=model_parameters,
@@ -126,13 +126,13 @@ def wrapped_bedrock_converse(**kwargs):
     response = bedrock_runtime.converse(**kwargs)
   except (ClientError, Exception) as e:
     error_message = f"ERROR: Can't invoke '{modelId}'. Reason: {e}"
-    langfuse_context.update_current_observation(level="ERROR", status_message=error_message)
+    langfuse.update_current_span(level="ERROR", status_message=error_message)
     print(error_message)
     return
 
   # 3. extract response metadata
   response_text = response["output"]["message"]["content"][0]["text"]
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
     output=response_text,
     usage_details={
         "input": response["usage"]["inputTokens"],

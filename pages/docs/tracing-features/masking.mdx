@@ -105,9 +105,10 @@ def masking_function(data):
 Use with the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
-langfuse_context.configure(mask=masking_function)
+langfuse.configure(mask=masking_function)
 
 @observe()
 def fn():
@@ -115,7 +116,7 @@ def fn():
 
 fn()
 
-langfuse_context.flush()
+langfuse.flush()
 
 # The trace output in Langfuse will have the output masked as "REDACTED".
 ```
@@ -197,10 +198,11 @@ completion = openai.chat.completions.create(
 openai.flush_langfuse()
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set masking function via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set masking function via the `langfuse`:
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 from langfuse.openai import openai
 
 def masking_function(data):
@@ -209,7 +211,7 @@ def masking_function(data):
 
   return data
 
-langfuse_context.configure(mask=masking_function)
+langfuse.configure(mask=masking_function)
 
 @observe()
 def fn():
@@ -251,10 +253,11 @@ handler = CallbackHandler(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `mask` via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `mask` via the `langfuse`:
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 def masking_function(data):
   if isinstance(data, str) and data.startswith("SECRET_"):
@@ -262,11 +265,11 @@ def masking_function(data):
 
   return data
 
-langfuse_context.configure(mask=masking_function)
+langfuse.configure(mask=masking_function)
 
 @observe()
 def fn():
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
 
     # Pass handler to invoke of your langchain chain/agent
     chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
@@ -324,10 +327,11 @@ with instrumentor.observe():
 instrumentor.flush()
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the `mask` via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the `mask` via the `langfuse`:
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 from langfuse.llama_index import LlamaIndexInstrumentor
 
 def masking_function(data):
@@ -336,13 +340,13 @@ def masking_function(data):
 
   return data
 
-langfuse_context.configure(mask=masking_function)
+langfuse.configure(mask=masking_function)
 
 @observe()
 def llama_index_fn(question: str):
     # Get IDs
-    current_trace_id = langfuse_context.get_current_trace_id()
-    current_observation_id = langfuse_context.get_current_observation_id()
+    current_trace_id = langfuse.get_current_trace_id()
+    current_observation_id = langfuse.get_current_observation_id()
 
     # Pass to instrumentor
     with instrumentor.observe(

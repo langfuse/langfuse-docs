@@ -101,7 +101,8 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, Part, FinishReason
 import vertexai.preview.generative_models as generative_models
 
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe(as_type="generation")
 def vertex_generate_content(input, model_name = "gemini-pro"):
@@ -117,7 +118,7 @@ def vertex_generate_content(input, model_name = "gemini-pro"):
   )
 
   # pass model, model input, and usage metrics to Langfuse
-  langfuse_context.update_current_observation(
+  langfuse.update_current_span(
       input=input,
       model=model_name,
       usage_details={

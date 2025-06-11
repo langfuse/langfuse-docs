@@ -145,7 +145,7 @@ openai.flush_langfuse()
 
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, langfuse
 from langfuse.media import LangfuseMedia
 
 with open("static/bitcoin.pdf", "rb") as pdf_file:
@@ -157,7 +157,7 @@ wrapped_obj = LangfuseMedia(
 
 @observe()
 def main():
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         metadata={
             "context": wrapped_obj
         },
@@ -167,7 +167,7 @@ def main():
 
 main()
 
-langfuse_context.flush()
+langfuse.flush()
 ```
 
 ## Langchain: Image input

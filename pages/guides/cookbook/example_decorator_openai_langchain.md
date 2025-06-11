@@ -38,12 +38,13 @@ from operator import itemgetter
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
-from langfuse.decorators import observe
+from langfuse import observe
 ```
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # import openai
 from langfuse.openai import openai
@@ -66,7 +67,7 @@ def get_random_rap_topic():
 ```python
 @observe()
 def summarize_rap_langchain(rap):
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    langfuse_handler = langfuse.get_current_langchain_handler()
 
     # Create chain
     prompt = ChatPromptTemplate.from_template("Summarrize this rap: {rap}")
@@ -90,7 +91,7 @@ def rap_battle(turns: int = 5):
 
   print(f"Topic: {topic}")
 
-  langfuse_context.update_current_trace(
+  langfuse.update_current_trace(
      metadata={"topic":topic},
      tags=["Launch Week 1"]
   )

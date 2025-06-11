@@ -120,11 +120,12 @@ for topic in topics:
     print(topic)
 ```
 
-Great job! You now have a list of interesting topics users might ask about. Next, let's have our science communicator LLM handle those queries and add the results to Langfuse. To keep things simple, we’ll use Langfuse’s `@observe()` decorator. This decorator automatically monitors all LLM calls (generations) nested in the function. We’re also using the `langfuse_context` class to label and tag the traces, making it easier to fetch them later.
+Great job! You now have a list of interesting topics users might ask about. Next, let's have our science communicator LLM handle those queries and add the results to Langfuse. To keep things simple, we’ll use Langfuse’s `@observe()` decorator. This decorator automatically monitors all LLM calls (generations) nested in the function. We’re also using the `langfuse` class to label and tag the traces, making it easier to fetch them later.
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 prompt_template = """
 You're an expert science communicator, able to explain complex topics in an
@@ -138,7 +139,7 @@ Question: {question}
 
 @observe()
 def explain_concept(topic):
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name=f"Explanation '{topic}'",
         tags=["ext_eval_pipelines"]
     )
