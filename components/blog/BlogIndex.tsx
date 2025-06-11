@@ -19,11 +19,13 @@ export const BlogIndex = ({ maxItems }: { maxItems?: number }) => {
   const posts = useMemo(
     () =>
       (getPagesUnderRoute("/blog") as Array<Page & { frontMatter: any }>)
-        .filter((page) => page.frontMatter?.showInBlogIndex !== false && page.frontMatter?.date)
+        .filter((page) => page.frontMatter?.showInBlogIndex !== false)
         .sort(
-          (a, b) =>
-            new Date(b.frontMatter.date).getTime() -
-            new Date(a.frontMatter.date).getTime()
+          (a, b) => {
+            const dateA = a.frontMatter?.date ? new Date(a.frontMatter.date).getTime() : 0;
+            const dateB = b.frontMatter?.date ? new Date(b.frontMatter.date).getTime() : 0;
+            return dateB - dateA;
+          }
         )
         .slice(0, maxItems),
     [maxItems]
