@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const CustomerStoryCTA = () => {
   return (
-    <div className="flex flex-col gap-6 pt-14 border-t dark:border-neutral-800 mb-20">
+    <div className="flex flex-col gap-6 pt-14 border-t dark:border-neutral-800 mb-10">
       <div className="text-center bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-8 rounded-lg border">
         <h3 className="text-2xl font-bold mb-4">
           Ready to get started with Langfuse?
@@ -21,7 +21,7 @@ export const CustomerStoryCTA = () => {
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/docs/get-started">
+            <Link href="/docs">
               View documentation
             </Link>
           </Button>

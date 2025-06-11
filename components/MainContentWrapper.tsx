@@ -25,9 +25,9 @@ import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./blog/CustomerStoryCTA";
 
-const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
+const pathsWithoutFooterWidgets = ["/imprint", "/blog", "/customers"];
 const isCustomerStory = (pathname: string) =>
-  pathname.startsWith("/blog/customer-stories/");
+  pathname.startsWith("/customers/");
 
 const CopyMarkdownButton = () => {
   const router = useRouter();
@@ -212,7 +212,7 @@ export const MainContentWrapper = (props) => {
 
       {props.children}
       {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
-      {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
+      {!pathsWithoutFooterWidgets.some(path => router.pathname === path || router.pathname.startsWith(path + "/")) ? (
         <div
           className="flex flex-col gap-10 pt-14 border-t dark:border-neutral-800 mb-20"
           id="docs-feedback"

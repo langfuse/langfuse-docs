@@ -11,10 +11,10 @@ interface ImpactChartProps {
 export const ImpactChart = ({ items }: ImpactChartProps) => {
   return (
     <div className="bg-white dark:bg-transparent dark:backdrop-blur-md rounded-lg border border-gray-200 dark:border-gray-700 p-6 my-8">
-      <div className="space-y-6">
+      <div className="space-y-4">
         {items.map((item, index) => (
           <div key={index}>
-            <div className="flex gap-4">
+            <div className="flex">
               <div className="flex-shrink-0 mt-1">
                 {item.icon}
               </div>
@@ -32,7 +32,7 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
               </div>
             </div>
             {index < items.length - 1 && (
-              <hr className="mt-6 border-gray-200 dark:border-gray-700" />
+              <hr className="mt-4 border-gray-200 dark:border-gray-700" />
             )}
           </div>
         ))}
