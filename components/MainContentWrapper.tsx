@@ -4,10 +4,9 @@ import { useConfig } from "nextra-theme-docs";
 import config from "../theme.config";
 import { Button } from "./ui/button";
 import {
-  Calendar,
   Copy as CopyIcon,
   Check as CheckIcon,
-  Mail,
+  LifeBuoy,
   MessageSquare,
   ThumbsDown,
   ThumbsUp,
@@ -18,7 +17,6 @@ import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { ProductUpdateSignup } from "./productUpdateSignup";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
-import IconGithub from "./icons/github";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -210,12 +208,11 @@ export const MainContentWrapper = (props) => {
       {props.children}
       {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
         <div
-          className="flex flex-col gap-10 pt-14 border-t dark:border-neutral-800 mb-20"
+          className="flex flex-wrap items-center justify-between gap-6 pt-14 border-t dark:border-neutral-800 mb-20"
           id="docs-feedback"
         >
           <DocsFeedback key={router.pathname} />
           <DocsSupport />
-          <DocsSubscribeToUpdates />
         </div>
       ) : null}
       <Background />
@@ -225,44 +222,26 @@ export const MainContentWrapper = (props) => {
 
 export const DocsSubscribeToUpdates = () => {
   return (
-    <div className="flex flex-col items-start gap-3">
-      <h3 className="text-xl font-semibold">Subscribe to updates</h3>
-      <div className="flex gap-3 flex-wrap">
-        <ProductUpdateSignup source="docs-footer" small />
-      </div>
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium">Subscribe to updates:</span>
+      <ProductUpdateSignup source="docs-footer" small />
     </div>
   );
 };
 
 export const DocsSupport = () => {
   return (
-    <div className="flex flex-col items-start gap-3">
-      <h3 className="text-xl font-semibold" id="contact">
-        Questions? We're here to help
-      </h3>
-      <div className="flex gap-3 flex-wrap">
-        <Button variant="outline" size="sm" asChild>
-          <a href="/gh-support" target="_blank">
-            <span>GitHub Q&A</span>
-            <IconGithub className="h-4 w-4 ml-3" />
-          </a>
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => showChat()}>
-          <span>Chat</span> <MessageSquare className="h-4 w-4 ml-3" />
-        </Button>
-        <Button variant="outline" size="sm" asChild>
-          <a href="mailto:support@langfuse.com" target="_blank">
-            <span>Email</span>
-            <Mail className="h-4 w-4 ml-3" />
-          </a>
-        </Button>
-        <Button variant="outline" size="sm" asChild>
-          <a href="/talk-to-us" target="_blank">
-            <span>Talk to sales</span>
-            <Calendar className="h-4 w-4 ml-3" />
-          </a>
-        </Button>
-      </div>
+    <div className="flex items-center gap-3">
+      <Button variant="outline" size="sm" asChild>
+        <a href="/support">
+          <span>Support</span>
+          <LifeBuoy className="h-4 w-4 ml-2" />
+        </a>
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => showChat()}>
+        <span>Chat</span>
+        <MessageSquare className="h-4 w-4 ml-2" />
+      </Button>
     </div>
   );
 };
@@ -276,20 +255,14 @@ export const DocsFeedback = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [commentSubmitting, setCommentSubmitting] = useState<boolean>(false);
 
-  // Controls the prominent follow-up dialog shown after a negative rating
+  // Controls the prominent follow-up dialog shown after any rating
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const handleFeedbackSelection = (newSelection: "positive" | "negative") => {
-    // If negative feedback, immediately update selected state and open dialog
-    // This makes the dialog appear "snappy"
-    if (newSelection === "negative") {
-      setSelected(newSelection); // Update title to "What can we improve?"
-      setDialogOpen(true); // Open dialog immediately
-      setFeedbackComment(""); // Clear any previous comment
-    }
-
-    // Indicate API call is in progress (disables Yes/No buttons if they were still visible for positive feedback)
-    // And sets submitting state for the subsequent comment submission if negative.
+    // For both positive and negative feedback, open dialog immediately
+    setSelected(newSelection);
+    setDialogOpen(true);
+    setFeedbackComment("");
     setSubmitting(true);
 
     fetch("/api/feedback", {
@@ -300,18 +273,11 @@ export const DocsFeedback = () => {
       }),
     })
       .then(() => {
-        // If positive feedback, update selected state now.
-        // For negative feedback, 'selected' was already set to 'negative' to show the dialog's context.
-        if (newSelection === "positive") {
-          setSelected(newSelection);
-          setFeedbackComment(""); // Clear comment for positive feedback as well
-        }
-        // Regardless of positive or negative, the initial ping to the API succeeded.
-        setSubmitting(false); // Re-enable buttons or indicate API call finished
+        setSubmitting(false);
       })
       .catch(() => {
-        // API call for the initial feedback failed.
-        setSelected(null); // Revert to the initial state ("Was this page useful?")
+        setSelected(null);
+        setDialogOpen(false);
         setSubmitting(false);
       });
   };
@@ -340,76 +306,35 @@ export const DocsFeedback = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-xl font-semibold">
-        {selected === null
-          ? "Was this page useful?"
-          : selected === "positive"
-          ? "What was most useful?"
-          : selected === "negative"
-          ? "What can we improve?"
-          : "Thanks for your feedback!"}
-      </h3>
-      {selected === null ? (
-        <div className="flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            size="xl"
-            onClick={() => handleFeedbackSelection("positive")}
-            disabled={submitting}
-          >
-            <span>Yes</span>
-            <ThumbsUp className="h-5 w-5 ml-4 text-green-800" />
-          </Button>
-          <Button
-            variant="outline"
-            size="xl"
-            onClick={() => handleFeedbackSelection("negative")}
-            disabled={submitting}
-          >
-            <span>Could be better</span>
-            <ThumbsDown className="h-5 w-5 ml-4 text-red-800" />
-          </Button>
-        </div>
-      ) : selected === "positive" ? (
-        <div className="flex flex-col gap-3">
-          <Textarea
-            placeholder="Let us know what you found most useful"
-            value={feedbackComment}
-            onChange={(e) => setFeedbackComment(e.target.value)}
-          />
-          <Button
-            variant="secondary"
-            className="self-start"
-            size="lg"
-            disabled={commentSubmitting}
-            onClick={handleFeedbackCommentSubmit}
-          >
-            {commentSubmitting ? "Submitting ..." : "Send feedback"}
-          </Button>
-        </div>
-      ) : selected === "submitted" ? (
-        <div className="flex flex-col gap-3">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => setSelected(null)}
-            className="self-start"
-          >
-            Send more feedback
-          </Button>
-        </div>
-      ) : null}
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium">Was this page helpful?</span>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleFeedbackSelection("positive")}
+          disabled={submitting}
+        >
+          <ThumbsUp className="h-4 w-4 text-green-600" />
+          <span className="sr-only">Yes</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleFeedbackSelection("negative")}
+          disabled={submitting}
+        >
+          <ThumbsDown className="h-4 w-4 text-red-600" />
+          <span className="sr-only">No</span>
+        </Button>
+      </div>
 
-      {/* Prominent dialog for detailed feedback after a negative rating */}
+      {/* Dialog for feedback follow-up */}
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
-          // If dialog is closed (e.g. by clicking outside or pressing ESC)
           setDialogOpen(open);
-          // Reset selection if it was 'negative' (meaning feedback form was open)
-          // or 'submitted' (meaning thank you screen was open) to reset the main widget
-          if (!open && (selected === "negative" || selected === "submitted")) {
+          if (!open) {
             setSelected(null);
             setFeedbackComment("");
           }
@@ -424,23 +349,52 @@ export const DocsFeedback = () => {
                 Thank you for your feedback!
               </h4>
               <p className="text-sm text-muted-foreground">
-                We appreciate you taking the time to help us improve. Please
-                continue to share your thoughts whenever you have more feedback.
+                We appreciate you taking the time to help us improve.
               </p>
               <Button
                 variant="outline"
                 size="lg"
                 className="mt-4"
                 onClick={() => {
-                  setDialogOpen(false); // Close the dialog
-                  setSelected(null); // Reset the main page widget
+                  setDialogOpen(false);
+                  setSelected(null);
                 }}
               >
                 Done
               </Button>
             </div>
+          ) : selected === "positive" ? (
+            // Positive feedback follow-up
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-4 items-start">
+                <ThumbsUp className="h-8 w-8 text-green-500 mt-1" />
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">
+                    What was most helpful?
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Let us know what you found most useful (optional).
+                  </p>
+                </div>
+              </div>
+              <Textarea
+                placeholder="What was most helpful about this page?"
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+              />
+              <div className="flex justify-end">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  disabled={commentSubmitting}
+                  onClick={handleFeedbackCommentSubmit}
+                >
+                  {commentSubmitting ? "Submitting…" : "Send feedback"}
+                </Button>
+              </div>
+            </div>
           ) : (
-            // Feedback input view
+            // Negative feedback follow-up
             <div className="flex flex-col gap-6">
               <div className="flex gap-4 items-start">
                 <Image
@@ -483,7 +437,7 @@ export const DocsFeedback = () => {
                   }
                   onClick={handleFeedbackCommentSubmit}
                 >
-                  {commentSubmitting ? "Submitting …" : "Send feedback"}
+                  {commentSubmitting ? "Submitting…" : "Send feedback"}
                 </Button>
               </div>
             </div>
