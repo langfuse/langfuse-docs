@@ -113,6 +113,7 @@ Depending on the scale of your experiments, there are different approaches you c
   - When using a prompt without specifying a label, Langfuse will serve the version with the `production` label.
   - `latest` points to the most recently created version.
   - You can create any additional labels, e.g. for different environments (`staging`, `production`) or tenants (`tenant-1`, `tenant-2`).
+- `tags`: Use tags to categorize prompts, e.g. to filter them in the UI or SDKs. All versions of a prompt share the same tags.
 
 ## How it works
 
@@ -826,7 +827,7 @@ Admins and owners can update a label's protection status in the project settings
   aspectRatio={16 / 9}
 />
 
-You can reference other **text** prompts in your promptsusing a simple tag format:
+You can reference other **text** prompts in your prompts using a simple tag format:
 
 ```
 @@@langfusePrompt:name=PromptName|version=1@@@
