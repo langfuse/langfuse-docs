@@ -165,8 +165,9 @@ Here, we'll use the [LangChain integration](https://langfuse.com/docs/integratio
 
 
 ```python
-# Initialize callback handler
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 ```
 

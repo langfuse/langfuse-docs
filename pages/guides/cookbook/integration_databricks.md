@@ -132,14 +132,22 @@ Databricks models can also be used via LangChain. The [`ChatDatabricks`](https:/
 
 
 ```python
-from langfuse.callback import CallbackHandler
+import os
 
-# Initialize the Langfuse callback handler
-langfuse_handler = CallbackHandler(
-    secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
-    public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
-    host=os.environ.get("LANGFUSE_HOST")
-)
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+```
+
+
+```python
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler()
 ```
 
 

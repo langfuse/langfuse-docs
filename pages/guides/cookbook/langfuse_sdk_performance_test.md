@@ -175,7 +175,7 @@ chain = prompt | model | StrOutputParser()
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 langfuse_handler = CallbackHandler()
 ```
 

@@ -176,12 +176,12 @@ langfuse_context.flush()
 ```python
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
-
-from langfuse.callback import CallbackHandler
-
+from langfuse.langchain import CallbackHandler
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 handler = CallbackHandler()
-model = ChatOpenAI(model="gpt-4o-mini")
 
+model = ChatOpenAI(model="gpt-4o-mini")
 image_data = encode_file("static/puton.jpg")
 
 message = HumanMessage(
