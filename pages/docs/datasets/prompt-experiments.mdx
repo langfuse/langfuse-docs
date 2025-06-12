@@ -32,6 +32,50 @@ This is a no-code feature within Langfuse. You can run more complex experiments 
   title="Introduction to Prompt Experiments"
 />
 
+## Requirements
+
+<Callout type="warning">
+For prompt experiments to work correctly, you must ensure:
+
+1. **Your prompt contains at least one variable** using the `{{variableName}}` syntax
+2. **Variable names in your prompt must exactly match the keys in your dataset items**
+3. **Dataset items must have their input formatted as valid JSON**
+</Callout>
+
+### Variable Mapping Example
+
+The following example demonstrates how prompt variables are mapped to dataset item inputs:
+
+<div className="grid md:grid-cols-2 gap-4">
+<div>
+
+**Prompt:**
+```bash
+You are a Langfuse expert. Answer based on:
+{{documentation}}
+
+Question: {{question}}
+```
+
+</div>
+<div>
+
+**Dataset Item:**
+```json
+{
+  "documentation": "Langfuse is an LLM Engineering Platform",
+  "question": "What is Langfuse?"
+}
+```
+
+</div>
+</div>
+
+In this example:
+- The prompt variable `{{documentation}}` maps to the JSON key `"documentation"`
+- The prompt variable `{{question}}` maps to the JSON key `"question"`
+- Both keys must exist in the dataset item's input JSON for the experiment to run successfully
+
 ## Setup
 
 <Callout type="info">
@@ -70,6 +114,10 @@ import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
 
 Dataset items include the input variables that should be inserted into the prompt.
 
+<Callout type="important">
+The input must be a JSON object where each key exactly matches a variable name in your prompt. For example, if your prompt contains `{{question}}`, your dataset item's input JSON must have a `"question"` key.
+</Callout>
+
 <details>
 <summary>Example Dataset Item with variables</summary>
 
@@ -93,6 +141,10 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 ### Create a prompt with variables
 
 Use `{{variables}}` to insert the dataset variables into the prompt during experiments.
+
+<Callout type="important">
+Each `{{variableName}}` in your prompt must have a corresponding key in your dataset items' input JSON. The names must match exactly (case-sensitive).
+</Callout>
 
 <details>
 <summary>Example Prompt</summary>
@@ -122,13 +174,20 @@ Now that we have set up a prompt version and a dataset, we can run a prompt expe
 
 When viewing the prompt details or a dataset, use the following button to run a prompt experiment:
 
-<Frame className="w-36" border>
+<Frame className="my-10" fullWidth>
 
 ![New Experiment Button](/images/docs/prompt-experiments-new-experiment.png)
 
 </Frame>
 
 Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.
+
+<Callout type="tip" emoji="ℹ️">
+**Troubleshooting:** If you see a warning about mismatched variables, ensure that:
+- Every `{{variable}}` in your prompt has a matching key in your dataset items' input JSON
+- The names match exactly (including case sensitivity)
+- Your dataset input is valid JSON format
+</Callout>
 
 ## GitHub Discussions
 
