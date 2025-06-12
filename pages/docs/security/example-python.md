@@ -10,7 +10,7 @@ There are a host of potential security risks involved with LLM-based application
 LLM Security can be addressed with a combination of
 
 - strong run-time security measures by LLM security libraries
-- and asynchrounous evaluations of the effectiveness of these measures in Langfuse
+- and asynchronous evaluations of the effectiveness of these measures in Langfuse
 
 In this cookbook we use the open source library [LLM Guard](https://llm-guard.com/), but there are other open-source and/or paid security tools available, such as Prompt Armor, Nemo Guardrails, Microsoft Azure AI Content Safety, and Lakera.
 
