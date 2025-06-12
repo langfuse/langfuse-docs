@@ -49,18 +49,18 @@ The following example demonstrates how prompt variables are mapped to dataset it
 <div className="grid md:grid-cols-2 gap-4">
 <div>
 
-**Prompt Variables:**
-```text
-System: You are a Langfuse expert. Answer based on:
+**Prompt:**
+```bash
+You are a Langfuse expert. Answer based on:
 {{documentation}}
 
-User: {{question}}
+Question: {{question}}
 ```
 
 </div>
 <div>
 
-**Dataset Item Input (JSON):**
+**Dataset Item:**
 ```json
 {
   "documentation": "Langfuse is an LLM Engineering Platform",
@@ -174,7 +174,7 @@ Now that we have set up a prompt version and a dataset, we can run a prompt expe
 
 When viewing the prompt details or a dataset, use the following button to run a prompt experiment:
 
-<Frame className="w-36" border>
+<Frame className="my-10" fullWidth>
 
 ![New Experiment Button](/images/docs/prompt-experiments-new-experiment.png)
 
@@ -182,7 +182,7 @@ When viewing the prompt details or a dataset, use the following button to run a 
 
 Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.
 
-<Callout type="tip">
+<Callout type="tip" emoji="ℹ️">
 **Troubleshooting:** If you see a warning about mismatched variables, ensure that:
 - Every `{{variable}}` in your prompt has a matching key in your dataset items' input JSON
 - The names match exactly (including case sensitivity)
