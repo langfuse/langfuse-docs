@@ -13,7 +13,7 @@ def anthropic_completion(**kwargs):
   kwargs_clone = kwargs.copy()
   input = kwargs_clone.pop('messages', None)
   model = kwargs_clone.pop('model', None)
-  langfuse.update_current_span(
+  langfuse.update_current_generation(
       input=input,
       model=model,
       metadata=kwargs_clone
@@ -23,7 +23,7 @@ def anthropic_completion(**kwargs):
 
   # See docs for more details on token counts and usd cost in Langfuse
   # https://langfuse.com/docs/model-usage-and-cost
-  langfuse.update_current_span(
+  langfuse.update_current_generation(
       usage_details={
           "input": response.usage.input_tokens,
           "output": response.usage.output_tokens
