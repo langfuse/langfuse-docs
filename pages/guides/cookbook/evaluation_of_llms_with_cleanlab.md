@@ -22,9 +22,11 @@ This guide will walk you through the process of evaluating LLM responses capture
 
 ### Install dependencies & Set environment variables
 
+_**Note:** New Python SDK available (v3) - We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install -q langfuse openai cleanlab-tlm --upgrade
+%pip install "langfuse==2.60.8" openai cleanlab-tlm
 ```
 
 
@@ -69,8 +71,7 @@ NOTE: TLM requires the entire input to the LLM to be provided. This includes any
 
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 from openai import OpenAI
 
 openai = OpenAI()
@@ -92,7 +93,7 @@ def generate_answers(trivia_question):
     system_prompt = "You are a trivia master."
 
     # Update the trace with the question    
-    langfuse.update_current_trace(
+    langfuse_context.update_current_trace(
         name=f"Answering question: '{trivia_question}'",
         tags=["TLM_eval_pipeline"],
         metadata={"system_prompt": system_prompt}
@@ -183,7 +184,7 @@ langfuse = Langfuse()
 now = datetime.now()
 one_day_ago = now - timedelta(hours=24)
 
-traces = langfuse.api.trace.list(
+traces = langfuse.fetch_traces(
     tags="TLM_eval_pipeline",
     from_timestamp=one_day_ago,
     to_timestamp=now,
