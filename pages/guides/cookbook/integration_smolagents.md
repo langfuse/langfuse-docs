@@ -20,13 +20,12 @@ We'll walk through a simple example of using smolagents and integrating it with 
 
 
 ```python
-%pip install 'smolagents[telemetry]'
-%pip install opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-smolagents
+%pip install langfuse 'smolagents[telemetry]' opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-smolagents
 ```
 
 ### Step 2: Set Up Environment Variables
 
-Set your Langfuse API keys and configure the OpenTelemetry endpoint to send traces to Langfuse. Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
+Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
 Also, add your [Hugging Face token](https://huggingface.co/settings/tokens) (`HF_TOKEN`) as an environment variable.
 
@@ -34,35 +33,43 @@ Also, add your [Hugging Face token](https://huggingface.co/settings/tokens) (`HF
 
 ```python
 import os
-import base64
-
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
-
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # your Hugging Face token
 os.environ["HF_TOKEN"] = "hf_..."
 ```
 
-### Step 3: Initialize the `SmolagentsInstrumentor`
-
-Initialize the `SmolagentsInstrumentor` before your application code. Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
-from opentelemetry.sdk.trace import TracerProvider
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+    Langfuse client is authenticated and ready!
+
+
+### Step 3: Initialize the `SmolagentsInstrumentor`
+
+Initialize the `[SmolagentsInstrumentor](https://pypi.org/project/openinference-instrumentation-smolagents/)` before your application code.
+
+
+```python
 from openinference.instrumentation.smolagents import SmolagentsInstrumentor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-
-SmolagentsInstrumentor().instrument(tracer_provider=trace_provider)
+SmolagentsInstrumentor().instrument()
 ```
 
 ### Step 4: Run your smolagent
@@ -101,36 +108,7 @@ manager_agent.run(
 )
 ```
 
-### Step 5: Pass Additional Attributes (Optional)
-
-Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
-
-
-```python
-# Sets the global default tracer provider
-from opentelemetry import trace
-trace.set_tracer_provider(trace_provider)
-
-# Creates a tracer from the global tracer provider
-tracer = trace.get_tracer("my.tracer.name")
-
-with tracer.start_as_current_span("Smolagent-Trace") as span:
-    span.set_attribute("langfuse.user.id", "user-123")
-    span.set_attribute("langfuse.session.id", "123456789")
-    span.set_attribute("langfuse.tags", ["smolagents", "demo"])
-
-    # Create agent
-    model = HfApiModel()
-    agent = ToolCallingAgent(
-        tools=[DuckDuckGoSearchTool()],
-        model=model,
-    )
-
-    # Run your agent - the span attributes will be carried through
-    result = agent.run("How can Langfuse be used to monitor and improve the reasoning and decision-making of smolagents when they execute multi-step tasks, like dynamically adjusting a recipe based on user feedback or available ingredients?")
-```
-
-### Step 6: View Traces in Langfuse
+### Step 5: View Traces in Langfuse
 
 After running the agent, you can view the traces generated by your smolagents application in [Langfuse](https://cloud.langfuse.com). You should see detailed steps of the LLM interactions, which can help you debug and optimize your AI agent.
 
@@ -139,138 +117,6 @@ After running the agent, you can view the traces generated by your smolagents ap
 _[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ce5160f9bfd5a6cd63b07d2bfcec6f54?timestamp=2025-02-11T09%3A25%3A45.163Z&display=details)_
 
 
-
-### Dataset Experiments
-
-You can also test your smolagents using [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview):
-
-1. Create a benchmark dataset (with prompt and expected output pairs)
-2. Run your agent on that dataset
-3. Compare outputs to the expected results or use an additional scoring mechanism
-
-Below, we demonstrate this approach with the [GSM8K dataset](https://huggingface.co/datasets/gsm8k), which contains math questions and solutions.
-
-
-```python
-import pandas as pd
-from datasets import load_dataset
-
-# Fetch GSM8K from Hugging Face
-dataset = load_dataset("openai/gsm8k", 'main', split='train')
-df = pd.DataFrame(dataset)
-print("First few rows of GSM8K dataset:")
-print(df.head())
-```
-
-Next, we create a dataset entity in Langfuse to track the runs. Then, we add each item from the dataset to the system. (If you’re not using Langfuse, you might simply store these in your own database or local file for analysis.)
-
-
-```python
-from langfuse import Langfuse
-langfuse = Langfuse()
-
-langfuse_dataset_name = "gsm8k_dataset_huggingface"
-
-# Create a dataset in Langfuse
-langfuse.create_dataset(
-    name=langfuse_dataset_name,
-    description="GSM8K benchmark dataset uploaded from Huggingface",
-    metadata={
-        "date": "2025-03-10", 
-        "type": "benchmark"
-    }
-)
-```
-
-
-```python
-for idx, row in df.iterrows():
-    langfuse.create_dataset_item(
-        dataset_name=langfuse_dataset_name,
-        input={"text": row["question"]},
-        expected_output={"text": row["answer"]},
-        metadata={"source_index": idx}
-    )
-    if idx >= 9: # Upload only the first 10 items for demonstration
-        break
-```
-
-#### Running the Agent on the Dataset
-
-We define a helper function `run_smolagent()` that:
-1. Starts an OpenTelemetry span
-2. Runs our agent on the prompt
-3. Records the trace ID in Langfuse
-
-Then, we loop over each dataset item, run the agent, and link the trace to the dataset item. We can also attach a quick evaluation score if desired.
-
-
-```python
-from opentelemetry.trace import format_trace_id
-from smolagents import (CodeAgent, HfApiModel, LiteLLMModel)
-
-# Example: using HfApiModel or LiteLLMModel to access openai, anthropic, gemini, etc. models:
-model = HfApiModel()
-
-agent = CodeAgent(
-    tools=[],
-    model=model,
-    add_base_tools=True
-)
-
-def run_smolagent(question):
-    with tracer.start_as_current_span("Smolagent-Trace") as span:
-        span.set_attribute("langfuse.tag", "dataset-run")
-        output = agent.run(question)
-
-        current_span = trace.get_current_span()
-        span_context = current_span.get_span_context()
-        trace_id = span_context.trace_id
-        formatted_trace_id = format_trace_id(trace_id)
-
-        langfuse_trace = langfuse.trace(
-            id=formatted_trace_id, 
-            input=question, 
-            output=output
-        )
-    return langfuse_trace, output
-```
-
-
-```python
-dataset = langfuse.get_dataset(langfuse_dataset_name)
-
-# Run our agent against each dataset item (limited to first 10 above)
-for item in dataset.items:
-    langfuse_trace, output = run_smolagent(item.input["text"])
-
-    # Link the trace to the dataset item for analysis
-    item.link(
-        langfuse_trace,
-        run_name="smolagent-notebook-run-01",
-        run_metadata={ "model": model.model_id }
-    )
-
-    # Optionally, store a quick evaluation score for demonstration
-    langfuse_trace.score(
-        name="<example_eval>",
-        value=1,
-        comment="This is a comment"
-    )
-
-# Flush data to ensure all telemetry is sent
-langfuse.flush()
-```
-
-You can repeat this process with different:
-- Models (OpenAI GPT, local LLM, etc.)
-- Tools (search vs. no search)
-- Prompts (different system messages)
-
-Then compare them side-by-side in your observability tool:
-
-![Dataset run overview](https://langfuse.com/images/cookbook/huggingface-agent-course/dataset_runs.png)
-![Dataset run comparison](https://langfuse.com/images/cookbook/huggingface-agent-course/dataset-run-comparison.png)
 
 ## References
 

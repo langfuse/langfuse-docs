@@ -1,0 +1,33 @@
+---
+title: How do I cut my Langfuse Cloud bill?
+tags: [cloud]
+---
+
+# How do I cut my Langfuse Cloud bill?
+
+Langfuse Cloud [pricing](/pricing) is based on the number of ingested events per billing period.
+
+`Billable Events = Traces + Observations + Scores` ([data model](/docs/tracing-data-model))
+
+Most cost spikes result from ingesting **too many traces or overly verbose observations**.
+You can **cut costs quickly by sampling fewer traces or logging only essential data**—all while preserving your core insights.
+
+## Option 1: Reduce events per trace
+
+Every observation within a trace counts toward your event total. Some observations may be overly detailed or irrelevant to your specific use case. Steps to remove them:
+
+1. Review your traces to identify low-value or unnecessary observations.
+2. Update your integration/instrumentation to exclude these observations.
+
+## Option 2: Sample fewer traces
+
+Keeping all traces is often valuable for LLM application development. Unlike traditional observability:
+
+- Dynamic sampling based on error levels isn't feasible since you only know if a trace is interesting after completion (through user feedback, LLM-as-a-judge evaluation, etc.).
+- Retaining all traces supports model distillation efforts down the line.
+
+However, if your application operates at significant scale, sampling can be a reasonable cost-cutting strategy. Check out the [sampling docs](/docs/tracing-features/sampling) to learn more.
+
+---
+
+Have questions regarding your Langfuse bill? Reach out to [support](/support).

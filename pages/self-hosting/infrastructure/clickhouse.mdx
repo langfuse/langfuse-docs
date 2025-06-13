@@ -47,6 +47,21 @@ Langfuse expects that its infrastructure components default to UTC.
 Especially Postgres and ClickHouse settings that overwrite the UTC default are not supported and may lead to unexpected behavior.
 Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
 
+## User Permissions
+
+The ClickHouse user specified in `CLICKHOUSE_USER` must have the following grants to allow Langfuse to operate correctly:
+
+```sql
+GRANT INSERT ON default.* TO 'user';
+GRANT SELECT ON default.* TO 'user';
+GRANT ALTER UPDATE, ALTER DELETE ON default.* TO 'user';
+GRANT CREATE ON default.* TO 'user';
+GRANT DROP TABLE ON default.* TO 'user';
+```
+
+Replace `'user'` with your actual ClickHouse username and adjust the database name if you're using a different database than `default`.
+
+
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.

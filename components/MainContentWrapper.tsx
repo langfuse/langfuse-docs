@@ -20,8 +20,11 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
+import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 
-const pathsWithoutFooterWidgets = ["/imprint", "/blog"];
+const pathsWithoutFooterWidgets = ["/imprint", "/blog", "/customers"];
+const isCustomerStory = (pathname: string) =>
+  pathname.startsWith("/customers/");
 
 const CopyMarkdownButton = () => {
   const router = useRouter();
@@ -205,7 +208,11 @@ export const MainContentWrapper = (props) => {
       ) : null}
 
       {props.children}
-      {!pathsWithoutFooterWidgets.includes(router.pathname) ? (
+      {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
+      {!pathsWithoutFooterWidgets.some(
+        (path) =>
+          router.pathname === path || router.pathname.startsWith(path + "/")
+      ) ? (
         <div
           className="flex flex-wrap items-center justify-between gap-6 pt-14 border-t dark:border-neutral-800 mb-20"
           id="docs-feedback"

@@ -1,12 +1,12 @@
 ---
 title: Observability for Agno with Langfuse
-description: Learn how to integrate Langfuse with Agno via OpenTelemetry using OpenInference or OpenLIT
+description: Learn how to integrate Langfuse with Agno via OpenTelemetry
 category: Integrations
 ---
 
 # Integrate Langfuse with Agno
 
-This notebook demonstrates how to integrate **Langfuse** with **Agno** using OpenTelemetry via **OpenInference** or the **OpenLIT** SDK. By the end of this notebook, you will be able to trace your Agno applications with Langfuse for improved observability and debugging.
+This notebook demonstrates how to integrate **Langfuse** with **Agno** using OpenTelemetry via the **OpenLIT** instrumentation. By the end of this notebook, you will be able to trace your Agno applications with Langfuse for improved observability and debugging.
 
 > **What is Agno?** [Agno](https://docs.agno.com/) is a platform for building and managing AI agents.
 
@@ -21,19 +21,16 @@ We'll walk through examples of using Agno and integrating it with Langfuse.
 
 
 ```python
-%pip install agno openai langfuse opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-agno yfinance openlit
+%pip install agno openai langfuse yfinance openlit
 ```
 
 ### Step 2: Set Up Environment Variables
 
-Set your Langfuse API keys and configure OpenTelemetry export settings to send traces to Langfuse. Please refer to the [Langfuse OpenTelemetry Docs](https://langfuse.com/docs/opentelemetry/get-started) for more information on the Langfuse OpenTelemetry endpoint `/api/public/otel` and authentication.
-
-You'll also need your OpenAI API key.
+Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting). You'll also need your OpenAI API key.
 
 
 ```python
 import os
-import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
@@ -41,83 +38,39 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-LANGFUSE_AUTH = base64.b64encode(
-    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
-).decode()
-
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
 # your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
-### Step 3: Sending Traces to Langfuse
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-#### Example 1: Using Langfuse with OpenInference
-
-This example demonstrates how to instrument your Agno agent with OpenInference and send traces to Langfuse.
 
 
 ```python
-import base64
-import os
-
-from agno.agent import Agent
-from agno.models.openai import OpenAIChat
-from agno.tools.yfinance import YFinanceTools
-from openinference.instrumentation.agno import AgnoInstrumentor
-from opentelemetry import trace as trace_api
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-# Configure the tracer provider
-tracer_provider = TracerProvider()
-tracer_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-trace_api.set_tracer_provider(tracer_provider=tracer_provider)
-
-# Start instrumenting agno
-AgnoInstrumentor().instrument()
-
-# Create and configure the agent
-agent = Agent(
-    name="Stock Price Agent",
-    model=OpenAIChat(id="gpt-4o-mini"),
-    tools=[YFinanceTools()],
-    instructions="You are a stock price agent. Answer questions in the style of a stock analyst.",
-    debug_mode=True,
-)
-
-# Use the agent
-agent.print_response("What is the current price of Tesla?")
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
-#### Example 2: Using Langfuse with OpenLIT
+### Step 3: Sending Traces to Langfuse
 
-This example demonstrates how to use Langfuse via OpenLIT to trace model calls.
+This example demonstrates how to use the OpenLit instrumentation library to ingfe
 
 
 ```python
-import base64
-import os
-
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 from agno.tools.duckduckgo import DuckDuckGoTools
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry import trace
-
-# Configure the tracer provider
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-trace.set_tracer_provider(trace_provider)
 
 # Initialize OpenLIT instrumentation
 import openlit
-openlit.init(tracer=trace.get_tracer(__name__), disable_batch=True)
+openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
 
 # Create and configure the agent
 agent = Agent(
@@ -135,17 +88,9 @@ agent.print_response("What is currently trending on Twitter?")
 
 After running the agent examples above, you can view the traces generated by your Agno agent in Langfuse. 
 
-**Openinference Instrumentation:**
-
-![Agno Agents OpenInference Instrumentation](https://langfuse.com/images/cookbook/integration-agno-agents/agno-agents-openinference.png)
-
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8405ef8c640e146680d10f14560b0123?display=preview%3Ftimestamp%3D2025-05-26T12%3A04%3A55.692Z%3Ftimestamp%3D2025-05-26T12%3A04%3A33.072Z%3Ftimestamp%3D2025-05-26T12%3A04%3A55.692Z?timestamp=2025-05-26T12%3A04%3A33.072Z)
-
-**OpenLit Instrumentation:**
-
 ![Agno Agents OpenLit Instrumentation](https://langfuse.com/images/cookbook/integration-agno-agents/agno-agents-openlit.png)
 
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/556248fcb1ab657d0dddbc200c690449?display=preview%3Ftimestamp%3D2025-05-26T12%3A04%3A55.692Z&observation=e16fdc48043554b1)
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/080130871f53145aecf7c29d5dfb6e4c?timestamp=2025-06-11T14:01:32.598Z&display=details)
 
 ## References
 

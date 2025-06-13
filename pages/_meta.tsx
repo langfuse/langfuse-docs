@@ -60,6 +60,14 @@ export default {
       layout: "full",
     },
   },
+  customers: {
+    title: "Customers",
+    type: "page",
+    display: "hidden",
+    theme: {
+      layout: "full",
+    },
+  },
   "watch-demo": {
     type: "page",
     title: "Demo",

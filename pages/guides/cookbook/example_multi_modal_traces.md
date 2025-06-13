@@ -61,6 +61,7 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 ```python
 from langfuse.openai import openai
+from langfuse import get_client
 import base64
 
 client = openai.OpenAI()
