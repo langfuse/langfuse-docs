@@ -47,7 +47,7 @@ export const FeatureOverview = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         {features.map((feature, index) => (
           <div 
-            key={index}
+            key={feature.title}
             className="border rounded p-6 bg-card"
           >
             <div className="flex items-center gap-3 mb-4">
