@@ -29,21 +29,21 @@ For more detailed guidance on the Mistral SDK or the **@observe** decorator from
 
 
 ```python
-!pip install mistralai langfuse
+%pip install mistralai langfuse
 ```
 
 
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-xxx"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-xxx"
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your Mistral key
-os.environ["MISTRAL_API_KEY"] = "xxx"
+os.environ["MISTRAL_API_KEY"] = "..."
 ```
 
 
@@ -62,7 +62,8 @@ We are integrating the Mistral AI SDK with Langfuse using the [@observe decorato
 
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 # Function to handle Mistral completion calls, wrapped with @observe to log the LLM interaction
 @observe(as_type="generation")
@@ -88,7 +89,7 @@ def mistral_completion(**kwargs):
   model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
   # Log the input and model parameters before calling the LLM
-  langfuse_context.update_current_observation(
+  langfuse.update_current_generation(
       input=input,
       model=model,
       model_parameters=model_parameters,
@@ -100,7 +101,7 @@ def mistral_completion(**kwargs):
   res = mistral_client.chat.complete(**kwargs)
 
   # Log the usage details and output content after the LLM call
-  langfuse_context.update_current_observation(
+  langfuse.update_current_generation(
       usage_details={
           "input": res.usage.prompt_tokens,
           "output": res.usage.completion_tokens
@@ -118,7 +119,7 @@ Optionally, other functions (api handlers, retrieval functions, ...) can be also
 
 In the following example, we also added the decorator to the top-level function `find_best_painter_from`. This function calls the mistral_completion function, which is decorated with @observe(as_type="generation"). This hierarchical setup hels to trace more complex applications which involve multiple LLM calls and other non-llm methods which are decorated with @observe.
 
-You can use langfuse_context.update_current_observation or langfuse_context.update_current_trace to add additional details such as input, output, and model parameters to the trace.
+You can use langfuse.update_current_generation or langfuse.update_current_trace to add additional details such as input, output, and model parameters to the trace.
 
 
 ```python
@@ -143,7 +144,7 @@ find_best_painter_from()
 
 
 
-    'Claude Monet, renowned for his role as a founder of French Impressionist painting, is often considered one of the best painters from France.'
+    'Determining the "best" painter from France can be subjective, but many consider Claude Monet to be one of the greatest.'
 
 
 
@@ -187,7 +188,7 @@ find_best_painting_from("Germany")
 
 
 
-    ChatCompletionResponse(id='8bb8512749fd4ddf88720aec0021378c', object='chat.completion', model='mistral-small-latest', usage=UsageInfo(prompt_tokens=23, completion_tokens=23, total_tokens=46), created=1726597735, choices=[ChatCompletionChoice(index=0, message=AssistantMessage(content='Albrecht Dürer\'s most famous painting is "Self-Portrait at Twenty-Eight."', tool_calls=None, prefix=False, role='assistant'), finish_reason='stop')])
+    ChatCompletionResponse(id='f83e095854424211bfe1049e167f99c6', object='chat.completion', model='mistral-small-latest', usage=UsageInfo(prompt_tokens=21, completion_tokens=21, total_tokens=42), created=1749819201, choices=[ChatCompletionChoice(index=0, message=AssistantMessage(content='The most famous painting by Caspar David Friedrich is "Wanderer above the Sea of Fog."', tool_calls=None, prefix=False, role='assistant'), finish_reason='stop')])
 
 
 
@@ -220,7 +221,7 @@ def stream_mistral_completion(**kwargs):
     }
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-    langfuse_context.update_current_observation(
+    langfuse.update_current_generation(
         input=input,
         model=model,
         model_parameters=model_parameters,
@@ -235,7 +236,7 @@ def stream_mistral_completion(**kwargs):
         yield content
 
         if chunk.data.choices[0].finish_reason == "stop":
-            langfuse_context.update_current_observation(
+            langfuse.update_current_generation(
                 usage_details={
                     "input": chunk.data.usage.prompt_tokens,
                     "output": chunk.data.usage.completion_tokens
@@ -270,8 +271,9 @@ stream_find_best_five_painter_from("Spain")
 
     
     The
-     best
      five
+     most
+     renowned
      pain
     ters
      from
@@ -279,18 +281,14 @@ stream_find_best_five_painter_from("Spain")
      are
      Diego
      Vel
-    áz
-    que
-    z
+    ázquez
     ,
      Francisco
      G
     oya
     ,
-     P
-    ablo
-     Pic
-    asso
+     Pablo
+     Picasso
     ,
      Salvador
      Dal
@@ -307,7 +305,7 @@ stream_find_best_five_painter_from("Spain")
 
 
 
-    'The best five painters from Spain are Diego Velázquez, Francisco Goya, Pablo Picasso, Salvador Dalí, and Joan Miró.'
+    'The five most renowned painters from Spain are Diego Velázquez, Francisco Goya, Pablo Picasso, Salvador Dalí, and Joan Miró.'
 
 
 
@@ -339,7 +337,7 @@ async def async_mistral_completion(**kwargs):
     }
   model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-  langfuse_context.update_current_observation(
+  langfuse.update_current_generation(
       input=input,
       model=model,
       model_parameters=model_parameters,
@@ -349,7 +347,7 @@ async def async_mistral_completion(**kwargs):
 
   res = await mistral_client.chat.complete_async(**kwargs)
 
-  langfuse_context.update_current_observation(
+  langfuse.update_current_generation(
       usage_details={
           "input": res.usage.prompt_tokens,
           "output": res.usage.completion_tokens
@@ -379,7 +377,7 @@ await async_find_best_musician_from("Spain")
 
 
 
-    ChatCompletionResponse(id='589fa6216c5346cc984586209c693a41', object='chat.completion', model='mistral-small-latest', usage=UsageInfo(prompt_tokens=17, completion_tokens=33, total_tokens=50), created=1726597737, choices=[ChatCompletionChoice(index=0, message=AssistantMessage(content="One of the most renowned musicians from Spain is Andrés Segovia, a classical guitarist who significantly impacted the instrument's modern repertoire.", tool_calls=None, prefix=False, role='assistant'), finish_reason='stop')])
+    ChatCompletionResponse(id='afe157d5680049a78a5cd359f9a8238c', object='chat.completion', model='mistral-small-latest', usage=UsageInfo(prompt_tokens=17, completion_tokens=29, total_tokens=46), created=1749819243, choices=[ChatCompletionChoice(index=0, message=AssistantMessage(content='Determining the "best" musician from Spain can be subjective, but many would consider Paco de Lucía, a legendary flamenco guitarist.', tool_calls=None, prefix=False, role='assistant'), finish_reason='stop')])
 
 
 
@@ -412,7 +410,7 @@ async def async_stream_mistral_completion(**kwargs):
     }
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-    langfuse_context.update_current_observation(
+    langfuse.update_current_generation(
         input=input,
         model=model,
         model_parameters=model_parameters,
@@ -427,7 +425,7 @@ async def async_stream_mistral_completion(**kwargs):
         yield content
 
         if chunk.data.choices[0].finish_reason == "stop":
-            langfuse_context.update_current_observation(
+            langfuse.update_current_generation(
                 usage_details={
                     "input": chunk.data.usage.prompt_tokens,
                     "output": chunk.data.usage.completion_tokens
@@ -461,43 +459,40 @@ await async_stream_find_best_five_musician_from("Spain")
 ```
 
     
-    The
-     five
-     most
-     renown
-    ed
+    Determ
+    ining
+     the
+     "
+    best
+    "
      musicians
-     from
-     Spain
-     include
-    :
-     Andr
-    és
-     Seg
-    ov
-    ia
+     can
+     be
+     subjective
     ,
+     but
+     five
+     highly
+     influential
+     Spanish
+     musicians
+     are
      Pac
     o
      de
-     Luc
-    ía
+     Lucía
     ,
-     En
-    rique
-     I
-    gles
-    ias
+     Joaquín
+     Rodrigo
     ,
-     Ale
-    j
-    andro
-     San
-    z
+     Julio
+     Iglesias
+    ,
+     Enrique
+     Iglesias
     ,
      and
-     Ros
-    al
+     Rosal
     ía
     .
     
@@ -506,7 +501,7 @@ await async_stream_find_best_five_musician_from("Spain")
 
 
 
-    'The five most renowned musicians from Spain include: Andrés Segovia, Paco de Lucía, Enrique Iglesias, Alejandro Sanz, and Rosalía.'
+    'Determining the "best" musicians can be subjective, but five highly influential Spanish musicians are Paco de Lucía, Joaquín Rodrigo, Julio Iglesias, Enrique Iglesias, and Rosalía.'
 
 
 
@@ -643,7 +638,7 @@ tool_calling_check_transaction_status("T1005")
 
 
 
-    'Your transaction T1005 is currently pending.'
+    'The status of your transaction T1005 is currently "Pending". This means that the transaction has not yet been fully processed. Please allow some time for the transaction to be completed. If you have any further questions or concerns, feel free to ask!'
 
 
 

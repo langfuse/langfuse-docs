@@ -19,7 +19,7 @@ Let's dive right in!
 
 
 ```python
-!pip install "litellm[proxy]" langfuse openai
+%pip install "litellm[proxy]" langfuse openai
 ```
 
 ## Setup environment
@@ -27,20 +27,39 @@ Let's dive right in!
 
 ```python
 import os
-from langfuse.openai import openai
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "sk-proj-"
+```
+
+
+```python
+from litellm import completion
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def fn():
+  # set custom langfuse trace params and generation params
+  response = completion(
+    model="gpt-3.5-turbo",
+    messages=[
+      {"role": "user", "content": "Hi 👋 - i'm openai"}
+    ],
+    metadata={
+        "existing_trace_id": langfuse.get_current_trace_id(),   # set langfuse trace ID
+        "parent_observation_id": langfuse.get_current_observation_id(),
+    },
+  )
  
-# Test connection to Langfuse, not recommended for production as it is blocking
-openai.langfuse_auth_check()
+  print(response)
 ```
 
 ## Setup Lite LLM Proxy
@@ -120,7 +139,7 @@ Let's have a look at a simple example which uses all three models we have set up
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 from langfuse.openai import openai
 
 @observe()

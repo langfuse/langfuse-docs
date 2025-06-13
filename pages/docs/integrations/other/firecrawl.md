@@ -45,7 +45,7 @@ To monitor your Firecrawl scraper, we use the L[angfuse `@observe()` decorator](
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe()
 def scrape_website(url):
@@ -69,6 +69,6 @@ _[Public link to example trace in Langfuse](https://cloud.langfuse.com/project/c
 ## Learn More
 
 - **Firecrawl Documentation**: [https://docs.firecrawl.dev/introduction](https://docs.firecrawl.dev/introduction)
-- **Langfuse `@observe()` Decorator**: [https://langfuse.com/docs/sdk/python/decorators](/docs/sdk/python/decorators)
+- **Langfuse `@observe()` Decorator**: [https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator](/docs/sdk/python/sdk-v3#observe-decorator)
 
 
