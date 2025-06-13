@@ -17,14 +17,13 @@ Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](
 When using the [decorator-based integration](/docs/sdk/python/decorators):
 
 ```python
-from langfuse import get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context
 
 # fetch a trace
-langfuse.client_instance.api.trace.get(trace_id)
+langfuse_context.client_instance.api.trace.get(trace_id)
 
 # async client via asyncio
-await langfuse.client_instance.async_api.trace(trace_id)
+await langfuse_context.client_instance.async_api.trace(trace_id)
 ```
 
 When using the [low-level SDK](/docs/sdk/python/low-level-sdk):

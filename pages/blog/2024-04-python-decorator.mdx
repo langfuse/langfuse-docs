@@ -16,6 +16,10 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["marcklingen", "hassiebpakzad"]}
 />
 
+<Callout type="info" emoji="💡">
+_**Note:** This blog post references our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+</Callout>
+
 When we initially built complex agents for web scraping and code generation while in Y Combinator, we quickly recognized the need for new LLM-focused observability to truly understand how our applications produced their outputs. It wasn't just about the LLM calls, but also the retrieval steps, chaining of separate calls, function calling, obtaining the right JSON output, and various API calls that the agents should perform behind the scenes. In the end, all these steps led to them breaking many times on our initial users.
 
 This insight prompted us to start working on Langfuse. As many teams were experimenting, we prioritized easy integrations with frameworks like LangChain and LlamaIndex, as well as wrapping the OpenAI SDK to log individual LLM calls. As applications become increasingly complex and agents are deployed in production, the ability to trace complex applications is even more crucial.
@@ -116,7 +120,7 @@ def main():
 All complexity is abstracted away and you can focus on your business logic. The OpenAI SDK wrapper is aware that it is run within a decorated function and automatically adds its logs to the trace.
 
 ```python /@observe()/
-from langfuse import observe
+from langfuse.decorators import observe
 from langfuse.openai import openai # OpenAI integration
 
 @observe()
@@ -152,7 +156,7 @@ Example ([cookbook](/guides/cookbook/python_decorators#interoperability-with-oth
 
 ```python
 from langfuse.openai import openai
-from langfuse import observe
+from langfuse.decorators import observe
 
 @observe()
 def openai_fn(calc: str):
@@ -167,7 +171,7 @@ def openai_fn(calc: str):
 @observe()
 def llama_index_fn(question: str):
     # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
-    langfuse_handler = langfuse.get_current_llama_index_handler()
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
     Settings.callback_manager = CallbackManager([langfuse_handler])
 
     # Run application
@@ -178,7 +182,7 @@ def llama_index_fn(question: str):
 @observe()
 def langchain_fn(person: str):
     # Get Langchain Callback Handler scoped to the current trace context
-    langfuse_handler = langfuse.get_current_langchain_handler()
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
 
     # Pass handler to invoke method of chain/agent
     chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})

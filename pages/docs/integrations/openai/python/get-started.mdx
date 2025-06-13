@@ -192,7 +192,7 @@ If you are having issues with the integration, you can enable debug mode to get 
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.openai import openai
 
 # Enable debug via global client
@@ -225,7 +225,7 @@ openai.langfuse_debug = True
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.openai import openai
 
 # Set sampling via global client (default is 1.0)
@@ -258,7 +258,7 @@ You may disable sending traces to Langfuse by setting the appropriate flag.
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.openai import openai
 
 # Disable via global client
@@ -451,7 +451,7 @@ with langfuse.start_as_current_span(name="capital-poem-generator") as span:
 **Option 1: Python Decorator (v2)**
 
 ```python
-from langfuse import observe
+from langfuse.decorators import observe
 from langfuse.openai import openai
 
 @observe()
@@ -513,12 +513,11 @@ poem = openai.chat.completions.create(
 **Option 3: Low-level SDK (v2 approach)**
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.openai import openai
 
 # initialize SDK
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # create trace and add params
 trace = langfuse.trace(name="capital-poem-generator")

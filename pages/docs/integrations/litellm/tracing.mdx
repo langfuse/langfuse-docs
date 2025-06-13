@@ -144,6 +144,7 @@ If you want to use the LiteLLM SDK within a decorated function ([observe() decor
 ```python filename="main.py"
 from litellm import completion
 from langfuse import observe, get_client
+
 langfuse = get_client()
 
 @observe()
@@ -159,7 +160,7 @@ def fn():
         "parent_observation_id": langfuse.get_current_observation_id(),
     },
   )
-
+ 
   print(response)
 ```
 

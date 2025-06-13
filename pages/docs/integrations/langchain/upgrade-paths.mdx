@@ -12,6 +12,7 @@ Lanfuse and Langchain are under active development. Thus, we are constantly impr
 
 **Python**
 
+- [From v2.x.x to v3.x.x](#python3)
 - [From v1.x.x to v2.x.x](#python2)
 
 **JS/TS**
@@ -20,6 +21,63 @@ Lanfuse and Langchain are under active development. Thus, we are constantly impr
 - [From v1.x.x to v2.x.x](#js2)
 
 ## Python [#python]
+
+### From v2.x.x to v3.x.x 
+
+Python SDK v3 introduces a completely revised Langfuse core with a new **observability API**. While the LangChain integration still relies on a `CallbackHandler`, nearly all ergonomics have changed. The table below highlights the most important breaking changes:
+
+| Topic | v2 | v3 |
+|-------|-----|-----|
+|Package import |`from langfuse.callback import CallbackHandler`|`from langfuse.langchain import CallbackHandler`|
+|Client handling | Multiple instantiated clients | Singleton pattern, access via `get_client()` |
+|Trace/Span context | `CallbackHandler` optionally accepted `root` to group runs | Use context managers `with langfuse.start_as_current_span(...)` |
+|Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Call `span.update_trace(user_id=...)` |
+|Constructor args | `CallbackHandler(sample_rate=..., user_id=...)` | No constructor args – use Langfuse client or spans |
+
+Minimal migration example:
+
+```python
+# Install latest SDK (>=3.0.0)
+pip install --upgrade langfuse
+
+# v2 Code (for reference)
+# from langfuse.callback import CallbackHandler
+# handler = CallbackHandler()
+# chain.invoke({"topic": "cats"}, config={"callbacks": [handler]})
+
+# v3 Code
+from langfuse import Langfuse, get_client
+from langfuse.langchain  import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+# 1. Create/Configure Langfuse client (once at startup)
+Langfuse(
+    public_key="your-public-key",
+    secret_key="your-secret-key",
+)
+
+# 2. Access singleton instance and create handler
+langfuse = get_client()
+handler = CallbackHandler()
+
+# 3. Wrap LangChain execution in a span to attach metadata
+with langfuse.start_as_current_span(name="tell-joke") as span:
+    span.update_trace(user_id="user_123", input={"topic": "cats"})
+
+    llm = ChatOpenAI(model_name="gpt-4o")
+    prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+    chain = prompt | llm
+
+    response = chain.invoke({"topic": "cats"}, config={"callbacks": [handler]})
+    span.update_trace(output={"joke": response.content})
+
+# (Optional) Flush events in short-lived scripts
+langfuse.flush()
+```
+
+- All arguments such as `sample_rate` or `tracing_enabled` must now be provided when constructing the **Langfuse** client (or via environment variables) – not on the handler.
+- Functions like `flush()` and `shutdown()` moved to the client instance (`get_client().flush()`).
 
 ### From v1.x.x to v2.x.x [#python2]
 
@@ -80,9 +138,8 @@ TRACE_2
 If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
 
 ```python
-from langfuse import get_client
-from langfuse import get_client
-langfuse = get_client()
+from langfuse import Langfuse
+langfuse = Langfuse()
 
 # Get Langchain handler for a trace
 trace = langfuse.trace()

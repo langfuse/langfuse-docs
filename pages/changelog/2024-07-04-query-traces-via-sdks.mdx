@@ -21,23 +21,23 @@ pip install langfuse
 ```
 
 ```python
-from langfuse import get_client
-langfuse = get_client()
+from langfuse import Langfuse
+langfuse = Langfuse()
 
 # Fetch list of traces, supports filters and pagination
-traces = langfuse.api.trace.list()
+traces = langfuse.fetch_traces()
 
 # Fetch a single trace by ID
-trace = langfuse.api.trace.get("traceId")
+trace = langfuse.fetch_trace("traceId")
 
 # Fetch list of observations, supports filters and pagination
-observations = langfuse.api.observations.get_many()
+observations = langfuse.fetch_observations()
 
 # Fetch a single observation by ID
-observation = langfuse.api.observations.get("observationId")
+observation = langfuse.fetch_observation("observationId")
 
 # Fetch list of sessions
-sessions = langfuse.api.sessions.list()
+sessions = langfuse.fetch_sessions()
 ```
 
 </Tab>

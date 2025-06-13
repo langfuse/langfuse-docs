@@ -165,11 +165,10 @@ This is useful when your **LlamaIndex executions are part of a larger applicatio
 <Tabs items={["Python Decorator", "Low-level SDK"]}>
 <Tab>
 
-When using the [Langfuse `@observe()` decorator](/docs/sdk/python/decorators), `langfuse.get_current_llama_index_handler()` you can pass the current trace ID or parent observation ID to the `instrumentor.observe()` context manager.
+When using the [Langfuse `@observe()` decorator](/docs/sdk/python/decorators), `langfuse_context.get_current_llama_index_handler()` you can pass the current trace ID or parent observation ID to the `instrumentor.observe()` context manager.
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 from langfuse.llama_index import LlamaIndexInstrumentor
 from llama_index.core import Document, VectorStoreIndex
 
@@ -178,8 +177,8 @@ instrumentor = LlamaIndexInstrumentor()
 @observe()
 def llama_index_fn(question: str):
     # Get current trace ID and observation ID
-    current_trace_id = langfuse.get_current_trace_id()
-    current_observation_id = langfuse.get_current_observation_id()
+    current_trace_id = langfuse_context.get_current_trace_id()
+    current_observation_id = langfuse_context.get_current_observation_id()
 
     # Set IDs on the instrumentor
     with instrumentor.observe(
@@ -200,12 +199,11 @@ def llama_index_fn(question: str):
 If you have an existing Langfuse trace or span object, you can set it as the root observation for your `LlamaIndexInstrumentor`.
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.llama_index import LlamaIndexInstrumentor
 
 # Instantiate a Langfuse Client
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # Instantiate a new LlamaIndexInstrumentor and register it in the LlamaIndex Settings
 instrumentor = LlamaIndexInstrumentor()

@@ -116,11 +116,10 @@ This is useful when your **LlamaIndex executions are part of a larger applicatio
 <Tabs items={["Python Decorator", "Low-level SDK"]}>
 <Tab>
 
-When using the [Langfuse `@observe()` decorator](/docs/sdk/python/decorators), `langfuse.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `llama_index_fn()`. Pass it to the LlamaIndex `Settings.callback_manager` to trace subsequent LlamaIndex executions.
+When using the [Langfuse `@observe()` decorator](/docs/sdk/python/decorators), `langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context, in this case `llama_index_fn()`. Pass it to the LlamaIndex `Settings.callback_manager` to trace subsequent LlamaIndex executions.
 
 ```python showLineNumbers {1,6,9-10}
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 from llama_index.core import Document, VectorStoreIndex
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
@@ -128,7 +127,7 @@ from llama_index.core.callbacks import CallbackManager
 @observe()
 def llama_index_fn(question: str):
     # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
-    langfuse_handler = langfuse.get_current_llama_index_handler()
+    langfuse_handler = langfuse_context.get_current_llama_index_handler()
     Settings.callback_manager = CallbackManager([langfuse_handler])
 
     # Run application
@@ -150,11 +149,10 @@ If you have an existing Langfuse trace or span object, you can set it as the roo
 ```python {14,17,22}
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-from langfuse import get_client
+from langfuse import Langfuse
 
 # Instantiate a Langfuse Client
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
 langfuse_callback_handler = LlamaIndexCallbackHandler()
