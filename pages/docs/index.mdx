@@ -4,7 +4,7 @@ description: Langfuse is an open source LLM engineering platform. It includes ob
 ---
 
 
-# Langfuse
+# Langfuse Overview
 
 Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.
 
@@ -12,41 +12,35 @@ import { FeatureOverview } from "@/components/FeatureOverview";
 
 <FeatureOverview />
 
-Learn more: [Why Langfuse](/why), [Challenges when building LLM applications](/faq/all/challenges-of-building-llm-applications)
+## Tracing
 
-## Product Areas
+Tracing is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
 
-### Tracing
-
-[Tracing](/docs/tracing) is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
-
+- [Get started with tracing](/docs/get-started)
 - Traces include all LLM and non-LLM calls, including retrieval, embedding, API calls, and more
 - Support for tracking multi-turn conversations as sessions and user tracking
 - Agents can be represented as graphs
-- Capture traces via:
-  - Langfuse SDKs for Python, JS/TS
-  - Library integrations: LangChain, LanGraph, LlamaIndex, Vercel AI SDK, AutoGen, SmolAgents, Bedrock Agents, and many more
-  - OpenTelemetry endpoint: works well in Java, .NET, Go, and other languages
-  - Proxy/Gateway, e.g. LiteLLM
-  - No-code tools: OpenWebUI, Dify, Flowise, Langflow, Langdock, and more
+- Capture traces via our [50+ Integrations & SDKs](/docs/integrations/overview)
 
-Want to see an example? Play with the [interactive demo](/docs/demo).
+Want to see an example? Play with the [interactive demo](/docs/demo). 
 
-### Evaluations
+## Prompt Engineering
 
-[Evaluations](/docs/scores) are crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
+Prompt engineering is critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
 
-- Identify issues early by running evaluations on production traces
-- [Datasets](/docs/datasets) are the foundation for systematic testing and improvement of your LLM applications. Langfuse helps you create and manage test sets that ensure your application performs reliably across different scenarios. You can run experiments in development and monitor quality over time.
-- Supported evaluation methods: LLM-as-a-judge, user feedback, manual labeling via annotation queues, and custom evaluations via the API/SDKs
-
-### Prompt Engineering
-
-Prompt engineering is a critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
-
-- Use Langfuse [Prompt Management](/docs/prompts) to manage, version, and optimize your prompts throughout the development lifecycle
+- [Get started with prompt management](/docs/prompts/get-started)
+- Manage, version, and optimize your prompts throughout the development lifecycle
 - Test prompts interactively in the [LLM Playground](/docs/playground)
 - Run [prompt experiments](/docs/datasets/prompt-experiments) against datasets in order to test new prompt versions directly within Langfuse
+
+## Evaluations
+
+Evaluations are crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
+
+- Get started with different forms of [automated or manual evaluation methods](/docs/scores/overview)
+- Identify issues early by running evaluations on production traces
+- [Datasets](/docs/datasets) are the foundation for systematic testing and improvement of your LLM applications. 
+- Create and manage test sets that ensure your application performs reliably across different scenarios.
 
 ## Where to start?
 
@@ -57,7 +51,7 @@ _Simplified lifecycle from PoC to production:_
 <Frame
   transparent
   fullWidth
-  className="mt-2 rounded ring-primary/20 ring-1 dark:hidden"
+  className="mt-2 pt-4 rounded ring-primary/20 ring-1 dark:hidden"
 >
   ![Langfuse Features along the development
   lifecycle](/images/docs/features-light.png)
@@ -65,22 +59,13 @@ _Simplified lifecycle from PoC to production:_
 <Frame
   transparent
   fullWidth
-  className="mt-2 rounded ring-primary/20 ring-1 hidden dark:block"
+  className="mt-2 pt-4 rounded ring-primary/20 ring-1 hidden dark:block"
 >
   ![Langfuse Features along the development
   lifecycle](/images/docs/features-dark.png)
 </Frame>
 
-| Use case                               | Where to start?                                                                                                                                 |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| In production                          | Start with tracing, user feedback, LLM judges, and A/B tests                                                                                    |
-| Staging with test users                | Focus on tracing and collecting user feedback, helps to improve application by reviewing traces, and to build a dataset for offline evaluations |
-| B2B with strict requirements           | Prioritize offline evaluations                                                                                                                  |
-| Need offline evals                     | Start with 20–100 end-to-end (E2E) evaluations                                                                                                  |
-| Collaboration with non-technical teams | Use prompt management to iterate on prompts in UI                                                                                               |
-| Don't trust evals yet                  | Label data manually as a baseline, use annotation queues to scale this                                                                          |
-
-## Community & Updates
+## Community & Contact
 
 We actively develop Langfuse in [open source](/open-source) together with our community:
 
@@ -88,6 +73,7 @@ We actively develop Langfuse in [open source](/open-source) together with our co
 - Ask questions on [GitHub Discussions](/gh-support) or private [support channels](/support).
 - Report bugs via [GitHub Issues](/issue).
 - Chat with the Langfuse maintainers and community on [Discord](/discord).
+- [Why people choose Langfuse](/why)
 
 Langfuse evolves quickly, check out the [changelog](/changelog) for the latest updates. Subscribe to the **mailing list** to get notified about new major features:
 
