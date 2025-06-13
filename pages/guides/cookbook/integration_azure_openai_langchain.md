@@ -87,8 +87,8 @@ Learn more about Langfuse Prompt Management in the [docs](https://langfuse.com/d
 
 ```python
 # Initialize the Langfuse Client
-from langfuse import get_client
-langfuse = get_client()
+from langfuse import Langfuse
+langfuse = Langfuse()
 
 template = """
 You are an AI assistant travel assistant that provides vacation recommendations to users. 
@@ -173,7 +173,7 @@ Run the chain multiple times within the same Langfuse trace.
 
 ```python
 # Create trace using Langfuse Client
-langfuse = get_client()
+langfuse = Langfuse()
 trace = langfuse.trace(name="chain_of_thought_example", user_id="user-1234")
 
 # Create a handler scoped to this trace
@@ -204,7 +204,7 @@ trace_id = trace.id
 
 ```python
 # Add score to the trace via the Langfuse Python Client
-langfuse = get_client()
+langfuse = Langfuse()
 
 trace = langfuse.score(
     trace_id=trace_id,

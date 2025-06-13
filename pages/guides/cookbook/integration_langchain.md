@@ -478,9 +478,9 @@ chain.invoke({"person": "Ada Lovelace"}, config={
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
-langfuse = get_client()
+langfuse = Langfuse()
 
 langfuse.score(
     trace_id=predefined_run_id,
@@ -529,9 +529,9 @@ trace_id, response = main("Ada Lovelace")
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
-langfuse = get_client()
+langfuse = Langfuse()
 
 langfuse.score(
     trace_id=trace_id,

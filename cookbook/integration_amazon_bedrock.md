@@ -97,11 +97,26 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
 ### Wrap Bedrock SDK
 
 
 ```python
-from langfuse import observe, langfuse
+from langfuse import observe
 from botocore.exceptions import ClientError
 
 @observe(as_type="generation", name="Bedrock Converse")

@@ -34,9 +34,9 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
-langfuse = get_client()
+langfuse = Langfuse()
 ```
 
 

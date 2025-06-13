@@ -23,15 +23,15 @@ Initialize the Langfuse client with your API keys from the project settings in t
 
 
 ```python
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
+import os
 
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
@@ -119,7 +119,7 @@ print(response.model_dump_json(indent=2))
 """
 ```
 
-    <ipython-input-5-609add46bbd5>:6: DeprecationWarning: apatch is deprecated, use patch instead
+    /var/folders/r3/qf06gp294m109hgl7ycfyzqc0000gn/T/ipykernel_59166/1647180025.py:6: DeprecationWarning: apatch is deprecated, use patch instead
       client = instructor.apatch(AsyncOpenAI())
 
 
@@ -148,10 +148,8 @@ from enum import Enum
 import asyncio
 import instructor
 
-from langfuse import get_client
 from langfuse.openai import AsyncOpenAI
 from langfuse import observe, get_client
-langfuse = get_client()
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -162,7 +160,6 @@ client = AsyncOpenAI()
 client = instructor.patch(client, mode=instructor.Mode.TOOLS)
 
 # Initialize Langfuse (needed for scoring)
-from langfuse import get_client
 langfuse = get_client()
 
 # Rate limit the number of requests
@@ -218,7 +215,7 @@ def score_relevance(trace_id: str, observation_id: str, relevance_score: float):
     """
     Score the relevance of a feedback query in Langfuse given the observation_id.
     """
-    langfuse.score(
+    langfuse.create_score(
         trace_id=trace_id,
         observation_id=observation_id,
         name="feedback-relevance",
@@ -282,15 +279,15 @@ Relevance Score: 0.9
     Feedback: The chat bot on your website does not work.
     Classification: ['BUG']
     Relevance Score: 0.9
-    Feedback: Could you add more features to your app?
-    Classification: ['SUGGESTION']
+    Feedback: I have a question about my recent order.
+    Classification: ['QUESTION']
     Relevance Score: 0.8
     Feedback: Your customer service is exceptional!
     Classification: ['PRAISE']
-    Relevance Score: 0.9
-    Feedback: I have a question about my recent order.
-    Classification: ['QUESTION']
-    Relevance Score: 0.9
+    Relevance Score: 0.95
+    Feedback: Could you add more features to your app?
+    Classification: ['SUGGESTION']
+    Relevance Score: 0.8
 
 
 

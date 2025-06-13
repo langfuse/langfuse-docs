@@ -22,9 +22,11 @@ The Assistants API from OpenAI allows developers to build AI assistants that can
 
 Install the required packages:
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install --upgrade openai langfuse
+%pip install --upgrade openai "langfuse<3.0.0"
 ```
 
 Set your environment:

@@ -38,9 +38,11 @@ First, we set our Mistral API key as an environment variable. If you haven't alr
 
 Then, we use LlamaIndex to initialize both a Mistral language model and an embedding model. We then set these models in the LlamaIndex `Settings` object:
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install llama-index llama-index-llms-mistralai llama-index-embeddings-mistralai nest_asyncio --upgrade
+%pip install "langfuse<3.0.0" llama-index llama-index-llms-mistralai llama-index-embeddings-mistralai nest_asyncio --upgrade
 ```
 
 
@@ -93,9 +95,9 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
-langfuse = get_client()
+langfuse = Langfuse()
 ```
 
 Lastly, we register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager` at the root of the app.
@@ -199,7 +201,7 @@ def hedgehog_helper(user_message):
 trace_id = hedgehog_helper("Can I keep the hedgehog as a pet?")
 
 # Score the trace, e.g. to add user feedback using the trace_id
-langfuse.score(
+langfuse.create_score(
     trace_id = trace_id,
     name="user-explicit-feedback",
     value=0.9,

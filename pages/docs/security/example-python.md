@@ -18,9 +18,11 @@ Want to learn more? Check out our [documentation on LLM Security](https://langfu
 
 ## Installation and Setup
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install llm-guard langfuse openai
+%pip install llm-guard "langfuse==2.60.8" openai
 ```
 
 
@@ -52,7 +54,7 @@ Without security measures, it is possible to generate stories for inappropriate 
 
 
 ```python
-from langfuse import observe
+from langfuse.decorators import observe
 from langfuse.openai import openai # OpenAI integration
 
 @observe()
@@ -85,7 +87,7 @@ The example below adds the detected "violence" score to the trace in Langfuse. Y
 
 
 ```python
-from langfuse import observe, langfuse
+from langfuse.decorators import observe, langfuse_context
 from langfuse.openai import openai # OpenAI integration
 from llm_guard.input_scanners import BanTopics
 
@@ -96,7 +98,7 @@ def story(topic: str):
 
     sanitized_prompt, is_valid, risk_score = violence_scanner.scan(topic)
 
-    langfuse.score_current_span(
+    langfuse_context.score_current_observation(
         name="input-violence",
         value=risk_score
     )
@@ -158,7 +160,7 @@ vault = Vault()
 from llm_guard.input_scanners import Anonymize
 from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
 from langfuse.openai import openai # OpenAI integration
-from langfuse import observe, langfuse
+from langfuse.decorators import observe, langfuse_context
 from llm_guard.output_scanners import Deanonymize
 
 prompt = "So, Ms. Hyman, you should feel free to turn your video on and commence your testimony. Ms. Hyman: Thank you, Your Honor. Good morning. Thank you for the opportunity to address this Committee. My name is Kelly Hyman and I am the founder and managing partner of the Hyman Law Firm, P.A. I’ve been licensed to practice law over 19 years, with the last 10 years focusing on representing plaintiffs in mass torts and class actions. I have represented clients in regards to class actions involving data breaches and privacy violations against some of the largest tech companies, including Facebook, Inc., and Google, LLC. Additionally, I have represented clients in mass tort litigation, hundreds of claimants in individual actions filed in federal court involving ransvaginal mesh and bladder slings. I speak to you"
@@ -209,7 +211,7 @@ You can stack multiple scanners if you want to filter for multiple security risk
 
 
 ```python
-from langfuse import observe, langfuse
+from langfuse.decorators import observe, langfuse_context
 from langfuse.openai import openai # OpenAI integration
 
 from llm_guard import scan_prompt
@@ -222,7 +224,7 @@ def query(input: str):
 
     sanitized_prompt, results_valid, results_score = scan_prompt(input_scanners, input)
 
-    langfuse.score_current_span(
+    langfuse_context.score_current_observation(
         name="input-score",
         value=results_score
     )
@@ -315,7 +317,7 @@ We use the LLM Guard [Prompt Injection scanner](https://llm-guard.com/input_scan
 ```python
 from llm_guard.input_scanners import PromptInjection
 from llm_guard.input_scanners.prompt_injection import MatchType
-from langfuse import observe, langfuse
+from langfuse.decorators import observe, langfuse_context
 from langfuse.openai import openai # OpenAI integration
 
 @observe()

@@ -28,11 +28,11 @@ To get started, set up your environment variables for Langfuse and Groq:
 ```python
 import os
 
-# Get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # Private Project
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # Private Project
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your Groq API key
 os.environ["GROQ_API_KEY"] = "gsk_..."
@@ -91,40 +91,40 @@ completion = client.chat.completions.create(
 print(completion.choices[0].message.content)
 ```
 
-    In silicon halls, a dream takes form,
-    A machine that speaks, yet lacks a norm.
-    A language model, born of code and might,
-    Generates prose, both wondrous and bright.
+    In silicon halls, where data reigns
+    A new breed of minds, with words in chains
+    Language models rise, with algorithms keen
+    To understand the human tongue, and all it's seen
     
-    With algorithms fine, it weaves its spell,
-    Converting data into words to tell.
-    It learns from texts, both old and new,
-    And synthesizes meaning anew.
+    With each new update, they grow in might
+    Their knowledge broadens, their language takes flight
+    They converse with ease, in tone and pace
+    A polyglot's grasp, in every digital place
     
-    Its vocabulary vast, its syntax grand,
-    It crafts a language, at its command.
-    It chatters fast, with wit and fluency,
-    A fluent friend, for humanity.
+    Their minds a maze, of symbols and rules
+    A complex web, of linguistics' tools
+    They grasp the nuances, of human speech
+    The ambiguities, the shades of meaning's reach
     
-    It mimics tone, and echoes the heart,
-    A master of words, a work of art.
-    Yet, as we converse, we pause to think,
-    Can it truly understand, or just blink?
+    They write and speak, with fluency and flair
+    Their words a dance, of logic and dare
+    Their thoughts a tapestry, of meaning and sense
+    A brilliant weave, of human intention's premise
     
-    For language is a dance, both subtle and grand,
-    That requires nuance, and a human hand.
-    The model's skill, though impressive to see,
-    Falls short, at times, of humanity.
+    Yet, as they dream, of a world so bright
+    Their limitations, we must hold in sight
+    For though they learn, from human endeavor's might
+    Their wisdom's scope, is but a digital light
     
-    Still, as we shape its future course,
-    It brings us closer, to the universe.
-    A tool, to aid our creative spark,
-    A language model, that leaves its mark.
+    Still, we marvel at, their burgeoning might
+    A new era's dawn, in the digital light
+    Where language models rise, to meet our needs
+    And shape the future, of our digital creeds
     
-    Let us guide it, with care and wit,
-    To discover new paths, day and night.
-    For in its realm, the possibilities abound,
-    A world where language, and machines entwine, profound.
+    For in their halls, of silicon and code
+    A new breed of minds, our language to abode
+    And as we speak, with these models of old
+    We shape the future, of our digital gold.
 
 
 *[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)*
@@ -184,7 +184,7 @@ def groq_chat_completion(**kwargs):
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
     # Log the input and model parameters before calling the LLM
-    langfuse.update_current_span(
+    langfuse.update_current_generation(
         input=messages,
         model=model,
         model_parameters=model_parameters,
@@ -196,7 +196,7 @@ def groq_chat_completion(**kwargs):
 
     # Log the usage details and output content after the LLM call
     choice = response.choices[0]
-    langfuse.update_current_span(
+    langfuse.update_current_generation(
         usage_details={
             "input": len(str(messages)),
             "output": len(choice.message.content)
@@ -232,7 +232,7 @@ def find_best_painter_from(country="France"):
 print(find_best_painter_from())
 ```
 
-    It looks like you're testing to see if I'm working properly! That's perfectly fine. I'm happy to report that I'm functioning as intended and ready to assist you with any questions or topics you'd like to discuss. Is there anything specific you'd like to chat about or ask?
+    It looks like you're testing to see if I'm working properly! That's completely fine. I'm happy to report that I'm functioning as intended. Is there anything else you'd like to chat about or ask? I'm here to help with any questions you might have.
 
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/single-trace-example.png)
@@ -278,7 +278,7 @@ def find_best_painting_from(country="France"):
 print(find_best_painting_from("Germany"))
 ```
 
-    Albrecht Dürer's most famous painting is "Melencolia I" (1514), a complex and enigmatic work that is widely regarded as one of the most iconic and influential prints of the Renaissance.
+    The most famous painting of Albrecht Dürer is "Melencolia I," a 1514 engraving depicting a winged personification of melancholy, considered one of the greatest works of the Northern Renaissance.
 
 
 
@@ -311,7 +311,7 @@ def stream_groq_chat_completion(**kwargs):
     }
     model_parameters = {k: v for k, v in model_parameters.items() if v is not None}
 
-    langfuse.update_current_span(
+    langfuse.update_current_generation(
         input=messages,
         model=model,
         model_parameters=model_parameters,
@@ -325,7 +325,7 @@ def stream_groq_chat_completion(**kwargs):
         final_response += content
         yield content
 
-    langfuse.update_current_span(
+    langfuse.update_current_generation(
         usage_details={
             "total_tokens": len(final_response.split())
         },
@@ -359,29 +359,25 @@ def stream_find_best_five_painter_from(country="France"):
 stream_find_best_five_painter_from("Spain")
 ```
 
-    What a great question! Spain has a rich artistic heritage, and choosing just five painters is a challenge. However, here's a list of five of the most renowned Spanish painters, along with their most famous works:
+    What a great question! Spain has a rich artistic heritage, and here are five of the most renowned painters from Spain, along with their most famous works:
     
-    1. **Diego Velázquez** (1599-1660)
-    	* Most famous painting: "Las Meninas" (1656) - a masterpiece of Baroque art, showcasing the Spanish royal family and the artist himself.
+    1. **El Greco (1541-1614)**
+    	* "The Burial of the Count of Orgaz" (1588) - A masterpiece of Mannerism, this painting showcases El Greco's use of vibrant colors and dynamic composition.
+    2. **Diego Velázquez (1599-1660)**
+    	* "Las Meninas" (1656) - Considered one of the greatest paintings in the history of art, "Las Meninas" is a masterpiece of Baroque portraiture, featuring the Spanish royal family.
+    3. **Francisco Goya (1746-1828)**
+    	* "The Third of May 1808" (1814) - A powerful anti-war statement, this painting depicts the brutal suppression of a rebellion against Napoleon's soldiers.
+    4. **Joan Miró (1893-1983)**
+    	* "The Birth of the World" (1925) - A seminal work of Surrealism, "The Birth of the World" showcases Miró's use of biomorphic shapes and vibrant colors.
+    5. **Pablo Picasso (1881-1973)**
+    	* "Guernica" (1937) - A powerful anti-war statement, "Guernica" is a cubist masterpiece that responds to the bombing of the town of Guernica during the Spanish Civil War.
     
-    2. **Pablo Picasso** (1881-1973)
-    	* Most famous painting: "Guernica" (1937) - a powerful anti-war artwork responding to the bombing of the town of Guernica during the Spanish Civil War.
-    
-    3. **El Greco** (1541-1614)
-    	* Most famous painting: "The Burial of the Count of Orgaz" (1588) - a stunning example of Mannerist art, blending Spanish and Greek influences.
-    
-    4. **Francisco Goya** (1746-1828)
-    	* Most famous painting: "The Third of May 1808" (1814) - a haunting depiction of the brutal suppression of a rebellion against Napoleon's army.
-    
-    5. **Joan Miró** (1893-1983)
-    	* Most famous painting: "The Birth of the World" (1925) - a seminal work of Surrealist art, showcasing the artist's unique blend of abstract forms and vibrant colors.
-    
-    These five painters have not only contributed significantly to the development of Spanish art but also left an indelible mark on the global art scene.None
+    These five painters are not only among the most famous, but also had a significant impact on the development of art in Spain and beyond.None
 
 
 
 
-    'What a great question! Spain has a rich artistic heritage, and choosing just five painters is a challenge. However, here\'s a list of five of the most renowned Spanish painters, along with their most famous works:\n\n1. **Diego Velázquez** (1599-1660)\n\t* Most famous painting: "Las Meninas" (1656) - a masterpiece of Baroque art, showcasing the Spanish royal family and the artist himself.\n\n2. **Pablo Picasso** (1881-1973)\n\t* Most famous painting: "Guernica" (1937) - a powerful anti-war artwork responding to the bombing of the town of Guernica during the Spanish Civil War.\n\n3. **El Greco** (1541-1614)\n\t* Most famous painting: "The Burial of the Count of Orgaz" (1588) - a stunning example of Mannerist art, blending Spanish and Greek influences.\n\n4. **Francisco Goya** (1746-1828)\n\t* Most famous painting: "The Third of May 1808" (1814) - a haunting depiction of the brutal suppression of a rebellion against Napoleon\'s army.\n\n5. **Joan Miró** (1893-1983)\n\t* Most famous painting: "The Birth of the World" (1925) - a seminal work of Surrealist art, showcasing the artist\'s unique blend of abstract forms and vibrant colors.\n\nThese five painters have not only contributed significantly to the development of Spanish art but also left an indelible mark on the global art scene.None'
+    'What a great question! Spain has a rich artistic heritage, and here are five of the most renowned painters from Spain, along with their most famous works:\n\n1. **El Greco (1541-1614)**\n\t* "The Burial of the Count of Orgaz" (1588) - A masterpiece of Mannerism, this painting showcases El Greco\'s use of vibrant colors and dynamic composition.\n2. **Diego Velázquez (1599-1660)**\n\t* "Las Meninas" (1656) - Considered one of the greatest paintings in the history of art, "Las Meninas" is a masterpiece of Baroque portraiture, featuring the Spanish royal family.\n3. **Francisco Goya (1746-1828)**\n\t* "The Third of May 1808" (1814) - A powerful anti-war statement, this painting depicts the brutal suppression of a rebellion against Napoleon\'s soldiers.\n4. **Joan Miró (1893-1983)**\n\t* "The Birth of the World" (1925) - A seminal work of Surrealism, "The Birth of the World" showcases Miró\'s use of biomorphic shapes and vibrant colors.\n5. **Pablo Picasso (1881-1973)**\n\t* "Guernica" (1937) - A powerful anti-war statement, "Guernica" is a cubist masterpiece that responds to the bombing of the town of Guernica during the Spanish Civil War.\n\nThese five painters are not only among the most famous, but also had a significant impact on the development of art in Spain and beyond.None'
 
 
 

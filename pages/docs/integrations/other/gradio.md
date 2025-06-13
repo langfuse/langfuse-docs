@@ -49,10 +49,12 @@ This notebook will show you how to
 
 Install requirements. We use OpenAI for this simple example. We could use any model here.
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
 # pinning httpx as the latest version is not compatible with the OpenAI SDK at the time of creating this notebook
-!pip install gradio langfuse openai httpx==0.27.2
+%pip install gradio "langfuse<3.0.0" openai httpx==0.27.2
 ```
 
 Set credentials and initialize Langfuse SDK Client used to add user feedback later on.
@@ -80,10 +82,9 @@ os.environ["OPENAI_API_KEY"] = ""
 import gradio as gr
 import json
 import uuid
-from langfuse import get_client
+from langfuse import Langfuse
 
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 ```
 
 ## Implementation of Chat functions

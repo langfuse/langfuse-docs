@@ -47,10 +47,9 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 ```
 
 | Environment, Variable | Description   | Default value  
@@ -424,7 +423,7 @@ Make sure to initialize Langfuse always _inside_ the function body. If you want 
 
 ```python
 import functions_framework
-from langfuse import get_client
+from langfuse import Langfuse
 
 
 # Lazy initialization of the Langfuse client to allow imports in other modules
@@ -592,8 +591,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 ```python
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 @app.get("/generate/",tags=["APIs"])
 async def campaign(prompt: str = Query(..., max_length=20)):

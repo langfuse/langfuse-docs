@@ -46,7 +46,7 @@ Initialize the Langfuse client and configure the LLM with Langfuse as callback h
 ```python
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.config import RunnableConfig
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.callback import CallbackHandler
 from fastapi import FastAPI
 from langserve import add_routes

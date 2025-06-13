@@ -174,8 +174,8 @@ Then loop over the dataset items and run the application.
 
 
 ```python
-from langfuse import get_client
-langfuse = get_client()
+from langfuse import Langfuse
+langfuse = Langfuse()
 
 dataset = langfuse.get_dataset("<langfuse_dataset_name>")
 

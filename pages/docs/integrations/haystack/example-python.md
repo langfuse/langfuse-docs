@@ -232,10 +232,9 @@ The example below walks through a simple way to score the chat generator's respo
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 trace_id = trace_url.split('/')[-1] # extract id from trace url, to be exposed directly in a future release
 

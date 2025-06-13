@@ -100,9 +100,9 @@ There are two main ways to run evaluations:
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
  
-langfuse = get_client()
+langfuse = Langfuse()
 
 langfuse.auth_check()
 ```

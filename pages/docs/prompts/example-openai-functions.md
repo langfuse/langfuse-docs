@@ -29,9 +29,8 @@ os.environ["OPENAI_API_KEY"] = ""
 
 
 ```python
-from langfuse import get_client
-from langfuse import get_client
-langfuse = get_client()
+from langfuse import Langfuse
+langfuse = Langfuse()
 
 # optional, verify that Langfuse is configured correctly
 langfuse.auth_check()

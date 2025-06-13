@@ -22,28 +22,20 @@ The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports a
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
-
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 
 ```python
 # instead of: import openai
 from langfuse.openai import openai
-```
-
-
-```python
-# For debugging, checks the SDK connection with the server. Do not use in production as it adds latency.
-openai.langfuse_auth_check()
 ```
 
 ## Examples
@@ -62,6 +54,94 @@ completion = openai.chat.completions.create(
   metadata={"someMetadataKey": "someValue"},
 )
 ```
+
+    Exception while exporting Span batch.
+    Traceback (most recent call last):
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+        response = conn.getresponse()
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/connection.py", line 516, in getresponse
+        httplib_response = super().getresponse()
+      File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1430, in getresponse
+        response.begin()
+        ~~~~~~~~~~~~~~^^
+      File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 331, in begin
+        version, status, reason = self._read_status()
+                                  ~~~~~~~~~~~~~~~~~^^
+      File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 292, in _read_status
+        line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+      File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socket.py", line 719, in readinto
+        return self._sock.recv_into(b)
+               ~~~~~~~~~~~~~~~~~~~~^^^
+      File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1304, in recv_into
+        return self.read(nbytes, buffer)
+               ~~~~~~~~~^^^^^^^^^^^^^^^^
+      File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1138, in read
+        return self._sslobj.read(len, buffer)
+               ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+    TimeoutError: The read operation timed out
+    
+    The above exception was the direct cause of the following exception:
+    
+    Traceback (most recent call last):
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+        resp = conn.urlopen(
+            method=request.method,
+        ...<9 lines>...
+            chunked=chunked,
+        )
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+        retries = retries.increment(
+            method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+        )
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/util/retry.py", line 474, in increment
+        raise reraise(type(error), error, _stacktrace)
+              ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/util/util.py", line 39, in reraise
+        raise value
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+        response = self._make_request(
+            conn,
+        ...<10 lines>...
+            **response_kw,
+        )
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+        self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+        ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+        raise ReadTimeoutError(
+            self, url, f"Read timed out. (read timeout={timeout_value})"
+        ) from err
+    urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='cloud.langfuse.com', port=443): Read timed out. (read timeout=10)
+    
+    During handling of the above exception, another exception occurred:
+    
+    Traceback (most recent call last):
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/opentelemetry/sdk/trace/export/__init__.py", line 362, in _export_batch
+        self.span_exporter.export(self.spans_list[:idx])  # type: ignore
+        ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py", line 204, in export
+        return self._export_serialized_spans(serialized_data)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py", line 174, in _export_serialized_spans
+        resp = self._export(serialized_data)
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/opentelemetry/exporter/otlp/proto/http/trace_exporter/__init__.py", line 139, in _export
+        resp = self._session.post(
+            url=self._endpoint,
+        ...<3 lines>...
+            cert=self._client_cert,
+        )
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/requests/sessions.py", line 637, in post
+        return self.request("POST", url, data=data, json=json, **kwargs)
+               ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+        resp = self.send(prep, **send_kwargs)
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+        r = adapter.send(request, **kwargs)
+      File "/Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/requests/adapters.py", line 713, in send
+        raise ReadTimeout(e, request=request)
+    requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='cloud.langfuse.com', port=443): Read timed out. (read timeout=10)
+
 
 ### Chat completion (image)
 
@@ -114,6 +194,10 @@ completion = openai.chat.completions.create(
 for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
+
+    Why don't scientists trust atoms?
+    
+    Because they make up everything!None
 
 ### Chat completion (async)
 
@@ -291,6 +375,34 @@ def main(country: str, user_id: str, **kwargs) -> str:
 print(main("Bulgaria", "admin"))
 ```
 
+    In Sofia's embrace of time's gentle hand,  
+    Where ancient whispers in the cobblestones stand,  
+    The Vitosha's shadow kisses the town,  
+    As golden sunsets tie the day down.  
+    
+    Streets sing with echoes of footsteps past,  
+    Where stories linger, and memories cast,  
+    Beneath the banyan sky so wide,  
+    Cultures and histories peacefully collide.  
+    
+    The Alexander Nevsky, majestic and bold,  
+    A guardian of faith with domes of gold,  
+    Its silence speaks in volumes profound,  
+    In the heart of a city where old truths are found.  
+    
+    The rose-laden gardens in Boris' park,  
+    Perfume the air as day turns dark,  
+    While laughter and life dance at night,  
+    Under Sofia's tapestry of starlit light.  
+    
+    Markets bustle with the color of trade,  
+    Where lively exchanges and histories fade,  
+    A mosaic of tales in woven rhyme,  
+    Sofia stands timeless through passage of time.  
+    
+    
+
+
 Go to https://cloud.langfuse.com or your own instance to see your trace.
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
@@ -341,20 +453,45 @@ def main(country: str, user_id: str, **kwargs) -> str:
         user_id=user_id,
         tags=["tag1", "tag2"],
         public=True,
-        metadata = {
-        "env": "development",
-        },
-        release = "v0.0.21"
+        metadata = {"env": "development"}
     )
 
     return poem
 
 # create random trace_id, could also use existing id from your application, e.g. conversation id
-trace_id = str(uuid4())
+trace_id = langfuse.create_trace_id()
 
 # run main function, set your own id, and let Langfuse decorator do the rest
 print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 ```
+
+    In the cradle of Balkan hills, she lies,  
+    A gem under cerulean skies,  
+    Sofia, where the ancient whispers blend,  
+    With modern souls, as time extends.
+    
+    Her heart beats with the rhythm of the past,  
+    Where cobblestones and new dreams cast,  
+    A tapestry of age and youth, entwined,  
+    In every corner, stories unsigned.
+    
+    The Vitosha stands like a guardian old,  
+    Whose peaks in winter snow enfold,  
+    The city below, glowing warm and bright,  
+    Under the embrace of evening light.
+    
+    St. Alexander’s domes in sunlight gleam,  
+    Golden crowns of a Byzantine dream,  
+    While beneath, a bustling world unfurls,  
+    In markets vast, where culture swirls.
+    
+    Winding streets where whispers linger,  
+    Liberty echoes from corner to finger,  
+    In the shadow of Soviet grandiosity,  
+    Bulgaria’s spirit claims its clarity.
+    
+    Cafés breathe tales in the aroma of brew,
+
 
 ## Programmatically add scores
 
@@ -364,10 +501,7 @@ The score is associated to the trace using the `trace_id`.
 
 
 ```python
-from langfuse import get_client
 from langfuse import observe, get_client
-langfuse = get_client()
-
 langfuse = get_client()
 
 @observe() # decorator to automatically create trace and nest generations
@@ -383,7 +517,7 @@ def main():
 _, trace_id = main()
 
 # Score the trace from outside the trace context
-langfuse.score(
+langfuse.create_score(
     trace_id=trace_id,
     name="my-score-name",
     value=1

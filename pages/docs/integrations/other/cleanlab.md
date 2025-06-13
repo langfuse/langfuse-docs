@@ -176,15 +176,14 @@ The `fetch_traces()` function has arguments to filter the traces by tags, timest
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from datetime import datetime, timedelta
 
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 now = datetime.now()
 one_day_ago = now - timedelta(hours=24)
 
-traces = langfuse.fetch_traces(
+traces = langfuse.api.trace.list(
     tags="TLM_eval_pipeline",
     from_timestamp=one_day_ago,
     to_timestamp=now,

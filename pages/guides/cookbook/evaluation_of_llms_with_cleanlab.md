@@ -5,7 +5,7 @@ description: "Automatically evaluate LLMs in real time with Cleanlab's trustwort
 
 # Automated Evaluations with Cleanlab
 
-Cleanlab's [Trustworthy Language Model](https://cleanlab.ai/tlm/) (TLM) enables Langfuse users to quickly identify low quality and hallucinated responses from any LLM trace.
+Cleanlab’s [Trustworthy Language Model](https://cleanlab.ai/tlm/) (TLM) enables Langfuse users to quickly identify low quality and hallucinated responses from any LLM trace.
 
 ## What is TLM?
 
@@ -176,16 +176,15 @@ The `fetch_traces()` function has arguments to filter the traces by tags, timest
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from datetime import datetime, timedelta
 
-langfuse = get_client()
+langfuse = Langfuse()
 now = datetime.now()
 one_day_ago = now - timedelta(hours=24)
 
-# Step 1.1 Fetch traces for all customer support intents
 traces = langfuse.api.trace.list(
-    tags=["TLM_eval_pipeline"],
+    tags="TLM_eval_pipeline",
     from_timestamp=one_day_ago,
     to_timestamp=now,
 ).data

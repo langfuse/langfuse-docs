@@ -151,20 +151,33 @@ You can access additional Langfuse features by adding relevant attributes to the
 
 
 ```python
-completion_with_attributes = client.chat.completions.create(
-    name="translation-with-attributes",  # Trace name
-    model="tgi",
-    messages=[
-        {"role": "system", "content": "You are a translator."},
-        {"role": "user", "content": "Translate the following text from English to German: 'The Language model produces text'"}
-    ],
-    temperature=0.7,
-    metadata={"language": "English"},  # Trace metadata
-    tags=["translation", "language", "German"],  # Trace tags
-    user_id="user1234",  # Trace user ID
-    session_id="session5678",  # Trace session ID
-)
-print(completion_with_attributes.choices[0].message.content)
+from langfuse import get_client, observe
+langfuse = get_client()
+
+@observe()
+def technical_explanation():
+    # Your main application logic
+    response = client.chat.completions.create(
+        name="translation-with-attributes",
+        model="tgi",
+        messages=[
+            {"role": "system", "content": "You are a translator."},
+            {"role": "user", "content": "Translate the following text from English to German: 'The Language model produces text'"}
+        ],
+    ).choices[0].message.content
+
+    # Update the current trace with additional information
+    langfuse.update_current_trace(
+        session_id="session5678",
+        user_id="user1234",
+        tags=["translation", "language", "German"],
+        metadata={"language": "English"},  # Trace metadata
+    )
+
+    return response
+
+result = technical_explanation()
+print(result)
 ```
 
     The translation of the text from English to German is:
