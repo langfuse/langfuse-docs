@@ -1,33 +1,38 @@
-import { TextQuote, GitPullRequestArrow, ThumbsUp, Database } from "lucide-react";
+import {
+  TextQuote,
+  GitPullRequestArrow,
+  ThumbsUp,
+  Database,
+} from "lucide-react";
 
 const features = [
   {
     icon: TextQuote,
-    title: "Traces",
+    title: "Tracing",
     items: [
       "Log traces",
       "Lowest level transparency",
-      "Understand cost and latency"
-    ]
+      "Understand cost and latency",
+    ],
   },
   {
     icon: GitPullRequestArrow,
-    title: "Prompts", 
+    title: "Prompts",
     items: [
-      "Version control",
+      "Version control and deploy",
+      "Collaborate on prompts",
       "Test prompts and models",
-      "Collaborate on prompts"
-    ]
+    ],
   },
   {
     icon: ThumbsUp,
     title: "Evals",
     items: [
       "Measure output quality",
-      "Monitor production health", 
-      "Test changes in development"
-    ]
-  }
+      "Monitor production health",
+      "Test changes in development",
+    ],
+  },
 ];
 
 const platformFeature = {
@@ -36,19 +41,19 @@ const platformFeature = {
   items: [
     "API-first architecture",
     "Data exports to blob storage",
-    "Enterprise Security / administration"
-  ]
+    "Enterprise security and administration",
+  ],
 };
 
 export const FeatureOverview = () => {
   return (
-    <div className="not-prose my-8 p-4 border rounded bg-white">
+    <div className="not-prose flex flex-col my-8 p-2 lg:p-4 border rounded bg-card gap-2 lg:gap-4">
       {/* Top 3 cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        {features.map((feature, index) => (
-          <div 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 lg:gap-4">
+        {features.map((feature) => (
+          <div
             key={feature.title}
-            className="border rounded p-6 bg-card"
+            className="border rounded p-4 lg:p-6 bg-card"
           >
             <div className="flex items-center gap-3 mb-4">
               <feature.icon className="h-5 w-5 text-muted-foreground" />
@@ -60,18 +65,16 @@ export const FeatureOverview = () => {
               {feature.items.map((item, itemIndex) => (
                 <li key={itemIndex} className="flex items-start gap-2">
                   <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground text-sm">
-                    {item}
-                  </span>
+                  <span className="text-muted-foreground text-sm">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
-      
+
       {/* Platform card - full width */}
-      <div className="border rounded p-6 bg-card">
+      <div className="border rounded p-4 lg:p-6 bg-card">
         <div className="flex items-center gap-3 mb-4">
           <platformFeature.icon className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-lg font-semibold text-card-foreground">
@@ -82,13 +85,11 @@ export const FeatureOverview = () => {
           {platformFeature.items.map((item, itemIndex) => (
             <li key={itemIndex} className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0" />
-              <span className="text-muted-foreground text-sm">
-                {item}
-              </span>
+              <span className="text-muted-foreground text-sm">{item}</span>
             </li>
           ))}
         </ul>
       </div>
     </div>
   );
-}; 
+};
