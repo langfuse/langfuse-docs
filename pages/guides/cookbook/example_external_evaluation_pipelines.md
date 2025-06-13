@@ -567,30 +567,6 @@ def joyfulness_score(trace):
 joyfulness_score(traces_batch[1])
 ```
 
-    Overriding of current TracerProvider is not allowed
-
-
-
-    Output()
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
-
-
-
-    Score: 0.8851952809486198
-    Reason: The response captures attention immediately with the innovative use of VR in therapy and maintains interest by describing specific scenarios like exploring a virtual skyscraper. It elicits positive emotions by highlighting the safety and customization of VR therapy, making it appealing. The mention of wearing 'cool VR goggles' adds an entertaining element, enhancing the fun aspect. The creativity in presenting VR as a tool for therapy is unique and engaging, making the content stand out.
-
-
-
-
-
-    {'score': 0.8851952809486198,
-     'reason': "The response captures attention immediately with the innovative use of VR in therapy and maintains interest by describing specific scenarios like exploring a virtual skyscraper. It elicits positive emotions by highlighting the safety and customization of VR therapy, making it appealing. The mention of wearing 'cool VR goggles' adds an entertaining element, enhancing the fun aspect. The creativity in presenting VR as a tool for therapy is unique and engaging, making the content stand out."}
-
-
-
 Under the hood, GEval uses chain of thought (CoT) prompting to formulate a set of criteria for scoring prompts. When developing your own metrics, it's important to review the reasoning behind these scores. This helps ensure that the model evaluates the traces just as you intended when you wrote the evaluation prompt.
 
 Our eval function returns a dictionary with both the score and the model's reasoning. We do this as we'll persist the reasoning with every langfuse score, ensuring interpretability.
@@ -610,32 +586,6 @@ langfuse.create_score(
     comment=joyfulness_score(traces_batch[1])["reason"]
 )
 ```
-
-
-    Output()
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
-
-
-
-
-    Output()
-
-
-    Score: 0.8437823499114202
-    Reason: The output effectively captures interest by introducing the innovative use of VR in therapy, which is a novel and intriguing topic. It evokes enjoyment and amusement with the playful mention of wearing 'cool VR goggles.' The content is engaging and stands out by highlighting the personalized and safe nature of VR therapy. However, while it maintains attention well, it could be more compelling by providing additional examples or details to sustain engagement throughout.
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
-
-
-
-    Score: 0.32400192587553256
-    Reason: The response provides a creative and entertaining description of VR in therapy, aligning with Step 4. However, it lacks any assessment of user engagement metrics, user feedback, or comparison with previous outputs, which are crucial for Steps 1, 2, and 3.
-
 
 And thus, you've added your first externally-evaluated score to Langfuse! Just 49 more to go 😁. But don't worry — our solutions are easy to scale.
 
