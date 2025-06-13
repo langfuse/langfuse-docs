@@ -47,11 +47,14 @@ export const ToAppButton = () => {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") {
+      const abortController = new AbortController();
+
       // Check sign-in status for all regions
       Object.entries(regions).forEach(([key, region]) => {
         fetch(`${region.url}/api/auth/session`, {
           credentials: "include",
           mode: "cors",
+          signal: abortController.signal,
         })
           .then((response) => response.json())
           .then((data) => {
@@ -60,24 +63,36 @@ export const ToAppButton = () => {
               [key]: isSignedIn(data),
             }));
           })
-          .catch(() => {
-            setSignedInRegions((prev) => ({
-              ...prev,
-              [key]: false,
-            }));
+          .catch((error) => {
+            // Only update state if the error is not from aborting
+            if (error.name !== "AbortError") {
+              setSignedInRegions((prev) => ({
+                ...prev,
+                [key]: false,
+              }));
+            }
           });
       });
 
-      fetch("/api/get-continent-code")
+      fetch("/api/get-continent-code", {
+        signal: abortController.signal,
+      })
         .then((response) => response.json())
         .then((data) => {
           if (data.continentCode && continentHostMapping[data.continentCode]) {
             setContinentCode(data.continentCode);
           }
         })
-        .catch(() => {
-          setContinentCode(null);
+        .catch((error) => {
+          // Only update state if the error is not from aborting
+          if (error.name !== "AbortError") {
+            setContinentCode(null);
+          }
         });
+
+      return () => {
+        abortController.abort();
+      };
     }
   }, []);
 
