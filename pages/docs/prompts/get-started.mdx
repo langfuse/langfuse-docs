@@ -166,11 +166,10 @@ compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
 # Initialize Langfuse client
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # Get current `production` version of a text prompt
 prompt = langfuse.get_prompt("movie-critic")
@@ -320,12 +319,11 @@ prompt.config;
 As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.get_langchain_prompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate. You can pass optional keyword arguments to `prompt.get_langchain_prompt(**kwargs)` in order to precompile some variables and handle the others with Langchain's PromptTemplate.
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langchain_core.prompts import ChatPromptTemplate
 
 # Initialize Langfuse client
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # Get current `production` version
 langfuse_prompt = langfuse.get_prompt("movie-critic")
@@ -501,14 +499,13 @@ with langfuse.start_as_current_generation(
 **Decorators**
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 
 @observe(as_type="generation")
 def nested_generation():
     prompt = langfuse.get_prompt("movie-critic")
 
-    langfuse.update_current_span(
+    langfuse_context.update_current_observation(
         prompt=prompt,
     )
 
@@ -581,12 +578,11 @@ const res = await observeOpenAI(new OpenAI(), {
 <Tab>
 
 ```python /"langfuse_prompt"/
-from langfuse import get_client
+from langfuse import Langfuse
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI, OpenAI
 
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # Text prompts:
 langfuse_text_prompt = langfuse.get_prompt("movie-critic")
@@ -770,8 +766,7 @@ You can assign labels when [creating a new prompt (version)](#create-update-prom
 Alternatively, you can also update the labels of an existing prompt version:
 
 ```python
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 langfuse.update_prompt(
     name="movie-critic",
     version=1,
@@ -787,8 +782,7 @@ You can assign labels when [creating a new prompt (version)](#create-update-prom
 Alternatively, you can also update the labels of an existing prompt version:
 
 ```ts
-from langfuse import get_client
-langfuse = get_client();
+langfuse = Langfuse();
 await langfuse.updatePrompt({
   name: "movie-critic",
   version: 1,
@@ -868,12 +862,11 @@ _Example implementations:_
 
 ```python
 from flask import Flask, jsonify
-from langfuse import get_client
+from langfuse import Langfuse
 
 # Initialize the Flask app and Langfuse client
 app = Flask(__name__)
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 def fetch_prompts_on_startup():
     # Fetch and cache the production version of the prompt
@@ -1042,12 +1035,11 @@ To gurantee 100% availability, there are two options:
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 import sys
 
 # Initialize Langfuse client
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 def fetch_prompts_on_startup():
     try:
@@ -1097,9 +1089,8 @@ fetchPromptsOnStartup();
 <Tab>
 
 ```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
-from langfuse import get_client
-from langfuse import get_client
-langfuse = get_client()
+from langfuse import Langfuse
+langfuse = Langfuse()
 
 # Get `text` prompt with fallback
 prompt = langfuse.get_prompt(

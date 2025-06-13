@@ -159,7 +159,7 @@ with langfuse.start_as_current_span(name="analyze-document") as span:
 <Tab>
 
 ```python
-from langfuse import observe, langfuse
+from langfuse.decorators import observe, langfuse_context
 from langfuse.media import LangfuseMedia
 
 with open("static/bitcoin.pdf", "rb") as pdf_file:
@@ -175,14 +175,14 @@ wrapped_obj.obj
 
 @observe()
 def main():
-    langfuse.update_current_trace(
+    langfuse_context.update_current_trace(
       input=wrapped_obj,
       metadata={
           "context": wrapped_obj
       },
     )
 
-    return # Limitation: LangfuseMedia object does not work in decorated function IO, needs to be set via update_current_trace or update_current_span
+    return # Limitation: LangfuseMedia object does not work in decorated function IO, needs to be set via update_current_trace or update_current_observation
 
 main()
 ```
@@ -317,11 +317,10 @@ resolved_obj = langfuse.resolve_media_references(
 <Tab>
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
 # Initialize Langfuse client
-from langfuse import get_client
-langfuse = get_client()
+langfuse = Langfuse()
 
 # Example object with media references
 obj = {

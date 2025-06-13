@@ -66,15 +66,14 @@ main()
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 
 # Either set the environment variable or configure the decorator. The latter takes precedence.
 # Alternatively, set via .env file and load via dotenv
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 
 # Configure the decorator
-langfuse.configure(environment="production")
+langfuse_context.configure(environment="production")
 
 @observe()
 def fn():
@@ -86,7 +85,7 @@ fn()
 When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
 # Either set the environment variable or the constructor parameter. The latter takes precedence.
 os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
@@ -155,7 +154,7 @@ When using the [OpenAI SDK Integration](/docs/integrations/openai)
 Python SDK v3:
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 from langfuse.openai import openai
 
 # Either set the environment variable or configure the Langfuse client

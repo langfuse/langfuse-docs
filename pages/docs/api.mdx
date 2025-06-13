@@ -71,7 +71,6 @@ When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 ```python
 from langfuse import get_client
 
-from langfuse import get_client
 langfuse = get_client()
 ...
 # fetch a trace
@@ -83,23 +82,6 @@ await langfuse.async_api.trace(trace_id)
 # explore more endpoints via Intellisense
 langfuse.api.*
 await langfuse.async_api.*
-```
-
-You can also access the Langfuse client instance when using the [decorator-based integration](/docs/sdk/python/decorators):
-
-```python
-from langfuse import get_client
-langfuse = get_client()
-
-# fetch a trace
-langfuse.client_instance.api.trace.get(trace_id)
-
-# async client via asyncio
-await langfuse.client_instance.async_api.trace(trace_id)
-
-# explore more endpoints via Intellisense
-langfuse.client_instance.api.*
-await langfuse.client_instance.async_api.*
 ```
 
 </Tab>

@@ -50,8 +50,7 @@ If a trace is not sampled, none of its observations (spans or generations) or as
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 
 os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
 
@@ -65,7 +64,7 @@ fn()
 When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
 
 # Either set the environment variable or the constructor parameter. The latter takes precedence.
 os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'

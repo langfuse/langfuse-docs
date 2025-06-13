@@ -201,9 +201,8 @@ langfuse.shutdown()
 
 ```python
 # Decorator
-from langfuse import get_client
-langfuse = get_client()
-langfuse.flush()
+from langfuse.decorators import langfuse_context
+langfuse_context.flush()
 
 # low-level SDK
 langfuse.flush()

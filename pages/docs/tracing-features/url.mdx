@@ -54,12 +54,11 @@ with langfuse.start_as_current_span(name="process-request") as span:
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 
 @observe()
 def fn():
-    langfuse.get_current_trace_url()
+    langfuse_context.get_current_trace_url()
 
 fn()
 ```
@@ -84,19 +83,18 @@ trace.getTraceUrl()
 Use the interoperability of the Langfuse Python `@observe()` Decorator with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/tracing#interoperability)).
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 
 @observe()
 def fn():
-    langfuse_handler = langfuse.get_current_langchain_handler()
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
 
     # Your Langchain code
 
     # Add Langfuse handler as callback (classic and LCEL)
     chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
 
-    langfuse.get_current_trace_url()
+    langfuse_context.get_current_trace_url()
 
 fn()
 ```
@@ -192,12 +190,11 @@ with langfuse.start_as_current_span(name="process-request") as span:
 When using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, get_client
-langfuse = get_client()
+from langfuse.decorators import langfuse_context, observe
 
 @observe()
 def fn():
-    langfuse.update_current_trace(
+    langfuse_context.update_current_trace(
         public=True
     )
 
