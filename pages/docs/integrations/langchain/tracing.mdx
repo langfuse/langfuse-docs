@@ -173,7 +173,9 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 The `CallbackHandler` does not accept any constructor arguments for trace attributes or global settings.
 
 - **Global settings** (like `sample_rate`, `tracing_enabled`) must be set when initializing the Langfuse client via `Langfuse()` constructor or environment variables
-- **Trace attributes** (like `user_id`, `session_id`, `release`, `version`) must be set via an enclosing span using `span.update_trace()` as shown in the examples above
+- **Trace attributes** (like `user_id`, `session_id`, `tags`) can be set either:
+  - Via metadata fields in chain invocation (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`)
+  - Via an enclosing span using `span.update_trace()` as shown in the examples above
 
 </Tab>
 <Tab>
@@ -198,7 +200,36 @@ You can set trace attributes dynamically for each LangChain execution. The appro
 <Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS"]}>
 <Tab>
 
-For Python SDK v3, use enclosing spans to set trace attributes dynamically:
+For Python SDK v3, you have two options to set trace attributes dynamically:
+
+**Option 1: Via metadata fields in chain invocation (simplest approach):**
+
+```python
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+langfuse_handler = CallbackHandler()
+
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+
+# Set trace attributes dynamically via metadata
+response = chain.invoke(
+    {"topic": "cats"}, 
+    config={
+        "callbacks": [langfuse_handler],
+        "metadata": {
+            "langfuse_user_id": "random-user",
+            "langfuse_session_id": "random-session",
+            "langfuse_tags": ["random-tag-1", "random-tag-2"]
+        }
+    }
+)
+```
+
+**Option 2: Via enclosing span (for more control):**
 
 ```python
 from langfuse import get_client

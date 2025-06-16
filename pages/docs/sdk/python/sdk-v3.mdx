@@ -781,6 +781,32 @@ with langfuse.start_as_current_span(name="qna-bot-openai") as span:
     )
 ```
 
+**Setting trace attributes via metadata:**
+
+You can set trace attributes (`session_id`, `user_id`, `tags`) directly on OpenAI calls using special fields in the `metadata` parameter:
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    metadata={
+        "langfuse_session_id": "session_123",
+        "langfuse_user_id": "user_456",
+        "langfuse_tags": ["production", "chat-bot"],
+        "custom_field": "additional metadata"  # Regular metadata fields work too
+    }
+)
+```
+
+The special metadata fields are:
+- `langfuse_session_id`: Sets the session ID for the trace
+- `langfuse_user_id`: Sets the user ID for the trace  
+- `langfuse_tags`: Sets tags for the trace (should be a list of strings)
+
 Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`
 
 ### Langchain Integration
@@ -813,6 +839,43 @@ with langfuse.start_as_current_span(name="joke-chain") as span:
     response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
     print(response)
 ```
+
+**Setting trace attributes via metadata:**
+
+You can set trace attributes (`session_id`, `user_id`, `tags`) directly during chain invocation using special fields in the `metadata` configuration:
+
+```python
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+# Initialize the Langfuse handler
+langfuse_handler = CallbackHandler()
+
+# Create your LangChain components
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+
+# Set trace attributes via metadata in chain invocation
+response = chain.invoke(
+    {"topic": "cats"},
+    config={
+        "callbacks": [langfuse_handler],
+        "metadata": {
+            "langfuse_session_id": "session_123",
+            "langfuse_user_id": "user_456",
+            "langfuse_tags": ["production", "humor-bot"],
+            "custom_field": "additional metadata"  # Regular metadata fields work too
+        }
+    }
+)
+```
+
+The special metadata fields are:
+- `langfuse_session_id`: Sets the session ID for the trace
+- `langfuse_user_id`: Sets the user ID for the trace
+- `langfuse_tags`: Sets tags for the trace (should be a list of strings)
 
 **What's captured:**
 
@@ -1206,7 +1269,7 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 
 - **OpenTelemetry Foundation**: v3 is built on OpenTelemetry standards
 - **Trace Input/Output**: Now derived from root observation by default
-- **Trace Attributes** (`user_id`, `session_id`, etc.) Must be set via enclosing spans, not directly on integrations (OpenAI call, Langchain invocation)
+- **Trace Attributes** (`user_id`, `session_id`, etc.) Can be set via enclosing spans OR directly on integrations using metadata fields (OpenAI call, Langchain invocation)
 - **Context Management**: Automatic OTEL context propagation
 
 ### Migration Path by Integration Type
@@ -1262,7 +1325,26 @@ response = openai.chat.completions.create(
 
 If you do not set additional trace attributes, no changes are needed.
 
-If you set additional trace attributes, you need to wrap the OpenAI call with an enclosing span and set the trace attributes on the enclosing span:
+If you set additional trace attributes, you have two options:
+
+**Option 1: Use metadata fields (simplest migration):**
+
+```python
+from langfuse.openai import openai
+
+response = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    metadata={
+        "langfuse_user_id": "user_123",
+        "langfuse_session_id": "session_456", 
+        "langfuse_tags": ["chat"],
+        "source": "app"  # Regular metadata still works
+    }
+)
+```
+
+**Option 2: Use enclosing span (for more control):**
 
 ```python
 from langfuse import get_client
@@ -1270,7 +1352,6 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-# CRITICAL: Wrap OpenAI calls with enclosing span for trace attributes
 with langfuse.start_as_current_span(name="chat-request") as span:
     # Set trace attributes on the enclosing span
     span.update_trace(
@@ -1284,7 +1365,6 @@ with langfuse.start_as_current_span(name="chat-request") as span:
     response = openai.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": "Hello"}],
-        # Only generation-specific metadata allowed here
         metadata={"source": "app"}
     )
 
@@ -1310,13 +1390,36 @@ response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
 
 **v3 Migration:**
 
+You have two options for setting trace attributes:
+
+**Option 1: Use metadata fields in chain invocation (simplest migration):**
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+response = chain.invoke(
+    {"input": "Hello"}, 
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_user_id": "user_123",
+            "langfuse_session_id": "session_456",
+            "langfuse_tags": ["langchain"]
+        }
+    }
+)
+```
+
+**Option 2: Use enclosing span (for more control):**
+
 ```python
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 
 langfuse = get_client()
 
-# CRITICAL: Use enclosing span for trace attributes
 with langfuse.start_as_current_span(name="langchain-request") as span:
     span.update_trace(
         user_id="user_123",
@@ -1325,7 +1428,7 @@ with langfuse.start_as_current_span(name="langchain-request") as span:
         input={"query": "Hello"}  # Explicit trace input
     )
 
-    handler = CallbackHandler()  # No trace attributes in constructor
+    handler = CallbackHandler()
     response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
 
     # Set trace output explicitly
@@ -1430,8 +1533,8 @@ with langfuse.start_as_current_span(
 
 2. **Trace Attributes Pattern**:
 
-   - Move all `user_id`, `session_id`, `tags` from integration calls to enclosing spans
-   - Use `span.update_trace()` or `langfuse.update_current_trace()`
+   - **Option 1**: Use metadata fields (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`) directly in integration calls
+   - **Option 2**: Move `user_id`, `session_id`, `tags` to enclosing spans and use `span.update_trace()` or `langfuse.update_current_trace()`
 
 3. **Trace Input/Output**:
 
