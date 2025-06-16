@@ -49,6 +49,34 @@ with langfuse.start_as_current_span(name="another-operation"):
     langfuse.update_current_trace(tags=["processing", "beta-feature"])
 ```
 
+**With OpenAI integration via metadata:**
+
+```python
+from langfuse.openai import openai
+
+response = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    metadata={"langfuse_tags": ["production", "chat-bot"]}
+)
+```
+
+**With Langchain integration via metadata:**
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+response = chain.invoke(
+    {"input": "Hello"},
+    config={
+        "callbacks": [handler],
+        "metadata": {"langfuse_tags": ["production", "humor-bot"]}
+    }
+)
+```
+
 </Tab>
 <Tab>
 

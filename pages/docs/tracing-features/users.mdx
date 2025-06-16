@@ -63,6 +63,34 @@ with langfuse.start_as_current_span(name="handle-user-interaction"):
     langfuse.update_current_trace(user_id="user_12345")
 ```
 
+**With OpenAI integration via metadata:**
+
+```python
+from langfuse.openai import openai
+
+response = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    metadata={"langfuse_user_id": "user_12345"}
+)
+```
+
+**With Langchain integration via metadata:**
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+response = chain.invoke(
+    {"input": "Hello"},
+    config={
+        "callbacks": [handler],
+        "metadata": {"langfuse_user_id": "user_12345"}
+    }
+)
+```
+
 </Tab>
 <Tab>
 
