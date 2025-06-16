@@ -134,6 +134,8 @@ an equal distribution among the nodes, as each queue-shard will be allocated to 
 
 Sharding the queues is an advanced feature and should only be used if you have a high Redis CPU load and have followed the above recommendations.
 Once you have sharded your queue, do _not_ reduce the number of Shards.
+Make sure to scale `LANGFUSE_INGESTION_QUEUE_PROCESSING_CONCURRENCY` accordingly as it counts _per shard_.
+Per default, we target a concurrency of 20 per worker, i.e. set it to 2 if you have 10 queue-shards.
 
 </Callout>
 
