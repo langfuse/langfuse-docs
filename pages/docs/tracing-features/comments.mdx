@@ -1,0 +1,214 @@
+---
+description: Add comments to traces, observations, sessions, and prompts to collaborate on debugging and provide context for LLM application analysis.
+---
+
+# Comments
+
+Comments in Langfuse allow you to add context, feedback, and collaboration notes directly to your traces, observations, sessions, and prompts. This feature enables teams to collaboratively debug, analyze, and improve their LLM applications by adding structured commentary to specific objects in your application traces.
+
+<Callout type="info">
+Comments support Markdown formatting for rich text including code blocks, links, and tables.
+</Callout>
+
+## What can be commented on?
+
+You can add comments to exactly four object types in Langfuse:
+
+- **Traces**: High-level execution flows of your LLM application
+- **Observations**: Individual steps within traces (spans, generations, events)
+- **Sessions**: Groups of related traces representing user interactions
+- **Prompts**: Managed prompt templates and their versions
+
+## User Interface
+
+### Adding Comments
+
+1. Navigate to any trace, observation, session, or prompt detail page
+2. Look for the comment button (message bubble icon) in the page interface
+3. Click the button to open the comment drawer on the right side
+4. Type your comment in the text area (supports Markdown)
+5. Press **⌘/Ctrl + Enter** to submit quickly, or click the "Add Comment" button
+
+<Callout type="info">
+**Placeholder for Screenshot/Video**: Add a screenshot or video here showcasing the comment UI workflow, including the comment drawer and markdown rendering.
+</Callout>
+
+### Viewing Comments
+
+- Comment count is displayed on the comment button (e.g., message bubble with "3")
+- Click the button to view all comments in chronological order
+- Comments show the author, timestamp (relative, e.g., "5 min ago"), and content
+- Markdown content is rendered with proper formatting
+
+### Managing Comments
+
+- Only comment authors can delete their own comments
+- Look for the trash icon next to your comments to delete them
+- Comments have a maximum length of 3,000 characters
+- Comment counts are capped at "99+" to avoid UI clutter
+
+## API Usage
+
+Comments can be managed programmatically via Langfuse's Public API. All comment endpoints are available under the `/api/public/v1/comments` path.
+
+### Create Comment
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/v1/comments \
+  -H "Authorization: Bearer $LANGFUSE_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "projectId": "your-project-id",
+        "objectType": "TRACE",
+        "objectId": "trace-id",
+        "content": "This output looks suspicious. 🤔\n\n**Analysis needed:**\n- Check input validation\n- Review model parameters"
+      }'
+```
+
+### List Comments
+
+```bash
+# List all comments for a specific trace
+curl "https://cloud.langfuse.com/api/public/v1/comments?objectType=TRACE&objectId=trace-id&limit=20&page=1" \
+  -H "Authorization: Bearer $LANGFUSE_SECRET_KEY"
+
+# List comments by author
+curl "https://cloud.langfuse.com/api/public/v1/comments?authorUserId=user-123&limit=10" \
+  -H "Authorization: Bearer $LANGFUSE_SECRET_KEY"
+```
+
+### Get Comment
+
+```bash
+curl "https://cloud.langfuse.com/api/public/v1/comments/comment-id" \
+  -H "Authorization: Bearer $LANGFUSE_SECRET_KEY"
+```
+
+### API Schema
+
+#### Create Comment Request Body
+
+```json
+{
+  "projectId": "string",           // Required: Your project ID
+  "objectType": "TRACE" | "OBSERVATION" | "SESSION" | "PROMPT",  // Required
+  "objectId": "string",            // Required: ID of the object to comment on
+  "content": "string",             // Required: Comment content (1-3000 characters)
+  "authorUserId": "string"         // Optional: Override author (API only)
+}
+```
+
+#### Comment Response Object
+
+```json
+{
+  "id": "string",
+  "projectId": "string",
+  "objectType": "TRACE" | "OBSERVATION" | "SESSION" | "PROMPT",
+  "objectId": "string",
+  "content": "string",
+  "authorUserId": "string",
+  "authorUserName": "string",
+  "createdAt": "2024-01-01T12:00:00Z",
+  "updatedAt": "2024-01-01T12:00:00Z"
+}
+```
+
+#### List Comments Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `objectType` | string | Filter by object type (TRACE, OBSERVATION, SESSION, PROMPT) |
+| `objectId` | string | Filter by specific object ID |
+| `authorUserId` | string | Filter by comment author |
+| `limit` | number | Number of results per page (default: 50, max: 100) |
+| `page` | number | Page number for pagination (starts at 1) |
+
+## Permissions & Access Control
+
+Comment functionality respects Langfuse's Role-Based Access Control (RBAC) system:
+
+### Required Scopes
+
+- **Reading comments**: `comments:read` scope
+- **Creating/updating/deleting comments**: `comments:CUD` scope
+
+### Permission Behavior
+
+- Users without read access cannot see the comment button or existing comments
+- Users with read-only access can view comments but cannot add new ones
+- Comment authors can always delete their own comments
+- The comment drawer is disabled if the user lacks appropriate permissions
+
+### API Authentication
+
+When using the API, ensure your API key has the necessary project-level permissions:
+
+- Use your **Secret Key** for full read/write access
+- **Public Keys** have limited access based on your project configuration
+
+## Best Practices
+
+### Effective Commenting
+
+1. **Be specific**: Reference exact outputs, inputs, or behaviors you're commenting on
+2. **Use Markdown**: Format code snippets, create lists, and structure your feedback
+3. **Tag team members**: Use @mentions if your team setup supports notifications
+4. **Provide context**: Explain why something is noteworthy or problematic
+
+### Example Comment Formats
+
+```markdown
+## Issue Found
+The model hallucinated customer data in this response.
+
+**Evidence:**
+- Customer ID `12345` doesn't exist in our database
+- Address format is incorrect for this region
+
+**Next steps:**
+- [ ] Update input validation
+- [ ] Review prompt engineering
+```
+
+```markdown
+**Performance Note**: This trace took 2.3s to complete.
+
+Breakdown:
+- Retrieval: 800ms ⚠️ (too slow)
+- Generation: 1.2s ✅ (acceptable)
+- Post-processing: 300ms ✅ (good)
+
+Consider optimizing the retrieval step.
+```
+
+### Integration Workflows
+
+Comments work well with external tools and workflows:
+
+1. **Code Reviews**: Link to specific traces in pull request comments
+2. **Issue Tracking**: Reference trace IDs in bug reports with relevant comments
+3. **Team Handoffs**: Use comments to communicate findings between team members
+4. **Quality Assurance**: Annotate traces during testing phases
+
+## Limitations
+
+- **Character limit**: Comments are limited to 3,000 characters
+- **No nested replies**: Comments are flat, not threaded
+- **Object validation**: You can only comment on objects that exist in your project
+- **No file attachments**: Comments support text and Markdown only
+- **No notifications**: Comment activity doesn't trigger email or in-app notifications (yet)
+
+## Migration from Annotation Queues
+
+If you're currently using Langfuse's annotation queues for similar purposes, consider:
+
+1. **Comments** for unstructured feedback, debugging notes, and team collaboration
+2. **Annotations** for structured scoring and evaluation workflows
+3. Both features can be used together for comprehensive trace analysis
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-comments"]} />
