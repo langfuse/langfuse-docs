@@ -39,13 +39,14 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (default)
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Set up endpoint for OpenTelemetry
-otel_endpoint = str(os.environ.get("LANGFUSE_HOST")) + "/api/public/otel/v1/traces"
-
-# Create authentication token for OpenTelemetry
-auth_token = base64.b64encode(f"{os.environ.get("LANGFUSE_PUBLIC_KEY")}:{os.environ.get("LANGFUSE_SECRET_KEY")}".encode()).decode()
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = otel_endpoint
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {auth_token}"
+# Build Basic Auth header.
+LANGFUSE_AUTH = base64.b64encode(
+    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
+).decode()
+ 
+# Configure OpenTelemetry endpoint & headers
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel/v1/traces"
+os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 ```
 
 **2.2 Configure AWS Credentials**

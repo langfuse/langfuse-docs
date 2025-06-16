@@ -954,7 +954,7 @@ const sections: Section[] = [
       },
       {
         name: "Audit Logs",
-        href: "/changelog/2025-01-21-audit-logs",
+        href: "/docs/audit-logs",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1686,6 +1686,11 @@ const faqs = [
     question: "What is a billable event?",
     answer:
       "A billable event in Langfuse is any tracing data point you send to our platform - this includes traces (complete LLM interactions), observations (individual steps within a trace like prompts or generations), and scores (evaluations of your AI outputs). For a detailed explanation, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
+  },
+  {
+    question: "How can I reduce my Langfuse Cloud bill?",
+    answer:
+      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable events that you ingest. We have summarized how this can be done <a class='underline' href='/faq/all/cutting-costs'>here</a>.",
   },
   {
     question: "Can I self-host Langfuse?",

@@ -48,20 +48,20 @@ for file in test_files:
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 
 ```python
 from langfuse.openai import openai
+from langfuse import get_client
 import base64
 
 client = openai.OpenAI()
@@ -75,6 +75,8 @@ def encode_file(image_path):
 
 
 ```python
+from langfuse import get_client
+
 content_path = "static/puton.jpg"
 content_type = "image/jpeg"
 
@@ -101,16 +103,20 @@ response = client.chat.completions.create(
 
 print(response.__dict__)
 
-openai.flush_langfuse()
+# Flush the trace
+langfuse = get_client()
+langfuse.flush()
 ```
 
-    {'id': 'chatcmpl-AVgfcbLDSfqWKWTZoFHyjnZuEgXcF', 'choices': [Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='The image shows a dog with a curly coat, interacting with a person by placing its front paws on their lap. In the background, there are some people standing, and the setting appears to be a cozy interior with wooden flooring and a patterned rug. The dog looks happy and friendly.', refusal=None, role='assistant', audio=None, function_call=None, tool_calls=None))], 'created': 1732115556, 'model': 'gpt-4o-mini-2024-07-18', 'object': 'chat.completion', 'service_tier': None, 'system_fingerprint': 'fp_3de1288069', 'usage': CompletionUsage(completion_tokens=57, prompt_tokens=25514, total_tokens=25571, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)), '_request_id': 'req_701836bd3ee49571c4aeb9600273cbda'}
+    {'id': 'chatcmpl-Bhf794La4LhadJktsGaroFwbg2BIL', 'choices': [Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content="The image features a dog sitting on a person's lap with its front paws resting on their knee. The dog has a curly coat with black and white fur and appears to be happy, with its tongue out. In the background, there are people standing, likely engaged in conversation. The setting seems to be a cozy indoor space with wooden flooring and a colorful rug.", refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], 'created': 1749745847, 'model': 'gpt-4o-mini-2024-07-18', 'object': 'chat.completion', 'service_tier': 'default', 'system_fingerprint': 'fp_62a23a81ef', 'usage': CompletionUsage(completion_tokens=72, prompt_tokens=25514, total_tokens=25586, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)), '_request_id': 'req_da2df5cf5f1964746a107af72fb2daee'}
 
 
 ## OpenAI SDK: Audio input and output
 
 
 ```python
+from langfuse import get_client
+
 content_path = "static/joke_prompt.wav"
 
 base64_string = encode_file(content_path)
@@ -135,17 +141,19 @@ response = client.chat.completions.create(
 
 print(response.__dict__)
 
-openai.flush_langfuse()
+# Flush the trace
+langfuse = get_client()
+langfuse.flush()
 ```
 
-    {'id': 'chatcmpl-AVgfgHKaVpqPK3HzJwV7kvhDC2CuY', 'choices': [Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content=None, refusal=None, role='assistant', audio=ChatCompletionAudio(id='audio_673dfc6a54048190976c16d98c11dcd7', data=<langfuse.media.LangfuseMedia object at 0x78c13b074ac0>, expires_at=1732119162, transcript='Why do Berliners always carry a pencil? \n\nIn case they need to draw the line at a German comedy show!'), function_call=None, tool_calls=None))], 'created': 1732115560, 'model': 'gpt-4o-audio-preview-2024-10-01', 'object': 'chat.completion', 'service_tier': None, 'system_fingerprint': 'fp_6e2d124157', 'usage': CompletionUsage(completion_tokens=151, prompt_tokens=66, total_tokens=217, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=115, reasoning_tokens=0, rejected_prediction_tokens=0, text_tokens=36), prompt_tokens_details=PromptTokensDetails(audio_tokens=49, cached_tokens=0, text_tokens=17, image_tokens=0)), '_request_id': 'req_59902b4718abb9dbc82b83b40a8eda72'}
+    {'id': 'chatcmpl-Bhf92tYBL9Swp2MwBkA7bCQPVe9Vh', 'choices': [Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content=None, refusal=None, role='assistant', annotations=[], audio=ChatCompletionAudio(id='audio_684b01341fd081918a825276eb36472b', data=<langfuse.media.LangfuseMedia object at 0x10d82a9c0>, expires_at=1749749572, transcript='Why did the Berlin Bear get lost in the city? Because he couldn\'t decide whether to take the U-Bahn, the S-Bahn, or just "bear"ly walk anywhere!'), function_call=None, tool_calls=None))], 'created': 1749745964, 'model': 'gpt-4o-audio-preview-2024-12-17', 'object': 'chat.completion', 'service_tier': 'default', 'system_fingerprint': 'fp_bf8dbd2ceb', 'usage': CompletionUsage(completion_tokens=245, prompt_tokens=66, total_tokens=311, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=194, reasoning_tokens=0, rejected_prediction_tokens=0, text_tokens=51), prompt_tokens_details=PromptTokensDetails(audio_tokens=49, cached_tokens=0, text_tokens=17, image_tokens=0)), '_request_id': 'req_ead21d343638b42eefb42e80e1621c63'}
 
 
 ## Python Decorator: Attachments via `LangfuseMedia`
 
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, get_client
 from langfuse.media import LangfuseMedia
 
 with open("static/bitcoin.pdf", "rb") as pdf_file:
@@ -157,7 +165,7 @@ wrapped_obj = LangfuseMedia(
 
 @observe()
 def main():
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         metadata={
             "context": wrapped_obj
         },
@@ -167,7 +175,9 @@ def main():
 
 main()
 
-langfuse_context.flush()
+# Flush the trace
+langfuse = get_client()
+langfuse.flush()
 ```
 
 ## Langchain: Image input
@@ -176,12 +186,13 @@ langfuse_context.flush()
 ```python
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
-
-from langfuse.callback import CallbackHandler
-
+from langfuse.langchain import CallbackHandler
+from langfuse import get_client
+ 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 handler = CallbackHandler()
-model = ChatOpenAI(model="gpt-4o-mini")
 
+model = ChatOpenAI(model="gpt-4o-mini")
 image_data = encode_file("static/puton.jpg")
 
 message = HumanMessage(
@@ -198,10 +209,12 @@ response = model.invoke([message], config={"callbacks": [handler]})
 
 print(response.content)
 
-handler.flush()
+# Flush the trace
+langfuse = get_client()
+langfuse.flush()
 ```
 
-    The image shows a dog with a curly coat, sitting in a living room environment. The dog appears to be resting its front paws on someone's knee and has a happy expression. There are also a few people in the background, but they are not the focus of the image. The setting has wooden flooring and a colorful area rug.
+    The image features a dog with curly fur, sitting with its front paws resting on a person's knee. The dog appears to be friendly and is sticking out its tongue. In the background, there are a few people and some indoor furniture, suggesting a home environment. The floor has a colorful rug, and there are items like a basket and a leash visible.
 
 
 ## Custom via API
@@ -247,7 +260,7 @@ create_upload_url_body
 
 
 
-    {'traceId': 'dd10d875-2fc2-4c40-a392-7e90bcf73165',
+    {'traceId': '6f330ea4-0d96-4dfe-b4b4-d63daef4b240',
      'contentType': 'image/jpeg',
      'contentLength': 650780,
      'sha256Hash': 'i5BuV2qX9nPaAAPf7c0gCYPLPU2GS3VUFKctrbzTKu4=',
@@ -341,8 +354,8 @@ media_response
     {'mediaId': 'a78bf29d-e1ac-496e-8bb3-94cda265a2d5',
      'contentType': 'image/jpeg',
      'contentLength': 650780,
-     'url': 'https://langfuse-prod-eu-media.s3.eu-west-1.amazonaws.com/cloramnkj0002jz088vzn1ja4/a78bf29d-e1ac-496e-8bb3-94cda265a2d5.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAXEFUNOYRFMODTEQN%2F20241120%2Feu-west-1%2Fs3%2Faws4_request&X-Amz-Date=20241120T151614Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCWV1LXdlc3QtMSJGMEQCIBmbvq%2B9T4Mk5nsglfiNGOQHslPUA1p%2BKMvMDlurLatzAiAstT7tldVey%2Flc3T%2B7fFtmZ78MjlOLWdG6jnN4wCCpAyr%2BAwiQ%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ5MDAwNDY0MTMxNCIM4ULT67%2BGIK%2FH9CHXKtIDiEd2vWk8EYhtkYBTW%2FHx9jjiJEQlg%2F6F0GQcu7FfdegnUz132ie10Yspb1HUD3JEljFtwRNmkKkTn1u10r7FRA2HYoVjUNJBmXFuwEBDM6ag2pbqGWDdYYCy7v8%2F7W8i%2FipQNed%2BSWqqMl0Op646tt2oyaUcN7ee4r4i6xm3xcOXMtoNBacgvV%2F3TCMMnIB81mwrwxxBsLT1i5a4PD6%2FqOoglAho7G4s0DDyF0hL9xr%2BQDlg2ls6h3biOu6TUvl%2FOQL%2FiZsxZwL1YMhTlR1u2ib5%2BM7jF0AVNI9wz6b619xeIWiAhrHTLZruVj9WvIIor25Si592FqcIyP7kVdAnp6tVIIy6lJkguZlrkUPPrSor6qz5IvMF3jg0m0Ka5LlB8yvhWe3gGEQXLJ6%2BggbnQSiyOp47JhQI8qtdIkIW2wVv6yESRkOQHspTRKk4TCJQwKxu3MO6SChG2ZSXb%2FCk1g%2BtXQA6t%2B%2B7oHQC9bBjjg5lmAt4KByGulT7iksgV%2FNrYNMGPrJ7aNQOyU8Tg2NdHAArBWjjl4vFG5JDO%2FYuGVgD%2BT9apomLkUs7msHMmTvuGUXOYVc14g%2BdBGYgg3MkhcNTguxbn28WwQ5H3k4zvVxZwjD77fe5BjqmASX2LkNpRhuO6oDFgPiP3AC9BCgZ71yAIqfohGYo9K6DWGTO4i78mtRexHYfsQeCNC3bfGLscrFRdGn%2BZtPeFOifowUhHUpMkAZms%2Fja5h27whM0dd0Kmg%2B9sk%2FmAtY2yHgRpdx1IL8HWGHnAmuLK9BcRGbI%2F6y%2BfuGbgVx6d1qskisFjB9HtCtfDeMe4KxSJKawvMqKV3hJ8On0udsRkMkNiIGItmk%3D&X-Amz-Signature=dce937c9165dd0395517c1176c6dfbc99d42fa57d6f9c426a55114161aecbc7b&X-Amz-SignedHeaders=host&x-id=GetObject',
-     'urlExpiry': '2024-11-20T16:16:14.110Z',
+     'url': 'https://langfuse-prod-eu-media.s3.eu-west-1.amazonaws.com/cloramnkj0002jz088vzn1ja4/a78bf29d-e1ac-496e-8bb3-94cda265a2d5.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAXEFUNOYRIGEVFBHC%2F20250612%2Feu-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250612T163759Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEBgaCWV1LXdlc3QtMSJIMEYCIQD7Bye8IP4T7lt9UOH1a8wi8U3aQQPBulSl0Crh2LJW8AIhALyDgSbqWFUYR5RDB7B4rzcNipoGo%2BnZYftAjBnKmJyxKv4DCPH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNDkwMDA0NjQxMzE0IgxjkSsssdQEnoxRrsQq0gMxV0ZdTUay4A1eOUes90KuMGQSn69pLzvcJYrlSGpXkQ53xt0bxYPq9Gnq1KMuAHIev9EZNaypWRfnGiPq%2BDaD11K0f8U%2BybkSidYIpUczc1jpexwGXCQtT9XrIVn%2BsnN3spstFPaBsLavfQcXZMHq3yWjbolV8fEDBfhTYuBcFHtA4ELvGGSCmgWJY0UXY3078NTGzRXu3xzDMQrlClkbjuxOC75hGEIG9vmnUI%2BcG1L5Azl%2Bg47x5RpV5Nq8v0ilvYp%2B%2FkAC25OFVnMPMfaP6a2afY8UNdJGEqtFTlJVKmWT0nVsgAz6zAKw8aX4%2FGF8%2FjhSRRqPs%2BpdWwvtbM68deHXbNNudhg2joyUwgg1lZ90T%2BWHIRgH2KniyuOCwxhVuIanxrb1CA7cgptP%2BLHbYlszFBOF96DiRewJPreimyCaOX04A14puVfneD73cD16HKG3SQUPksujL9ySw4M3d54hLiSEqYhOQEC0ZDbfe121cR6yaGpqBtiE0bduKWfr33gBdzuBJQAA8MfPQw00J90CCvowu0B103mD9HVVrBL%2B%2BNby%2FYEikMBBUgbSmrLJNUdWQuxewinHy7qgdKvnB3MM0b%2FoqVgaJ0fw%2Fyd9NsZRMPDyq8IGOqQBH7QoPjK0NHpgkP7RKAFwoUzsYnjM1LRWzZDRxUy7YYGPyeesdc%2F8jy9cdErvfe%2BNiaGnixd707uXxfbRnYWEPuwV2PvimO%2FnlKxsIRmW27mmYeo2FTo4QC%2BBa%2F1zNfCf6G%2FgDKkw8hF2YsNoACWHTBNeUcc2PZ%2FHYTq6eyQkBAj9FHCnmEmSiDk6NVKanuE2EOGpoxEAWuDxHqRB73LatwU9OOQ%3D&X-Amz-Signature=8c1d8c4a721f2eb882405cdd47e2514b55eac1efd634791b8ea963a07a1bca01&X-Amz-SignedHeaders=host&x-id=GetObject',
+     'urlExpiry': '2025-06-12T17:37:59.356Z',
      'uploadedAt': '2024-11-14T10:44:32.535Z'}
 
 

@@ -43,10 +43,12 @@ warnings.filterwarnings("ignore")
 
 Install the necessary packages:
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
 # Install Langfuse
-%pip install --quiet langfuse
+%pip install --quiet "langfuse<3.0.0"
 # Install dependencies for supervised intent classification
 %pip install --quiet pandas scikit-learn sentence-transformers torch transformers
 # Install dependencies for unsupervised intent recognition
@@ -212,7 +214,7 @@ sample_data = {
         "check again",
         "redo",
         "again please",
-        "that was great, let's start from the beginning",
+        "that was great, let's start from teh beginning",
         "go back to start",
     ],
     "intent": [

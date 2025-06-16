@@ -7,7 +7,7 @@ export default {
   },
   index: "Overview",
   configuration: "Configuration",
-  "license-key": "License Key",
+  "license-key": "License Key (EE)",
   troubleshooting: "Troubleshooting",
   scaling: "Sizing & Scaling",
   backups: "Backups",

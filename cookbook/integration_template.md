@@ -1,0 +1,294 @@
+<!-- NOTEBOOK_METADATA source: "Jupyter Notebook" title: "Observability for FRAMEWORK with Langfuse Integration" description: "Discover how to integrate Langfuse with FRAMEWORK for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today." category: "Integrations" -->
+
+# Integrate Langfuse with FRAMEWORK
+
+This notebook provides a step-by-step guide on integrating **Langfuse** with **FRAMEWORK** to achieve observability and debugging for your LLM applications.
+
+> **What is FRAMEWORK?** [FRAMEWORK](https://www.FRAMEWORK.com) ([GitHub](https://github.com/FRAMEWORK/FRAMEWORK)) is ...
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is a an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+
+## Getting Started
+
+Let's walk through a practical example of using FRAMEWORK and integrating it with Langfuse for comprehensive tracing.
+
+<!-- STEPS_START -->
+### Step 1: Install Dependencies
+
+<!-- CALLOUT_START type: "info" emoji: "⚠️" -->
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy FRAMEWORK integration guide](https://langfuse.com/docs/integrations/FRAMEWORK)._
+<!-- CALLOUT_END -->
+
+
+
+```python
+%pip install langfuse FRAMEWORK FRAMEWORK-INSTRUMENTATION -U
+
+```
+
+### Step 2: Configure Langfuse SDK
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your OpenAI key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+
+```
+
+### Step 3: Initialize FRAMEWORK Instrumentation
+
+Now, we initialize the [FRAMEWORK-INSTRUMENTATION-MODULE](https://). This third-party instrumentation automatically captures FRAMEWORK operations and exports OpenTelemetry (OTel) spans to Langfuse.
+
+
+```python
+from openinference.instrumentation.FRAMEWORK import FRAMEWORKInstrumentor
+
+# Initialize FRAMEWORK instrumentation
+FRAMEWORKInstrumentor().instrument()
+```
+
+### Step 4: Basic FRAMEWORK Application
+
+Let's create a straightforward FRAMEWORK application. In this example, we'll create a simple query engine that can answer questions. This will serve as the foundation for demonstrating Langfuse tracing.
+
+
+
+```python
+from FRAMEWORK import FRAMEWORK
+
+llm = FRAMEWORK(model="gpt-4o")
+ 
+with langfuse.start_as_current_span(name="FRAMEWORK-index-trace"):
+    response = FRAMEWORK.complete("Hello, world!")
+    print(response)
+ 
+langfuse.flush()
+```
+
+### Step 5: View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, retrieval operations, inputs, outputs, and performance metrics. The trace will show the complete flow from query processing through document retrieval to response generation.
+
+![Example Trace in Langfuse](https://langfuse.com/images/cookbook/integration_llama-index/llama-index-example-trace.png)
+
+[Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/12ea412956f99347b0503c1144acd0ec?timestamp=2025-06-05T15:45:52.971Z&display=details)
+<!-- STEPS_END -->
+
+## Add Additional Attributes
+
+Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
+
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
+
+**→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
+
+
+
+```python
+with langfuse.start_as_current_span(
+    name="FRAMEWORK-index-trace",
+    ) as span:
+    
+    # Run your application here
+    question = "What is Langfuse?"
+    response = FRAMEWORK.complete(question)
+    print(response)
+
+    # Pass additional attributes to the span
+    span.update_trace(
+        input=question,
+        output=response.text,
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["dev", "FRAMEWORK"],
+        metadata={"email": "user@langfuse.com"},
+        version="1.0.0"
+        )
+
+# Flush events in short-lived applications
+langfuse.flush()
+
+```
+
+## Score Traces and Spans
+
+Langfuse lets you ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
+
+In the example below, we demonstrate how to score a specific span for `relevance` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
+
+**→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
+
+
+
+```python
+with langfuse.start_as_current_span(
+    name="FRAMEWORK-index-trace",
+    ) as span:
+    
+    # Run your application here
+    question = "What is Langfuse?"
+    response = FRAMEWORK.complete(question)
+    print(response)
+    
+    # Score this specific span
+    span.score(name="relevance", value=0.9, data_type="NUMERIC")
+
+    # Score the overall trace
+    span.score_trace(name="feedback", value="positive", data_type="CATEGORICAL")
+
+# Flush events in short-lived applications
+langfuse.flush()
+
+```
+
+## Manage Prompts with Langfuse
+
+Langfuse Prompt Management allows you to collaboratively create, version, and deploy prompts. You can manage prompts either through the Langfuse SDK or directly within the Langfuse UI. These managed prompts can then be fetched into your application at runtime.
+
+The code below illustrates fetching a prompt named `answer-question` from Langfuse, compiling it with an input variable (`country`), and then using this compiled prompt in the application. 
+
+**→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
+
+<!-- CALLOUT_START type: "info" emoji: "🔗" -->
+_**Note:** Linking the Langfuse Prompt and the Generation is currently not possible. This is on our roadmap and we are tracking this [here](https://github.com/orgs/langfuse/discussions/7180)._
+<!-- CALLOUT_END -->
+
+
+```python
+# Fetch the prompt from langfuse
+langfuse_prompt = langfuse.get_prompt(name="answer-question")
+
+# Compile the prompt with the input
+compiled_prompt = langfuse_prompt.compile(country = "France")
+
+# Run your application
+with langfuse.start_as_current_span(
+    name="FRAMEWORK-index-trace",
+    ) as span:
+    
+    # Run your application here
+    response = llm.complete(compiled_prompt)
+    print(response)
+
+# Flush events in short-lived applications
+langfuse.flush()
+
+```
+
+## Dataset Experiments
+
+Offline evaluation using datasets is a critical part of the LLM development lifecycle. Langfuse supports this through Dataset Experiments. The typical workflow involves:
+
+1.  **Benchmark Dataset**: Defining a dataset with input prompts and their corresponding expected outputs.
+2.  **Application Run**: Running your LLM application against each item in the dataset.
+3.  **Evaluation**: Comparing the generated outputs against the expected results or using other scoring mechanisms (e.g., model-based evaluation) to assess performance.
+
+The following example demonstrates how to use a pre-existing dataset containing countries and their capitals to run an experiment.
+
+**→ Learn more about [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview).**
+
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Fetch an existing dataset
+dataset = langfuse.get_dataset(name="capital_cities_11")
+for item in dataset.items:
+    print(f"Input: {item.input['country']}, Expected Output: {item.expected_output}")
+
+```
+Next, we iterate through each item in the dataset, run our FRAMEWORK application (`your_application`) with the item's input, and log the results as a run associated with that dataset item in Langfuse. This allows for structured evaluation and comparison of different application versions or prompt configurations.
+
+The `item.run()` context manager is used to create a new trace for each dataset item processed in the experiment. Optionally you can score the dataset runs.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+dataset_name = "capital_cities_11"
+current_run_name = "capital_cities_run-FRAMEWORK_01" # Identifies this specific evaluation run
+current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
+current_run_description="Evaluation run for Q&A model on June 4th"
+ 
+# Assume 'your_application' is your instrumented application function
+def your_application(question):
+    with langfuse.start_as_current_span(name="FRAMEWORK-trace") as span:
+
+        response = llm.complete(question)
+        print(response)
+ 
+        # Update the trace with the input and output
+        span.update_trace(
+            input=question,
+            output=response.text,
+        )
+ 
+        return response.text
+ 
+dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
+ 
+for item in dataset.items:
+    print(f"Running evaluation for item: {item.id} (Input: {item.input['country']})")
+ 
+    # Use the item.run() context manager
+    with item.run(
+        run_name=current_run_name,
+        run_metadata=current_run_metadata,
+        run_description=current_run_description
+    ) as root_span: 
+        # All subsequent langfuse operations within this block are part of this trace.
+        generated_answer = your_application(
+            question="What is the capital of " + item.input["country"] + "? Just answer with the name of the city.",
+        )
+ 
+        # Optionally, score the result against the expected output
+        if item.expected_output and generated_answer == item.expected_output:
+            root_span.score_trace(name="exact_match", value=1.0)
+        else:
+            root_span.score_trace(name="exact_match", value=0.0)
+ 
+print(f"\nFinished processing dataset '{dataset_name}' for run '{current_run_name}'.")
+
+```
+## Explore More Langfuse Features
+
+Langfuse offers more features to enhance your LLM development and observability workflow:
+
+- [LLM-as-a-Judge Evaluators](https://langfuse.com/docs/scores/model-based-evals)
+- [Custom Dashboards](https://langfuse.com/docs/analytics/custom-dashboards)
+- [LLM Playground](https://langfuse.com/docs/playground)
+- [Prompt Management](https://langfuse.com/docs/prompts/get-started)
+- [Prompt Experiments](https://langfuse.com/docs/datasets/prompt-experiments)
+- [More Integrations](https://langfuse.com/docs/integrations/overview)
