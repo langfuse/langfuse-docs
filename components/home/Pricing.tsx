@@ -1688,6 +1688,11 @@ const faqs = [
       "A billable event in Langfuse is any tracing data point you send to our platform - this includes traces (complete LLM interactions), observations (individual steps within a trace like prompts or generations), and scores (evaluations of your AI outputs). For a detailed explanation, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
   },
   {
+    question: "How can I reduce my Langfuse Cloud bill?",
+    answer:
+      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable events that you ingest. We have summarized how this can be done <a class='underline' href='/faq/all/cutting-costs'>here</a>.",
+  },
+  {
     question: "Can I self-host Langfuse?",
     answer:
       "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/local'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",

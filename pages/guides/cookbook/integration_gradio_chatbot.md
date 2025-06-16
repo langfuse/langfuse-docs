@@ -49,10 +49,12 @@ This notebook will show you how to
 
 Install requirements. We use OpenAI for this simple example. We could use any model here.
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
 # pinning httpx as the latest version is not compatible with the OpenAI SDK at the time of creating this notebook
-!pip install gradio langfuse openai httpx==0.27.2
+%pip install gradio "langfuse<3.0.0" openai httpx==0.27.2
 ```
 
 Set credentials and initialize Langfuse SDK Client used to add user feedback later on.
@@ -113,7 +115,7 @@ In addition we use the [openai integration](https://langfuse.com/docs/integratio
 
 ```python
 # Langfuse decorator
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, langfuse
 # Optional: automated instrumentation via OpenAI SDK integration
 # See note above regarding alternative implementations
 from langfuse.openai import openai
@@ -121,7 +123,7 @@ from langfuse.openai import openai
 # Global reference for the current trace_id which is used to later add user feedback
 current_trace_id = None
 
-# Add decorator here to capture overall timings, input/output, and manipulate trace metadata via `langfuse_context`
+# Add decorator here to capture overall timings, input/output, and manipulate trace metadata via `langfuse`
 @observe()
 async def create_response(
     prompt: str,
@@ -129,11 +131,11 @@ async def create_response(
 ):
     # Save trace id in global var to add feedback later
     global current_trace_id
-    current_trace_id = langfuse_context.get_current_trace_id()
+    current_trace_id = langfuse.get_current_trace_id()
 
     # Add session_id to Langfuse Trace to enable session tracking
     global session_id
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="gradio_demo_chat",
         session_id=session_id,
         input=prompt,
@@ -155,7 +157,7 @@ async def create_response(
     response["content"] = oai_response.choices[0].message.content or ""
 
     # Customize trace ouput for better readability in Langfuse Sessions
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         output=response["content"],
     )
 

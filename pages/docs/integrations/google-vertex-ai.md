@@ -78,10 +78,9 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
@@ -101,7 +100,8 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, Part, FinishReason
 import vertexai.preview.generative_models as generative_models
 
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe(as_type="generation")
 def vertex_generate_content(input, model_name = "gemini-pro"):
@@ -117,7 +117,7 @@ def vertex_generate_content(input, model_name = "gemini-pro"):
   )
 
   # pass model, model input, and usage metrics to Langfuse
-  langfuse_context.update_current_observation(
+  langfuse.update_current_generation(
       input=input,
       model=model_name,
       usage_details={
@@ -145,13 +145,6 @@ def poem():
 
 poem()
 ```
-
-
-
-
-    "The Sun, a giant ball so near and bright,\nIt casts its warmth and life-sustaining light,\nSo vast in size it fills our sky with gold,\nIts fiery furnace stories yet untold,\nA tiny speck, our Earth, around it goes,\nIn endless dance as planets should all know,\nIts light and heat our very being feed,\nWithout its grace we could never succeed. \n\nSo, Sun we thank you for your brilliance true, \nAnd all you do, that's good and kind and new,\nWe bask and breathe, you make our world so fair,\nA glowing star, our Sun beyond compare.\n"
-
-
 
 See [example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/582ab430-6fa3-4842-b472-96d33e12cd5f?timestamp=2024-12-02T15%3A01%3A42.419Z) in Langfuse.
 
