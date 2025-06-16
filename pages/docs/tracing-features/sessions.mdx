@@ -14,7 +14,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 
 <Tab>
 When using the `@observe()` decorator:
@@ -65,33 +65,6 @@ with langfuse.start_as_current_span(name="another-operation"):
     langfuse.update_current_trace(session_id="your-session-id")
 ```
 
-**With OpenAI integration via metadata:**
-
-```python
-from langfuse.openai import openai
-
-response = openai.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Hello"}],
-    metadata={"langfuse_session_id": "chat-session-123"}
-)
-```
-
-**With Langchain integration via metadata:**
-
-```python
-from langfuse.langchain import CallbackHandler
-
-handler = CallbackHandler()
-
-response = chain.invoke(
-    {"input": "Hello"},
-    config={
-        "callbacks": [handler],
-        "metadata": {"langfuse_session_id": "chat-session-123"}
-    }
-)
-```
 
 </Tab>
 <Tab>
@@ -138,7 +111,23 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai), pass the `session_id` as an additional argument:
+**Python SDK v3 - use metadata:**
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"langfuse_session_id": "your-session-id"}
+)
+```
+
+**Python SDK v2 - pass as additional argument:**
 
 ```python
 from langfuse.openai import openai
@@ -183,9 +172,30 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass the `session_id` as a keyword argument:
+**Python SDK v3 - use metadata in chain invocation:**
 
 ```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+# Pass langfuse_session_id as metadata to the chain invocation
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_session_id": "your-session-id",
+        },
+    },
+)
+```
+
+**Python SDK v2 - pass as constructor argument:**
+
+```python
+from langfuse.callback import CallbackHandler
+
 handler = CallbackHandler(
   session_id="your-session-id"
 )
@@ -197,9 +207,6 @@ You can also set the `session_id` dynamically via the runnable configuration in 
 from langfuse.callback import CallbackHandler
 
 handler = CallbackHandler()
-
-# Your existing Langchain code to create the chain
-...
 
 # Pass langfuse_session_id as metadata to the chain invocation to be parsed as the Langfuse session_id
 chain.invoke(
