@@ -1,0 +1,71 @@
+---
+title: The best LLMOps Tool? MLflow vs. Langfuse
+description: A detailed comparison of MLflow and Langfuse across model lifecycle management, observability, evaluation, and prompt management to help you choose the right LLMOps platform.
+tags: [product]
+---
+
+# The best LLMOps Tool? MLflow vs. Langfuse
+
+MLflow and Langfuse are both open-source tools that support the operationalisation of Large Language Models (LLMs), but they focus on different stages of the LLM application lifecycle.
+
+## How do MLflow and Langfuse compare?
+
+|                              | **🪢 Langfuse**                                                                                                             | **MLflow**                                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Primary Focus**            | Observability & debugging of LLM applications                                                                              | End-to-end model lifecycle management (tracking → registry → deployment)                                                        |
+| **Prompt Management**        | Centralised prompt store with versioning & live updates in production                                                      | Interactive prompt engineering UI (basic version control; requires redeploy for prod updates)                                   |
+| **Evaluation Tools**         | User feedback collection, manual reviews, LLM-as-a-judge, custom metrics                                                   | `mlflow.evaluate()` with built-in metrics (e.g. hallucination, toxicity) and artefact comparison UI                              |
+| **Observability / Tracing**  | Full async tracing of LLM & non-LLM steps, session & cost analytics                                                        | Limited (focus on experiment & model tracking)                                                                                  |
+| **Integration Ecosystem**    | Framework-agnostic SDKs (LangChain, LlamaIndex, OpenAI, LiteLLM, …)                                                        | Deeply integrated into Databricks; plugins for common MLOps stacks                                                               |
+| **Deployment Options**       | Self-host (MIT) or managed cloud                                                                                           | MLflow AI Gateway for multi-provider SaaS LLMs; Databricks managed service                                                     |
+| **Scalability**              | V3 architecture built for high-throughput ingestion & large analytical workloads                                           | Battle-tested at enterprise scale inside Databricks                                                                              |
+| **Licence**                  | MIT (core) + optional Enterprise features                                                                                  | Apache-2.0                                                                                                                       |
+
+## 🪢 Langfuse in a nutshell
+
+Langfuse is an open-source LLM observability platform. It traces every step of complex workflows (e.g. RAG pipelines, agents), tracks latency, token usage & costs, and lets teams iterate on prompts and evaluations **without redeploying**.
+
+import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
+
+<div className="h-6" />
+<TracingOverview />
+
+## MLflow in a nutshell
+
+MLflow is a mature open-source MLOps platform maintained by Databricks. Since v2.4 it ships specialised **LLMOps** features:
+
+- **Experiment & Model Tracking**: log prompts, parameters, responses.
+- **Evaluation**: `mlflow.evaluate()` with ready-made metrics (hallucination, factuality, toxicity …).
+- **Prompt Engineering UI**: experiment with prompts & parameters side-by-side.
+- **AI Gateway**: central governance & credential management for multiple LLM providers.
+
+> MLflow is an excellent choice when you already use the Databricks ecosystem or need a registry & deployment workflow for many model types.
+
+## When to choose which?
+
+| Choose **Langfuse** when … | Choose **MLflow** when … |
+| :------------------------- | :----------------------- |
+| You need deep visibility into production LLM chains, RAG pipelines or agent graphs. | You need experiment tracking, registries and governed deployment pipelines. |
+| You want to iterate on prompts & evaluations live, without redeploying. | You are heavily invested in the Databricks / MLflow stack already. |
+| You prefer a lightweight, framework-agnostic SDK you can self-host. | You need central governance of API keys & rate limits across many SaaS LLMs. |
+
+### Can I use both together?
+
+Yes. Many teams use **MLflow** for model development & registry, then feed runtime traces into **Langfuse** for observability and evaluation once the model is in production.
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  Read more about combining MLOps & LLM observability in our <a href="/blog/2025-05-open-sourcing-langfuse-product">blog post</a>.
+</Callout>
+
+## Further reading
+
+- [MLflow documentation — LLM tracking](https://mlflow.org/docs/latest/llms/llm-tracking/index.html)
+- [Databricks blog — MLflow 2.4: LLMOps](https://www.databricks.com/blog/announcing-mlflow-24-llmops-tools-robust-model-evaluation)
+- [Langfuse docs — Tracing](https://langfuse.com/docs/tracing)
+- [Langfuse v3 infrastructure evolution](https://langfuse.com/blog/2024-12-langfuse-v3-infrastructure-evolution)
+
+## This comparison is out of date?
+
+Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/pages/faq/all) with up-to-date information.
