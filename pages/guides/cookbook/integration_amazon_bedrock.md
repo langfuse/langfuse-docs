@@ -129,7 +129,7 @@ def wrapped_bedrock_converse(**kwargs):
       **kwargs_clone.pop('inferenceConfig', {}),
       **kwargs_clone.pop('additionalModelRequestFields', {})
   }
-  langfuse.update_current_span(
+  langfuse.update_current_generation(
     input=input,
     model=modelId,
     model_parameters=model_parameters,
@@ -141,13 +141,13 @@ def wrapped_bedrock_converse(**kwargs):
     response = bedrock_runtime.converse(**kwargs)
   except (ClientError, Exception) as e:
     error_message = f"ERROR: Can't invoke '{modelId}'. Reason: {e}"
-    langfuse.update_current_span(level="ERROR", status_message=error_message)
+    langfuse.update_current_generation(level="ERROR", status_message=error_message)
     print(error_message)
     return
 
   # 3. extract response metadata
   response_text = response["output"]["message"]["content"][0]["text"]
-  langfuse.update_current_span(
+  langfuse.update_current_generation(
     output=response_text,
     usage_details={
         "input": response["usage"]["inputTokens"],
