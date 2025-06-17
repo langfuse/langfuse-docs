@@ -61,6 +61,12 @@ export const allAuthors = {
     image: "/images/people/felixkrauth.jpg",
     twitter: "felixkrrr",
   },
+  nimarblume: {
+    firstName: "Nimar",
+    name: "Nimar Blume",
+    image: "/images/people/nimarblume.jpg",
+    twitter: "nimarblu",
+  },
 } as const;
 
 export const Authors = (props: { authors?: (keyof typeof allAuthors)[] }) => {
