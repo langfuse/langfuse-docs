@@ -15,7 +15,7 @@ Make sure you have both `llama-index` and `langfuse` installed.
 
 
 ```python
-%pip install llama-index langfuse --upgrade
+%pip install llama-index "langfuse<3.0.0" --upgrade
 ```
 
 Initialize the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com).

@@ -20,29 +20,26 @@ _In addition, we use [Langfuse Tracing](https://langfuse.com/docs/tracing) via t
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 
 ```python
-from langfuse import Langfuse
-from langfuse.callback import CallbackHandler
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse client (prompt management)
-langfuse = Langfuse()
+langfuse = get_client()
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_callback_handler = CallbackHandler()
-
-# Optional, verify that Langfuse is configured correctly
-assert langfuse.auth_check()
-assert langfuse_callback_handler.auth_check()
 ```
 
 ## Add prompt to Langfuse Prompt Management
@@ -121,7 +118,7 @@ print(f"Prompt model configurations\nModel: {model}\nTemperature: {temperature}"
 ```
 
     Prompt model configurations
-    Model: gpt-3.5-turbo-1106
+    Model: gpt-4o
     Temperature: 0
 
 
@@ -156,41 +153,71 @@ response = chain.invoke(input=example_input,config={"callbacks":[langfuse_callba
 print(response.content)
 ```
 
-    Event Title: Julia and Alex's Artful Nature Wedding
+    To plan an event titled "{Event Name}" in Central Park, New York City on June 5, 2024, we need to consider several key factors: audience, budget, venue, catering options, and entertainment. Below is a detailed plan to ensure the event is successful and memorable.
     
-    Audience: Family, friends, and loved ones of Julia and Alex, as well as art and nature enthusiasts.
+    ### Event Overview
+    - **Event Name**: {Event Name}
+    - **Event Description**: {Event Description}
+    - **Date**: June 5, 2024
+    - **Location**: Central Park, New York City
     
-    Budget: $30,000
+    ### Audience
+    - **Target Audience**: Define the demographic (e.g., age group, interests, professional background) that the event is aimed at.
+    - **Expected Attendance**: Estimate the number of attendees to plan logistics accordingly.
     
-    Venue: Central Park, New York City
+    ### Budget
+    - **Total Budget**: Determine the overall budget for the event.
+    - **Allocation**:
+      - Venue: 20%
+      - Catering: 25%
+      - Entertainment: 20%
+      - Marketing and Promotion: 15%
+      - Logistics and Rentals: 10%
+      - Miscellaneous: 10%
     
-    Catering Options: 
-    - Organic and locally sourced menu options
-    - Vegetarian and vegan options
-    - Artfully presented dishes
-    - Champagne toast and signature cocktails
+    ### Venue
+    - **Location**: Central Park, NYC
+    - **Permits**: Obtain necessary permits from the NYC Parks Department for hosting an event in Central Park.
+    - **Layout**: Plan the layout considering the stage, seating, food stations, and restrooms.
+    - **Weather Contingency**: Arrange for tents or an alternative indoor venue in case of inclement weather.
     
-    Entertainment:
-    - Live acoustic music during the ceremony
-    - DJ for the reception
-    - Interactive art stations for guests to create their own masterpieces
-    - Nature-inspired photo booth
+    ### Catering Options
+    - **Vendors**: Consider local catering companies such as:
+      - Great Performances
+      - Abigail Kirsch
+      - Neuman’s Kitchen
+    - **Menu**: Offer a diverse menu catering to various dietary preferences (vegetarian, vegan, gluten-free).
+    - **Beverages**: Include a selection of non-alcoholic and alcoholic beverages, ensuring compliance with local regulations.
     
-    Logistics:
-    - Ceremony and reception to be held in a secluded area of Central Park, surrounded by lush greenery and blooming flowers
-    - Tents and seating to be set up for guests
-    - Art installations and sculptures to be placed around the venue
-    - Transportation for guests to and from the park
-    - Permits and permissions for the event in Central Park
+    ### Entertainment
+    - **Performers**: Book local bands, DJs, or performers that align with the event theme.
+    - **Sound and Lighting**: Hire a professional company to manage sound and lighting, ensuring high-quality production.
+    - **Activities**: Plan interactive activities or workshops relevant to the event theme.
     
-    Potential Vendors:
-    - Catering: Farm-to-table catering company
-    - Music: Local acoustic musician and DJ
-    - Art installations: Local artists and galleries
-    - Photography: Nature and art-focused photographer
-    - Transportation: Eco-friendly shuttle service
+    ### Logistics
+    - **Transportation**: Provide information on public transport options and parking facilities.
+    - **Security**: Hire a security team to ensure the safety of all attendees.
+    - **First Aid**: Arrange for a first aid station with trained medical personnel.
+    - **Waste Management**: Implement a waste management plan with recycling options.
     
-    Overall, the wedding will be a beautiful blend of art and nature, with a focus on sustainability and creativity. The event will showcase the couple's love for each other and their shared passions, creating a memorable and unique experience for all in attendance.
+    ### Marketing and Promotion
+    - **Strategy**: Develop a marketing plan using social media, email campaigns, and partnerships with local businesses.
+    - **Materials**: Create promotional materials such as flyers, banners, and digital content.
+    - **Registration**: Set up an online registration platform for attendees to RSVP.
+    
+    ### Potential Vendors
+    - **Event Planner**: Hire a local event planning company with experience in organizing events in Central Park.
+    - **AV Equipment**: Rent from companies like AV NYC or Big Apple Rentals.
+    - **Decor**: Work with a local decor company to enhance the event's aesthetic.
+    
+    ### Timeline
+    - **6 Months Prior**: Finalize vendors, secure permits, and begin marketing.
+    - **3 Months Prior**: Confirm all bookings, finalize the guest list, and start ticket sales.
+    - **1 Month Prior**: Conduct a walkthrough of the venue, finalize the menu, and confirm all logistics.
+    - **1 Week Prior**: Reconfirm all arrangements with vendors and staff.
+    - **Event Day**: Arrive early for setup, conduct a final check, and ensure all elements are in place.
+    
+    By addressing these factors and following this plan, {Event Name} is set to be a successful and enjoyable event for all attendees.
 
 
 ## View Trace in Langfuse

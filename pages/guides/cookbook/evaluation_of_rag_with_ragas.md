@@ -18,16 +18,14 @@ Ragas is an open-source tool that can help you run [Model-Based Evaluation](http
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
-
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-"
 ```
 
 
@@ -52,6 +50,16 @@ from datasets import load_dataset
 fiqa_eval = load_dataset("explodinggradients/fiqa", "ragas_eval")['baseline']
 fiqa_eval
 ```
+
+
+
+
+    Dataset({
+        features: ['question', 'ground_truths', 'answer', 'contexts'],
+        num_rows: 30
+    })
+
+
 
 ## The Metrics
 For going to measure the following aspects of a RAG system. These metric are from the Ragas library:
@@ -134,19 +142,34 @@ row = fiqa_eval[0]
 row['question'], row['answer']
 ```
 
+
+
+
+    ('How to deposit a cheque issued to an associate in my business into my business account?',
+     '\nThe best way to deposit a cheque issued to an associate in your business into your business account is to open a business account with the bank. You will need a state-issued "dba" certificate from the county clerk\'s office as well as an Employer ID Number (EIN) issued by the IRS. Once you have opened the business account, you can have the associate sign the back of the cheque and deposit it into the business account.')
+
+
+
 Now lets init a Langfuse client SDK to instrument you app.
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 ```
 
 
 ```python
-langfuse.auth_check()
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 Here we are defining a utility function to score your trace with the metrics you chose.
 
@@ -178,35 +201,68 @@ All these step are logged as spans in a single trace in langfuse. You can read m
 ```python
 # start a new trace when you get a question
 question = row['question']
-trace = langfuse.trace(name = "rag")
-
-# retrieve the relevant chunks
-# chunks = get_similar_chunks(question)
 contexts = row['contexts']
-# pass it as span
-trace.span(
-    name = "retrieval", input={'question': question}, output={'contexts': contexts}
-)
-
-# use llm to generate a answer with the chunks
-# answer = get_response_from_llm(question, chunks)
 answer = row['answer']
-trace.span(
-    name = "generation", input={'question': question, 'contexts': contexts}, output={'answer': answer}
-)
 
-# compute scores for the question, context, answer tuple
-ragas_scores = await score_with_ragas(question, contexts, answer)
+with langfuse.start_as_current_span(name="rag") as trace:
+    # Store trace_id for later use
+    trace_id = trace.trace_id
+    
+    # retrieve the relevant chunks
+    # chunks = get_similar_chunks(question)
+    
+    # pass it as span
+    with trace.start_as_current_span(
+        name="retrieval", 
+        input={'question': question}, 
+        output={'contexts': contexts}
+    ):
+        pass
+
+    # use llm to generate a answer with the chunks
+    # answer = get_response_from_llm(question, chunks)
+    
+    with trace.start_as_current_span(
+        name="generation", 
+        input={'question': question, 'contexts': contexts}, 
+        output={'answer': answer}
+    ):
+        pass
+
+    # compute scores for the question, context, answer tuple
+    ragas_scores = await score_with_ragas(question, contexts, answer)
+
+print("RAGAS Scores:", ragas_scores)
 ragas_scores
 ```
+
+    calculating faithfulness
+    calculating answer_relevancy
+    calculating llm_context_precision_without_reference
+    RAGAS Scores: {'faithfulness': 0.8, 'answer_relevancy': np.float64(0.9825100521118072), 'llm_context_precision_without_reference': 0.9999999999}
+
+
+
+
+
+    {'faithfulness': 0.8,
+     'answer_relevancy': np.float64(0.9825100521118072),
+     'llm_context_precision_without_reference': 0.9999999999}
+
+
 
 Once the scores are computed you can add them to the trace in Langfuse:
 
 
 ```python
 # send the scores
+# Use the trace_id stored from the previous cell
 for m in metrics:
-    trace.score(name=m.name, value=ragas_scores[m.name])
+    langfuse.create_score(
+        name=m.name, 
+        value=ragas_scores[m.name], 
+        trace_id=trace_id
+    )
 ```
 
 ![Trace with RAGAS scores](https://langfuse.com/images/docs/ragas-trace-score.png)
@@ -227,17 +283,24 @@ To create demo data in Langfuse, lets first create ~10 traces with the fiqa data
 ```python
 # fiqa traces
 for interaction in fiqa_eval.select(range(10, 20)):
-    trace = langfuse.trace(name = "rag")
-    trace.span(
-        name = "retrieval",
-        input={'question': question},
-        output={'contexts': contexts}
-    )
-    trace.span(
-        name = "generation",
-        input={'question': question, 'contexts': contexts},
-        output={'answer': answer}
-    )
+    question = interaction['question']
+    contexts = interaction['contexts']
+    answer = interaction['answer']
+    
+    with langfuse.start_as_current_span(name="rag") as trace:
+        with trace.start_as_current_span(
+            name="retrieval",
+            input={'question': question},
+            output={'contexts': contexts}
+        ):
+            pass
+        
+        with trace.start_as_current_span(
+            name="generation",
+            input={'question': question, 'contexts': contexts},
+            output={'answer': answer}
+        ):
+            pass
 
 # await that Langfuse SDK has processed all events before trying to retrieve it in the next step
 langfuse.flush()
@@ -252,7 +315,7 @@ def get_traces(name=None, limit=None, user_id=None):
     page = 1
 
     while True:
-        response = langfuse.client.trace.list(
+        response = langfuse.api.trace.list(
             name=name, page=page, user_id=user_id
         )
         if not response.data:
@@ -276,6 +339,13 @@ traces_sample = sample(traces, NUM_TRACES_TO_SAMPLE)
 len(traces_sample)
 ```
 
+
+
+
+    3
+
+
+
 Now lets make a batch and score it. Ragas uses huggingface dataset object to build the dataset and run the evaluation. If you run this on your own production data, use the right keys to extract the question, contexts and answer from the trace
 
 
@@ -291,7 +361,7 @@ evaluation_batch = {
 }
 
 for t in traces_sample:
-    observations = [langfuse.client.observations.get(o) for o in t.observations]
+    observations = [langfuse.api.observations.get(o) for o in t.observations]
     for o in observations:
         if o.name == 'retrieval':
             question = o.input['question']
@@ -315,12 +385,23 @@ ds = Dataset.from_dict(evaluation_batch)
 r = evaluate(ds, metrics=[Faithfulness(), ResponseRelevancy()])
 ```
 
+
+    Evaluating:   0%|          | 0/6 [00:00<?, ?it/s]
+
+
 And that is it! You can see the scores over a time period.
 
 
 ```python
 r
 ```
+
+
+
+
+    {'faithfulness': 0.5516, 'answer_relevancy': 0.9294}
+
+
 
 You can also push the scores back into Langfuse or use the exported pandas dataframe to run further analysis.
 
@@ -335,10 +416,73 @@ df.head()
 ```
 
 
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_input</th>
+      <th>retrieved_contexts</th>
+      <th>response</th>
+      <th>faithfulness</th>
+      <th>answer_relevancy</th>
+      <th>trace_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Do I need a new EIN since I am hiring employee...</td>
+      <td>[You don't need to notify the IRS of new membe...</td>
+      <td>\nNo, you do not need a new EIN since you are ...</td>
+      <td>0.750000</td>
+      <td>0.992491</td>
+      <td>9a96d48d96d45b1bb6d28d48b7cc93d4</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Privacy preferences on creditworthiness data</td>
+      <td>[See the first item in the list: For our every...</td>
+      <td>\nThe best answer to this question is that you...</td>
+      <td>0.571429</td>
+      <td>0.875799</td>
+      <td>18e23692aa5b2b245c176574e247a236</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Have plenty of cash flow but bad credit</td>
+      <td>[This is probably a good time to note that cre...</td>
+      <td>\nIf you have plenty of cash flow but bad cred...</td>
+      <td>0.333333</td>
+      <td>0.919893</td>
+      <td>877d64dc4355743e2d2f1b2607d9ec14</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
 ```python
 for _, row in df.iterrows():
     for metric_name in ["faithfulness", "answer_relevancy"]:
-        langfuse.score(
+        langfuse.create_score(
             name=metric_name,
             value=row[metric_name],
             trace_id=row["trace_id"]

@@ -1211,6 +1211,146 @@ from langfuse import Langfuse
 langfuse_sampled = Langfuse(sample_rate=0.2)
 ```
 
+### Multi-Project Setup (Experimental)
+
+<Callout type="warning">
+Multi-project setups are **experimental** and have important limitations regarding third-party OpenTelemetry integrations.
+</Callout>
+
+The Langfuse Python SDK supports routing traces to different projects within the same application by using multiple public keys. This works because the Langfuse SDK adds a specific span attribute containing the public key to all spans it generates.
+
+**How it works:**
+
+1. **Span Attributes**: The Langfuse SDK adds a specific span attribute containing the public key to spans it creates
+2. **Multiple Processors**: Multiple span processors are registered onto the global tracer provider, each with their respective exporters bound to a specific public key
+3. **Filtering**: Within each span processor, spans are filtered based on the presence and value of the public key attribute
+
+**Important Limitation with Third-Party Libraries:**
+
+Third-party libraries that emit OpenTelemetry spans automatically (e.g., HTTP clients, databases, other instrumentation libraries) do **not** have the Langfuse public key span attribute. As a result:
+
+- These spans cannot be routed to a specific project
+- They are processed by all span processors and sent to all projects
+- All projects will receive these third-party spans
+
+**Why is this experimental?**
+This approach requires that the `public_key` parameter be passed to all Langfuse SDK executions across all integrations to ensure proper routing, and third-party spans will appear in all projects.
+
+#### Initialization
+
+To set up multiple projects, initialize separate Langfuse clients for each project:
+
+```python
+from langfuse import Langfuse
+
+# Initialize clients for different projects
+project_a_client = Langfuse(
+    public_key="pk-lf-project-a-...",
+    secret_key="sk-lf-project-a-...",
+    host="https://cloud.langfuse.com"
+)
+
+project_b_client = Langfuse(
+    public_key="pk-lf-project-b-...",
+    secret_key="sk-lf-project-b-...",
+    host="https://cloud.langfuse.com"
+)
+```
+
+#### Integration Usage
+
+For all integrations in multi-project setups, you must specify the `public_key` parameter to ensure traces are routed to the correct project.
+
+**Observe Decorator:**
+
+Pass `langfuse_public_key` as a keyword argument to the observed function (not the decorator):
+
+```python
+from langfuse import observe
+
+@observe()
+def process_data_for_project_a(data):
+    # Processing logic
+    return {"processed": data}
+
+@observe()
+def process_data_for_project_b(data):
+    # Processing logic
+    return {"enhanced": data}
+
+# Route to Project A
+result_a = process_data_for_project_a(
+    data="input data",
+    langfuse_public_key="pk-lf-project-a-..."
+)
+
+# Route to Project B  
+result_b = process_data_for_project_b(
+    data="input data", 
+    langfuse_public_key="pk-lf-project-b-..."
+)
+```
+
+**OpenAI Integration:**
+
+Add `langfuse_public_key` as a keyword argument to the OpenAI execution:
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+# Route to Project A
+response_a = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello from Project A"}],
+    langfuse_public_key="pk-lf-project-a-..."
+)
+
+# Route to Project B
+response_b = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello from Project B"}],
+    langfuse_public_key="pk-lf-project-b-..."
+)
+```
+
+**Langchain Integration:**
+
+Add `public_key` to the CallbackHandler constructor:
+
+```python
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+# Create handlers for different projects
+handler_a = CallbackHandler(public_key="pk-lf-project-a-...")
+handler_b = CallbackHandler(public_key="pk-lf-project-b-...")
+
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me about {topic}")
+chain = prompt | llm
+
+# Route to Project A
+response_a = chain.invoke(
+    {"topic": "machine learning"},
+    config={"callbacks": [handler_a]}
+)
+
+# Route to Project B  
+response_b = chain.invoke(
+    {"topic": "data science"},
+    config={"callbacks": [handler_b]}
+)
+```
+
+**Important Considerations:**
+
+- Every Langfuse SDK execution across all integrations must include the appropriate public key parameter
+- Missing public key parameters may result in traces being routed to the default project or lost
+- Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
+
 ## OTEL and Langfuse
 
 The Langfuse v3 SDK is built upon [OpenTelemetry (OTEL)](https://opentelemetry.io/), a standard for observability. Understanding the relation between OTEL and Langfuse is not required to use the SDK, but it is helpful to have a basic understanding of the concepts. OTEL related concepts are abstracted away and you can use the SDK without being deeply familiar with them.

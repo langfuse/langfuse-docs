@@ -18,7 +18,7 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 
 
 ```python
-%pip install google-adk opentelemetry-sdk opentelemetry-exporter-otlp -q
+%pip install langfuse google-adk -q
 ```
 
 ## Step 2: Set up environment variables
@@ -30,38 +30,45 @@ Fill in the **Langfuse** and **OpenTelemetry** credentials for your project. Als
 import os
 import base64
 
-LANGFUSE_PUBLIC_KEY = "pk-lf-..."
-LANGFUSE_SECRET_KEY = "sk-lf-..."
-LANGFUSE_AUTH=base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # US data region
+# Build Basic Auth header.
+LANGFUSE_AUTH = base64.b64encode(
+    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
+).decode()
+ 
+# Configure OpenTelemetry endpoint & headers
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
+
 
 # Gemini API Key (Get from Google AI Studio: https://aistudio.google.com/app/apikey)
 os.environ["GOOGLE_API_KEY"] = "..." 
 ```
 
-## Step 3: Initialise OTel
-
-We configure an **OTLPSpanExporter** so every span generated in this notebook is pushed straight to Langfuse.
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
-from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-
-provider = TracerProvider(resource=Resource.create({"service.name": "hello_agent"}))
-exporter = OTLPSpanExporter()
-provider.add_span_processor(BatchSpanProcessor(exporter))
-trace.set_tracer_provider(provider)
-tracer = trace.get_tracer("hello_app")
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
-## Step 4: Build a hello world agent
+    Langfuse client is authenticated and ready!
+
+
+## Step 3: Build a hello world agent
 
 Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
 
@@ -104,7 +111,14 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
         print(event.content.parts[0].text)
 ```
 
-## Step 5: View the trace in Langfuse
+    Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+
+
+    Hello Langfuse 👋!
+    
+
+
+## Step 4: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
 
