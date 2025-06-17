@@ -247,6 +247,7 @@ const nonPermanentRedirects = [
   ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/daily-metrics-api", "/docs/analytics/metrics-api#daily-metrics"],
   ["/docs/opentelemetry/example-opentelemetry-collector", "/docs/opentelemetry/get-started#export-from-opentelemetry-collector"],
+  ["/docs/sdk/python/decorators", "https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
