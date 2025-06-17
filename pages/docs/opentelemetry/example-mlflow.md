@@ -12,9 +12,11 @@ Langfuse is an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/g
 
 Install the necessary Python packages: `openai`, `langfuse`, and `mlflow`. These will allow you to interact with OpenAI as well as setup the instrumentation for tracing.
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install mlflow openai opentelemetry-exporter-otlp-proto-http langfuse
+%pip install mlflow openai opentelemetry-exporter-otlp-proto-http "langfuse<3.0.0"
 ```
 
 ## Step 2: Configure Environment Variables

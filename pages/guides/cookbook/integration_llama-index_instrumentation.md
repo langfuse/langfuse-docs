@@ -15,7 +15,7 @@ Make sure you have both `llama-index` and `langfuse` installed.
 
 
 ```python
-%pip install langfuse llama_index --upgrade
+%pip install "langfuse<3.0.0" llama_index --upgrade
 ```
 
 Initialize the integration. Get your API keys from the Langfuse project settings. This example uses OpenAI for embeddings and chat completions. You can also use any other model supported by LlamaIndex.

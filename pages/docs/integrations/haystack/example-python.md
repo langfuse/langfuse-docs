@@ -33,10 +33,12 @@ This cookbook walks through building a simple RAG pipeline using Haystack and ho
 
 ## Installation and Setup
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
 # install haystack, langfuse, and the langfuse-haystack integration package
-%pip install haystack-ai langfuse-haystack langfuse
+%pip install haystack-ai langfuse-haystack "langfuse<3.0.0"
 
 # additional requirements for this cookbook
 %pip install sentence-transformers datasets mwparserfromhell
@@ -48,13 +50,11 @@ Then set the environment variables. You can find your Langfuse public and privat
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
-os.environ["HAYSTACK_CONTENT_TRACING_ENABLED"] = "True"
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -155,11 +155,22 @@ question = "What can you tell me about Truman Capote?"
 response = pipeline.run({"text_embedder": {"text": question}, "prompt_builder": {"question": question}})
 ```
 
+    PromptBuilder has 2 prompt variables, but `required_variables` is not set. By default, all prompt variables are treated as optional, which may lead to unintended behavior in multi-branch pipelines. To avoid unexpected execution, ensure that variables intended to be required are explicitly set in `required_variables`.
+
+
+
+    Batches:   0%|          | 0/1 [00:00<?, ?it/s]
+
+
 
 ```python
 print("Trace url:", response["tracer"]["trace_url"])
 print("Response:", response["llm"]["replies"][0])
 ```
+
+    Trace url: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5b1cb651-fe83-45b1-a73c-5e59f408cf2b
+    Response: Truman Capote was an American author, known for his distinctive writing style and for pioneering the true crime genre. He was born on September 30, 1924, in New Orleans, Louisiana, as Truman Streckfus Persons. After his parents' divorce, his mother remarried and he was adopted by his stepfather, becoming Truman Garcia Capote. Capote is best known for his novella "Breakfast at Tiffany's" and his true crime novel "In Cold Blood," which he described as a "nonfiction novel." He cultivated a public persona as a socialite and was known for his flamboyant and witty personality. Capote passed away on August 25, 1984, in Los Angeles, California.
+
 
 The output should look like similar to this:
 
@@ -232,18 +243,18 @@ The example below walks through a simple way to score the chat generator's respo
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
-trace_id = trace_url.split('/')[-1] # extract id from trace url, to be exposed directly in a future release
+trace_id = langfuse.get_current_trace_id()
 
-langfuse.score(
+langfuse.create_score(
     trace_id=trace_id,
     name="quality",
     value=1,
     comment="Cordial and relevant", # optional
-);
+)
 ```
 
 The previously created trace now includes this score:

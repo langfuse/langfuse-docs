@@ -26,7 +26,7 @@ _**Note:** New Python SDK available (v3) - We have a new, improved SDK available
 
 
 ```python
-%pip install "langfuse==2.60.8" openai cleanlab-tlm
+%pip install "langfuse<3.0.0" openai cleanlab-tlm
 ```
 
 
