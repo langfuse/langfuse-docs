@@ -7,7 +7,7 @@ category: Evaluation
 
 In this notebook, we will explore how to **generate synthetic datasets** using language models and uploading them to [Langfuse](https://langfuse.com) for evaluation. 
 
-## What Langfuse Datasets?
+## What are Langfuse Datasets?
 
 In Langfuse, a *dataset* is a collection of *dataset items*, each typically containing an `input` (e.g., user prompt/question), `expected_output` (the ground truth or ideal answer) and optional metadata.
 
