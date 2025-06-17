@@ -5,12 +5,19 @@ description: How to connect Langfuse with OpenTelemetry to observe LLM applicati
 
 # LLM Observability via OpenTelemetry
 
-
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
 
 Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
 
 As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/tracing-data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([property mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
+
+## OpenTelemetry native Langfuse SDK v3
+
+The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring. 
+
+Because it lives in the shared OpenTelemetry context, any other library that is already instrumented with OTEL (HTTP frameworks, databases, GenAI instrumentation like OpenLLMetry/OpenLIT, etc.) will seamlessly show up in the same Langfuse traces without additional configuration. 
+
+Get started by following the dedicated guide for the Python implementation here: [/docs/sdk/python/sdk-v3](/docs/sdk/python/sdk-v3).
 
 ## OpenTelemetry endpoint
 
@@ -146,6 +153,7 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 - [Semantic Kernel](/docs/integrations/semantic-kernel)
 - [Pydantic AI](/docs/integrations/pydantic-ai)
 - [Spring AI](/docs/integrations/spring-ai)
+- [LlamaIndex](/docs/integrations/llama-index)
 - [LlamaIndex Workflows](/docs/integrations/llama-index/workflows)
 
 ## Export from OpenTelemetry Collector
