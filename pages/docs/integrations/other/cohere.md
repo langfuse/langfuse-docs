@@ -35,10 +35,8 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-
 # Set your Cohere API key from your Cohere account settings
 os.environ["COHERE_API_KEY"] = "..."
-
 ```
 
 ## Step 3: Use Cohere with the OpenAI SDK

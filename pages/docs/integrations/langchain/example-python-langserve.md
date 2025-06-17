@@ -16,11 +16,12 @@ category: Integrations
 This cookbook demonstrates how to trace applications deployed via Langserve with Langfuse (using the [LangChain integration](https://langfuse.com/docs/integrations/langchain)). We'll run both the server and the client in this notebook.
 
 ## Setup
-Install dependencies and configure environment
+
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
 
 ```python
-!pip install fastapi sse_starlette httpx langserve langfuse langchain-openai langchain
+!pip install fastapi sse_starlette httpx langserve "langfuse<3.0.0" langchain-openai langchain
 ```
 
 

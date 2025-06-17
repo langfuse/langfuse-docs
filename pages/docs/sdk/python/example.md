@@ -15,7 +15,7 @@ Install `langfuse`:
 
 
 ```python
-%pip install langfuse
+%pip install "langfuse<3.0.0"
 ```
 
 If you haven't done so yet, [sign up to Langfuse](https://cloud.langfuse.com/auth/sign-up) and obtain your API keys from the project settings. You can also [self-host](https://langfuse.com/self-hosting) Langfuse.

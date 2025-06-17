@@ -15,7 +15,7 @@ Make sure you have both `llama-index` and `langfuse` installed.
 
 
 ```python
-%pip install llama-index langfuse llama-index-vector-stores-milvus --upgrade
+%pip install llama-index "langfuse<3.0.0" llama-index-vector-stores-milvus --upgrade
 ```
 
 Initialize the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com), and replace public_key secret_key with your key values. This example uses OpenAI for embeddings and chat completions, so you also need to specify your OpenAI key in environment variable.

@@ -15,21 +15,21 @@ You can get your Langfuse API keys [here](https://cloud.langfuse.com/) and OpenA
 
 
 ```python
-%pip install langfuse datasets uptrain litellm openai --upgrade
+%pip install langfuse datasets uptrain litellm openai rouge_score --upgrade
 ```
 
 
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # for EU data region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # for US data region
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 ## Sample Dataset
@@ -88,6 +88,20 @@ res = eval_llm.evaluate(
 )
 ```
 
+    [32m2025-06-17 10:43:14.568[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:01<00:00,  2.85it/s]
+    /Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/uptrain/operators/language/llm.py:271: RuntimeWarning: coroutine 'LLMMulticlient.async_fetch_responses' was never awaited
+      with ThreadPoolExecutor(max_workers=1) as executor:
+    RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+    [32m2025-06-17 10:43:15.996[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:01<00:00,  2.74it/s]
+    [32m2025-06-17 10:43:17.464[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:03<00:00,  1.19it/s]
+    [32m2025-06-17 10:43:20.860[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:01<00:00,  3.13it/s]
+    [32m2025-06-17 10:43:22.148[0m | [1mINFO    [0m | [36muptrain.framework.evalllm[0m:[36mevaluate[0m:[36m376[0m - [1mLocal server not running, start the server to log data and visualize in the dashboard![0m
+
+
 ## Using Langfuse
 
 There are two main ways to run evaluations:
@@ -100,12 +114,19 @@ There are two main ways to run evaluations:
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
  
-langfuse = Langfuse()
-
-langfuse.auth_check()
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 We mock the instrumentation of your application by using the sample dataset. See the [quickstart](https://langfuse.com/docs/get-started) to integrate Langfuse with your application.
 
@@ -113,31 +134,42 @@ We mock the instrumentation of your application by using the sample dataset. See
 ```python
 # start a new trace when you get a question
 question = data[0]['question']
-trace = langfuse.trace(name = "uptrain trace")
-
-# retrieve the relevant chunks
-# chunks = get_similar_chunks(question)
 context = data[0]['context']
-# pass it as span
-trace.span(
-    name = "retrieval", input={'question': question}, output={'context': context}
-)
-
-# use llm to generate a answer with the chunks
-# answer = get_response_from_llm(question, chunks)
 response = data[0]['response']
-trace.span(
-    name = "generation", input={'question': question, 'context': context}, output={'response': response}
-)
+
+with langfuse.start_as_current_span(name="uptrain trace") as trace:
+    # Store trace_id for later use
+    trace_id = trace.trace_id
+    
+    # retrieve the relevant chunks
+    # chunks = get_similar_chunks(question)
+    
+    # pass it as span
+    with trace.start_as_current_span(
+        name="retrieval", 
+        input={'question': question}, 
+        output={'context': context}
+    ):
+        pass
+
+    # use llm to generate a answer with the chunks
+    # answer = get_response_from_llm(question, chunks)
+    
+    with trace.start_as_current_span(
+        name="generation", 
+        input={'question': question, 'context': context}, 
+        output={'response': response}
+    ):
+        pass
 ```
 
 We reuse the scores previously calculated for the traces in the sample dataset. In development, you would run the UpTrain evaluations for the single trace as it's created.
 
 
 ```python
-trace.score(name='context_relevance', value=res[0]['score_context_relevance'])
-trace.score(name='factual_accuracy', value=res[0]['score_factual_accuracy'])
-trace.score(name='response_completeness', value=res[0]['score_response_completeness'])
+langfuse.create_score(name='context_relevance', value=res[0]['score_context_relevance'], trace_id=trace_id)
+langfuse.create_score(name='factual_accuracy', value=res[0]['score_factual_accuracy'], trace_id=trace_id)
+langfuse.create_score(name='response_completeness', value=res[0]['score_response_completeness'], trace_id=trace_id)
 ```
 
 ![UpTrain Evals on a single trace in Langfuse](https://langfuse.com/images/cookbook/uptrain-trace.png)
@@ -149,17 +181,20 @@ To simulate a production environment, we will log our sample dataset to Langfuse
 
 ```python
 for interaction in data:
-    trace = langfuse.trace(name = "uptrain batch")
-    trace.span(
-        name = "retrieval",
-        input={'question': interaction['question']},
-        output={'context': interaction['context']}
-    )
-    trace.span(
-        name = "generation",
-        input={'question': interaction['question'], 'context': interaction['context']},
-        output={'response': interaction['response']}
-    )
+    with langfuse.start_as_current_span(name="uptrain batch") as trace:
+        with trace.start_as_current_span(
+            name="retrieval",
+            input={'question': interaction['question']},
+            output={'context': interaction['context']}
+        ):
+            pass
+        
+        with trace.start_as_current_span(
+            name="generation",
+            input={'question': interaction['question'], 'context': interaction['context']},
+            output={'response': interaction['response']}
+        ):
+            pass
  
 # await that Langfuse SDK has processed all events before trying to retrieve it in the next step
 langfuse.flush()
@@ -174,7 +209,7 @@ def get_traces(name=None, limit=10000, user_id=None):
     page = 1
  
     while True:
-        response = langfuse.client.trace.list(
+        response = langfuse.api.trace.list(
             name=name, page=page, user_id=user_id, order_by=None
         )
         if not response.data:
@@ -210,7 +245,7 @@ evaluation_batch = {
 }
  
 for t in traces_sample:
-    observations = [langfuse.client.observations.get(o) for o in t.observations]
+    observations = [langfuse.api.observations.get(o) for o in t.observations]
     for o in observations:
         if o.name == 'retrieval':
             question = o.input['question']
@@ -237,6 +272,20 @@ res = eval_llm.evaluate(
 )
 ```
 
+    [32m2025-06-17 10:46:35.647[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:01<00:00,  3.06it/s]
+    /Users/jannik/Documents/GitHub/langfuse-docs/.venv/lib/python3.13/site-packages/uptrain/operators/language/llm.py:271: RuntimeWarning: coroutine 'LLMMulticlient.async_fetch_responses' was never awaited
+      with ThreadPoolExecutor(max_workers=1) as executor:
+    RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+    [32m2025-06-17 10:46:36.963[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:02<00:00,  1.88it/s]
+    [32m2025-06-17 10:46:39.097[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:03<00:00,  1.12it/s]
+    [32m2025-06-17 10:46:42.703[0m | [33m[1mWARNING [0m | [36muptrain.operators.language.llm[0m:[36mfetch_responses[0m:[36m268[0m - [33m[1mDetected a running event loop, scheduling requests in a separate thread.[0m
+    100%|██████████| 4/4 [00:01<00:00,  3.87it/s]
+    [32m2025-06-17 10:46:43.749[0m | [1mINFO    [0m | [36muptrain.framework.evalllm[0m:[36mevaluate[0m:[36m376[0m - [1mLocal server not running, start the server to log data and visualize in the dashboard![0m
+
+
 Add the `trace_id` back to the dataset as it was omitted in the previous step to be compatible with UpTrain.
 
 
@@ -249,13 +298,105 @@ df["trace_id"] = [d['trace_id'] for d in data]
 df.head()
 ```
 
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>question</th>
+      <th>context</th>
+      <th>response</th>
+      <th>trace_id</th>
+      <th>score_context_relevance</th>
+      <th>explanation_context_relevance</th>
+      <th>score_factual_accuracy</th>
+      <th>explanation_factual_accuracy</th>
+      <th>score_response_completeness</th>
+      <th>explanation_response_completeness</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Can stress cause physical health problems?</td>
+      <td>Stress is the body's response to challenges or...</td>
+      <td>Symptoms of a heart attack may include chest p...</td>
+      <td>a105ba2b-337f-4af7-a367-663df325b44d</td>
+      <td>0.5</td>
+      <td>{\n    "Reasoning": "The given context can giv...</td>
+      <td>0.0</td>
+      <td>{\n    "Result": [\n        {\n            "Fa...</td>
+      <td>0.0</td>
+      <td>{\n    "Reasoning": "The given response does n...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>What are the symptoms of a heart attack?</td>
+      <td>A heart attack, or myocardial infarction, occu...</td>
+      <td>Symptoms of a heart attack may include chest p...</td>
+      <td>66730079-4f83-40ff-9eb6-2fbf07b79bf1</td>
+      <td>1.0</td>
+      <td>{\n    "Reasoning": "The given context provide...</td>
+      <td>0.6</td>
+      <td>{\n    "Result": [\n        {\n            "Fa...</td>
+      <td>1.0</td>
+      <td>{\n    "Reasoning": "The given response is com...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Can stress cause physical health problems?</td>
+      <td>Stress is the body's response to challenges or...</td>
+      <td>Symptoms of a heart attack may include chest p...</td>
+      <td>7206b436f865f4a5fe892f2b5ec4cbe6</td>
+      <td>0.5</td>
+      <td>{\n    "Reasoning": "The given context can giv...</td>
+      <td>0.0</td>
+      <td>{\n    "Result": [\n        {\n            "Fa...</td>
+      <td>0.0</td>
+      <td>{\n    "Reasoning": "The given response does n...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Can stress cause physical health problems?</td>
+      <td>Stress is the body's response to challenges or...</td>
+      <td>Symptoms of a heart attack may include chest p...</td>
+      <td>ec78d1929443997d1dbbdef2822b37dd</td>
+      <td>1.0</td>
+      <td>{\n    "Reasoning": "The given context can ans...</td>
+      <td>0.0</td>
+      <td>{\n    "Result": [\n        {\n            "Fa...</td>
+      <td>0.0</td>
+      <td>{\n    "Reasoning": "The given response does n...</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 Now that we have the evaluations, we can add them back to the traces in Langfuse as [scores](https://langfuse.com/docs/scores).
 
 
 ```python
 for _, row in df.iterrows():
     for metric_name in ["context_relevance", "factual_accuracy","response_completeness"]:
-        langfuse.score(
+        langfuse.create_score(
             name=metric_name,
             value=row["score_"+metric_name],
             trace_id=row["trace_id"]

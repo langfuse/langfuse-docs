@@ -21,7 +21,7 @@ This is useful for scenarios such as:
 
 
 ```python
-!pip install "langfuse<3.0.0" -q
+%pip install "langfuse<3.0.0" -q
 ```
 
 
