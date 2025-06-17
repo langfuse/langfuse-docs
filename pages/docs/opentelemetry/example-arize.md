@@ -1,14 +1,11 @@
 ---
-title: Tracing using the Arize SDK
-description: Example cookbook on using the Arize AI SDK to trace your application to Langfuse.
-
+title: Tracing using the OpenInference SDK
+description: Example cookbook on using the OpenInference SDK by Arize to trace your application to Langfuse.
 ---
 
-# Tracing using the Arize SDK
+# Tracing using the OpenInference SDK
 
-Langfuse offers an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/get-started) to ingest trace data from your LLM applications. With the Arize SDK and OpenTelemetry, you can log traces from multiple other frameworks to Langfuse. Below is an example of tracing OpenAI to Langfuse, you can find a full list of supported frameworks [here](https://docs.arize.com/phoenix/tracing/integrations-tracing). To make this example work with other frameworks, you just need to change the instrumentor to match the framework. 
-
-> **Arize AI SDK:** Arize AI provides [Openinference](https://github.com/Arize-ai/openinference), a library that is complimentary to OpenTelemetry to enable tracing of AI applications. OpenInference can be used with any OpenTelemetry-compatible backend. 
+Langfuse offers an [OpenTelemetry compatible SDK](https://langfuse.com/docs/sdk/python/sdk-v3). With the OpenInference instrumentation library, you can log traces from multiple other frameworks to Langfuse. Below is an example of tracing OpenAI to Langfuse, you can find a full list of supported frameworks [here](https://docs.arize.com/phoenix/tracing/integrations-tracing). To make this example work with other frameworks, you just need to change the instrumentor to match the framework. 
 
 ## Step 1: Install Dependencies
 
@@ -16,7 +13,7 @@ Install the necessary Python packages to enable OpenTelemetry tracing, openinfer
 
 
 ```python
-%pip install arize-phoenix-otel openai openinference-instrumentation-openai
+%pip install langfuse openai openinference-instrumentation-openai --upgrade
 ```
 
 ## Step 2: Configure Environment Variables
@@ -28,66 +25,45 @@ Also, add your `OPENAI_API_KEY` as an environment variable.
 
 ```python
 import os
-import base64
 
-LANGFUSE_PUBLIC_KEY = "pk-lf-..."
-LANGFUSE_SECRET_KEY = "sk-lf-..."
-LANGFUSE_AUTH = base64.b64encode(f"{LANGFUSE_PUBLIC_KEY}:{LANGFUSE_SECRET_KEY}".encode()).decode()
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
-# os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
-
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
-# Set your OpenAI API key.
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
-Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-
-# Sets the global default tracer provider
-from opentelemetry import trace
-trace.set_tracer_provider(trace_provider)
-
-# Creates a tracer from the global tracer provider
-tracer = trace.get_tracer(__name__)
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 ## Step 3: Initialize Instrumentation
 
-Initialize the Arize Phoenix module [`register()`](https://docs.arize.com/phoenix/tracing/how-to-tracing/setup-tracing-python). By setting `set_global_tracer_provider = False`, we can use the OpenTelemetry tracer provider we created in the previous step. Then, we can use the `OpenAIInstrumentor` to instrument the OpenAI SDK. You can replace this with any of the frameworks supported [here](https://docs.arize.com/phoenix/tracing/integrations-tracing)
+We use the `OpenAIInstrumentor` to instrument the OpenAI SDK. You can replace this with any of the frameworks supported [here](https://docs.arize.com/phoenix/tracing/integrations-tracing)
 
 
 ```python
-# from phoenix.otel import register
-from phoenix.otel import register
 from openinference.instrumentation.openai import OpenAIInstrumentor
-
-# configure the Phoenix tracer
-register(set_global_tracer_provider = False,)
 
 OpenAIInstrumentor().instrument()
 ```
-
-    🔭 OpenTelemetry Tracing Details 🔭
-    |  Phoenix Project: default
-    |  Span Processor: SimpleSpanProcessor
-    |  Collector Endpoint: localhost:4317
-    |  Transport: gRPC
-    |  Transport Headers: {'authorization': '****', 'user-agent': '****'}
-    |  
-    |  Using a default SpanProcessor. `add_span_processor` will overwrite this default.
-    
-
 
 ## Step 4: Execute a Sample LLM Request
 
@@ -108,34 +84,32 @@ response = openai.OpenAI().chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## Step 5: Pass Additional Attributes (Optional)
+    Enhanced observability in large language models (LLMs) plays a crucial role in improving AI debugging by providing deeper insights into model performance, behavior, and internal mechanics. Here are several ways in which enhanced observability can improve AI debugging:
+    
+    1. **Detailed Monitoring**: Enhanced observability allows developers to monitor various metrics related to model performance in real time, such as accuracy, precision, recall, and F1 scores across different tasks. This helps identify specific areas where the model is underperforming.
+    
+    2. **Data Drift Detection**: Observability tools can monitor incoming data distributions and detect drift over time. If the data the model encounters changes significantly from the training data, this can lead to degraded performance. Detecting data drift enables timely interventions, such as model retraining or adjustment.
+    
+    3. **Error Analysis**: Enhanced observability tools can assist in logging and categorizing errors made by the model, such as misclassifications or inappropriate responses. By analyzing these errors, developers can pinpoint patterns and root causes, guiding debugging efforts more effectively.
+    
+    4. **Model Interpretability**: Observability can be coupled with interpretability tools that provide insights into how a model makes decisions. By understanding the features or tokens that lead to certain outputs, developers can identify whether the model is relying on spurious correlations or misjudgments in particular contexts.
+    
+    5. **Traceability**: With enhanced observability, it's possible to track the inputs and outputs of the model dynamically. This feature can help reproduce issues and understand the circumstances under which certain errors occur, facilitating quicker resolutions.
+    
+    6. **User Feedback Integration**: Integrating user feedback into observability systems can provide qualitative insights into model performance. When users provide feedback on model outputs, it can highlight areas of misunderstanding or repeated errors that quantitative metrics may not reveal.
+    
+    7. **Performance Variability Monitoring**: Tracking performance variability across different populations or contexts can uncover biases or inconsistencies in model behavior. By identifying and understanding these variances, developers can address fairness and ethical concerns more efficiently.
+    
+    8. **Version Control and Experimentation**: Observability can provide a framework for tracking experiments with different model versions. This allows developers to understand how changes in training data, model architecture, or hyperparameters affect performance, making it easier to identify optimal configurations.
+    
+    9. **Logging Contextual Information**: By capturing contextual information during model execution (e.g., user queries, environmental variables), developers can better understand the conditions that lead to specific outputs, making debugging more straightforward.
+    
+    10. **Alerts and Anomaly Detection**: With enhanced observability, systems can automatically alert developers to anomalies in performance, enabling them to investigate and resolve issues proactively, rather than reactively waiting for user reports or performance drops.
+    
+    In conclusion, enhanced observability fosters a more proactive and informed debugging process for large language models. By improving transparency and understanding of the model's behavior, developers can diagnose issues more efficiently, refine model performance, and ultimately build more robust AI solutions.
 
-Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
 
-
-```python
-import openai
-
-with tracer.start_as_current_span("OpenAI-Trace") as span:
-    span.set_attribute("langfuse.user.id", "user-123")
-    span.set_attribute("langfuse.session.id", "123456789")
-    span.set_attribute("langfuse.tags", ["staging", "demo"])
-
-    # You application code below:
-
-    response = openai.OpenAI().chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": "How does enhanced LLM observability improve AI debugging?",
-            }
-        ],
-        model="gpt-4o-mini",
-    )
-    print(response.choices[0].message.content)
-```
-
-## Step 6: View the Traces in Langfuse
+## Step 5: View the Traces in Langfuse
 
 After running the above code, you can inspect the generated traces on your Langfuse dashboard:
 

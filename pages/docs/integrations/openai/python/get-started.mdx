@@ -290,8 +290,6 @@ openai.langfuse_enabled = False # disable tracing
 <Tabs items={["Python SDK v3", "Python SDK v2"]}>
 <Tab>
 
-**Important**: In Python SDK v3, trace attributes (`session_id`, `user_id`, `tags`) must be set on an **enclosing span**, not directly on the OpenAI call.
-
 You can add the following properties to the openai method:
 
 | Property                | Description                                                                  |
@@ -301,7 +299,32 @@ You can add the following properties to the openai method:
 | `trace_id`              | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 | `parent_observation_id` | See "Interoperability with Langfuse Python SDK" (below) for more details.    |
 
-For trace attributes, use an enclosing span:
+**Setting trace attributes (`session_id`, `user_id`, `tags`):**
+
+You have two options:
+
+**Option 1: Via metadata (simplest approach):**
+
+```python
+from langfuse.openai import openai
+
+result = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a very accurate calculator."},
+        {"role": "user", "content": "1 + 1 = "}
+    ],
+    name="test-chat",
+    metadata={
+        "langfuse_session_id": "session_123",
+        "langfuse_user_id": "user_456", 
+        "langfuse_tags": ["calculator"],
+        "someMetadataKey": "someValue"  # Regular metadata still works
+    }
+)
+```
+
+**Option 2: Via enclosing span (for more control):**
 
 ```python
 from langfuse import get_client
@@ -309,7 +332,6 @@ from langfuse.openai import openai
 
 langfuse = get_client()
 
-# Trace attributes must be set on enclosing span
 with langfuse.start_as_current_span(name="calculator-request") as span:
     span.update_trace(
         session_id="session_123",

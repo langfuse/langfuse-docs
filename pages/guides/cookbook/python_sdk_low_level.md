@@ -18,7 +18,7 @@ Please make sure that you have a good understanding of [tracing](/docs/tracing) 
 
 
 ```python
-%pip install langfuse --upgrade
+%pip install "langfuse<3.0.0"
 ```
 
 ## Initialize Client

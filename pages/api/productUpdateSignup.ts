@@ -46,7 +46,9 @@ export default async function handler(req: NextRequest) {
         body: JSON.stringify({
           email,
           source,
-          receiveProductUpdates: true,
+          mailingLists: {
+            cmbzj9z64074z0iyj7jj38ra6: true, //Product Updates Loops List
+          },
         }),
         headers: {
           "Content-Type": "application/json",

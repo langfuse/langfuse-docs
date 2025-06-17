@@ -33,11 +33,7 @@ Below we install the `openai-agents` library (the OpenAI Agents SDK [link text](
 
 
 ```python
-%pip install openai-agents
-%pip install nest_asyncio
-%pip install pydantic-ai[logfire]
-%pip install langfuse
-%pip install datasets
+%pip install openai-agents nest_asyncio "pydantic-ai[logfire]" langfuse datasets
 ```
 
 ## Step 1: Instrument Your Agent
@@ -52,39 +48,41 @@ import os
 import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
+# Build Basic Auth header.
 LANGFUSE_AUTH = base64.b64encode(
     f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
 ).decode()
-
+ 
+# Configure OpenTelemetry endpoint & headers
 os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
-# Set your OpenAI API Key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
 
 ```python
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-# Create a TracerProvider for OpenTelemetry
-trace_provider = TracerProvider()
-
-# Add a SimpleSpanProcessor with the OTLPSpanExporter to send traces
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-
-# Set the global default tracer provider
-from opentelemetry import trace
-trace.set_tracer_provider(trace_provider)
-tracer = trace.get_tracer(__name__)
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
 
@@ -110,6 +108,9 @@ logfire.configure(
 logfire.instrument_openai_agents()
 ```
 
+    Overriding of current TracerProvider is not allowed
+
+
 ## Step 2: Test Your Instrumentation
 
 Here is a simple Q&A agent. We run it to confirm that the instrumentation is working correctly. If everything is set up correctly, you will see logs/spans in your observability dashboard.
@@ -130,32 +131,32 @@ async def main():
 
 loop = asyncio.get_running_loop()
 await loop.create_task(main())
+
+langfuse.flush()
 ```
 
-    12:01:03.401 OpenAI Agents trace: Agent workflow
-    12:01:03.403   Agent run: 'Assistant'
-    12:01:03.404     Responses API with 'gpt-4o'
+    09:51:42.350 OpenAI Agents trace: Agent workflow
+    09:51:42.352   Agent run: 'Assistant'
+    09:51:42.359     Responses API with 'gpt-4o'
     Evaluating AI agents is crucial for several reasons:
     
-    1. **Performance Verification**: Ensures that the AI performs its intended tasks accurately and efficiently, meeting the desired objectives and criteria.
+    1. **Performance Assessment**: Evaluating AI helps determine how well an agent performs on specific tasks and whether it meets the desired objectives or benchmarks.
     
-    2. **Reliability and Consistency**: Assesses whether the AI provides consistent results across different scenarios and over time.
+    2. **Reliability and Safety**: Ensures the AI behaves consistently and safely, particularly in critical applications like healthcare, finance, or autonomous vehicles.
     
-    3. **Safety and Risk Management**: Identifies potential risks or harmful behaviors that could lead to undesirable outcomes, ensuring the AI operates safely within defined limits.
+    3. **Bias Detection**: Helps identify and mitigate biases that could lead to unfair or discriminatory outcomes, promoting ethical AI use.
     
-    4. **Bias and Fairness**: Checks for any biases in the AI’s decision-making process to promote fairness and avoid discrimination against particular groups.
+    4. **Improvement and Iteration**: Evaluation provides insights into areas where the AI can be improved, guiding further development and optimization.
     
-    5. **User Trust and Adoption**: Builds confidence and trust in the AI system among users and stakeholders, which is essential for widespread adoption.
+    5. **Trust and Transparency**: Building trust with users and stakeholders by demonstrating the AI’s capabilities, reliability, and limitations through clear evaluation metrics.
     
-    6. **Regulatory Compliance**: Ensures that the AI adheres to relevant laws, regulations, and ethical guidelines, which may vary by industry or region.
+    6. **Regulatory Compliance**: Ensures adherence to industry standards and legal requirements, which can vary by region and application.
     
-    7. **Continuous Improvement**: Provides feedback that can be used to refine and improve the AI model over time, enhancing its effectiveness and efficiency.
+    7. **Resource Allocation**: Helps in making informed decisions about resource allocation, ensuring effort and investment are directed towards promising AI solutions.
     
-    8. **Integration and Compatibility**: Evaluates how well the AI integrates with existing systems and processes, ensuring compatibility and smooth operation.
+    8. **User Satisfaction**: Evaluation ensures that the AI meets user needs and expectations, leading to better user experience and engagement.
     
-    9. **Resource Optimization**: Assesses the efficiency of the AI in terms of computational resources, which can lead to cost savings and improved performance.
-    
-    Evaluating AI agents systematically and rigorously supports their development and deployment in a responsible and effective manner.
+    Each of these factors contributes to developing AI systems that are effective, ethical, and aligned with human values and needs.
 
 
 Check your [Langfuse Traces Dashboard](https://cloud.langfuse.com/traces) to confirm that the spans and logs have been recorded.
@@ -194,11 +195,11 @@ loop = asyncio.get_running_loop()
 await loop.create_task(main())
 ```
 
-    13:33:30.839 OpenAI Agents trace: Agent workflow
-    13:33:30.840   Agent run: 'Hello world'
-    13:33:30.842     Responses API with 'gpt-4o'
-    13:33:31.822     Function: get_weather
-    13:33:31.825     Responses API with 'gpt-4o'
+    09:53:26.847 OpenAI Agents trace: Agent workflow
+    09:53:26.856   Agent run: 'Hello world'
+    09:53:26.859     Responses API with 'gpt-4o'
+    09:53:27.783     Function: get_weather
+    09:53:27.784     Responses API with 'gpt-4o'
     The weather in Berlin is currently sunny.
 
 
@@ -245,75 +246,70 @@ We can also see how long it took to complete each step. In the example below, th
 
 _[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019594b5b9a27c5d497b13be71e7f255?timestamp=2025-03-14T12%3A51%3A32.386Z&display=timeline&observation=b12967a01b3f8bcb)_
 
-#### 3. Additional Attributes
+#### 3. Add Additional Attributes
 
-Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
+Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
-In this example, we pass a [user_id](https://langfuse.com/docs/tracing-features/users), [session_id](https://langfuse.com/docs/tracing-features/sessions) and [trace_tags](https://langfuse.com/docs/tracing-features/tags) to Langfuse. You can also use the span attribute `input.value` and `output.value` to set the trace level input and output.
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
 
-
-```python
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
-
-# Sets the global default tracer provider
-from opentelemetry import trace
-trace.set_tracer_provider(trace_provider)
-
-# Creates a tracer from the global tracer provider
-tracer = trace.get_tracer(__name__)
-```
+**→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
 
 
 ```python
 input_query = "Why is AI agent evaluation important?"
 
-with tracer.start_as_current_span("OpenAI-Agent-Trace") as span:
-    span.set_attribute("langfuse.user.id", "user-12345")
-    span.set_attribute("langfuse.session.id", "my-agent-session")
-    span.set_attribute("langfuse.tags", ["staging", "demo", "OpenAI Agent SDK"])
-
+with langfuse.start_as_current_span(
+    name="OpenAI-Agent-Trace",
+    ) as span:
+    
+    # Run your application here
     async def main(input_query):
-        agent = Agent(
-            name = "Assistant",
-            instructions = "You are a helpful assistant.",
-        )
+            agent = Agent(
+                name = "Assistant",
+                instructions = "You are a helpful assistant.",
+            )
 
-        result = await Runner.run(agent, input_query)
-        print(result.final_output)
-        return result
+            result = await Runner.run(agent, input_query)
+            print(result.final_output)
+            return result
 
     result = await main(input_query)
-
-    # Add input and output values to parent trace
-    span.set_attribute("input.value", input_query)
-    span.set_attribute("output.value", result.final_output)
+ 
+    # Pass additional attributes to the span
+    span.update_trace(
+        input=input_query,
+        output=result,
+        user_id="user_123",
+        session_id="my-agent-session",
+        tags=["staging", "demo", "OpenAI Agent SDK"],
+        metadata={"email": "user@langfuse.com"},
+        version="1.0.0"
+        )
+ 
+# Flush events in short-lived applications
+langfuse.flush()
 ```
 
-    13:34:49.654 OpenAI Agents trace: Agent workflow
-    13:34:49.655   Agent run: 'Assistant'
-    13:34:49.657     Responses API with 'gpt-4o'
+    09:56:52.232 OpenAI Agents trace: Agent workflow
+    09:56:52.233   Agent run: 'Assistant'
+    09:56:52.236     Responses API with 'gpt-4o'
     AI agent evaluation is crucial for several reasons:
     
-    1. **Performance Verification**: It ensures that the AI agent performs its intended tasks effectively and meets specific criteria or benchmarks.
+    1. **Performance Assessment**: It determines how well the AI meets its intended tasks and objectives. This ensures that the AI can perform at a level that is useful and reliable.
     
-    2. **Safety and Reliability**: Evaluation helps identify and mitigate risks, ensuring that the AI operates safely and reliably in real-world situations.
+    2. **Safety and Reliability**: Evaluating AI helps identify and mitigate potential risks, bugs, or errors that could lead to unintended or harmful outcomes.
     
-    3. **Continuous Improvement**: Analyzing performance data allows developers to refine and enhance the AI, leading to better outcomes and more efficient systems.
+    3. **Fairness and Bias**: It helps detect and address biases in AI systems, ensuring fair treatment and reducing discrimination against specific groups.
     
-    4. **Transparency and Accountability**: Thorough evaluation provides transparency into how decisions are made by the AI, which is essential for accountability, especially in sensitive applications.
+    4. **Transparency and Accountability**: Evaluation provides insights into AI decision-making processes, which is vital for accountability and building trust with users and stakeholders.
     
-    5. **Bias and Fairness**: Evaluating AI systems helps detect and address potential biases, ensuring fair treatment of all users and stakeholders.
+    5. **Improvement and Optimization**: Through evaluation, developers can identify areas for improvement, optimize algorithms, and enhance the overall efficiency and effectiveness of AI systems.
     
-    6. **Compliance**: It ensures adherence to regulations and industry standards, which is critical for legal and ethical compliance.
+    6. **Compliance and Regulation**: Ensures that AI systems comply with legal, ethical, and industry standards, which is increasingly important as regulations evolve.
     
-    7. **User Trust**: A well-evaluated AI fosters trust among users, stakeholders, and the public, as they can be confident in its capabilities and limitations.
+    7. **User Experience**: Helps tailor AI systems to user needs by understanding how they interact with and perceive the AI’s performance.
     
-    8. **Resource Allocation**: Evaluation helps determine if the AI is using resources efficiently, which can be crucial for cost management and scalability.
+    Overall, evaluation is a key component in the lifecycle of AI development, ensuring that systems are effective, ethical, and aligned with their intended purpose.
 
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-sdk-custom-attributes.png)
@@ -330,9 +326,9 @@ from agents import Agent, Runner, WebSearchTool
 from opentelemetry.trace import format_trace_id
 import ipywidgets as widgets
 from IPython.display import display
-from langfuse import Langfuse
-
-langfuse = Langfuse()
+from langfuse import get_client
+ 
+langfuse = get_client()
 
 # Define your agent with the web search tool
 agent = Agent(
@@ -341,39 +337,41 @@ agent = Agent(
     tools=[WebSearchTool()]
 )
 
-formatted_trace_id = None  # We'll store the current trace_id globally for demonstration
-
 def on_feedback(button):
     if button.icon == "thumbs-up":
-      langfuse.score(
+      langfuse.create_score(
             value=1,
             name="user-feedback",
             comment="The user gave this response a thumbs up",
-            trace_id=formatted_trace_id
+            trace_id=trace_id
         )
     elif button.icon == "thumbs-down":
-      langfuse.score(
+      langfuse.create_score(
             value=0,
             name="user-feedback",
             comment="The user gave this response a thumbs down",
-            trace_id=formatted_trace_id
+            trace_id=trace_id
         )
     print("Scored the trace in Langfuse")
 
 user_input = input("Enter your question: ")
 
 # Run agent
-with trace.get_tracer(__name__).start_as_current_span("OpenAI-Agent-Trace") as span:
-
-    # Run your agent with a query
+with langfuse.start_as_current_span(
+    name="OpenAI-Agent-Trace",
+    ) as span:
+    
+    # Run your application here
     result = Runner.run_sync(agent, user_input)
     print(result.final_output)
 
-    current_span = trace.get_current_span()
-    span_context = current_span.get_span_context()
-    trace_id = span_context.trace_id
-    formatted_trace_id = str(format_trace_id(trace_id))
-    langfuse.trace(id=formatted_trace_id, input=user_input, output=result.final_output)
+    result = await main(user_input)
+    trace_id = langfuse.get_current_trace_id()
+
+    span.update_trace(
+        input=user_input,
+        output=result.final_output,
+    )
 
 # Get feedback
 print("How did you like the agent response?")
@@ -385,29 +383,19 @@ thumbs_up.on_click(on_feedback)
 thumbs_down.on_click(on_feedback)
 
 display(widgets.HBox([thumbs_up, thumbs_down]))
+
+# Flush events in short-lived applications
+langfuse.flush()
 ```
 
-    Enter your question: What is Langfuse?
-    13:54:41.574 OpenAI Agents trace: Agent workflow
-    13:54:41.575   Agent run: 'WebSearchAgent'
-    13:54:41.577     Responses API with 'gpt-4o'
-    Langfuse is an open-source engineering platform designed to enhance the development, monitoring, and optimization of Large Language Model (LLM) applications. It offers a suite of tools that provide observability, prompt management, evaluations, and metrics, facilitating the debugging and improvement of LLM-based solutions. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
-    
-    **Key Features of Langfuse:**
-    
-    - **LLM Observability:** Langfuse enables developers to monitor and analyze the performance of language models by tracking API calls, user inputs, prompts, and outputs. This observability aids in understanding model behavior and identifying areas for improvement. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
-    
-    - **Prompt Management:** The platform provides tools for managing, versioning, and deploying prompts directly within Langfuse. This feature allows for efficient organization and refinement of prompts to optimize model responses. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
-    
-    - **Evaluations and Metrics:** Langfuse offers capabilities to collect and calculate scores for LLM completions, run model-based evaluations, and gather user feedback. It also tracks key metrics such as cost, latency, and quality, providing insights through dashboards and data exports. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
-    
-    - **Playground Environment:** The platform includes a playground where users can interactively experiment with different models and prompts, facilitating prompt engineering and testing. ([toolkitly.com](https://www.toolkitly.com/langfuse?utm_source=openai))
-    
-    - **Integration Capabilities:** Langfuse integrates seamlessly with various tools and frameworks, including LlamaIndex, LangChain, OpenAI SDK, LiteLLM, and more, enhancing its functionality and allowing for the development of complex applications. ([toolerific.ai](https://toolerific.ai/ai-tools/opensource/langfuse-langfuse?utm_source=openai))
-    
-    - **Open Source and Self-Hosting:** Being open-source, Langfuse allows developers to customize and extend the platform according to their specific needs. It can be self-hosted, providing full control over infrastructure and data. ([vafion.com](https://www.vafion.com/blog/unlocking-power-language-models-langfuse/?utm_source=openai))
-    
-    Langfuse is particularly valuable for developers and researchers working with LLMs, offering a comprehensive set of tools to improve the performance and reliability of LLM applications. Its flexibility, integration capabilities, and open-source nature make it a robust choice for those seeking to enhance their LLM projects. 
+    10:06:34.993 OpenAI Agents trace: Agent workflow
+    10:06:34.995   Agent run: 'WebSearchAgent'
+    10:06:34.996     Responses API with 'gpt-4o'
+    1 times 1 equals 1.
+    10:06:36.456 OpenAI Agents trace: Agent workflow
+    10:06:36.456   Agent run: 'Assistant'
+    10:06:36.457     Responses API with 'gpt-4o'
+    \(1 \times 1 = 1\)
     How did you like the agent response?
 
 
@@ -452,18 +440,20 @@ agent = Agent(
 input_query = "Is eating carrots good for the eyes?"
 
 # Run agent
-with trace.get_tracer(__name__).start_as_current_span("OpenAI-Agent-Trace") as span:
+with langfuse.start_as_current_span(name="OpenAI-Agent-Trace") as span:
     # Run your agent with a query
     result = Runner.run_sync(agent, input_query)
 
     # Add input and output values to parent trace
-    span.set_attribute("input.value", input_query)
-    span.set_attribute("output.value", result.final_output)
+    span.update_trace(
+        input=input_query,
+        output=result.final_output,
+    )
 ```
 
-    14:05:34.735 OpenAI Agents trace: Agent workflow
-    14:05:34.736   Agent run: 'WebSearchAgent'
-    14:05:34.738     Responses API with 'gpt-4o'
+    10:08:58.475 OpenAI Agents trace: Agent workflow
+    10:08:58.476   Agent run: 'WebSearchAgent'
+    10:08:58.478     Responses API with 'gpt-4o'
 
 
 You can see that the answer of this example is judged as "not toxic".
@@ -501,51 +491,12 @@ print("First few rows of search-dataset:")
 print(df.head())
 ```
 
-
-    README.md:   0%|          | 0.00/2.12k [00:00<?, ?B/s]
-
-
-
-    data-samples.json:   0%|          | 0.00/2.48k [00:00<?, ?B/s]
-
-
-
-    data.jsonl:   0%|          | 0.00/316k [00:00<?, ?B/s]
-
-
-
-    Generating train split:   0%|          | 0/934 [00:00<?, ? examples/s]
-
-
-    First few rows of GSM8K dataset:
-                                         id  \
-    0  20caf138-0c81-4ef9-be60-fe919e0d68d4   
-    1  1f37d9fd-1bcc-4f79-b004-bc0e1e944033   
-    2  76173a7f-d645-4e3e-8e0d-cca139e00ebe   
-    3  5f5ef4ca-91fe-4610-a8a9-e15b12e3c803   
-    4  64dbed0d-d91b-4acd-9a9c-0a7aa83115ec   
-    
-                                                question  \
-    0                 steve jobs statue location budapst   
-    1  Why is the Battle of Stalingrad considered a t...   
-    2  In what year did 'The Birth of a Nation' surpa...   
-    3  How many Russian soldiers surrendered to AFU i...   
-    4   What event led to the creation of Google Images?   
-    
-                                         expected_answer       category       area  
-    0  The Steve Jobs statue is located in Budapest, ...           Arts  Knowledge  
-    1  The Battle of Stalingrad is considered a turni...   General News       News  
-    2  This question is based on a false premise. 'Th...  Entertainment       News  
-    3  About 300 Russian soldiers surrendered to the ...   General News       News  
-    4  Jennifer Lopez's appearance in a green Versace...     Technology       News  
-
-
 Next, we create a dataset entity in Langfuse to track the runs. Then, we add each item from the dataset to the system.
 
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 langfuse_dataset_name = "search-dataset_huggingface_openai-agent"
 
@@ -584,7 +535,7 @@ for idx, row in df.iterrows():
 #### Running the Agent on the Dataset
 
 We define a helper function `run_openai_agent()` that:
-1. Starts an OpenTelemetry span
+1. Starts a Langfuse span
 2. Runs our agent on the prompt
 3. Records the trace ID in Langfuse
 
@@ -593,60 +544,48 @@ Then, we loop over each dataset item, run the agent, and link the trace to the d
 
 ```python
 from agents import Agent, Runner, WebSearchTool
-from opentelemetry.trace import format_trace_id
+from langfuse import get_client
+ 
+langfuse = get_client()
+dataset_name = "search-dataset_huggingface_openai-agent"
+current_run_name = "qna_model_v3_run_05_20" # Identifies this specific evaluation run
 
-# Define your agent with the web search tool
 agent = Agent(
     name="WebSearchAgent",
     instructions="You are an agent that can search the web.",
     tools=[WebSearchTool(search_context_size= "high")]
 )
-
+ 
+# Assume 'run_openai_agent' is your instrumented application function
 def run_openai_agent(question):
-    with tracer.start_as_current_span("OpenAI-Agent-Trace") as span:
-        span.set_attribute("langfuse.tag", "dataset-run")
-
-        # Run your agent with a query
+    with langfuse.start_as_current_generation(name="qna-llm-call") as generation:
+        # Simulate LLM call
         result = Runner.run_sync(agent, question)
-
-        # Get the Langfuse trace_id to link the dataset run item to the agent trace
-        current_span = trace.get_current_span()
-        span_context = current_span.get_span_context()
-        trace_id = span_context.trace_id
-        formatted_trace_id = format_trace_id(trace_id)
-
-        langfuse_trace = langfuse.trace(
-            id=formatted_trace_id,
-            input=question,
-            output=result.final_output
+ 
+        # Update the trace with the input and output
+        generation.update_trace(
+            input= question,
+            output=result.final_output,
         )
-    return langfuse_trace, result.final_output
-```
 
-
-```python
-dataset = langfuse.get_dataset(langfuse_dataset_name)
-
-# Run our agent against each dataset item
+        return result.final_output
+ 
+dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
+ 
 for item in dataset.items:
-    langfuse_trace, output = run_openai_agent(item.input["text"])
+ 
+    # Use the item.run() context manager
+    with item.run(
+        run_name=current_run_name,
+        run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7},
+        run_description="Evaluation run for Q&A model v3 on May 20th"
+    ) as root_span: # root_span is the root span of the new trace for this item and run.
+        # All subsequent langfuse operations within this block are part of this trace.
+ 
+        # Call your application logic
+        generated_answer = run_openai_agent(question=item.input["text"])
 
-    # Link the trace to the dataset item for analysis
-    item.link(
-        langfuse_trace,
-        run_name="openai-agent-run-03",
-        run_metadata={ "search_context_size": "high"}
-    )
-
-    # Optionally, store a quick evaluation score for demonstration
-    langfuse_trace.score(
-        name="<example_eval>",
-        value=1,
-        comment="This is a comment"
-    )
-
-# Flush data to ensure all telemetry is sent
-langfuse.flush()
+        print(item.input)
 ```
 
 You can repeat this process with different:

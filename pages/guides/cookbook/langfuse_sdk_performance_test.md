@@ -17,9 +17,11 @@ Limitation: We test integrations using OpenAI's hosted models, making the experi
 
 ## Setup
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install langfuse --upgrade
+%pip install "langfuse<3.0.0" --upgrade
 ```
 
 

@@ -7,7 +7,7 @@ category: Evaluation
 
 In this notebook, we will explore how to **generate synthetic datasets** using language models and uploading them to [Langfuse](https://langfuse.com) for evaluation. 
 
-## What Langfuse Datasets?
+## What are Langfuse Datasets?
 
 In Langfuse, a *dataset* is a collection of *dataset items*, each typically containing an `input` (e.g., user prompt/question), `expected_output` (the ground truth or ideal answer) and optional metadata.
 
@@ -38,16 +38,34 @@ We'll use OpenAI's API in a simple loop to create synthetic questions for an air
 
 ```python
 import os
-from langfuse import Langfuse
 
-# Get keys for your project from the project settings page: # https://cloud.langfuse.com
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+    Langfuse client is authenticated and ready!
+
 
 
 ```python
@@ -89,7 +107,9 @@ df = pd.DataFrame({"Question": airline_questions})
 
 
 ```python
-langfuse = Langfuse()
+from langfuse import get_client
+ 
+langfuse = get_client()
 
 # Create a new dataset in Langfuse
 dataset_name = "openai_synthetic_dataset"
@@ -159,8 +179,11 @@ df = dataset.to_pandas()
 
 
 ```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+
 # 5. Push the RAGAS-generated testset to Langfuse
-langfuse = Langfuse()
 langfuse.create_dataset(
     name="ragas_generated_testset",
     description="Synthetic RAG test set (RAGAS)",
@@ -189,7 +212,7 @@ for _, row in df.iterrows():
 
 ```python
 import os
-from langfuse import Langfuse
+from langfuse import get_client
 from deepeval.synthesizer import Synthesizer
 from deepeval.synthesizer.config import StylingConfig
 ```
@@ -217,7 +240,8 @@ synthetic_goldens = synthesizer.synthetic_goldens
 
 
 ```python
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # 5. Create a Langfuse dataset
 deepeval_dataset_name = "deepeval_synthetic_data"

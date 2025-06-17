@@ -30,9 +30,7 @@ Below we install the `openai-agents` library (the OpenAI Agents SDK), and the `p
 
 
 ```python
-%pip install openai-agents
-%pip install nest_asyncio
-%pip install pydantic-ai[logfire]
+%pip install openai-agents nest_asyncio "pydantic-ai[logfire]"
 ```
 
 ## 2. Configure Environment & Langfuse Credentials
@@ -222,60 +220,6 @@ await loop.create_task(main())
 
 Each child call is represented as a sub-span under the top-level **Joke workflow** span, making it easy to see the entire conversation or sequence of calls.
 
-## 8: Pass Additional Attributes
-
-Opentelemetry lets you attach a set of attributes to all spans by setting [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span). This allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
-
-In this example, we pass a [user_id](https://langfuse.com/docs/tracing-features/users), [session_id](https://langfuse.com/docs/tracing-features/sessions), [trace_tags](https://langfuse.com/docs/tracing-features/tags) and [environment](https://langfuse.com/docs/tracing-features/environments) to Langfuse. You can also use the span attribute `input.value` and `output.value` to set the trace level input and output.
-
-
-```python
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
- 
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter()))
- 
-# Sets the global default tracer provider
-from opentelemetry import trace
-trace.set_tracer_provider(trace_provider)
- 
-# Creates a tracer from the global tracer provider
-tracer = trace.get_tracer(__name__)
-```
-
-
-```python
-input_query = "Why is AI agent evaluation important?"
- 
-with tracer.start_as_current_span("OpenAI-Agent-Trace") as span:
-    span.set_attribute("langfuse.user.id", "user-12345")
-    span.set_attribute("langfuse.session.id", "my-agent-session")
-    span.set_attribute("langfuse.tags", ["staging", "demo", "OpenAI Agent SDK"])
-    span.set_attribute("langfuse.environment", "local-dev")
- 
-    async def main(input_query):
-        agent = Agent(
-            name = "Assistant",
-            instructions = "You are a helpful assistant.",
-        )
-
-        result = await Runner.run(agent, input_query)
-        print(result.final_output)
-        return result
-
-    result = await main(input_query)
- 
-    # Add input and output values to parent trace
-    span.set_attribute("input.value", input_query)
-    span.set_attribute("output.value", result.final_output)
-```
-
-![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_openai-agents/openai-agent-sdk-custom-attributes.png)
-
-**Example**: [Langfuse Trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593d79e1efd7d7542e76c15a81bdb?timestamp=2025-03-14T08%3A48%3A56.349Z&view=preview)
-
-## Evaluating OpenAI Agents
+## Resources
 
 Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents) with Langfuse. 

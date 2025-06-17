@@ -97,11 +97,26 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
 ### Wrap Bedrock SDK
 
 
 ```python
-from langfuse import observe, langfuse
+from langfuse import observe
 from botocore.exceptions import ClientError
 
 @observe(as_type="generation", name="Bedrock Converse")
@@ -114,7 +129,7 @@ def wrapped_bedrock_converse(**kwargs):
       **kwargs_clone.pop('inferenceConfig', {}),
       **kwargs_clone.pop('additionalModelRequestFields', {})
   }
-  langfuse.update_current_span(
+  langfuse.update_current_generation(
     input=input,
     model=modelId,
     model_parameters=model_parameters,
@@ -126,13 +141,13 @@ def wrapped_bedrock_converse(**kwargs):
     response = bedrock_runtime.converse(**kwargs)
   except (ClientError, Exception) as e:
     error_message = f"ERROR: Can't invoke '{modelId}'. Reason: {e}"
-    langfuse.update_current_span(level="ERROR", status_message=error_message)
+    langfuse.update_current_generation(level="ERROR", status_message=error_message)
     print(error_message)
     return
 
   # 3. extract response metadata
   response_text = response["output"]["message"]["content"][0]["text"]
-  langfuse.update_current_span(
+  langfuse.update_current_generation(
     output=response_text,
     usage_details={
         "input": response["usage"]["inputTokens"],
