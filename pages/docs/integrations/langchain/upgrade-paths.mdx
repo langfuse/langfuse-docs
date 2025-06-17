@@ -31,7 +31,7 @@ Python SDK v3 introduces a completely revised Langfuse core with a new **observa
 |Package import |`from langfuse.callback import CallbackHandler`|`from langfuse.langchain import CallbackHandler`|
 |Client handling | Multiple instantiated clients | Singleton pattern, access via `get_client()` |
 |Trace/Span context | `CallbackHandler` optionally accepted `root` to group runs | Use context managers `with langfuse.start_as_current_span(...)` |
-|Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Call `span.update_trace(user_id=...)` |
+|Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `span.update_trace(user_id=...)` |
 |Constructor args | `CallbackHandler(sample_rate=..., user_id=...)` | No constructor args – use Langfuse client or spans |
 
 Minimal migration example:
@@ -61,16 +61,24 @@ Langfuse(
 langfuse = get_client()
 handler = CallbackHandler()
 
-# 3. Wrap LangChain execution in a span to attach metadata
-with langfuse.start_as_current_span(name="tell-joke") as span:
-    span.update_trace(user_id="user_123", input={"topic": "cats"})
+# 3. Option 1: Use metadata in chain invocation (simplest migration)
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
 
-    llm = ChatOpenAI(model_name="gpt-4o")
-    prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-    chain = prompt | llm
+response = chain.invoke(
+    {"topic": "cats"}, 
+    config={
+        "callbacks": [handler],
+        "metadata": {"langfuse_user_id": "user_123"}
+    }
+)
 
-    response = chain.invoke({"topic": "cats"}, config={"callbacks": [handler]})
-    span.update_trace(output={"joke": response.content})
+# 3. Option 2: Wrap LangChain execution in a span (for more control)
+# with langfuse.start_as_current_span(name="tell-joke") as span:
+#     span.update_trace(user_id="user_123", input={"topic": "cats"})
+#     response = chain.invoke({"topic": "cats"}, config={"callbacks": [handler]})
+#     span.update_trace(output={"joke": response.content})
 
 # (Optional) Flush events in short-lived scripts
 langfuse.flush()

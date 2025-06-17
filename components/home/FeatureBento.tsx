@@ -1,7 +1,7 @@
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import {
   Database,
-  GanttChart,
+  TextQuote,
   GitPullRequestArrow,
   LineChart,
   ThumbsUp,
@@ -56,7 +56,7 @@ const BentoBgImage = ({
 
 const features = [
   {
-    Icon: GanttChart,
+    Icon: TextQuote,
     name: "Tracing",
     description: "Detailed production traces to debug LLM applications faster.",
     href: "/docs/tracing",

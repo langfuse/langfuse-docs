@@ -29,16 +29,14 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
-
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 
@@ -65,12 +63,19 @@ Initialize the Langfuse Python SDK, more information [here](https://langfuse.com
 
 
 ```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-
-langfuse.auth_check()
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 ### Fetching data
 
@@ -85,7 +90,7 @@ def fetch_all_pages(name=None, user_id = None, limit=50):
     all_data = []
 
     while True:
-        response = langfuse.get_generations(name=name, limit=limit, user_id=user_id, page=page)
+        response = langfuse.api.trace.list(name=name, limit=limit, user_id=user_id, page=page)
         if not response.data:
             break
 
@@ -97,8 +102,20 @@ def fetch_all_pages(name=None, user_id = None, limit=50):
 
 
 ```python
-generations = fetch_all_pages(user_id='user:abc')
+generations = fetch_all_pages(user_id='user_123')
 ```
+
+
+```python
+generations[0].id
+```
+
+
+
+
+    'adb5ba6beab14984ab89006ee09e9cd6'
+
+
 
 ### Set up evaluation functions
 
@@ -148,7 +165,7 @@ def execute_eval_and_score():
       )
       print(eval_result)
 
-      langfuse.score(name=criterion, trace_id=generation.trace_id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
+      langfuse.create_score(name=criterion, trace_id=generation.id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
 
 execute_eval_and_score()
 
@@ -157,7 +174,6 @@ execute_eval_and_score()
 
 ```python
 # hallucination
-
 
 def eval_hallucination():
 
@@ -171,7 +187,7 @@ def eval_hallucination():
     )
     print(eval_result)
     if eval_result is not None and eval_result["score"] is not None and eval_result["reasoning"] is not None:
-      langfuse.score(name='hallucination', trace_id=generation.trace_id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
+      langfuse.create_score(name='hallucination', trace_id=generation.id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
 
 ```
 

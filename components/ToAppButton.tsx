@@ -8,61 +8,97 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+const regions = {
+  eu: {
+    url: "https://cloud.langfuse.com",
+    label: "EU region",
+  },
+  us: {
+    url: "https://us.cloud.langfuse.com",
+    label: "US region",
+  },
+  hipaa: {
+    url: "https://hipaa.cloud.langfuse.com",
+    label: "HIPAA region",
+  },
+} as const;
+
 const continentHostMapping = {
-  AF: "https://cloud.langfuse.com", // Africa
-  AN: "https://cloud.langfuse.com", // Antarctica
-  AS: "https://cloud.langfuse.com", // Asia
-  EU: "https://cloud.langfuse.com", // Europe
-  NA: "https://us.cloud.langfuse.com", // North America
-  OC: "https://cloud.langfuse.com", // Oceania
-  SA: "https://us.cloud.langfuse.com", // South America
+  AF: regions.eu.url, // Africa
+  AN: regions.eu.url, // Antarctica
+  AS: regions.eu.url, // Asia
+  EU: regions.eu.url, // Europe
+  NA: regions.us.url, // North America
+  OC: regions.eu.url, // Oceania
+  SA: regions.us.url, // South America
 };
 
+type RegionKey = keyof typeof regions;
+
 export const ToAppButton = () => {
-  const [signedInUS, setSignedInUS] = useState(false);
-  const [signedInEU, setSignedInEU] = useState(false);
+  const [signedInRegions, setSignedInRegions] = useState<
+    Record<RegionKey, boolean>
+  >(
+    Object.fromEntries(
+      Object.keys(regions).map((key) => [key, false])
+    ) as Record<RegionKey, boolean>
+  );
   const [continentCode, setContinentCode] = useState<string | null>(null);
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") {
-      fetch("https://us.cloud.langfuse.com/api/auth/session", {
-        credentials: "include",
-        mode: "cors",
-      })
-        .then((us) => us.json())
-        .then((usData) => {
-          setSignedInUS(isSignedIn(usData));
-        })
-        .catch(() => {
-          setSignedInUS(false);
-        });
+      const abortController = new AbortController();
 
-      fetch("https://cloud.langfuse.com/api/auth/session", {
-        credentials: "include",
-        mode: "cors",
-      })
-        .then((eu) => eu.json())
-        .then((euData) => {
-          setSignedInEU(isSignedIn(euData));
+      // Check sign-in status for all regions
+      Object.entries(regions).forEach(([key, region]) => {
+        fetch(`${region.url}/api/auth/session`, {
+          credentials: "include",
+          mode: "cors",
+          signal: abortController.signal,
         })
-        .catch(() => {
-          setSignedInEU(false);
-        });
+          .then((response) => response.json())
+          .then((data) => {
+            setSignedInRegions((prev) => ({
+              ...prev,
+              [key]: isSignedIn(data),
+            }));
+          })
+          .catch((error) => {
+            // Only update state if the error is not from aborting
+            if (error.name !== "AbortError") {
+              setSignedInRegions((prev) => ({
+                ...prev,
+                [key]: false,
+              }));
+            }
+          });
+      });
 
-      fetch("/api/get-continent-code")
+      fetch("/api/get-continent-code", {
+        signal: abortController.signal,
+      })
         .then((response) => response.json())
         .then((data) => {
           if (data.continentCode && continentHostMapping[data.continentCode]) {
             setContinentCode(data.continentCode);
           }
         })
-        .catch(() => {
-          setContinentCode(null);
+        .catch((error) => {
+          // Only update state if the error is not from aborting
+          if (error.name !== "AbortError") {
+            setContinentCode(null);
+          }
         });
+
+      return () => {
+        abortController.abort();
+      };
     }
   }, []);
 
-  if (signedInUS && signedInEU) {
+  const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
+
+  if (signedInCount > 1) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -72,29 +108,29 @@ export const ToAppButton = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem asChild key="us">
-            <Link href="https://us.cloud.langfuse.com">US region</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild key="eu">
-            <Link href="https://cloud.langfuse.com">EU region</Link>
-          </DropdownMenuItem>
+          {Object.entries(regions).map(
+            ([key, region]) =>
+              signedInRegions[key as RegionKey] && (
+                <DropdownMenuItem asChild key={key}>
+                  <Link href={region.url}>{region.label}</Link>
+                </DropdownMenuItem>
+              )
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  } else if (signedInUS || signedInEU) {
+  } else if (signedInCount === 1) {
+    const signedInRegion = Object.entries(regions).find(
+      ([key]) => signedInRegions[key as RegionKey]
+    );
+
     return (
       <Button
         size="xs"
         asChild
         className="whitespace-nowrap w-[45px] sm:w-[70px]"
       >
-        <Link
-          href={
-            signedInUS
-              ? "https://us.cloud.langfuse.com"
-              : "https://cloud.langfuse.com"
-          }
-        >
+        <Link href={signedInRegion![1].url}>
           <span className="sm:hidden">App</span>
           <span className="hidden sm:inline">To App</span>
         </Link>
@@ -109,9 +145,7 @@ export const ToAppButton = () => {
       >
         <Link
           href={
-            continentCode
-              ? continentHostMapping[continentCode]
-              : "https://cloud.langfuse.com"
+            continentCode ? continentHostMapping[continentCode] : regions.eu.url
           }
         >
           <span className="sm:hidden">App</span>
@@ -123,6 +157,5 @@ export const ToAppButton = () => {
 };
 
 const isSignedIn = (session: Record<string, unknown>) => {
-  // check if session is object and has key "user", get typing right
   return session && "user" in session;
 };

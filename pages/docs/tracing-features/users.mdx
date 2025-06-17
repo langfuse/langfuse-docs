@@ -14,7 +14,7 @@ The Users view provides an overview of all users. It also offers an in-depth loo
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -63,6 +63,7 @@ with langfuse.start_as_current_span(name="handle-user-interaction"):
     langfuse.update_current_trace(user_id="user_12345")
 ```
 
+
 </Tab>
 <Tab>
 
@@ -108,7 +109,23 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai), pass `user_id` as an additional argument:
+**Python SDK v3 - use metadata:**
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"langfuse_user_id": "user-id"}
+)
+```
+
+**Python SDK v2 - pass as additional argument:**
 
 ```python
 from langfuse.openai import openai
@@ -153,9 +170,30 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `user_id` as a keyword argument:
+**Python SDK v3 - use metadata in chain invocation:**
 
 ```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+# Pass langfuse_user_id as metadata to the chain invocation
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_user_id": "user-id",
+        },
+    },
+)
+```
+
+**Python SDK v2 - pass as constructor argument:**
+
+```python
+from langfuse.callback import CallbackHandler
+
 handler = CallbackHandler(
   user_id="user-id"
 )
@@ -167,9 +205,6 @@ You can also set the `user_id` dynamically via the runnable configuration in the
 from langfuse.callback import CallbackHandler
 
 handler = CallbackHandler()
-
-# Your existing Langchain code to create the chain
-...
 
 # Pass user_id as metadata to the chain invocation to be parsed as the Langfuse user_id
 chain.invoke(

@@ -9,9 +9,11 @@ This cookbook demonstate use of Langfuse with Azure OpenAI and Langchain for pro
 
 ## Setup
 
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install --quiet langfuse langchain langchain-openai --upgrade
+%pip install --quiet "langfuse<3.0.0" langchain langchain-openai --upgrade
 ```
 
 

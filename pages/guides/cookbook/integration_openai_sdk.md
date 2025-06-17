@@ -22,28 +22,20 @@ The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports a
 ```python
 import os
 
-# get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
-os.environ["OPENAI_API_KEY"] = ""
-
-# Your host, defaults to https://cloud.langfuse.com
-# For US data region, set to "https://us.cloud.langfuse.com"
-# os.environ["LANGFUSE_HOST"] = "http://localhost:3000"
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 
 ```python
 # instead of: import openai
 from langfuse.openai import openai
-```
-
-
-```python
-# For debugging, checks the SDK connection with the server. Do not use in production as it adds latency.
-openai.langfuse_auth_check()
 ```
 
 ## Examples
@@ -114,6 +106,10 @@ completion = openai.chat.completions.create(
 for chunk in completion:
   print(chunk.choices[0].delta.content, end="")
 ```
+
+    Why don't scientists trust atoms?
+    
+    Because they make up everything!None
 
 ### Chat completion (async)
 
@@ -260,7 +256,7 @@ Many applications require more than one OpenAI call. The `@observe()` decorator 
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import observe
+from langfuse import observe
 
 @observe() # decorator to automatically create trace and nest generations
 def main(country: str, user_id: str, **kwargs) -> str:
@@ -291,6 +287,34 @@ def main(country: str, user_id: str, **kwargs) -> str:
 print(main("Bulgaria", "admin"))
 ```
 
+    In Sofia's embrace of time's gentle hand,  
+    Where ancient whispers in the cobblestones stand,  
+    The Vitosha's shadow kisses the town,  
+    As golden sunsets tie the day down.  
+    
+    Streets sing with echoes of footsteps past,  
+    Where stories linger, and memories cast,  
+    Beneath the banyan sky so wide,  
+    Cultures and histories peacefully collide.  
+    
+    The Alexander Nevsky, majestic and bold,  
+    A guardian of faith with domes of gold,  
+    Its silence speaks in volumes profound,  
+    In the heart of a city where old truths are found.  
+    
+    The rose-laden gardens in Boris' park,  
+    Perfume the air as day turns dark,  
+    While laughter and life dance at night,  
+    Under Sofia's tapestry of starlit light.  
+    
+    Markets bustle with the color of trade,  
+    Where lively exchanges and histories fade,  
+    A mosaic of tales in woven rhyme,  
+    Sofia stands timeless through passage of time.  
+    
+    
+
+
 Go to https://cloud.langfuse.com or your own instance to see your trace.
 
 ![Trace with multiple OpenAI calls](https://langfuse.com/images/docs/openai-trace-grouped.png)
@@ -308,7 +332,8 @@ Some of the functionality enabled by custom traces:
 
 ```python
 from langfuse.openai import openai
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe() # decorator to automatically create trace and nest generations
 def main(country: str, user_id: str, **kwargs) -> str:
@@ -334,26 +359,51 @@ def main(country: str, user_id: str, **kwargs) -> str:
     ).choices[0].message.content
 
     # rename trace and set attributes (e.g., medatata) as needed
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="City poem generator",
         session_id="1234",
         user_id=user_id,
         tags=["tag1", "tag2"],
         public=True,
-        metadata = {
-        "env": "development",
-        },
-        release = "v0.0.21"
+        metadata = {"env": "development"}
     )
 
     return poem
 
 # create random trace_id, could also use existing id from your application, e.g. conversation id
-trace_id = str(uuid4())
+trace_id = langfuse.create_trace_id()
 
 # run main function, set your own id, and let Langfuse decorator do the rest
 print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 ```
+
+    In the cradle of Balkan hills, she lies,  
+    A gem under cerulean skies,  
+    Sofia, where the ancient whispers blend,  
+    With modern souls, as time extends.
+    
+    Her heart beats with the rhythm of the past,  
+    Where cobblestones and new dreams cast,  
+    A tapestry of age and youth, entwined,  
+    In every corner, stories unsigned.
+    
+    The Vitosha stands like a guardian old,  
+    Whose peaks in winter snow enfold,  
+    The city below, glowing warm and bright,  
+    Under the embrace of evening light.
+    
+    St. Alexander’s domes in sunlight gleam,  
+    Golden crowns of a Byzantine dream,  
+    While beneath, a bustling world unfurls,  
+    In markets vast, where culture swirls.
+    
+    Winding streets where whispers linger,  
+    Liberty echoes from corner to finger,  
+    In the shadow of Soviet grandiosity,  
+    Bulgaria’s spirit claims its clarity.
+    
+    Cafés breathe tales in the aroma of brew,
+
 
 ## Programmatically add scores
 
@@ -363,15 +413,13 @@ The score is associated to the trace using the `trace_id`.
 
 
 ```python
-from langfuse import Langfuse
-from langfuse.decorators import langfuse_context, observe
-
-langfuse = Langfuse()
+from langfuse import observe, get_client
+langfuse = get_client()
 
 @observe() # decorator to automatically create trace and nest generations
 def main():
     # get trace_id of current trace
-    trace_id = langfuse_context.get_current_trace_id()
+    trace_id = langfuse.get_current_trace_id()
 
     # rest of your application ...
 
@@ -381,7 +429,7 @@ def main():
 _, trace_id = main()
 
 # Score the trace from outside the trace context
-langfuse.score(
+langfuse.create_score(
     trace_id=trace_id,
     name="my-score-name",
     value=1

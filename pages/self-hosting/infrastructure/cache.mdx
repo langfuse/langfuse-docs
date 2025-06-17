@@ -32,15 +32,17 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 OR
 
-| Variable              | Required / Default | Description                                                                                       |
-| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
-| `REDIS_HOST`          | Required           | Redis host name.                                                                                  |
-| `REDIS_PORT`          | `6379`             | Port of the Redis instance.                                                                       |
-| `REDIS_AUTH`          |                    | Authentication string for the Redis instance.                                                     |
-| `REDIS_TLS_ENABLED`   | `false`            | Enable TLS for the Redis connection. Alternatively, enable tls via `rediss://` connection string. |
-| `REDIS_TLS_CA_PATH`   |                    | Path to the CA certificate for the Redis connection.                                              |
-| `REDIS_TLS_CERT_PATH` |                    | Path to the certificate for the Redis connection.                                                 |
-| `REDIS_TLS_KEY_PATH`  |                    | Path to the private key for the Redis connection.                                                 |
+| Variable                | Required / Default | Description                                                                                                             |
+|-------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `REDIS_HOST`            | Required           | Redis host name.                                                                                                        |
+| `REDIS_PORT`            | `6379`             | Port of the Redis instance.                                                                                             |
+| `REDIS_AUTH`            |                    | Authentication string for the Redis instance.                                                                           |
+| `REDIS_TLS_ENABLED`     | `false`            | Enable TLS for the Redis connection. Alternatively, enable tls via `rediss://` connection string.                       |
+| `REDIS_TLS_CA_PATH`     |                    | Path to the CA certificate for the Redis connection.                                                                    |
+| `REDIS_TLS_CERT_PATH`   |                    | Path to the certificate for the Redis connection.                                                                       |
+| `REDIS_TLS_KEY_PATH`    |                    | Path to the private key for the Redis connection.                                                                       |
+| `REDIS_CLUSTER_ENABLED` | `false`            | Set to `true` to enable Redis cluster mode. When enabled, you must also provide `REDIS_CLUSTER_NODES`.                  |
+| `REDIS_CLUSTER_NODES`   |                    | Comma-separated list of Redis cluster nodes in the format `host:port`. Required when `REDIS_CLUSTER_ENABLED` is `true`. |
 
 ## Deployment Options
 
@@ -49,8 +51,20 @@ This section covers different deployment options and provides example environmen
 ### Managed Redis/Valkey by Cloud Providers
 
 [Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/de-de/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
-Langfuse handles failovers between read-replicas, but does not support Redis cluster mode for now, i.e. there is no sharding support.
-To connect your cloud provider manager Redis instance, set the environment variables as defined above.
+Langfuse handles failovers between read-replicas and supports Redis cluster mode for horizontal scaling.
+
+For **standalone Redis instances**, use the standard configuration:
+```bash
+REDIS_CONNECTION_STRING=redis://username:password@your-redis-endpoint:6379
+```
+
+For **Redis cluster mode**, enable cluster support:
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=your-cluster-endpoint:6379
+REDIS_AUTH=your-redis-password  # if authentication is enabled
+```
+
 Ensure that your Langfuse container can reach your Redis instance within the VPC.
 
 <Callout type="warning">
@@ -108,6 +122,56 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_AUTH=myredissecret
 ```
+
+## Redis Cluster Mode
+
+Redis cluster mode enables horizontal scaling by distributing data across multiple Redis nodes.
+Langfuse supports Redis cluster mode for high-availability and increased throughput scenarios.
+
+### Configuration
+
+To enable Redis cluster mode, set the following environment variables:
+
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=redis-node1:6379,redis-node2:6379,redis-node3:6379,redis-node4:6379,redis-node5:6379,redis-node6:6379
+REDIS_AUTH=your-redis-password  # if authentication is enabled
+```
+
+<Callout type="info">
+
+For production deployments, we recommend using 3 master nodes with 1 replica each (6 nodes total) for high availability.
+
+</Callout>
+
+### Example Configurations
+
+#### AWS ElastiCache Redis Cluster
+
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=clustercfg.my-redis-cluster.abc123.cache.amazonaws.com:6379
+REDIS_AUTH=your-auth-token
+REDIS_TLS_ENABLED=true
+```
+
+#### Self-hosted Redis Cluster
+
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=10.0.1.10:6379,10.0.1.11:6379,10.0.1.12:6379,10.0.1.13:6379,10.0.1.14:6379,10.0.1.15:6379
+REDIS_AUTH=your-cluster-password
+```
+
+<Callout type="warning">
+
+When using Redis cluster mode:
+- Ensure all cluster nodes are accessible from your Langfuse containers
+- Use the same authentication credentials across all cluster nodes
+- Monitor cluster health and handle node failures appropriately
+- Set `maxmemory-policy=noeviction` on all cluster nodes to prevent queue job eviction
+
+</Callout>
 
 ## Sizing Recommendations
 

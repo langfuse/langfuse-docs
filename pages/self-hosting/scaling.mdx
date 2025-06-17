@@ -117,6 +117,28 @@ SELECT table, formatReadableSize(size) as size, rows FROM (
 )
 ```
 
+## High Redis CPU Load
+
+If you observe high Redis Engine CPU utilization (above 90%), we recommend to check the following:
+
+- Use an instance with at least 4 CPUs. This will allow Redis to schedule networking and background tasks on separate CPUs.
+- Ensure that you have [Redis Cluster mode](/self-hosting/infrastructure/cache#redis-cluster-mode) enabled.
+
+If the high CPU utilization persists, it is possible to shard the queues that Langfuse uses across multiple nodes.
+Set `LANGFUSE_INGESTION_QUEUE_SHARD_COUNT` to a value greater than 1 to enable sharding.
+We recommend a value that is approximately 2-3 times the number of shards you have within your Redis cluster to ensure
+an equal distribution among the nodes, as each queue-shard will be allocated to a random slot in Redis
+(see [Redis Cluster](https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/) docs for more details).
+
+<Callout type="warning">
+
+Sharding the queues is an advanced feature and should only be used if you have a high Redis CPU load and have followed the above recommendations.
+Once you have sharded your queue, do _not_ reduce the number of Shards.
+Make sure to scale `LANGFUSE_INGESTION_QUEUE_PROCESSING_CONCURRENCY` accordingly as it counts _per shard_.
+Per default, we target a concurrency of 20 per worker, i.e. set it to 2 if you have 10 queue-shards.
+
+</Callout>
+
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";

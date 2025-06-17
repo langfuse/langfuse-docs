@@ -32,11 +32,11 @@ Set up your environment variables with the necessary keys. Obtain your Langfuse 
 ```python
 import os
 
-# Get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
-# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your DeepSeek API key (get it from https://platform.deepseek.com/api_keys)
 os.environ["DEEPSEEK_API_KEY"] = "sk-..."  # Replace with your DeepSeek API key
@@ -52,7 +52,7 @@ Check out our [OpenAI integration docs](https://langfuse.com/docs/integrations/o
 ```python
 # Instead of: import openai
 from langfuse.openai import OpenAI
-from langfuse.decorators import observe
+from langfuse import observe
 ```
 
 ### Initialize the OpenAI Client for DeepSeek Models
@@ -87,7 +87,7 @@ completion = client.chat.completions.create(
 print(completion.choices[0].message.content)
 ```
 
-    AI is cool because it automates tasks, enhances creativity, solves complex problems, and transforms industries with smart, efficient solutions.
+    AI is cool because it automates tasks, enhances creativity, and solves complex problems quickly—making life smarter and easier.
 
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_deepseek/deepseek-simple-trace.png)
@@ -118,7 +118,19 @@ story = generate_story()
 print(story)
 ```
 
-    Once, a tiny token named Lex set off to join a language model's grand library. Along the way, Lex got distracted by a shimmering metaphor and wandered into a syntax labyrinth. Lost among dangling modifiers and rogue commas, Lex cried for help. A friendly emoji spotted Lex and guided it back to the path. "Stick to the vectors," the emoji advised. Lex finally arrived, a little wiser, and whispered its tale into the model's vast neural network. From then on, the model always paused to appreciate the journey of every token, no matter how small or lost.
+    **The Lost Token**  
+    
+    Timmy the Token was excited—today, he’d help the language model craft a story! But as he raced through the data pipeline, he took a wrong turn, tumbling into a forgotten cache.  
+    
+    "Hello?" Timmy echoed. Only silence replied.  
+    
+    Days passed. The model stuttered without him. Then, a cleanup script swept through. "Gotcha!" it chirped, rescuing Timmy.  
+    
+    Back in the prompt, Timmy gleamed. The model sparked to life: *"Once, a token got lost…"*  
+    
+    And so, Timmy’s adventure became the very story he was meant to tell.  
+    
+    (100 words exactly)
 
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_deepseek/deepseek-story-trace.png)
@@ -127,38 +139,52 @@ print(story)
 
 ### Add Additional Langfuse Features (User, Tags, Metadata, Session)
 
-You can enhance your traces by adding attributes such as `user_id`, `session_id`, `tags`, and `metadata`.
+You can enhance your traces by adding [attributes](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) such as `user_id`, `session_id`, `tags`, and `metadata`.
 
 
 ```python
-completion_with_attributes = client.chat.completions.create(
-    name="math-tutor",  # Trace name
-    model="deepseek-chat",
-    messages=[
-        {"role": "system", "content": "You are a math tutor."},
-        {"role": "user", "content": "Help me understand the Pythagorean theorem. Answer in 100 words or less."}
-    ],
-    temperature=0.7,
-    metadata={"subject": "Mathematics"},  # Trace metadata
-    tags=["education", "math"],  # Trace tags
-    user_id="student_001",  # Trace user ID
-    session_id="session_abc123",  # Trace session ID
-)
-print(completion_with_attributes.choices[0].message.content)
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Trace attributes must be set on enclosing span
+with langfuse.start_as_current_span(name="math-tutor") as span:
+    span.update_trace(
+        session_id="session_123",
+        user_id="user_456",
+        tags=["math"]
+    )
+ 
+    result = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": "You are a math tutor."},
+            {"role": "user", "content": "Help me understand the Pythagorean theorem. Answer in 100 words or less."}
+        ],
+        name="test-chat",
+        metadata={"someMetadataKey": "someValue"},
+    )
+
+print(result.choices[0].message.content)
 ```
 
-    The Pythagorean theorem is a fundamental principle in geometry, stating that in a right-angled triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides. Mathematically, it's expressed as \( a^2 + b^2 = c^2 \), where \( c \) is the hypotenuse, and \( a \) and \( b \) are the other two sides. This theorem is useful for calculating distances, constructing shapes, and solving various real-world problems involving right triangles. It's named after the ancient Greek mathematician Pythagoras, who is credited with its discovery.
+    The Pythagorean theorem states that in a right-angled triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides. Mathematically, if \( a \) and \( b \) are the legs, and \( c \) is the hypotenuse, then:  
+    
+    \[ a^2 + b^2 = c^2 \]  
+    
+    This theorem helps calculate distances, solve geometry problems, and is foundational in trigonometry. For example, if \( a = 3 \) and \( b = 4 \), then \( c = 5 \) because \( 3^2 + 4^2 = 5^2 \).
 
 
-*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e18ab6ff-7ad5-491b-87bf-571dd7854923?timestamp=2025-01-09T17%3A09%3A52.866Z)*
+*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/19dc2f6afdf9bdfc295c10b2403e7b07?timestamp=2025-06-13T09:26:11.293Z&display=details)*
 
 ### Utilize Langfuse Context to Update Trace Attributes
 
-You can modify trace attributes within a function using `langfuse_context`.
+You can modify trace attributes within a function using `langfuse`.
 
 
 ```python
-from langfuse.decorators import langfuse_context
+from langfuse import get_client, observe
+langfuse = get_client()
 
 @observe()
 def technical_explanation():
@@ -172,13 +198,12 @@ def technical_explanation():
     ).choices[0].message.content
 
     # Update the current trace with additional information
-    langfuse_context.update_current_trace(
+    langfuse.update_current_trace(
         name="Blockchain Explanation",
         session_id="session_xyz789",
         user_id="user_tech_42",
         tags=["technology", "blockchain"],
         metadata={"topic": "blockchain", "difficulty": "intermediate"},
-        release="v1.0.0",
     )
 
     return response
@@ -187,56 +212,50 @@ result = technical_explanation()
 print(result)
 ```
 
-    Blockchain is a decentralized digital ledger that records transactions across a network of computers. Each block contains data, a timestamp, and a cryptographic link to the previous block, ensuring security and transparency.
+    Blockchain is a decentralized digital ledger that records transactions across a network of computers. Each block contains transaction data, linked securely to the previous one, ensuring transparency and immutability. (30 words)
 
 
 *[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/06cca972-a885-454f-8303-0fd753dbf5e3?timestamp=2025-01-09T17%3A10%3A39.275Z)*
 
 ### Programmatically Add Scores
 
-Add [scores](https://langfuse.com/docs/scores) to the trace to record user feedback or programmatic evaluations. In production the scoring usually happens in a separate function and can be accomplished by passing the `trace_id`. 
+Langfuse lets you ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
+
+In the example below, we demonstrate how to score a specific span for conciseness (a numeric score) and the overall trace for feedback (a categorical score). This helps in systematically assessing and improving your application.
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Trace attributes must be set on enclosing span
+with langfuse.start_as_current_span(name="math-tutor") as span:
 
-langfuse = Langfuse()
-
-@observe()
-def generate_and_score():
-    # Get the trace_id of the current trace
-    trace_id = langfuse_context.get_current_trace_id()
-    
-    # Generate content
-    content = client.chat.completions.create(
-        name="content-generator",
+    result = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "user", "content": "What is quantum computing? Answer in 50 words or less."}
+            {"role": "system", "content": "You are a math tutor."},
+            {"role": "user", "content": "Help me understand the Pythagorean theorem. Answer in 100 words or less."}
         ],
-    ).choices[0].message.content
-    
-    # Evaluate content (placeholder function)
-    score_value = evaluate_content(content)
-    
-    # Add score to Langfuse
-    langfuse.score(
-        trace_id=trace_id,
-        name="content_quality",
-        value=score_value,
+        name="test-chat",
+        metadata={"someMetadataKey": "someValue"},
     )
-    
-    return content
 
-def evaluate_content(content):
-    # Placeholder evaluation function (e.g., content length or keyword presence)
-    return 9.0  # Score out of 10
+    # Score this specific span
+    span.score(name="conciseness", value=0.8, data_type="NUMERIC")
+ 
+    # Score the overall trace
+    span.score_trace(name="feedback", value="positive", data_type="CATEGORICAL")
 
-output = generate_and_score()
-print(output)
+print(result.choices[0].message.content)
 ```
 
-    Quantum computing leverages quantum mechanics to process information using qubits, which can exist in multiple states simultaneously. This enables solving complex problems faster than classical computers, particularly in cryptography, optimization, and simulations, by exploiting superposition, entanglement, and quantum interference.
+    The Pythagorean theorem states that in a right-angled triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides. Mathematically, it’s written as:  
+    
+    \[ a^2 + b^2 = c^2 \]  
+    
+    Here, \(a\) and \(b\) are the legs, and \(c\) is the hypotenuse. For example, if \(a = 3\) and \(b = 4\), then \(c = 5\) because \(3^2 + 4^2 = 9 + 16 = 25 = 5^2\). This theorem helps calculate distances and solve geometry problems involving right triangles.
 
 
 *[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/44616768-253d-41fd-b336-8611899a2fad?timestamp=2025-01-09T17%3A11%3A01.665Z)*

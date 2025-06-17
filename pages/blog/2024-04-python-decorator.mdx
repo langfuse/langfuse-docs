@@ -16,6 +16,10 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["marcklingen", "hassiebpakzad"]}
 />
 
+<Callout type="info" emoji="💡">
+_**Note:** This blog post references our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+</Callout>
+
 When we initially built complex agents for web scraping and code generation while in Y Combinator, we quickly recognized the need for new LLM-focused observability to truly understand how our applications produced their outputs. It wasn't just about the LLM calls, but also the retrieval steps, chaining of separate calls, function calling, obtaining the right JSON output, and various API calls that the agents should perform behind the scenes. In the end, all these steps led to them breaking many times on our initial users.
 
 This insight prompted us to start working on Langfuse. As many teams were experimenting, we prioritized easy integrations with frameworks like LangChain and LlamaIndex, as well as wrapping the OpenAI SDK to log individual LLM calls. As applications become increasingly complex and agents are deployed in production, the ability to trace complex applications is even more crucial.

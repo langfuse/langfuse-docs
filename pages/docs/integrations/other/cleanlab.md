@@ -22,9 +22,11 @@ This guide will walk you through the process of evaluating LLM responses capture
 
 ### Install dependencies & Set environment variables
 
+_**Note:** New Python SDK available (v3) - We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
-%pip install -q langfuse openai cleanlab-tlm --upgrade
+%pip install "langfuse<3.0.0" openai cleanlab-tlm
 ```
 
 

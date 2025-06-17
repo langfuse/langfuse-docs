@@ -32,12 +32,13 @@ Label your prompt versions (e.g., `prod-a` and `prod-b`) to identify different v
 <Tab>
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 import random
 from langfuse.openai import openai
 
 # Requires environment variables for initialization
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 # Fetch prompt versions
 prompt_a = langfuse.get_prompt("my-prompt-name", label="prod-a")

@@ -12,6 +12,8 @@ In this example, we'll use the [Python OpenTelemetry SDK](https://opentelemetry.
 
 ## Setup
 
+_**⚠️ Note:** We have a new OpenTelemetry native Langfuse SDK. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
 
 ```python
 %pip install opentelemetry-sdk opentelemetry-exporter-otlp opentelemetry-api
