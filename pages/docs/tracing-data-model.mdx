@@ -23,16 +23,13 @@ Each trace can contain multiple `observations` to log the individual steps of th
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
-<div className="border rounded py-4 text-center bg-card">
+<div className="border rounded py-4 flex flex-col items-center justify-center bg-card">
 
 **Hierarchical structure of traces in Langfuse**
 
 ```mermaid
 classDiagram
     Trace "1" *-- "n" Observation
-    Observation <|-- Event
-    Observation <|-- Span
-    Observation <|-- Generation
     Observation o-- Observation: Nesting
 ```
 
