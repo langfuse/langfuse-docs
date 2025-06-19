@@ -22,7 +22,7 @@ _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK availa
 
 
 ```python
-%pip install llm-guard "langfuse==2.60.8" openai
+%pip install llm-guard "langfuse<3.0.0" openai
 ```
 
 

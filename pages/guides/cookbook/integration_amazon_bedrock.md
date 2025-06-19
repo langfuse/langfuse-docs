@@ -228,7 +228,7 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 Yes, you can monitor cost and token usage of your Bedrock calls in Langfuse. The native integrations with LLM application frameworks and the LiteLLM proxy will automatically report token usage to Langfuse.
 
-If you use the Langfuse decorator or the low-level Python SDK, you can [report](https://langfuse.com/docs/model-usage-and-cost) token usage and (optionally) also cost information directly. See example above for details.
+If you use the [Langfuse Decorator or Context Manager](https://langfuse.com/docs/sdk/python/sdk-v3), you can [report](https://langfuse.com/docs/model-usage-and-cost) token usage and (optionally) also cost information directly. See example above for details.
 
 You can define custom price information via the Langfuse dashboard or UI ([see docs](https://langfuse.com/docs/model-usage-and-cost)) to adjust to the exact pricing of your models on Amazon Bedrock.
 
