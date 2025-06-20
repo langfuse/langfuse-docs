@@ -1,9 +1,19 @@
+import { Tabs, Cards } from "nextra/components";
+import {
+  FileText,
+  ClipboardCheck,
+  Scale,
+  Database,
+  LayoutDashboard,
+  TestTube,
+} from "lucide-react";
+
 ## Interoperability with the Python SDK
 
 You can use this integration together with the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) to add additional attributes to the trace.
 
 <Tabs items={["Decorator", "Context Manager"]}>
-<Tab>
+<Tabs.Tab>
 
 The [`@observe()` decorator](/docs/sdk/python/sdk-v3#observe-decorator) provides a convenient way to automatically wrap your instrumented code and add additional attributes to the trace.
 
@@ -31,8 +41,8 @@ def my_instrumented_function(input):
 
 Learn more about using the Decorator in the [Python SDK](/docs/sdk/python/sdk-v3#observe-decorator) docs.
 
-</Tab>
-<Tab>
+</Tabs.Tab>
+<Tabs.Tab>
 
 The [Context Manager](/docs/sdk/python/sdk-v3#context-managers) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace.
 
@@ -63,49 +73,40 @@ langfuse.flush()
 
 Learn more about using the Context Manager in the [Python SDK](/sdk-v3#context-managers) docs.
 
-</Tab>
+</Tabs.Tab>
 </Tabs>
 
 ## Next Steps
 
 Once you have instrumented your code, you can manage, evaluate and debug your application:
 
-import {
-  FileText,
-  ClipboardCheck,
-  Scale,
-  Database,
-  LayoutDashboard,
-  TestTube,
-} from "lucide-react";
-
 <Cards>
-  <Card
+  <Cards.Card
     title="Manage prompts in langfuse"
     href="/docs/prompts/get-started"
     icon={<FileText />}
   />
-  <Card
+  <Cards.Card
     title="Add evaluation scores"
     href="/docs/scores/custom"
     icon={<ClipboardCheck />}
   />
-  <Card
+  <Cards.Card
     title="Run LLM-as-a-judge Evaluators"
     href="/docs/scores/model-based-evals"
     icon={<Scale />}
   />
-  <Card
+  <Cards.Card
     title="Create datasets"
     href="/docs/datasets/overview"
     icon={<Database />}
   />
-  <Card
+  <Cards.Card
     title="Create custom dashboards"
     href="/docs/analytics/custom-dashboards"
     icon={<LayoutDashboard />}
   />
-  <Card
+  <Cards.Card
     title="Test queries in the Playground"
     href="/docs/playground"
     icon={<TestTube />}
