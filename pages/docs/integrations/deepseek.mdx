@@ -1,5 +1,7 @@
 ---
-description: Example cookbook on how to monitor DeepSeek models with Langfuse using the OpenAI SDK
+source: Jupyter Notebook
+title: Example cookbook on how to monitor DeepSeek models with Langfuse using the OpenAI SDK
+description: Discover how to integrate Langfuse with DeepSeek for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
 category: Integrations
 ---
 
@@ -11,7 +13,9 @@ This cookbook demonstrates how to monitor [DeepSeek](https://github.com/deepseek
 
 This guide will walk you through setting up the integration, making requests to DeepSeek models, and observing the interactions with Langfuse.
 
+<Callout type="info" emoji="ℹ️">
 **Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). These frameworks can be used as well to trace DeepSeek requests.*
+</Callout>
 
 ## Setup
 
@@ -137,135 +141,6 @@ print(story)
 
 *[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9a0dca39-9fac-4fce-ace9-52b85edfb0d8?timestamp=2025-01-09T17%3A08%3A25.698Z)*
 
-### Add Additional Langfuse Features (User, Tags, Metadata, Session)
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
-You can enhance your traces by adding [attributes](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) such as `user_id`, `session_id`, `tags`, and `metadata`.
-
-
-```python
-from langfuse import get_client
- 
-langfuse = get_client()
- 
-# Trace attributes must be set on enclosing span
-with langfuse.start_as_current_span(name="math-tutor") as span:
-    span.update_trace(
-        session_id="session_123",
-        user_id="user_456",
-        tags=["math"]
-    )
- 
-    result = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[
-            {"role": "system", "content": "You are a math tutor."},
-            {"role": "user", "content": "Help me understand the Pythagorean theorem. Answer in 100 words or less."}
-        ],
-        name="test-chat",
-        metadata={"someMetadataKey": "someValue"},
-    )
-
-print(result.choices[0].message.content)
-```
-
-    The Pythagorean theorem states that in a right-angled triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides. Mathematically, if \( a \) and \( b \) are the legs, and \( c \) is the hypotenuse, then:  
-    
-    \[ a^2 + b^2 = c^2 \]  
-    
-    This theorem helps calculate distances, solve geometry problems, and is foundational in trigonometry. For example, if \( a = 3 \) and \( b = 4 \), then \( c = 5 \) because \( 3^2 + 4^2 = 5^2 \).
-
-
-*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/19dc2f6afdf9bdfc295c10b2403e7b07?timestamp=2025-06-13T09:26:11.293Z&display=details)*
-
-### Utilize Langfuse Context to Update Trace Attributes
-
-You can modify trace attributes within a function using `langfuse`.
-
-
-```python
-from langfuse import get_client, observe
-langfuse = get_client()
-
-@observe()
-def technical_explanation():
-    # Your main application logic
-    response = client.chat.completions.create(
-        name="tech-explainer",
-        model="deepseek-chat",
-        messages=[
-            {"role": "user", "content": "Explain how blockchain technology works. Answer in 30 words or less."}
-        ],
-    ).choices[0].message.content
-
-    # Update the current trace with additional information
-    langfuse.update_current_trace(
-        name="Blockchain Explanation",
-        session_id="session_xyz789",
-        user_id="user_tech_42",
-        tags=["technology", "blockchain"],
-        metadata={"topic": "blockchain", "difficulty": "intermediate"},
-    )
-
-    return response
-
-result = technical_explanation()
-print(result)
-```
-
-    Blockchain is a decentralized digital ledger that records transactions across a network of computers. Each block contains transaction data, linked securely to the previous one, ensuring transparency and immutability. (30 words)
-
-
-*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/06cca972-a885-454f-8303-0fd753dbf5e3?timestamp=2025-01-09T17%3A10%3A39.275Z)*
-
-### Programmatically Add Scores
-
-Langfuse lets you ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
-
-In the example below, we demonstrate how to score a specific span for conciseness (a numeric score) and the overall trace for feedback (a categorical score). This helps in systematically assessing and improving your application.
-
-
-```python
-from langfuse import get_client
- 
-langfuse = get_client()
- 
-# Trace attributes must be set on enclosing span
-with langfuse.start_as_current_span(name="math-tutor") as span:
-
-    result = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[
-            {"role": "system", "content": "You are a math tutor."},
-            {"role": "user", "content": "Help me understand the Pythagorean theorem. Answer in 100 words or less."}
-        ],
-        name="test-chat",
-        metadata={"someMetadataKey": "someValue"},
-    )
-
-    # Score this specific span
-    span.score(name="conciseness", value=0.8, data_type="NUMERIC")
- 
-    # Score the overall trace
-    span.score_trace(name="feedback", value="positive", data_type="CATEGORICAL")
-
-print(result.choices[0].message.content)
-```
-
-    The Pythagorean theorem states that in a right-angled triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides. Mathematically, it’s written as:  
-    
-    \[ a^2 + b^2 = c^2 \]  
-    
-    Here, \(a\) and \(b\) are the legs, and \(c\) is the hypotenuse. For example, if \(a = 3\) and \(b = 4\), then \(c = 5\) because \(3^2 + 4^2 = 9 + 16 = 25 = 5^2\). This theorem helps calculate distances and solve geometry problems involving right triangles.
-
-
-*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/44616768-253d-41fd-b336-8611899a2fad?timestamp=2025-01-09T17%3A11%3A01.665Z)*
-
-### Learn More
-
-- **[Langfuse Documentation](https://langfuse.com/docs)**: Explore the full capabilities of Langfuse and learn how to utilize advanced features.
-- **[Langfuse Integrations](https://langfuse.com/docs/integrations)**: Discover other integrations and examples.
-- **[DeepSeek GitHub Repository](https://github.com/deepseek-ai/DeepSeek-V3)**: Learn more about DeepSeek models and access additional resources.
-
-## Feedback
-
-If you have any feedback or requests, please create an issue on [GitHub](https://github.com/langfuse/langfuse/issues) or share your ideas with the community on [Discord](https://langfuse.com/discord).
+<LearnMore />

@@ -21,6 +21,7 @@ Install the latest versions of DSPy and langfuse.
 %pip install langfuse dspy openinference-instrumentation-dspy -U
 ```
 
+<Steps>
 ## Step 1: Setup Langfuse Environment Variables
 
 First, we configure the environment variables. We set the OpenTelemetry endpoint, protocol, and authorization headers so that the traces from DSPy are correctly sent to Langfuse. You can get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
@@ -127,80 +128,8 @@ After running your DSPy application, you can inspect the traced events in Langfu
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-dspy/dspy-example-trace.png)
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c6182b14e8e7ac7543645e19cdf1a895?timestamp=2025-06-06T15%3A59%3A47.264Z&display=details&observation=dfec1f8a95e91773)_
+</Steps>
 
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
-## Add Additional Attributes
-
-Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
-
-The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
-
-**→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
-
-
-```python
-with langfuse.start_as_current_span(
-    name="dspy-trace",
-    ) as span:
-    
-    # Run your application here
-    question="Two dice are tossed. What is the probability that the sum equals two?"
-    math = dspy.ChainOfThought("question -> answer: float")
-    result = math(question = question)
-    print(result)
-
-    # Pass additional attributes to the span
-    span.update_trace(
-        input=question,
-        output=result,
-        user_id="user_123",
-        session_id="session_abc",
-        tags=["dev", "dspy"],
-        metadata={"email": "user@langfuse.com"},
-        version="1.0.0"
-        )
-
-# Flush events in short-lived applications
-langfuse.flush()
-```
-
-## Score Traces and Spans
-
-Langfuse lets you ingest custom scores for individual spans or entire traces. This scoring workflow enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
-
-In the example below, we demonstrate how to score a specific span for `relevance` (a numeric score) and the overall trace for `feedback` (a categorical score). This helps in systematically assessing and improving your application.
-
-**→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
-
-
-```python
-with langfuse.start_as_current_span(
-    name="dspy-scored-trace",
-    ) as span:
-    
-    # Run your application here
-    question="Two dice are tossed. What is the probability that the sum equals two?"
-    math = dspy.ChainOfThought("question -> answer: float")
-    result = math(question = question)
-    print(result)
-    
-    # Score this specific span
-    span.score(name="relevance", value=0.9, data_type="NUMERIC")
-
-    # Score the overall trace
-    span.score_trace(name="feedback", value="positive", data_type="CATEGORICAL")
-
-# Flush events in short-lived applications
-langfuse.flush()
-```
-
-## Explore More Langfuse Features
-
-Langfuse offers more features to enhance your LLM development and observability workflow:
-
-- [LLM-as-a-Judge Evaluators](https://langfuse.com/docs/scores/model-based-evals)
-- [Custom Dashboards](https://langfuse.com/docs/analytics/custom-dashboards)
-- [LLM Playground](https://langfuse.com/docs/playground)
-- [Prompt Management](https://langfuse.com/docs/prompts/get-started)
-- [Prompt Experiments](https://langfuse.com/docs/datasets/prompt-experiments)
-- [More Integrations](https://langfuse.com/docs/integrations/overview)
+<LearnMore />
