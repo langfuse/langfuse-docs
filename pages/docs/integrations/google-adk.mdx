@@ -1,4 +1,5 @@
 ---
+source: ⚠️ Jupyter Notebook
 title: Observability for Google Agent Development Kit with Langfuse
 description: Learn how to instrument Google ADK agents with Langfuse via OpenTelemetry
 category: Integrations
@@ -14,6 +15,7 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 > **Why Langfuse?**  
 > [Langfuse](https://langfuse.com) gives you a detailed dashboard and rich analytics for every prompt, model response, and function call in your agent, making it easy to debug, evaluate, and iterate on LLM apps.
 
+<Steps>
 ## Step&nbsp;1: Install dependencies
 
 
@@ -123,3 +125,8 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
 
 ![Google ADK example trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
