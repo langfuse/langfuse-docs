@@ -1,5 +1,4 @@
 ---
-source: ⚠️ Jupyter Notebook
 title: Integrate Cohere with Langfuse
 description: Guide on integrating Cohere with Langfuse via the OpenAI SDK for observability and debugging.
 category: Integrations
