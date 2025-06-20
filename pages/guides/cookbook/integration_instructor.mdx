@@ -1,14 +1,15 @@
 ---
+source: ⚠️ Jupyter Notebook
 title: Observability & Tracing for Instructor
 description: Open-source observability for Instructor, a popular library to get structured (JSON, Pydantic) LLM outputs.
 category: Integrations
 ---
 
-
 # Instructor - Observability & Tracing
 
-**What is Instructor?**
-> [Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.Instructor makes it easy to reliably get structured data like JSON from Large Language Models (LLMs) like GPT-3.5, GPT-4, GPT-4-Vision, including open source models like Mistral/Mixtral from Together, Anyscale, Ollama, and llama-cpp-python. By leveraging various modes like Function Calling, Tool Calling and even constrained sampling modes like JSON mode, JSON Schema; Instructor stands out for its simplicity, transparency, and user-centric design. Under the hood, Instructor leverages Pydantic to do the heavy lifting, and provides a simple, easy-to-use API on top of it by helping you manage validation context, retries with Tenacity, and streaming Lists and Partial responses.
+> **What is Instructor?** [Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.Instructor makes it easy to reliably get structured data like JSON from Large Language Models (LLMs) like GPT-3.5, GPT-4, GPT-4-Vision, including open source models like Mistral/Mixtral from Together, Anyscale, Ollama, and llama-cpp-python. By leveraging various modes like Function Calling, Tool Calling and even constrained sampling modes like JSON mode, JSON Schema; Instructor stands out for its simplicity, transparency, and user-centric design. Under the hood, Instructor leverages Pydantic to do the heavy lifting, and provides a simple, easy-to-use API on top of it by helping you manage validation context, retries with Tenacity, and streaming Lists and Partial responses.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
 
 This is a cookbook with examples of the Langfuse Integration for Python.
 
@@ -72,19 +73,6 @@ print(weather_info.model_dump_json(indent=2))
 """
 ```
 
-    {
-      "city": "Paris",
-      "temperature": 18
-    }
-
-
-
-
-
-    '\n{\n  "city": "Paris",\n  "temperature": 18\n}\n'
-
-
-
 ### Langfuse-Instructor integration with asychnronous OpenAI client
 
 
@@ -118,23 +106,6 @@ print(response.model_dump_json(indent=2))
 }
 """
 ```
-
-    /var/folders/r3/qf06gp294m109hgl7ycfyzqc0000gn/T/ipykernel_59166/1647180025.py:6: DeprecationWarning: apatch is deprecated, use patch instead
-      client = instructor.apatch(AsyncOpenAI())
-
-
-    {
-      "city": "Paris",
-      "temperature": 18
-    }
-
-
-
-
-
-    '\n{\n  "city": "Paris",\n  "temperature": 18\n}\n'
-
-
 
 ## Example
 
@@ -276,27 +247,10 @@ Relevance Score: 0.9
 """
 ```
 
-    Feedback: The chat bot on your website does not work.
-    Classification: ['BUG']
-    Relevance Score: 0.9
-    Feedback: I have a question about my recent order.
-    Classification: ['QUESTION']
-    Relevance Score: 0.8
-    Feedback: Your customer service is exceptional!
-    Classification: ['PRAISE']
-    Relevance Score: 0.95
-    Feedback: Could you add more features to your app?
-    Classification: ['SUGGESTION']
-    Relevance Score: 0.8
-
-
-
-
-
-    "\nFeedback: I have a question about my recent order.\nClassification: ['QUESTION']\nRelevance Score: 0.0\nFeedback: Could you add more features to your app?\nClassification: ['SUGGESTION']\nRelevance Score: 0.0\nFeedback: The chat bot on your website does not work.\nClassification: ['BUG']\nRelevance Score: 0.9\nFeedback: Your customer service is exceptional!\nClassification: ['PRAISE']\nRelevance Score: 0.9\n"
-
-
-
 ![Instructor Trace in Langfuse](https://langfuse.com/images/docs/instructor-trace.png)
 
 _[Public link to trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ba27e7b1-e23e-4f50-87de-420cf038190f?timestamp=2025-03-31T16:12:57.041Z&display=details)_
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
