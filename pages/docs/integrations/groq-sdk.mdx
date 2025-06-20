@@ -1,4 +1,6 @@
 ---
+source: Jupyter Notebook
+title: Observability for Groq models with Langfuse Integration
 description: Traceability and observability for Groq language models with Langfuse. This cookbook provides examples on how to use the OpenAI SDK and the Groq SDK to interact with Groq models and trace them with Langfuse.
 category: Integrations
 ---
@@ -12,7 +14,9 @@ This cookbook shows two ways to interact with Groq models and trace them with La
 
 By following these examples, you'll learn how to log and trace interactions with Groq language models, enabling you to debug and evaluate the performance of your AI-driven applications.
 
+<Callout type="info" emoji="ℹ️">
 **Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). If you use one of them, any use of Groq models is instrumented right away.*
+</Callout>
 
 ## Overview
 
@@ -90,42 +94,6 @@ completion = client.chat.completions.create(
 )
 print(completion.choices[0].message.content)
 ```
-
-    In silicon halls, where data reigns
-    A new breed of minds, with words in chains
-    Language models rise, with algorithms keen
-    To understand the human tongue, and all it's seen
-    
-    With each new update, they grow in might
-    Their knowledge broadens, their language takes flight
-    They converse with ease, in tone and pace
-    A polyglot's grasp, in every digital place
-    
-    Their minds a maze, of symbols and rules
-    A complex web, of linguistics' tools
-    They grasp the nuances, of human speech
-    The ambiguities, the shades of meaning's reach
-    
-    They write and speak, with fluency and flair
-    Their words a dance, of logic and dare
-    Their thoughts a tapestry, of meaning and sense
-    A brilliant weave, of human intention's premise
-    
-    Yet, as they dream, of a world so bright
-    Their limitations, we must hold in sight
-    For though they learn, from human endeavor's might
-    Their wisdom's scope, is but a digital light
-    
-    Still, we marvel at, their burgeoning might
-    A new era's dawn, in the digital light
-    Where language models rise, to meet our needs
-    And shape the future, of our digital creeds
-    
-    For in their halls, of silicon and code
-    A new breed of minds, our language to abode
-    And as we speak, with these models of old
-    We shape the future, of our digital gold.
-
 
 *[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)*
 
@@ -232,9 +200,6 @@ def find_best_painter_from(country="France"):
 print(find_best_painter_from())
 ```
 
-    It looks like you're testing to see if I'm working properly! That's completely fine. I'm happy to report that I'm functioning as intended. Is there anything else you'd like to chat about or ask? I'm here to help with any questions you might have.
-
-
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/single-trace-example.png)
 
 *[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d5f7e896-a51c-4f70-b066-114f0cab9020?timestamp=2025-01-09T10%3A23%3A26.872Z&observation=3dee4a0f-e348-481f-a795-d46c90ffbea5)*
@@ -277,9 +242,6 @@ def find_best_painting_from(country="France"):
 
 print(find_best_painting_from("Germany"))
 ```
-
-    The most famous painting of Albrecht Dürer is "Melencolia I," a 1514 engraving depicting a winged personification of melancholy, considered one of the greatest works of the Northern Renaissance.
-
 
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/chained-trace.png)
@@ -359,34 +321,10 @@ def stream_find_best_five_painter_from(country="France"):
 stream_find_best_five_painter_from("Spain")
 ```
 
-    What a great question! Spain has a rich artistic heritage, and here are five of the most renowned painters from Spain, along with their most famous works:
-    
-    1. **El Greco (1541-1614)**
-    	* "The Burial of the Count of Orgaz" (1588) - A masterpiece of Mannerism, this painting showcases El Greco's use of vibrant colors and dynamic composition.
-    2. **Diego Velázquez (1599-1660)**
-    	* "Las Meninas" (1656) - Considered one of the greatest paintings in the history of art, "Las Meninas" is a masterpiece of Baroque portraiture, featuring the Spanish royal family.
-    3. **Francisco Goya (1746-1828)**
-    	* "The Third of May 1808" (1814) - A powerful anti-war statement, this painting depicts the brutal suppression of a rebellion against Napoleon's soldiers.
-    4. **Joan Miró (1893-1983)**
-    	* "The Birth of the World" (1925) - A seminal work of Surrealism, "The Birth of the World" showcases Miró's use of biomorphic shapes and vibrant colors.
-    5. **Pablo Picasso (1881-1973)**
-    	* "Guernica" (1937) - A powerful anti-war statement, "Guernica" is a cubist masterpiece that responds to the bombing of the town of Guernica during the Spanish Civil War.
-    
-    These five painters are not only among the most famous, but also had a significant impact on the development of art in Spain and beyond.None
-
-
-
-
-    'What a great question! Spain has a rich artistic heritage, and here are five of the most renowned painters from Spain, along with their most famous works:\n\n1. **El Greco (1541-1614)**\n\t* "The Burial of the Count of Orgaz" (1588) - A masterpiece of Mannerism, this painting showcases El Greco\'s use of vibrant colors and dynamic composition.\n2. **Diego Velázquez (1599-1660)**\n\t* "Las Meninas" (1656) - Considered one of the greatest paintings in the history of art, "Las Meninas" is a masterpiece of Baroque portraiture, featuring the Spanish royal family.\n3. **Francisco Goya (1746-1828)**\n\t* "The Third of May 1808" (1814) - A powerful anti-war statement, this painting depicts the brutal suppression of a rebellion against Napoleon\'s soldiers.\n4. **Joan Miró (1893-1983)**\n\t* "The Birth of the World" (1925) - A seminal work of Surrealism, "The Birth of the World" showcases Miró\'s use of biomorphic shapes and vibrant colors.\n5. **Pablo Picasso (1881-1973)**\n\t* "Guernica" (1937) - A powerful anti-war statement, "Guernica" is a cubist masterpiece that responds to the bombing of the town of Guernica during the Spanish Civil War.\n\nThese five painters are not only among the most famous, but also had a significant impact on the development of art in Spain and beyond.None'
-
-
-
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/streaming-trace.png)
 
 *[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c21544f3-d837-4441-9a0c-a47b3fd5dcaf?timestamp=2025-01-09T13%3A02%3A14.362Z&observation=c0d9e820-377c-4c4d-b6cb-19dd6951bfa4)*
 
-## Feedback
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
-If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your ideas with the community on [Discord](https://langfuse.com/discord).
-
-
+<LearnMore />
