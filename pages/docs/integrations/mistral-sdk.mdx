@@ -9,9 +9,9 @@ category: Integrations
 
 This cookbook provides step-by-step examples of integrating Langfuse with the Mistral AI SDK (v1) in Python. By following these examples, you'll learn how to seamlessly log and trace interactions with Mistral's language models, enhancing the transparency, debuggability, and performance monitoring of your AI-driven applications.
 
-<!-- CALLOUT_END -->
+<Callout type="info" emoji="ℹ️">
 Note: Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). If you use one of them, any use of Mistral models is instrumented right away.
-<!-- CALLOUT_END -->
+</Callout>
 
 ## Overview
 
@@ -394,37 +394,6 @@ async def async_stream_find_best_five_musician_from(country="France"):
 
 # Run the async function
 await async_stream_find_best_five_musician_from("Spain")
-
-```
-Determ
-ining
- the
- "
-best
-"
- musicians
- can
- be
- subjective
-,
- but
- five
- highly
- influential
- Spanish
- musicians
- are
- Pac
-o
- de
- Lucía
-,
- Joaquín
-...
- Rosal
-ía
-.
-```
 ```
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/36608110-f6cf-4566-a080-7c18777e2dbf
@@ -555,10 +524,6 @@ def tool_calling_check_transaction_status(id="T1001"):
   return response.choices[0].message.content
 
 tool_calling_check_transaction_status("T1005")
-
-```
-'The status of your transaction T1005 is currently "Pending". This means that the transaction has not yet been fully processed. Please allow some time for the transaction to be completed. If you have any further questions or concerns, feel free to ask!'
-```
 ```
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e986408a-f96b-40dc-8278-5d0eb0286f82
