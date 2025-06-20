@@ -1,4 +1,5 @@
 ---
+source: Jupyter Notebook
 title: Trace Mistral models with Langfuse
 description: Cookbook with examples of the Langfuse Integration for Mistral SDK (Python).
 category: Integrations
@@ -8,11 +9,9 @@ category: Integrations
 
 This cookbook provides step-by-step examples of integrating Langfuse with the Mistral AI SDK (v1) in Python. By following these examples, you'll learn how to seamlessly log and trace interactions with Mistral's language models, enhancing the transparency, debuggability, and performance monitoring of your AI-driven applications.
 
----
-
+<!-- CALLOUT_END -->
 Note: Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). If you use one of them, any use of Mistral models is instrumented right away.
-
----
+<!-- CALLOUT_END -->
 
 ## Overview
 
@@ -141,13 +140,6 @@ def find_best_painter_from(country="France"):
 find_best_painter_from()
 ```
 
-
-
-
-    'Determining the "best" painter from France can be subjective, but many consider Claude Monet to be one of the greatest.'
-
-
-
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/836a9585-cfcc-47f7-881f-85ebdd9f601b
 
 #### Chained Completions
@@ -184,13 +176,6 @@ def find_best_painting_from(country="France"):
 
 find_best_painting_from("Germany")
 ```
-
-
-
-
-    ChatCompletionResponse(id='f83e095854424211bfe1049e167f99c6', object='chat.completion', model='mistral-small-latest', usage=UsageInfo(prompt_tokens=21, completion_tokens=21, total_tokens=42), created=1749819201, choices=[ChatCompletionChoice(index=0, message=AssistantMessage(content='The most famous painting by Caspar David Friedrich is "Wanderer above the Sea of Fog."', tool_calls=None, prefix=False, role='assistant'), finish_reason='stop')])
-
-
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a3360c6f-24ad-455c-aae7-eb9d5c6f5dac
 
@@ -269,46 +254,6 @@ def stream_find_best_five_painter_from(country="France"):
 stream_find_best_five_painter_from("Spain")
 ```
 
-    
-    The
-     five
-     most
-     renowned
-     pain
-    ters
-     from
-     Spain
-     are
-     Diego
-     Vel
-    ázquez
-    ,
-     Francisco
-     G
-    oya
-    ,
-     Pablo
-     Picasso
-    ,
-     Salvador
-     Dal
-    í
-    ,
-     and
-     Joan
-     Mir
-    ó
-    .
-    
-
-
-
-
-
-    'The five most renowned painters from Spain are Diego Velázquez, Francisco Goya, Pablo Picasso, Salvador Dalí, and Joan Miró.'
-
-
-
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/75a2a4fe-088d-4134-9797-ba9c21be01b2
 
 ### Async Completion
@@ -373,13 +318,6 @@ async def async_find_best_musician_from(country="France"):
 
 await async_find_best_musician_from("Spain")
 ```
-
-
-
-
-    ChatCompletionResponse(id='afe157d5680049a78a5cd359f9a8238c', object='chat.completion', model='mistral-small-latest', usage=UsageInfo(prompt_tokens=17, completion_tokens=29, total_tokens=46), created=1749819243, choices=[ChatCompletionChoice(index=0, message=AssistantMessage(content='Determining the "best" musician from Spain can be subjective, but many would consider Paco de Lucía, a legendary flamenco guitarist.', tool_calls=None, prefix=False, role='assistant'), finish_reason='stop')])
-
-
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/1f7d91ce-45dd-41bf-8e6f-1875086ed32f
 
@@ -456,54 +394,38 @@ async def async_stream_find_best_five_musician_from(country="France"):
 
 # Run the async function
 await async_stream_find_best_five_musician_from("Spain")
+
 ```
-
-    
-    Determ
-    ining
-     the
-     "
-    best
-    "
-     musicians
-     can
-     be
-     subjective
-    ,
-     but
-     five
-     highly
-     influential
-     Spanish
-     musicians
-     are
-     Pac
-    o
-     de
-     Lucía
-    ,
-     Joaquín
-     Rodrigo
-    ,
-     Julio
-     Iglesias
-    ,
-     Enrique
-     Iglesias
-    ,
-     and
-     Rosal
-    ía
-    .
-    
-
-
-
-
-
-    'Determining the "best" musicians can be subjective, but five highly influential Spanish musicians are Paco de Lucía, Joaquín Rodrigo, Julio Iglesias, Enrique Iglesias, and Rosalía.'
-
-
+Determ
+ining
+ the
+ "
+best
+"
+ musicians
+ can
+ be
+ subjective
+,
+ but
+ five
+ highly
+ influential
+ Spanish
+ musicians
+ are
+ Pac
+o
+ de
+ Lucía
+,
+ Joaquín
+...
+ Rosal
+ía
+.
+```
+```
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/36608110-f6cf-4566-a080-7c18777e2dbf
 
@@ -633,17 +555,14 @@ def tool_calling_check_transaction_status(id="T1001"):
   return response.choices[0].message.content
 
 tool_calling_check_transaction_status("T1005")
+
 ```
-
-
-
-
-    'The status of your transaction T1005 is currently "Pending". This means that the transaction has not yet been fully processed. Please allow some time for the transaction to be completed. If you have any further questions or concerns, feel free to ask!'
-
-
+'The status of your transaction T1005 is currently "Pending". This means that the transaction has not yet been fully processed. Please allow some time for the transaction to be completed. If you have any further questions or concerns, feel free to ask!'
+```
+```
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e986408a-f96b-40dc-8278-5d0eb0286f82
 
-## Questions?
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
-Join our [Discord community](https://langfuse.com/discord) in case you have any questions.
+<LearnMore />
