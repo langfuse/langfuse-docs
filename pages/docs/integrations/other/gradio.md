@@ -115,7 +115,7 @@ In addition we use the [openai integration](https://langfuse.com/docs/integratio
 
 ```python
 # Langfuse decorator
-from langfuse import observe, langfuse
+from langfuse.decorators import observe
 # Optional: automated instrumentation via OpenAI SDK integration
 # See note above regarding alternative implementations
 from langfuse.openai import openai

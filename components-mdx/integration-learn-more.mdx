@@ -1,0 +1,114 @@
+import { Tabs, Cards } from "nextra/components";
+import {
+  FileText,
+  ClipboardCheck,
+  Scale,
+  Database,
+  LayoutDashboard,
+  TestTube,
+} from "lucide-react";
+
+## Interoperability with the Python SDK
+
+You can use this integration together with the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) to add additional attributes to the trace.
+
+<Tabs items={["Decorator", "Context Manager"]}>
+<Tabs.Tab>
+
+The [`@observe()` decorator](/docs/sdk/python/sdk-v3#observe-decorator) provides a convenient way to automatically wrap your instrumented code and add additional attributes to the trace.
+
+```python
+from langfuse import observe, get_client
+ 
+langfuse = get_client()
+
+@observe()
+def my_instrumented_function(input):
+    output = my_llm_call(input)
+
+    langfuse.update_current_trace(
+        input=input,
+        output=output,
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["agent", "my-trace"],
+        metadata={"email": "user@langfuse.com"},
+        version="1.0.0"
+    )
+
+    return output
+```
+
+Learn more about using the Decorator in the [Python SDK](/docs/sdk/python/sdk-v3#observe-decorator) docs.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+The [Context Manager](/docs/sdk/python/sdk-v3#context-managers) allows you to wrap your instrumented code using context managers (with `with` statements), which allows you to add additional attributes to the trace.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="my-trace") as span:
+    
+    # Run your application here
+    output = my_llm_call(input)
+
+    # Pass additional attributes to the span
+    span.update_trace(
+        input=input,
+        output=output,
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["agent", "my-trace"],
+        metadata={"email": "user@langfuse.com"},
+        version="1.0.0"
+        )
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+Learn more about using the Context Manager in the [Python SDK](/sdk-v3#context-managers) docs.
+
+</Tabs.Tab>
+</Tabs>
+
+## Next Steps
+
+Once you have instrumented your code, you can manage, evaluate and debug your application:
+
+<Cards>
+  <Cards.Card
+    title="Manage prompts in langfuse"
+    href="/docs/prompts/get-started"
+    icon={<FileText />}
+  />
+  <Cards.Card
+    title="Add evaluation scores"
+    href="/docs/scores/custom"
+    icon={<ClipboardCheck />}
+  />
+  <Cards.Card
+    title="Run LLM-as-a-judge Evaluators"
+    href="/docs/scores/model-based-evals"
+    icon={<Scale />}
+  />
+  <Cards.Card
+    title="Create datasets"
+    href="/docs/datasets/overview"
+    icon={<Database />}
+  />
+  <Cards.Card
+    title="Create custom dashboards"
+    href="/docs/analytics/custom-dashboards"
+    icon={<LayoutDashboard />}
+  />
+  <Cards.Card
+    title="Test queries in the Playground"
+    href="/docs/playground"
+    icon={<TestTube />}
+  />
+</Cards>
