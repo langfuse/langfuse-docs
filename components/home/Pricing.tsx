@@ -47,6 +47,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/router";
 
 // Graduated pricing tiers
 const pricingTiers = [
@@ -166,15 +167,32 @@ const PricingCalculatorModal = ({
   baseFee?: number;
   planName?: string;
 }) => {
-  const [monthlyEvents, setMonthlyEvents] = useState<string>("500,000");
+  const router = useRouter();
+  const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
   const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
   const [selectedPlan, setSelectedPlan] = useState<string>(planName);
   const [currentBaseFee, setCurrentBaseFee] = useState<number>(baseFee);
 
+  // Read open state from URL
+  const isOpen = router.query.calculatorOpen === "true";
+
+  // Calculate price when events change
   useEffect(() => {
     const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
     setCalculatedPrice(calculateGraduatedPrice(events));
   }, [monthlyEvents]);
+
+  const handleOpenChange = (open: boolean) => {
+    const query = { ...router.query };
+    if (open) {
+      query.calculatorOpen = "true";
+    } else {
+      delete query.calculatorOpen;
+    }
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
+  };
 
   const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newPlanName = e.target.value;
@@ -188,7 +206,7 @@ const PricingCalculatorModal = ({
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <span className="text-sm hover:text-primary underline cursor-pointer">
           pricing calculator
