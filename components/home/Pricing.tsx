@@ -20,6 +20,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { CheckIcon, MinusIcon } from "lucide-react";
@@ -29,6 +30,296 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+// Graduated pricing tiers
+const pricingTiers = [
+  { min: 0, max: 100000, rate: 0, description: "0-100k units" },
+  { min: 100001, max: 1000000, rate: 8, description: "0-1M units" },
+  { min: 1000001, max: 10000000, rate: 7, description: "1-10M units" },
+  {
+    min: 10000001,
+    max: 50000000,
+    rate: 6.5,
+    description: "10-50M units",
+  },
+  { min: 50000001, max: Infinity, rate: 6, description: "50M+ units" },
+];
+
+// Calculate graduated pricing
+const calculateGraduatedPrice = (events: number): number => {
+  if (events <= 100000) return 0; // First 100k are free
+
+  let totalCost = 0;
+  let processedEvents = 100000; // Start after free tier
+
+  for (let i = 1; i < pricingTiers.length; i++) {
+    const tier = pricingTiers[i];
+    if (events <= processedEvents) break;
+
+    const tierStart = Math.max(processedEvents, tier.min);
+    const tierEnd = tier.max === Infinity ? events : Math.min(events, tier.max);
+    const eventsInTier = tierEnd - tierStart;
+
+    if (eventsInTier > 0) {
+      totalCost += (eventsInTier / 100000) * tier.rate;
+      processedEvents = tierEnd;
+    }
+  }
+
+  return Math.round(totalCost * 100) / 100;
+};
+
+// Plan configuration
+type PlanConfig = {
+  name: string;
+  baseFee: number;
+};
+
+const PLAN_CONFIGS: PlanConfig[] = [
+  { name: "Core", baseFee: 59 },
+  { name: "Pro", baseFee: 199 },
+];
+
+// Utility functions
+const formatNumber = (num: number) => num.toLocaleString();
+
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
+const formatEventsInput = (value: string) => {
+  const numbersOnly = value.replace(/\D/g, "");
+  return numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+// Calculate events and cost for a specific tier
+const calculateTierBreakdown = (
+  events: number,
+  tier: (typeof pricingTiers)[0],
+  index: number
+) => {
+  let eventsInTier = 0;
+  let costForTier = 0;
+  let tierRate = "";
+
+  if (index === 0) {
+    // Free tier
+    eventsInTier = Math.min(events, 100000);
+    costForTier = 0;
+    tierRate = "Free";
+  } else {
+    // Paid tiers
+    if (events > tier.min) {
+      const tierStart = Math.max(100000, tier.min);
+      const tierEnd =
+        tier.max === Infinity ? events : Math.min(events, tier.max);
+      eventsInTier = Math.max(0, tierEnd - tierStart);
+      costForTier = (eventsInTier / 100000) * tier.rate;
+    }
+    tierRate = `$${tier.rate}/100k`;
+  }
+
+  return { eventsInTier, costForTier, tierRate };
+};
+
+// Reusable graduated pricing text with calculator
+const GraduatedPricingWithCalculator = ({ planName }: { planName: string }) => {
+  const planConfig = PLAN_CONFIGS.find((p) => p.name === planName);
+  return (
+    <>
+      Graduated pricing: $8-6/100k units (
+      <PricingCalculatorModal
+        baseFee={planConfig?.baseFee || 0}
+        planName={planName}
+      />
+      )
+    </>
+  );
+};
+
+// Pricing Calculator Modal Component
+const PricingCalculatorModal = ({
+  baseFee = 0,
+  planName = "plan",
+}: {
+  baseFee?: number;
+  planName?: string;
+}) => {
+  const [monthlyEvents, setMonthlyEvents] = useState<string>("500,000");
+  const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
+  const [selectedPlan, setSelectedPlan] = useState<string>(planName);
+  const [currentBaseFee, setCurrentBaseFee] = useState<number>(baseFee);
+
+  useEffect(() => {
+    const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
+    setCalculatedPrice(calculateGraduatedPrice(events));
+  }, [monthlyEvents]);
+
+  const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPlanName = e.target.value;
+    const newPlan = PLAN_CONFIGS.find((plan) => plan.name === newPlanName);
+    setSelectedPlan(newPlanName);
+    setCurrentBaseFee(newPlan?.baseFee || 0);
+  };
+
+  const handleEventsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMonthlyEvents(formatEventsInput(e.target.value));
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <span className="text-sm hover:text-primary underline cursor-pointer">
+          pricing calculator
+        </span>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Pricing Calculator</DialogTitle>
+          <DialogDescription>
+            Enter your monthly tracing units to see the graduated pricing
+            breakdown
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="plan">Plan</Label>
+            <select
+              id="plan"
+              value={selectedPlan}
+              onChange={handlePlanChange}
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {PLAN_CONFIGS.map((plan) => (
+                <option key={plan.name} value={plan.name}>
+                  {plan.name}{" "}
+                  {plan.baseFee > 0 ? `($${plan.baseFee}/month)` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="events">Monthly Tracing Units</Label>
+            <Input
+              id="events"
+              type="text"
+              value={monthlyEvents}
+              onChange={handleEventsChange}
+              placeholder="Enter number of tracing units per month"
+              className="mt-1"
+            />
+          </div>
+
+          <div className="bg-muted p-6 rounded">
+            {currentBaseFee > 0 ? (
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-4 text-lg font-medium">
+                  <div className="text-center">
+                    <div className="text-primary">
+                      {formatCurrency(currentBaseFee)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {selectedPlan} Base
+                    </div>
+                  </div>
+                  <div className="text-muted-foreground">+</div>
+                  <div className="text-center">
+                    <div className="text-primary">
+                      {formatCurrency(calculatedPrice)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Usage
+                    </div>
+                  </div>
+                  <div className="text-muted-foreground">=</div>
+                  <div className="text-center">
+                    <div className="text-primary">
+                      {formatCurrency(calculatedPrice + currentBaseFee)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Total
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="text-center">
+                  <div className="text-lg font-medium text-primary">
+                    {formatCurrency(calculatedPrice)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Total Usage Cost
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Breakdown */}
+          <div className="space-y-2">
+            <div className="font-medium text-sm">Pricing tiers:</div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">Tier</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
+                  <TableHead className="text-right">Your Units</TableHead>
+                  <TableHead className="text-right">Cost</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pricingTiers.map((tier, index) => {
+                  const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
+                  const { eventsInTier, costForTier, tierRate } =
+                    calculateTierBreakdown(events, tier, index);
+
+                  return (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        {tier.description}
+                      </TableCell>
+                      <TableCell className="text-right">{tierRate}</TableCell>
+                      <TableCell className="text-right">
+                        {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {/* Total row */}
+                <TableRow className="border-t-2">
+                  <TableCell className="font-semibold">Total</TableCell>
+                  <TableCell className="text-right"></TableCell>
+                  <TableCell className="text-right">{monthlyEvents}</TableCell>
+                  <TableCell className="text-right font-semibold text-primary">
+                    {formatCurrency(calculatedPrice)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 type DeploymentOption = "cloud" | "selfHosted";
 
@@ -73,7 +364,7 @@ type Tier = {
   description: string;
   price: string;
   priceUnit?: string;
-  mainFeatures: string[];
+  mainFeatures: (string | React.ReactNode)[];
   cta: string;
   ctaCallout?: {
     text: string;
@@ -105,7 +396,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Free",
       mainFeatures: [
         "All platform features (with limits)",
-        "50k events / month included",
+        "50k tracing units / month included",
         "30 days data access",
         "2 users",
         "Community support (Discord & GitHub)",
@@ -126,7 +417,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       },
       mainFeatures: [
         "Everything in Hobby",
-        "100k events / month included, additional: $8 / 100k events",
+        <>
+          100k tracing units / month included, additional:{" "}
+          <GraduatedPricingWithCalculator planName="Core" />
+        </>,
         "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
@@ -144,7 +438,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "For scaling projects. Unlimited history, high rate limits, all features.",
       mainFeatures: [
         "Everything in Core",
-        "100k events / month included, additional: $8 / 100k events",
+        <>
+          100k tracing units / month included, additional:{" "}
+          <GraduatedPricingWithCalculator planName="Pro" />
+        </>,
         "Unlimited data access",
         "Unlimited annotation queues",
         "High rate limits",
@@ -236,7 +533,12 @@ type Section = {
     name: string;
     description?: string;
     href?: string;
-    tiers: Partial<Record<DeploymentOption, Record<string, boolean | string>>>;
+    tiers: Partial<
+      Record<
+        DeploymentOption,
+        Record<string, boolean | string | React.ReactNode>
+      >
+    >;
   }[];
 };
 
@@ -356,13 +658,13 @@ const sections: Section[] = [
       {
         name: "Included usage",
         description:
-          "Events are the collection of created traces, observations, and scores in Langfuse.",
+          "Tracing units are the collection of created traces, observations, and scores in Langfuse.",
         href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
-            Hobby: "50k events",
-            Core: "100k events",
-            Pro: "100k events",
+            Hobby: "50k units",
+            Core: "100k units",
+            Pro: "100k units",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -374,13 +676,13 @@ const sections: Section[] = [
       {
         name: "Additional usage",
         description:
-          "Events are the collection of created traces, observations, and scores in Langfuse.",
+          "Tracing units are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
         href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "$8 / 100k events",
-            Pro: "$8 / 100k events",
+            Core: <GraduatedPricingWithCalculator planName="Core" />,
+            Pro: <GraduatedPricingWithCalculator planName="Pro" />,
             Enterprise: "Custom",
           },
         },
@@ -1220,32 +1522,44 @@ export default function Pricing({
     );
   };
 
-  const FeatureCell = ({ value }: { value: boolean | string }) => {
-    return typeof value === "string" ? (
-      <div className="text-sm leading-6 text-center break-words">
-        {value}
-        {value === TEAMS_ADDON && (
-          <HoverCard>
-            <HoverCardTrigger>
-              <InfoIcon className="inline-block size-3 ml-1" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-60">
-              <p className="text-sm">
-                Available as part of the Teams add-on on the Pro plan.
-              </p>
-            </HoverCardContent>
-          </HoverCard>
-        )}
-      </div>
-    ) : (
-      <div className="flex justify-center">
-        {value === true ? (
-          <CheckIcon className="h-5 w-5 text-primary" />
-        ) : (
-          <MinusIcon className="h-5 w-5 text-muted-foreground" />
-        )}
-      </div>
-    );
+  const FeatureCell = ({
+    value,
+  }: {
+    value: boolean | string | React.ReactNode;
+  }) => {
+    if (typeof value === "string") {
+      return (
+        <div className="text-sm leading-6 text-center break-words">
+          {value}
+          {value === TEAMS_ADDON && (
+            <HoverCard>
+              <HoverCardTrigger>
+                <InfoIcon className="inline-block size-3 ml-1" />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-60">
+                <p className="text-sm">
+                  Available as part of the Teams add-on on the Pro plan.
+                </p>
+              </HoverCardContent>
+            </HoverCard>
+          )}
+        </div>
+      );
+    } else if (typeof value === "boolean") {
+      return (
+        <div className="flex justify-center">
+          {value === true ? (
+            <CheckIcon className="h-5 w-5 text-primary" />
+          ) : (
+            <MinusIcon className="h-5 w-5 text-muted-foreground" />
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-sm leading-6 text-center break-words">{value}</div>
+      );
+    }
   };
 
   return (
@@ -1683,14 +1997,19 @@ const faqs = [
       "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
   },
   {
-    question: "What is a billable event?",
+    question: "What is a billable tracing unit?",
     answer:
-      "A billable event in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
+      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
   },
   {
     question: "How can I reduce my Langfuse Cloud bill?",
     answer:
-      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable events that you ingest. We have summarized how this can be done <a class='underline' href='/faq/all/cutting-costs'>here</a>.",
+      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable tracing units that you ingest. We have summarized how this can be done <a class='underline' href='/faq/all/cutting-costs'>here</a>. Additionally, with our new graduated pricing model, you automatically get lower rates per 100k tracing units as your volume increases.",
+  },
+  {
+    question: "How does the graduated pricing work?",
+    answer:
+      "Our graduated pricing means you pay different rates for different volume tiers. The first 100k tracing units are included in paid plans, then you pay $8/100k for tracing units 100k-1M, $7/100k for 1M-10M tracing units, $6.5/100k for 10M-50M tracing units, and $6/100k for 50M+ tracing units. This ensures you get better rates as you scale up your usage.",
   },
   {
     question: "Can I self-host Langfuse?",

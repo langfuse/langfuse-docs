@@ -5,23 +5,23 @@ tags: [cloud]
 
 # How do I cut my Langfuse Cloud bill?
 
-Langfuse Cloud [pricing](/pricing) is based on the number of ingested events per billing period.
+Langfuse Cloud [pricing](/pricing) is based on the number of ingested tracing units per billing period.
 
-`Billable Events = Traces + Observations + Scores` ([data model](/docs/tracing-data-model))
+`Billable Units = Traces + Observations + Scores` ([data model](/docs/tracing-data-model))
 
 Most cost spikes result from ingesting **too many traces or overly verbose observations**.
 You can **cut costs quickly by sampling fewer traces or logging only essential data**—all while preserving your core insights.
 
-You can track your event consumption in real-time via the "Langfuse Usage Management" dashboard:
+You can track your unit consumption in real-time via the "Langfuse Usage Management" dashboard:
 
 <Frame>
   ![Langfuse Usage Management
   Dashboard](/images/docs/cloud-usage-management-dashboard.png)
 </Frame>
 
-## Option 1: Reduce events per trace
+## Option 1: Reduce observations per trace
 
-Every observation within a trace counts toward your event total. Some observations may be overly detailed or irrelevant to your specific use case. Steps to remove them:
+Every observation within a trace counts toward your unit total. Some observations may be overly detailed or irrelevant to your specific use case. Steps to remove them:
 
 1. Review your traces to identify low-value or unnecessary observations.
 2. Update your integration/instrumentation to exclude these observations.
