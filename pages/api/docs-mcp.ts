@@ -254,7 +254,7 @@ function createDocsServer(): McpServer {
     "get-integration-docs-toc",
     {
       title: "Get Integration Documentation Table of Contents",
-      description: "Get the table of contents for the integration documentation.",
+      description: "Get a complete table of contents for all integration documentation. This tool does not accept any parameters.",
       inputSchema: {}
     },
     async () => {
