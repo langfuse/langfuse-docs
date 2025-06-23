@@ -1,0 +1,85 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Integrate Fireworks AI with Langfuse
+description: Guide on using Fireworks AI's open-source and proprietary AI models with Langfuse via the OpenAI SDK.
+category: Integrations
+---
+
+# Observability for Fireworks AI with Langfuse
+
+This guide shows you how to integrate Fireworks AI with Langfuse. Fireworks AI's API endpoints are fully [compatible](https://docs.fireworks.ai/tools-sdks/openai-compatibility) with the OpenAI SDK, allowing you to trace and monitor your AI applications seamlessly.
+
+> **What is Fireworks AI?** [Fireworks AI](https://fireworks.ai/) is a platform that provides API access to state-of-the-art open-source and proprietary AI models with OpenAI-compatible endpoints.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+
+<Steps>
+## Step 1: Install Dependencies
+
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Set your Fireworks API details
+os.environ["FIREWORKS_AI_API_BASE"] = "https://api.fireworks.ai/inference/v1"
+os.environ["FIREWORKS_AI_API_KEY"] = "fw_..."
+```
+
+## Step 3: Use Langfuse OpenAI Drop-in Replacement
+
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("FIREWORKS_AI_API_KEY"),
+  base_url=os.environ.get("FIREWORKS_AI_API_BASE")
+)
+```
+
+## Step 4: Run an Example
+
+
+```python
+response = client.chat.completions.create(
+  model="accounts/fireworks/models/llama-v3p1-8b-instruct",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Why is open source important?"},
+  ],
+  name = "Fireworks-AI-Trace" # name of the trace
+)
+print(response.choices[0].message.content)
+```
+
+## Step 5: See Traces in Langfuse
+
+After running the example, log in to Langfuse to view the detailed traces, including:
+
+- Request parameters
+- Response content
+- Token usage and latency metrics
+
+![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-fireworks-ai/fireworks-ai-example-trace.png)
+
+_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c11b0e4-eb40-49de-aee9-2ed11bed2839?timestamp=2025-03-05T13%3A31%3A34.781Z&observation=e9668bb4-29d7-4239-87be-e3019480f71f)_
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

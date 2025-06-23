@@ -10,45 +10,49 @@ description: Langfuse (open source) helps you trace and analyze LLM applications
 ## Traces and Observations
 
 A `trace` typically represents a single request or operation.
-It contains the overall input and output of the function, as well as metadata about the request, such as the user, the session, and tags.
-Usually, _a trace corresponds to a single api call of an application_.
+It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
-Each trace can contain multiple `observations` to log the individual steps of the execution.
+Each trace can contain multiple `observations` to log the individual steps of the execution. Usually, a trace corresponds to a single api call of an application.
 
-- Observations are of different types:
-  - `Events` are the basic building blocks. They are used to track discrete events in a trace.
-  - `Spans` represent durations of units of work in a trace.
-  - `Generations` are spans used to log generations of AI models. They contain additional attributes about the model, the prompt, and the completion. For generations, [token usage and costs](/docs/model-usage-and-cost) are automatically calculated.
-- Observations can be nested.
+import { CircleDot, MoveHorizontal, Fan, ListTree } from "lucide-react";
+
+### Observation types
+
+  - <CircleDot size={16} className="text-muted-green inline mr-1" /> `Events` are the basic building blocks. They are used to track discrete events in a trace.
+  - <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `Spans` represent durations of units of work in a trace.
+  - <Fan size={16} className="text-muted-magenta inline mr-1" /> `Generations` are spans used to log generations of AI models incl. prompts, [token usage and costs](/docs/model-usage-and-cost).
+
+### Observation nesting
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
-<div className="border rounded py-4 text-center bg-card">
+<div className="border rounded py-4 px-4 flex flex-col items-center justify-center bg-card">
 
-**Hierarchical structure of traces in Langfuse**
+Hierarchical structure of traces in Langfuse
+
+<div className="flex-1 flex items-center justify-center ">
 
 ```mermaid
 classDiagram
     Trace "1" *-- "n" Observation
-    Observation <|-- Event
-    Observation <|-- Span
-    Observation <|-- Generation
     Observation o-- Observation: Nesting
 ```
 
 </div>
 
-<div className="border rounded py-4 text-center block dark:hidden bg-card">
+</div>
 
-**Example trace in Langfuse UI**
+<div className="border rounded py-4 px-4 text-center block dark:hidden bg-card">
+
+Example trace in Langfuse UI
 
 ![Trace in Langfuse UI](/images/docs/tracing-observation-tree-light.png)
 
 </div>
 
-<div className="border rounded py-4 text-center bg-background hidden dark:block">
+<div className="border rounded py-4 px-4 text-center bg-card hidden dark:block">
 
-**Example trace in Langfuse UI**
+Example trace in Langfuse UI
 
 ![Trace in Langfuse UI](/images/docs/tracing-observation-tree-dark.png)
 
@@ -66,9 +70,11 @@ Please refer to the [Sessions](/docs/tracing-features/sessions) documentation to
 
 <div className="grid grid-cols-2 mt-6 gap-2 md:gap-4">
 
-<div className="border rounded py-4 text-center bg-card">
+<div className="border rounded py-4 text-center px-4 flex flex-col bg-card">
 
-**Optionally, sessions aggregate traces**
+Optionally, sessions aggregate traces
+
+<div className="flex-1 flex items-center justify-center">
 
 ```mermaid
 classDiagram
@@ -77,9 +83,11 @@ classDiagram
 
 </div>
 
-<div className="border rounded pt-4 px-2 pb-2 text-center block bg-card">
+</div>
 
-**Example session in Langfuse UI**
+<div className="border rounded py-4 px-4 text-center block bg-card">
+
+Example session in Langfuse UI
 
 <Frame border fullWidth>
   ![Session view](/images/docs/session.png)
@@ -91,8 +99,9 @@ classDiagram
 
 ## Scores
 
-Traces, observations, sessions and dataset runs can be evaluated using [scores](/docs/scores). Scores are flexible objects that store evaluation metrics and can be:
+[Scores](/docs/scores) are flexible objects used to evaluate traces, observations, sessions and dataset runs. 
 
+They can be:
 - Numeric, categorical, or boolean values
 - Associated with a trace, a session, or a dataset run (one and only one is required)
 - For trace level scores only: Linked to a specific observation within a trace (optional)
@@ -103,31 +112,8 @@ Typically, session-level scores are used for comprehensive evaluation of convers
 
 Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
 
-<div className="border rounded py-4 mt-6 text-center bg-card">
+## Billable Events 
 
-**Optionally, scores can add evaluation metrics to traces, sessions, and dataset runs**
+The sum of `Traces`, `Observations` and `Scores` is used to calculate the billable events for a given month.
 
-```mermaid
-classDiagram
-  namespace Evaluation {
-    class Score
-    class ScoreConfig
-  }
-
-  namespace Tracing {
-    class Trace
-    class Observation
-    class Session
-    class DatasetRun
-  }
-
-  Trace *-- Observation
-  Session "1" o-- "n" Trace
-  Score --> Session : optional
-  Score --> Trace : optional
-  Score --> DatasetRun : optional
-  Score --> Observation : optional, reference observation within a trace
-  Score --> ScoreConfig : optional, ensure schema
-```
-
-</div>
+_Note: while the name might be misleading observations of type "event" are not the only billable events. [See pricing page](/pricing)_
