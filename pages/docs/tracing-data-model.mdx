@@ -18,9 +18,12 @@ import { CircleDot, MoveHorizontal, Fan, ListTree } from "lucide-react";
 
 ### Observation types
 
-  - <CircleDot size={16} className="text-muted-green inline mr-1" /> `Events` are the basic building blocks. They are used to track discrete events in a trace.
-  - <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `Spans` represent durations of units of work in a trace.
-  - <Fan size={16} className="text-muted-magenta inline mr-1" /> `Generations` are spans used to log generations of AI models incl. prompts, [token usage and costs](/docs/model-usage-and-cost).
+- <CircleDot size={16} className="text-muted-green inline mr-1" /> `Events` are the
+  basic building blocks. They are used to track discrete events in a trace.
+- <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `Spans` represent
+  durations of units of work in a trace.
+- <Fan size={16} className="text-muted-magenta inline mr-1" /> `Generations` are
+  spans used to log generations of AI models incl. prompts, [token usage and costs](/docs/model-usage-and-cost).
 
 ### Observation nesting
 
@@ -99,9 +102,10 @@ Example session in Langfuse UI
 
 ## Scores
 
-[Scores](/docs/scores) are flexible objects used to evaluate traces, observations, sessions and dataset runs. 
+[Scores](/docs/scores) are flexible objects used to evaluate traces, observations, sessions and dataset runs.
 
 They can be:
+
 - Numeric, categorical, or boolean values
 - Associated with a trace, a session, or a dataset run (one and only one is required)
 - For trace level scores only: Linked to a specific observation within a trace (optional)
@@ -112,8 +116,18 @@ Typically, session-level scores are used for comprehensive evaluation of convers
 
 Please refer to the [scores documentation](/docs/scores) to get started. For more details on score types and attributes, refer to the [score data model](/docs/scores/data-model) documentation.
 
-## Billable Events 
+## Billable Tracing Units
 
-The sum of `Traces`, `Observations` and `Scores` is used to calculate the billable events for a given month.
+Langfuse Cloud [pricing](/pricing) is based on the number of ingested tracing units per billing period.
 
-_Note: while the name might be misleading observations of type "event" are not the only billable events. [See pricing page](/pricing)_
+`Billable Units = Traces + Observations + Scores` (see above)
+
+### FAQ
+
+> How can I track my Langfuse Cloud usage?
+
+Use the Usage Monitoring Report in the Dashboards tab in Langfuse to analyze your Langfuse Cloud usage.
+
+> How can I optimize my Langfuse Cloud usage to reduce cost?
+
+If your application scales and you want to optimize Langfuse Cloud cost, please check out [this guide](/faq/all/cutting-costs).
