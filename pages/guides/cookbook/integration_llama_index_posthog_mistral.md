@@ -4,55 +4,52 @@ description: Learn how to build and monitor a RAG application using LlamaIndex w
 category: Integrations
 ---
 
-# Monitoring LlamaIndex applications with PostHog and Langfuse
+# Analyze and Debug LlamaIndex Applications with PostHog and Langfuse
 
-In this cookbook, we show you how to build a RAG application with [LlamaIndex](https://www.llamaindex.ai/), observe the steps with [Langfuse](https://langfuse.com/) and analyze the data in [PostHog](https://posthog.com/).
-
-## What is LlamaIndex?
-
-LlamaIndex [(GitHub)](https://github.com/run-llama/llama_index) is a data framework designed to connect LLMs with external data sources. It helps structure, index, and query data effectively. This makes it easier for developers to build advanced LLM applications.
+In this cookbook, we show you how to build a RAG application with [LlamaIndex](https://www.llamaindex.ai/), observe the steps with [Langfuse](https://langfuse.com/), and analyze the data in [PostHog](https://posthog.com/).
 
 ## What is Langfuse?
-
-Langfuse is an open-source LLM engineering platform. It includes features such as [traces](https://langfuse.com/docs/tracing), [evals](https://langfuse.com/docs/scores/overview), and [prompt management](https://langfuse.com/docs/prompts/get-started) to help you debug and improve your LLM app.
+[Langfuse](https://langfuse.com/) is an open-source LLM engineering platform designed to help engineers understand and optimize user interactions with their language model applications. It provides tools for tracking, debugging, and improving LLM performance in real-world use cases. Langfuse is available both as a managed [cloud solution](https://cloud.langfuse.com/) and for [local or self-hosted](https://langfuse.com/docs/deployment/feature-overview) deployments.
 
 ## What is PostHog?
-
 [PostHog](https://posthog.com/) is a popular choice for product analytics. Combining Langfuse's LLM analytics with PostHog's product analytics makes it easy to:
 
 - **Analyze User Engagement**: Determine how often users interact with specific LLM features and understand their overall activity patterns.
 - **Correlate Feedback with Behavior**: See how user feedback captured in Langfuse correlates with user behavior in PostHog.
 - **Monitor LLM Performance**: Track and analyze metrics such as model cost, latency, and user feedback to optimize LLM performance.
 
+## What is LlamaIndex?
+LlamaIndex [(GitHub)](https://github.com/run-llama/llama_index) is a data framework designed to connect LLMs with external data sources. It helps structure, index, and query data effectively. This makes it easier for developers to build advanced LLM applications.
 
-## How to build a Simple RAG app with LlamaIndex and Mistral
 
-In this example, we create a chat app that answers questions about how to care for hedgehogs. LlamaIndex vectorizes a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) using the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). Then, all model generations are traced using Langfuse's [LLamaIndex integration](https://langfuse.com/docs/integrations/llama-index/get-started).
+## How to Build a Simple RAG Application with LlamaIndex and Mistral
 
-Lastly, the [PostHog integration](https://langfuse.com/docs/analytics/integrations/posthog) enables you to view detailed analytics about your hedgehog app directly in PostHog.
+In this tutorial, we demonstrate how to create a chat application that provides answers to questions about hedgehog care. LlamaIndex is used to vectorize a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) with the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). All model generations are then traced using Langfuse's [LlamaIndex integration](https://langfuse.com/docs/integrations/llama-index/get-started).
+
+Finally, the [PostHog integration](https://langfuse.com/docs/analytics/posthog) allows you to view detailed analytics about your hedgehog application directly in PostHog.
 
 
 ### Step 1: Set up LlamaIndex and Mistral
 
-First, we set our Mistral API key as an environment variable. If you haven't already, [sign up for a Mistral account](https://console.mistral.ai/). Then [subscribe](https://console.mistral.ai/billing/) to a free trial or billing plan, after which you'll be able to [generate an API key](https://console.mistral.ai/api-keys/) (💡 You can use any other model supported by LlamaIndex; we just use Mistral in this cookbook).
+First, we set our Mistral API key as an environment variable. If you haven't already, [sign up for a Mistral acccount](https://console.mistral.ai/). Then [subscribe](https://console.mistral.ai/billing/) to a free trial or billing plan, after which you'll be able to [generate an API key](https://console.mistral.ai/api-keys/) (💡 You can use any other model supported by LlamaIndex; we just use Mistral in this cookbook).
 
 Then, we use LlamaIndex to initialize both a Mistral language model and an embedding model. We then set these models in the LlamaIndex `Settings` object:
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
 
 ```python
-%pip install "langfuse<3.0.0" llama-index llama-index-llms-mistralai llama-index-embeddings-mistralai nest_asyncio --upgrade
+%pip install llama-index llama-index-llms-mistralai llama-index-embeddings-mistralai nest_asyncio --upgrade
 ```
 
 
 ```python
 # Set the Mistral API key
 import os
-os.environ["MISTRAL_API_KEY"] = "***Your-Mistral-API-Key***"
+
+os.environ["MISTRAL_API_KEY"] = "NwdduAIL1px36ybmct1GaUPPA2grxLJk"
 
 # Ensures that sync and async code can be used together without issues
 import nest_asyncio
+
 nest_asyncio.apply()
 
 # Import and set up llama index
@@ -75,43 +72,49 @@ Next, we initialize the Langfuse client. [Sign up](https://cloud.langfuse.com/au
 
 
 ```python
-%pip install langfuse
+%pip install langfuse openinference-instrumentation-llama-index wget
 ```
 
 
 ```python
 import os
 
-# Get keys for your project from the project settings page
-# https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-5855d85e-3943-497e-bd10-f50ad414bcba" 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-aec2d812-0e49-4f45-a1db-7f6fe6d8a108" 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
-
-# Your openai key
-os.environ["OPENAI_API_KEY"] = ""
 ```
+
+With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
-from langfuse import Langfuse
-
-langfuse = Langfuse()
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+ 
 ```
 
-Lastly, we register Langfuse's `LlamaIndexCallbackHandler` in the LlamaIndex `Settings.callback_manager` at the root of the app.
+    Langfuse client is authenticated and ready!
+
+
+Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
 Find out more about the Langfuse's LlamaIndex integration [here](https://langfuse.com/docs/integrations/llama-index/get-started).
 
 
 ```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
-
-langfuse_callback_handler = LlamaIndexCallbackHandler()
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+ 
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
 ```
 
 ### Step 3: Download data
@@ -120,20 +123,17 @@ We download the file we want to use for RAG. In this example, we use a [hedgehog
 
 
 ```python
-!wget 'https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf' -O './hedgehog.pdf'
+import wget
+
+url = "https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf"
+wget.download(url, "./hedgehog.pdf")   # saves as ./hedgehog.pdf
 ```
 
-    --2024-09-20 13:16:39--  https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf
-    Resolving www.pro-igel.de (www.pro-igel.de)... 152.53.23.200
-    Connecting to www.pro-igel.de (www.pro-igel.de)|152.53.23.200|:443... connected.
-    HTTP request sent, awaiting response... 200 OK
-    Length: 1160174 (1.1M) [application/pdf]
-    Saving to: ‘./hedgehog.pdf’
-    
-    ./hedgehog.pdf      100%[===================>]   1.11M  2.03MB/s    in 0.5s    
-    
-    2024-09-20 13:16:40 (2.03 MB/s) - ‘./hedgehog.pdf’ saved [1160174/1160174]
-    
+
+
+
+    './hedgehog (1).pdf'
+
 
 
 Next, we load the pdf using the LlamaIndex [`SimpleDirectoryReader`](https://docs.llamaindex.ai/en/stable/module_guides/loading/simpledirectoryreader/).
@@ -142,7 +142,9 @@ Next, we load the pdf using the LlamaIndex [`SimpleDirectoryReader`](https://doc
 ```python
 from llama_index.core import SimpleDirectoryReader
 
-hedgehog_docs = SimpleDirectoryReader(input_files=["./hedgehog.pdf"]).load_data()
+hedgehog_docs = SimpleDirectoryReader(
+    input_files=["./hedgehog.pdf"]
+).load_data()
 ```
 
 ### Step 4: Build RAG on the hedgehog doc
@@ -165,7 +167,7 @@ response = hedgehog_query_engine.query("Which hedgehogs require help?")
 print(response)
 ```
 
-    Hedgehogs that require help are those that are sick, injured, and helpless, such as orphaned hoglets. These hedgehogs in need may be temporarily taken into human care and must be released into the wild as soon as they can survive there independently.
+    Hedgehogs that may require help include young hedgehogs in need of assistance during autumn, those in need of care, orphaned hoglets, and hedgehogs in need of rehabilitation before release. Additionally, hedgehogs facing dangers such as poison, pesticides, and hazards in built-up areas may also need assistance.
 
 
 All steps of the LLM chain are now tracked in Langfuse.
@@ -185,12 +187,12 @@ To get the context of the current observation, we use the [`observe()` decorator
 
 ```python
 from langfuse import observe, get_client
+
 langfuse = get_client()
 
 # Langfuse observe() decorator to automatically create a trace for the top-level function and spans for any nested functions.
 @observe()
 def hedgehog_helper(user_message):
-
     response = hedgehog_query_engine.query(user_message)
     trace_id = langfuse.get_current_trace_id()
 
@@ -202,22 +204,15 @@ trace_id = hedgehog_helper("Can I keep the hedgehog as a pet?")
 
 # Score the trace, e.g. to add user feedback using the trace_id
 langfuse.create_score(
-    trace_id = trace_id,
+    trace_id=trace_id,
     name="user-explicit-feedback",
     value=0.9,
-    data_type="NUMERIC", # optional, inferred if not provided
-    comment="Good to know!", # optional
+    data_type="NUMERIC",  # optional, inferred if not provided
+    comment="Good to know!",  # optional
 )
 ```
 
-    Based on the provided context, it is not recommended to keep wild hedgehogs as pets. The Federal Nature Conservation Act protects hedgehogs as a native mammal species, making it illegal to chase, catch, injure, kill, or take their nesting and refuge places. Exceptions apply only to sick, injured, and helpless hedgehogs, which may be temporarily taken into human care and released into the wild as soon as they can survive independently. It is important to respect the natural habitats and behaviors of wild animals, including hedgehogs.
-
-
-
-
-
-    <langfuse.client.StatefulClient at 0x7c7cd656e2f0>
-
+    Based on the provided context, there is no information regarding keeping hedgehogs as pets. The text primarily discusses the biology, behavior, and protection of wild hedgehogs. It is important to note that laws and regulations regarding the keeping of wild animals as pets can vary greatly, so it is always best to consult with local wildlife authorities or experts.
 
 
 ### Step 6: See your data in PostHog
@@ -244,11 +239,10 @@ To create your own dashboard from a template:
 2. Click the **New dashboard** button in the top right.
 3. Select **LLM metrics – Langfuse** from the list of templates.
 
-![Posthog Dashboard with user feedback and number of generations](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-1.png)
+![Posthog Dashboard showing user feedback and number of traces](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-1.png)
 
-![Posthog Dashboard with latency and cost of AI application](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-2.png)
+![Posthog Dashboard showing latency and costs](https://langfuse.com/images/cookbook/example-posthog-llamaindex-mistral/dashboard-posthog-2.png)
 
 ## Feedback
----
 
-If you have any feedback or requests, please create a GitHub [Issue](https://langfuse.com/issue) or share your idea with the community on [Discord](https://discord.langfuse.com/).
+If you have any feedback or requests, please create a GitHub [Issue](https://github.com/orgs/langfuse/discussions) or share your idea with the community on [Discord](https://discord.langfuse.com/).

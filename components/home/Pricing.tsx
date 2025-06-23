@@ -1999,7 +1999,7 @@ const faqs = [
   {
     question: "What is a billable tracing unit?",
     answer:
-      "A billable tracing unit in Langfuse is any tracing data point you send to our platform - this includes traces (complete LLM interactions), observations (individual steps within a trace like prompts or generations), and scores (evaluations of your AI outputs). For a detailed explanation, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
+      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
   },
   {
     question: "How can I reduce my Langfuse Cloud bill?",

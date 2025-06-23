@@ -110,7 +110,7 @@ def transform_content_to_mdx(markdown_content):
     
     # --- Stage 5: Component Transformation ---
     component_comment_pattern = re.compile(
-        r'<!--\s*COMPONENT\s*(.*?)\s*-->',
+        r'<!--\s*(?:COMPONENT|MARKDOWN_COMPONENT)\s*(.*?)\s*-->',
         re.DOTALL | re.MULTILINE
     )
     imports_seen: set[str] = set()
@@ -120,7 +120,7 @@ def transform_content_to_mdx(markdown_content):
         was_transformed_overall = True
         attr_string = match_obj.group(1)
         attrs = {k: v for k, v in attribute_parser_regex.findall(attr_string)}
-        title = attrs.pop("title", "").strip()
+        title = attrs.pop("title", "").strip() or attrs.pop("name", "").strip()
         path  = attrs.pop("path", "").strip()
         other_props = " ".join(f'{k}="{v}"' for k, v in attrs.items())
         import_stmt = ""
