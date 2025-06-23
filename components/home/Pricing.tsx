@@ -7,14 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Check,
-  Plus,
-  Minus,
-  ExternalLink,
-  InfoIcon,
-  Calculator,
-} from "lucide-react";
+import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -148,11 +141,12 @@ const GraduatedPricingWithCalculator = ({ planName }: { planName: string }) => {
   const planConfig = PLAN_CONFIGS.find((p) => p.name === planName);
   return (
     <>
-      Graduated pricing: $8-6/100k units{" "}
+      Graduated pricing: $8-6/100k units (
       <PricingCalculatorModal
         baseFee={planConfig?.baseFee || 0}
         planName={planName}
       />
+      )
     </>
   );
 };
@@ -189,13 +183,9 @@ const PricingCalculatorModal = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-        >
-          <Calculator className="h-4 w-4" />
-        </Button>
+        <span className="text-sm hover:text-primary underline cursor-pointer">
+          pricing calculator
+        </span>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
