@@ -50,11 +50,16 @@ import {
 
 // Graduated pricing tiers
 const pricingTiers = [
-  { min: 0, max: 100000, rate: 0, description: "0-100k events" },
-  { min: 100001, max: 1000000, rate: 8, description: "0-1M events" },
-  { min: 1000001, max: 10000000, rate: 7, description: "1-10M events" },
-  { min: 10000001, max: 50000000, rate: 6.5, description: "10-50M events" },
-  { min: 50000001, max: Infinity, rate: 6, description: "50M+ events" },
+  { min: 0, max: 100000, rate: 0, description: "0-100k units" },
+  { min: 100001, max: 1000000, rate: 8, description: "0-1M units" },
+  { min: 1000001, max: 10000000, rate: 7, description: "1-10M units" },
+  {
+    min: 10000001,
+    max: 50000000,
+    rate: 6.5,
+    description: "10-50M units",
+  },
+  { min: 50000001, max: Infinity, rate: 6, description: "50M+ units" },
 ];
 
 // Calculate graduated pricing
@@ -143,11 +148,12 @@ const GraduatedPricingWithCalculator = ({ planName }: { planName: string }) => {
   const planConfig = PLAN_CONFIGS.find((p) => p.name === planName);
   return (
     <>
-      Graduated pricing: $8-6/100k events{" "}
+      Graduated pricing: $8-6/100k units (
       <PricingCalculatorModal
         baseFee={planConfig?.baseFee || 0}
         planName={planName}
       />
+      )
     </>
   );
 };
@@ -184,19 +190,16 @@ const PricingCalculatorModal = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-        >
-          <Calculator className="h-4 w-4" />
-        </Button>
+        <span className="text-sm hover:text-primary underline cursor-pointer">
+          pricing calculator
+        </span>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Pricing Calculator</DialogTitle>
           <DialogDescription>
-            Enter your monthly events to see the graduated pricing breakdown
+            Enter your monthly tracing units to see the graduated pricing
+            breakdown
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -217,18 +220,18 @@ const PricingCalculatorModal = ({
             </select>
           </div>
           <div>
-            <Label htmlFor="events">Monthly Events</Label>
+            <Label htmlFor="events">Monthly Tracing Units</Label>
             <Input
               id="events"
               type="text"
               value={monthlyEvents}
               onChange={handleEventsChange}
-              placeholder="Enter number of events per month"
+              placeholder="Enter number of tracing units per month"
               className="mt-1"
             />
           </div>
 
-          <div className="bg-muted p-6 rounded-lg">
+          <div className="bg-muted p-6 rounded">
             {currentBaseFee > 0 ? (
               <div className="text-center">
                 <div className="flex items-center justify-center gap-4 text-lg font-medium">
@@ -281,8 +284,8 @@ const PricingCalculatorModal = ({
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-left">Tier</TableHead>
-                  <TableHead className="text-center">Rate</TableHead>
-                  <TableHead className="text-center">Your Events</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
+                  <TableHead className="text-right">Your Units</TableHead>
                   <TableHead className="text-right">Cost</TableHead>
                 </TableRow>
               </TableHeader>
@@ -297,8 +300,8 @@ const PricingCalculatorModal = ({
                       <TableCell className="font-medium">
                         {tier.description}
                       </TableCell>
-                      <TableCell className="text-center">{tierRate}</TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-right">{tierRate}</TableCell>
+                      <TableCell className="text-right">
                         {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
                       </TableCell>
                       <TableCell className="text-right font-medium">
@@ -308,12 +311,10 @@ const PricingCalculatorModal = ({
                   );
                 })}
                 {/* Total row */}
-                <TableRow className="border-t-2 border-primary/20 bg-muted/30">
-                  <TableCell className="font-semibold">
-                    Total Usage Cost
-                  </TableCell>
-                  <TableCell className="text-center">—</TableCell>
-                  <TableCell className="text-center">—</TableCell>
+                <TableRow className="border-t-2">
+                  <TableCell className="font-semibold">Total</TableCell>
+                  <TableCell className="text-right"></TableCell>
+                  <TableCell className="text-right">{monthlyEvents}</TableCell>
                   <TableCell className="text-right font-semibold text-primary">
                     {formatCurrency(calculatedPrice)}
                   </TableCell>
@@ -402,7 +403,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Free",
       mainFeatures: [
         "All platform features (with limits)",
-        "50k events / month included",
+        "50k tracing units / month included",
         "30 days data access",
         "2 users",
         "Community support (Discord & GitHub)",
@@ -424,7 +425,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Hobby",
         <>
-          100k events / month included, additional:{" "}
+          100k tracing units / month included, additional:{" "}
           <GraduatedPricingWithCalculator planName="Core" />
         </>,
         "90 days data access",
@@ -445,7 +446,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Core",
         <>
-          100k events / month included, additional:{" "}
+          100k tracing units / month included, additional:{" "}
           <GraduatedPricingWithCalculator planName="Pro" />
         </>,
         "Unlimited data access",
@@ -664,13 +665,13 @@ const sections: Section[] = [
       {
         name: "Included usage",
         description:
-          "Events are the collection of created traces, observations, and scores in Langfuse.",
+          "Tracing units are the collection of created traces, observations, and scores in Langfuse.",
         href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
-            Hobby: "50k events",
-            Core: "100k events",
-            Pro: "100k events",
+            Hobby: "50k units",
+            Core: "100k units",
+            Pro: "100k units",
             Enterprise: "Custom",
           },
           selfHosted: {
@@ -682,7 +683,7 @@ const sections: Section[] = [
       {
         name: "Additional usage",
         description:
-          "Events are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
+          "Tracing units are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
         href: "/docs/tracing-data-model",
         tiers: {
           cloud: {
@@ -2003,19 +2004,19 @@ const faqs = [
       "You can view the <a class='underline' href='/demo'>public demo project</a> or sign up for a <a class='underline' href='https://cloud.langfuse.com'>free account</a> to try Langfuse with your own data. The Hobby plan is completeley free and does not require a credit card.",
   },
   {
-    question: "What is a billable event?",
+    question: "What is a billable tracing unit?",
     answer:
-      "A billable event in Langfuse is any tracing data point you send to our platform - this includes traces (complete LLM interactions), observations (individual steps within a trace like prompts or generations), and scores (evaluations of your AI outputs). For a detailed explanation, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
+      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
   },
   {
     question: "How can I reduce my Langfuse Cloud bill?",
     answer:
-      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable events that you ingest. We have summarized how this can be done <a class='underline' href='/faq/all/cutting-costs'>here</a>. Additionally, with our new graduated pricing model, you automatically get lower rates per 100k events as your volume increases.",
+      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable tracing units that you ingest. We have summarized how this can be done <a class='underline' href='/faq/all/cutting-costs'>here</a>. Additionally, with our new graduated pricing model, you automatically get lower rates per 100k tracing units as your volume increases.",
   },
   {
     question: "How does the graduated pricing work?",
     answer:
-      "Our graduated pricing means you pay different rates for different volume tiers. The first 100k events are included in paid plans, then you pay $8/100k for events 100k-1M, $7/100k for 1M-10M events, $6.5/100k for 10M-50M events, and $6/100k for 50M+ events. This ensures you get better rates as you scale up your usage.",
+      "Our graduated pricing means you pay different rates for different volume tiers. The first 100k tracing units are included in paid plans, then you pay $8/100k for tracing units 100k-1M, $7/100k for 1M-10M tracing units, $6.5/100k for 10M-50M tracing units, and $6/100k for 50M+ tracing units. This ensures you get better rates as you scale up your usage.",
   },
   {
     question: "Can I self-host Langfuse?",
