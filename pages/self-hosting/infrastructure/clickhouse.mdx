@@ -249,7 +249,9 @@ Keep in mind that metadata is still stored on local disk, i.e. you need to use a
 
   - **Do not enable bucket versioning**: ClickHouse will write and update many files within its merge processing. Having versioned buckets will retain the full history and quickly grow your storage consumption.
   - **Do not enable lifecycle policies for deletion**: Avoid deletion lifecycle policies as this may break ClickHouse's internal consistency model. Instead, delete data via the Langfuse application or using ClickHouse TTLs.
-  - **Do not enable lifecycle policies for aborted multi-part uploads**.
+  - **Enable lifecycle policies for aborted multi-part uploads**: If ClickHouse attempts an upload, but aborts it before completion undesirable artifacts may remain.
+
+  This is being derived from this [ClickHouse issue](https://github.com/ClickHouse/clickhouse-docs/issues/1385).
 
 </Callout>
 
