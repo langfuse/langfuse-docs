@@ -4,6 +4,7 @@
   "description": "Langfuse docs",
   "scripts": {
     "dev": "next dev -p 3333",
+    "prebuild": "node scripts/fetch-github-stars.js",
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
     "start": "next start -p 3333",

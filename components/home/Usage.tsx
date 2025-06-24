@@ -19,6 +19,7 @@ import sumupLight from "./img/sumup_light.svg";
 import sumupDark from "./img/sumup_dark.svg";
 import telusLight from "./img/telus_light.png";
 import telusDark from "./img/telus_dark.png";
+import { getGitHubStars } from "@/lib/github-stars";
 
 type User = {
   name: string;
@@ -79,13 +80,14 @@ const users: User[] = [
   },
 ];
 
-const stats = [
-  { name: "SDK installs / month", value: 7_000_000 },
-  { name: "GitHub stars", value: 12_500 },
-  { name: "Docker pulls", value: 6_000_000 },
-];
+export const Usage = () => {
+  const stats = [
+    { name: "SDK installs / month", value: 7_000_000 },
+    { name: "GitHub stars", value: getGitHubStars() },
+    { name: "Docker pulls", value: 6_000_000 },
+  ];
 
-export const Usage = () => (
+  return (
   <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
     <div className="py-14">
       <h2 className="text-center text-lg font-semibold leading-8 mb-8">
@@ -134,4 +136,5 @@ export const Usage = () => (
       </div>
     </div>
   </HomeSection>
-);
+  );
+};

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { getGitHubStars } from "@/lib/github-stars";
 import IconGithub from "./icons/github";
 
 export const GithubMenuBadge = () => (
@@ -19,23 +19,14 @@ export const GithubMenuBadge = () => (
 );
 
 export const StarCount = () => {
-  const [stars, setStars] = useState<number | null>(null);
+  const stars = getGitHubStars();
 
-  useEffect(() => {
-    if (!stars)
-      fetch("/api/stargazer-count")
-        .then((data) =>
-          data.json().then((json) => setStars(json.stargazers_count))
-        )
-        .catch((err) => console.error("Error while loading GitHub stars", err));
-  }, []);
-
-  return stars ? (
+  return (
     <span>
-      {(stars as number).toLocaleString("en-US", {
+      {stars.toLocaleString("en-US", {
         compactDisplay: "short",
         notation: "compact",
       })}
     </span>
-  ) : null;
+  );
 };
