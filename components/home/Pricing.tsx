@@ -96,6 +96,7 @@ type PlanConfig = {
 const PLAN_CONFIGS: PlanConfig[] = [
   { name: "Core", baseFee: 59 },
   { name: "Pro", baseFee: 199 },
+  { name: "Pro + Teams", baseFee: 499 }
 ];
 
 // Utility functions
@@ -132,10 +133,11 @@ const calculateTierBreakdown = (
   } else {
     // Paid tiers
     if (events > tier.min) {
-      const tierStart = Math.max(100000, tier.min);
+      // Fix: Adjust tierStart to be exactly tier.min for correct boundary calculation
+      const tierStart = tier.min;
       const tierEnd =
         tier.max === Infinity ? events : Math.min(events, tier.max);
-      eventsInTier = Math.max(0, tierEnd - tierStart);
+      eventsInTier = Math.max(0, tierEnd - tierStart + 1);
       costForTier = (eventsInTier / 100000) * tier.rate;
     }
     tierRate = `$${tier.rate}/100k`;
