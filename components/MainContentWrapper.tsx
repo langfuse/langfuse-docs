@@ -7,12 +7,10 @@ import {
   Copy as CopyIcon,
   Check as CheckIcon,
   LifeBuoy,
-  MessageSquare,
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { showChat } from "./supportChat";
 import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
@@ -234,10 +232,6 @@ export const DocsSupport = () => {
           <span>Support</span>
           <LifeBuoy className="h-4 w-4 ml-2" />
         </a>
-      </Button>
-      <Button variant="outline" size="sm" onClick={() => showChat()}>
-        <span>Chat</span>
-        <MessageSquare className="h-4 w-4 ml-2" />
       </Button>
     </div>
   );

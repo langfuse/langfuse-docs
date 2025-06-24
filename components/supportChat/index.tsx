@@ -41,7 +41,12 @@ export const PlainChat = () => {
             launcherBackgroundColor: "#666666", // These can also be passed in this format { light: '#FFFFFF', dark: '#000000' }
             launcherIconColor: "#FFFFFF",
           },
-
+          chatButtons: [
+            {
+              icon: "email",
+              text: "Contact Support",
+            },
+          ],
           position: {
             right: "25px",
             bottom: "80px",
