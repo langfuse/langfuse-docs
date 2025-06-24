@@ -1,0 +1,1 @@
+export const GITHUB_STARS = 9999;
