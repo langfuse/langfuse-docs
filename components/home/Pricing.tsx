@@ -7,14 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Check,
-  Plus,
-  Minus,
-  ExternalLink,
-  InfoIcon,
-  Calculator,
-} from "lucide-react";
+import { Check, Plus, Minus, ExternalLink, InfoIcon } from "lucide-react";
 import { Disclosure } from "@headlessui/react";
 import Link from "next/link";
 import { Header } from "../Header";
@@ -96,7 +89,7 @@ type PlanConfig = {
 const PLAN_CONFIGS: PlanConfig[] = [
   { name: "Core", baseFee: 59 },
   { name: "Pro", baseFee: 199 },
-  { name: "Pro + Teams", baseFee: 499 }
+  { name: "Pro + Teams", baseFee: 499 },
 ];
 
 // Utility functions
@@ -240,7 +233,15 @@ const PricingCalculatorModal = ({
             </select>
           </div>
           <div>
-            <Label htmlFor="events">Monthly Units</Label>
+            <Label htmlFor="events" className="flex items-center gap-1">
+              Monthly Units
+              <Link
+                href="/docs/tracing-data-model#billable-units"
+                target="_blank"
+              >
+                <InfoIcon className="size-3" />
+              </Link>
+            </Label>
             <Input
               id="events"
               type="text"
