@@ -28,7 +28,7 @@ Steps after updating notebooks:
 2. Run `bash scripts/update_cookbook_docs.sh`
 3. Commit the changed markdown files
 
-**Note**: All `.md` files in the `pages/` directory are automatically generated from Jupyter notebooks. Do not edit them manually as they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.
+**Note**: All `.md` files or `.mdx` files that contain "source: ⚠️ Jupyter Notebook" on top in the `pages/` directory are automatically generated from Jupyter notebooks. Do not edit them manually as they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.
 
 ## Media
 
