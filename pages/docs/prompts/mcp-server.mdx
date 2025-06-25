@@ -9,10 +9,6 @@ The Langfuse Prompt [Model Context Protocol](https://github.com/modelcontextprot
 
 The MCP Server is open source and available on [GitHub](https://github.com/langfuse/mcp-server-langfuse).
 
-<Callout type="info">
-**Updated for Latest Cursor Versions**: This documentation has been updated to reflect the improved MCP support in Cursor 0.46+ with dedicated MCP settings and streamlined JSON configuration. For older versions, legacy instructions are provided below.
-</Callout>
-
 ## Demo
 
 This is a brief demo of the Langfuse Prompt MCP Server in action in Claude Desktop.
@@ -104,18 +100,16 @@ Make sure to replace the environment variables with your actual Langfuse API key
 
 <Tab>
 
-**For Cursor versions 0.46+ (Recommended)**
-
 1. Open Cursor Settings (`Cmd/Ctrl + Shift + J`)
-2. Navigate to the **MCP** tab in the left sidebar
-3. Click **"Add new MCP server"**
+2. Navigate to the **Tools & Integrations** tab in the left sidebar
+3. Click **"Add Custom MCP"**
 4. This will open the `mcp.json` configuration file
 5. Add your Langfuse MCP server configuration:
 
 ```json
 {
   "mcpServers": {
-    "langfuse_prompts": {
+    "langfuse-prompts": {
       "command": "node",
       "args": ["<absolute-path>/build/index.js"],
       "env": {
@@ -131,62 +125,11 @@ Make sure to replace the environment variables with your actual Langfuse API key
 6. Save the file and restart Cursor
 7. The server should appear in the MCP settings with a green dot indicating it's active
 
-**Configuration File Locations:**
-- **Project-specific**: Create `.cursor/mcp.json` in your project directory
-- **Global**: The configuration is stored in `~/.cursor/mcp.json` for use across all projects
-
-**Important Notes:**
-- Use underscores (`_`) instead of dashes (`-`) in server names and tool names for better compatibility
-- Make sure to replace the environment variables with your actual Langfuse API keys
-- The server will now be available to use in Cursor's agent mode
-
-**For older Cursor versions (Legacy)**
-
-If you're using an older version of Cursor, you can add the server through the settings interface:
-
-- Name: `Langfuse Prompts`
-- Type: `command`
-- Command:
-  ```bash
-  LANGFUSE_PUBLIC_KEY="your-public-key" LANGFUSE_SECRET_KEY="your-secret-key" LANGFUSE_BASEURL="https://cloud.langfuse.com" node absolute-path/build/index.js
-  ```
-
 </Tab>
 
 </Tabs>
 
 </Steps>
-
-## Troubleshooting
-
-### Common Issues
-
-**MCP Server Not Showing Up**
-- Ensure you're using Cursor version 0.46 or later for the best MCP experience
-- Check that the MCP tab is visible in Settings (`Cmd/Ctrl + Shift + J`)
-- Verify your `mcp.json` configuration file syntax is correct
-- Restart Cursor after making configuration changes
-
-**Tool Names with Dashes Not Working**
-- Use underscores (`_`) instead of dashes (`-`) in server names and tool names
-- Example: Use `langfuse_prompts` instead of `langfuse-prompts`
-
-**Environment Variables Not Working**
-- Make sure environment variables are properly set in your shell before starting Cursor
-- For Windows users, be aware that MCP servers may open terminal windows - this is expected behavior
-- Verify that your API keys don't contain placeholder values
-
-**Agent Not Using MCP Tools**
-- Ensure you're in Agent mode when using Cursor
-- Try explicitly mentioning the tool name in your prompt
-- Check that the server shows a green dot in the MCP settings, indicating it's active
-- Some users report better results when MCP servers are listed early in the configuration file
-
-### Getting Help
-
-- Check the [official Cursor MCP documentation](https://docs.cursor.com/context/model-context-protocol)
-- Visit the [Cursor Community Forum](https://forum.cursor.com/) for community support
-- For Langfuse-specific issues, use the [mcp-server-langfuse repository](https://github.com/langfuse/mcp-server-langfuse)
 
 ## Limitations
 
@@ -195,6 +138,5 @@ The MCP Server is a work in progress and has some limitations:
 - Only prompts with a `production` label in Langfuse are returned
 - All arguments are assumed to be optional and do not include descriptions as variables do not have specification in Langfuse
 - List operations require fetching each prompt individually in the background to extract the arguments, this works but is not efficient
-- Cursor may have a limit on the total number of MCP tools (approximately 40 tools across all servers)
 
 Contributions are welcome! Please open an issue or a PR ([repo](https://github.com/langfuse/mcp-server-langfuse)) if you have any suggestions or feedback.
