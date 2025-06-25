@@ -66,8 +66,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     <language>en-US</language>
     <lastBuildDate>${now}</lastBuildDate>
     <generator>Langfuse Docs</generator>
-    <webMaster>support@langfuse.com (Langfuse Team)</webMaster>
-    <managingEditor>support@langfuse.com (Langfuse Team)</managingEditor>
     <image>
       <url>${baseUrl}/icon256.png</url>
       <title>Langfuse Changelog</title>

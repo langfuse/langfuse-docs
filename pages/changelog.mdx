@@ -4,6 +4,8 @@ description: The latest release updates from the Langfuse team.
 
 import { ChangelogIndex } from "@/components/changelog/ChangelogIndex";
 import { Header } from "@/components/Header";
+import { Rss } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 import Link from "next/link";
 
@@ -23,8 +25,14 @@ import Link from "next/link";
       className="mb-8"
       h="h1"
     />
-    <div className="mb-8">
+    <div className="mb-8 flex flex-col sm:flex-row items-center gap-4">
       <ProductUpdateSignup source="changelog" />
+      <Link asChild href="/api/changelog-rss.xml" target="_blank">
+        <Button variant="outline" className="flex items-center gap-2" size="lg">
+          <Rss className="w-4 h-4" />
+          <span>RSS</span>
+        </Button>
+      </Link>
     </div>
   </div>
   <ChangelogIndex />
