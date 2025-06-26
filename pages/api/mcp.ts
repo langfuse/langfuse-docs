@@ -9,7 +9,7 @@ const mcpHandler = createMcpHandler(
     // Define the searchDocs tool
     server.tool(
       "searchDocs",
-      "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool.",
+      "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool to get relevant documentation chunks.",
       {
         query: z.string().describe("Natural-language question from the user"),
       },
@@ -22,7 +22,7 @@ const mcpHandler = createMcpHandler(
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.INKEEP_BACKEND_API_KEY!}`,
+                Authorization: `Bearer ${process.env.INKEEP_BACKEND_API_KEY}`,
               },
               body: JSON.stringify({
                 model: "inkeep-rag",
