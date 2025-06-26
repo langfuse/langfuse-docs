@@ -4,17 +4,23 @@ description: "Join the Langfuse team to build the leading open-source LLM engine
 
 import { CTACard } from "@/components/CTACard"
 import { Button } from "@/components/ui/button"
+import { Header } from "@/components/Header"
+import { ImpactChart } from "@/components/customers/ImpactChart"
 
-# Join Us!
-
-Langfuse is building the leading **open-source LLM engineering platform** (**[Why Langfuse?](/why)**).
-
-While LLMs improve a lot, we don't see enough applications in production. Building these applications requires a new workflow of continuous monitoring and evaluation that we enable with Langfuse.
-We are seeing strong traction (see metrics below), thus it is the right time to grow the team to build out our backend systems, product, and how we communicate with developers.
-
-**We are hiring across for engineering and technical go-to-market roles. We work in-person in Berlin, Germany & are building an excellent, small team.** If you are considering new opportunities -- even if you might not be looking immediately, we would love to hear from you & get coffee.
-
-We have raised a [$4M seed round](/blog/announcing-our-seed-round) from Lightspeed, General Catalyst, Y Combinator and angels. We are growing fast (see metrics below) and work with some of the best AI teams such as Samsara, Twilio, KhanAcademy and Rocket Money.
+<div className="md:container">
+  <div className="flex flex-col items-center content-center text-center my-10 mb-20">
+    <Header 
+      title="Building Langfuse"
+      description="Join the team building the leading open-source LLM engineering platform"
+      h="h1"
+    />
+    <Button asChild variant="default" size="lg" >
+      <a href="https://jobs.ashbyhq.com/langfuse" target="_blank" rel="noopener noreferrer">
+        View Open Positions →
+      </a>
+    </Button>
+  </div>
+</div>
 
 <iframe
   width="100%"
@@ -27,9 +33,15 @@ We have raised a [$4M seed round](/blog/announcing-our-seed-round) from Lightspe
   allowFullScreen
 ></iframe>
 
+While LLMs improve a lot, we don't see enough applications in production. Building these applications requires a new workflow of continuous monitoring and evaluation that we enable with Langfuse.
+We are seeing strong traction (see metrics below), thus it is the right time to grow the team to build out our backend systems, product, and how we communicate with developers.
+
+We have raised a [$4M seed round](/blog/announcing-our-seed-round) from Lightspeed, General Catalyst, Y Combinator and angels. We are growing fast (see metrics below) and work with some of the best AI teams such as Samsara, Twilio, KhanAcademy and Rocket Money.
+
 <details>
 <summary>Learn more about Langfuse</summary>
 
+- [Why Langfuse?](/why)
 - [Documentation](/docs)
 - [10 min product walkthrough](/watch-demo)
 - [Interactive demo](/docs/demo)
@@ -56,59 +68,70 @@ We have raised a [$4M seed round](/blog/announcing-our-seed-round) from Lightspe
 
 
 ## How we operate
-- We have 2 scheduled meetings per week: 15 min planning on Monday, 60 min demo on Friday
-- We are a very high-trust environment, [Reed Hastings' 'No Rules Rules'](https://www.mattswain.com/booknotes/no-rules-rules), inspires our culture
-- In everyone that's joining us, we are mostly looking for [high agency and good taste](https://www.benkuhn.net/impact)
-- Most team members have led projects/teams before but are excited about shipping as an IC
-- We were heavily influenced by our time at Y Combinator and follow its ethos. We're a Silicon Valley Startup in Berlin - [more here](https://www.ycombinator.com/library/4D-yc-s-essential-startup-advice)
-- We use AI to the upmost extent to give us leverage across everything we do, [some highlights](/blog/2025-04-24-how-we-use-llms-to-scale-langfuse)
 
-## Open Roles
+<ImpactChart 
+  items={[
+      {
+      area: "Open Source",
+      impact: "The future of AI must be open. It's not only about licensing, but about building a community far bigger than any single company. We are building in public.",
+      icon: <></>
+    },
+   
+    {
+      area: "High Trust / Extreme Autonomy",
+      impact: "We own work end-to-end. Everyone runs their part of the product, including planning, design, implementation and support. We removed any bureaucracy trusting you to do the right thing.¹",
+      icon: <></>
+    },
+     {
+      area: "Strong In-person engineering",
+      impact: "The things we build are complex and are moving really fast. We are playing to win. We believe this takes a level of communication that only in-person work can achieve.",
+      icon: <></>
+    },
+     {
+      area: "Deep Work",
+      impact: "We have only 2 scheduled meetings per week: 15 min planning on Monday, 60 min demo on Friday. We collaborate where it makes sense, but we get impatient with time not shipping",
+      icon: <></>
+    },
+   
+     {
+      area: "Agency & Taste",
+      impact: "On the team we care deeply about agency and taste. It's about knowing what good looks like and shipping improvements without needing permission.²",
+      icon: <></>
+    },
+     {
+      area: "Pushing LLMs hard",
+      impact: "We are using LLMs and Agents for most things we do. This stuff is moving fast, to keep up we are constantly learning new workflows and teach each other.³",
+      icon: <></>
+    },
+    {
+      area: "A-Team",
+      impact: "We want to build a small group of strong individuals. Everyone on our team earns their spot. We strive to raise the bar with every addition. Many on the team have led companies/teams before but are excited about shipping as an IC.",
+      icon: <></>
+    },
+  ]}
+/>
+Links:
+- ¹ [Reed Hastings' 'No Rules Rules'](https://www.mattswain.com/booknotes/no-rules-rules)
+- ² [Ben Kuhn's article on impact, agency, and taste](https://www.benkuhn.net/impact)
+- ³ [Some highlights how we use LLMs](/blog/2025-04-24-how-we-use-llms-to-scale-langfuse)
 
-<CTACard 
-  title="Curious to build with us?"
-  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
-  showArrow={true}
->
-  <Button asChild variant="default" size="sm">
-    <a href="https://jobs.ashbyhq.com/langfuse" target="_blank" rel="noopener noreferrer">
-      See open Roles
-    </a>
-  </Button>
-</CTACard>
 
-Can't find a role that's a perfect fit? Feel free to reach out: careers@langfuse.com
-
-You need to be located in Berlin, Germany or willing to relocate. The first few interviews can be done remotely via Zoom. In the final stage, we will work one day onsite together (usually on an actual high-priority project).
-
-## Why Join?
-
-<div className="flex flex-row gap-4">
-
+<div className="flex flex-row gap-4 mt-6">
 <Frame>![Langfuse Office](/images/careers/office1.jpg)</Frame>
 <Frame>![Langfuse Office](/images/careers/office2.jpg)</Frame>
-
 </div>
 
 <span className="italic text-muted-foreground mb-6">
   Langfuse HQ, Berlin (Mitte), Germany
 </span>
 
-**Impactful work/product for awesome OSS community and users**. We get to work with extremely smart users in our OSS community who share a ton of great feedback, and it feels great to help them build exciting products. You'll also get to work with many large enterprises and YC companies who monitor and improve their LLM products with Langfuse. Community channels: [GitHub Discussions](/ideas), [GitHub Issues](/issues), [Discord](/discord), recordings of [community town halls](https://www.youtube.com/@langfuse)
-
-**Strong in-person engineering culture**. Almost everyone on the team works on the product; our go-to-market (also Enterprise) is exclusively inbound, and we enjoy building a developer tool together with our open-source community.
-
-**Interesting challenges**. Building an open source developer tool with a strong observability component is engineering-wise highly interesting due the various integrations and SDKs, the chance to design the best LLM Engineering workflows for these teams, and the necessity to scale our backend-logic and infrastructure.
-
-**Growth & Ownership**. We believe that a product like ours is best built by a small group of excellent engineers who fully own the components that they build. This includes running them in production, product feedback and roadmap planning, and design. We are a small team that's moving fast ([changelog](/changelog)) with a focus on great developer experience.
-
-**Shared curiosity and interest**. If you are interested in working with engineering teams who rethink what's possible when using LLMs to power new use cases, come work with us as we all share this excitement and get to see the leading edge of what great teams build every day. Next to shipping quickly this is the most fun part for sure.
-
 ## Public Metrics
 
 import PublicMetrics from "@/components-mdx/public-metrics.mdx";
 
 <PublicMetrics />
+
+## Work with us
 
 <CTACard 
   title="Curious to build with us?"
