@@ -313,7 +313,7 @@ Once you have confirmed the language is compatible, explore the entire codebase 
 
 Step 3: Discover Available Integrations
 
-After I confirm the files and entry points, crawl the Langfuse integrations by triggering the `get-integration-docs-toc` tool of the langfuse-docs MCP server. Your goal is to get a high-level understanding of all the official SDKs and framework integrations Langfuse offers.
+After I confirm the files and entry points, get the Langfuse integrations sitemap by triggering the `get-integration-sitemap` tool of the langfuse-docs MCP server. Your goal is to get a high-level understanding of all the official SDKs and framework integrations Langfuse offers.
 
 Step 4: Analyze Confirmed Files for Technologies
 
@@ -346,6 +346,51 @@ Step 9: Debug and Fix if Necessary
 
 If I report that something is not working correctly, analyze my feedback. Use the knowledge you have to debug the issue. If required, re-crawl the relevant Langfuse documentation to find a solution, propose a fix to me, and then implement it.
 ```
+
+**3. Available Tools**
+
+The Langfuse Docs MCP server exposes the following tools that an AI agent can use:
+
+#### `get-integration-sitemap`
+
+This tool returns a simple list of URL paths for all available Langfuse integrations. It's a lightweight way for an agent to get a high-level overview of what integrations are officially supported and documented.
+
+**Parameters:**
+
+This tool does not take any parameters.
+
+**Example Output:**
+
+```json
+[
+  "/docs/integrations/autogen",
+  "/docs/integrations/bedrock/amazon-bedrock",
+  "/docs/integrations/crewai",
+  "/docs/integrations/dify",
+  "/docs/integrations/dspy",
+  ...
+]
+```
+
+#### `search-docs`
+
+This tool performs a semantic search (also known as vector search) across the entire content of the Langfuse documentation. It's the most powerful tool for finding relevant information when you don't know the exact page to look for. The agent provides a natural language query, and the tool returns the most relevant page sections. Each returned section includes its source path, allowing the agent to retrieve the full page content using the `get-docs-page` tool for more context.
+
+**Parameters:**
+
+- `query` (string, required): A natural language search query.
+
+**Example Usage:**
+
+An agent wanting to know how to track costs would call this tool with a query like `"how to track token costs"`.
+
+#### `get-docs-page`
+
+This tool retrieves the full content of a single documentation page, given its path. It is useful when an agent knows the exact page it needs to read, for example, after discovering the path via the `get-integration-sitemap` or `search-docs` tool.
+
+**Parameters:**
+
+- `path` (string, required): The URL path of the page to retrieve (e.g., `"docs/get-started"` or `"integrations/openai/python/get-started"`).
 
 </Tab>
 </Tabs>

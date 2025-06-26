@@ -4,6 +4,27 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from 'zod';
 import fs from 'fs/promises';
 import path from 'path';
+import xml2js from 'xml2js';
+import { createClient } from '@supabase/supabase-js';
+import { Configuration, OpenAIApi } from 'openai-edge';
+
+// OpenAI client
+const openAIconfig = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(openAIconfig);
+
+// Supabase client
+const supabaseClient = createClient(
+  process.env.SUPABASE_URL ?? '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+  {
+    db: { schema: "docs" },
+    auth: {
+      persistSession: false,
+    },
+  }
+);
 
 interface DocsPage {
   path: string;
@@ -38,7 +59,7 @@ function parseFrontmatter(content: string): { frontmatter: any; content: string 
   return { frontmatter, content: bodyContent };
 }
 
-// Get page content from local file system (same logic as MainContentWrapper)
+// Get page content from local file system
 async function getPageContent(pathname: string): Promise<string> {
   let basePath = pathname;
   if (basePath.startsWith("/")) basePath = basePath.substring(1);
@@ -66,56 +87,66 @@ async function getPageContent(pathname: string): Promise<string> {
   throw new Error(`No markdown file found for path: ${pathname}`);
 }
 
-// Recursively find all documentation files
-async function findAllDocsFiles(): Promise<DocsPage[]> {
-  const pagesDir = path.join(process.cwd(), 'pages');
-  const pages: DocsPage[] = [];
+// Get sitemap URLs
+async function getSitemapUrls(): Promise<string[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL;
+  const sitemapUrl = new URL('/sitemap-0.xml', baseUrl).href;
+  const response = await fetch(sitemapUrl);
+  if (!response.ok) {
+      throw new Error(`Failed to fetch sitemap.xml: ${response.statusText}`);
+  }
+  const sitemapContent = await response.text();
 
-  async function scanDirectory(dir: string, relativePath: string = ''): Promise<void> {
-    try {
-      const entries = await fs.readdir(dir, { withFileTypes: true });
-      
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        const entryRelativePath = path.join(relativePath, entry.name);
-        
-        if (entry.isDirectory()) {
-          // Skip certain directories
-          if (!['api', 'node_modules', '.next'].includes(entry.name)) {
-            await scanDirectory(fullPath, entryRelativePath);
-          }
-        } else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))) {
-          try {
-            const content = await fs.readFile(fullPath, 'utf-8');
-            const { frontmatter } = parseFrontmatter(content);
-            
-            // Convert file path to URL path
-            let urlPath = entryRelativePath
-              .replace(/\.(md|mdx)$/, '')
-              .replace(/\/index$/, '')
-              .replace(/\\/g, '/'); // normalize Windows paths
-            
-            if (urlPath === 'index') urlPath = '';
-            
-            const section = entryRelativePath.split(path.sep)[0] || 'root';
-            
-            pages.push({
-              path: urlPath || '/',
-              title: frontmatter.title || path.basename(entry.name, path.extname(entry.name)),
-              description: frontmatter.description,
-              section: section
-            });
-          } catch (error) {
-            console.warn(`Failed to process ${fullPath}:`, error);
-          }
-        }
-      }
-    } catch (error) {
-      console.warn(`Failed to scan directory ${dir}:`, error);
-    }
+  const parser = new xml2js.Parser();
+  const result = await parser.parseStringPromise(sitemapContent);
+
+  const urls: string[] = [];
+  if (result.urlset && result.urlset.url) {
+      result.urlset.url.forEach((urlEntry: any) => {
+          const url = urlEntry.loc[0];
+          const urlPath = new URL(url).pathname;
+          urls.push(urlPath);
+      });
   }
 
-  await scanDirectory(pagesDir);
+  return urls;
+}
+
+// Find all documentation files by parsing llms.txt
+async function findAllDocsFiles(): Promise<DocsPage[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error(
+      "Cannot determine the application's base URL. " +
+        "Please set the NEXT_PUBLIC_LANGFUSE_BASE_URL environment variable."
+    );
+  }
+
+  const llmsTxtUrl = new URL('/llms.txt', baseUrl).href;
+  const response = await fetch(llmsTxtUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch llms.txt: ${response.statusText}`);
+  }
+  const llmsTxtContent = await response.text();
+
+  const pages: DocsPage[] = [];
+  const linkRegex = /- \[(.*?)\]\((.*?)\)/g;
+  let match;
+  while ((match = linkRegex.exec(llmsTxtContent)) !== null) {
+    const title = match[1];
+    const url = match[2];
+    const urlPath = new URL(url).pathname;
+    const section = urlPath.split('/')[1] || 'root';
+
+    pages.push({
+      path: urlPath,
+      title: title,
+      description: '', // Description is not available in llms.txt
+      section: section,
+    });
+  }
+
   return pages;
 }
 
@@ -123,44 +154,19 @@ async function findAllDocsFiles(): Promise<DocsPage[]> {
 async function searchPages(query: string, section?: string): Promise<DocsPage[]> {
   const allPages = await findAllDocsFiles();
   const lowerQuery = query.toLowerCase();
-  
-  const results: Array<DocsPage & { score: number }> = [];
-  
-  for (const page of allPages) {
-    const matchesSection = !section || page.section === section;
-    if (!matchesSection) continue;
-    
-    let score = 0;
-    
-    // Title match (highest weight)
-    if (page.title.toLowerCase().includes(lowerQuery)) {
-      score += 10;
-    }
-    
-    // Description match (medium weight)
-    if (page.description?.toLowerCase().includes(lowerQuery)) {
-      score += 5;
-    }
-    
-    // Try to read content for full-text search (lower weight)
-    try {
-      const content = await getPageContent(page.path);
-      if (content.toLowerCase().includes(lowerQuery)) {
-        score += 1;
-      }
-    } catch (error) {
-      // Skip content search if file can't be read
-    }
-    
-    if (score > 0) {
-      results.push({ ...page, score });
-    }
-  }
-  
-  // Sort by score (descending)
-  return results
-    .sort((a, b) => b.score - a.score)
-    .map(({ score, ...page }) => page);
+
+  const results = allPages
+    .filter(page => {
+      const matchesSection = !section || page.section === section;
+      if (!matchesSection) return false;
+
+      // Only search by title, as it's the only reliable data from llms.txt
+      return page.title.toLowerCase().includes(lowerQuery);
+    });
+
+  // The search logic is now simpler, no need for complex scoring.
+  // The results are implicitly sorted by their order in llms.txt.
+  return results;
 }
 
 // Create the MCP server instance
@@ -207,34 +213,59 @@ function createDocsServer(): McpServer {
   server.registerTool(
     "search-docs",
     {
-      title: "Search Documentation",
-      description: "Search through Langfuse documentation pages",
+      title: "Search Documentation (Vector Search)",
+      description: "Performs semantic search over the full content of Langfuse documentation to find the most relevant pages.",
       inputSchema: {
-        query: z.string().describe("Search query to find relevant documentation"),
-        section: z.string().optional().describe("Optional: Limit search to specific section (e.g., 'docs', 'blog', 'changelog')")
+        query: z.string().describe("Search query to find relevant documentation."),
       }
     },
-    async ({ query, section }) => {
+    async ({ query }) => {
       try {
-        const results = await searchPages(query, section);
+        // 1. Create embedding for the query
+        const embeddingResponse = await openai.createEmbedding({
+          model: "text-embedding-ada-002",
+          input: query.replaceAll("\n", " "),
+        });
+
+        if (embeddingResponse.status !== 200) {
+          const errorText = await embeddingResponse.text();
+          throw new Error(`Failed to create embedding: ${errorText}`);
+        }
+        const [{ embedding }] = (await embeddingResponse.json()).data;
+
+        // 2. Query Supabase for matching page sections
+        const { error: matchError, data: pageSections } = await supabaseClient.rpc(
+          "match_page_sections",
+          {
+            embedding,
+            match_threshold: 0.78,
+            match_count: 10,
+            min_content_length: 50,
+          }
+        );
+
+        if (matchError) {
+          throw new Error(`Failed to match page sections: ${matchError.message}`);
+        }
         
-        if (results.length === 0) {
+        if (!pageSections || pageSections.length === 0) {
           return {
             content: [{
               type: "text",
-              text: `No documentation found for query: "${query}"${section ? ` in section: ${section}` : ''}`
+              text: `No documentation found for query: "${query}"`
             }]
           };
         }
-        
-        const formattedResults = results.slice(0, 10).map(page => 
-          `**${page.title}** (${page.path})\n${page.description || 'No description available'}\n`
-        ).join('\n');
+
+        // 3. Format and return the results
+        const formattedResults = pageSections.map(chunk => 
+          `### [${chunk.heading}](${chunk.path})\n\n${chunk.content}\n\n---`
+        ).join('\n\n');
         
         return {
           content: [{
             type: "text",
-            text: `Found ${results.length} results for "${query}":\n\n${formattedResults}`
+            text: `Found ${pageSections.length} relevant section(s) for "${query}":\n\n${formattedResults}`
           }]
         };
       } catch (error) {
@@ -249,57 +280,30 @@ function createDocsServer(): McpServer {
     }
   );
 
-  // Tool for getting integration docs table of contents
+  // Tool for getting integration sitemap
   server.registerTool(
-    "get-integration-docs-toc",
+    "get-integration-sitemap",
     {
-      title: "Get Integration Documentation Table of Contents",
-      description: "Get a complete table of contents for all integration documentation. This tool does not accept any parameters.",
+      title: "Get Integration Documentation Sitemap",
+      description: "Get all integration documentation URLs from the sitemap. Fast and simple - just returns the paths.",
       inputSchema: {}
     },
     async () => {
       try {
-        const allPages = await findAllDocsFiles();
-        const pages = allPages.filter(p => p.path.startsWith("docs/integrations"));
-        
-        // Group by section
-        const tocBySection = pages.reduce((acc, page) => {
-          const pathParts = page.path.split('/');
-          const section = pathParts.length > 2 ? pathParts[2] : 'overview';
-
-          if (!acc[section]) {
-            acc[section] = [];
-          }
-          acc[section].push({
-            title: page.title,
-            path: page.path,
-            description: page.description
-          });
-          return acc;
-        }, {} as Record<string, any[]>);
-        
-        // Format as markdown
-        let toc = "# Langfuse Integration Documentation Table of Contents\n\n";
-        
-        Object.keys(tocBySection).sort().forEach(section => {
-          toc += `## ${section.charAt(0).toUpperCase() + section.slice(1)}\n\n`;
-          tocBySection[section].forEach(page => {
-            toc += `- [${page.title}](${page.path})\n`;
-          });
-          toc += '\n';
-        });
+        const allUrls = await getSitemapUrls();
+        const integrationUrls = allUrls.filter(url => url.startsWith("/docs/integrations"));
         
         return {
           content: [{
             type: "text",
-            text: toc
+            text: integrationUrls.join('\n')
           }]
         };
       } catch (error) {
         return {
           content: [{
             type: "text",
-            text: `Error generating table of contents: ${error instanceof Error ? error.message : String(error)}`
+            text: `Error fetching integration sitemap: ${error instanceof Error ? error.message : String(error)}`
           }],
           isError: true
         };
