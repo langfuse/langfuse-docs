@@ -6,10 +6,12 @@ import type {
   AIChatDisclaimerSettings,
   InvokeCallbackAction,
   InkeepCallbackEvent,
+  ToolFunction,
 } from "@inkeep/cxkit-react";
 import { useTheme } from "nextra-theme-docs";
 import { showChat } from "../supportChat";
 import { type PostHog, usePostHog } from "posthog-js/react";
+import { provideAnswerConfidenceSchema } from "./answerConfidence";
 
 const customAnalyticsCallback = (
   event: InkeepCallbackEvent,
@@ -110,6 +112,29 @@ const useInkeepSettings = (): InkeepSharedSettings => {
       "How can Langfuse help me?",
       "How to use the Python decorator for tracing?",
       "How to set up LLM-as-a-judge evals?",
+    ],
+    getTools: () => [
+      {
+        type: "function",
+        function: {
+          name: "provideAnswerConfidence",
+          description: "Determine how confident the AI assistant was and whether or not to escalate to humans.",
+          parameters: provideAnswerConfidenceSchema,
+        },
+        renderMessageButtons: ({ args }) => {
+          const confidence = args.answerConfidence;
+          if (["not_confident", "no_sources", "other"].includes(confidence)) {
+            return [
+              {
+                label: "Create Ticket",
+                icon: { builtIn: "LuUsers" },
+                action: contactSupportCallToAction,
+              }
+            ];
+          }
+          return [];
+        },
+      } as ToolFunction<{explanation: string; answerConfidence: string}>,
     ],
   };
 
