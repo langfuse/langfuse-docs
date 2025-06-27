@@ -102,7 +102,7 @@ export function Carousel({
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white border-gray-200 shadow-lg z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background border-border shadow-lg z-10"
             onClick={goToPrevious}
             aria-label="Previous image"
           >
@@ -111,7 +111,7 @@ export function Carousel({
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white border-gray-200 shadow-lg z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background border-border shadow-lg z-10"
             onClick={goToNext}
             aria-label="Next image"
           >
