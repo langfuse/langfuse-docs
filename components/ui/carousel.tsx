@@ -23,6 +23,8 @@ export function Carousel({
   showArrows = true,
 }: CarouselProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [isActive, setIsActive] = React.useState(false);
+  const carouselRef = React.useRef<HTMLDivElement>(null);
   const totalSlides = children.length;
 
   const goToSlide = React.useCallback((index: number) => {
@@ -52,22 +54,34 @@ export function Carousel({
     return () => clearInterval(interval);
   }, [autoPlay, autoPlayInterval, goToNext]);
 
-  // Keyboard navigation
+  // Keyboard navigation - only when carousel is active (focused/hovered)
   React.useEffect(() => {
+    if (!isActive) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") {
+        event.preventDefault();
         goToPrevious();
       } else if (event.key === "ArrowRight") {
+        event.preventDefault();
         goToNext();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToPrevious, goToNext]);
+  }, [goToPrevious, goToNext, isActive]);
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div 
+      ref={carouselRef}
+      className={cn("relative w-full", className)}
+      onMouseEnter={() => setIsActive(true)}
+      onMouseLeave={() => setIsActive(false)}
+      onFocus={() => setIsActive(true)}
+      onBlur={() => setIsActive(false)}
+      tabIndex={0}
+    >
       {/* Main carousel container */}
       <div className="relative overflow-hidden rounded-lg">
         <div
