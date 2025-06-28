@@ -1,0 +1,24 @@
+# Langfuse Docs MCP Server
+
+The Langfuse Docs MCP server exposes the Langfuse docs to AI agents.
+
+Example use case: See [Get Started](/docs/get-started) for instructions on how to use it to automatically integrate Langfuse Tracing into your codebase.
+
+## About
+
+- Endpoint: `https://langfuse.com/api/mcp`
+- Transport: `streamableHttp`
+- Tools:
+  - `searchLangfuseDocs` returns relevant context from the Langfuse Docs, GitHub Issues, and GitHub Discussions. Powered by [Inkeep RAG API](https://docs.inkeep.com/ai-api/rag-mode/http-request).
+
+## Usage
+
+import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installation.mdx";
+
+<DocsMcpServerInstallation />
+
+## References
+
+- Implementation of the MCP server: [mcp.ts](https://github.com/langfuse/langfuse-docs/blob/main/pages/api/mcp.ts)
+- [Ask AI](/docs/ask-ai): RAG chat with the Langfuse docs to get answers to your questions
+- [langfuse.com/llms.txt](https://langfuse.com/llms.txt): overview of all relevant links from the Langfuse docs
