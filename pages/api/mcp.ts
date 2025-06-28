@@ -23,16 +23,9 @@ const mcpHandler = createMcpHandler(
         query: z.string().describe("Natural-language question from the user"),
       },
       async ({ query }) => {
-        // Track MCP tool usage
-        posthog.capture({
-          distinctId: "mcp-server",
-          event: "MCP",
-          properties: {
-            tool_name: "searchLangfuseDocs",
-            query: query,
-            timestamp: new Date().toISOString(),
-          },
-        });
+        let result: any;
+        let error: Error | null = null;
+        let responseContent = "";
 
         try {
           // Call Inkeep RAG API
@@ -56,26 +49,31 @@ const mcpHandler = createMcpHandler(
             throw new Error(`Inkeep API returned ${inkeepRes.status}`);
           }
 
-          const result = await inkeepRes.json();
+          result = await inkeepRes.json();
 
           // Extract the actual content from the Inkeep response
-          const responseContent =
+          responseContent =
             result.choices?.[0]?.message?.content || "No results found";
+        } catch (err) {
+          error = err instanceof Error ? err : new Error("Unknown error");
+          responseContent = `Error searching documentation: ${error.message}`;
+        }
 
-          // Track successful tool execution
-          posthog.capture({
-            distinctId: "mcp-server",
-            event: "MCP",
-            properties: {
-              tool_name: "searchLangfuseDocs",
-              query: query,
-              status: "success",
-              response_length: responseContent.length,
-              timestamp: new Date().toISOString(),
-            },
-          });
+        // Track single MCP tool event with complete information
+        posthog.capture({
+          distinctId: "mcp-server",
+          event: "MCP",
+          properties: {
+            tool_name: "searchLangfuseDocs",
+            query: query,
+            status: error ? "error" : "success",
+            response_length: responseContent.length,
+            error_message: error?.message || null,
+            timestamp: new Date().toISOString(),
+          },
+        });
 
-          // Return the actual documentation content in MCP format
+        if (error) {
           return {
             content: [
               {
@@ -83,35 +81,21 @@ const mcpHandler = createMcpHandler(
                 text: responseContent,
               },
             ],
-            // Include the full Inkeep response as structured data for debugging
-            _meta: result,
-          };
-        } catch (error) {
-          // Track error in tool execution
-          posthog.capture({
-            distinctId: "mcp-server",
-            event: "MCP",
-            properties: {
-              tool_name: "searchLangfuseDocs",
-              query: query,
-              status: "error",
-              error_message: error instanceof Error ? error.message : "Unknown error",
-              timestamp: new Date().toISOString(),
-            },
-          });
-
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error searching documentation: ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`,
-              },
-            ],
             isError: true,
           };
         }
+
+        // Return the actual documentation content in MCP format
+        return {
+          content: [
+            {
+              type: "text",
+              text: responseContent,
+            },
+          ],
+          // Include the full Inkeep response as structured data for debugging
+          _meta: result,
+        };
       }
     );
   },
@@ -131,20 +115,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Track MCP request
-  posthog.capture({
-    distinctId: "mcp-server",
-    event: "MCP",
-    properties: {
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
-      body: req.body,
-      timestamp: new Date().toISOString(),
-      user_agent: req.headers["user-agent"],
-    },
-  });
-
   // Create a Request object from NextApiRequest
   const url = new URL(req.url || "", `http://${req.headers.host}`);
   const requestInit: RequestInit = {
@@ -163,35 +133,8 @@ export default async function handler(
 
   try {
     response = await mcpHandler(request);
-    
-    // Track successful MCP response
-    posthog.capture({
-      distinctId: "mcp-server",
-      event: "MCP",
-      properties: {
-        method: req.method,
-        url: req.url,
-        status: response.status,
-        response_status: "success",
-        timestamp: new Date().toISOString(),
-      },
-    });
   } catch (error) {
     console.error("MCP Handler Error:", error);
-    
-    // Track MCP error
-    posthog.capture({
-      distinctId: "mcp-server",
-      event: "MCP",
-      properties: {
-        method: req.method,
-        url: req.url,
-        status: "error",
-        error_message: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
-      },
-    });
-    
     res.status(500).json({ error: "Internal server error" });
     return;
   }
