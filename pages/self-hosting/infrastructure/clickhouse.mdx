@@ -110,6 +110,8 @@ clickhouse:
   shards: 1 # Fixed: Langfuse does not support multi-shard clusters
   replicaCount: 3
   resourcesPreset: large # or more
+  persistence:
+    size: 100Gi # Start with a large volume to prevent early resizing. Alternatively, consider a blob storage backed disked.
   auth:
     username: default
     password: changeme
@@ -177,24 +179,19 @@ CLICKHOUSE_PASSWORD=changeme
   kubectl patch pvc data-<chart-name>-clickhouse-2 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
   ```
 
-  **3. Alternative: Update Helm values and upgrade:**
-  ```yaml
-  # values.yaml
-  clickhouse:
-    persistence:
-      size: 200Gi  # Increase from previous size
-  ```
-  ```bash
-  helm upgrade <release-name> <chart-name> -f values.yaml
-  ```
-
-  **4. Monitor expansion progress:**
+  **3. Monitor expansion progress:**
   ```bash
   # Watch PVC status
   kubectl get pvc -w
 
   # Check if pods recognize the new space
   kubectl exec -it <clickhouse-pod-name> -- df -h /var/lib/clickhouse
+  ```
+
+  **4. Restart StatefulSet:**
+  ```bash
+  # Restart all pods individually to make use of the larger volumes
+  kubectl rollout restart statefulset <chart-name>-clickhouse
   ```
 
   **Prevention tips:**
