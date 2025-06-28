@@ -8,7 +8,7 @@ const mcpHandler = createMcpHandler(
   (server) => {
     // Define the searchDocs tool
     server.tool(
-      "searchDocs",
+      "searchLangfuseDocs",
       "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool to get relevant documentation chunks.",
       {
         query: z.string().describe("Natural-language question from the user"),
