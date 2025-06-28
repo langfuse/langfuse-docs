@@ -6,7 +6,7 @@ export const agenticOnboardingPrompt = `# Langfuse Agentic Onboarding
 
 ## Goals
 
-You goal is to help me integrate Langfuse tracing into my codebase.
+Your goal is to help me integrate Langfuse tracing into my codebase.
 
 ## Rules
 
