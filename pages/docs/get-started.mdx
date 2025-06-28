@@ -4,9 +4,7 @@ description: Get started with LLM observability with Langfuse in minutes before 
 
 # Get Started with Langfuse Tracing
 
-This quickstart helps you to integrate your LLM application with [Langfuse Tracing](/docs/tracing). It will log a single LLM call to get you started.
-
-If you are looking for other features, see the [overview](/docs).
+This quickstart helps you to integrate your LLM application with [Langfuse Tracing](/docs/tracing). If you are looking for other features, see the [overview](/docs).
 
 ## Create new project in Langfuse
 
@@ -14,7 +12,7 @@ If you are looking for other features, see the [overview](/docs).
 2.  Create a new project
 3.  Create new API credentials in the project settings
 
-## Log your first LLM call to Langfuse
+## Integrate with Langfuse
 
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
@@ -24,6 +22,12 @@ import EnvPython from "@/components-mdx/env-python.mdx";
 import EnvJs from "@/components-mdx/env-js.mdx";
 import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
 import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
+import { CopyAgentOnboardingPrompt } from "@/components/agentic-onboarding/CopyAgentOnboardingPrompt";
+import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installation.mdx";
+
+<Tabs items={["Manual", "✨ Agentic: Cursor, GitHub Copilot, Windsurf, etc"]}>
+
+<Tab>
 
 <Tabs items={["Python SDK","Python SDK + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","API"]}>
 
@@ -252,10 +256,44 @@ All features are available via the public API. See documentation below:
 </Cards>
 
 </Tab>
+
+</Tabs>
+
+</Tab>
+
+<Tab>
+
+Use the agent mode of your editor to integrate Langfuse into your existing codebase.
+
+<Callout type="warning" emoji="🤖">
+
+This might or might not work very well (depending on your code base). Please share any feedback or issues on [GitHub](/issues).
+
+</Callout>
+
+<Steps>
+
+### Install the Langfuse Docs MCP Server
+
+The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration you are looking for. This is optional, alternatively the agent can use its native websearch capabilities.
+
+<DocsMcpServerInstallation />
+
+### Run Agent
+
+Copy and execute the following prompt in the agent mode of your editor:
+
+<CopyAgentOnboardingPrompt />
+
+</Steps>
+
+</Tab>
+
 </Tabs>
 
 <Callout type="info" emoji="✅">
-  Done, now visit the Langfuse interface to look at the trace you just created.
+  Done. After running your application, visit the Langfuse interface to view the
+  trace you just created.
 </Callout>
 
 ## All Langfuse platform features

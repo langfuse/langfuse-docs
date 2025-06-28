@@ -1,0 +1,84 @@
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+<Tabs items={["Cursor", "Copilot in VSCode", "Windsurf", "Other MCP Clients"]}>
+
+<Tab>
+
+Add Langfuse Docs MCP to Cursor via the one-click install:
+
+<div className="flex gap-2 mt-3 mb-6">
+  <Button asChild>
+    <Link href="https://cursor.com/install-mcp?name=langfuse-docs&config=eyJ1cmwiOiJodHRwczovL2xhbmdmdXNlLmNvbS9hcGkvbWNwIn0%3D">
+      Install MCP Server in Cursor
+    </Link>
+  </Button>
+</div>
+
+</Tab>
+
+<Tab>
+
+Add Langfuse Docs MCP to Copilot in VSCode via the following steps:
+
+1. Open Command Palette (⌘+Shift+P)
+2. Open "MCP: Add Server..."
+3. Select `HTTP`
+4. Paste `https://langfuse.com/api/mcp`
+5. Select name (e.g. `langfuse-docs`) and whether to save in user or workspace settings
+6. You're all set! The MCP server is now available in Agent mode
+
+</Tab>
+
+<Tab>
+
+Add Langfuse Docs MCP to Windsurf via the following steps:
+
+1. Open Command Palette (⌘+Shift+P)
+2. Open "MCP Configuration Panel"
+3. Select `Add custom server`
+4. Add the following configuration:
+
+   ```json
+   {
+     "mcpServers": {
+       "langfuse-docs": {
+         "command": "npx",
+         "args": ["mcp-remote", "https://langfuse.com/api/mcp"]
+       }
+     }
+   }
+   ```
+
+</Tab>
+
+<Tab>
+
+Langfuse uses the `streamableHttp` protocol to communicate with the MCP server. This is supported by most clients.
+
+```json
+{
+  "mcpServers": {
+    "langfuse-docs": {
+      "url": "https://langfuse.com/api/mcp"
+    }
+  }
+}
+```
+
+If you use a client that does not support `streamableHttp` (e.g. Windsurf), you can use the `mcp-remote` command as a local proxy.
+
+```json
+{
+  "mcpServers": {
+    "langfuse-docs": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://langfuse.com/api/mcp"]
+    }
+  }
+}
+```
+
+</Tab>
+
+</Tabs>
