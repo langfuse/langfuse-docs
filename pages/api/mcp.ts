@@ -2,6 +2,15 @@
 import { createMcpHandler } from "@vercel/mcp-adapter";
 import { z } from "zod";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { PostHog } from "posthog-node";
+
+// Initialize PostHog client for server-side tracking
+const posthog = new PostHog(
+  process.env.POSTHOG_API_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY || "",
+  {
+    host: process.env.POSTHOG_HOST || process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+  }
+);
 
 // Create the MCP handler using Vercel's adapter
 const mcpHandler = createMcpHandler(
@@ -14,6 +23,17 @@ const mcpHandler = createMcpHandler(
         query: z.string().describe("Natural-language question from the user"),
       },
       async ({ query }) => {
+        // Track MCP tool usage
+        posthog.capture({
+          distinctId: "mcp-server",
+          event: "MCP",
+          properties: {
+            tool_name: "searchLangfuseDocs",
+            query: query,
+            timestamp: new Date().toISOString(),
+          },
+        });
+
         try {
           // Call Inkeep RAG API
           const inkeepRes = await fetch(
@@ -42,6 +62,19 @@ const mcpHandler = createMcpHandler(
           const responseContent =
             result.choices?.[0]?.message?.content || "No results found";
 
+          // Track successful tool execution
+          posthog.capture({
+            distinctId: "mcp-server",
+            event: "MCP",
+            properties: {
+              tool_name: "searchLangfuseDocs",
+              query: query,
+              status: "success",
+              response_length: responseContent.length,
+              timestamp: new Date().toISOString(),
+            },
+          });
+
           // Return the actual documentation content in MCP format
           return {
             content: [
@@ -54,6 +87,19 @@ const mcpHandler = createMcpHandler(
             _meta: result,
           };
         } catch (error) {
+          // Track error in tool execution
+          posthog.capture({
+            distinctId: "mcp-server",
+            event: "MCP",
+            properties: {
+              tool_name: "searchLangfuseDocs",
+              query: query,
+              status: "error",
+              error_message: error instanceof Error ? error.message : "Unknown error",
+              timestamp: new Date().toISOString(),
+            },
+          });
+
           return {
             content: [
               {
@@ -85,6 +131,20 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Track MCP request
+  posthog.capture({
+    distinctId: "mcp-server",
+    event: "MCP",
+    properties: {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body,
+      timestamp: new Date().toISOString(),
+      user_agent: req.headers["user-agent"],
+    },
+  });
+
   // Create a Request object from NextApiRequest
   const url = new URL(req.url || "", `http://${req.headers.host}`);
   const requestInit: RequestInit = {
@@ -103,8 +163,35 @@ export default async function handler(
 
   try {
     response = await mcpHandler(request);
+    
+    // Track successful MCP response
+    posthog.capture({
+      distinctId: "mcp-server",
+      event: "MCP",
+      properties: {
+        method: req.method,
+        url: req.url,
+        status: response.status,
+        response_status: "success",
+        timestamp: new Date().toISOString(),
+      },
+    });
   } catch (error) {
     console.error("MCP Handler Error:", error);
+    
+    // Track MCP error
+    posthog.capture({
+      distinctId: "mcp-server",
+      event: "MCP",
+      properties: {
+        method: req.method,
+        url: req.url,
+        status: "error",
+        error_message: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
+      },
+    });
+    
     res.status(500).json({ error: "Internal server error" });
     return;
   }
