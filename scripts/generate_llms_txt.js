@@ -9,7 +9,6 @@ const MAIN_SECTIONS = [
     'docs',
 ];
 const OPTIONAL_SECTIONS = [
-    'faq',
     'self-hosting'
 ];
 
