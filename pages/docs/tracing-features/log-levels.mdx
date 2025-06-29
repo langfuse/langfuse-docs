@@ -12,7 +12,7 @@ In addition to the level, you can also include a `statusMessage` to provide addi
   ![Trace log level and statusMessage](/images/docs/trace-log-level.png)
 </Frame>
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI SDK", "Langchain", "LlamaIndex"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI SDK", "Langchain", "LlamaIndex"]}>
 <Tab>
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -137,6 +137,54 @@ trace.span({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), log levels can be set using the OpenTelemetry span status and events:
+
+```python
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set span status to indicate success, error, or unset
+    # This maps to Langfuse log levels
+    span.set_status(Status(StatusCode.OK, "Operation completed successfully"))  # DEFAULT level
+    
+    # For warnings and errors, use StatusCode.ERROR with descriptive messages
+    span.set_status(Status(StatusCode.ERROR, "This is a warning"))  # WARNING/ERROR level
+    
+    # Add events for more detailed logging
+    span.add_event(
+        name="processing_step",
+        attributes={
+            "level": "DEBUG",
+            "message": "Processing intermediate results"
+        }
+    )
+```
+
+**OpenTelemetry Status to Langfuse Log Level Mapping:**
+- `StatusCode.UNSET` → `DEFAULT`
+- `StatusCode.OK` → `DEFAULT`
+- `StatusCode.ERROR` → `ERROR`
+
+For more granular control, you can use span events with custom attributes:
+
+```python
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Add events with custom level attributes
+    span.add_event("debug_info", attributes={"level": "DEBUG", "message": "Debug information"})
+    span.add_event("warning_event", attributes={"level": "WARNING", "message": "This is a warning"})
+    span.add_event("error_event", attributes={"level": "ERROR", "message": "An error occurred"})
+```
+
+Learn more about OpenTelemetry span status in the [OpenTelemetry documentation](https://opentelemetry.io/docs/specs/otel/trace/api/#set-status) and Langfuse integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>

@@ -34,7 +34,7 @@ The SDKs look for a `release` in the following order:
 
 #### SDK initialization
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
 
 <Tab>
 
@@ -106,6 +106,37 @@ langfuse = new Langfuse({
 
 </Tab><Tab>
 
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the release using the `langfuse.release` span attribute:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set release using the Langfuse-specific attribute
+    span.set_attribute("langfuse.release", "v2.1.24")
+```
+
+You can also set the release globally using resource attributes:
+
+```python
+import os
+
+# Set release globally for all traces
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.release=v2.1.24"
+```
+
+**Supported OpenTelemetry attributes for releases:**
+
+- `langfuse.release` - String identifier for the application release (only applied to root spans)
+
+Note: The `langfuse.release` attribute is only considered when set on the root span of a trace, as the release is a trace-level property in Langfuse.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
+
+</Tab><Tab>
+
 <Callout type="info">
 
 When using the **Python SDK v3**, the release provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
@@ -162,7 +193,7 @@ flowchart LR
 
 The `version` parameter can be added to `traces` and all observation types (`span`, `generation`, `event`). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -250,6 +281,37 @@ langfuse.generation({
 ```
 
 `langfuse.trace()`, `langfuse.span()` and `langfuse.event()` also take an optional `version` parameter.
+
+</Tab><Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the version using the `langfuse.version` span attribute:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set version using the Langfuse-specific attribute
+    span.set_attribute("langfuse.version", "1.0")
+```
+
+You can also set the version globally using resource attributes:
+
+```python
+import os
+
+# Set version globally for all traces
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.version=1.0"
+```
+
+**Supported OpenTelemetry attributes for versions:**
+
+- `langfuse.version` - String identifier for the version (can be applied to any span)
+
+Note: Unlike release, the version can be set on any span in the trace, not just the root span. This allows for fine-grained versioning of specific operations within a trace.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab><Tab>
 

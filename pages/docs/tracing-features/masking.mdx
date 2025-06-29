@@ -20,7 +20,7 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
 <Tab>
 
 Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
@@ -160,6 +160,94 @@ await langfuse.flushAsync();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), masking is typically handled at the span processor or exporter level rather than through Langfuse-specific configuration. You can implement custom masking using OpenTelemetry span processors:
+
+**Option 1: Custom Span Processor for Masking**
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider, Span
+from opentelemetry.sdk.trace.export import SpanProcessor
+from typing import Optional
+
+class MaskingSpanProcessor(SpanProcessor):
+    def __init__(self, next_processor: SpanProcessor):
+        self.next_processor = next_processor
+    
+    def on_start(self, span: Span, parent_context: Optional[trace.Context] = None) -> None:
+        self.next_processor.on_start(span, parent_context)
+    
+    def on_end(self, span: Span) -> None:
+        # Mask sensitive attributes before processing
+        if span.attributes:
+            masked_attributes = {}
+            for key, value in span.attributes.items():
+                if isinstance(value, str) and value.startswith("SECRET_"):
+                    masked_attributes[key] = "REDACTED"
+                else:
+                    masked_attributes[key] = value
+            
+            # Update span attributes
+            span._attributes = masked_attributes
+        
+        self.next_processor.on_end(span)
+    
+    def shutdown(self) -> None:
+        self.next_processor.shutdown()
+    
+    def force_flush(self, timeout_millis: int = 30000) -> bool:
+        return self.next_processor.force_flush(timeout_millis)
+
+# Usage
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+# Set up your OTLP exporter (configured for Langfuse)
+otlp_exporter = OTLPSpanExporter(
+    endpoint="https://cloud.langfuse.com/api/public/otel",
+    headers={"Authorization": "Basic <your-encoded-credentials>"}
+)
+
+# Wrap the batch processor with masking
+batch_processor = BatchSpanProcessor(otlp_exporter)
+masking_processor = MaskingSpanProcessor(batch_processor)
+
+# Configure tracer provider
+tracer_provider = TracerProvider()
+tracer_provider.add_span_processor(masking_processor)
+trace.set_tracer_provider(tracer_provider)
+```
+
+**Option 2: Masking at Attribute Level**
+
+```python
+from opentelemetry import trace
+
+def mask_sensitive_data(data):
+    if isinstance(data, str) and data.startswith("SECRET_"):
+        return "REDACTED"
+    return data
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Apply masking before setting attributes
+    sensitive_data = "SECRET_USER_DATA"
+    masked_data = mask_sensitive_data(sensitive_data)
+    
+    span.set_attribute("user.data", masked_data)
+```
+
+**Note on OpenTelemetry Masking:**
+- OpenTelemetry masking happens at the instrumentation level before data is sent to exporters
+- This approach ensures sensitive data is masked before being sent to any observability backend, including Langfuse
+- Consider implementing masking processors for comprehensive data protection
+
+Learn more about OpenTelemetry span processors in the [OpenTelemetry documentation](https://opentelemetry.io/docs/reference/specification/trace/sdk/#span-processor) and Langfuse integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>

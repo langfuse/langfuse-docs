@@ -14,7 +14,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 
 <Tab>
 When using the `@observe()` decorator:
@@ -107,6 +107,38 @@ const trace = langfuse.trace({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the session ID using the `langfuse.session.id` span attribute:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set session ID using the Langfuse-specific attribute
+    span.set_attribute("langfuse.session.id", "chat-session-123")
+```
+
+You can also set the session ID globally using resource attributes:
+
+```python
+import os
+
+# Set session ID globally for all traces
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.session.id=chat-session-123"
+```
+
+**Supported OpenTelemetry attributes for sessions:**
+
+- `langfuse.session.id` - String identifier for the session (only applied to root spans)
+
+Note: The `langfuse.session.id` attribute is only considered when set on the root span of a trace, as the session ID is a trace-level property in Langfuse.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>

@@ -216,6 +216,76 @@ const trace = langfuse.trace({
 ```
 
 </Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), multi-modal content should be handled as span attributes. Since OpenTelemetry doesn't have native multi-modal support, you have several options:
+
+**Option 1: Base64 Data URIs as Attributes**
+
+```python
+from opentelemetry import trace
+import base64
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("process-image") as span:
+    # Include base64 encoded media as span attributes
+    with open("image.jpg", "rb") as image_file:
+        image_data = base64.b64encode(image_file.read()).decode()
+        data_uri = f"data:image/jpeg;base64,{image_data}"
+    
+    # Set as span attribute - will be processed by Langfuse
+    span.set_attribute("input.image", data_uri)
+    span.set_attribute("gen_ai.prompt.0.content", f"Analyze this image: {data_uri}")
+```
+
+**Option 2: External URLs**
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("analyze-image") as span:
+    # Reference external images via URLs
+    image_url = "https://example.com/image.jpg"
+    
+    span.set_attribute("input.image_url", image_url)
+    span.set_attribute("gen_ai.prompt.0.content", f"![Image]({image_url})")
+```
+
+**Option 3: Media References in OpenAI Format**
+
+```python
+from opentelemetry import trace
+import json
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("multimodal-llm-call") as span:
+    # Structure multi-modal content in OpenAI format
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What's in this image?"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "data:image/jpeg;base64,/9j/4AAQ..."}
+                }
+            ]
+        }
+    ]
+    
+    span.set_attribute("gen_ai.prompt_json", json.dumps(messages))
+    span.set_attribute("gen_ai.request.model", "gpt-4o")
+```
+
+**Note:** OpenTelemetry itself doesn't have specialized multi-modal handling. When using OpenTelemetry with Langfuse, the base64 data URIs in span attributes will be automatically detected and processed by Langfuse according to its multi-modal media handling.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
+
+</Tab>
 </Tabs>
 
 ### API
@@ -281,7 +351,7 @@ Based on this token, the Langfuse UI can automatically detect the `mediaId` and 
 
 When dealing with traces, observations, or dataset items that include media references, you can convert them back to their base64 data URI format using the `resolve_media_references` utility method provided by the Langfuse client. This is particularly useful for reinserting the original content during fine-tuning, dataset runs, or replaying a generation. The utility method traverses the parsed object and returns a deep copy with all media reference strings replaced by the corresponding base64 data URI representations.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry"]}>
 <Tab>
 
 ```python
@@ -376,6 +446,47 @@ const resolvedTrace = await langfuse.resolveMediaReferences({
 //     }
 // }
 ```
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), media references in traces are handled automatically by the Langfuse backend when processing OpenTelemetry spans. However, if you need to resolve media references manually, you would need to use the Langfuse SDK alongside OpenTelemetry:
+
+```python
+from opentelemetry import trace
+from langfuse import get_client
+import json
+
+# Get the Langfuse client for media resolution
+langfuse = get_client()
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("process-media-references") as span:
+    # Example span attribute with media references
+    span_data = {
+        "image": "@@@langfuseMedia:type=image/jpeg|id=some-uuid|source=bytes@@@",
+        "nested": {
+            "pdf": "@@@langfuseMedia:type=application/pdf|id=some-other-uuid|source=bytes@@@"
+        }
+    }
+    
+    # Set as span attribute (Langfuse will handle automatically)
+    span.set_attribute("input.data", json.dumps(span_data))
+    
+    # If you need to resolve manually for processing
+    resolved_data = langfuse.resolve_media_references(
+        obj=span_data,
+        resolve_with="base64_data_uri"
+    )
+    
+    # Use resolved_data for further processing
+    span.set_attribute("processed.resolved_data", json.dumps(resolved_data))
+```
+
+**Note:** When using OpenTelemetry with Langfuse, media references in span attributes are automatically resolved in the Langfuse UI. Manual resolution is typically only needed if you want to process the media content in your application code.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 </Tabs>

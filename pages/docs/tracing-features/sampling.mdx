@@ -10,7 +10,7 @@ You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environm
 
 The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)"]}>
 <Tab>
 With Python SDK v3, you can configure sampling when initializing the client:
 
@@ -87,6 +87,49 @@ const langfuse = new Langfuse({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), sampling is typically handled by the OpenTelemetry SDK itself rather than Langfuse-specific configuration. However, you can configure sampling in several ways:
+
+**Option 1: Using OpenTelemetry Trace Sampling**
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.sampling import TraceIdRatioBasedSampler
+
+# Configure a sampler that samples 50% of traces
+sampler = TraceIdRatioBasedSampler(0.5)
+
+# Set up tracer provider with the sampler
+tracer_provider = TracerProvider(sampler=sampler)
+trace.set_tracer_provider(tracer_provider)
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Only ~50% of these spans will be sampled
+    span.set_attribute("custom.attribute", "value")
+```
+
+**Option 2: Using Environment Variables**
+
+```python
+import os
+
+# Set sampling ratio via environment variable
+os.environ["OTEL_TRACES_SAMPLER"] = "traceidratio"
+os.environ["OTEL_TRACES_SAMPLER_ARG"] = "0.5"  # 50% sampling rate
+```
+
+**Note on Langfuse and OpenTelemetry Sampling:**
+- OpenTelemetry sampling occurs at the SDK level before spans are sent to exporters
+- If a span is not sampled by OpenTelemetry, it won't be sent to Langfuse at all
+- This is different from Langfuse SDK sampling, which is Langfuse-specific
+
+Learn more about OpenTelemetry sampling in the [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/sampling/) and Langfuse integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>

@@ -14,7 +14,7 @@ The Users view provides an overview of all users. It also offers an in-depth loo
 
 It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -105,6 +105,38 @@ const trace = langfuse.trace({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set the user ID using the `langfuse.user.id` span attribute:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set user ID using the Langfuse-specific attribute
+    span.set_attribute("langfuse.user.id", "user_12345")
+```
+
+You can also set the user ID globally using resource attributes:
+
+```python
+import os
+
+# Set user ID globally for all traces
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.user.id=user_12345"
+```
+
+**Supported OpenTelemetry attributes for users:**
+
+- `langfuse.user.id` - String identifier for the user (only applied to root spans)
+
+Note: The `langfuse.user.id` attribute is only considered when set on the root span of a trace, as the user ID is a trace-level property in Langfuse.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>

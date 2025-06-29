@@ -6,7 +6,7 @@ description: Add any customer metadata to your traces to better understand your 
 
 Traces and observations (see [Langfuse Data Model](/docs/tracing)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -134,6 +134,46 @@ const span = trace.span({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can add metadata using the `langfuse.metadata` span attribute or by prefixing keys with `langfuse.metadata.`:
+
+```python
+from opentelemetry import trace
+import json
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Method 1: Set metadata as JSON string
+    metadata = {"key": "value", "user_type": "premium", "version": "1.2.3"}
+    span.set_attribute("langfuse.metadata", json.dumps(metadata))
+
+    # Method 2: Set individual metadata keys
+    span.set_attribute("langfuse.metadata.user_type", "premium")
+    span.set_attribute("langfuse.metadata.version", "1.2.3")
+    span.set_attribute("langfuse.metadata.feature_flag", "experimental")
+```
+
+You can also set metadata globally using resource attributes:
+
+```python
+import os
+import json
+
+# Set global metadata for all traces
+global_metadata = {"environment": "production", "team": "backend"}
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = f"langfuse.metadata={json.dumps(global_metadata)}"
+```
+
+**Supported OpenTelemetry attributes for metadata:**
+
+- `langfuse.metadata` - JSON string containing metadata object
+- `langfuse.metadata.*` - Individual metadata keys prefixed with `langfuse.metadata.`
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>

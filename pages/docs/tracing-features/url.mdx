@@ -11,7 +11,7 @@ Each trace has a unique URL that you can use to share it with others or to acces
 
 Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -80,6 +80,34 @@ trace.getTraceUrl()
 </Tab>
 <Tab>
 
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can access trace URLs by first obtaining the trace ID from the OpenTelemetry context and then constructing the URL:
+
+```python
+from opentelemetry import trace
+import os
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Get the trace ID from the span context
+    trace_id = format(span.get_span_context().trace_id, "032x")
+    
+    # Construct the Langfuse trace URL
+    # Replace with your actual Langfuse host and project ID
+    langfuse_host = os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com")
+    project_id = "your-project-id"  # Get this from your Langfuse project settings
+    
+    trace_url = f"{langfuse_host}/project/{project_id}/traces/{trace_id}"
+    print(f"View trace at: {trace_url}")
+```
+
+Note: When using OpenTelemetry, you'll need to manually construct the trace URL since OpenTelemetry doesn't have a built-in method to get Langfuse-specific URLs. The trace ID format should match the OpenTelemetry trace ID format (32-character hex string).
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
+
+</Tab>
+<Tab>
+
 Use the interoperability of the Langfuse Python `@observe()` Decorator with the Langchain integration to get the URL of a trace ([interop docs](/docs/integrations/langchain/tracing#interoperability)).
 
 ```python
@@ -142,7 +170,7 @@ You can make a trace `public` to share it via a public link. This allows others 
 
 _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99_
 
-<Tabs items={["Langfuse UI", "Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<Tabs items={["Langfuse UI", "Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry"]}>
 <Tab>
 
 <CloudflareVideo
@@ -221,6 +249,39 @@ const trace = langfuse.trace({
     ...
 });
 ```
+
+</Tab>
+
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can make a trace public using the `langfuse.public` span attribute:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Make the trace public using the Langfuse-specific attribute
+    span.set_attribute("langfuse.public", True)
+```
+
+You can also set traces to be public globally using resource attributes:
+
+```python
+import os
+
+# Set all traces to be public by default
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.public=true"
+```
+
+**Supported OpenTelemetry attributes for making traces public:**
+
+- `langfuse.public` - Boolean value to make the trace publicly accessible (only applied to root spans)
+
+Note: The `langfuse.public` attribute is only considered when set on the root span of a trace, as the public status is a trace-level property in Langfuse.
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 </Tabs>

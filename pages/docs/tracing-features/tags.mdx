@@ -6,7 +6,7 @@ description: Tags help to filter and organize traces in Langfuse based on use ca
 
 Tags allow you to categorize and filter traces. You can tag traces (1) when they are created using the Langfuse SDKs and integrations or (2) from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)" ]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)" ]}>
 <Tab>
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -91,6 +91,36 @@ const trace = langfuse.trace({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using [OpenTelemetry](/docs/opentelemetry/get-started), you can set tags using the `langfuse.tags` span attribute:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    # Set tags using the Langfuse-specific attribute
+    span.set_attribute("langfuse.tags", ["tag-1", "tag-2"])
+```
+
+You can also set tags globally using resource attributes:
+
+```python
+import os
+
+# Set tags globally for all traces
+os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "langfuse.tags=production,api-v2"
+```
+
+**Supported OpenTelemetry attributes for tags:**
+
+- `langfuse.tags` - Array of tag strings for the trace
+
+Learn more about OpenTelemetry integration in the [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
 </Tab>
 <Tab>
