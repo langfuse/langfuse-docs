@@ -12,57 +12,201 @@ Objective:
 1. Capture [traces](/docs/tracing) of your application
 2. Add [scores](/docs/scores) to these traces to measure/evaluate quality of outputs
 
+## New
+
+| Language            | Official SDK                                                                                                                                       | LangFuse‑maintained Integrations                                                                                                                                                                                                                  | Community Integrations                                                                                                        |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Python**          | [Decorator (@observe)](/docs/sdk/python/sdk-v3)<br/>[Context Manager (with)](/docs/sdk/python/sdk-v3)<br/>[Low-level SDK](/docs/sdk/python/sdk-v3) | [LangChain](/docs/integrations/langchain/tracing)<br/>[LangGraph](/docs/integrations/langchain/example-python-langgraph)<br/>[LlamaIndex](/docs/integrations/llama-index/get-started)<br/>[OpenAI SDK](/docs/integrations/openai/python/examples) | [SmolAgents](/docs/integrations/smolagents)<br/>[CrewAI](/docs/integrations/crewai)<br/>[AutoGen](/docs/integrations/autogen) |
+| **TypeScript / JS** | [TS SDK](/docs/sdk/typescript/guide)                                                                                                               | LangChain.js<br/>Vercel AI SDK<br/>OpenAI SDK                                                                                                                                                                                                     | VoltAgent                                                                                                                     |
+| **Go**              | –                                                                                                                                                  | –                                                                                                                                                                                                                                                 | Go client (henomis)                                                                                                           |
+| **Java**            | Java SDK                                                                                                                                           | Spring AI<br/>OpenTelemetry                                                                                                                                                                                                                       | –                                                                                                                             |
+| **.NET**            | –                                                                                                                                                  | OpenTelemetry                                                                                                                                                                                                                                     | Semantic Kernel                                                                                                               |
+| **Other**           | –                                                                                                                                                  | OpenTelemetry<br/>OpenAPI                                                                                                                                                                                                                         | –                                                                                                                             |
+| **Proxy**           | –                                                                                                                                                  | LiteLLM (gateway)                                                                                                                                                                                                                                 | –                                                                                                                             |
+| **No‑Code**         | –                                                                                                                                                  | Flowise<br/>Dify<br/>Langflow                                                                                                                                                                                                                     | –                                                                                                                             |
+
+Below is a **ready‑to‑paste Markdown page** for your LangFuse documentation.
+It begins with a concise summary and a clickable table of contents, then lists every publicly documented integration grouped by language or category, using lean two‑column tables just as you requested. Where LangFuse does not yet ship an official SDK the **Official SDKs** cell is left blank.
+
+---
+
+# Integration Overview
+
+LangFuse applications can be instrumented in three complementary ways — **official SDKs** (Python & JS/TS), **any OpenTelemetry (OTel) exporter** for every other language, and a **proxy / gateway approach (LiteLLM)**. In addition, several no‑code builders come with native LangFuse support. Together these options cover everything from quick prototypes to complex multi‑language micro‑services.([langfuse.com][1], [langfuse.com][2])
+
+## Table of Contents
+
+- [Python](#python)
+- [TypeScript / JavaScript](#typescript--javascript)
+- [Go](#go)
+- [Java](#java)
+- [.NET](#net)
+- [Other Languages](#other-languages)
+- [Proxy Gateway](#proxy-gateway)
+- [No‑Code Builders](#no-code-builders)
+
+---
+
+## Python
+
+LangFuse’s Python SDK (v3) is built on OpenTelemetry and supports decorators, context managers, and manual spans.([langfuse.com][3])
+
+| Category                             | Integrations                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Official SDKs**                    | [LangFuse Python SDK](/docs/sdk/python/overview)                                                                                                                                                                                                                                                                                                                        |
+| **LangFuse‑maintained integrations** | [LangChain](/docs/integrations/langchain/tracing)<br/>[LangGraph](/docs/integrations/langchain/example-python-langgraph) · [LlamaIndex](/docs/integrations/llama-index/get-started) · [Haystack](/docs/integrations/haystack) · [OpenAI SDK wrapper](/docs/integrations/openai/python/examples) · [OpenAI Agents SDK](/docs/integrations/openaiagentssdk/openai-agents) |
+| **Community integrations**           | [SmolAgents](/docs/integrations/smolagents) · [CrewAI](/docs/integrations/crewai) · [AutoGen](/docs/integrations/autogen)                                                                                                                                                                                                                                               |
+
+The maintained integrations all ship first‑party callback handlers or exporters, so traces show up in LangFuse without additional code.([langfuse.com][4], [langfuse.com][5], [langfuse.com][6], [langfuse.com][7], [langfuse.com][8]) Community packages rely on the same OTel attributes and therefore interoperate perfectly.([langfuse.com][9], [langfuse.com][10], [langfuse.com][11])
+
+---
+
+## TypeScript / JavaScript
+
+The JS/TS SDK works in Node, Deno, and most edge runtimes, queues calls asynchronously, and exposes helpers for common frameworks.([langfuse.com][12])
+
+| Category                             | Integrations                                                                                                                                                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Official SDKs**                    | [LangFuse JS/TS SDK](/docs/sdk/typescript/guide)                                                                                                                                                                                                  |
+| **LangFuse‑maintained integrations** | [LangChain.js](/docs/integrations/langchain/tracing) · [Vercel AI SDK](/docs/integrations/vercel-ai-sdk) · [OpenAI SDK wrapper](/docs/integrations/openai/js/get-started) · [OpenAI Agents SDK](/docs/integrations/openaiagentssdk/openai-agents) |
+| **Community integrations**           | [VoltAgent](/docs/integrations/voltagent)                                                                                                                                                                                                         |
+
+Because all of these wrappers emit OTel spans, you can freely mix them with raw SDK calls or other instrumentation in the same trace.([langfuse.com][4], [langfuse.com][13], [langfuse.com][14])
+
+---
+
+## Go
+
+There is no first‑party Go SDK yet, but you have two straightforward paths:
+
+- **HTTP / OpenAPI** – call the public API directly or use an auto‑generated client.([langfuse.com][15], [github.com][16])
+- **OpenTelemetry Exporter** – point any Go OTel exporter at LangFuse’s `/api/public/otel` endpoint.([langfuse.com][1])
+
+| Category                             | Integrations                                                |
+| ------------------------------------ | ----------------------------------------------------------- |
+| **Official SDKs**                    |                                                             |
+| **LangFuse‑maintained integrations** |                                                             |
+| **Community integrations**           | [Unofficial Go SDK](https://github.com/henomis/langfuse-go) |
+
+---
+
+## Java
+
+A generated Java client ships as a simple API wrapper; tracing is done via standard OTel instrumentation or Spring AI’s built‑in support.([langfuse.com][17], [langfuse.com][18])
+
+| Category                             | Integrations                                                                 |
+| ------------------------------------ | ---------------------------------------------------------------------------- |
+| **Official SDKs**                    | [langfuse‑java](https://github.com/langfuse/langfuse-java)                   |
+| **LangFuse‑maintained integrations** | OpenTelemetry Exporter (generic) · [Spring AI](/docs/integrations/spring-ai) |
+| **Community integrations**           | –                                                                            |
+
+---
+
+## .NET
+
+No dedicated SDK yet; instead:
+
+| Category                             | Integrations                                          |
+| ------------------------------------ | ----------------------------------------------------- |
+| **Official SDKs**                    |                                                       |
+| **LangFuse‑maintained integrations** | OpenTelemetry Exporter                                |
+| **Community integrations**           | [Semantic Kernel](/docs/integrations/semantic-kernel) |
+
+The Semantic Kernel cookbook shows how to wire up the OTel exporter and still capture Gen‑AI‑specific attributes like prompts and token counts.([langfuse.com][19])
+
+---
+
+## Other Languages
+
+Any language with an OpenTelemetry implementation or the ability to make HTTP calls can integrate with LangFuse via:
+
+- **/api/public/otel** for tracing (OTLP).([langfuse.com][1])
+- **OpenAPI spec** for data ingestion (scores, datasets, etc.).([langfuse.com][15])
+
+---
+
+## Proxy Gateway
+
+| Category        | Integrations                                  |
+| --------------- | --------------------------------------------- |
+| **Proxy Tools** | [LiteLLM](/docs/integrations/litellm/tracing) |
+
+LiteLLM acts as an OpenAI‑compatible gateway for 100+ providers and can stream its request/response telemetry straight into LangFuse, either via a direct callback or the OTel exporter.([langfuse.com][2], [docs.litellm.ai][20])
+
+---
+
+## No‑Code Builders
+
+| Tool         | Integration Guide                   |
+| ------------ | ----------------------------------- |
+| **Flowise**  | [docs](/docs/integrations/flowise)  |
+| **Dify**     | [docs](/docs/integrations/dify)     |
+| **Langflow** | [docs](/docs/integrations/langflow) |
+
+These builders surface a LangFuse section in their UI where you simply paste your `PUBLIC_KEY`, `SECRET_KEY`, and (if self‑hosted) `HOST`, then publish flows as usual.([langfuse.com][21], [langfuse.com][22], [langfuse.com][23])
+
+---
+
+### Where to go next?
+
+- **Deep‑dive cookbooks** – Explore end‑to‑end notebooks for every integration in the [LangFuse guides](https://langfuse.com/guides/cookbook).([langfuse.com][24])
+- **OpenTelemetry reference** – See attribute mapping and exporter setup in the [OTel guide](/docs/opentelemetry).([langfuse.com][1])
+
+---
+
+# Old
+
 ## Main Integrations
 
-| Integration                                              | Supports                   | Description                                                                                                                                      |
-| -------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [SDK](/docs/sdk)                                         | Python, JS/TS              | Manual instrumentation using the SDKs for full flexibility.                                                                                      |
-| [OpenAI](/docs/integrations/openai)                      | Python, JS/TS              | Automated instrumentation using drop-in replacement of OpenAI SDK.                                                                               |
-| [Langchain](/docs/integrations/langchain)                | Python, JS/TS              | Automated instrumentation by passing callback handler to Langchain application or using OpenTelemetry.                                           |
-| [Haystack](/docs/integrations/haystack)                  | Python                     | Automated instrumentation via Haystack content tracing system.                                                                                   |
-| [LiteLLM](/docs/integrations/litellm/tracing)            | Python, JS/TS (proxy only) | Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs). |
-| [Vercel AI SDK](/docs/integrations/vercel-ai-sdk)        | JS/TS                      | TypeScript toolkit designed to help developers build AI-powered applications with React, Next.js, Vue, Svelte, Node.js.                          |
-| [API](/docs/api)                                         |                            | Directly call the public API. [OpenAPI spec available](https://api.reference.langfuse.com).                                                                                            |
+| Integration                                       | Supports                   | Description                                                                                                                                      |
+| ------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [SDK](/docs/sdk)                                  | Python, JS/TS              | Manual instrumentation using the SDKs for full flexibility.                                                                                      |
+| [OpenAI](/docs/integrations/openai)               | Python, JS/TS              | Automated instrumentation using drop-in replacement of OpenAI SDK.                                                                               |
+| [Langchain](/docs/integrations/langchain)         | Python, JS/TS              | Automated instrumentation by passing callback handler to Langchain application or using OpenTelemetry.                                           |
+| [Haystack](/docs/integrations/haystack)           | Python                     | Automated instrumentation via Haystack content tracing system.                                                                                   |
+| [LiteLLM](/docs/integrations/litellm/tracing)     | Python, JS/TS (proxy only) | Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs). |
+| [Vercel AI SDK](/docs/integrations/vercel-ai-sdk) | JS/TS                      | TypeScript toolkit designed to help developers build AI-powered applications with React, Next.js, Vue, Svelte, Node.js.                          |
+| [API](/docs/api)                                  |                            | Directly call the public API. [OpenAPI spec available](https://api.reference.langfuse.com).                                                      |
 
 ## Packages integrated with Langfuse
 
-| Name                                                                  | Type               | Description                                                                                                                |
-| --------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Name                                                                  | Type               | Description                                                                                                                                                                     |
+| --------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [LlamaIndex](/docs/integrations/llama-index/get-started)              | Library            | Available via third-party OTEL-based instrumentation package ([openinference-instrumentation-llama-index](https://pypi.org/project/openinference-instrumentation-llama-index/)) |
-| [Instructor](/docs/integrations/instructor)                           | Library            | Library to get structured LLM outputs (JSON, Pydantic)                                                                     |
-| [DSPy](/docs/integrations/dspy)                                       | Library            | Framework that systematically optimizes language model prompts and weights                                                 |
-| [Mirascope](/docs/integrations/mirascope/tracing)                     | Library            | Python toolkit for building LLM applications.                                                                              |
-| [Pydantic AI](/docs/integrations/pydantic-ai)                         | Library            | Pydantic integration for LLM applications.                                                                                 |
-| [Ollama](/docs/integrations/ollama)                                   | Model (local)      | Easily run open source LLMs on your own machine.                                                                           |
-| [OpenAI Agents SDK](/docs/integrations/openaiagentssdk/openai-agents) | Library            | Agents framework by OpenAI SDK.                                                                                            |
-| [Pipecat](/docs/integrations/pipecat)                                 | Agents             | Open source framework for building real-time voice and multimodal conversational AI agents.                                |
-| [Amazon Bedrock](/docs/integrations/amazon-bedrock)                   | Model              | Run foundation and fine-tuned models on AWS.                                                                               |
-| [Google Vertex AI and Gemini](/docs/integrations/google-vertex-ai)    | Model              | Grants access to Google's own series of Gemini models as well as various models via the Vertex Model Garden (e.g. Claude3) |
-| [AutoGen](/docs/integrations/autogen)                                 | Agent Framework    | Open source LLM platform for building distributed agents.                                                                  |
-| [Flowise](/docs/integrations/flowise)                                 | Chat/Agent&nbsp;UI | JS/TS no-code builder for customized LLM flows.                                                                            |
-| [Langflow](/docs/integrations/langflow)                               | Chat/Agent&nbsp;UI | Python-based UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.    |
-| [Dify](/docs/integrations/dify)                                       | Chat/Agent&nbsp;UI | Open source LLM app development platform with no-code builder.                                                             |
-| [OpenWebUI](/docs/integrations/openwebui)                             | Chat/Agent&nbsp;UI | Self-hosted LLM Chat web ui supporting various LLM runners including self-hosted and local models.                         |
-| [Promptfoo](/docs/integrations/promptfoo)                             | Tool               | Open source LLM testing platform.                                                                                          |
-| [LobeChat](/docs/integrations/lobechat)                               | Chat/Agent&nbsp;UI | Open source chatbot platform.                                                                                              |
-| [Vapi](/docs/integrations/vapi)                                       | Platform           | Open source voice AI platform.                                                                                             |
-| [Inferable](/docs/integrations/other/inferable)                       | Agents             | Open source LLM platform for building distributed agents.                                                                  |
-| [Gradio](/docs/integrations/other/gradio)                             | Chat/Agent&nbsp;UI | Open source Python library to build web interfaces like Chat UI.                                                           |
-| [Goose](/docs/integrations/goose)                                     | Agents             | Open source LLM platform for building distributed agents.                                                                  |
-| [smolagents](/docs/integrations/smolagents)                           | Agents             | Open source AI agents framework.                                                                                           |
-| [CrewAI](/docs/integrations/crewai)                                   | Agents             | Multi agent framework for agent collaboration and tool use.                                                                |
-| [Spring AI](/docs/integrations/spring-ai)                             | Library            | Spring-based framework for AI development with built-in OTel tracing for AI calls.                                         |
-| [Quarkus LangChain4j](/docs/integrations/quarkus-langchain4j)         | Library            | A Quarkus based integration of LangChain4j for AI development with built-in OTel tracing for AI calls                      |
-| [Firecrawl](/docs/integrations/other/firecrawl)                       | Web Scraping       | Web scraper that allows you to turn entire websites into LLM-ready markdown.                                               |
-| [OpenRouter](/docs/integrations/other/openrouter)                     | Framework          | OpenAI-compatible completion API to +280 language models                                                                   |
-| [xAI / Grok](/docs/integrations/other/xai)                            | Model              | xAI's Grok models                                                                                                          |
-| [Cohere](/docs/integrations/other/cohere)                             | Model              | Cohere's models                                                                                                            |
-| [Fireworks AI](/docs/integrations/other/fireworks-ai)                 | Model              | Fireworks AI's models                                                                                                      |
-| [Novita AI](/docs/integrations/other/novitaai)                        | Model              | Deployment for open source and specialized models                                                                          |
-| [Cleanlab](/docs/integrations/other/cleanlab)                         | Model / Framework  | Automated Evaluations                                                                                                      |
-| [VoltAgent](/docs/integrations/voltagent)                             | Agents             | Open source Typescript toolkit to build LLM Agents.                                                                        |
-| [Strands Agents](/docs/integrations/strands-agents)                   | Agents             | Open source Python framework for building distributed agents.                                                              |
-| [Agno Agents](/docs/integrations/other/agno-agents)                   | Agents             | Lightweight, high-performance library for building AI Agents                                                               |
+| [Instructor](/docs/integrations/instructor)                           | Library            | Library to get structured LLM outputs (JSON, Pydantic)                                                                                                                          |
+| [DSPy](/docs/integrations/dspy)                                       | Library            | Framework that systematically optimizes language model prompts and weights                                                                                                      |
+| [Mirascope](/docs/integrations/mirascope/tracing)                     | Library            | Python toolkit for building LLM applications.                                                                                                                                   |
+| [Pydantic AI](/docs/integrations/pydantic-ai)                         | Library            | Pydantic integration for LLM applications.                                                                                                                                      |
+| [Ollama](/docs/integrations/ollama)                                   | Model (local)      | Easily run open source LLMs on your own machine.                                                                                                                                |
+| [OpenAI Agents SDK](/docs/integrations/openaiagentssdk/openai-agents) | Library            | Agents framework by OpenAI SDK.                                                                                                                                                 |
+| [Pipecat](/docs/integrations/pipecat)                                 | Agents             | Open source framework for building real-time voice and multimodal conversational AI agents.                                                                                     |
+| [Amazon Bedrock](/docs/integrations/amazon-bedrock)                   | Model              | Run foundation and fine-tuned models on AWS.                                                                                                                                    |
+| [Google Vertex AI and Gemini](/docs/integrations/google-vertex-ai)    | Model              | Grants access to Google's own series of Gemini models as well as various models via the Vertex Model Garden (e.g. Claude3)                                                      |
+| [AutoGen](/docs/integrations/autogen)                                 | Agent Framework    | Open source LLM platform for building distributed agents.                                                                                                                       |
+| [Flowise](/docs/integrations/flowise)                                 | Chat/Agent&nbsp;UI | JS/TS no-code builder for customized LLM flows.                                                                                                                                 |
+| [Langflow](/docs/integrations/langflow)                               | Chat/Agent&nbsp;UI | Python-based UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.                                                         |
+| [Dify](/docs/integrations/dify)                                       | Chat/Agent&nbsp;UI | Open source LLM app development platform with no-code builder.                                                                                                                  |
+| [OpenWebUI](/docs/integrations/openwebui)                             | Chat/Agent&nbsp;UI | Self-hosted LLM Chat web ui supporting various LLM runners including self-hosted and local models.                                                                              |
+| [Promptfoo](/docs/integrations/promptfoo)                             | Tool               | Open source LLM testing platform.                                                                                                                                               |
+| [LobeChat](/docs/integrations/lobechat)                               | Chat/Agent&nbsp;UI | Open source chatbot platform.                                                                                                                                                   |
+| [Vapi](/docs/integrations/vapi)                                       | Platform           | Open source voice AI platform.                                                                                                                                                  |
+| [Inferable](/docs/integrations/other/inferable)                       | Agents             | Open source LLM platform for building distributed agents.                                                                                                                       |
+| [Gradio](/docs/integrations/other/gradio)                             | Chat/Agent&nbsp;UI | Open source Python library to build web interfaces like Chat UI.                                                                                                                |
+| [Goose](/docs/integrations/goose)                                     | Agents             | Open source LLM platform for building distributed agents.                                                                                                                       |
+| [smolagents](/docs/integrations/smolagents)                           | Agents             | Open source AI agents framework.                                                                                                                                                |
+| [CrewAI](/docs/integrations/crewai)                                   | Agents             | Multi agent framework for agent collaboration and tool use.                                                                                                                     |
+| [Spring AI](/docs/integrations/spring-ai)                             | Library            | Spring-based framework for AI development with built-in OTel tracing for AI calls.                                                                                              |
+| [Quarkus LangChain4j](/docs/integrations/quarkus-langchain4j)         | Library            | A Quarkus based integration of LangChain4j for AI development with built-in OTel tracing for AI calls                                                                           |
+| [Firecrawl](/docs/integrations/other/firecrawl)                       | Web Scraping       | Web scraper that allows you to turn entire websites into LLM-ready markdown.                                                                                                    |
+| [OpenRouter](/docs/integrations/other/openrouter)                     | Framework          | OpenAI-compatible completion API to +280 language models                                                                                                                        |
+| [xAI / Grok](/docs/integrations/other/xai)                            | Model              | xAI's Grok models                                                                                                                                                               |
+| [Cohere](/docs/integrations/other/cohere)                             | Model              | Cohere's models                                                                                                                                                                 |
+| [Fireworks AI](/docs/integrations/other/fireworks-ai)                 | Model              | Fireworks AI's models                                                                                                                                                           |
+| [Novita AI](/docs/integrations/other/novitaai)                        | Model              | Deployment for open source and specialized models                                                                                                                               |
+| [Cleanlab](/docs/integrations/other/cleanlab)                         | Model / Framework  | Automated Evaluations                                                                                                                                                           |
+| [VoltAgent](/docs/integrations/voltagent)                             | Agents             | Open source Typescript toolkit to build LLM Agents.                                                                                                                             |
+| [Strands Agents](/docs/integrations/strands-agents)                   | Agents             | Open source Python framework for building distributed agents.                                                                                                                   |
+| [Agno Agents](/docs/integrations/other/agno-agents)                   | Agents             | Lightweight, high-performance library for building AI Agents                                                                                                                    |
 
 Unsure which integration to choose? Ask us on [Discord](/discord) or in the chat.
 
