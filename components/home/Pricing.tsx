@@ -207,7 +207,7 @@ const PricingCalculatorModal = ({
           pricing calculator
         </span>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Pricing Calculator</DialogTitle>
           <DialogDescription>
@@ -252,10 +252,10 @@ const PricingCalculatorModal = ({
             />
           </div>
 
-          <div className="bg-muted p-6 rounded">
+          <div className="bg-muted p-4 sm:p-6 rounded">
             {currentBaseFee > 0 ? (
               <div className="text-center">
-                <div className="flex items-center justify-center gap-4 text-lg font-medium">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-base sm:text-lg font-medium">
                   <div className="text-center">
                     <div className="text-primary">
                       {formatCurrency(currentBaseFee)}
@@ -264,7 +264,7 @@ const PricingCalculatorModal = ({
                       {selectedPlan} Base
                     </div>
                   </div>
-                  <div className="text-muted-foreground">+</div>
+                  <div className="text-muted-foreground text-sm sm:text-base">+</div>
                   <div className="text-center">
                     <div className="text-primary">
                       {formatCurrency(calculatedPrice)}
@@ -273,7 +273,7 @@ const PricingCalculatorModal = ({
                       Usage
                     </div>
                   </div>
-                  <div className="text-muted-foreground">=</div>
+                  <div className="text-muted-foreground text-sm sm:text-base">=</div>
                   <div className="text-center">
                     <div className="text-primary">
                       {formatCurrency(calculatedPrice + currentBaseFee)}
@@ -301,47 +301,54 @@ const PricingCalculatorModal = ({
           {/* Breakdown */}
           <div className="space-y-2">
             <div className="font-medium text-sm">Pricing tiers:</div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-left">Tier</TableHead>
-                  <TableHead className="text-right">Rate</TableHead>
-                  <TableHead className="text-right">Your Units</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pricingTiers.map((tier, index) => {
-                  const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-                  const { eventsInTier, costForTier, tierRate } =
-                    calculateTierBreakdown(events, tier, index);
+            <div className="overflow-x-auto -mx-2 sm:mx-0">
+              <Table className="min-w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left px-2 sm:px-4 text-xs sm:text-sm">Tier</TableHead>
+                    <TableHead className="text-right px-2 sm:px-4 text-xs sm:text-sm">Rate</TableHead>
+                    <TableHead className="text-right px-2 sm:px-4 text-xs sm:text-sm">Your Units</TableHead>
+                    <TableHead className="text-right px-2 sm:px-4 text-xs sm:text-sm">Cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pricingTiers.map((tier, index) => {
+                    const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
+                    const { eventsInTier, costForTier, tierRate } =
+                      calculateTierBreakdown(events, tier, index);
 
-                  return (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {tier.description}
-                      </TableCell>
-                      <TableCell className="text-right">{tierRate}</TableCell>
-                      <TableCell className="text-right">
-                        {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {/* Total row */}
-                <TableRow className="border-t-2">
-                  <TableCell className="font-semibold">Total</TableCell>
-                  <TableCell className="text-right"></TableCell>
-                  <TableCell className="text-right">{monthlyEvents}</TableCell>
-                  <TableCell className="text-right font-semibold text-primary">
-                    {formatCurrency(calculatedPrice)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                    return (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium px-2 sm:px-4 text-xs sm:text-sm">
+                          <span className="block sm:hidden">
+                            {tier.description.replace(' units', '')}
+                          </span>
+                          <span className="hidden sm:block">
+                            {tier.description}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right px-2 sm:px-4 text-xs sm:text-sm">{tierRate}</TableCell>
+                        <TableCell className="text-right px-2 sm:px-4 text-xs sm:text-sm">
+                          {eventsInTier > 0 ? formatNumber(eventsInTier) : "—"}
+                        </TableCell>
+                        <TableCell className="text-right font-medium px-2 sm:px-4 text-xs sm:text-sm">
+                          {eventsInTier > 0 ? formatCurrency(costForTier) : "—"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {/* Total row */}
+                  <TableRow className="border-t-2">
+                    <TableCell className="font-semibold px-2 sm:px-4 text-xs sm:text-sm">Total</TableCell>
+                    <TableCell className="text-right px-2 sm:px-4"></TableCell>
+                    <TableCell className="text-right px-2 sm:px-4 text-xs sm:text-sm">{monthlyEvents}</TableCell>
+                    <TableCell className="text-right font-semibold text-primary px-2 sm:px-4 text-xs sm:text-sm">
+                      {formatCurrency(calculatedPrice)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       </DialogContent>
