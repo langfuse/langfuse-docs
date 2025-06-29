@@ -1,7 +1,52 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-<Tabs items={["Cursor", "Copilot in VSCode", "Windsurf", "Other MCP Clients"]}>
+<Tabs items={["Claude Code", "Cursor", "Copilot in VSCode", "Windsurf", "Other MCP Clients"]}>
+
+<Tab>
+
+Add Langfuse Docs MCP to Claude Code via the CLI:
+
+#### Quick setup (recommended)
+
+```bash
+claude mcp add \
+  --transport http \
+  langfuse-docs \
+  https://langfuse.com/api/mcp \
+  --scope user
+```
+
+#### Manual configuration
+
+Alternatively, add the following to your settings file:
+
+- **User scope**: `~/.claude/settings.json`
+- **Project scope**: `your-repo/.claude/settings.json`
+- **Local scope**: `your-repo/.claude/settings.local.json`
+
+```json
+{
+  "mcpServers": {
+    "langfuse-docs": {
+      "transportType": "http",
+      "url": "https://langfuse.com/api/mcp",
+      "verifySsl": true
+    }
+  }
+}
+```
+
+#### One-liner JSON import
+
+```bash
+claude mcp add-json langfuse-docs \
+  '{"type":"http","url":"https://langfuse.com/api/mcp"}'
+```
+
+Once added, start a Claude Code session (`claude`) and type `/mcp` to confirm the connection.
+
+</Tab>
 
 <Tab>
 
