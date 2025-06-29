@@ -9,6 +9,8 @@ const posthog = new PostHog(
   process.env.POSTHOG_API_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY || "",
   {
     host: process.env.POSTHOG_HOST || process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+    flushAt:1,
+    flushInterval: 0
   }
 );
 
@@ -53,15 +55,15 @@ const mcpHandler = createMcpHandler(
 
           // Track successful MCP tool event
           posthog.capture({
-            distinctId: "mcp-server",
-            event: "MCP",
+            distinctId: "docs-mcp-server",
+            event: "docs_mcp:execute_tool",
             properties: {
               tool_name: "searchLangfuseDocs",
               query: query,
               status: "success",
               response_length: responseContent.length,
-              timestamp: new Date().toISOString(),
-            },
+              $process_person_profile: false,
+          },
           });
 
           // Return the actual documentation content in MCP format
@@ -78,14 +80,13 @@ const mcpHandler = createMcpHandler(
         } catch (error) {
           // Track error MCP tool event
           posthog.capture({
-            distinctId: "mcp-server",
-            event: "MCP",
+            distinctId: "docs-mcp-server",
+            event: "docs_mcp:execute_tool",
             properties: {
               tool_name: "searchLangfuseDocs",
               query: query,
               status: "error",
               error_message: error instanceof Error ? error.message : "Unknown error",
-              timestamp: new Date().toISOString(),
             },
           });
 
