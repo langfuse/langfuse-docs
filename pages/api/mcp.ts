@@ -12,6 +12,35 @@ const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
   flushInterval: 0,
 });
 
+// Helper function for PostHog tracking
+const trackMcpToolUsage = async (
+  toolName: string,
+  status: "success" | "error",
+  properties: Record<string, any> = {}
+) => {
+  return waitUntil(
+    (async () => {
+      try {
+        posthog.capture({
+          distinctId: "docs-mcp-server",
+          event: "docs_mcp:execute_tool",
+          properties: {
+            tool_name: toolName,
+            status: status,
+            $process_person_profile: false,
+            ...properties,
+          },
+        });
+
+        // Ensure events are flushed before function shutdown
+        await posthog.flush();
+      } catch (error) {
+        console.error("Error tracking PostHog event:", error);
+      }
+    })()
+  );
+};
+
 // Create the MCP handler using Vercel's adapter
 const mcpHandler = createMcpHandler(
   (server) => {
@@ -51,29 +80,11 @@ const mcpHandler = createMcpHandler(
           const responseContent =
             result.choices?.[0]?.message?.content || "No results found";
 
-          // Track successful MCP tool event with waitUntil and shutdown
-          waitUntil(
-            (async () => {
-              try {
-                posthog.capture({
-                  distinctId: "docs-mcp-server",
-                  event: "docs_mcp:execute_tool",
-                  properties: {
-                    tool_name: "searchLangfuseDocs",
-                    query: query,
-                    status: "success",
-                    response_length: responseContent.length,
-                    $process_person_profile: false,
-                  },
-                });
-
-                // Ensure events are flushed before function shutdown
-                await posthog.flush();
-              } catch (error) {
-                console.error("Error tracking PostHog event:", error);
-              }
-            })()
-          );
+          // Track successful MCP tool event
+          trackMcpToolUsage("searchLangfuseDocs", "success", {
+            query: query,
+            response_length: responseContent.length,
+          });
 
           // Return the actual documentation content in MCP format
           return {
@@ -87,36 +98,72 @@ const mcpHandler = createMcpHandler(
             _meta: result,
           };
         } catch (error) {
-          // Track error MCP tool event with waitUntil and shutdown
-          waitUntil(
-            (async () => {
-              try {
-                posthog.capture({
-                  distinctId: "docs-mcp-server",
-                  event: "docs_mcp:execute_tool",
-                  properties: {
-                    tool_name: "searchLangfuseDocs",
-                    query: query,
-                    status: "error",
-                    error_message:
-                      error instanceof Error ? error.message : "Unknown error",
-                    $process_person_profile: false,
-                  },
-                });
-
-                // Ensure events are flushed before function shutdown
-                await posthog.flush();
-              } catch (trackingError) {
-                console.error("Error tracking PostHog event:", trackingError);
-              }
-            })()
-          );
+          // Track error MCP tool event
+          trackMcpToolUsage("searchLangfuseDocs", "error", {
+            query: query,
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
+          });
 
           return {
             content: [
               {
                 type: "text",
                 text: `Error searching documentation: ${
+                  error instanceof Error ? error.message : "Unknown error"
+                }`,
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+    );
+
+    // Define the getLangfuseOverview tool
+    server.tool(
+      "getLangfuseOverview",
+      "Get an initial overview of Langfuse documentation and features by fetching the llms.txt file from langfuse.com",
+      {
+        // No parameters needed for this tool
+      },
+      async () => {
+        try {
+          // Fetch the llms.txt file from langfuse.com
+          const llmsTxtRes = await fetch("https://langfuse.com/llms.txt");
+
+          if (!llmsTxtRes.ok) {
+            throw new Error(`Failed to fetch llms.txt: ${llmsTxtRes.status}`);
+          }
+
+          const llmsTxtContent = await llmsTxtRes.text();
+
+          // Track successful MCP tool event
+          trackMcpToolUsage("getLangfuseOverview", "success", {
+            content_length: llmsTxtContent.length,
+          });
+
+          // Return the llms.txt content in MCP format
+          return {
+            content: [
+              {
+                type: "text",
+                text: llmsTxtContent,
+              },
+            ],
+          };
+        } catch (error) {
+          // Track error MCP tool event
+          trackMcpToolUsage("getLangfuseOverview", "error", {
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
+          });
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error fetching Langfuse overview: ${
                   error instanceof Error ? error.message : "Unknown error"
                 }`,
               },
