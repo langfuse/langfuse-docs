@@ -3,14 +3,18 @@ import { createMcpHandler } from "@vercel/mcp-adapter";
 import { z } from "zod";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PostHog } from "posthog-node";
+import { waitUntil } from "@vercel/functions";
 
 // Initialize PostHog client for server-side tracking
 const posthog = new PostHog(
   process.env.POSTHOG_API_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY || "",
   {
-    host: process.env.POSTHOG_HOST || process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
-    flushAt:1,
-    flushInterval: 0
+    host:
+      process.env.POSTHOG_HOST ||
+      process.env.NEXT_PUBLIC_POSTHOG_HOST ||
+      "https://eu.posthog.com",
+    flushAt: 1,
+    flushInterval: 0,
   }
 );
 
@@ -53,18 +57,29 @@ const mcpHandler = createMcpHandler(
           const responseContent =
             result.choices?.[0]?.message?.content || "No results found";
 
-          // Track successful MCP tool event
-          posthog.capture({
-            distinctId: "docs-mcp-server",
-            event: "docs_mcp:execute_tool",
-            properties: {
-              tool_name: "searchLangfuseDocs",
-              query: query,
-              status: "success",
-              response_length: responseContent.length,
-              $process_person_profile: false,
-          },
-          });
+          // Track successful MCP tool event with waitUntil and shutdown
+          waitUntil(
+            (async () => {
+              try {
+                posthog.capture({
+                  distinctId: "docs-mcp-server",
+                  event: "docs_mcp:execute_tool",
+                  properties: {
+                    tool_name: "searchLangfuseDocs",
+                    query: query,
+                    status: "success",
+                    response_length: responseContent.length,
+                    $process_person_profile: false,
+                  },
+                });
+
+                // Ensure events are flushed before function shutdown
+                await posthog.shutdown();
+              } catch (error) {
+                console.error("Error tracking PostHog event:", error);
+              }
+            })()
+          );
 
           // Return the actual documentation content in MCP format
           return {
@@ -78,17 +93,30 @@ const mcpHandler = createMcpHandler(
             _meta: result,
           };
         } catch (error) {
-          // Track error MCP tool event
-          posthog.capture({
-            distinctId: "docs-mcp-server",
-            event: "docs_mcp:execute_tool",
-            properties: {
-              tool_name: "searchLangfuseDocs",
-              query: query,
-              status: "error",
-              error_message: error instanceof Error ? error.message : "Unknown error",
-            },
-          });
+          // Track error MCP tool event with waitUntil and shutdown
+          waitUntil(
+            (async () => {
+              try {
+                posthog.capture({
+                  distinctId: "docs-mcp-server",
+                  event: "docs_mcp:execute_tool",
+                  properties: {
+                    tool_name: "searchLangfuseDocs",
+                    query: query,
+                    status: "error",
+                    error_message:
+                      error instanceof Error ? error.message : "Unknown error",
+                    $process_person_profile: false,
+                  },
+                });
+
+                // Ensure events are flushed before function shutdown
+                await posthog.shutdown();
+              } catch (trackingError) {
+                console.error("Error tracking PostHog event:", trackingError);
+              }
+            })()
+          );
 
           return {
             content: [
