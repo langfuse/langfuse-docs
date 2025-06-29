@@ -6,17 +6,11 @@ import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 
 // Initialize PostHog client for server-side tracking
-const posthog = new PostHog(
-  process.env.POSTHOG_API_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY || "",
-  {
-    host:
-      process.env.POSTHOG_HOST ||
-      process.env.NEXT_PUBLIC_POSTHOG_HOST ||
-      "https://eu.posthog.com",
-    flushAt: 1,
-    flushInterval: 0,
-  }
-);
+const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
+  host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+  flushAt: 1,
+  flushInterval: 0,
+});
 
 // Create the MCP handler using Vercel's adapter
 const mcpHandler = createMcpHandler(
@@ -74,7 +68,7 @@ const mcpHandler = createMcpHandler(
                 });
 
                 // Ensure events are flushed before function shutdown
-                await posthog.shutdown();
+                await posthog.flush();
               } catch (error) {
                 console.error("Error tracking PostHog event:", error);
               }
@@ -111,7 +105,7 @@ const mcpHandler = createMcpHandler(
                 });
 
                 // Ensure events are flushed before function shutdown
-                await posthog.shutdown();
+                await posthog.flush();
               } catch (trackingError) {
                 console.error("Error tracking PostHog event:", trackingError);
               }
