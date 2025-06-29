@@ -23,10 +23,6 @@ const mcpHandler = createMcpHandler(
         query: z.string().describe("Natural-language question from the user"),
       },
       async ({ query }) => {
-        let result: any;
-        let error: Error | null = null;
-        let responseContent = "";
-
         try {
           // Call Inkeep RAG API
           const inkeepRes = await fetch(
@@ -49,31 +45,26 @@ const mcpHandler = createMcpHandler(
             throw new Error(`Inkeep API returned ${inkeepRes.status}`);
           }
 
-          result = await inkeepRes.json();
+          const result = await inkeepRes.json();
 
           // Extract the actual content from the Inkeep response
-          responseContent =
+          const responseContent =
             result.choices?.[0]?.message?.content || "No results found";
-        } catch (err) {
-          error = err instanceof Error ? err : new Error("Unknown error");
-          responseContent = `Error searching documentation: ${error.message}`;
-        }
 
-        // Track single MCP tool event with complete information
-        posthog.capture({
-          distinctId: "mcp-server",
-          event: "MCP",
-          properties: {
-            tool_name: "searchLangfuseDocs",
-            query: query,
-            status: error ? "error" : "success",
-            response_length: responseContent.length,
-            error_message: error?.message || null,
-            timestamp: new Date().toISOString(),
-          },
-        });
+          // Track successful MCP tool event
+          posthog.capture({
+            distinctId: "mcp-server",
+            event: "MCP",
+            properties: {
+              tool_name: "searchLangfuseDocs",
+              query: query,
+              status: "success",
+              response_length: responseContent.length,
+              timestamp: new Date().toISOString(),
+            },
+          });
 
-        if (error) {
+          // Return the actual documentation content in MCP format
           return {
             content: [
               {
@@ -81,21 +72,35 @@ const mcpHandler = createMcpHandler(
                 text: responseContent,
               },
             ],
+            // Include the full Inkeep response as structured data for debugging
+            _meta: result,
+          };
+        } catch (error) {
+          // Track error MCP tool event
+          posthog.capture({
+            distinctId: "mcp-server",
+            event: "MCP",
+            properties: {
+              tool_name: "searchLangfuseDocs",
+              query: query,
+              status: "error",
+              error_message: error instanceof Error ? error.message : "Unknown error",
+              timestamp: new Date().toISOString(),
+            },
+          });
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error searching documentation: ${
+                  error instanceof Error ? error.message : "Unknown error"
+                }`,
+              },
+            ],
             isError: true,
           };
         }
-
-        // Return the actual documentation content in MCP format
-        return {
-          content: [
-            {
-              type: "text",
-              text: responseContent,
-            },
-          ],
-          // Include the full Inkeep response as structured data for debugging
-          _meta: result,
-        };
       }
     );
   },
