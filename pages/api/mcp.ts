@@ -68,6 +68,49 @@ const mcpHandler = createMcpHandler(
         }
       }
     );
+
+    // Define the getLangfuseOverview tool
+    server.tool(
+      "getLangfuseOverview",
+      "Get an overview of Langfuse documentation and features by fetching the llms.txt file from langfuse.com",
+      {
+        // No parameters needed for this tool
+      },
+      async () => {
+        try {
+          // Fetch the llms.txt file from langfuse.com
+          const llmsTxtRes = await fetch("https://langfuse.com/llms.txt");
+
+          if (!llmsTxtRes.ok) {
+            throw new Error(`Failed to fetch llms.txt: ${llmsTxtRes.status}`);
+          }
+
+          const llmsTxtContent = await llmsTxtRes.text();
+
+          // Return the llms.txt content in MCP format
+          return {
+            content: [
+              {
+                type: "text",
+                text: llmsTxtContent,
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error fetching Langfuse overview: ${
+                  error instanceof Error ? error.message : "Unknown error"
+                }`,
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+    );
   },
   {
     // Server options (empty for now)

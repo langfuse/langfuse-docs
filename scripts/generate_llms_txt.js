@@ -28,14 +28,13 @@ async function generateLLMsList() {
 
         // Create a map to store URLs by section
         const urlsBySection = {
-            other: [],
             optional: []
         };
         MAIN_SECTIONS.forEach(section => {
             urlsBySection[section] = [];
         });
 
-        // Sort URLs into sections
+        // Sort URLs into sections (only include main and optional sections)
         const urls = result.urlset.url.map(url => url.loc[0]);
         urls.forEach(url => {
             const urlPath = new URL(url).pathname.split('/')[1]; // Get first part of path
@@ -50,12 +49,8 @@ async function generateLLMsList() {
                     title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
                     url: url
                 });
-            } else {
-                urlsBySection.other.push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
             }
+            // Note: Removed the "other" section - URLs that don't match main or optional sections are now ignored
         });
 
         // Generate markdown for main sections
@@ -69,16 +64,7 @@ async function generateLLMsList() {
             }
         });
 
-        // Add other section
-        if (urlsBySection.other.length > 0) {
-            markdownContent += '## Other\n\n';
-            urlsBySection.other.forEach(({ title, url }) => {
-                markdownContent += `- [${title}](${url})\n`;
-            });
-            markdownContent += '\n';
-        }
-
-        // Add optional integrations section at the end
+        // Add optional sections at the end
         if (urlsBySection.optional.length > 0) {
             markdownContent += '## Optional\n\n';
             urlsBySection.optional.forEach(({ title, url }) => {
