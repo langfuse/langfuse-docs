@@ -4,21 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const authorsPath = path.join(__dirname, '../components/Authors.tsx');
-const contributorsPath = path.join(__dirname, '../data/contributors.json');
-const docsPath = path.join(__dirname, '../pages/docs');
+const authorsPath = path.join(__dirname, '../../data/authors.json');
+const contributorsPath = path.join(__dirname, '../../data/contributors.json');
+const docsPath = path.join(__dirname, '../../pages/docs');
 
-// Helper function to read and parse the current authors file
+// Helper function to read the authors JSON file
 function getCurrentAuthors() {
-    const authorsContent = fs.readFileSync(authorsPath, 'utf8');
-    const allAuthorsMatch = authorsContent.match(/export const allAuthors = ({[\s\S]*?}) as const;/);
-
-    if (!allAuthorsMatch) {
-        throw new Error('Could not find allAuthors object in Authors.tsx');
-    }
-
-    const allAuthorsString = allAuthorsMatch[1];
-    return eval(`(${allAuthorsString})`);
+    return JSON.parse(fs.readFileSync(authorsPath, 'utf8'));
 }
 
 // Function to find author by email
