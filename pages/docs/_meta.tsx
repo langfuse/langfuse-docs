@@ -63,7 +63,6 @@ export default {
     type: "separator",
     title: "More",
   },
-  comments: "Comments",
   rbac: "Access Control (RBAC)",
   "audit-logs": "Audit Logs",
   "data-retention": "Data Retention",
