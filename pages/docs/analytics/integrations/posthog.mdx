@@ -55,6 +55,8 @@ Once integrated, you can build a dashboard in PostHog to visualize your Langfuse
 
 On an hourly schedule Langfuse batches aggregated events and metrics to your PostHog instance.
 
+All events include the `langfuse_environment` property which corresponds to the [environment](/docs/tracing-features/environments) configured in Langfuse for organizing traces across different contexts (e.g., production, staging, development).
+
 ### Metadata matching
 
 Matching of metadata helps to join the data from Langfuse with the data from PostHog:
@@ -92,6 +94,7 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_release`: Information relating to the event release.
 - `langfuse_version`: The version of the event.
 - `langfuse_tags`: Any tags associated with the event.
+- `langfuse_environment`: The environment associated with the trace.
 - `langfuse_event_version`: The integration version of Langfuse.
 
 #### Event: `langfuse generation`
@@ -115,6 +118,7 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_model`: The model used during this generation's process.
 - `langfuse_level`: The level associated with the generation.
 - `langfuse_tags`: Any tags attached to the trace of the generation.
+- `langfuse_environment`: The environment associated with the generation.
 - `langfuse_event_version`: The integration version with Langfuse.
 
 #### Event `langfuse score`
@@ -130,6 +134,7 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_user_id`: The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.
 - `langfuse_release`: The release information of the trace associated with the score.
 - `langfuse_tags`: Any tags related to the trace of the score.
+- `langfuse_environment`: The environment associated with the score.
 - `langfuse_event_version`: The integration version with Langfuse.
 
 ## Troubleshooting
