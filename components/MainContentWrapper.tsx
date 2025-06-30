@@ -20,7 +20,7 @@ import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 
-const pathsWithoutFooterWidgets = ["/imprint", "/blog", "/customers"];
+const pathsWithoutFooterWidgets = ["/imprint", "/blog", "/customers", "/careers"];
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/customers/");
 
