@@ -145,6 +145,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  vn: {
+    title: "Vietnamese Overview",
+    type: "page",
+    display: "hidden",
+  },
   community: {
     title: "Community",
     type: "page",
