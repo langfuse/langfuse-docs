@@ -94,7 +94,7 @@ export const CopyAgentOnboardingPrompt = () => {
       </Button>
       <details className="text-xs text-muted-foreground">
         <summary className="cursor-pointer hover:text-foreground">
-          View raw prompt
+          View prompt
         </summary>
         <pre className="mt-2 whitespace-pre-wrap break-words bg-muted p-2 rounded text-xs">
           {agenticOnboardingPrompt}
