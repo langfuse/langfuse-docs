@@ -21,7 +21,7 @@ export const allAuthors = {
     image: "/images/people/clemensrawert.jpg",
     twitter: "rawert",
     githubEmail: "121163007+clemra@users.noreply.github.com",
-    githubEmailAlt: "clemens@langfuse.com",
+    githubEmailAlt: ["clemens@langfuse.com"],
   },
   hassiebpakzad: {
     firstName: "Hassieb",
@@ -43,7 +43,7 @@ export const allAuthors = {
     image: "/images/people/jannikmaierhoefer.jpg",
     twitter: "jmaierhoefer",
     githubEmail: "48529566+jannikmaierhoefer@users.noreply.github.com",
-    githubEmailAlt: "jannik@langfuse.com",
+    githubEmailAlt: ["jannik@langfuse.com"],
   },
   steffenschmitz: {
     firstName: "Steffen",

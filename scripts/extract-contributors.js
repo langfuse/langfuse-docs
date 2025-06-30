@@ -4,20 +4,50 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Email to author mapping based on the allAuthors data
-const emailToAuthor = {
-  "git@marcklingen.com": "marcklingen",
-  "68423100+hassiebp@users.noreply.github.com": "hassiebpakzad",
-  "74332854+marliessophie@users.noreply.github.com": "marliesmayerhofer",
-  "48529566+jannikmaierhoefer@users.noreply.github.com": "jannikmaierhoefer",
-  "jannik@langfuse.com": "jannikmaierhoefer",
-  "steffen@langfuse.com": "steffenschmitz",
-  "57024447+felixkrrr@users.noreply.github.com": "felixkrauth",
-  "l.nimar.b@gmail.com": "nimarblume",
-  "121163007+clemra@users.noreply.github.com": "clemensrawert",
-  "clemens@langfuse.com": "clemensrawert",
-  "lydia.g.you@gmail.com": "lydiayou",
-};
+// Import the authors data to build dynamic email mapping
+const authorsPath = path.join(__dirname, '../components/Authors.tsx');
+const authorsContent = fs.readFileSync(authorsPath, 'utf8');
+
+// Extract the allAuthors object from the file
+// This is a simple regex-based extraction - in production you might want a more robust parser
+const allAuthorsMatch = authorsContent.match(/export const allAuthors = ({[\s\S]*?}) as const;/);
+if (!allAuthorsMatch) {
+  throw new Error('Could not find allAuthors object in Authors.tsx');
+}
+
+// Evaluate the allAuthors object (this is safe since we control the content)
+const allAuthorsString = allAuthorsMatch[1];
+const allAuthors = eval(`(${allAuthorsString})`);
+
+// Build email to author mapping dynamically
+function buildEmailMapping() {
+  const emailToAuthor = {};
+  
+  Object.entries(allAuthors).forEach(([authorKey, authorData]) => {
+    // Add primary GitHub email
+    if (authorData.githubEmail) {
+      emailToAuthor[authorData.githubEmail] = authorKey;
+    }
+    
+    // Add alternative emails (now an array)
+    if (authorData.githubEmailAlt && Array.isArray(authorData.githubEmailAlt)) {
+      authorData.githubEmailAlt.forEach(email => {
+        emailToAuthor[email] = authorKey;
+      });
+    }
+  });
+  
+  return emailToAuthor;
+}
+
+// Build the email mapping
+const emailToAuthor = buildEmailMapping();
+
+console.log('📧 Email mappings found:');
+Object.entries(emailToAuthor).forEach(([email, author]) => {
+  console.log(`   ${email} → ${author}`);
+});
+console.log();
 
 function getAllDocsFiles() {
   try {
