@@ -1,0 +1,24 @@
+---
+date: 2025-06-30
+title: Message Placeholders in Chat Prompts
+description: Inject context or message history into your chat prompts at just the right spot.
+author: Nimar
+ogImage: /images/changelog/2025-06-30-prompt-message-placeholders.gif
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+With Message Placeholders, easily inject message histories (or other context) into chat prompts at defined positions.
+Add a placeholder message in your chat prompt and fill it in with a list of chat messages in the SDKs.
+You can also try it in the playground, add a placeholder and provide a list of chat messages to fill in below the variables.
+
+In the SDKs, you can fill in values for placeholders by calling the `update(placeholders={"key": ChatMessage[]})` method.
+You can chain that call with further processing, such as `.update(...).getLangchainPrompt()`.
+
+**Note**: to use Message placeholders with SDKs, you need to run at least `langfuse-python >= 3.0.9` or `langfuse-js >= 3.37.7`.
+
+## Learn more
+
+- [Chat Message Placeholder Docs](/docs/prompts/get-started#message-placeholders)
