@@ -19,33 +19,35 @@ if (!allAuthorsMatch) {
 const allAuthorsString = allAuthorsMatch[1];
 const allAuthors = eval(`(${allAuthorsString})`);
 
-// Build email to author mapping dynamically
-function buildEmailMapping() {
-  const emailToAuthor = {};
-  
-  Object.entries(allAuthors).forEach(([authorKey, authorData]) => {
-    // Add primary GitHub email
-    if (authorData.githubEmail) {
-      emailToAuthor[authorData.githubEmail] = authorKey;
+// Function to find author by email
+function findAuthorByEmail(email) {
+  for (const [authorKey, authorData] of Object.entries(allAuthors)) {
+    // Check primary GitHub email
+    if (authorData.githubEmail === email) {
+      return authorKey;
     }
     
-    // Add alternative emails (now an array)
+    // Check alternative emails (array)
     if (authorData.githubEmailAlt && Array.isArray(authorData.githubEmailAlt)) {
-      authorData.githubEmailAlt.forEach(email => {
-        emailToAuthor[email] = authorKey;
-      });
+      if (authorData.githubEmailAlt.includes(email)) {
+        return authorKey;
+      }
     }
-  });
-  
-  return emailToAuthor;
+  }
+  return null;
 }
 
-// Build the email mapping
-const emailToAuthor = buildEmailMapping();
-
-console.log('📧 Email mappings found:');
-Object.entries(emailToAuthor).forEach(([email, author]) => {
-  console.log(`   ${email} → ${author}`);
+// Log all available email mappings for debugging
+console.log('📧 Available email mappings:');
+Object.entries(allAuthors).forEach(([authorKey, authorData]) => {
+  if (authorData.githubEmail) {
+    console.log(`   ${authorData.githubEmail} → ${authorKey}`);
+  }
+  if (authorData.githubEmailAlt && Array.isArray(authorData.githubEmailAlt)) {
+    authorData.githubEmailAlt.forEach(email => {
+      console.log(`   ${email} → ${authorKey} (alt)`);
+    });
+  }
 });
 console.log();
 
@@ -86,7 +88,7 @@ function getContributorsForFile(filePath) {
 
     // Map emails to known authors
     const contributors = Array.from(contributorEmails)
-      .map(email => emailToAuthor[email])
+      .map(email => findAuthorByEmail(email))
       .filter(author => author); // Only include known authors
 
     return [...new Set(contributors)]; // Remove duplicates
@@ -122,7 +124,7 @@ function generateContributorsData() {
         );
         emails.forEach(email => {
           const cleanEmail = email.trim();
-          if (cleanEmail && !emailToAuthor[cleanEmail]) {
+          if (cleanEmail && !findAuthorByEmail(cleanEmail)) {
             unmappedEmails.add(cleanEmail);
           }
         });

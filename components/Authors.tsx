@@ -6,7 +6,8 @@ export const allAuthors = {
     firstName: "Max",
     name: "Max Deichmann",
     image: "/images/people/maxdeichmann.jpg",
-    twitter: "maxdeichmann",
+    twitter: "maxdeichmann",    githubEmailAlt: ["m.deichmann@tum.de"],
+
   },
   marcklingen: {
     firstName: "Marc",
@@ -50,6 +51,7 @@ export const allAuthors = {
     name: "Steffen Schmitz",
     image: "/images/people/steffenschmitz.jpg",
     githubEmail: "steffen@langfuse.com",
+    githubEmailAlt: ["steffenschmitz@hotmail.de"],
   },
 
   lydiayou: {
@@ -63,6 +65,7 @@ export const allAuthors = {
     name: "Richard Krümmel",
     image: "/images/people/richardkruemmel.jpg",
     twitter: "RichardKrue",
+    githubEmail: "61158193+RichardKruemmel@users.noreply.github.com",
   },
   felixkrauth: {
     firstName: "Felix",
