@@ -4,13 +4,13 @@ import contributorsData from "../data/contributors.json";
 
 export const DocsContributors = () => {
   const router = useRouter();
-  
+
   // Get the current page path
-  const currentPath = router.asPath.split('#')[0].split('?')[0];
-  
+  const currentPath = router.asPath.split("#")[0].split("?")[0];
+
   // Get contributors for this page
   const contributors = contributorsData[currentPath] || [];
-  
+
   // Filter to only include known authors
   const validContributors = contributors.filter(
     (contributor: string) => contributor in allAuthors
@@ -28,7 +28,10 @@ export const DocsContributors = () => {
       <div className="space-y-2">
         {validContributors.map((contributor: string) => (
           <div key={contributor} className="flex items-center">
-            <Author author={contributor} hideLastName={validContributors.length > 3} />
+            <Author
+              author={contributor}
+              hideLastName={validContributors.length > 3}
+            />
           </div>
         ))}
       </div>

@@ -6,8 +6,8 @@ export const allAuthors = {
     firstName: "Max",
     name: "Max Deichmann",
     image: "/images/people/maxdeichmann.jpg",
-    twitter: "maxdeichmann",    githubEmailAlt: ["m.deichmann@tum.de"],
-
+    twitter: "maxdeichmann",
+    githubEmailAlt: ["m.deichmann@tum.de"],
   },
   marcklingen: {
     firstName: "Marc",
