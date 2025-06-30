@@ -1,0 +1,76 @@
+---
+title: "Langfuse May Update"
+description: "Langfuse May Update: Python SDK v3 GA, Launch Week #3 Recap, Custom Dashboards & More!"
+ogImage: /images/blog/2025-05-31-langfuse-may-update/may-update.png
+tag: update
+date: 2025/05/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse May Update"
+  description="Langfuse May Update: Python SDK v3 GA, Launch Week #3 Recap, Custom Dashboards & More!"
+  authors={["marcklingen"]}
+  image="/images/blog/2025-05-31-langfuse-may-update/may-update.png"
+  date="June 13, 2025"
+/>
+
+After we open-sourced all product features last week, we're coming to you a tad late (hello, **June&nbsp;13th!**), but **May&nbsp;2025** was still our most action-packed month yet at Langfuse. We welcomed thousands of new users, powered through countless lines of code, wrapped our third Launch Week, shipped long-awaited API goodies, and rolled out a handful of fresh integrations.
+
+## 🔭 Python SDK v3 is now Generally Available
+
+Following extensive testing and community feedback, we're excited to announce that **Langfuse Python SDK&nbsp;v3 is now generally available** and ready for production use.
+
+**Why you'll love it:**
+
+- **Unified context propagation:** Automatically nests spans and generations, even across threads or async tasks.
+- **Simple & Flexible Instrumentation:** Use the `@observe` decorator, context managers, or manual observations. Mix and match as you like.
+- **Ecosystem Integration:** Works out-of-the-box with OTel-instrumented libraries like MLflow, OpenLit, and more – covering the long-tail of model and agent SDKs much better.
+- **Global Client Access:** Easily fetch the initialized Langfuse client anywhere in your project via `get_client()`.
+- 🕹️ **Get started now:** `pip install langfuse`
+
+→ Find out more in the [migration guide & docs](/docs/sdk/python/sdk-v3)
+
+## ⭐ Launch Week #3 Recap
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Launch Week #3 Recap](/images/blog/2025-05-31-langfuse-may-update/launch-week-recap.png)
+</Frame>
+
+We marked our **third Launch Week** in May, rolling out six new releases that unlock deeper insights into your LLM data and make it even easier to integrate Langfuse with your favorite tools:
+
+🔎 **Day&nbsp;1:** Full-text search lets you query inputs & outputs across traces and observations.
+
+📌 **Day&nbsp;2:** Saved table views save your favorite filter combos with a single click.
+
+📊 **Day&nbsp;3:** Custom Dashboards let you turn raw data into insights with a wide range of chart types, flexible metrics, and rich filtering options.
+
+📦 **Day&nbsp;4:** Hyperscaler Terraform modules for fast and scalable self-hosting.
+
+🔭 **Day&nbsp;5:** OpenTelemetry Python SDK, now GA.
+
+📐 **Day&nbsp;6:** Langfuse Evaluator Library for state-of-the-art LLM-as-a-Judge evals.
+
+→ Find out more about all Launch Week releases [here](/blog/2025-05-19-launch-week-3).
+
+## 🔍 How we built Customizable Dashboards
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Customizable Dashboards](/images/blog/2025-05-31-langfuse-may-update/custom-dashboards.png)
+</Frame>
+
+In a new blog post, Steffen walks through the product thinking and architecture behind our most-requested feature of Launch Week: **Custom Dashboards**.
+
+You'll see how a **virtual data model** decouples the UI from ClickHouse, how the query builder assembles complex charts in milliseconds, and why reusable widgets make collaboration a breeze.
+
+→ If you're curious about the trade-offs that let dashboards stay flexible **and** fast, even on billions of rows, give the [post a read](/blog/2025-05-21-customizable-dashboards).
+
+## ➕ More May Releases
+
+- **Metrics API**: Query custom dimensions & time-series straight from your data warehouse or BI tool.
+- **Pipecat tracing integration**: Real-time audio agents now send spans to Langfuse via OTel out of the box.
+- **Claude Sonnet&nbsp;4 & Opus&nbsp;4 support**: Day-1 playground, evaluator, and cost-tracking support.
+- **Customize product-module visibility**: Hide or whitelist sidebar modules with two env vars when self-hosting Langfuse.
+- **Dataset run-level scores**: Record aggregate precision/recall/F1 (and more) for every experiment run.
