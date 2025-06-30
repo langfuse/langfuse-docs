@@ -13,41 +13,50 @@ export const allAuthors = {
     name: "Marc Klingen",
     image: "/images/people/marcklingen.jpg",
     twitter: "marcklingen",
+    githubEmail: "git@marcklingen.com",
   },
   clemensrawert: {
     firstName: "Clemens",
     name: "Clemens Rawert",
     image: "/images/people/clemensrawert.jpg",
     twitter: "rawert",
+    githubEmail: "121163007+clemra@users.noreply.github.com",
+    githubEmailAlt: "clemens@langfuse.com",
   },
   hassiebpakzad: {
     firstName: "Hassieb",
     name: "Hassieb Pakzad",
     image: "/images/people/hassiebpakzad.jpg",
     twitter: "hassiebpakzad",
+    githubEmail: "68423100+hassiebp@users.noreply.github.com",
   },
   marliesmayerhofer: {
     firstName: "Marlies",
     name: "Marlies Mayerhofer",
     image: "/images/people/marliesmayerhofer.jpg",
     twitter: "marliessophie",
+    githubEmail: "74332854+marliessophie@users.noreply.github.com",
   },
   jannikmaierhoefer: {
     firstName: "Jannik",
     name: "Jannik Maierhöfer",
     image: "/images/people/jannikmaierhoefer.jpg",
     twitter: "jmaierhoefer",
+    githubEmail: "48529566+jannikmaierhoefer@users.noreply.github.com",
+    githubEmailAlt: "jannik@langfuse.com",
   },
   steffenschmitz: {
     firstName: "Steffen",
     name: "Steffen Schmitz",
     image: "/images/people/steffenschmitz.jpg",
+    githubEmail: "steffen@langfuse.com",
   },
 
   lydiayou: {
     firstName: "Lydia",
     name: "Lydia You",
     image: "/images/people/lydiayou.jpg",
+    githubEmail: "lydia.g.you@gmail.com",
   },
   richardkruemmel: {
     firstName: "Richard",
@@ -60,12 +69,14 @@ export const allAuthors = {
     name: "Felix Krauth",
     image: "/images/people/felixkrauth.jpg",
     twitter: "felixkrrr",
+    githubEmail: "57024447+felixkrrr@users.noreply.github.com",
   },
   nimarblume: {
     firstName: "Nimar",
     name: "Nimar Blume",
     image: "/images/people/nimarblume.jpg",
     twitter: "nimarblu",
+    githubEmail: "l.nimar.b@gmail.com",
   },
 } as const;
 
