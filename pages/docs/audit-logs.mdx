@@ -30,13 +30,44 @@ They capture:
 
 These logs provide a complete audit trail for security monitoring, compliance reporting, and forensic analysis.
 
-## Auditable Resources
+## Viewing Audit Logs
+
+The audit log viewer is available in the Enterprise Edition and provides:
+
+<Frame className="my-6">
+  ![Audit Logs Interface](/images/changelog/2025-01-21-audit-logs.png)
+</Frame>
+
+### Access Control
+
+- Available to users with `auditLogs:read` permission
+- Typically accessible to project OWNERs and ADMINs
+- Controlled through Langfuse's role-based access control system
+
+### Filtering and Navigation
+
+- **Time-based filtering**: View logs for specific time periods
+- **Project filtering**: Focus on specific project activities
+- **Pagination**: Efficient browsing of large audit trails
+
+## Exporting Audit Logs
+
+You can export audit logs directly from the UI. Thereby you can analyze your data externally or create backups of important information.
+
+**How to use:**
+
+- Navigate to your audit logs table
+- Click the export button on the top right
+
+## Event Types and Data Capture
+
+### Auditable Resources
 
 Langfuse tracks specific actions across all system resources.
 The following table shows the exact resource types and actions that are logged:
 
 | Resource                     | Actions                                               |
-|------------------------------|-------------------------------------------------------|
+| ---------------------------- | ----------------------------------------------------- |
 | **Annotation Queue**         | create, delete, update                                |
 | **Annotation Queue Item**    | complete, create, delete                              |
 | **API Key**                  | create, delete, update                                |
@@ -66,63 +97,32 @@ The following table shows the exact resource types and actions that are logged:
 | **Stripe Checkout Session**  | create                                                |
 | **Trace**                    | bookmark, delete, publish, updateTags                 |
 
-## Event Types and Data Capture
-
 ### State Capture
+
 For update operations, Langfuse captures:
+
 - **Before State**: Complete resource state prior to modification
 - **After State**: Complete resource state after modification
 
 States are stored as JSON, providing full context for any modifications made to your data.
 
-## User Attribution
+### User Attribution
 
-### Identity Sources
+#### Identity Sources
 
 Audit logs distinguish between different types of actors:
 
 - **User Actions** (`USER` type): Actions performed by authenticated users through the web interface
 - **API Key Actions** (`API_KEY` type): Programmatic actions via API keys
 
-### Context Information
+#### Context Information
 
 Each entry includes:
+
 - **User ID**: For user-initiated actions
 - **API Key ID**: For programmatic actions
 - **Organization ID**: Organizational context
 - **Role Context**: User's organizational and project roles at the time of action
-
-## Viewing Audit Logs
-
-The audit log viewer is available in the Enterprise Edition and provides:
-
-<Frame className="my-6">
-  ![Audit Logs Interface](/images/changelog/2025-01-21-audit-logs.png)
-</Frame>
-
-### Access Control
-
-- Available to users with `auditLogs:read` permission
-- Typically accessible to project OWNERs and ADMINs
-- Controlled through Langfuse's role-based access control system
-
-### Filtering and Navigation
-
-- **Time-based filtering**: View logs for specific time periods
-- **Project filtering**: Focus on specific project activities
-- **Pagination**: Efficient browsing of large audit trails
-
-## Getting Started
-
-To access audit logs in your Langfuse instance:
-
-1. Ensure you have an Enterprise or Teams plan
-2. Verify you have the appropriate permissions (`auditLogs:read`)
-3. Navigate to your project settings
-4. Access the "Audit Logs" section
-5. Use filters to focus on specific time periods or activities
-
-Audit logs provide powerful visibility into your Langfuse usage and are an essential tool for maintaining security, compliance, and operational excellence in enterprise environments.
 
 ## GitHub Discussions
 
