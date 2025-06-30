@@ -1,0 +1,311 @@
+---
+title: Comments on Objects
+description: Add contextual comments to traces, observations, sessions, and prompts in Langfuse for team collaboration.
+---
+
+# Comments on Objects
+
+Comments enable teams to add contextual notes and discussions directly to traces, observations, sessions, and prompts within Langfuse. This feature facilitates collaboration by allowing team members to:
+
+- Flag issues or anomalies in specific traces
+- Share insights about particular model outputs
+- Document edge cases and debugging notes
+- Coordinate on prompt improvements
+- Leave feedback during development and review cycles
+
+<Callout type="info">
+  Comments were introduced in August 2024. See the [announcement](/changelog/2024-08-20-comments) for more details.
+</Callout>
+
+<Frame border className="max-w-4xl">
+  {/* Placeholder for screenshot showing the comments UI */}
+  <img src="/images/docs/comments-ui-overview.png" alt="Comments UI in Langfuse showing the comment drawer and thread" />
+</Frame>
+
+## Supported Object Types
+
+Comments can be added to the following Langfuse objects:
+
+- **Traces** - Comment on complete execution flows
+- **Observations** - Add notes to specific LLM calls, spans, or events
+- **Sessions** - Discuss user interaction patterns
+- **Prompts** - Collaborate on prompt versions and improvements
+
+## User Interface
+
+### Accessing Comments
+
+Each supported object page displays a comment button <MessageCircle className="inline h-4 w-4" /> in the interface. The button shows:
+- The current comment count (capped at "99+" for readability)
+- A disabled state if you don't have read permissions
+- An active state when comments are available or you can create them
+
+### Comment Drawer
+
+Clicking the comment button opens a side drawer containing:
+
+1. **Comment Thread** - All existing comments displayed chronologically
+2. **Composer** - Text area for writing new comments (if you have write permissions)
+3. **Markdown Preview** - Real-time preview of your formatted comment
+
+<Frame border className="max-w-3xl">
+  {/* Placeholder for GIF showing the comment drawer interaction */}
+  <img src="/images/docs/comments-drawer-demo.gif" alt="Demo of opening comment drawer and adding a comment" />
+</Frame>
+
+### Key Features
+
+- **Markdown Support** - Full markdown formatting including code blocks, tables, and lists
+- **Keyboard Shortcuts** - Press `Cmd/Ctrl + Enter` to quickly submit comments
+- **Author Controls** - Only comment authors see the delete option for their own comments
+- **Relative Timestamps** - Comments show human-readable times like "5 minutes ago"
+- **Non-blocking UI** - The comment drawer overlays without interrupting your workflow
+
+## Permissions (RBAC)
+
+Comment access is controlled through Langfuse's role-based access control system:
+
+| Action | Required Scope | Description |
+|--------|---------------|-------------|
+| View comments | `comments:read` | See existing comments on objects |
+| Create comments | `comments:CUD` | Add new comments |
+| Delete comments | `comments:CUD` | Remove your own comments |
+
+<Callout type="info">
+  Comment authors can only delete their own comments. Project admins cannot delete other users' comments through the UI.
+</Callout>
+
+## Limits and Constraints
+
+- **Maximum Length**: 3,000 characters per comment
+- **Content Type**: Plain text with markdown formatting
+- **Object Validation**: Comments can only be added to existing objects in your project
+
+## API Reference
+
+The Comments API allows programmatic access to create and retrieve comments. All endpoints follow the standard Langfuse API patterns.
+
+### Authentication
+
+Use your Langfuse API keys with standard Bearer authentication:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Base URL
+
+- **Cloud**: `https://cloud.langfuse.com/api/public/v1`
+- **Self-hosted**: `https://your-instance.com/api/public`
+
+### Endpoints
+
+#### Create Comment
+
+Create a new comment on an object.
+
+```http
+POST /comments
+```
+
+**Request Body:**
+
+```json
+{
+  "projectId": "string",      // Required: Your project ID
+  "objectType": "string",     // Required: One of TRACE, OBSERVATION, SESSION, PROMPT
+  "objectId": "string",       // Required: ID of the object to comment on
+  "content": "string",        // Required: Comment text (1-3000 characters)
+  "authorUserId": "string"    // Optional: Override comment author
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "comment_abc123"
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/v1/comments \
+  -H "Authorization: Bearer $LANGFUSE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectId": "proj_123",
+    "objectType": "TRACE",
+    "objectId": "trace_abc",
+    "content": "This trace shows unexpected latency spikes. The third LLM call is taking 3x longer than usual. 🐌"
+  }'
+```
+
+#### List Comments
+
+Retrieve comments with optional filtering.
+
+```http
+GET /comments
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `objectType` | string | Filter by object type (TRACE, OBSERVATION, SESSION, PROMPT) |
+| `objectId` | string | Filter by specific object ID |
+| `authorUserId` | string | Filter by comment author |
+| `limit` | integer | Maximum results per page (default: 50) |
+| `page` | integer | Page number for pagination (default: 1) |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "comment_abc123",
+      "projectId": "proj_123",
+      "objectType": "TRACE",
+      "objectId": "trace_abc",
+      "content": "This trace shows unexpected latency...",
+      "authorUserId": "user_123",
+      "authorUserName": "alice@example.com",
+      "createdAt": "2024-08-20T10:30:00Z",
+      "updatedAt": "2024-08-20T10:30:00Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 50,
+    "totalItems": 1,
+    "totalPages": 1
+  }
+}
+```
+
+**Example:**
+
+```bash
+# Get all comments on a specific trace
+curl "https://cloud.langfuse.com/api/public/v1/comments?objectType=TRACE&objectId=trace_abc&limit=20" \
+  -H "Authorization: Bearer $LANGFUSE_API_KEY"
+```
+
+#### Get Single Comment
+
+Retrieve a specific comment by ID.
+
+```http
+GET /comments/{commentId}
+```
+
+**Response:**
+
+Returns a single comment object with the same structure as in the list response.
+
+**Example:**
+
+```bash
+curl "https://cloud.langfuse.com/api/public/v1/comments/comment_abc123" \
+  -H "Authorization: Bearer $LANGFUSE_API_KEY"
+```
+
+## Use Cases and Examples
+
+### Debugging Production Issues
+
+Add comments to traces when investigating production issues:
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/v1/comments \
+  -H "Authorization: Bearer $LANGFUSE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectId": "proj_123",
+    "objectType": "TRACE",
+    "objectId": "trace_xyz",
+    "content": "Customer reported this trace. The model returned PII in the response despite our system prompt. Need to investigate the prompt injection vulnerability."
+  }'
+```
+
+### Prompt Iteration Feedback
+
+Leave feedback on prompt versions during development:
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/v1/comments \
+  -H "Authorization: Bearer $LANGFUSE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectId": "proj_123",
+    "objectType": "PROMPT",
+    "objectId": "prompt_v2_draft",
+    "content": "This version handles edge cases better, but we should add more explicit instructions for formatting the JSON output. See trace_abc123 for an example where it failed."
+  }'
+```
+
+### Session Analysis
+
+Document insights from user session analysis:
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/v1/comments \
+  -H "Authorization: Bearer $LANGFUSE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectId": "proj_123",
+    "objectType": "SESSION",
+    "objectId": "session_user_456",
+    "content": "User struggled with the chat interface. They had to rephrase their question 3 times before getting a useful response. Consider adding example prompts or clarifying questions."
+  }'
+```
+
+## Best Practices
+
+### Effective Comments
+
+- **Be Specific**: Reference exact issues, line numbers, or model outputs
+- **Add Context**: Include relevant trace IDs, error messages, or user feedback
+- **Use Markdown**: Format code snippets, create lists, and structure longer comments
+- **Tag Team Members**: Use @mentions in comments to notify specific team members (if your organization uses integrated notifications)
+
+### Comment Etiquette
+
+- Keep comments professional and constructive
+- Focus on actionable insights rather than opinions
+- Update or reply to comments as issues are resolved
+- Use threading by referencing previous comments when continuing a discussion
+
+### Integration with Workflows
+
+Comments work best when integrated into your team's workflow:
+
+1. **During Development**: Comment on prompt versions and test traces
+2. **In Review**: Add feedback during code/prompt reviews
+3. **For Debugging**: Document findings and hypotheses on problematic traces
+4. **Post-Incident**: Leave notes for future reference after resolving issues
+
+## Limitations
+
+- Comments cannot be edited after creation (only deleted by the author)
+- No comment threading or replies (each comment is standalone)
+- No notifications system (check the UI regularly for new comments)
+- Bulk operations not supported (must handle comments individually)
+
+<Frame border className="max-w-2xl">
+  {/* Placeholder for video tutorial */}
+  <video controls className="w-full rounded">
+    <source src="/videos/docs/comments-tutorial.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+</Frame>
+
+## Related Features
+
+- [Sessions](/docs/tracing-features/sessions) - Group related traces for holistic analysis
+- [Scores & Evaluation](/docs/scores) - Quantitative assessment complementing qualitative comments
+- [Metadata](/docs/tracing-features/metadata) - Attach structured data to objects
+- [Tags](/docs/tracing-features/tags) - Categorize objects for filtering and analysis
