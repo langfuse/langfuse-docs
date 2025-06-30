@@ -1,6 +1,6 @@
 echo "Updating cookbook docs... (needs to be executed from the root directory)"
 
-jupyter nbconvert --to markdown cookbook/*.ipynb
+python3 -m nbconvert --to markdown cookbook/*.ipynb
 
 # delete all files in pages/guides/cookbook/
 echo "Deleting all files in pages/guides/cookbook/"
@@ -9,6 +9,6 @@ find ./pages/guides/cookbook/ -type f -not -name "index.mdx" -not -name "_meta.t
 
 # script needs to be executed from the root directory
 echo "Moving docs..."
-python ./scripts/move_docs.py
+python3 ./scripts/move_docs.py
 
 echo "Done!"
