@@ -15,6 +15,7 @@ import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
+import DocsAuthors from "./components/DocsAuthors";
 import Image from "next/image";
 import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 
@@ -71,6 +72,7 @@ const config: DocsThemeConfig = {
   },
   toc: {
     backToTop: true,
+    extraContent: <DocsAuthors />,
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
