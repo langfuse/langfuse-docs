@@ -80,16 +80,13 @@ You can add additional Langfuse attributes to the requests in order to group req
 Instead of the proxy, you can also use the native LiteLLM Python client. You can find more in-depth documentation in the [LiteLLM docs](https://litellm.vercel.app/docs/observability/langfuse_integration).
 
 <Callout type="warning">
-  LiteLLM relies on the <strong>Langfuse Python SDK v2</strong>. It is currently
-  <strong>not compatible</strong> with the newer
-  <strong>[Python SDK v3](/docs/sdk/python/sdk-v3)</strong>. Please refer to the
-  [v2 documentation](/docs/sdk/python/low-level-sdk) and pin the SDK version
-  during installation:
+  LiteLLM `langfuse` integration relies on the <strong>Langfuse Python SDK v2</strong>. To use 
+  litellm with the newer
+  <strong>[Python SDK v3](/docs/sdk/python/sdk-v3)</strong>, use `langfuse_otel` integration instead.
+
+  You need at least version `XXXXXX TBD XXXXXX` of `litellm` to be able to use it with `langfuse_otel`! 
 </Callout>
 
-```
-pip install "langfuse>=2,<3" litellm
-```
 
 ```python filename="main.py"
 from litellm import completion
@@ -106,8 +103,9 @@ os.environ["OPENAI_API_KEY"] = ""
 os.environ["COHERE_API_KEY"] = ""
 
 # set callbacks
-litellm.success_callback = ["langfuse"]
-litellm.failure_callback = ["langfuse"]
+# "langfuse_otel" for v3 and "langfuse" for v2 Python SDK
+litellm.success_callback = ["langfuse_otel"]
+litellm.failure_callback = ["langfuse_otel"]
 
 ```
 
