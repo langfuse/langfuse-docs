@@ -17,9 +17,10 @@ Maps Git commit emails to rich author profiles (names, photos, social handles) f
 ## System Components
 
 - **`Authors.tsx`** - Author profiles with email mappings (`githubEmail`, `githubEmailAlt`)
-- **`DocsContributors.tsx`** - Displays contributors on doc pages
-- **`contributors.json`** - Maps pages to contributor lists
+- **`DocsContributors.tsx`** - Displays contributors on doc pages (shows first 3, then "... and n more")
+- **`contributors.json`** - Maps pages to contributor lists (auto-generated)
 - **`update-authors.js`** - Email mapping management tool
+- **`generate-contributors.js`** - Auto-generates contributors.json from git history
 
 ## Usage
 
@@ -45,12 +46,29 @@ node scripts/update-authors.js add-email <authorKey> <email> --alt
 node scripts/update-authors.js add-email marcklingen "marc@langfuse.com"
 ```
 
+### Generate contributors.json manually
+
+```bash
+node scripts/generate-contributors.js
+```
+
+## Automated Process
+
+The `contributors.json` file is **automatically generated** during the build process by:
+
+1. Scanning current documentation files in the file system
+2. Running a single optimized git command for all historical data (~0.2s)
+3. Filtering to only include pages that currently exist
+4. Mapping commit emails to author keys using `Authors.tsx`
+5. Ordering contributors by most recent contribution (descending)
+6. Creating the page-to-contributors mapping
+
 ## Workflow
 
 1. **Check for new contributors:** `node scripts/update-authors.js analyze`
 2. **For existing team members:** Map new email to existing author
 3. **For new contributors:** Add author profile to `Authors.tsx` first
-4. **Verify:** Run `analyze` again to confirm mapping
+4. **Contributors.json updates automatically** on next build
 
 ## Author Profile Format
 
