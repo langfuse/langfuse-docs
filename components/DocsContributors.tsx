@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { allAuthors, Author } from "./Authors";
-import contributorsData from "../data/contributors.json";
+import contributorsData from "../data/generated/contributors.json";
 
 export const DocsContributors = () => {
   const router = useRouter();

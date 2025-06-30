@@ -5,7 +5,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const authorsPath = path.join(__dirname, '../../data/authors.json');
-const contributorsPath = path.join(__dirname, '../../data/contributors.json');
+const contributorsPath = path.join(__dirname, '../../data/generated/contributors.json');
 const docsPath = path.join(__dirname, '../../pages/docs');
 
 // Helper function to read the authors JSON file

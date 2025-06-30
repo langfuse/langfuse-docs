@@ -19,7 +19,7 @@ Maps Git commit emails to rich author profiles (names, photos, social handles) f
 - **`data/authors.json`** - Author profiles with email mappings (`githubEmail`, `githubEmailAlt`)
 - **`components/Authors.tsx`** - React components for displaying author information
 - **`components/DocsContributors.tsx`** - Displays contributors on doc pages (shows first 3, then "... and n more")
-- **`data/contributors.json`** - Maps pages to contributor lists (auto-generated)
+- **`data/generated/contributors.json`** - Maps pages to contributor lists (auto-generated)
 - **`scripts/authors/update-authors.js`** - Email mapping management tool
 - **`scripts/authors/generate-contributors.js`** - Auto-generates contributors.json from git history
 
