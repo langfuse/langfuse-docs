@@ -214,7 +214,7 @@ sample_data = {
         "check again",
         "redo",
         "again please",
-        "that was great, let's start from teh beginning",
+        "that was great, let's start from the beginning",
         "go back to start",
     ],
     "intent": [
