@@ -1185,6 +1185,22 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Data masking",
+        href: "/docs/tracing-features/masking",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
         name: "SSO via Google, AzureAD, GitHub",
         tiers: {
           cloud: {
