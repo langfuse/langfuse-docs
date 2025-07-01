@@ -851,6 +851,77 @@ When fetched via the SDK / API, these tags are automatically replaced with the r
 
 Langfuse prompts are served from a client-side cache in the SDKs. Therefore, **Langfuse Prompt Management does not add any latency to your application when a cached prompt is available from a previous use**. Optionally, you can pre-fetch prompts on application startup to ensure that the cache is populated (example below).
 
+### Multi-tiered Caching Architecture
+
+Langfuse uses a sophisticated multi-tiered caching system to ensure prompts are always available with minimal latency:
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+    participant API as Langfuse API
+    participant Redis as Redis Cache
+    participant DB as PostgreSQL
+
+    Note over App,DB: Normal Flow - Cache Hit
+    App->>SDK: getPrompt("my-prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ✅ Fresh prompt found
+    SDK-->>App: Return cached prompt
+
+    Note over App,DB: Background Revalidation (TTL expired)
+    App->>SDK: getPrompt("my-prompt") 
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ⚠️ Stale prompt found
+    SDK-->>App: Return stale prompt (instant)
+    
+    par Background refresh
+        SDK->>API: GET /api/public/prompts/:name
+        API->>Redis: Check Redis cache
+        Redis-->>API: ✅ Prompt found
+        API-->>SDK: Return prompt
+        SDK->>Cache: Update cache
+    end
+
+    Note over App,DB: Cold Start - Cache Miss
+    App->>SDK: getPrompt("my-prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ❌ No prompt found
+    SDK->>API: GET /api/public/prompts/:name
+    API->>Redis: Check Redis cache
+    
+    alt Redis Cache Hit
+        Redis-->>API: ✅ Prompt found
+        API-->>SDK: Return prompt
+    else Redis Cache Miss
+        API->>DB: Query prompt
+        DB-->>API: Return prompt data
+        API->>Redis: Store in cache
+        API-->>SDK: Return prompt
+    end
+    
+    SDK->>Cache: Store in cache
+    SDK-->>App: Return prompt
+
+    Note over App,DB: Optional: Prefetch on Startup
+    App->>SDK: Prefetch prompts
+    SDK->>API: GET /api/public/prompts/:name
+    API->>Redis: Check/populate cache
+    Redis-->>API: Cached prompt
+    API-->>SDK: Return prompt
+    SDK->>Cache: Populate cache
+    Note over Cache: Cache now warm for runtime
+```
+
+**Key benefits of this architecture:**
+
+- **Zero latency**: Prompts are served instantly from the SDK cache after first use
+- **High availability**: Stale prompts are served immediately while fresh versions load in background
+- **Scalable**: Redis cache reduces database load for frequently accessed prompts
+- **Resilient**: Multiple fallback layers ensure prompts are always available
+- **Optimized**: Background revalidation keeps cache fresh without blocking requests
+
 ### Optional: Pre-fetch prompts on application start
 
 **To ensure that your application never hits an empty cache at runtime** (and thus adding an initial delay of fetching the prompt), you can pre-fetch the prompts during the application startup. This pre-fetching will populate the cache and ensure that the prompts are readily available when needed.
