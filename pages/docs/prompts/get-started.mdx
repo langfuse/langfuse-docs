@@ -1000,7 +1000,7 @@ However, `get_prompt()`/`getPrompt()` will throw an exception if:
 1. No local (fresh or stale) cached prompt is available -> new application instance fetching prompt for the first time
 2. _and_ network request fails -> networking or Langfuse API issue (after retries)
 
-To gurantee 100% availability, there are two options:
+To guarantee 100% availability, there are two options:
 
 1. Pre-fetch prompts on application startup and exit the application if the prompt is not available.
 2. Provide a `fallback` prompt that will be used in these cases.
