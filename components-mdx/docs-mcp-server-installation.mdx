@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-<Tabs items={["Cursor", "Copilot in VSCode", "Claude Code", "Windsurf", "Other MCP Clients"]}>
+<Tabs items={["Cursor", "Copilot (in VSCode)", "Claude Code", "Windsurf", "Other MCP Clients"]}>
 
 <Tab>
 
@@ -9,11 +9,32 @@ Add Langfuse Docs MCP to Cursor via the one-click install:
 
 <div className="flex gap-2 mt-3 mb-6">
   <Button asChild>
-    <Link href="https://cursor.com/install-mcp?name=langfuse-docs&config=eyJ1cmwiOiJodHRwczovL2xhbmdmdXNlLmNvbS9hcGkvbWNwIn0%3D" target="_blank" rel="noopener noreferrer">
+    <Link
+      href="https://cursor.com/install-mcp?name=langfuse-docs&config=eyJ1cmwiOiJodHRwczovL2xhbmdmdXNlLmNvbS9hcGkvbWNwIn0%3D"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       Install MCP Server in Cursor
     </Link>
   </Button>
 </div>
+
+<details>
+<summary>Manual configuration</summary>
+
+Add the following to your `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "langfuse-docs": {
+      "url": "https://langfuse.com/api/mcp"
+    }
+  }
+}
+```
+
+</details>
 
 </Tab>
 
@@ -34,8 +55,6 @@ Add Langfuse Docs MCP to Copilot in VSCode via the following steps:
 
 Add Langfuse Docs MCP to Claude Code via the CLI:
 
-#### Quick setup (recommended)
-
 ```bash
 claude mcp add \
   --transport http \
@@ -44,7 +63,8 @@ claude mcp add \
   --scope user
 ```
 
-#### Manual configuration
+<details>
+<summary>Manual configuration</summary>
 
 Alternatively, add the following to your settings file:
 
@@ -64,7 +84,7 @@ Alternatively, add the following to your settings file:
 }
 ```
 
-#### One-liner JSON import
+**One-liner JSON import**
 
 ```bash
 claude mcp add-json langfuse-docs \
@@ -72,6 +92,8 @@ claude mcp add-json langfuse-docs \
 ```
 
 Once added, start a Claude Code session (`claude`) and type `/mcp` to confirm the connection.
+
+</details>
 
 </Tab>
 

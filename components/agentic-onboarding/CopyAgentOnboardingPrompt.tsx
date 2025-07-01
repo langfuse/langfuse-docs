@@ -35,13 +35,13 @@ Once you have confirmed the language is compatible, explore the entire codebase 
 
 ### Step 3: Discover Available Integrations
 
-After I confirm the files and entry points, get a list of available integrations from the Langfuse docs. Please include the language that is used in every request to the docs.
+After I confirm the files and entry points, get a list of available integrations from the Langfuse docs by calling the \`getLangfuseOverview\` tool.
 
 ### Step 4: Analyze Confirmed Files for Technologies
 
-Based on the files we confirmed in Step 2, perform a deeper analysis to identify the specific LLM frameworks or SDKs being used (e.g., OpenAI SDK, LangChain, LlamaIndex, Anthropic SDK, etc.). Search the Langfuse docs for the integration instructions for these frameworks.
+Based on the files we confirmed in Step 2, perform a deeper analysis to identify the specific LLM frameworks or SDKs being used (e.g., OpenAI SDK, LangChain, LlamaIndex, Anthropic SDK, etc.). Search the Langfuse docs for the integration instructions for these frameworks via the \`searchLangfuseDocs\` tool.
 
-If you are unsure, repeatedly visit the langfuse docs.
+If you are unsure, repeatedly query the Langfuse docs via the \`searchLangfuseDocs\` tool.
 
 ### Step 5: Propose a Development Plan
 

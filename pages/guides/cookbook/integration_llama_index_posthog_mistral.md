@@ -178,7 +178,7 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 
 ### Step 5: (Optional) Implement user feedback to see how your application is performing
 
-To monitor the quality of your hedgehog chat application, you can use [Langfuse Scores](https://langfuse.com/docs/scores/overview) to store user feedback (e.g. thumps up/down or comments). These scores can then be analysed in PostHog.
+To monitor the quality of your hedgehog chat application, you can use [Langfuse Scores](https://langfuse.com/docs/scores/overview) to store user feedback (e.g. thumps up/down or comments). These scores can then be analyzed in PostHog.
 
 Scores are used to evaluate single observations or entire traces. You can create them via the annotation workflow in the Langfuse UI, run model-based evaluation or ingest via the SDK as we do it in this example.
 
