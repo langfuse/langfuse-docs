@@ -7,7 +7,9 @@ const { execSync } = require('child_process');
 // Configuration
 const PATHS = {
     contributors: path.join(__dirname, '../../data/generated/contributors.json'),
-    docs: path.join(__dirname, '../../pages/docs')
+    docs: path.join(__dirname, '../../pages/docs'),
+    selfHosting: path.join(__dirname, '../../pages/self-hosting'),
+    security: path.join(__dirname, '../../pages/security')
 };
 
 const GITHUB_CONFIG = {
@@ -107,7 +109,7 @@ async function analyzeContributors() {
 
     // Get git history
     const gitOutput = execSync(
-        `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- pages/docs/`,
+        `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- pages/docs/ pages/self-hosting/ pages/security/`,
         { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }
     );
 
@@ -129,7 +131,9 @@ async function analyzeContributors() {
             if (!usernameFromEmail && !emailToUsernameCache.has(currentCommit.email)) {
                 emailsNeedingAPI.add(currentCommit.email);
             }
-        } else if (line.trim() && currentCommit && line.startsWith('pages/docs/') && !line.includes('_meta.')) {
+        } else if (line.trim() && currentCommit &&
+            (line.startsWith('pages/docs/') || line.startsWith('pages/self-hosting/') || line.startsWith('pages/security/')) &&
+            !line.includes('_meta.')) {
             commits.push({
                 ...currentCommit,
                 filePath: line.trim()
@@ -169,7 +173,17 @@ async function analyzeContributors() {
     const fileContributors = {};
 
     for (const commit of commits) {
-        const urlPath = `/docs/${commit.filePath.replace('pages/docs/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
+        let urlPath;
+        if (commit.filePath.startsWith('pages/docs/')) {
+            urlPath = `/docs/${commit.filePath.replace('pages/docs/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
+        } else if (commit.filePath.startsWith('pages/self-hosting/')) {
+            urlPath = `/self-hosting/${commit.filePath.replace('pages/self-hosting/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
+        } else if (commit.filePath.startsWith('pages/security/')) {
+            urlPath = `/security/${commit.filePath.replace('pages/security/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
+        } else {
+            continue; // Skip if path doesn't match expected patterns
+        }
+
         const contributor = await resolveContributor(commit.email, commit.hash);
 
         if (contributor) {
@@ -185,19 +199,23 @@ async function analyzeContributors() {
     // Convert to sorted arrays and filter current pages
     const currentPages = new Set();
 
-    const findPages = (dir, basePath = '') => {
+    const findPages = (dir, basePath = '', sectionPrefix = '/docs') => {
+        if (!fs.existsSync(dir)) return; // Skip if directory doesn't exist
+
         const items = fs.readdirSync(dir, { withFileTypes: true });
         for (const item of items) {
             if (item.isDirectory() && !item.name.startsWith('.')) {
-                findPages(path.join(dir, item.name), path.join(basePath, item.name));
+                findPages(path.join(dir, item.name), path.join(basePath, item.name), sectionPrefix);
             } else if (item.isFile() && /\.(mdx?|md)$/.test(item.name) && !item.name.includes('_meta.')) {
-                const urlPath = `/docs/${path.join(basePath, item.name).replace(/\.(mdx?|md)$/, '').replace(/\\/g, '/')}`;
+                const urlPath = `${sectionPrefix}/${path.join(basePath, item.name).replace(/\.(mdx?|md)$/, '').replace(/\\/g, '/')}`;
                 currentPages.add(urlPath);
             }
         }
     };
 
-    findPages(PATHS.docs);
+    findPages(PATHS.docs, '', '/docs');
+    findPages(PATHS.selfHosting, '', '/self-hosting');
+    findPages(PATHS.security, '', '/security');
 
     const result = {};
     for (const [urlPath, contributorDates] of Object.entries(fileContributors)) {
