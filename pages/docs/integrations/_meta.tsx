@@ -10,6 +10,7 @@ export default {
   "strands-agents": "Strands Agents",
   autogen: "AutoGen",
   pipecat: "Pipecat",
+  portkey: "Portkey",
   "semantic-kernel": "Semantic Kernel",
   "pydantic-ai": "Pydantic AI",
   dify: "Dify.AI",
