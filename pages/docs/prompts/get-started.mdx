@@ -849,11 +849,163 @@ When fetched via the SDK / API, these tags are automatically replaced with the r
 
 ## Caching in client SDKs
 
-Langfuse prompts are served from a client-side cache in the SDKs. Therefore, **Langfuse Prompt Management does not add any latency to your application when a cached prompt is available from a previous use**. Optionally, you can pre-fetch prompts on application startup to ensure that the cache is populated (example below).
+Langfuse prompts are cached client-side in the SDKs, so **there's no latency impact after the first use**. You can also pre-fetch prompts on startup to populate the cache (see example below).
 
-### Optional: Pre-fetch prompts on application start
+<Tabs items={["Cache Hit", "Background Revalidation", "Cache Miss", "Optional: Pre-fetch", "Optional: Fallback"]}>
+<Tab>
 
-**To ensure that your application never hits an empty cache at runtime** (and thus adding an initial delay of fetching the prompt), you can pre-fetch the prompts during the application startup. This pre-fetching will populate the cache and ensure that the prompts are readily available when needed.
+When the SDK cache contains a fresh prompt, it's returned **immediately** without any network requests.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+
+    App->>SDK: getPrompt("my-prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ✅ Fresh prompt found
+    SDK-->>App: Return cached prompt
+```
+
+</Tab>
+<Tab>
+
+When the cache TTL has expired, stale prompts are served **immediately** while it **revalidates in the background**.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+    participant API as Langfuse API
+    participant Redis as Redis Cache
+
+    App->>SDK: getPrompt("my-prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ⚠️ Stale prompt found
+    SDK-->>App: Return stale prompt (instant)
+
+    par Background refresh
+        SDK->>API: GET /api/public/prompts/:name
+        API->>Redis: Check Redis cache
+        Redis-->>API: ✅ Prompt found
+        API-->>SDK: Return prompt
+        SDK->>Cache: Update cache
+    end
+```
+
+This ensures **high availability** - users never wait for network requests while the cache stays fresh.
+
+</Tab>
+<Tab>
+
+When no cached prompt exists (e.g., first application startup), the prompt is fetched from the API. The API caches prompts in a Redis cache to ensure low latency.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+    participant API as Langfuse API
+    participant Redis as Redis Cache
+    participant DB as PostgreSQL
+
+    App->>SDK: getPrompt("my-prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ❌ No prompt found
+    SDK->>API: GET /api/public/prompts/:name
+    API->>Redis: Check Redis cache
+
+    alt Redis Cache Hit
+        Redis-->>API: ✅ Prompt found
+        API-->>SDK: Return prompt
+    else Redis Cache Miss
+        API->>DB: Query prompt
+        DB-->>API: Return prompt data
+        API->>Redis: Store in cache
+        API-->>SDK: Return prompt
+    end
+
+    SDK->>Cache: Store in cache
+    SDK-->>App: Return prompt
+```
+
+Multiple fallback layers ensure **resilience** - if Redis is unavailable, the database serves as backup.
+
+</Tab>
+<Tab>
+
+Pre-fetching prompts during application startup ensures that the cache is populated before runtime requests.
+
+This step is optional and often unnecessary. Typically, the minimal latency experienced during the first use after a service starts is acceptable. See examples below on how to set this up.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+    participant API as Langfuse API
+    participant Redis as Redis Cache
+
+    App->>SDK: Prefetch prompts
+    SDK->>API: GET /api/public/prompts/:name
+    API->>Redis: Check/populate cache
+    Redis-->>API: Cached prompt
+    API-->>SDK: Return prompt
+    SDK->>Cache: Populate cache
+    Note over Cache: Cache now warm for runtime
+```
+
+</Tab>
+<Tab>
+
+When both the local cache is empty and the Langfuse API is unavailable, a fallback prompt can be used to ensure 100% availability.
+
+This is rarely necessary because the prompts API is highly available, and we closely monitor its performance ([status page](https://status.langfuse.com)). In the event of a brief service disruption, the SDK-level prompt cache typically ensures that applications remain unaffected.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+    participant API as Langfuse API
+
+    App->>SDK: getPrompt("my-prompt", fallback="fallback prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ❌ No prompt found
+    SDK->>API: GET /api/public/prompts/:name
+    API-->>SDK: ❌ Network error / API unavailable
+
+    Note over SDK: Use fallback prompt
+    SDK-->>App: Return fallback prompt
+    Note over App: Application continues with fallback
+```
+
+</Tab>
+</Tabs>
+
+### Optional: Guaranteed availability
+
+<Callout>
+
+Implementing this is usually not necessary as it adds complexity to your application. The Langfuse Prompt Management is highly available due to multiple caching layers and we closely monitor its performance ([status page](https://status.langfuse.com)). However, if you require 100% availability, you can use the following options.
+
+</Callout>
+
+The Langfuse API has high uptime and prompts are cached locally in the SDKs to prevent network issues from affecting your application.
+
+However, `get_prompt()`/`getPrompt()` will throw an exception if:
+
+1. No local (fresh or stale) cached prompt is available -> new application instance fetching prompt for the first time
+2. _and_ network request fails -> networking or Langfuse API issue (after retries)
+
+To guarantee 100% availability, there are two options:
+
+1. Pre-fetch prompts on application startup and exit the application if the prompt is not available.
+2. Provide a `fallback` prompt that will be used in these cases.
+
+#### Option 1: Pre-fetch prompts on application startup and exit if not available
 
 _Example implementations:_
 
@@ -869,8 +1021,12 @@ app = Flask(__name__)
 langfuse = Langfuse()
 
 def fetch_prompts_on_startup():
-    # Fetch and cache the production version of the prompt
-    langfuse.get_prompt("movie-critic")
+    try:
+        # Fetch and cache the production version of the prompt
+        langfuse.get_prompt("movie-critic")
+    except Exception as e:
+        print(f"Failed to fetch prompt on startup: {e}")
+        sys.exit(1)  # Exit the application if the prompt is not available
 
 # Call the function during application startup
 fetch_prompts_on_startup()
@@ -897,8 +1053,13 @@ const app = express();
 const langfuse = new Langfuse();
 
 async function fetchPromptsOnStartup() {
-  // Fetch and cache the production version of the prompt
-  await langfuse.getPrompt("movie-critic");
+  try {
+    // Fetch and cache the production version of the prompt
+    await langfuse.getPrompt("movie-critic");
+  } catch (error) {
+    console.error("Failed to fetch prompt on startup:", error);
+    process.exit(1); // Exit the application if the prompt is not available
+  }
 }
 
 // Call the function during application startup
@@ -914,6 +1075,57 @@ app.get("/get-movie-prompt/:movie", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
+```
+
+</Tab>
+</Tabs>
+
+#### Option 2: Fallback [#fallback]
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Get `text` prompt with fallback
+prompt = langfuse.get_prompt(
+  "movie-critic",
+  fallback="Do you like {{movie}}?"
+)
+
+# Get `chat` prompt with fallback
+chat_prompt = langfuse.get_prompt(
+  "movie-critic-chat",
+  type="chat",
+  fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]
+)
+
+# True if the prompt is a fallback
+prompt.is_fallback
+```
+
+</Tab>
+<Tab>
+
+```ts /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+// Get `text` prompt with fallback
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  fallback: "Do you like {{movie}}?",
+});
+
+// Get `chat` prompt with fallback
+const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+  fallback: [{ role: "system", content: "You are an expert on {{movie}}" }],
+});
+
+// True if the prompt is a fallback
+prompt.isFallback;
 ```
 
 </Tab>
@@ -1008,131 +1220,6 @@ max       0.687994 sec
 ```
 
 </div>
-
-## Optional: Guaranteed availability
-
-<Callout>
-
-Implementing this is usually not necessary as it adds complexity to your application and the Langfuse API is highly available. However, if you require 100% availability, you can use the following options.
-
-</Callout>
-
-The Langfuse API has high uptime and prompts are cached locally in the SDKs to prevent network issues from affecting your application.
-
-However, `get_prompt()`/`getPrompt()` will throw an exception if:
-
-1. No local (fresh or stale) cached prompt is available -> new application instance fetching prompt for the first time
-2. _and_ network request fails -> networking or Langfuse API issue (after retries)
-
-To gurantee 100% availability, there are two options:
-
-1. Pre-fetch prompts on application startup and exit the application if the prompt is not available.
-2. Provide a `fallback` prompt that will be used in these cases.
-
-### Option 1: Pre-fetch prompts on application startup and exit if not available
-
-<Tabs items={["Python", "JS/TS"]}>
-<Tab>
-
-```python
-from langfuse import Langfuse
-import sys
-
-# Initialize Langfuse client
-langfuse = Langfuse()
-
-def fetch_prompts_on_startup():
-    try:
-        # Fetch and cache the production version of the prompt
-        langfuse.get_prompt("movie-critic")
-    except Exception as e:
-        print(f"Failed to fetch prompt on startup: {e}")
-        sys.exit(1)  # Exit the application if the prompt is not available
-
-# Call the function during application startup
-fetch_prompts_on_startup()
-
-# Your application code here
-```
-
-</Tab>
-<Tab>
-
-```ts
-import { Langfuse } from "langfuse";
-
-// Initialize Langfuse client
-const langfuse = new Langfuse();
-
-async function fetchPromptsOnStartup() {
-  try {
-    // Fetch and cache the production version of the prompt
-    await langfuse.getPrompt("movie-critic");
-  } catch (error) {
-    console.error("Failed to fetch prompt on startup:", error);
-    process.exit(1); // Exit the application if the prompt is not available
-  }
-}
-
-// Call the function during application startup
-fetchPromptsOnStartup();
-
-// Your application code here
-```
-
-</Tab>
-</Tabs>
-
-### Option 2: Fallback [#fallback]
-
-<Tabs items={["Python", "JS/TS"]}>
-<Tab>
-
-```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
-from langfuse import Langfuse
-langfuse = Langfuse()
-
-# Get `text` prompt with fallback
-prompt = langfuse.get_prompt(
-  "movie-critic",
-  fallback="Do you like {{movie}}?"
-)
-
-# Get `chat` prompt with fallback
-chat_prompt = langfuse.get_prompt(
-  "movie-critic-chat",
-  type="chat",
-  fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]
-)
-
-# True if the prompt is a fallback
-prompt.is_fallback
-```
-
-</Tab>
-<Tab>
-
-```ts /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
-
-// Get `text` prompt with fallback
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
-  fallback: "Do you like {{movie}}?",
-});
-
-// Get `chat` prompt with fallback
-const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
-  type: "chat",
-  fallback: [{ role: "system", content: "You are an expert on {{movie}}" }],
-});
-
-// True if the prompt is a fallback
-prompt.isFallback;
-```
-
-</Tab>
-</Tabs>
 
 ## Additional Features
 
