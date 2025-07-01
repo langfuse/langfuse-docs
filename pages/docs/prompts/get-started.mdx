@@ -855,7 +855,7 @@ Langfuse prompts are served from a client-side cache in the SDKs. Therefore, **L
 
 Langfuse uses a sophisticated multi-tiered caching system to ensure prompts are always available with minimal latency:
 
-<Tabs items={["Cache Hit", "Background Revalidation", "Cache Miss", "Prefetch on Startup"]}>
+<Tabs items={["Cache Hit", "Background Revalidation", "Cache Miss", "Optional: Pre-fetch", "Optional: Fallback"]}>
 <Tab>
 
 When the SDK cache contains a fresh prompt, it's returned **immediately** without any network requests.
@@ -959,6 +959,31 @@ sequenceDiagram
     API-->>SDK: Return prompt
     SDK->>Cache: Populate cache
     Note over Cache: Cache now warm for runtime
+```
+
+</Tab>
+<Tab>
+
+When both the local cache is empty and the Langfuse API is unavailable, a fallback prompt can be used to ensure 100% availability.
+
+This is rarely necessary because the prompts API is highly available, and we closely monitor its performance ([status page](https://status.langfuse.com)). In the event of a brief service disruption, the SDK-level prompt cache typically ensures that applications remain unaffected.
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant SDK as Langfuse SDK
+    participant Cache as SDK Cache
+    participant API as Langfuse API
+
+    App->>SDK: getPrompt("my-prompt", fallback="fallback prompt")
+    SDK->>Cache: Check cache
+    Cache-->>SDK: ❌ No prompt found
+    SDK->>API: GET /api/public/prompts/:name
+    API-->>SDK: ❌ Network error / API unavailable
+
+    Note over SDK: Use fallback prompt
+    SDK-->>App: Return fallback prompt
+    Note over App: Application continues with fallback
 ```
 
 </Tab>
