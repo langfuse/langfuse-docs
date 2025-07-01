@@ -6,7 +6,6 @@ const { execSync } = require('child_process');
 
 // Configuration
 const PATHS = {
-    authors: path.join(__dirname, '../../data/authors.json'),
     contributors: path.join(__dirname, '../../data/generated/contributors.json'),
     docs: path.join(__dirname, '../../pages/docs')
 };
@@ -106,8 +105,6 @@ async function analyzeContributors() {
     console.log('🔍 Analyzing contributors...');
     const startTime = Date.now();
 
-    const authors = JSON.parse(fs.readFileSync(PATHS.authors, 'utf8'));
-
     // Get git history
     const gitOutput = execSync(
         `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- pages/docs/`,
@@ -173,7 +170,7 @@ async function analyzeContributors() {
 
     for (const commit of commits) {
         const urlPath = `/docs/${commit.filePath.replace('pages/docs/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
-        const contributor = await resolveContributor(commit.email, commit.hash, authors);
+        const contributor = await resolveContributor(commit.email, commit.hash);
 
         if (contributor) {
             if (!fileContributors[urlPath]) fileContributors[urlPath] = {};
