@@ -862,11 +862,12 @@ A placeholder has the structure:
 
 of which you use the defined `PLACEHOLDER_NAME` name as a key within your application to insert messages.
 
-In the SDKs, use the `.update(placeholders=...)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
+In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
+When using Langchain, the `getLangchainPrompt(...)` method returns unresolved placeholders as Langchain `MessagesPlaceholder` objects.
 
-You can try this feature and experiment with placeholders in the Playground.
+You can try-out message placeholders with your prompts in the Playground.
 
-**Note**: To access message placeholders via SDK, you need at least `langfuse-python >= 3.0.9` or `langfuse-js >= 3.37.`.
+**Note**: To access message placeholders via SDK, you need at least `langfuse-python >= 3.0.10` or `langfuse-js >= 3.37.`.
 
 
 ## Caching in client SDKs
