@@ -4,7 +4,7 @@
   "description": "Langfuse docs",
   "scripts": {
     "dev": "next dev -p 3333",
-    "prebuild": "node scripts/update-github-stars.js",
+    "prebuild": "node scripts/update-github-stars.js && node scripts/authors/generate-contributors.js",
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
     "start": "next start -p 3333",

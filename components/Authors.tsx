@@ -1,73 +1,8 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import authorsData from "../data/authors.json";
 
-export const allAuthors = {
-  maxdeichmann: {
-    firstName: "Max",
-    name: "Max Deichmann",
-    image: "/images/people/maxdeichmann.jpg",
-    twitter: "maxdeichmann",
-  },
-  marcklingen: {
-    firstName: "Marc",
-    name: "Marc Klingen",
-    image: "/images/people/marcklingen.jpg",
-    twitter: "marcklingen",
-  },
-  clemensrawert: {
-    firstName: "Clemens",
-    name: "Clemens Rawert",
-    image: "/images/people/clemensrawert.jpg",
-    twitter: "rawert",
-  },
-  hassiebpakzad: {
-    firstName: "Hassieb",
-    name: "Hassieb Pakzad",
-    image: "/images/people/hassiebpakzad.jpg",
-    twitter: "hassiebpakzad",
-  },
-  marliesmayerhofer: {
-    firstName: "Marlies",
-    name: "Marlies Mayerhofer",
-    image: "/images/people/marliesmayerhofer.jpg",
-    twitter: "marliessophie",
-  },
-  jannikmaierhoefer: {
-    firstName: "Jannik",
-    name: "Jannik Maierhöfer",
-    image: "/images/people/jannikmaierhoefer.jpg",
-    twitter: "jmaierhoefer",
-  },
-  steffenschmitz: {
-    firstName: "Steffen",
-    name: "Steffen Schmitz",
-    image: "/images/people/steffenschmitz.jpg",
-  },
-
-  lydiayou: {
-    firstName: "Lydia",
-    name: "Lydia You",
-    image: "/images/people/lydiayou.jpg",
-  },
-  richardkruemmel: {
-    firstName: "Richard",
-    name: "Richard Krümmel",
-    image: "/images/people/richardkruemmel.jpg",
-    twitter: "RichardKrue",
-  },
-  felixkrauth: {
-    firstName: "Felix",
-    name: "Felix Krauth",
-    image: "/images/people/felixkrauth.jpg",
-    twitter: "felixkrrr",
-  },
-  nimarblume: {
-    firstName: "Nimar",
-    name: "Nimar Blume",
-    image: "/images/people/nimarblume.jpg",
-    twitter: "nimarblu",
-  },
-} as const;
+export const allAuthors = authorsData;
 
 export const Authors = (props: { authors?: (keyof typeof allAuthors)[] }) => {
   const authors = props.authors?.filter((author) => author in allAuthors) ?? [];

@@ -7,6 +7,7 @@ import { MainContentWrapper } from "./components/MainContentWrapper";
 import { Frame } from "./components/Frame";
 import { GithubMenuBadge } from "./components/GitHubBadge";
 import { ToAppButton } from "./components/ToAppButton";
+import { DocsContributors } from "./components/DocsContributors";
 import { COOKBOOK_ROUTE_MAPPING } from "./lib/cookbook_route_mapping";
 import { GeistSans } from "geist/font/sans";
 import IconDiscord from "./components/icons/discord";
@@ -71,6 +72,7 @@ const config: DocsThemeConfig = {
   },
   toc: {
     backToTop: true,
+    extraContent: <DocsContributors />,
   },
   docsRepositoryBase: "https://github.com/langfuse/langfuse-docs/tree/main",
   footer: {
