@@ -4,184 +4,239 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const authorsPath = path.join(__dirname, '../../data/authors.json');
-const contributorsPath = path.join(__dirname, '../../data/generated/contributors.json');
-const docsPath = path.join(__dirname, '../../pages/docs');
+// Configuration
+const PATHS = {
+    authors: path.join(__dirname, '../../data/authors.json'),
+    contributors: path.join(__dirname, '../../data/generated/contributors.json'),
+    docs: path.join(__dirname, '../../pages/docs')
+};
 
-// Helper function to read the authors JSON file
-function getCurrentAuthors() {
-    return JSON.parse(fs.readFileSync(authorsPath, 'utf8'));
-}
+const GITHUB_CONFIG = {
+    repo: 'langfuse/langfuse-docs',
+    apiBase: 'https://api.github.com',
+    batchSize: 10,
+    batchDelay: 100
+};
 
-// Function to find author by email
-function findAuthorByEmail(email, allAuthors) {
-    for (const [authorKey, authorData] of Object.entries(allAuthors)) {
-        if (authorData.githubEmail === email) {
-            return authorKey;
-        }
+// Single cache for all GitHub API responses
+const cache = new Map();
+// Cache for email to GitHub username mapping
+const emailToUsernameCache = new Map();
 
-        if (authorData.githubEmailAlt && Array.isArray(authorData.githubEmailAlt)) {
-            if (authorData.githubEmailAlt.includes(email)) {
-                return authorKey;
-            }
-        }
+// GitHub API helper
+async function fetchFromGitHub(endpoint) {
+    if (cache.has(endpoint)) return cache.get(endpoint);
+
+    const headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'langfuse-docs-contributor-generator'
+    };
+
+    if (process.env.GITHUB_ACCESS_TOKEN) {
+        headers['Authorization'] = `token ${process.env.GITHUB_ACCESS_TOKEN}`;
     }
-    return null;
-}
 
-// Get all contributors for all files in a single git command
-function getAllFileContributors(allAuthors) {
     try {
-        console.log('🔍 Running single git log command for all files...');
-        const gitCommand = `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- pages/docs/`;
-        const output = execSync(gitCommand, {
-            encoding: 'utf8',
-            stdio: ['pipe', 'pipe', 'ignore']
-        });
+        const response = await fetch(`${GITHUB_CONFIG.apiBase}${endpoint}`, { headers });
 
-        if (!output.trim()) {
-            return {};
+        if (!response.ok) {
+            if (response.status === 404) return null;
+            throw new Error(`GitHub API: ${response.status} ${response.statusText}`);
         }
 
-        const lines = output.trim().split('\n');
-        const fileContributors = {};
-
-        let currentCommit = null;
-
-        for (const line of lines) {
-            if (line.includes('|')) {
-                // This is a commit line: hash|email|date
-                const [hash, email, dateStr] = line.split('|');
-                currentCommit = {
-                    hash: hash.trim(),
-                    email: email.trim(),
-                    date: new Date(dateStr.trim())
-                };
-            } else if (line.trim() && currentCommit && line.startsWith('pages/docs/')) {
-                // This is a file path
-                const filePath = line.trim();
-
-                // Convert to URL path format
-                const urlPath = `/docs/${filePath.replace('pages/docs/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
-
-                // Skip meta files
-                if (filePath.includes('_meta.')) {
-                    continue;
-                }
-
-                const authorKey = findAuthorByEmail(currentCommit.email, allAuthors);
-                if (authorKey) {
-                    if (!fileContributors[urlPath]) {
-                        fileContributors[urlPath] = {};
-                    }
-
-                    // Track the most recent commit date for each author per file
-                    if (!fileContributors[urlPath][authorKey] || currentCommit.date > fileContributors[urlPath][authorKey]) {
-                        fileContributors[urlPath][authorKey] = currentCommit.date;
-                    }
-                }
-            }
-        }
-
-        // Convert to sorted contributor arrays
-        const result = {};
-        for (const [urlPath, authorDates] of Object.entries(fileContributors)) {
-            // Sort authors by most recent contribution (descending)
-            result[urlPath] = Object.keys(authorDates)
-                .sort((a, b) => authorDates[b] - authorDates[a]);
-        }
-
-        return result;
+        const data = await response.json();
+        cache.set(endpoint, data);
+        return data;
     } catch (error) {
-        console.error('Error getting all contributors:', error.message);
-        return {};
+        console.warn(`GitHub API failed for ${endpoint}:`, error.message);
+        return null;
     }
 }
 
-// Recursively find all .mdx and .md files in docs directory
-function findDocFiles(dir, basePath = '') {
-    const files = [];
-    const items = fs.readdirSync(dir);
+// Contributor resolution helpers
+const extractGitHubUsernameFromEmail = (email) => {
+    const match = email.match(/^\d+\+([^@]+)@users\.noreply\.github\.com$/);
+    return match ? match[1] : null;
+};
 
-    for (const item of items) {
-        const fullPath = path.join(dir, item);
-        const relativePath = path.join(basePath, item);
+const resolveContributor = async (email, commitSha) => {
+    // Try GitHub noreply email pattern first (fast)
+    const usernameFromEmail = extractGitHubUsernameFromEmail(email);
+    if (usernameFromEmail) {
+        return usernameFromEmail;
+    }
 
-        if (fs.statSync(fullPath).isDirectory()) {
-            // Skip certain directories
-            if (item.startsWith('.') || item === 'node_modules') {
-                continue;
+    // Check if we have cached the GitHub username for this email
+    if (emailToUsernameCache.has(email)) {
+        const cachedUsername = emailToUsernameCache.get(email);
+        if (cachedUsername) {
+            return cachedUsername;
+        }
+    }
+
+    // Use GitHub API to get the actual GitHub username
+    const commitData = await fetchFromGitHub(`/repos/${GITHUB_CONFIG.repo}/commits/${commitSha}`);
+    const githubUsername = commitData?.author?.login || null;
+
+    // Cache the result for this email
+    emailToUsernameCache.set(email, githubUsername);
+
+    if (githubUsername) return githubUsername;
+
+    return null;
+};
+
+// Batch processing helper
+async function processBatch(items, processor) {
+    const results = [];
+    for (let i = 0; i < items.length; i += GITHUB_CONFIG.batchSize) {
+        const batch = items.slice(i, i + GITHUB_CONFIG.batchSize);
+        const batchResults = await Promise.all(batch.map(processor));
+        results.push(...batchResults.filter(Boolean));
+
+        if (i + GITHUB_CONFIG.batchSize < items.length) {
+            await new Promise(resolve => setTimeout(resolve, GITHUB_CONFIG.batchDelay));
+        }
+    }
+    return results;
+}
+
+// Main contributor analysis
+async function analyzeContributors() {
+    console.log('🔍 Analyzing contributors...');
+    const startTime = Date.now();
+
+    const authors = JSON.parse(fs.readFileSync(PATHS.authors, 'utf8'));
+
+    // Get git history
+    const gitOutput = execSync(
+        `git log --pretty=format:"%H|%ae|%ad" --date=iso --no-merges --name-only -- pages/docs/`,
+        { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }
+    );
+
+    if (!gitOutput.trim()) return {};
+
+    // Parse git output
+    const commits = [];
+    const emailsNeedingAPI = new Set();
+    let currentCommit = null;
+
+    for (const line of gitOutput.trim().split('\n')) {
+        if (line.includes('|')) {
+            const [hash, email, dateStr] = line.split('|');
+            currentCommit = { hash: hash.trim(), email: email.trim(), date: new Date(dateStr.trim()) };
+
+            // Check if we need GitHub API for this email
+            const usernameFromEmail = extractGitHubUsernameFromEmail(currentCommit.email);
+
+            if (!usernameFromEmail && !emailToUsernameCache.has(currentCommit.email)) {
+                emailsNeedingAPI.add(currentCommit.email);
             }
-            files.push(...findDocFiles(fullPath, relativePath));
-        } else if (item.endsWith('.mdx') || item.endsWith('.md')) {
-            // Skip meta files
-            if (item === '_meta.tsx' || item === '_meta.ts') {
-                continue;
-            }
-            files.push({
-                filePath: fullPath,
-                relativePath: relativePath,
-                urlPath: relativePath.replace(/\.(mdx?|tsx?)$/, '').replace(/\\/g, '/')
+        } else if (line.trim() && currentCommit && line.startsWith('pages/docs/') && !line.includes('_meta.')) {
+            commits.push({
+                ...currentCommit,
+                filePath: line.trim()
             });
         }
     }
 
-    return files;
-}
+    console.log(`📊 Processing ${commits.length} file-commit pairs from ${new Set(commits.map(c => c.hash)).size} commits`);
 
-// Main function to generate contributors.json
-function generateContributors() {
-    console.log('🔍 Generating contributors.json...');
-    const startTime = Date.now();
+    // Batch fetch GitHub data for unique emails that need it
+    if (emailsNeedingAPI.size > 0) {
+        console.log(`🚀 Fetching GitHub data for ${emailsNeedingAPI.size} unique emails...`);
+        const fetchStart = Date.now();
 
-    const allAuthors = getCurrentAuthors();
+        // Get a sample commit SHA for each email to make the API call
+        const emailToCommitSha = new Map();
+        for (const commit of commits) {
+            if (emailsNeedingAPI.has(commit.email) && !emailToCommitSha.has(commit.email)) {
+                emailToCommitSha.set(commit.email, commit.hash);
+            }
+        }
 
-    // Get current documentation files to filter against
-    const docFiles = findDocFiles(docsPath);
-    const validUrlPaths = new Set(docFiles.map(file => `/docs/${file.urlPath}`));
+        await processBatch(Array.from(emailsNeedingAPI), async (email) => {
+            const commitSha = emailToCommitSha.get(email);
+            if (commitSha) {
+                const commitData = await fetchFromGitHub(`/repos/${GITHUB_CONFIG.repo}/commits/${commitSha}`);
+                const githubUsername = commitData?.author?.login || null;
+                emailToUsernameCache.set(email, githubUsername);
+            }
+        });
 
-    console.log(`📁 Found ${docFiles.length} current documentation files`);
+        console.log(`✅ GitHub API completed in ${((Date.now() - fetchStart) / 1000).toFixed(2)}s`);
+        console.log(`📦 Cached ${emailToUsernameCache.size} email-to-username mappings`);
+    }
 
-    // Get all contributors in a single git command (much faster!)
-    const allContributors = getAllFileContributors(allAuthors);
+    // Process all commits
+    const fileContributors = {};
 
-    // Filter to only include pages that currently exist
-    const contributors = {};
-    for (const [urlPath, fileContributors] of Object.entries(allContributors)) {
-        if (validUrlPaths.has(urlPath)) {
-            contributors[urlPath] = fileContributors;
+    for (const commit of commits) {
+        const urlPath = `/docs/${commit.filePath.replace('pages/docs/', '').replace(/\.(mdx?|tsx?)$/, '')}`;
+        const contributor = await resolveContributor(commit.email, commit.hash, authors);
+
+        if (contributor) {
+            if (!fileContributors[urlPath]) fileContributors[urlPath] = {};
+
+            // Keep most recent contribution date
+            if (!fileContributors[urlPath][contributor] || commit.date > fileContributors[urlPath][contributor]) {
+                fileContributors[urlPath][contributor] = commit.date;
+            }
         }
     }
 
-    console.log(`🔍 Filtered ${Object.keys(allContributors).length} historical pages to ${Object.keys(contributors).length} current pages`);
+    // Convert to sorted arrays and filter current pages
+    const currentPages = new Set();
 
-    // Log the results
-    for (const [urlPath, fileContributors] of Object.entries(contributors)) {
-        console.log(`   ${urlPath}: ${fileContributors.join(', ')}`);
+    const findPages = (dir, basePath = '') => {
+        const items = fs.readdirSync(dir, { withFileTypes: true });
+        for (const item of items) {
+            if (item.isDirectory() && !item.name.startsWith('.')) {
+                findPages(path.join(dir, item.name), path.join(basePath, item.name));
+            } else if (item.isFile() && /\.(mdx?|md)$/.test(item.name) && !item.name.includes('_meta.')) {
+                const urlPath = `/docs/${path.join(basePath, item.name).replace(/\.(mdx?|md)$/, '').replace(/\\/g, '/')}`;
+                currentPages.add(urlPath);
+            }
+        }
+    };
+
+    findPages(PATHS.docs);
+
+    const result = {};
+    for (const [urlPath, contributorDates] of Object.entries(fileContributors)) {
+        if (currentPages.has(urlPath)) {
+            result[urlPath] = Object.keys(contributorDates)
+                .sort((a, b) => contributorDates[b] - contributorDates[a]);
+        }
     }
 
-    // Sort contributors by path for stable git output
-    const sortedContributors = Object.keys(contributors)
-        .sort()
-        .reduce((sorted, key) => {
-            sorted[key] = contributors[key];
-            return sorted;
-        }, {});
+    console.log(`🔍 Generated ${Object.keys(result).length} pages with ${[...new Set(Object.values(result).flat())].length} unique contributors`);
+    console.log(`⚡ Completed in ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
 
-    // Write contributors.json
-    fs.writeFileSync(contributorsPath, JSON.stringify(sortedContributors, null, 2));
-
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
-    console.log(`✅ Generated contributors.json with ${Object.keys(contributors).length} pages`);
-    console.log(`📊 Total unique contributors: ${[...new Set(Object.values(contributors).flat())].length}`);
-    console.log(`⚡ Completed in ${duration.toFixed(2)}s`);
+    return result;
 }
 
-// CLI interface
+// Main execution
+async function main() {
+    try {
+        const contributors = await analyzeContributors();
+
+        // Sort and write output
+        const sorted = Object.keys(contributors)
+            .sort()
+            .reduce((acc, key) => ({ ...acc, [key]: contributors[key] }), {});
+
+        fs.writeFileSync(PATHS.contributors, JSON.stringify(sorted, null, 2));
+        console.log('✅ Generated contributors.json');
+
+    } catch (error) {
+        console.error('❌ Error:', error.message);
+        process.exit(1);
+    }
+}
+
 if (require.main === module) {
-    generateContributors();
+    main();
 }
 
-module.exports = { generateContributors }; 
+module.exports = { analyzeContributors }; 
