@@ -26,7 +26,7 @@ _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of 
 
 
 ```python
-%pip install langfuse openai llama-index
+%pip install langfuse openai llama-index-workflows llama-index-core llama-index-llms-openai openinference-instrumentation-llama_index llama-index-instrumentation
 ```
 
 ### Step 2: Set Up Environment Variables
@@ -38,12 +38,12 @@ Configure your Langfuse API keys. You can get them by signing up for [Langfuse C
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Set your OpenAI API key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
@@ -81,42 +81,36 @@ In LlamaIndex Workflows, you build event-driven AI agents by defining steps with
 
 
 ```python
-from llama_index.core.workflow import (
-    Event,
-    StartEvent,
-    StopEvent,
-    Workflow,
-    step,
-)
-
-# `pip install llama-index-llms-openai` if you don't already have it
+from llama_index.core.llms import ChatMessage
 from llama_index.llms.openai import OpenAI
+from typing import Annotated
 
-class JokeEvent(Event):
-    joke: str
+from workflows import Workflow, step
+from workflows.events import StartEvent, StopEvent
+from workflows.resource import Resource
 
-class JokeFlow(Workflow):
-    llm = OpenAI()
 
+def get_llm(**kwargs):
+    return OpenAI(model="gpt-4.1-mini")
+
+
+class MyWorkflow(Workflow):
     @step
-    async def generate_joke(self, ev: StartEvent) -> JokeEvent:
-        topic = ev.topic
+    async def step1(
+        self, ev: StartEvent, llm: Annotated[OpenAI, Resource(get_llm)]
+    ) -> StopEvent:
+        msg = ChatMessage(role="user", content=ev.get("input"))
+        response = await llm.achat([msg])
+        return StopEvent(result=response.message.content)
 
-        prompt = f"Write your best joke about {topic}."
-        response = await self.llm.acomplete(prompt)
-        return JokeEvent(joke=str(response))
 
-    @step
-    async def critique_joke(self, ev: JokeEvent) -> StopEvent:
-        joke = ev.joke
+w = MyWorkflow()
+```
 
-        prompt = f"Give a thorough analysis and critique of the following joke: {joke}"
-        response = await self.llm.acomplete(prompt)
-        return StopEvent(result=str(response))
 
-w = JokeFlow(timeout=60, verbose=False)
-result = await w.run(topic="pirates")
-print(str(result))
+```python
+response = await w.run(input="Hello, what is Langfuse?")
+print(response)
 ```
 
 ### Step 5: View Traces in Langfuse
@@ -125,7 +119,7 @@ After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to
 
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-llamaindex-workflows/llamaindex-workflows-example-trace.png)
 
-_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7b96398452b54e01ffd3490c4558cce0?timestamp=2025-06-06T09%3A16%3A00.842Z&display=details)_
+_[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e0987dce85c8c49602030599b84e77e8?timestamp=2025-07-01T09%3A42%3A54.701Z&display=details)_
 </Steps>
 
 <Callout type="info" emoji="ℹ️">
