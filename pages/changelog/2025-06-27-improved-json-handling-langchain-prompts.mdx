@@ -1,0 +1,77 @@
+---
+date: 2025-06-27
+title: Improved JSON Handling in LangChain Prompts
+description: Simplified JSON handling in prompts designated for LangChain consumption - no more extra escaping required.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We've shipped significant improvements for handling JSON in prompts designed to be consumed via `get_langchain_prompt()` (Python) and `getLangchainPrompt()` (JS/TS). 
+
+You no longer need to add extra escaping brackets for JSON content in your prompts, making prompt creation more intuitive and reducing common integration issues.
+
+## What's Changed
+
+Previously, when creating prompts with embedded JSON that were intended for LangChain consumption, you needed to carefully escape JSON braces to avoid conflicts with LangChain's templating system. This often led to confusion and errors when working with complex prompts.
+
+Now, the SDK automatically handles the escaping and unescaping of JSON content, making the process seamless.
+
+## Example
+
+Here's how it works now:
+
+```python
+from langchain.prompts import PromptTemplate
+from langfuse import Langfuse
+
+# Create a prompt with JSON content and LangChain variables
+prompt_string = """
+This is my test prompt with a variable {{animal}} and some JSON.
+There's also a LangChain variable {country} with single braces.
+
+{
+    "answer": "OK",
+    "animal": {{animal}},
+    "country": {country}
+}
+"""
+
+# Store the prompt in Langfuse
+langfuse = Langfuse()
+langfuse.create_prompt(
+    name="my_prompt", 
+    prompt=prompt_string, 
+    labels=["production"]
+)
+
+# Retrieve and convert to LangChain format
+prompt = langfuse.get_prompt("my_prompt")
+langchain_prompt_string = prompt.get_langchain_prompt()
+
+# Use with LangChain
+langchain_prompt = PromptTemplate.from_template(langchain_prompt_string)
+formatted_prompt = langchain_prompt.format(
+    animal="dog", 
+    country="France"
+)
+```
+
+The SDK now automatically:
+- Converts `{{animal}}` (Langfuse variables) to `{animal}` (LangChain format)
+- Properly escapes the JSON structure to avoid conflicts with LangChain templating
+- Maintains the integrity of both your JSON content and variable substitution
+
+## Availability
+
+This improvement is available in:
+- **Python SDK**: [v3.0.6](https://github.com/langfuse/langfuse-python/releases/tag/v3.0.6) and later
+- **JavaScript/TypeScript SDK**: [v3.37.6](https://github.com/langfuse/langfuse-js/releases/tag/v3.37.6) and later
+
+## Learn More
+
+- [LangChain Integration Documentation](/docs/integrations/langchain)
+- [Prompt Management](/docs/prompts)
+- [GitHub Discussion](https://github.com/orgs/langfuse/discussions/7057)

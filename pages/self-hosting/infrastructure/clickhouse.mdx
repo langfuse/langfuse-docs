@@ -110,6 +110,8 @@ clickhouse:
   shards: 1 # Fixed: Langfuse does not support multi-shard clusters
   replicaCount: 3
   resourcesPreset: large # or more
+  persistence:
+    size: 100Gi # Start with a large volume to prevent early resizing. Alternatively, consider a blob storage backed disked.
   auth:
     username: default
     password: changeme
@@ -177,24 +179,19 @@ CLICKHOUSE_PASSWORD=changeme
   kubectl patch pvc data-<chart-name>-clickhouse-2 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
   ```
 
-  **3. Alternative: Update Helm values and upgrade:**
-  ```yaml
-  # values.yaml
-  clickhouse:
-    persistence:
-      size: 200Gi  # Increase from previous size
-  ```
-  ```bash
-  helm upgrade <release-name> <chart-name> -f values.yaml
-  ```
-
-  **4. Monitor expansion progress:**
+  **3. Monitor expansion progress:**
   ```bash
   # Watch PVC status
   kubectl get pvc -w
 
   # Check if pods recognize the new space
   kubectl exec -it <clickhouse-pod-name> -- df -h /var/lib/clickhouse
+  ```
+
+  **4. Restart StatefulSet:**
+  ```bash
+  # Restart all pods individually to make use of the larger volumes
+  kubectl rollout restart statefulset <chart-name>-clickhouse
   ```
 
   **Prevention tips:**
@@ -242,6 +239,18 @@ For a full overview of the feature, see the [ClickHouse External Disks documenta
 
 Below, we give a config.xml example to use S3 and Azure Blob Storage as disks for ClickHouse Docker containers using Docker Compose.
 Keep in mind that metadata is still stored on local disk, i.e. you need to use a persistent volume for the ClickHouse container or risk loosing access to your tables.
+
+<Callout type="warning">
+
+  We recommend the following settings when using Blob Storage as a disk for your ClickHouse deployment:
+
+  - **Do not enable bucket versioning**: ClickHouse will write and update many files within its merge processing. Having versioned buckets will retain the full history and quickly grow your storage consumption.
+  - **Do not enable lifecycle policies for deletion**: Avoid deletion lifecycle policies as this may break ClickHouse's internal consistency model. Instead, delete data via the Langfuse application or using ClickHouse TTLs.
+  - **Enable lifecycle policies for aborted multi-part uploads**: If ClickHouse attempts an upload, but aborts it before completion undesirable artifacts may remain.
+
+  This is being derived from this [ClickHouse issue](https://github.com/ClickHouse/clickhouse-docs/issues/1385).
+
+</Callout>
 
 ### S3 Example
 

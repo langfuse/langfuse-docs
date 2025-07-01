@@ -69,6 +69,12 @@ export default {
   "data-deletion": "Data Deletion",
   roadmap: "Roadmap",
   "ask-ai": "Ask AI",
+  "docs-mcp": "Docs MCP Server",
+  "security-compliance": {
+    title: "Security & Compliance ↗",
+    href: "/security",
+    newWindow: true,
+  },
   support: {
     title: "Support ↗",
     href: "/support",

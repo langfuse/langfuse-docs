@@ -100,16 +100,30 @@ Make sure to replace the environment variables with your actual Langfuse API key
 
 <Tab>
 
-Add new MCP Server in Cursor settings:
+1. Open Cursor Settings (`Cmd/Ctrl + Shift + J`)
+2. Navigate to the **Tools & Integrations** tab in the left sidebar
+3. Click **"Add Custom MCP"**
+4. This will open the `mcp.json` configuration file
+5. Add your Langfuse MCP server configuration:
 
-- Name: `Langfuse Prompts`
-- Type: `command`
-- Command:
-  ```bash
-  LANGFUSE_PUBLIC_KEY="your-public-key" LANGFUSE_SECRET_KEY="your-secret-key" LANGFUSE_BASEURL="https://cloud.langfuse.com" node absolute-path/build/index.js
-  ```
+```json
+{
+  "mcpServers": {
+    "langfuse-prompts": {
+      "command": "node",
+      "args": ["<absolute-path>/build/index.js"],
+      "env": {
+        "LANGFUSE_PUBLIC_KEY": "your-public-key",
+        "LANGFUSE_SECRET_KEY": "your-secret-key",
+        "LANGFUSE_BASEURL": "https://cloud.langfuse.com"
+      }
+    }
+  }
+}
+```
 
-Make sure to replace the environment variables with your actual Langfuse API keys. The server will now be available to use in Cursor.
+6. Save the file and restart Cursor
+7. The server should appear in the MCP settings with a green dot indicating it's active
 
 </Tab>
 
