@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { allAuthors } from "./Authors";
 import contributorsData from "../data/generated/contributors.json";
 import Image from "next/image";
@@ -52,6 +52,11 @@ export const DocsContributors = () => {
   const router = useRouter();
   const currentPath = router.asPath.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
+
+  // Reset showAll when the page changes
+  useEffect(() => {
+    setShowAll(false);
+  }, [currentPath]);
 
   const contributors = getContributors(currentPath);
   if (contributors.length === 0) return null;
