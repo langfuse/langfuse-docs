@@ -68,8 +68,8 @@ export const DocsContributors = () => {
   const remainingCount = Math.max(0, processedContributors.length - 3);
 
   return (
-    <div className="mt-6 pt-4 border-t border-border">
-      <div className="text-sm font-medium text-foreground mb-2">
+    <div className="mt-1 pt-4 border-t border-border w-full">
+      <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
         Contributors
       </div>
       <div>
