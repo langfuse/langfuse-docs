@@ -253,6 +253,7 @@ import sys
 import uuid
 import datetime as dt
 import time
+import json
 from langfuse import Langfuse
 # Corrected location for MapValue:
 from langfuse.api.resources.commons.types import MapValue
@@ -327,7 +328,7 @@ def transform_trace_to_ingestion_batch(source_trace):
         metadata=trace_metadata or None,
         tags=source_trace.tags if source_trace.tags is not None else [],
         public=source_trace.public,
-        environment=source_trace.environment,
+        environment=source_trace.environment if source_trace.environment else "default",
     )
     event_timestamp_str = safe_isoformat(dt.datetime.now(dt.timezone.utc))
     if not event_timestamp_str:
@@ -355,7 +356,7 @@ def transform_trace_to_ingestion_batch(source_trace):
             "start_time": source_obs.start_time, "metadata": obs_metadata or None,
             "input": source_obs.input, "output": source_obs.output, "level": source_obs.level,
             "status_message": source_obs.status_message, "parent_observation_id": new_parent_observation_id,
-            "version": source_obs.version, "environment": source_obs.environment,
+            "version": source_obs.version, "environment": source_obs.environment if source_obs.environment else "default",
         }
 
         event_body = None; ingestion_event_type = None
@@ -440,7 +441,7 @@ def transform_trace_to_ingestion_batch(source_trace):
                 config_id=source_score.config_id,
                 metadata=score_metadata or None,
                 data_type=source_score.data_type,
-                environment=source_score.environment,
+                environment=source_score.environment if source_score.environment else "default",
             )
             event_timestamp_str = safe_isoformat(dt.datetime.now(dt.timezone.utc))
             if not event_timestamp_str: print(f"Error: Could not format timestamp for score {new_score_id}. Skipping."); continue
