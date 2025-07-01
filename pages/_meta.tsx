@@ -12,6 +12,11 @@ export default {
     type: "page",
     display: "hidden",
   },
+  "find-us": {
+    title: "Find Us",
+    type: "page",
+    display: "hidden",
+  },
   docs: {
     type: "page",
     title: "Docs",
