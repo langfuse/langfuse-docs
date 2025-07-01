@@ -24,6 +24,7 @@ export default {
   "google-vertex-ai": "Google Vertex AI",
   "google-adk": "Google ADK",
   "mistral-sdk": "Mistral SDK",
+  portkey: "Portkey",
   promptfoo: "Promptfoo",
   openwebui: "OpenWebUI",
   lobechat: "LobeChat",
