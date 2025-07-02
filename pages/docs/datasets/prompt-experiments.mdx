@@ -81,8 +81,7 @@ In this example:
 
 In addition to variables, you can also map placeholders in chat message prompts to dataset item keys.
 This is useful when the dataset item also contains for example a chat message history to use.
-Your chat prompt needs to contain a placeholder with a name. Variables are resolved after placeholder values
-are filled in, so your history may use variables as well.
+Your chat prompt needs to contain a placeholder with a name. Variables within placeholders are not resolved.
 
 Here is an example:
 
@@ -95,7 +94,7 @@ Placeholder named: `message_history`
   "message_history": [
     {
       "role": "user",
-      "content": "{{question}}"
+      "content": "What is Langfuse?"
     },
     {
       "role": "assistant",
