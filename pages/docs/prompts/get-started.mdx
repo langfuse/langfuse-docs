@@ -847,6 +847,30 @@ When fetched via the SDK / API, these tags are automatically replaced with the r
 - Maintain common instructions, examples, or context in a single place
 - Update dependent prompts automatically when base prompts change
 
+## Message Placeholders in Chat Prompts [#message-placeholders]
+
+Message placeholders allow you to insert chat messages at specific positions within a chat prompt.
+This is for example useful to provide a message history as context to an LLM.
+
+A placeholder has the structure:
+```json
+{
+  "type": "placeholder",
+  "name": "PLACEHOLDER_NAME"
+}
+```
+
+of which you use the defined `PLACEHOLDER_NAME` name as a key within your application to insert messages.
+
+In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
+The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted.
+When using Langchain, the `getLangchainPrompt(...)` method also takes placeholders as argument and returns unresolved placeholders as Langchain-native `MessagesPlaceholder` objects.
+
+You can try-out message placeholders with your prompts in the Playground.
+
+**Note**: To access message placeholders via SDK, you need at least `langfuse-python >= 3.1.0` or `langfuse-js >= 3.38.0`.
+
+
 ## Caching in client SDKs
 
 Langfuse prompts are cached client-side in the SDKs, so **there's no latency impact after the first use**. You can also pre-fetch prompts on startup to populate the cache (see example below).
