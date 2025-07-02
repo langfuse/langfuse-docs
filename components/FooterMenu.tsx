@@ -39,6 +39,10 @@ const menuItems: {
         name: "Playground",
         href: "/docs/playground",
       },
+      {
+        name: "Fine-Tuning",
+        href: "/docs/fine-tuning",
+      },
     ],
   },
   {
@@ -93,6 +97,10 @@ const menuItems: {
       {
         name: "Video demo (10 min)",
         href: "/watch-demo",
+      },
+      {
+        name: "Ask AI",
+        href: "/docs/ask-ai",
       },
       {
         name: "Changelog",
@@ -160,6 +168,10 @@ const menuItems: {
         href: "/oss-friends",
       },
       {
+        name: "Community",
+        href: "/community",
+      },
+      {
         name: "Twitter",
         href: "https://x.com/langfuse",
       },
@@ -182,6 +194,10 @@ const menuItems: {
       {
         name: "Privacy",
         href: "/privacy",
+      },
+      {
+        name: "Cookie Policy",
+        href: "/cookie-policy",
       },
       "separator",
       {
