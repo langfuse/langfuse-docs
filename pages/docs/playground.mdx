@@ -24,6 +24,10 @@ Test and iterate on your prompts directly in the Langfuse Prompt Playground. Twe
 
 We'll be adding more features and models in the future. If you have any feedback or feature requests, please let us know!
 
+<Callout type="info">
+**Note:** LLM API keys for the Playground and evaluations are configured per project in Langfuse. In large organizations, each project needs to be set up with its own credentials (no org-wide default yet).
+</Callout>
+
 ## Jump from prompt management to the playground
 
 You can either start from scratch or jump into the playground from an existing prompt in [Langfuse Prompt Management](/docs/prompts/get-started).
@@ -150,6 +154,17 @@ export function ModelList() {
 }
 
 <ModelList />
+
+<Callout type="info">
+**Tip:** For Amazon Bedrock, ensure your AWS role or user includes the `bedrock:InvokeModel` permission. For example, a minimal IAM policy might be:
+```json
+{
+  "Effect": "Allow",
+  "Action": ["bedrock:InvokeModel"],
+  "Resource": "*"
+}
+```
+</Callout>
 
 ## GitHub Discussions
 
