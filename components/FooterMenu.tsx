@@ -45,6 +45,10 @@ const menuItems: {
     heading: "Integrations",
     items: [
       {
+        name: "Overview",
+        href: "/docs/integrations/overview",
+      },
+      {
         name: "Python SDK",
         href: "/docs/sdk/python",
       },
@@ -69,28 +73,8 @@ const menuItems: {
         href: "/docs/integrations/litellm/tracing",
       },
       {
-        name: "Dify",
-        href: "/docs/integrations/dify",
-      },
-      {
-        name: "Flowise",
-        href: "/docs/integrations/flowise",
-      },
-      {
-        name: "Langflow",
-        href: "/docs/integrations/langflow",
-      },
-      {
         name: "Vercel AI SDK",
         href: "/docs/integrations/vercel-ai-sdk",
-      },
-      {
-        name: "Instructor",
-        href: "/docs/integrations/instructor",
-      },
-      {
-        name: "Mirascope",
-        href: "/docs/integrations/mirascope",
       },
       {
         name: "API",
