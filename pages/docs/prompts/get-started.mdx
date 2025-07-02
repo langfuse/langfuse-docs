@@ -847,6 +847,13 @@ When fetched via the SDK / API, these tags are automatically replaced with the r
 - Maintain common instructions, examples, or context in a single place
 - Update dependent prompts automatically when base prompts change
 
+## Prompt Folders for Organization [#folders]
+
+Prompts can be organized into virtual folders to group prompts with similar purposes.
+To create a folder, add slashes (`/`) to a prompt name. The UI shows every segment ending with a `/` as a folder automatically.
+
+**Note**: accessing prompts in folders via the Python SDK requires `langfuse-python` version `3.0.2` or later.
+
 ## Caching in client SDKs
 
 Langfuse prompts are cached client-side in the SDKs, so **there's no latency impact after the first use**. You can also pre-fetch prompts on startup to populate the cache (see example below).
@@ -1225,13 +1232,6 @@ max       0.687994 sec
 
 - [Prompt Management MCP Server](/docs/prompts/mcp-server)
 - [Prompt A/B Testing](/docs/prompts/a-b-testing)
-
-### Prompt Folders for Organization
-
-Prompts can be organized into virtual folders to group prompts with similar purposes.
-To create a folder, add slashes (`/`) to a prompt name. The UI shows every segment ending with a `/` as a folder automatically.
-
-**Note**: accessing prompts in folders via the Python SDK requires `langfuse-python` version `3.0.2` or later.
 
 ## FAQ
 
