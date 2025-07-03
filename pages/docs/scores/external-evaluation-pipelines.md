@@ -419,10 +419,6 @@ print(f"Traces in first batch: {len(traces_batch)}")
 
     Traces in first batch: 10
 
-<Callout type="info">
-**Tip:** If you need to evaluate a specific step or tool output within your traces (instead of the whole trace), you can retrieve those observations directly. For example, use `fetch_observations()` with a filter on the observation name (e.g. `"generate SQL"`) to get all such events across traces and evaluate them in bulk.
-</Callout>
-
 
 ## 2. Run your evaluations
 

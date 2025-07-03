@@ -14,10 +14,6 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Callout type="tip">
-**Tip:** For chat applications, we recommend using one trace per user message (and the AI's response) and grouping them via a shared `sessionId` for the entire conversation. This way each turn's latency is measured separately and you can still replay the full chat. It's also easier in serverless or distributed setups than keeping one long trace open for the whole chat session.
-</Callout>
-
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
 
 <Tab>
