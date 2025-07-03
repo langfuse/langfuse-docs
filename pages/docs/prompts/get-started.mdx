@@ -917,13 +917,15 @@ const prompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
 });
 
 // Compile the variable and resolve the placeholder with a list of messages.
-const compiledPrompt = prompt.compile({
-  criticlevel: "expert",
-  chat_history: [
-    { role: "user", content: "I love Ron Fricke movies like Baraka" },
-    { role: "user", content: "Also, the Korean movie Memories of a Murderer" },
-  ],
-});
+const compiledPrompt = prompt.compile(
+  { criticlevel: "expert" },
+  {
+    chat_history: [
+      { role: "user", content: "I love Ron Fricke movies like Baraka" },
+      { role: "user", content: "Also, the Korean movie Memories of a Murderer" },
+    ],
+  }
+);
 
 // -> compiledPrompt = [
 //   { role: "system", content: "You are an expert movie critic" },
@@ -937,7 +939,7 @@ const langchainPrompt = prompt.getLangchainPrompt();
 
 // -> langchainPrompt = [
 //   { role: "system", content: "You are an expert movie critic" },
-//   MessagesPlaceholder("chat_history"),
+//   { variableName: "chat_history", optional: false },  // Langchain MessagesPlaceholder structure
 //   { role: "user", content: "What should I watch next?" },
 // ]
 ```
