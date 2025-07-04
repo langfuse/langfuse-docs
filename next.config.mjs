@@ -205,7 +205,7 @@ const nonPermanentRedirects = [
   ["/docs/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/integrations/litellm", "/docs/integrations/litellm/tracing"],
   ["/docs/langflow", "/docs/integrations/langflow"],
-  ["/integrations", "/docs/integrations"],
+  // ["/integrations", "/docs/integrations"],
   ["/docs/local", "/docs/deployment/local"],
   ["/docs/self-host", "/docs/deployment/self-host"],
   ["/docs/cloud", "/docs/deployment/cloud"],
