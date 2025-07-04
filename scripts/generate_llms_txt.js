@@ -23,6 +23,15 @@ async function generateLLMsList() {
         let markdownContent = `# ${TITLE}\n\n`;
         markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+        // Add Settings section with MCP server information
+        markdownContent += `## Settings\n\n`;
+        markdownContent += `### Langfuse Docs MCP Server\n\n`;
+        markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
+        markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
+        markdownContent += `- **Transport**: \`streamableHttp\`\n`;
+        markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](/docs/docs-mcp)\n\n`;
+        markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
+
         // Create a map to store URLs by section
         const urlsBySection = {
             other: [],
