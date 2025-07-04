@@ -24,8 +24,7 @@ async function generateLLMsList() {
         markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
         // Add Settings section with MCP server information
-        markdownContent += `## Settings\n\n`;
-        markdownContent += `### Langfuse Docs MCP Server\n\n`;
+        markdownContent += `## Langfuse Docs MCP Server\n\n`;
         markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
         markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
         markdownContent += `- **Transport**: \`streamableHttp\`\n`;
