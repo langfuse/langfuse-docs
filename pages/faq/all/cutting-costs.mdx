@@ -27,6 +27,8 @@ Every observation within a trace counts toward your unit total. Some observation
 
 1. Review your traces to identify low-value or unnecessary observations.
 2. Update your integration/instrumentation to exclude these observations.
+   - For most integrations, you define which observations are created. Thus, you can remove them by updating your instrumentation.
+   - If you use the Python SDK (v3, OpenTelemetry-based), all OpenTelemetry spans are exported to Langfuse by default. If some observations are not relevant, you can [filter out observations by instrumentation scope](/docs/sdk/python/sdk-v3#filtering-by-instrumentation-scope).
 
 ## Option 2: Sample fewer traces
 

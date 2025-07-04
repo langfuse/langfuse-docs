@@ -4,7 +4,6 @@ description: Create powerful, customizable dashboards to visualize, monitor, and
 
 # Custom Dashboards
 
-
 Transform your LLM application data into actionable insights with Langfuse custom dashboards.
 Create personalized views that track the metrics that matter most to your team - from latency and cost optimization to quality monitoring and user behavior analysis.
 
@@ -35,7 +34,9 @@ Whether you're monitoring production performance, analyzing user feedback trends
 
 Get started with custom dashboards in two simple steps or use Langfuse's curated dashboards right away.
 
-### Step 1: Create Your First Widget
+<Steps>
+
+### Create Your First Widget
 
 Widgets are individual visualization components that display specific metrics from your LLM application data.
 
@@ -43,9 +44,9 @@ Widgets are individual visualization components that display specific metrics fr
 2. Select the **Widgets** tab
 3. Click **New Widget**
 4. Configure your widget:
-   - **Data Source**: Choose from traces, observations, or user data
+   - **Data Source**: Choose from traces, observations, or evaluation scores
    - **Metrics**: Select what to measure (count, latency, cost, scores, etc.)
-   - **Dimensions**: Group by user, model, time, or custom metadata
+   - **Dimensions**: Group by user, model, time, trace name, etc.
    - **Filters**: Narrow down to specific data subsets
    - **Chart Type**: Pick the best visualization for your data
 5. Click **Save** to store your widget
@@ -56,7 +57,7 @@ Widgets are individual visualization components that display specific metrics fr
   aspectRatio={16 / 9}
 />
 
-### Step 2: Build Your Dashboard
+### Build Your Dashboard
 
 Combine multiple widgets into comprehensive dashboards that tell the story of your LLM application performance.
 
@@ -72,6 +73,8 @@ Combine multiple widgets into comprehensive dashboards that tell the story of yo
   gifStyle
   aspectRatio={16 / 9}
 />
+
+</Steps>
 
 ### Leverage Curated Dashboards
 
@@ -112,6 +115,21 @@ Choose the right visualization for your data:
 - **Widget Resizing**: Emphasize important metrics with larger visualizations
 - **Grid System**: Maintain clean, organized layouts automatically
 
+### Data Export and Integration
+
+<CloudflareVideo
+  videoId="17baadbea7eea373b17d7ce56451e376"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+Export your dashboard data for further analysis or integration with external tools:
+
+- **CSV Export**: Download the underlying data from any chart as CSV files for spreadsheet analysis
+- **Complete Data Access**: Export includes all metrics, dimensions, and data points used in the visualization
+
+Alternatively, you can also use the [Metrics API](/docs/analytics/metrics-api) to get the data in a structured format.
+
 ## Use Cases and Examples
 
 ### Production Monitoring Dashboard
@@ -122,6 +140,7 @@ Monitor the health and performance of your LLM application in real-time:
 - **Latency Analysis**: Track P95 and P99 response times across different endpoints
 - **Throughput Monitoring**: Visualize request volume and capacity utilization
 - **Model Performance**: Compare accuracy and quality metrics across model versions
+- **Tool Usage & Latency**: Track how often each external tool (e.g. API calls, database queries) is invoked and its latency
 
 ### Cost Optimization Dashboard
 

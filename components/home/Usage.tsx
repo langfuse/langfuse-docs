@@ -82,9 +82,9 @@ const users: User[] = [
 
 export const Usage = () => {
   const stats = [
-    { name: "SDK installs / month", value: 7_000_000 },
-    { name: "GitHub stars", value: getGitHubStars() },
-    { name: "Docker pulls", value: 6_000_000 },
+    { name: "SDK installs / month", value: 7_000_000, showPlus: true },
+    { name: "GitHub stars", value: getGitHubStars(), showPlus: false },
+    { name: "Docker pulls", value: 6_000_000, showPlus: true },
   ];
 
   return (
@@ -125,7 +125,9 @@ export const Usage = () => {
             <div key={item.name} className="text-center">
               <p className="text-xl sm:text-2xl font-bold text-primary/80 font-mono">
                 <NumberTicker value={item.value} />
-                <span className="ml-1 hidden sm:inline">{"+"}</span>
+                {item.showPlus && (
+                  <span className="ml-1 hidden sm:inline">{"+"}</span>
+                )}
               </p>
               <p className="mt-2 text-xs sm:text-sm text-primary/70">
                 {item.name}

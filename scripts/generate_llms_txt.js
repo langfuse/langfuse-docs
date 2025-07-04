@@ -9,10 +9,7 @@ const MAIN_SECTIONS = [
     'docs',
 ];
 const OPTIONAL_SECTIONS = [
-    'guides',
-    'changelog',
-    'blog',
-    'faq'
+    'self-hosting'
 ];
 
 async function generateLLMsList() {
@@ -69,15 +66,6 @@ async function generateLLMsList() {
             }
         });
 
-        // Add other section
-        if (urlsBySection.other.length > 0) {
-            markdownContent += '## Other\n\n';
-            urlsBySection.other.forEach(({ title, url }) => {
-                markdownContent += `- [${title}](${url})\n`;
-            });
-            markdownContent += '\n';
-        }
-
         // Add optional integrations section at the end
         if (urlsBySection.optional.length > 0) {
             markdownContent += '## Optional\n\n';
@@ -85,6 +73,15 @@ async function generateLLMsList() {
                 markdownContent += `- [${title}](${url})\n`;
             });
         }
+
+        // // Add other section
+        // if (urlsBySection.other.length > 0) {
+        //     markdownContent += '## Other\n\n';
+        //     urlsBySection.other.forEach(({ title, url }) => {
+        //         markdownContent += `- [${title}](${url})\n`;
+        //     });
+        //     markdownContent += '\n';
+        // }
 
         // Write to llms.txt
         const outputPath = path.join(process.cwd(), 'public', 'llms.txt');

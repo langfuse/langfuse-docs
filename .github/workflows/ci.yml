@@ -34,12 +34,56 @@ jobs:
       - name: Run H1 heading check
         run: node scripts/check-h1-headings.js
 
+  check-notebook-docs-sync:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Jupyter and dependencies
+        run: |
+          pip install jupyter nbconvert
+
+      - name: Check if notebook docs are up to date
+        run: |
+          # Create a backup of the current state
+          cp -r pages/guides/cookbook pages/guides/cookbook.backup
+          
+          # Run the update script
+          bash scripts/update_cookbook_docs.sh
+          
+          # Check if any files changed
+          if ! git diff --quiet pages/guides/cookbook/; then
+            echo "❌ Cookbook documentation is out of sync with notebooks!"
+            echo "The following files have changes:"
+            git diff --name-only pages/guides/cookbook/
+            echo ""
+            echo "Please run 'bash scripts/update_cookbook_docs.sh' locally and commit the changes."
+            echo ""
+            echo "Detailed diff:"
+            git diff pages/guides/cookbook/
+            exit 1
+          else
+            echo "✅ Cookbook documentation is up to date with notebooks"
+          fi
+
   build-and-check-links:
     needs:
       - pre-job
     if: needs.pre-job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:

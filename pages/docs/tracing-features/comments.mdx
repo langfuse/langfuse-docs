@@ -1,0 +1,68 @@
+---
+title: Comments on Objects
+description: Add contextual comments to traces, observations, sessions, and prompts in Langfuse for team collaboration.
+---
+
+# Comments on Objects
+
+Comments enable teams to add contextual notes and discussions directly to traces, observations, sessions, and prompts within Langfuse. This feature facilitates collaboration by allowing team members to:
+
+- Flag issues or anomalies in specific traces
+- Share insights about particular model outputs
+- Document edge cases and debugging notes
+- Coordinate on prompt improvements
+- Leave feedback during development and review cycles
+
+<CloudflareVideo
+  videoId="df0996b99551a3cf96a1a5a33487e0e5"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+## Supported Object Types
+
+Comments can be added to the following Langfuse objects:
+
+- **Traces** - Comment on complete execution flows
+- **Observations** - Add notes to specific LLM calls, spans, or events
+- **Sessions** - Discuss user interaction patterns
+- **Prompts** - Collaborate on prompt versions and improvements
+
+## Adding Comments
+
+<Tabs items={["UI", "API"]}>
+
+<Tab>
+
+Each supported object page displays a comment button in the interface. The button shows:
+- The current comment count (capped at "99+" for readability)
+- A disabled state if you don't have read permissions
+- An active state when comments are available or you can create them
+
+Clicking the comment button opens a side drawer containing:
+
+1. **Comment Thread** - All existing comments displayed chronologically
+2. **Composer** - Text area for writing new comments (if you have write permissions)
+3. **Markdown Preview** - Real-time preview of your formatted comment
+
+<Callout type="info">
+  Comment authors can only delete their own comments. Project admins cannot delete other users' comments through the UI.
+</Callout>
+
+</Tab>
+
+<Tab>
+
+The Comments API allows programmatic access to create and retrieve comments. All endpoints follow the standard Langfuse API patterns.
+
+```http
+POST /api/public/comments
+```
+
+**[API Reference](https://api.reference.langfuse.com/#tag/comments/post/api/public/comments)**
+
+
+</Tab>
+
+</Tabs>
+
