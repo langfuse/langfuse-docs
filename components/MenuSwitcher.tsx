@@ -1,10 +1,4 @@
-import {
-  CircleHelp,
-  Server,
-  LibraryBig,
-  BookOpen,
-  FileCode,
-} from "lucide-react";
+import { Server, LibraryBig, BookOpen, FileCode, Unplug } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
@@ -15,10 +9,11 @@ export const MenuSwitcher = () => {
     <div className="-mx-2 hidden md:block">
       {[
         { title: "Docs", path: "/docs", Icon: LibraryBig },
+        { title: "Integrations", path: "/integrations", Icon: Unplug },
         { title: "Self Hosting", path: "/self-hosting", Icon: Server },
         { title: "Guides", path: "/guides", Icon: FileCode },
         { title: "AI Engineering Library", path: "/library", Icon: BookOpen },
-        { title: "FAQ", path: "/faq", Icon: CircleHelp },
+        // { title: "FAQ", path: "/faq", Icon: CircleHelp },
       ].map((item) =>
         asPath.startsWith(item.path) ? (
           <div
