@@ -1,0 +1,157 @@
+---
+title: "How European Energy Giant E.ON launched AI Search from POC to Production"
+date: July 4, 2025
+description: E.ON built on Langfuse to transform their traditional website search into a sophisticated AI-powered customer interaction channel serving millions of customers.
+ogImage: 
+tag: customer-story
+author: Felix
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+
+<BlogHeader
+  title="How European Energy Giant E.ON launched AI Search from POC to Production"
+  description="E.ON built on Langfuse to transform their traditional website search into a sophisticated AI-powered customer interaction channel serving millions of customers"
+  authors={["felixkrauth"]}
+/>
+
+[E.ON](https://www.eon.de/de/pk.html), one of Europe's largest energy companies serving millions of consumers and companies alike, transformed their traditional website search into a sophisticated AI-powered customer interaction channel building on Langfuse.
+
+<Frame fullWidth className="hidden dark:block">
+  ![Eon AI Search](/images/customers/eon/eon-rag-dark.png)
+</Frame>
+
+<Frame fullWidth className="block dark:hidden">
+  ![Eon AI Search](/images/customers/eon/eon-rag.png)
+</Frame>
+
+Today millions of customers and partners have access to the project helping them answer critical questions about their energy consumption. [Try it here!](https://www.eon.de/de/aisearch.html)
+
+The project serves as a logical first step in E.ON's broader AI strategy.
+
+## Starting with Prompt Management for Fast Iteration
+
+What started as a POC quickly became more complex: FAQ checking, hybrid search, re-ranking, document grading, and answer generation. With that iterating prompts and debugging became a nightmare.
+
+Here is how E.ON adopted Langfuse through different project stages:
+
+<Frame fullWidth className="hidden dark:block">
+  ![Eon Langfuse Adoption](/images/customers/eon/eon-adoption-dark.png)
+</Frame>
+
+<Frame fullWidth className="block dark:hidden">
+  ![Eon Langfuse Adoption](/images/customers/eon/eon-adoption-light.png)
+</Frame>
+
+<CustomerQuote
+  quote="We were using Langfuse from early POC phases starting with prompt management. Traces and evaluations followed. The Langfuse features very naturally followed our changing needs from early experiments to full production rollout."
+  name="Ankur Garha"
+  role="Lead MLOps Engineer"
+  company="E.ON Energie Deutschland GmbH"
+  image="/images/customers/eon/Ankur-Garha.jpeg"
+/>
+
+## Confidently launching with Evals & Deployment Pipelines
+
+### Evals
+
+Moving from proof-of-concept to production required abandoning "gut feeling as quality assurance". E.ON has implemented a complementary set of evaluations to ship with confidence. This gives them **24/7 visibility into quality** and **makes releasing prompt or code changes to users much less scary**.
+
+They are especially excited about the [G-Eval methodology](https://arxiv.org/abs/2303.16634) and having it run on the Langfuse platform.
+
+Here is their recipe:
+
+<Frame fullWidth className="hidden dark:block">
+  ![Eon Evals](/images/customers/eon/eon-evals-dark.png)
+</Frame>
+
+<Frame fullWidth className="block dark:hidden">
+  ![Eon Evals](/images/customers/eon/eon-evals-light.png)
+</Frame>
+
+<CustomerQuote
+  quote="Langfuse's evals are a game changer. We can run experiments against datasets more or less with one line of code or with just pushing a button. The team now confidently makes changes knowing they can measure impact across the entire system."
+  name="Lukas Altenkamp"
+  role="Senior Data Scientist & ML Engineer"
+  company="EON"
+  image="/images/customers/eon/Lukas-altenkamp.jpeg"
+/>
+
+### Deployment Pipeline
+
+The team runs a sophisticated workflow for experiment driven development (EDD) using Langfuse's [prompt labeling](https://langfuse.com/docs/prompts/get-started#labels):
+
+<Frame fullWidth className="hidden dark:block">
+  ![Eon EDD](/images/customers/eon/eon-EDD-dark.png)
+</Frame>
+
+<Frame fullWidth className="block dark:hidden">
+  ![Eon EDD](/images/customers/eon/eon-EDD.png)
+</Frame>
+
+1. Develop prompts in development environments  
+2. Run [evaluations against datasets](https://langfuse.com/docs/datasets/overview)    
+3. Test in staging  
+4. Deploy to production with rollback capabilities  
+
+Prompt iterations became much faster than code deployments
+
+## Optimizing Latency & Time-to-first-token
+
+The team discovered that time-to-first-token mattered more than overall latency since users remain engaged once output starts streaming.
+
+Using Langfuse Timelines, they ran a very structured set of ROI analysis on many components. 
+
+<Frame fullWidth>
+  ![Eon Latency](/images/customers/eon/latency.png)
+</Frame>
+
+What has helped E.ON to **reduce latency to first token by 70%**:
+
+1. **Parallelizing** steps that ran in sequence (e.g. grading of documents)  
+2. **Simplifying** by throwing out most design patterns that added latency without improving quality
+
+<CustomerQuote
+  quote="There is so much content out there about fancy architectures and I think we tried them all. Langfuse's Latency Tracking made us aware that most of the fancy stuff only increased latency and did nothing for quality. What worked for us was to simplify over and over again."
+  name="Lukas Altenkamp"
+  role="Senior Data Scientist & ML Engineer"
+  company="EON"
+  image="/images/customers/eon/Lukas-altenkamp.jpeg"
+/>
+
+## Impact
+
+<ImpactChart
+  items={[
+    {
+      area: "70% Latency Reduction",
+      impact:
+        "70% latency reduction (7 to 2 seconds) by identifying and removing components that added latency without improving quality",
+    },
+    {
+      area: "Production Reliability",
+      impact:
+        "Seamless transition from POC to production serving millions of monthly users with 24/7 visibility into performance",
+    },
+    {
+      area: "Development Velocity",
+      impact:
+        "Prompt iterations are much faster than code deployments using sophisticated deployment pipelines with rollback capabilities",
+    },
+    {
+      area: "Shipping Confidence",
+      impact:
+        "Abandoned 'gut feeling' for systematic evaluation using 300+ business-defined test cases and LLM-as-a-judge evaluations",
+    },
+  ]}
+/>
+
+## What's next
+
+E.ON views their search as a customer interaction channel that will expand to include agentic workflows for logged-in users, enabling real transactions and personal data access.
+
+With Langfuse providing the foundational infrastructure, E.ON confidently scales their AI capabilities while maintaining enterprise reliability for millions of customers.
+
+_Learn more about E.ON at [eon.de](https://eon.de)_
