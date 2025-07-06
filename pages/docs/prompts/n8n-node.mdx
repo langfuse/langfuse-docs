@@ -1,0 +1,159 @@
+---
+title: n8n Node for Langfuse
+description: Community-maintained n8n node that enables seamless integration of Langfuse prompt management and tracing capabilities into n8n workflows.
+---
+
+# n8n Node for Langfuse
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+This is currently a community node that needs to be installed via the settings of a self-hosted n8n instance. The node is pending verification in order to be used on n8n cloud instances.
+</Callout>
+
+The Langfuse n8n node enables seamless integration between [Langfuse's Prompt Management](/docs/prompts/get-started) and tracing capabilities with n8n workflows. This community-maintained node allows you to fetch prompts, create traces, and monitor your AI workflows directly from within n8n.
+
+## Features
+
+### Prompt Management
+- **Fetch Prompts**: Retrieve prompts from your Langfuse project with support for versioning and labels
+- **Compile Templates**: Process prompt templates with variables to generate ready-to-use prompts
+- **Version Control**: Access specific prompt versions or use labels like `production` and `latest`
+
+### Tracing and Observability
+- **Create Traces**: Generate traces for your n8n workflow executions
+- **Monitor Performance**: Track execution metrics and analyze workflow performance
+- **Debug Workflows**: Gain insights into your AI pipeline execution with detailed tracing
+
+### Workflow Integration
+- **Seamless Setup**: Easy configuration with Langfuse API credentials
+- **Multiple Operations**: Support for various Langfuse operations within your workflows
+- **Error Handling**: Robust error handling and logging for production use
+
+## Installation
+
+### Community Node Installation
+
+For self-hosted n8n instances:
+
+1. Go to **Settings** > **Community Nodes**
+2. Select **Install**
+3. Enter `@langfuse/n8n-nodes-langfuse` in **Enter npm package name**
+4. Agree to the risks of using community nodes: select **I understand the risks of installing unverified code from a public source**
+5. Select **Install**
+
+After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
+
+### Manual Installation
+
+For Docker-based deployments, add the following line to your n8n Dockerfile:
+
+```dockerfile
+RUN cd /usr/local/lib/node_modules/n8n && npm install @langfuse/n8n-nodes-langfuse
+```
+
+## Configuration
+
+### Credentials Setup
+
+1. **Create Langfuse Credentials** in n8n:
+   - Go to **Credentials** > **Add Credential**
+   - Search for "Langfuse" and select it
+   - Enter your Langfuse credentials:
+     - **Public Key**: Your Langfuse public key (starts with `pk-lf-`)
+     - **Secret Key**: Your Langfuse secret key (starts with `sk-lf-`)
+     - **Base URL**: Your Langfuse instance URL (e.g., `https://cloud.langfuse.com` or your self-hosted URL)
+
+2. **Test Connection**: Verify your credentials work correctly
+
+## Operations
+
+### Get Prompt
+Retrieve and compile prompts from your Langfuse project.
+
+**Parameters:**
+- **Prompt Name**: Name of the prompt to retrieve
+- **Version** (optional): Specific version number to fetch
+- **Label** (optional): Label to use (e.g., `production`, `latest`)
+- **Variables** (optional): JSON object with variables to compile the prompt
+
+**Example Usage:**
+```json
+{
+  "promptName": "customer-support-agent",
+  "label": "production",
+  "variables": {
+    "customerName": "John Doe",
+    "issue": "billing question"
+  }
+}
+```
+
+### Create Trace
+Create a new trace for monitoring workflow execution.
+
+**Parameters:**
+- **Trace Name**: Name identifier for the trace
+- **User ID** (optional): User identifier for the trace
+- **Session ID** (optional): Session identifier
+- **Metadata** (optional): Additional metadata as JSON object
+
+### Create Generation
+Log a generation event within a trace.
+
+**Parameters:**
+- **Trace ID**: ID of the parent trace
+- **Name**: Name of the generation
+- **Model**: Model used for generation
+- **Input**: Input data for the generation
+- **Output**: Generated output
+- **Usage** (optional): Token usage information
+
+## Example Workflows
+
+### Basic Prompt Fetching
+1. **Langfuse Node**: Fetch prompt with "Get Prompt" operation
+2. **OpenAI Node**: Use the compiled prompt for chat completion
+3. **Langfuse Node**: Create trace for monitoring
+
+### Advanced Workflow with Tracing
+1. **Trigger**: Webhook or manual trigger
+2. **Langfuse Node**: Create initial trace
+3. **Langfuse Node**: Fetch prompt template
+4. **Set Node**: Prepare variables for prompt compilation  
+5. **OpenAI Node**: Generate response using compiled prompt
+6. **Langfuse Node**: Log generation with usage metrics
+7. **Response**: Return result to user
+
+## Best Practices
+
+- **Use Labels**: Organize prompts with labels like `production`, `staging`, `development`
+- **Version Control**: Keep track of prompt versions for reproducibility
+- **Trace Everything**: Create comprehensive traces for debugging and monitoring
+- **Error Handling**: Implement proper error handling for production workflows
+- **Variable Validation**: Validate prompt variables before compilation
+
+## Troubleshooting
+
+### Common Issues
+
+**Authentication Errors**
+- Verify your API keys are correct and have proper permissions
+- Check that your Base URL is correctly configured
+- Ensure your Langfuse instance is accessible from your n8n deployment
+
+**Prompt Not Found**
+- Confirm the prompt name exists in your Langfuse project
+- Check if you're using the correct label or version
+- Verify the prompt has the `production` label if no specific label is provided
+
+**Connection Timeouts**
+- Check network connectivity between n8n and Langfuse
+- Increase timeout settings if using a slow network
+- Verify firewall settings allow outbound connections
+
+## Resources
+
+- [Langfuse Prompt Management Documentation](/docs/prompts/get-started)
+- [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
+- [Package on npm](https://www.npmjs.com/package/@langfuse/n8n-nodes-langfuse)
