@@ -13,127 +13,42 @@ This is currently a community node that needs to be installed via the settings o
 
 The Langfuse n8n node enables seamless integration of [Langfuse's Prompt Management](/docs/prompts/get-started) with n8n workflows. This community-maintained node allows you to fetch and use prompts directly from your Langfuse project within n8n workflows.
 
-## Features
+## Readme
 
-### Prompt Management
-- **Fetch Prompts**: Retrieve prompts from your Langfuse project with support for versioning and labels
-- **Compile Templates**: Process prompt templates with variables to generate ready-to-use prompts
-- **Version Control**: Access specific prompt versions or use labels like `production` and `latest`
+Source: [langfuse/n8n-nodes-langfuse](https://github.com/langfuse/n8n-nodes-langfuse)
 
-### Workflow Integration
-- **Seamless Setup**: Easy configuration with Langfuse API credentials
-- **Variable Substitution**: Support for dynamic prompt compilation with workflow data
-- **Error Handling**: Robust error handling and logging for production use
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
 
-## Installation
+export const getStaticProps = async () => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/langfuse/n8n-nodes-langfuse/main/README.md"
+  );
+  const readmeContent = await res.text();
+  return {
+    props: {
+      ssg: {
+        n8nReadme: readmeContent,
+      },
+    },
+  };
+};
 
-### Community Node Installation
-
-For self-hosted n8n instances:
-
-1. Go to **Settings** > **Community Nodes**
-2. Select **Install**
-3. Enter `@langfuse/n8n-nodes-langfuse` in **Enter npm package name**
-4. Agree to the risks of using community nodes: select **I understand the risks of installing unverified code from a public source**
-5. Select **Install**
-
-After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
-
-### Manual Installation
-
-For Docker-based deployments, add the following line to your n8n Dockerfile:
-
-```dockerfile
-RUN cd /usr/local/lib/node_modules/n8n && npm install @langfuse/n8n-nodes-langfuse
-```
-
-## Configuration
-
-### Credentials Setup
-
-1. **Create Langfuse Credentials** in n8n:
-   - Go to **Credentials** > **Add Credential**
-   - Search for "Langfuse" and select it
-   - Enter your Langfuse credentials:
-     - **Public Key**: Your Langfuse public key (starts with `pk-lf-`)
-     - **Secret Key**: Your Langfuse secret key (starts with `sk-lf-`)
-     - **Base URL**: Your Langfuse instance URL (e.g., `https://cloud.langfuse.com` or your self-hosted URL)
-
-2. **Test Connection**: Verify your credentials work correctly
-
-## Operations
-
-### Get Prompt
-Retrieve and compile prompts from your Langfuse project.
-
-**Parameters:**
-- **Prompt Name**: Name of the prompt to retrieve
-- **Version** (optional): Specific version number to fetch
-- **Label** (optional): Label to use (e.g., `production`, `latest`)
-- **Variables** (optional): JSON object with variables to compile the prompt
-
-**Example Usage:**
-```json
-{
-  "promptName": "customer-support-agent",
-  "label": "production",
-  "variables": {
-    "customerName": "John Doe",
-    "issue": "billing question"
+export function N8nNodeReadme() {
+  const { n8nReadme } = useData();
+  // Basic check to prevent errors if fetching failed or content is empty
+  if (!n8nReadme) {
+    return <p>Error loading README content.</p>;
   }
+  // Ensure the source prop receives a string
+  const readmeString =
+    typeof n8nReadme === "string"
+      ? n8nReadme
+      : JSON.stringify(n8nReadme);
+  return <Playground source={readmeString} />;
 }
-```
 
-## Example Workflows
+<div className="p-6 mt-6 border bg-card rounded-md">
+  <N8nNodeReadme />
+</div>
 
-### Basic Prompt Fetching
-1. **Trigger**: Webhook or manual trigger
-2. **Langfuse Node**: Fetch prompt with "Get Prompt" operation
-3. **OpenAI Node**: Use the compiled prompt for chat completion
-4. **Response**: Return result to user
-
-### Dynamic Prompt Selection
-1. **Trigger**: Webhook with customer data
-2. **Switch Node**: Route based on customer type or issue category
-3. **Langfuse Node**: Fetch appropriate prompt for each path
-4. **Set Node**: Prepare variables for prompt compilation
-5. **OpenAI Node**: Generate response using compiled prompt
-6. **Response**: Return personalized result
-
-## Best Practices
-
-- **Use Labels**: Organize prompts with labels like `production`, `staging`, `development`
-- **Version Control**: Keep track of prompt versions for reproducibility
-- **Variable Validation**: Validate prompt variables before compilation
-- **Error Handling**: Implement proper error handling for production workflows
-- **Caching**: Consider workflow design to minimize prompt fetching frequency
-
-## Troubleshooting
-
-### Common Issues
-
-**Authentication Errors**
-- Verify your API keys are correct and have proper permissions
-- Check that your Base URL is correctly configured
-- Ensure your Langfuse instance is accessible from your n8n deployment
-
-**Prompt Not Found**
-- Confirm the prompt name exists in your Langfuse project
-- Check if you're using the correct label or version
-- Verify the prompt has the `production` label if no specific label is provided
-
-**Connection Timeouts**
-- Check network connectivity between n8n and Langfuse
-- Increase timeout settings if using a slow network
-- Verify firewall settings allow outbound connections
-
-**Variable Compilation Errors**
-- Ensure all required variables are provided
-- Check variable names match those in your prompt template
-- Verify variable values are in the correct format
-
-## Resources
-
-- [Langfuse Prompt Management Documentation](/docs/prompts/get-started)
-- [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
-- [Package on npm](https://www.npmjs.com/package/@langfuse/n8n-nodes-langfuse)
