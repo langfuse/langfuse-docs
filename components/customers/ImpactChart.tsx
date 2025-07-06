@@ -35,6 +35,8 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
                           <a
                             key={linkIndex}
                             href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
                           >
                             {link.title}
