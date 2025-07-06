@@ -1,7 +1,7 @@
 ---
 date: 2025-06-06
 title: n8n Node for Langfuse
-description: Community-maintained n8n node enables seamless integration of Langfuse prompt management and tracing capabilities into n8n workflows.
+description: Community-maintained n8n node enables seamless integration of Langfuse prompt management into n8n workflows.
 author: Marc
 ---
 
@@ -9,41 +9,26 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-We're excited to announce the availability of a community-maintained n8n node for Langfuse! This integration brings the power of Langfuse's prompt management and observability features directly into your n8n workflows.
+We're excited to announce the availability of a community-maintained n8n node for Langfuse! This integration brings Langfuse's prompt management capabilities directly into your n8n workflows.
 
 ## What's New
 
-The Langfuse n8n node provides seamless integration between [Langfuse's Prompt Management](/docs/prompts/get-started) and tracing capabilities with n8n workflows. This community-maintained node allows you to:
+The Langfuse n8n node provides seamless integration with [Langfuse's Prompt Management](/docs/prompts/get-started) in n8n workflows. Key features include:
 
 - **Fetch Prompts**: Retrieve prompts from your Langfuse project with support for versioning and labels
-- **Compile Templates**: Process prompt templates with variables to generate ready-to-use prompts  
-- **Create Traces**: Generate traces for your n8n workflow executions
-- **Monitor Performance**: Track execution metrics and analyze workflow performance
+- **Compile Templates**: Process prompt templates with variables to generate ready-to-use prompts
+- **Version Control**: Access specific prompt versions or use labels like `production` and `latest`
 
 ## Installation
 
-This is currently a community node that needs to be installed via the settings of a self-hosted n8n instance. The node is pending verification in order to be used on n8n cloud instances.
+This is currently a community node that needs to be installed via the settings of a self-hosted n8n instance. The node is pending verification for n8n cloud instances.
 
-For self-hosted n8n instances:
-
-1. Go to **Settings** > **Community Nodes**
-2. Select **Install**
-3. Enter `@langfuse/n8n-nodes-langfuse` in **Enter npm package name**
-4. Agree to the risks of using community nodes
-5. Select **Install**
-
-## Key Features
-
-- **Prompt Management**: Access your Langfuse prompts directly within n8n workflows
-- **Version Control**: Fetch specific prompt versions or use labels like `production` and `latest`
-- **Tracing Integration**: Create comprehensive traces for debugging and monitoring
-- **Error Handling**: Robust error handling and logging for production use
+Install via **Settings** > **Community Nodes** using package name: `@langfuse/n8n-nodes-langfuse`
 
 ## Example Use Cases
 
-- **Customer Support Automation**: Fetch dynamic prompts for handling different types of customer inquiries
-- **Content Generation Pipelines**: Use versioned prompts to ensure consistent content generation
-- **AI Workflow Monitoring**: Track and analyze the performance of your AI-powered workflows
+- **Dynamic Prompt Fetching**: Use different prompts based on workflow context
+- **Content Generation Pipelines**: Ensure consistent prompts across automated workflows  
 - **A/B Testing**: Test different prompt versions in production workflows
 
 ## Learn More
