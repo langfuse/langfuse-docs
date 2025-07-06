@@ -2,6 +2,7 @@ interface ImpactItem {
   area: string;
   impact: string;
   icon: React.ReactNode;
+  learnMore?: { title: string; href: string }[];
 }
 
 interface ImpactChartProps {
@@ -17,7 +18,7 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
             <div className="flex">
               <div className="flex-shrink-0 mr-4">
                 <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
-                  {String(index + 1).padStart(2, '0')}
+                  {String(index + 1).padStart(2, "0")}
                 </span>
               </div>
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -30,6 +31,22 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                     {item.impact}
                   </p>
+                  {item.learnMore && item.learnMore.length > 0 && (
+                    <div className="mt-3">
+                      <div className="w-12 border-t border-gray-200 dark:border-gray-700 mb-2"></div>
+                      <div className="flex flex-col gap-1">
+                        {item.learnMore.map((link, linkIndex) => (
+                          <a
+                            key={linkIndex}
+                            href={link.href}
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline transition-colors"
+                          >
+                            {link.title}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -41,4 +58,4 @@ export const ImpactChart = ({ items }: ImpactChartProps) => {
       </div>
     </div>
   );
-}; 
+};
