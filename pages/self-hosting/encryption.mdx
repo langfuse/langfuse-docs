@@ -50,10 +50,9 @@ On Langfuse Cloud, we use AES-256 across all databases.
 
 In addition to in-transit and at-rest encryption, sensitive data is also encrypted or hashed at the application level.
 
-| Data                                      | Encryption                                                                           |
-| ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| API keys                                  | Hashed using `SALT`                                                                  |
-| Langfuse Console JWTs                     | Encrypted via `NEXTAUTH_SECRET`                                                      |
-| LLM API credentials stored in Langfuse    | Encrypted using `ENCRYPTION_KEY`                                                     |
-| Integration credentials (e.g. PostHog)    | Encrypted using `ENCRYPTION_KEY`                                                     |
-| Input/Outputs of LLM Calls, Traces, Spans | Work in progress, reach out to enterprise@langfuse.com if you are interested in this |
+| Data                                   | Encryption                       |
+| -------------------------------------- | -------------------------------- |
+| API keys                               | Hashed using `SALT`              |
+| Langfuse Console JWTs                  | Encrypted via `NEXTAUTH_SECRET`  |
+| LLM API credentials stored in Langfuse | Encrypted using `ENCRYPTION_KEY` |
+| Integration credentials (e.g. PostHog) | Encrypted using `ENCRYPTION_KEY` |
