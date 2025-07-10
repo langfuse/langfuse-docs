@@ -9,16 +9,18 @@ const withBundleAnalyzer = NextBundleAnalyzer({
 /**
  * CSP headers
  * img-src https to allow loading images from SSO providers
+ * Plain.com domains explicitly included for customer support chat
  */
 const cspHeader = process.env.NODE_ENV === 'production' ? `
   default-src 'self' https: wss:;
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
-  style-src 'self' 'unsafe-inline' https:;
-  img-src 'self' https: blob: data:;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https: https://chat.cdn-plain.com;
+  style-src 'self' 'unsafe-inline' https: https://fonts.googleapis.com;
+  img-src 'self' https: blob: data: https://prod-uk-services-workspac-workspacefilespublicbuck-vs4gjqpqjkh6.s3.amazonaws.com https://prod-uk-services-attachm-attachmentsbucket28b3ccf-uwfssb4vt2us.s3.eu-west-2.amazonaws.com https://i0.wp.com;
   media-src 'self' https: blob: data:;
   font-src 'self' https:;
   frame-src 'self' https:;
   worker-src 'self' blob:;
+  connect-src 'self' https: wss: https://chat.uk.plain.com https://prod-uk-services-attachm-attachmentsuploadbucket2-1l2e4906o2asm.s3.eu-west-2.amazonaws.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';
