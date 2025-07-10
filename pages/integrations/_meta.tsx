@@ -5,4 +5,8 @@ export default {
     type: "separator",
     title: <MenuSwitcher />,
   },
+  index: "Overview",
+  frameworks: "Frameworks",
+  "model-providers": "Model Providers",
+  gateways: "Gateways",
 };
