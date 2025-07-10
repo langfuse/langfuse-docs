@@ -1245,6 +1245,124 @@ max       0.687994 sec
 
 </div>
 
+## Webhooks
+
+Webhooks in Langfuse automatically notify your applications when prompt versions change, enabling real-time integrations and automated workflows.
+
+### Quick Start
+
+<Steps>
+
+#### 1. Select for which prompt versions the webhook should fire
+
+
+<Frame >
+  ![Webhook trigger](/images/docs/webhook-trigger.png)
+</Frame>
+
+
+- Navigate to **Webhooks** in your Langfuse project and click **Create Webhook**.
+- Select for which prompt version actions the webhook should fire:
+  - **Created** - A new prompt version is added
+  - **Updated** - Labels or tags on an existing prompt version are modified (e.g. two webhooks are sent: one for the version receiving the label and one for the version losing it)
+  - **Deleted** - A prompt version is removed
+- Optional: add filters to narrow on which prompt version the webhook fires
+
+
+#### 2. Configure your webhook
+
+<Frame >
+  ![Webhook trigger](/images/docs/webhook-action.png)
+</Frame>
+
+
+- **URL**: Your HTTP endpoint that will receive the payload
+- **Headers**: Langfuse will send default headers to your endpoint. You can add additional headers to the request.
+
+
+#### 3. Receive the webhook payload
+
+Ensure your endpoint:
+
+- Accepts POST requests
+- Returns a 200 status code to acknowledge receipt
+- Can handle the webhook payload format
+
+The payload is a JSON object with the following fields:
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2024-07-10T10:30:00Z",
+  "type": "prompt-version",
+  "apiVersion": "v1",
+  "action": "created" | "updated" | "deleted",
+  "prompt": {
+    "id": "prompt_abc123",
+    "name": "movie-critic",
+    "version": 3,
+    "projectId": "xyz789",
+    "labels": ["production", "latest"],
+    "prompt": "As a {{criticLevel}} movie critic, rate {{movie}} out of 10.",
+    "type": "text",
+    "config": {
+      "model": "gpt-4",
+      "temperature": 0.7
+    },
+    "commitMessage": "Improved critic persona",
+    "tags": ["entertainment"],
+    "createdAt": "2024-07-10T10:30:00Z",
+    "updatedAt": "2024-07-10T10:30:00Z"
+  }
+}
+```
+
+#### 4. Verify the webhook signature
+
+Each webhook includes a signature in the `x-langfuse-signature` header for verification. Once you create a webhook, Langfuse will generate a secret and display it upon creation. It can be regenerated at any time.
+
+We use this webhook to sign the payload to help you verify that the request comes from Langfuse and not an attacker.
+
+
+```typescript
+import crypto from "crypto";
+
+function verifyWebhookSignature(
+  payload: string,
+  signatureHeader: string,
+  secret: string,
+): boolean {
+  const [timestampPart, signaturePart] = signatureHeader.split(",");
+
+  if (!timestampPart || !signaturePart) {
+    return false;
+  }
+
+  const timestamp = parseInt(timestampPart.split("=")[1]);
+  const receivedSignature = signaturePart.split("=")[1];
+
+  if (!timestamp || !receivedSignature) {
+    throw Error("Invalid signature");
+  }
+
+  // Generate expected signature using our provided function
+  const signedPayload = `${timestamp}.${payload}`;
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(signedPayload, "utf8")
+    .digest("hex");
+
+  // Use timing-safe comparison
+  return crypto.timingSafeEqual(
+    Buffer.from(receivedSignature),
+    Buffer.from(expectedSignature),
+  );
+}
+```
+
+</Steps>
+
+
 ## Additional Features
 
 - [Prompt Management MCP Server](/docs/prompts/mcp-server)
