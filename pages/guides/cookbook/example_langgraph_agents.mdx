@@ -44,7 +44,7 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Set your OpenAI API Key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
@@ -423,7 +423,7 @@ with langfuse.start_as_current_span(name="langgraph-request") as span:
  
 # Option 3: Use create_score() with trace ID (when outside context)
 langfuse.create_score(
-    trace_id=predefined_trace_id,
+    trace_id="predefined-trace-id", # Needs to be a valid trace id format (see docs)
     name="user-feedback",
     value=1,
     data_type="NUMERIC",
@@ -464,7 +464,11 @@ spam_result = compiled_graph.invoke(
     config={"callbacks": [langfuse_handler]}
 ) 
 ```
-
+Processing spam email...
+Alfred is processing an email from Crypto bro with subject: The best investment of 2025
+spam
+Alfred has marked the email as spam.
+The email has been moved to the spam folder.
 You can see that the answer of this example is judged as "not toxic".
 
 ![LLM-as-a-Judge Evaluation Score](https://langfuse.com/images/cookbook/example-langgraph-evaluation/llm-as-a-judge-score.png)
@@ -577,39 +581,42 @@ from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
  
+graph_builder = StateGraph(State)
+llm = ChatOpenAI(model = "gpt-4o")
 langfuse = get_client()
+
+def chatbot(state: State):
+    return {"messages": [llm.invoke(state["messages"])]}
  
-# Create a trace via Langfuse spans and use Langchain within it
-with langfuse.start_as_current_span(name="multi-step-process") as root_span:
-    # Update trace attributes
-    root_span.update_trace(
-        session_id="session-1234",
-        user_id="user-5678",
-        input={"user_query": "Explain quantum computing"}
-    )
- 
-    # Initialize the Langfuse handler
-    langfuse_handler = CallbackHandler()
- 
-    # Step 1: Initial processing (custom logic)
-    with langfuse.start_as_current_span(name="input-preprocessing") as prep_span:
-        processed_input = "Simplified: Explain quantum computing"
-        prep_span.update(output={"processed_query": processed_input})
- 
-    # Step 2: LangChain processing
-    response = graph.invoke(
-    input={"messages": [HumanMessage(content = question)]},
-    config={"callbacks": [langfuse_handler]}
-    )
- 
-    # Step 3: Post-processing (custom logic)
-    with langfuse.start_as_current_span(name="output-postprocessing") as post_span:
-        final_result = f"Response: {result.content}"
-        post_span.update(output={"final_response": final_result})
- 
-    # Update trace output
-    root_span.update_trace(output={"final_answer": final_result})
+graph_builder.add_node("chatbot", chatbot)
+graph_builder.set_entry_point("chatbot")
+graph_builder.set_finish_point("chatbot")
+graph = graph_builder.compile()
+
+def my_agent(question, langfuse_handler):
+    
+    # Create a trace via Langfuse spans and use Langchain within it
+    with langfuse.start_as_current_span(name="my-langgraph-agent") as root_span:
+    
+        # Step 2: LangChain processing
+        response = graph.invoke(
+        input={"messages": [HumanMessage(content = question)]},
+        config={"callbacks": [langfuse_handler]}
+        )
+    
+        # Update trace output
+        root_span.update_trace(
+            input=question,
+            output=response["messages"][1].content)
+        
+        print(question)
+        print(response["messages"][1].content)
+
+    return response["messages"][1].content
 ```
 
 Finally, we loop over each dataset item, run the agent, and link the trace to the dataset item. We can also attach a quick evaluation score if desired.
@@ -617,29 +624,42 @@ Finally, we loop over each dataset item, run the agent, and link the trace to th
 
 ```python
 from langfuse import get_client
+from langfuse.langchain import CallbackHandler
  
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler()
 langfuse = get_client()
 
 dataset = langfuse.get_dataset('qa-dataset_langgraph-agent')
+
 for item in dataset.items:
-
-    trace, output = my_agent(item.input["text"])
-
-    # link the execution trace to the dataset item and give it a run_name
-    item.link(
-        trace,
-        run_name = "run_gpt-4.5-preview",
-        run_description="my dataset run", # optional
-        run_metadata={ "model": "gpt-4.5-preview" } # optional
-    )
-
-    # optional: score the trace
-    trace.score(
-        name="user-feedback",
-        value=1,
-        comment="This was a good answer"
+    # Use the item.run() context manager for automatic trace linking
+    with item.run(
+        run_name="run_gpt-4o",
+        run_description="My first run",
+        run_metadata={"model": "gpt-4o"},
+    ) as root_span:
+        # All operations within this block are part of the trace for this dataset item
+        
+        # Call your application logic - this can use any combination of decorators, 
+        # context managers, or manual observations
+        with langfuse.start_as_current_generation(
+            name="llm-call",
+            model="gpt-4o",
+            input=item.input
+        ) as generation:
+            # Your LLM application logic here
+            output = my_agent(str(item.input), langfuse_handler)
+            generation.update(output=output)
+ 
+        # Optionally, score the result against the expected output
+        root_span.score_trace(
+            name="user-feedback",
+            value=1,
+            comment="This is a comment",  # optional, useful to add reasoning
         )
-
+ 
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 langfuse.flush()
 ```
 
