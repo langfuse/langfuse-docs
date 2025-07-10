@@ -40,28 +40,33 @@ import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Your OpenAI key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
 
 ```python
-from langfuse import get_client
+from langfuse import Langfuse
  
-langfuse = get_client()
+# Filter out Autogen OpenTelemetryspans
+langfuse = Langfuse(
+    blocked_instrumentation_scopes=["autogen SingleThreadedAgentRuntime"]
+)
  
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
 else:
     print("Authentication failed. Please check your credentials and host.")
-
 ```
+
+    Langfuse client is authenticated and ready!
+
 
 ### Step 3: Initialize OpenLit Instrumentation
 
@@ -70,7 +75,7 @@ Now, we initialize the [OpenLit](https://github.com/openlit/openlit) instrumenta
 
 ```python
 import openlit
-
+ 
 # Initialize OpenLIT instrumentation. The disable_batch flag is set to true to process traces immediately.
 openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
 ```
@@ -89,6 +94,9 @@ agent = AssistantAgent("assistant", model_client=model_client)
 print(await agent.run(task="Say 'Hello World!'"))
 await model_client.close()
 ```
+
+    messages=[TextMessage(id='0935120c-2a27-4bb8-ad7f-eb5cb2b4902d', source='user', models_usage=None, metadata={}, created_at=datetime.datetime(2025, 7, 8, 8, 32, 25, 422043, tzinfo=datetime.timezone.utc), content="Say 'Hello World!'", type='TextMessage'), TextMessage(id='2046975a-235c-4e46-be55-719bb79ced95', source='assistant', models_usage=RequestUsage(prompt_tokens=41, completion_tokens=5), metadata={}, created_at=datetime.datetime(2025, 7, 8, 8, 32, 26, 265424, tzinfo=datetime.timezone.utc), content='Hello World! TERMINATE', type='TextMessage')] stop_reason=None
+
 
 ### Step 6: View Traces in Langfuse
 

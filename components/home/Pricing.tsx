@@ -496,7 +496,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description: "Enterprise-grade support and security features.",
       price: "Custom",
       mainFeatures: [
-        "Everything in Team",
+        "Everything in Pro and Teams add-on",
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
