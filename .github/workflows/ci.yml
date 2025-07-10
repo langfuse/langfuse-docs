@@ -1,3 +1,5 @@
+permissions:
+  contents: read
 name: "CI"
 
 on:
@@ -123,3 +125,49 @@ jobs:
 
           # Exit with the link checker's exit code
           exit $LINK_CHECK_EXIT
+
+  check-sitemap-links:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        id: pnpm-install
+        with:
+          version: 9.5.0
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: pnpm install
+
+      - name: Build next.js app
+        run: pnpm build
+
+      - name: Start server and check sitemap links
+        run: |
+          # Start the server in the background and capture its PID
+          pnpm start & SERVER_PID=$!
+
+          # Wait for the server to be ready (max 30 seconds)
+          timeout 30 bash -c 'until curl -s http://localhost:3333 > /dev/null; do sleep 1; done'
+
+          # Run the sitemap checker
+          pnpm sitemap-check
+
+          # Store the exit code
+          SITEMAP_CHECK_EXIT=$?
+
+          # Kill the server using the captured PID
+          kill $SERVER_PID || true
+
+          # Exit with the sitemap checker's exit code
+          exit $SITEMAP_CHECK_EXIT

@@ -852,17 +852,37 @@ When fetched via the SDK / API, these tags are automatically replaced with the r
 Prompts can be organized into virtual folders to group prompts with similar purposes.
 To create a folder, add slashes (`/`) to a prompt name. The UI shows every segment ending with a `/` as a folder automatically.
 
-**Note**: accessing prompts in folders via the Python SDK requires `langfuse-python` version `3.0.2` or later.
+**Note**: accessing prompts in folders via the Python SDK requires `langfuse >= 3.0.2`.
 
 ## Message Placeholders in Chat Prompts [#message-placeholders]
 
-Message placeholders allow you to insert chat messages at specific positions within a chat prompt.
-This is for example useful to provide a message history as context to an LLM.
+Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt. You can define multiple placeholders in a prompt and resolve them with different values at runtime.
+Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
 
-<Tabs items={["Python", "JS/TS"]}>
+**Note**: To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+
+<Steps>
+
+### Create prompt with placeholders
+
+<Tabs items={["UI","Python", "JS/TS"]}>
+<Tab>
+
+<Frame border>
+  ![Prompt placeholder in prompt editor](/images/docs/prompt-placeholder.png)
+</Frame>
+
+1. Create a placeholder in any prompt by using the `Add message placeholder` button.
+2. Select a `name` for the placeholder that will be used to reference it in your application.
+
+</Tab>
 <Tab>
 
 ```python
+from langfuse import get_client
+
+langfuse = get_client()
+
 langfuse.create_prompt(
     name="movie-critic-chat",
     type="chat",
@@ -873,7 +893,48 @@ langfuse.create_prompt(
     ],
     labels=["production"],  # directly promote to production
 )
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+await langfuse.createPrompt({
+  name: "movie-critic-chat",
+  type: "chat",
+  prompt: [
+    { role: "system", content: "You are an {{criticlevel}} movie critic" },
+    { type: "placeholder", name: "chat_history" },
+    { role: "user", content: "What should I watch next?" },
+  ],
+  labels: ["production"], // directly promote to production
+});
+```
+
+</Tab>
+</Tabs>
+
+### Resolve placeholders at runtime
+
+In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
+The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted as `compile` does not validate the format of the messages.
+
+<Tabs items={["Python", "JS/TS", "LangChain (Python)", "LangChain (JS/TS)"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Use prompt with placeholders in your application
 prompt = langfuse.get_prompt("movie-critic-chat")
+
 # Compile the variable and resolve the placeholder with a list of messages.
 compiled_prompt = prompt.compile(criticlevel="expert", chat_history=[
   {"role": "user", "content": "I love Ron Fricke movies like Baraka"},
@@ -886,31 +947,16 @@ compiled_prompt = prompt.compile(criticlevel="expert", chat_history=[
 #   { "role": "user", "content": "Also, the Korean movie Memories of a Murderer" },
 #   { "role": "user", "content": "What should I watch next?" },
 # ]
-
-# Using langchain, you can obtain a MessagesPlaceholder object for unresolved placeholders
-langchain_prompt = prompt.get_langchain_prompt()
-
-# -> langchain_prompt = [
-#   ( "system", "You are an expert movie critic" ),
-#   MessagesPlaceholder("chat_history"),
-#   ( "user", "What should I watch next?" ),
-# ]
 ```
+
 </Tab>
 
 <Tab>
 
 ```typescript
-await langfuse.createPrompt({
-  name: "movie-critic-chat",
-  type: "chat",
-  prompt: [
-    { role: "system", content: "You are an {{criticlevel}} movie critic" },
-    { type: "placeholder", name: "chat_history" },
-    { role: "user", content: "What should I watch next?" },
-  ],
-  labels: ["production"], // directly promote to production
-});
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
 
 const prompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
   type: "chat",
@@ -918,11 +964,16 @@ const prompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
 
 // Compile the variable and resolve the placeholder with a list of messages.
 const compiledPrompt = prompt.compile(
+  // variables
   { criticlevel: "expert" },
+  // placeholders
   {
     chat_history: [
       { role: "user", content: "I love Ron Fricke movies like Baraka" },
-      { role: "user", content: "Also, the Korean movie Memories of a Murderer" },
+      {
+        role: "user",
+        content: "Also, the Korean movie Memories of a Murderer",
+      },
     ],
   }
 );
@@ -933,37 +984,65 @@ const compiledPrompt = prompt.compile(
 //   { role: "user", content: "Also, the Korean movie Memories of a Murderer" },
 //   { role: "user", content: "What should I watch next?" },
 // ]
+```
 
-// Using langchain, you can obtain a MessagesPlaceholder object for unresolved placeholders
-const langchainPrompt = prompt.getLangchainPrompt();
+</Tab>
+
+<Tab>
+
+```python
+from langfuse import get_client
+from langchain_core.prompts import ChatPromptTemplate
+
+langfuse = get_client()
+
+langfuse_prompt = langfuse.get_prompt("movie-critic-chat")
+
+# Using langchain, you can obtain a MessagesPlaceholder object for unresolved placeholders
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+
+# -> langchain_prompt = [
+#   SystemMessage(content="You are an expert movie critic"),
+#   MessagesPlaceholder(name="chat_history"),
+#   HumanMessage(content="What should I watch next?"),
+# ]
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new Langfuse();
+
+// Get current `production` version
+const langfusePrompt = await langfuse.getPrompt(
+  "movie-critic-chat",
+  undefined,
+  {
+    type: "chat",
+  }
+);
+
+// Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
+const langchainPrompt = ChatPromptTemplate.fromTemplate(
+  langfusePrompt.getLangchainPrompt()
+);
 
 // -> langchainPrompt = [
-//   { role: "system", content: "You are an expert movie critic" },
-//   { variableName: "chat_history", optional: false },  // Langchain MessagesPlaceholder structure
-//   { role: "user", content: "What should I watch next?" },
+//   SystemMessage(content="You are an expert movie critic"),
+//   MessagesPlaceholder(name="chat_history"),
+//   HumanMessage(content="What should I watch next?"),
 // ]
 ```
 
 </Tab>
 </Tabs>
 
-A placeholder has the structure:
-```json
-{
-  "type": "placeholder",
-  "name": "PLACEHOLDER_NAME"
-}
-```
-
-of which you use the defined `PLACEHOLDER_NAME` name as a key within your application to insert messages.
-
-In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
-The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted.
-When using Langchain, the `getLangchainPrompt(...)` method also takes placeholders as argument and returns unresolved placeholders as Langchain-native `MessagesPlaceholder` objects.
-
-You can try-out message placeholders with your prompts in the Playground.
-
-**Note**: To access message placeholders via SDK, you need at least `langfuse-python >= 3.1.0` or `langfuse-js >= 3.38.0`.
+</Steps>
 
 ## Caching in client SDKs
 
@@ -1342,6 +1421,7 @@ max       0.687994 sec
 ## Additional Features
 
 - [Prompt Management MCP Server](/docs/prompts/mcp-server)
+- [n8n Node for Langfuse](/docs/prompts/n8n-node)
 - [Prompt A/B Testing](/docs/prompts/a-b-testing)
 
 ## FAQ
