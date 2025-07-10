@@ -8,7 +8,7 @@ The mission was simple: empower Sumup’s merchant support teams with an AI assi
 
 Yet the challenge was far from trivial: 
 
-**Multi market complexity and scale:** Sumups merchant support serves over 4 million merchants across 30+ markets with market specific differences in requirements. 
+**Multi market complexity and scale:** SumUp's merchant support serves over 4 million merchants across 30+ markets with market specific differences in requirements. 
 
 **Security & Privacy:** SumUp operates in Financial Services, data privacy and security are of paramount importance and had to be maintained throughout the project. **Systems** 
 
