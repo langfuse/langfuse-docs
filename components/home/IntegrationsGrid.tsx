@@ -6,25 +6,6 @@ import { ReactNode } from "react";
 import IconPython from "../icons/python";
 import IconTypescript from "../icons/typescript";
 import IconOpenai from "../icons/openai";
-import LlamaindexIcon from "./img/llamaindex_icon.png";
-import LangchainIcon from "./img/langchain_icon.png";
-import HaystackIcon from "./img/haystack_icon.png";
-import LitellmIcon from "./img/litellm_icon.png";
-import InstructorIcon from "./img/instructor_icon.svg";
-import OllamaIcon from "./img/ollama_icon.png";
-import BedrockIcon from "./img/bedrock_icon.png";
-import FlowiseLogo from "./img/flowise_logo.png";
-import LangflowIcon from "./img/langflow_icon.svg";
-import DifyIcon from "./img/dify_icon.png";
-import OpenwebUiIcon from "./img/openwebui_icon.png";
-import DSPyIcon from "./img/dspy_icon.png";
-import GoogleGeminiIcon from "./img/google_gemini.svg";
-import OpenTelemetryIcon from "./img/opentelemetry_icon.svg";
-import CrewAiIcon from "./img/crewai_icon.svg";
-import MicrosoftIcon from "./img/microsoft_icon.svg";
-import HuggingFaceIcon from "./img/huggingface_icon.svg";
-import PydanticAiIcon from "./img/pydantic-ai_icon.svg";
-import AutoGenIcon from "./img/autogen_icon.svg";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 import React from "react";
@@ -56,7 +37,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/opentelemetry/get-started",
     icon: (
       <Image
-        src={OpenTelemetryIcon}
+        src="/images/integrations/opentelemetry_icon.svg"
         alt="OpenTelemetry Icon"
         width={36}
         height={36}
@@ -73,7 +54,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/langchain/tracing",
     icon: (
       <Image
-        src={LangchainIcon}
+        src="/images/integrations/langchain_icon.png"
         alt="Langchain Icon"
         width={40}
         height={40}
@@ -86,7 +67,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/llama-index/get-started",
     icon: (
       <Image
-        src={LlamaindexIcon}
+        src="/images/integrations/llamaindex_icon.png"
         alt="Llama-index Icon"
         width={35}
         height={35}
@@ -96,12 +77,26 @@ const integrations: IntegrationTileProps[] = [
   {
     title: "CrewAI",
     href: "/docs/integrations/crewai",
-    icon: <Image src={CrewAiIcon} alt="CrewAI Icon" width={60} height={40} />,
+    icon: (
+      <Image
+        src="/images/integrations/crewai_icon.svg"
+        alt="CrewAI Icon"
+        width={60}
+        height={40}
+      />
+    ),
   },
   {
     title: "LiteLLM",
     href: "/docs/integrations/litellm/tracing",
-    icon: <Image src={LitellmIcon} alt="LiteLLM Icon" width={40} height={40} />,
+    icon: (
+      <Image
+        src="/images/integrations/litellm_icon.png"
+        alt="LiteLLM Icon"
+        width={40}
+        height={40}
+      />
+    ),
   },
   {
     title: "AI SDK",
@@ -116,7 +111,12 @@ const integrations: IntegrationTileProps[] = [
     title: "Haystack",
     href: "/docs/integrations/haystack",
     icon: (
-      <Image src={HaystackIcon} alt="Haystack Icon" width={28} height={28} />
+      <Image
+        src="/images/integrations/haystack_icon.png"
+        alt="Haystack Icon"
+        width={28}
+        height={28}
+      />
     ),
   },
   {
@@ -124,7 +124,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/instructor",
     icon: (
       <Image
-        src={InstructorIcon}
+        src="/images/integrations/instructor_icon.svg"
         alt="Instructor Icon"
         width={36}
         height={36}
@@ -137,7 +137,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/semantic-kernel",
     icon: (
       <Image
-        src={MicrosoftIcon}
+        src="/images/integrations/microsoft_icon.svg"
         alt="Semantic Kernel Icon"
         width={36}
         height={36}
@@ -147,14 +147,21 @@ const integrations: IntegrationTileProps[] = [
   {
     title: "DSPy",
     href: "/docs/integrations/dspy",
-    icon: <Image src={DSPyIcon} alt="DSPy Icon" width={36} height={36} />,
+    icon: (
+      <Image
+        src="/images/integrations/dspy_icon.png"
+        alt="DSPy Icon"
+        width={36}
+        height={36}
+      />
+    ),
   },
   {
     title: "Smolagents",
     href: "/docs/integrations/smolagents",
     icon: (
       <Image
-        src={HuggingFaceIcon}
+        src="/images/integrations/huggingface_icon.svg"
         alt="Smolagents Icon"
         width={36}
         height={36}
@@ -166,7 +173,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/pydantic-ai",
     icon: (
       <Image
-        src={PydanticAiIcon}
+        src="/images/integrations/pydantic-ai_icon.svg"
         alt="Pydantic AI Icon"
         width={36}
         height={36}
@@ -176,19 +183,33 @@ const integrations: IntegrationTileProps[] = [
   {
     title: "AutoGen",
     href: "/docs/integrations/autogen",
-    icon: <Image src={AutoGenIcon} alt="AutoGen Icon" width={36} height={36} />,
+    icon: (
+      <Image
+        src="/images/integrations/autogen_icon.svg"
+        alt="AutoGen Icon"
+        width={36}
+        height={36}
+      />
+    ),
   },
   {
     title: "Amazon Bedrock",
     href: "/docs/integrations/amazon-bedrock",
-    icon: <Image src={BedrockIcon} alt="Bedrock Icon" width={36} height={36} />,
+    icon: (
+      <Image
+        src="/images/integrations/bedrock_icon.png"
+        alt="Bedrock Icon"
+        width={36}
+        height={36}
+      />
+    ),
   },
   {
     title: "Google Vertex/Gemini",
     href: "/docs/integrations/google-vertex-ai",
     icon: (
       <Image
-        src={GoogleGeminiIcon}
+        src="/images/integrations/google_gemini.svg"
         alt="Google Gemini Icon"
         width={36}
         height={36}
@@ -200,7 +221,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/ollama",
     icon: (
       <Image
-        src={OllamaIcon}
+        src="/images/integrations/ollama_icon.png"
         alt="Ollama Icon"
         width={30}
         height={30}
@@ -211,14 +232,21 @@ const integrations: IntegrationTileProps[] = [
   {
     title: "Flowise",
     href: "/docs/integrations/flowise",
-    icon: <Image src={FlowiseLogo} alt="Flowise Logo" width={50} height={36} />,
+    icon: (
+      <Image
+        src="/images/integrations/flowise_logo.png"
+        alt="Flowise Logo"
+        width={50}
+        height={36}
+      />
+    ),
   },
   {
     title: "Langflow",
     href: "/docs/integrations/langflow",
     icon: (
       <Image
-        src={LangflowIcon}
+        src="/images/integrations/langflow_icon.svg"
         alt="Langflow Icon"
         width={36}
         height={36}
@@ -229,14 +257,21 @@ const integrations: IntegrationTileProps[] = [
   {
     title: "Dify",
     href: "/docs/integrations/dify",
-    icon: <Image src={DifyIcon} alt="Dify Icon" width={36} height={36} />,
+    icon: (
+      <Image
+        src="/images/integrations/dify_icon.png"
+        alt="Dify Icon"
+        width={36}
+        height={36}
+      />
+    ),
   },
   {
     title: "OpenWeb UI",
     href: "/docs/integrations/openwebui",
     icon: (
       <Image
-        src={OpenwebUiIcon}
+        src="/images/integrations/openwebui_icon.png"
         alt="OpenWeb UI Icon"
         width={36}
         height={36}
