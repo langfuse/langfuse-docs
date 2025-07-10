@@ -65,8 +65,8 @@ export const CustomerQuote = ({
     }
   }, [isAnimating, quote]);
 
-  const quoteMarkStyle = "font-serif text-[32px] leading-none text-gray-600 dark:text-gray-400";
-  const openingQuoteStyle = "font-serif text-[32px] leading-none -ml-3 text-gray-600 dark:text-gray-400";
+  const quoteMarkStyle = "font-serif text-[32px] leading-none text-gray-900 dark:text-gray-100";
+  const openingQuoteStyle = "font-serif text-[32px] leading-none -ml-3 text-gray-900 dark:text-gray-100";
 
   return (
     <div ref={ref} className={`my-24 ${className}`}>
@@ -77,7 +77,7 @@ export const CustomerQuote = ({
         </span>
         
         {/* Visible streaming text positioned absolutely */}
-        <span className="absolute inset-0 text-gray-600 dark:text-gray-400">
+        <span className="absolute inset-0 text-gray-900 dark:text-gray-100">
           <span className={`${openingQuoteStyle} mr-1`}>"</span>
           <span className="text-2xl">{hasAnimated ? displayedText : quote}</span>
           {hasAnimated && !isAnimating && (
