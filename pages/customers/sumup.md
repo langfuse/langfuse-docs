@@ -1,4 +1,4 @@
-## **About Sumup**
+## **About SumUp**
 
 SumUp is a leading global fintech company trusted by over 4 million merchants in more than 30+ markets worldwide. It stands out by making card payments easy and accessible for small businesses, offering simple, reliable hardware and software solutions. 
 
