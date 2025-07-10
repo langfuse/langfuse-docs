@@ -18,7 +18,7 @@ Yet the challenge was far from trivial:
 
 **Merchant facing:** AI assistant that answers first line of questions & routes the conversation to humans if nessecary 
 
-**Inward facing tools:** Self-built AI translation tools allow support agents to help merchants in other languages than their own & an AI assistant that help agents finds most relevant resources and answers faster
+**Inward facing tools:** Self-built AI translation tools allow support agents to help merchants in other languages than their own & an AI assistant that helps agents find the most relevant resources and answer faster
 
 ## **The strategy & tactics behind SumUp’s rollout to 30+ markets within 10 months**
 
