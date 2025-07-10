@@ -16,7 +16,7 @@ Yet the challenge was far from trivial:
 
 ## **Sumup’s solution: multiple layers of AI empowerment**
 
-**Merchant facing:** AI assistant that answers first line of questions & routes the conversation to humans if nessecary 
+**Merchant facing:** AI assistant that answers first line of questions & routes the conversation to humans if necessary 
 
 **Inward facing tools:** Self-built AI translation tools allow support agents to help merchants in other languages than their own & an AI assistant that helps agents find the most relevant resources and answer faster
 
