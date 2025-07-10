@@ -269,7 +269,6 @@ def run_langchain_experiment(experiment_name, system_prompt):
           # Optionally, score the result against the expected output
           root_span.score_trace(name="exact_match", value = simple_evaluation(output, item.expected_output))
 
-  
   print(f"\nFinished processing dataset 'capital_cities' for run '{experiment_name}'.")
 ```
 
