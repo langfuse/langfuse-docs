@@ -29,7 +29,14 @@ You’ll also need the Micrometer -> OpenTelemetry bridge and an OTLP exporter. 
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-instrumentation-bom</artifactId>
-            <version>2.13.2</version>
+            <version>2.17.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-bom</artifactId>
+            <version>1.0.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -43,8 +50,7 @@ You’ll also need the Micrometer -> OpenTelemetry bridge and an OTLP exporter. 
     </dependency>
     <dependency>
         <groupId>org.springframework.ai</groupId>
-        <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-        <version>1.0.0-M6</version>
+        <artifactId>spring-ai-starter-model-openai</artifactId>
     </dependency>
     <!-- Spring AI needs a reactive web server to run for some reason-->
     <dependency>
@@ -84,8 +90,8 @@ spring:
   ai:
     chat:
       observations:
-        include-prompt: true # Include prompt content in tracing (disabled by default for privacy)
-        include-completion: true # Include completion content in tracing (disabled by default)
+        log-prompt: true # Include prompt content in tracing (disabled by default for privacy)
+        log-completion: true # Include completion content in tracing (disabled by default)
 management:
   tracing:
     sampling:
@@ -93,6 +99,78 @@ management:
   observations:
     annotations:
       enabled: true # Enable @Observed (if you use observation annotations in code)
+```
+
+**Add Custom Span Processor** (`ChatModelCompletionContentObservationFilter.java`):
+
+Add a custom span processor to include prompt and completion properties on the spans emitted by OpenTelemetry.
+
+```java
+package com.langfuse.springai;
+
+import io.micrometer.common.KeyValue;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationFilter;
+import org.springframework.ai.chat.observation.ChatModelObservationContext;
+import org.springframework.ai.content.Content;
+import org.springframework.ai.observation.ObservabilityHelper;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+
+@Component
+public class ChatModelCompletionContentObservationFilter implements ObservationFilter {
+
+    @Override
+    public Observation.Context map(Observation.Context context) {
+        if (!(context instanceof ChatModelObservationContext chatModelObservationContext)) {
+            return context;
+        }
+
+        var prompts = processPrompts(chatModelObservationContext);
+        var completions = processCompletion(chatModelObservationContext);
+
+        chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
+            @Override
+            public String getKey() {
+                return "gen_ai.prompt";
+            }
+
+            @Override
+            public String getValue() {
+                return ObservabilityHelper.concatenateStrings(prompts);
+            }
+        });
+
+        chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
+            @Override
+            public String getKey() {
+                return "gen_ai.completion";
+            }
+
+            @Override
+            public String getValue() {
+                return ObservabilityHelper.concatenateStrings(completions);
+            }
+        });
+
+        return chatModelObservationContext;
+    }
+
+    private List<String> processPrompts(ChatModelObservationContext chatModelObservationContext) {
+            return CollectionUtils.isEmpty((chatModelObservationContext.getRequest()).getInstructions()) ? List.of() : (chatModelObservationContext.getRequest()).getInstructions().stream().map(Content::getText).toList();
+    }
+
+    private List<String> processCompletion(ChatModelObservationContext context) {
+        if (context.getResponse() != null && (context.getResponse()).getResults() != null && !CollectionUtils.isEmpty((context.getResponse()).getResults())) {
+            return !StringUtils.hasText((context.getResponse()).getResult().getOutput().getText()) ? List.of() : (context.getResponse()).getResults().stream().filter((generation) -> generation.getOutput() != null && StringUtils.hasText(generation.getOutput().getText())).map((generation) -> generation.getOutput().getText()).toList();
+        } else {
+            return List.of();
+        }
+    }
+}
 ```
 
 With these configurations and dependencies in place, your Spring Boot application is ready to produce OpenTelemetry traces. Spring AI’s internal calls (e.g. when you invoke a chat model or generate an embedding) will be recorded as spans.
@@ -188,7 +266,7 @@ private String performAiOperation(String userInput) {
 
 **Missing Prompt/Completion:**
 
-- Ensure `include-prompt` and `include-completion` are `true`.
+- Ensure `log-prompt` and `log-completion` are `true`.
 - Sampling probability must be high enough.
 
 ## GitHub Discussions
