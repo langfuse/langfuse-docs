@@ -1,7 +1,7 @@
 ---
 date: 2025-07-11
-title: Prompt Version Webhooks
-description: Get real-time notifications when prompt versions are created, updated, or deleted with the new webhook feature.
+title: Webhooks for Prompt Changes
+description: Get real-time notifications for new prompt versions, changes to deployment labels or tags, and other edits.
 author: Max
 ogImage: /images/changelog/2025-07-11-webhook-changelog.png
 ---
@@ -10,24 +10,22 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-**Prompt Version Webhooks** automatically notify your applications when prompt versions change, enabling real-time integrations and automated workflows.
+When using Langfuse [Prompt Management](/docs/prompts/get-started), you can now receive real-time notifications when prompts are changed:
 
-## Overview
-
-Receive HTTP notifications when prompt versions in your Langfuse project are:
 - **Created** - A new prompt version is added
 - **Updated** - Labels or tags on an existing prompt version are modified
 - **Deleted** - A prompt version is removed
 
 Common use cases:
+
 - Trigger CI/CD pipelines when production prompts are updated
-- Sync prompt changes with external systems such as GitHub
+- Sync prompt changes with external systems or persist them in your repo via a GitHub Action
 - Notify team members about prompt modifications
 
 ## Features
 
 - **Filtering**: Configure webhooks for specific prompt actions with custom filters
-- **Security**: Cryptographic signature verification via `x-langfuse-signature` header
+- **Security**: HMAC SHA‑256 signature verification via `x-langfuse-signature` header
 - **Reliability**: High availability with error handling and retry mechanisms
 
 ## Setup
@@ -38,7 +36,6 @@ Common use cases:
 4. Configure your HTTP endpoint URL and optional headers
 5. Add any desired filters to narrow the scope
 6. Save and start receiving real-time notifications
-
 
 ## Learn More
 
