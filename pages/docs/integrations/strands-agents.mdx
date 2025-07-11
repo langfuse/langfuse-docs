@@ -47,7 +47,7 @@ LANGFUSE_AUTH = base64.b64encode(
 ).decode()
  
 # Configure OpenTelemetry endpoint & headers
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel/v1/traces"
+os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 ```
 
@@ -69,11 +69,15 @@ With the environment set up, we can now initialize the Strands agent. This invol
 This cell performs the following key actions:
 1.  Defines a detailed `system_prompt`.
 2.  Configures the `BedrockModel`.
-3.  Instantiates the `Agent` with the configured model, system prompt, and optional `trace_attributes`. Tracing attributes, such as `session.id`, `user.id`, and `langfuse.tags`, are sent to Langfuse with the traces and help organize, filter, and analyze traces in the Langfuse UI.
+3.  Creates new tracer and meter using `StrandsTelemetry`
+4.  Instantiates the `Agent` with the configured model, system prompt, and optional `trace_attributes`. Tracing attributes, such as `session.id`, `user.id`, and `langfuse.tags`, are sent to Langfuse with the traces and help organize, filter, and analyze traces in the Langfuse UI.
+
+
 
 
 ```python
 from strands import Agent
+from strands.telemetry import StrandsTelemetry
 from strands.models.bedrock import BedrockModel
 
 # Define the system prompt for the agent
@@ -107,6 +111,10 @@ system_prompt = """You are \"Restaurant Helper\", a restaurant assistant helping
 model = BedrockModel(
     model_id="us.anthropic.claude-3-7-sonnet-20250219-v1:0", # Example model ID
 )
+
+# Configure the telemetry
+# (Creates new tracer provider and sets it as global)
+strands_telemetry = StrandsTelemetry().setup_otlp_exporter()
 
 # Configure the agent
 # Pass optional tracing attributes such as session id, user id or tags to Langfuse.
