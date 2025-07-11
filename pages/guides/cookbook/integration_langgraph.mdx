@@ -52,7 +52,7 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
@@ -453,6 +453,118 @@ graph TD;
 	classDef last fill:#bfb6fc
 ```
 
+## Multiple LangGraph Agents
+
+There are setups where one LangGraph agent uses one or multiple other LangGraph agents. To combine all corresponding spans in one single trace for the multi agent execution, we can pass a custom `trace_id`. 
+
+First, we generate a trace_id that can be used for both agents to group the agent executions together in one Langfuse trace.
+
+
+```python
+from langfuse import get_client, Langfuse
+from langfuse.langchain import CallbackHandler
+ 
+langfuse = get_client()
+ 
+# Generate deterministic trace ID from external system
+predefined_trace_id = Langfuse.create_trace_id()
+
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler()
+```
+
+Next, we set up the sub-agent.
+
+
+```python
+from typing import Annotated
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+from typing_extensions import TypedDict
+from langgraph.graph import StateGraph
+from langgraph.graph.message import add_messages
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+graph_builder = StateGraph(State)
+
+llm = ChatOpenAI(model = "gpt-4o", temperature = 0.2)
+
+def chatbot(state: State):
+    return {"messages": [llm.invoke(state["messages"])]}
+
+graph_builder.add_node("chatbot", chatbot)
+graph_builder.set_entry_point("chatbot")
+graph_builder.set_finish_point("chatbot")
+sub_agent = graph_builder.compile()
+```
+
+Then, we set the tool that uses the research-sub-agent to answer questions.
+
+
+```python
+from langchain_core.tools import tool
+
+@tool
+def langgraph_research(question):
+  """Conducts research for various topics."""
+
+  with langfuse.start_as_current_span(
+      name="🤖-sub-research-agent",
+      trace_context={"trace_id": predefined_trace_id}
+  ) as span:
+      span.update_trace(input=question)
+
+      response = sub_agent.invoke({"messages": [HumanMessage(content = question)]},
+                        config={"callbacks": [langfuse_handler]})
+    
+      span.update_trace(output= response["messages"][1].content)
+
+  return response["messages"][1].content
+```
+
+Set up a second simple LangGraph agent that uses the new `langgraph_research`. 
+
+
+```python
+from langgraph.prebuilt import create_react_agent
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model = "gpt-4o", temperature = 0.2)
+
+main_agent = create_react_agent(
+    model=llm,
+    tools=[langgraph_research]
+)
+```
+
+
+```python
+user_question = "What is Langfuse?"
+
+# Use the predefined trace ID with trace_context
+with langfuse.start_as_current_span(
+    name="🤖-main-agent",
+    trace_context={"trace_id": predefined_trace_id}
+) as span:
+    span.update_trace(input=user_question)
+ 
+    # LangChain execution will be part of this trace
+    response = main_agent.invoke({"messages": [{"role": "user", "content": user_question}]},
+                            config={"callbacks": [langfuse_handler]})
+
+    span.update_trace(output=response["messages"][1].content)
+ 
+print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
+```
+
+### View traces in Langfuse
+
+![multi agent trace in Langfuse](https://langfuse.com/images/cookbook/integration-langgraph/a2a_langgraph.png)
+
+Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/85b0c53c4414f22ed8bfc9eb35f917c4
+
 ## Adding scores to traces as scores
 
 [Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single observations or entire traces. They enables you to implement custom quality checks at runtime or facilitate human-in-the-loop evaluation processes.
@@ -547,9 +659,6 @@ langchain_system_prompt = langfuse_system_prompt.get_langchain_prompt()
 
 print(langchain_system_prompt)
 ```
-
-    You are a translator that translates every input text into Spanish.
-
 
 Now we can use the new system prompt string to update our assistant.
 

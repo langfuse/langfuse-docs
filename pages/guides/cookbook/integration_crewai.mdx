@@ -26,7 +26,7 @@ _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of 
 
 
 ```python
-%pip install langfuse crewai openlit
+%pip install langfuse crewai openinference-instrumentation-crewai openinference-instrumentation-litellm
 ```
 
 ### Step 2: Configure Langfuse SDK
@@ -42,7 +42,6 @@ os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
-
 
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
@@ -65,14 +64,15 @@ else:
 
 ### Step 3: Initialize CrewAI Instrumentation
 
-Now, we initialize the [OpenLit OpenTelemetry instrumentation SDK](https://docs.openlit.io/latest/integrations/crewai) to automatically capture CrewAI operations and export OpenTelemetry (OTel) spans to Langfuse.
+Now, we initialize the [OpenInference instrumentation SDK](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-crewai) to automatically capture CrewAI operations and export OpenTelemetry (OTel) spans to Langfuse.
 
 
 ```python
-import openlit
+from openinference.instrumentation.crewai import CrewAIInstrumentor
+from openinference.instrumentation.litellm import LiteLLMInstrumentor
 
-# Initialize OpenLIT instrumentation. The disable_batch flag is set to true to process traces immediately. Also set the langfuse tracer to use the langfuse tracer.
-openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
+CrewAIInstrumentor().instrument(skip_dep_check=True)
+LiteLLMInstrumentor().instrument()
 ```
 
 ### Step 4: Basic CrewAI Application
@@ -116,7 +116,7 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 
 ![CrewAI example trace in Langfuse](https://langfuse.com/images/cookbook/integration_crewai/crewai-example-trace.png)
 
-[Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a082747f3146d0083179421fdb8ad2b5?timestamp=2025-06-06T13%3A23%3A42.208Z&display=details)
+[Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a287bb31e317433610d8827617471140?timestamp=2025-07-11T07:45:13.601Z&display=details)
 </Steps>
 
 
