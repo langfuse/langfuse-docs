@@ -17,18 +17,20 @@ This is a cookbook with examples of the Langfuse Integration for Python.
 
 ## Setup
 
+
 ```python
 %pip install langfuse openai pydantic instructor --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
 
+
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -41,6 +43,7 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 It is easy to use instructor with Langfuse. We use the [Langfuse OpenAI intgeration](https://langfuse.com/docs/integrations/openai/get-started) and simply patch the client with instructor. This works with both synchronous and asynchronous clients.
 
 ### Langfuse-Instructor integration with sychnronous OpenAI client
+
 
 ```python
 import instructor
@@ -73,6 +76,7 @@ print(weather_info.model_dump_json(indent=2))
 ```
 
 ### Langfuse-Instructor integration with asychnronous OpenAI client
+
 
 ```python
 import instructor
@@ -108,6 +112,7 @@ print(response.model_dump_json(indent=2))
 ## Example
 
 In this example, we first classify customer feedback into categories like `PRAISE`, `SUGGESTION`, `BUG` and `QUESTION`, and further scores the relevance of each feedback to the business on a scale of 0.0 to 1.0. In this case, we use the asynchronous OpenAI client `AsyncOpenAI` to classify and evaluate the feedback.
+
 
 ```python
 from typing import List, Tuple

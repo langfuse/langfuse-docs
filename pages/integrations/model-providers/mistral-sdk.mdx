@@ -2,9 +2,9 @@
 source: ⚠️ Jupyter Notebook
 title: Trace Mistral models with Langfuse
 sidebarTitle: Mistral
+logo: /images/integrations/mistral_icon.svg
 description: Cookbook with examples of the Langfuse Integration for Mistral SDK (Python).
 category: Integrations
-logo: /images/integrations/mistral_icon.svg
 ---
 
 # Cookbook: Mistral SDK Integration (Python)
@@ -12,12 +12,7 @@ logo: /images/integrations/mistral_icon.svg
 This cookbook provides step-by-step examples of integrating Langfuse with the Mistral AI SDK (v1) in Python. By following these examples, you'll learn how to seamlessly log and trace interactions with Mistral's language models, enhancing the transparency, debuggability, and performance monitoring of your AI-driven applications.
 
 <Callout type="info" emoji="ℹ️">
-  Note: Langfuse is also natively integrated with
-  [LangChain](https://langfuse.com/docs/integrations/langchain/tracing),
-  [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started),
-  [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other
-  frameworks](https://langfuse.com/docs/integrations/overview). If you use one
-  of them, any use of Mistral models is instrumented right away.
+Note: Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). If you use one of them, any use of Mistral models is instrumented right away.
 </Callout>
 
 ## Overview
@@ -33,22 +28,25 @@ For more detailed guidance on the Mistral SDK or the **@observe** decorator from
 
 ## Setup
 
+
 ```python
 %pip install mistralai langfuse
 ```
+
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your Mistral key
 os.environ["MISTRAL_API_KEY"] = "..."
 ```
+
 
 ```python
 from mistralai import Mistral
@@ -62,6 +60,7 @@ mistral_client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 ### Completions
 
 We are integrating the Mistral AI SDK with Langfuse using the [@observe decorator](https://langfuse.com/docs/sdk/python/decorators), which is crucial for logging and tracing interactions with large language models (LLMs). The @observe(as_type="generation") decorator specifically logs LLM interactions, capturing inputs, outputs, and model parameters. The resulting `mistral_completion` method can then be used across your project.
+
 
 ```python
 from langfuse import observe, get_client
@@ -123,6 +122,7 @@ In the following example, we also added the decorator to the top-level function 
 
 You can use langfuse.update_current_generation or langfuse.update_current_trace to add additional details such as input, output, and model parameters to the trace.
 
+
 ```python
 @observe()
 def find_best_painter_from(country="France"):
@@ -146,7 +146,9 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 
 #### Chained Completions
 
+
 This example demonstrates chaining multiple LLM calls using the @observe decorator. The first call identifies the best painter from a specified country, and the second call uses that painter's name to find their most famous painting. Both interactions are logged by Langfuse as we use the wrapped `mistral_completion` method created above, ensuring full traceability across the chained requests.
+
 
 ```python
 @observe()
@@ -181,9 +183,10 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 
 ### Streaming Completions
 
-The following example demonstrates how to handle streaming responses from the Mistral model using the @observe(as_type="generation") decorator. The process is similar to the _Completion_ example but includes handling streamed data in real-time.
+The following example demonstrates how to handle streaming responses from the Mistral model using the @observe(as_type="generation") decorator. The process is similar to the *Completion* example but includes handling streamed data in real-time.
 
 Just like in the previous example, we wrap the streaming function with the @observe decorator to capture the input, model parameters, and usage details. Additionally, the function processes the streamed output incrementally, updating the Langfuse context as each chunk is received.
+
 
 ```python
 # Wrap streaming function with decorator
@@ -257,7 +260,9 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 
 ### Async Completion
 
+
 This example showcases the use of the @observe decorator in an asynchronous context. It wraps an async function that interacts with the Mistral model, ensuring that both the request and the response are logged by Langfuse. The async function allows for non-blocking LLM calls, making it suitable for applications that require concurrency while maintaining full observability of the interactions.
+
 
 ```python
 # Wrap async function with decorator
@@ -321,6 +326,7 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 ### Async Streaming
 
 This example demonstrates the use of the @observe decorator in an asynchronous streaming context. It wraps an async function that streams responses from the Mistral model, logging each chunk of data in real-time.
+
 
 ```python
 import asyncio
@@ -397,6 +403,7 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 ### Tool Calling
 
 This snippet introduces Mistral's function-calling capability, where you can define custom functions to retrieve specific data, like payment status and date, based on a transaction ID. These functions are then registered with the Mistral model, allowing it to call them when processing queries. For a deeper dive into function calling with Mistral, refer to the official [Mistral documentation](https://docs.mistral.ai/capabilities/function_calling/).
+
 
 ```python
 import pandas as pd
@@ -475,7 +482,8 @@ names_to_functions = {
 }
 ```
 
-The _check_transaction_status_ function demonstrates the use of Mistral's function-calling capabilities. The function's result is then incorporated into the LLM's response, which is logged and traced in Langfuse. This example illustrates how external function calls can be seamlessly integrated into a Langfuse by using the wrapped _mistral_completion_ function, ensuring that every step — from tool selection to final output - is captured for thorough observability.
+The *check_transaction_status* function demonstrates the use of Mistral's function-calling capabilities. The function's result is then incorporated into the LLM's response, which is logged and traced in Langfuse. This example illustrates how external function calls can be seamlessly integrated into a Langfuse by using the wrapped *mistral_completion* function, ensuring that every step — from tool selection to final output - is captured for thorough observability.
+
 
 ```python
 @observe()

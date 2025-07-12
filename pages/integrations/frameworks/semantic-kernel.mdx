@@ -16,12 +16,7 @@ This notebook provides a step-by-step guide on integrating **Langfuse** with **S
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source platform dedicated to LLM observability. It offers robust tracing and monitoring capabilities tailored for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
 <Callout type="info" emoji="ℹ️">
-  _**Note:** This guide focuses on the Python implementation. However, the
-  principles of this Langfuse integration apply to other languages supported by
-  Semantic Kernel, including
-  [C#](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-csharp)
-  and
-  [Java](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-java)._
+_**Note:** This guide focuses on the Python implementation. However, the principles of this Langfuse integration apply to other languages supported by Semantic Kernel, including [C#](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-csharp) and [Java](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/?pivots=programming-language-java)._
 </Callout>
 
 ## Getting Started
@@ -32,26 +27,27 @@ Let's walk through a practical example of using Semantic Kernel and integrating 
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="⚠️">
-  _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users
-  of Python SDK v2, a previous version of this guide is available
-  [here](https://github.com/langfuse/langfuse-docs/blob/4bba7985939469dab76b04513221995a203ac3c7/cookbook/integration_semantic_kernel.ipynb#L4)._
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, a previous version of this guide is available [here](https://github.com/langfuse/langfuse-docs/blob/4bba7985939469dab76b04513221995a203ac3c7/cookbook/integration_semantic_kernel.ipynb#L4)._
 </Callout>
+
 
 ```python
 %pip install langfuse openlit semantic-kernel
 ```
 
+
 ### Step 2: Configure Langfuse SDK
 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -63,11 +59,12 @@ os.environ["OPENAI_CHAT_MODEL_ID"] = "gpt-4o"
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
+
 ```python
 from langfuse import get_client
-
+ 
 langfuse = get_client()
-
+ 
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -77,9 +74,11 @@ else:
 
     Langfuse client is authenticated and ready!
 
+
 ### Step 3: Initialize OpenLit for Instrumentation
 
 Now, we initialize the [OpenLit instrumentation SDK](https://docs.openlit.io/latest/sdk-configuration). OpenLit automatically instruments Semantic Kernel and exports OpenTelemetry (OTel) spans to Langfuse.
+
 
 ```python
 import openlit
@@ -92,6 +91,7 @@ openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
 
 Let's create a straightforward Semantic Kernel application. In this example, an Assistant agent will answer a user's question. This will serve as the foundation for demonstrating Langfuse tracing.
 
+
 ```python
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
@@ -102,6 +102,7 @@ kernel.add_service(
     OpenAIChatCompletion(),
 )
 ```
+
 
 ```python
 from semantic_kernel.prompt_template import InputVariable, PromptTemplateConfig
@@ -130,6 +131,7 @@ summarize = kernel.add_function(
 
 With the Semantic Kernel application set up, let's invoke it with a sample question and print the response. OpenLit will automatically capture this interaction and send the trace data to Langfuse.
 
+
 ```python
 input_text = "What is Langfuse?"
 
@@ -138,6 +140,7 @@ summary = await kernel.invoke(summarize, input=input_text)
 print(summary)
 ```
 
+
 ### Step 6: View Traces in Langfuse
 
 After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the LLM calls, inputs, outputs, and performance metrics. Below is an example screenshot illustrating how a trace appears in Langfuse:
@@ -145,7 +148,6 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 ![Langfuse Trace of Semantic Kernel Application](https://langfuse.com/images/cookbook/integration-semantic-kernel/sematric-kernel-example-trace.png)
 
 For a live example, you can explore this public trace: [Langfuse Semantic Kernel Trace Example](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/51d7ea51af5cf9048f607ac6abb79b4f?timestamp=2025-06-04T08:17:14.026Z&display=details)
-
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

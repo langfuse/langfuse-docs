@@ -1,7 +1,9 @@
 ---
 title: Integrate Cohere with Langfuse
+sidebarTitle: Cohere
 description: Guide on integrating Cohere with Langfuse via the OpenAI SDK for observability and debugging.
 category: Integrations
+logo: /images/integrations/cohere_icon.svg
 ---
 
 # Observability for Cohere with Langfuse

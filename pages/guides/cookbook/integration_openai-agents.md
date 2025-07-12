@@ -1,5 +1,7 @@
 ---
 title: Trace the OpenAI Agents SDK with Langfuse
+sidebarTitle: OpenAI Agents
+logo: /images/integrations/openai_icon.svg
 description: Learn how to use Langfuse to monitor OpenAI Agents SDK to debug and evaluate your AI agents
 category: Integrations
 ---

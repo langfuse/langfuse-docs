@@ -1,10 +1,10 @@
 ---
 source: ⚠️ Jupyter Notebook
 title: Integrate X.ai (Grok) with Langfuse
-sidebarTitle: xAI / Grok
+sidebarTitle: xAI Grok
+logo: /images/integrations/xai_icon.svg
 description: Guide on integrating xAI's Grok models with Langfuse for observability.
 category: Integrations
-logo: /images/integrations/xai_icon.svg
 ---
 
 # Observability for xAI / Grok with Langfuse
@@ -20,11 +20,13 @@ This guide shows you how to integrate Grok with Langfuse using the OpenAI SDK.
 
 Make sure you have installed the necessary Python packages:
 
+
 ```python
 %pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
+
 
 ```python
 import os
@@ -46,6 +48,7 @@ os.environ["GROK_API_KEY"] = "xai-..."
 
 To utilize Grok through the OpenAI SDK, we use the Langfuse drop-in replacement for OpenAI. Replace the base URL with Grok’s endpoint.
 
+
 ```python
 # Instead of importing openai directly:
 from langfuse.openai import openai
@@ -59,6 +62,7 @@ client = openai.OpenAI(
 ## Step 4: Run an Example
 
 The following example demonstrates how to make a simple request using Grok's API. All API calls will be automatically traced by Langfuse.
+
 
 ```python
 response = client.chat.completions.create(
@@ -86,6 +90,7 @@ You can enhance your Grok traces:
 Visit the [OpenAI SDK cookbook](https://langfuse.com/docs/integrations/openai/python/examples) to see more examples on passing additional parameters.
 Find out more about Langfuse Evaluations and Prompt Management in the [Langfuse documentation](https://langfuse.com/docs).
 
+
 ## Step 6: See Traces in Langfuse
 
 After running the example, log in to Langfuse to view the detailed traces, including:
@@ -97,7 +102,6 @@ After running the example, log in to Langfuse to view the detailed traces, inclu
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-grok/grok-example-trace.png)
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9178205e-2cb4-4952-8ec0-5244a1105263?timestamp=2025-03-05T11%3A07%3A46.600Z)_
-
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

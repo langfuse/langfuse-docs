@@ -1,7 +1,9 @@
 ---
 title: Observability and Metrics for Google Vertex AI and Gemini
+sidebarTitle: Google Vertex AI
 description: Open source observability for Google Vertex AI applications and the Vertex AI SDK.
 category: Integrations
+logo: /images/integrations/google_gemini_icon.svg
 ---
 
 # Google Vertex AI and Google Gemini Integration

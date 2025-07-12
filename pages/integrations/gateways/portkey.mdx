@@ -1,10 +1,10 @@
 ---
 source: ⚠️ Jupyter Notebook
 title: Integrate Portkey LLM Gateway with Langfuse
-description: Guide on using Portkey's AI gateway to access 250+ LLM models with Langfuse via the OpenAI SDK.
-category: Integrations
 sidebarTitle: Portkey
 logo: /images/integrations/portkey_icon.svg
+description: Guide on using Portkey's AI gateway to access 250+ LLM models with Langfuse via the OpenAI SDK.
+category: Integrations
 ---
 
 # Observability for Portkey LLM Gateway with Langfuse
@@ -18,6 +18,7 @@ This guide shows you how to integrate Portkey's AI gateway with Langfuse. Portke
 <Steps>
 ## Step 1: Install Dependencies
 
+
 ```python
 %pip install openai langfuse portkey_ai
 ```
@@ -26,35 +27,43 @@ This guide shows you how to integrate Portkey's AI gateway with Langfuse. Portke
 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
+
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
 
+
 ```python
 from langfuse import get_client
-
+ 
 get_client().auth_check()
 ```
 
+
+
+
     True
+
+
 
 ## Step 3: Use Langfuse OpenAI Drop-in Replacement
 
 Next, you can use Langfuse’s OpenAI-compatible client (from langfuse.openai import OpenAI) to trace all requests sent through the Portkey gateway. For detailed setup instructions on the LLM gateway and virtual LLM keys, refer to the [Portkey documentation](https://portkey.ai/docs/product/ai-gateway).
+
 
 ```python
 from langfuse.openai import OpenAI
 from portkey_ai import createHeaders, PORTKEY_GATEWAY_URL
 
 client = OpenAI(
-    api_key="xxx", #Since we are using a virtual key we do not need this
-    base_url = PORTKEY_GATEWAY_URL,
+    api_key="xxx", #Since we are using a virtual key we do not need this 
+    base_url = PORTKEY_GATEWAY_URL, 
     default_headers = createHeaders(
     api_key = "***",
     virtual_key = "***"
@@ -63,6 +72,7 @@ client = OpenAI(
 ```
 
 ## Step 4: Run an Example
+
 
 ```python
 response = client.chat.completions.create(
@@ -91,7 +101,6 @@ After running the example, log in to Langfuse to view the detailed traces, inclu
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-portkey/portkey-example-trace.png)
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4a2391624dcd7478e56d188f55379049?timestamp=2025-07-01T13:54:00.114Z&display=details)_
-
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

@@ -1,11 +1,11 @@
 ---
 sidebarTitle: Amazon Bedrock
-seoTitle: Open Source Observability for Amazon Bedrock
+seoTitle: Open Source Observability and Metrics for Amazon Bedrock
 description: Open source observability for Amazon Bedrock applications and the Bedrock SDK.
 logo: /images/integrations/bedrock_icon.png
 ---
 
-# Integration: Amazon Bedrock
+# Amazon Bedrock Integration
 
 [**Amazon Bedrock**](https://aws.amazon.com/bedrock/) is a fully managed AWS service that lets you use foundation models and custom models to generate text, images, and audio.
 
@@ -29,6 +29,7 @@ There are a few ways through which you can capture traces and metrics for Amazon
 
 ## How to wrap Amazon Bedrock SDK (Converse API)
 
+
 ```python
 # install requirements
 %pip install boto3 langfuse awscli --quiet
@@ -37,6 +38,7 @@ There are a few ways through which you can capture traces and metrics for Amazon
 ### Authenticate AWS Session
 
 Sign in with your AWS Role that has access to Amazon Bedrock.
+
 
 ```python
 AWS_ACCESS_KEY_ID="***"
@@ -64,6 +66,7 @@ bedrock_runtime = boto3.client(
 )
 ```
 
+
 ```python
 # Check which models are available in your account
 models = bedrock.list_inference_profiles()
@@ -77,7 +80,9 @@ for model in models["inferenceProfileSummaries"]:
     EU Meta Llama 3.2 3B Instruct - eu.meta.llama3-2-3b-instruct-v1:0
     EU Meta Llama 3.2 1B Instruct - eu.meta.llama3-2-1b-instruct-v1:0
 
+
 ### Set Langfuse Credentials
+
 
 ```python
 import os
@@ -95,11 +100,12 @@ os.environ["OPENAI_API_KEY"] = ""
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
+
 ```python
 from langfuse import get_client
-
+ 
 langfuse = get_client()
-
+ 
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -108,6 +114,7 @@ else:
 ```
 
 ### Wrap Bedrock SDK
+
 
 ```python
 from langfuse import observe
@@ -158,6 +165,7 @@ def wrapped_bedrock_converse(**kwargs):
 
 ### Run Example
 
+
 ```python
 # Converesation according to AWS spec including prompting + history
 user_message = """You will be acting as an AI personal finance advisor named Alex, created by the company SmartFinance Advisors. Your goal is to provide financial advice and guidance to users. You will be replying to users who are on the SmartFinance Advisors site and who will be confused if you don't respond in the character of Alex.
@@ -207,9 +215,11 @@ for key, value in res.items():
 
     Anthropic
     Understood. I'll continue to act as Alex, the AI personal finance advisor from SmartFinance Advisors, maintaining that character throughout our interaction. I'll provide financial advice and guidance based on the user's questions and needs. If I'm unsure about something, I'll ask for clarification as instructed. How may I assist you with your financial matters today?
-
+    
     Llama3-2
     Hello again! I'm glad you're excited about receiving my advice. How can I assist you with your financial goals today? Are you looking to create a budget, paying off debt, saving for a specific goal, or something else entirely?
+    
+
 
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f01a828c-fed1-45e1-b836-cd74c331597d?observation=512a4d7f-5a6c-461e-bd8f-76f6bdcc91fd
 

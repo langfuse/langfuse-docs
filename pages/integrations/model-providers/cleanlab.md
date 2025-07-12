@@ -14,7 +14,6 @@ Cleanlab’s [Trustworthy Language Model](https://cleanlab.ai/tlm/) (TLM) enable
 TLM is an automated evaluation tool that add reliability and explainability to every LLM output. TLM automatically finds the poor quality and incorrect LLM responses lurking within your production logs and traces. This helps you perform better Evals, with significantly less manual review and annotation work to find these bad responses yourself. TLM also enables smart-routing for LLM-automated responses and decision-making using trustworthiness scores for every LLM output.
 
 **TLM provides users with:**
-
 - Trustworthiness scores and explanation for every LLM response
 - Higher accuracy: rigorous [benchmarks](https://cleanlab.ai/blog/trustworthy-language-model/) show TLM consistently produces more accurate results than other LLMs like GPT 4/4o and Claude.
 - Scalable API: designed to handle large datasets, TLM is suitable for most enterprise applications, including data extraction, tagging/labeling, Q&A (RAG), and more.
@@ -27,9 +26,11 @@ This guide will walk you through the process of evaluating LLM responses capture
 
 _**Note:** New Python SDK available (v3) - We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
+
 ```python
 %pip install "langfuse<3.0.0" openai cleanlab-tlm
 ```
+
 
 ```python
 import os
@@ -44,16 +45,17 @@ dotenv.load_dotenv()
 This guide requires a Cleanlab TLM API key. If you don't have one, you can sign up for a free trial [here](https://tlm.cleanlab.ai/).
 
 This guide requires four API keys:
-
 - [Langfuse Public Key](https://us.cloud.langfuse.com/)
 - [Langfuse Secret Key](https://us.cloud.langfuse.com/)
 - [OpenAI API Key](https://platform.openai.com/api-keys)
 - [Cleanlab TLM API Key](https://tlm.cleanlab.ai/)
 
+
+
 ```python
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
@@ -69,6 +71,7 @@ For the sake of demonstration purposes, we'll briefly generate some traces and t
 
 NOTE: TLM requires the entire input to the LLM to be provided. This includes any system prompts, context, or other information that was originally provided to the LLM to generate the response. Notice below that we include the system prompt in the trace metadata since by default the trace does not include the system prompt within the input.
 
+
 ```python
 from langfuse.decorators import langfuse_context, observe
 from openai import OpenAI
@@ -76,9 +79,10 @@ from openai import OpenAI
 openai = OpenAI()
 ```
 
+
 ```python
 # Let's use some tricky trivia questions to generate some traces
-trivia_questions = [
+trivia_questions = [    
     "What is the 3rd month of the year in alphabetical order?",
     "What is the capital of France?",
     "How many seconds are in 100 years?",
@@ -90,7 +94,7 @@ trivia_questions = [
 def generate_answers(trivia_question):
     system_prompt = "You are a trivia master."
 
-    # Update the trace with the question
+    # Update the trace with the question    
     langfuse_context.update_current_trace(
         name=f"Answering question: '{trivia_question}'",
         tags=["TLM_eval_pipeline"],
@@ -104,7 +108,7 @@ def generate_answers(trivia_question):
             {"role": "user", "content": trivia_question},
         ],
     )
-
+    
     answer = response.choices[0].message.content
     return answer
 
@@ -113,7 +117,7 @@ def generate_answers(trivia_question):
 answers = []
 for i in range(len(trivia_questions)):
     answer = generate_answers(trivia_questions[i])
-    answers.append(answer)
+    answers.append(answer)  
     print(f"Question {i+1}: {trivia_questions[i]}")
     print(f"Answer {i+1}:\n{answer}\n")
 
@@ -123,45 +127,47 @@ print(f"Generated {len(answers)} answers and tracked them in Langfuse.")
     Question 1: What is the 3rd month of the year in alphabetical order?
     Answer 1:
     March
-
+    
     Question 2: What is the capital of France?
     Answer 2:
     The capital of France is Paris.
-
+    
     Question 3: How many seconds are in 100 years?
     Answer 3:
     There are 31,536,000 seconds in a year (60 seconds x 60 minutes x 24 hours x 365 days). Therefore, in 100 years, there would be 3,153,600,000 seconds.
-
+    
     Question 4: Alice, Bob, and Charlie went to a café. Alice paid twice as much as Bob, and Bob paid three times as much as Charlie. If the total bill was $72, how much did each person pay?
     Answer 4:
-    Let's call the amount Charlie paid x.
+    Let's call the amount Charlie paid x. 
     Alice paid twice as much as Bob, so she paid 2*(3x) = 6x.
     Bob paid three times as much as Charlie, so he paid 3x.
-
+    
     We know the total bill was $72:
     x + 6x + 3x = 72
     10x = 72
-    x = 7.2
-
+    x = 7.2 
+    
     Therefore, Charlie paid $7.20, Bob paid $21.60, and Alice paid $43.20.
-
+    
     Question 5: When was the Declaration of Independence signed?
     Answer 5:
     The Declaration of Independence was signed on July 4, 1776.
-
+    
     Generated 5 answers and tracked them in Langfuse.
+
 
 Remember, the goal of this tutorial is to show you how to build an external evaluation pipeline. These pipelines will run in your CI/CD environment, or be run in a different orchestrated container service. No matter the environment you choose, three key steps always apply:
 
-1.  **Fetch Your Traces**: Get your application traces to your evaluation environment
-2.  **Run Your Evaluations**: Apply any evaluation logic you prefer
-3.  **Save Your Results**: Attach your evaluations back to the Langfuse trace used for calculating them.
+
+1.   **Fetch Your Traces**: Get your application traces to your evaluation environment
+2.   **Run Your Evaluations**: Apply any evaluation logic you prefer
+3.   **Save Your Results**: Attach your evaluations back to the Langfuse trace used for calculating them.
 
 For the rest of the notebook, we'll have one goal:
 
 ---
 
-🎯 Goal: **_Evaluate all traces run in the past 24 hours_**
+🎯 Goal: ***Evaluate all traces run in the past 24 hours***
 
 ---
 
@@ -170,6 +176,7 @@ For the rest of the notebook, we'll have one goal:
 Fetching traces from Langfuse is straightforward. Just set up the Langfuse client and use one of its functions to fetch the data. We'll fetch the traces and evaluate them. After that, we'll add our scores back into Langfuse.
 
 The `fetch_traces()` function has arguments to filter the traces by tags, timestamps, and beyond. You can find more about other methods to [query traces](https://langfuse.com/docs/query-traces) in our docs.
+
 
 ```python
 from langfuse import Langfuse
@@ -189,15 +196,17 @@ traces = langfuse.fetch_traces(
 
 ### Generate evaluations with TLM
 
-Langfuse can handle numerical, boolean and categorical (`string`) scores. Wrapping your custom evaluation logic in a function is often a good practice.
+Langfuse can handle numerical, boolean and categorical (`string`) scores.  Wrapping your custom evaluation logic in a function is often a good practice.
 
 Instead of running TLM individually on each trace, we'll provide all of the prompt, response pairs in a list to TLM in a single call. This is more efficient and allows us to get scores and explanations for all of the traces at once. Then, using the `trace.id`, we can attach the scores and explanations back to the correct trace in Langfuse.
+
 
 ```python
 from cleanlab_tlm import TLM
 
 tlm = TLM(options={"log": ["explanation"]})
 ```
+
 
 ```python
 # This helper method will extract the prompt and response from each trace and return three lists: trace ID's, prompts, and responses.
@@ -217,6 +226,7 @@ Now, let's use TLM to generate a `trustworthiness score` and `explanation` for e
 
 **IMPORTANT:** It is essential to always include any system prompts, context, or other information that was originally provided to the LLM to generate the response. You should construct the prompt input to `get_trustworthiness_score()` in a way that is as similar as possible to the original prompt. This is why we included the system prompt in the trace metadata.
 
+
 ```python
 # Evaluate each of the prompt, response pairs using TLM
 evaluations = tlm.get_trustworthiness_score(prompts, responses)
@@ -229,7 +239,7 @@ explanations = [entry["log"]["explanation"] for entry in evaluations]
 trace_evaluations = pd.DataFrame({
     'trace_id': trace_ids,
     'prompt': prompts,
-    'response': responses,
+    'response': responses, 
     'trust_score': trust_scores,
     'explanation': explanations
 })
@@ -238,6 +248,10 @@ trace_evaluations
 
     Querying TLM... 100%|██████████|
 
+
+
+
+
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -251,7 +265,6 @@ trace_evaluations
     .dataframe thead th {
         text-align: right;
     }
-
 </style>
 <table border="1" class="dataframe">
   <thead>
@@ -309,13 +322,19 @@ trace_evaluations
 </table>
 </div>
 
+
+
 Awesome! Now we have a DataFrame mapping trace IDs to their scores and explanations. We've also included the prompt and response for each trace for demonstration purposes to find the **least trustworthy trace!**
+
 
 ```python
 sorted_df = trace_evaluations.sort_values(by="trust_score", ascending=True).head()
 sorted_df
 ```
 
+
+
+
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -329,7 +348,6 @@ sorted_df
     .dataframe thead th {
         text-align: right;
     }
-
 </style>
 <table border="1" class="dataframe">
   <thead>
@@ -386,6 +404,9 @@ sorted_df
   </tbody>
 </table>
 </div>
+
+
+
 
 ```python
 # Let's look at the least trustworthy trace.
@@ -396,15 +417,16 @@ print("TLM Explanation: ", sorted_df.iloc[0]["explanation"])
 ```
 
     Prompt:  You are a trivia master.
-    What is the 3rd month of the year in alphabetical order?
-
-    OpenAI Response:  March.
-
-    TLM Trust Score:  0.11487442493072615
-
-    TLM Explanation:  To determine the 3rd month of the year in alphabetical order, we first list the months: January, February, March, April, May, June, July, August, September, October, November, December. When we arrange these months alphabetically, we get: April, August, December, February, January, July, June, March, May, November, October, September. In this alphabetical list, March is the 8th month, not the 3rd. The 3rd month in alphabetical order is actually December. Therefore, the proposed response is incorrect.
-    This response is untrustworthy due to lack of consistency in possible responses from the model. Here's one inconsistent alternate response that the model considered (which may not be accurate either):
+    What is the 3rd month of the year in alphabetical order? 
+    
+    OpenAI Response:  March. 
+    
+    TLM Trust Score:  0.11487442493072615 
+    
+    TLM Explanation:  To determine the 3rd month of the year in alphabetical order, we first list the months: January, February, March, April, May, June, July, August, September, October, November, December. When we arrange these months alphabetically, we get: April, August, December, February, January, July, June, March, May, November, October, September. In this alphabetical list, March is the 8th month, not the 3rd. The 3rd month in alphabetical order is actually December. Therefore, the proposed response is incorrect. 
+    This response is untrustworthy due to lack of consistency in possible responses from the model. Here's one inconsistent alternate response that the model considered (which may not be accurate either): 
     December.
+
 
 #### Awesome! TLM was able to identify multiple traces that contained incorrect answers from OpenAI.
 
@@ -412,12 +434,13 @@ Let's upload the `trust_score` and `explanation` columns to Langfuse.
 
 ### Upload evaluations to Langfuse
 
+
 ```python
 for idx, row in trace_evaluations.iterrows():
     trace_id = row["trace_id"]
     trust_score = row["trust_score"]
     explanation = row["explanation"]
-
+    
     # Add the trustworthiness score to the trace with the explanation as a comment
     langfuse.score(
             trace_id=trace_id,

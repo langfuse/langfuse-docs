@@ -1,6 +1,8 @@
 ---
 title: "Langfuse Integration with Cleanlab"
+sidebarTitle: Cleanlab
 description: "Automatically evaluate LLMs in real time with Cleanlab's trustworthy Language Model (TLM)"
+logo: /images/integrations/cleanlab_icon.png
 ---
 
 # Automated Evaluations with Cleanlab

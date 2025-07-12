@@ -23,10 +23,9 @@ Let's walk through a practical example of using CrewAI and integrating it with L
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="⚠️">
-  _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users
-  of Python SDK v2, please refer to our [legacy CrewAI integration
-  guide](https://github.com/langfuse/langfuse-docs/blob/26a3aa9e935a0325b463e3fa585772fd20c23642/cookbook/integration_crewai.ipynb)._
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy CrewAI integration guide](https://github.com/langfuse/langfuse-docs/blob/26a3aa9e935a0325b463e3fa585772fd20c23642/cookbook/integration_crewai.ipynb)._
 </Callout>
+
 
 ```python
 %pip install langfuse crewai openinference-instrumentation-crewai openinference-instrumentation-litellm
@@ -36,11 +35,12 @@ Let's walk through a practical example of using CrewAI and integrating it with L
 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
+
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
@@ -48,14 +48,14 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # Your OpenAI key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
-
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
 
 ```python
 from langfuse import get_client
-
+ 
 langfuse = get_client()
-
+ 
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -68,6 +68,7 @@ else:
 
 Now, we initialize the [OpenInference instrumentation SDK](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-crewai) to automatically capture CrewAI operations and export OpenTelemetry (OTel) spans to Langfuse.
 
+
 ```python
 from openinference.instrumentation.crewai import CrewAIInstrumentor
 from openinference.instrumentation.litellm import LiteLLMInstrumentor
@@ -79,6 +80,7 @@ LiteLLMInstrumentor().instrument()
 ### Step 4: Basic CrewAI Application
 
 Let's create a straightforward CrewAI application. In this example, we'll create a simple crew with agents that can collaborate to complete tasks. This will serve as the foundation for demonstrating Langfuse tracing.
+
 
 ```python
 from crewai import Agent, Task, Crew
@@ -117,22 +119,24 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 ![CrewAI example trace in Langfuse](https://langfuse.com/images/cookbook/integration_crewai/crewai-example-trace.png)
 
 [Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a287bb31e317433610d8827617471140?timestamp=2025-07-11T07:45:13.601Z&display=details)
-
 </Steps>
+
 
 ## Add Additional Attributes
 
 Langfuse allows you to pass additional attributes to your spans. These can include `user_id`, `tags`, `session_id`, and custom `metadata`. Enriching traces with these details is important for analysis, debugging, and monitoring of your application's behavior across different users or sessions.
 
-The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`.
+The following code demonstrates how to start a custom span with `langfuse.start_as_current_span` and then update the trace associated with this span using `span.update_trace()`. 
 
 **→ Learn more about [Updating Trace and Span Attributes](https://langfuse.com/docs/sdk/python/sdk-v3#updating-observations).**
+
+
 
 ```python
 with langfuse.start_as_current_span(
     name="crewai-index-trace",
     ) as span:
-
+    
     # Run your application here
     task_description = "Define the HTML for making a simple website with heading- Hello World! Langfuse monitors your CrewAI agent!"
     result = crew.kickoff()
@@ -162,15 +166,17 @@ In the example below, we demonstrate how to score a specific span for `relevance
 
 **→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
 
+
+
 ```python
 with langfuse.start_as_current_span(
     name="crewai-index-trace",
     ) as span:
-
+    
     # Run your application here
     result = crew.kickoff()
     print(result)
-
+    
     # Score this specific span
     span.score(name="relevance", value=0.9, data_type="NUMERIC")
 
@@ -186,15 +192,14 @@ langfuse.flush()
 
 Langfuse Prompt Management allows you to collaboratively create, version, and deploy prompts. You can manage prompts either through the Langfuse SDK or directly within the Langfuse UI. These managed prompts can then be fetched into your application at runtime.
 
-The code below illustrates fetching a prompt named `crewai-task` from Langfuse, compiling it with an input variable (`task_type`), and then using this compiled prompt in the CrewAI application.
+The code below illustrates fetching a prompt named `crewai-task` from Langfuse, compiling it with an input variable (`task_type`), and then using this compiled prompt in the CrewAI application. 
 
 **→ Get started with [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started).**
 
 <Callout type="info" emoji="🔗">
-  _**Note:** Linking the Langfuse Prompt and the Generation is currently not
-  possible. This is on our roadmap and we are tracking this
-  [here](https://github.com/orgs/langfuse/discussions/7180)._
+_**Note:** Linking the Langfuse Prompt and the Generation is currently not possible. This is on our roadmap and we are tracking this [here](https://github.com/orgs/langfuse/discussions/7180)._
 </Callout>
+
 
 ```python
 # Fetch the prompt from langfuse
@@ -220,7 +225,7 @@ crew_with_prompt = Crew(
 with langfuse.start_as_current_span(
     name="crewai-index-trace",
     ) as span:
-
+    
     # Run your application here
     result = crew_with_prompt.kickoff()
     print(result)
@@ -242,11 +247,13 @@ The following example demonstrates how to use a pre-existing dataset containing 
 
 **→ Learn more about [Langfuse Dataset Experiments](https://langfuse.com/docs/datasets/overview).**
 
+
+
 ```python
 from langfuse import get_client
-
+ 
 langfuse = get_client()
-
+ 
 # Fetch an existing dataset
 dataset = langfuse.get_dataset(name="capital_cities_11")
 for item in dataset.items:
@@ -258,14 +265,16 @@ Next, we iterate through each item in the dataset, run our CrewAI application (`
 
 The `item.run()` context manager is used to create a new trace for each dataset item processed in the experiment. Optionally you can score the dataset runs.
 
+
+
 ```python
 from crewai import Agent, Task, Crew
-
+ 
 dataset_name = "capital_cities_11"
 current_run_name = "dev_tasks_run-crewai_03" # Identifies this specific evaluation run
 current_run_metadata={"model_provider": "OpenAI", "temperature_setting": 0.7}
 current_run_description="Evaluation run for CrewAI model on June 4th"
-
+ 
 # Assume 'your_application' is your instrumented application function
 def your_application(country):
     with langfuse.start_as_current_span(name="crewai-trace") as span:
@@ -299,31 +308,31 @@ def your_application(country):
             input = task1.description,
             output = result.raw,
         )
-
+ 
     return str(result)
-
+ 
 dataset = langfuse.get_dataset(name=dataset_name) # Fetch your pre-populated dataset
-
+ 
 for item in dataset.items:
     print(f"Running evaluation for item: {item.id} (Input: {item.input})")
-
+ 
     # Use the item.run() context manager
     with item.run(
         run_name=current_run_name,
         run_metadata=current_run_metadata,
         run_description=current_run_description
-    ) as root_span:
+    ) as root_span: 
         # All subsequent langfuse operations within this block are part of this trace.
         generated_answer = your_application(
             country=item.input["country"],
         )
-
+ 
         # Optionally, score the result against the expected output
         if item.expected_output and generated_answer == item.expected_output:
             root_span.score_trace(name="exact_match", value=1.0)
         else:
             root_span.score_trace(name="exact_match", value=0.0)
-
+ 
 print(f"\nFinished processing dataset '{dataset_name}' for run '{current_run_name}'.")
 
 ```
@@ -338,3 +347,4 @@ Langfuse offers more features to enhance your LLM development and observability 
 - [Prompt Management](https://langfuse.com/docs/prompts/get-started)
 - [Prompt Experiments](https://langfuse.com/docs/datasets/prompt-experiments)
 - [More Integrations](https://langfuse.com/docs/integrations/overview)
+

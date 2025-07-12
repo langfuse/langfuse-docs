@@ -13,10 +13,12 @@ With the [Langfuse <-> Mirascope integration](https://langfuse.com/docs/integrat
 
 Let's dive right in with some examples:
 
+
 ```python
 # Install Mirascope and Langfuse
 %pip install "mirascope[langfuse]"
 ```
+
 
 ```python
 import os
@@ -34,6 +36,7 @@ os.environ["OPENAI_API_KEY"] = "sk-..."
 
 ## Log a first simple call
 
+
 ```python
 from mirascope.integrations.langfuse import with_langfuse
 from mirascope.core import openai, prompt_template
@@ -50,6 +53,7 @@ print(response.content)
 
     I recommend **"The House in the Cerulean Sea" by TJ Klune**. It's a heartwarming fantasy that follows Linus Baker, a caseworker for magical children, who is sent on a special assignment to a mysterious orphanage. There, he discovers unique and lovable characters and confronts themes of acceptance, found family, and the importance of love and kindness. The book combines whimsy, humor, and poignant moments, making it a delightful read for fantasy lovers.
 
+
 [**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/84bbb50e-aebc-424a-ae8a-e1012914d46b)
 
 ![Trace of simple Mirascope execution in Langfuse](https://langfuse.com/images/cookbook/integration_mirascope_simple.png)
@@ -57,9 +61,9 @@ print(response.content)
 ## Let's use it together with the Langfuse decorator
 
 We'll use
-
 - Mirascope's `@with_langfuse()` decorator to log the generation
 - and Langfuse default [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) which works with any Python function to observe the `generate_facts` function and group the generations into a single trace.
+
 
 ```python
 from mirascope.integrations.langfuse import with_langfuse
@@ -83,6 +87,7 @@ generate_facts(3)
     Sure! Frogs can breathe through their skin, allowing them to absorb oxygen and release carbon dioxide directly into and out of their bloodstream. This process is known as cutaneous respiration.
     Some species of frogs can absorb water through their skin, meaning they don't need to drink water with their mouths.
     Frogs can breathe through their skin! This adaptation allows them to absorb oxygen directly from water, which is especially useful when they're submerged.
+
 
 Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfuse.com) to see the entire chat history, token counts, cost, model, latencies and more
 

@@ -1,10 +1,10 @@
 ---
 source: ⚠️ Jupyter Notebook
-sidebarTitle: Fireworks AI
 title: Integrate Fireworks AI with Langfuse
+sidebarTitle: Fireworks AI
+logo: /images/integrations/fireworks_ai_icon.svg
 description: Guide on using Fireworks AI's open-source and proprietary AI models with Langfuse via the OpenAI SDK.
 category: Integrations
-logo: /images/integrations/fireworks_icon.svg
 ---
 
 # Observability for Fireworks AI with Langfuse
@@ -18,11 +18,13 @@ This guide shows you how to integrate Fireworks AI with Langfuse. Fireworks AI's
 <Steps>
 ## Step 1: Install Dependencies
 
+
 ```python
 %pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
+
 
 ```python
 import os
@@ -30,7 +32,7 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
@@ -42,6 +44,7 @@ os.environ["FIREWORKS_AI_API_KEY"] = "fw_..."
 
 ## Step 3: Use Langfuse OpenAI Drop-in Replacement
 
+
 ```python
 from langfuse.openai import openai
 
@@ -52,6 +55,7 @@ client = openai.OpenAI(
 ```
 
 ## Step 4: Run an Example
+
 
 ```python
 response = client.chat.completions.create(
@@ -76,7 +80,6 @@ After running the example, log in to Langfuse to view the detailed traces, inclu
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-fireworks-ai/fireworks-ai-example-trace.png)
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2c11b0e4-eb40-49de-aee9-2ed11bed2839?timestamp=2025-03-05T13%3A31%3A34.781Z&observation=e9668bb4-29d7-4239-87be-e3019480f71f)_
-
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

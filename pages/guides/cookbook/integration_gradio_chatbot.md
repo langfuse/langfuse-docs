@@ -1,5 +1,7 @@
 ---
 title: Open Source LLM Observability for Gradio
+sidebarTitle: Gradio
+logo: /images/integrations/gradio_icon.svg
 description: Build a LLM Chat UI with 🤗 Gradio and trace it with 🪢 Langfuse.
 category: Integrations
 ---

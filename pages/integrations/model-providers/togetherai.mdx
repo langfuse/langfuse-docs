@@ -1,10 +1,10 @@
 ---
 source: ⚠️ Jupyter Notebook
 title: Monitor Together AI with Langfuse
-sidebarTitle: Together.ai
+sidebarTitle: Together AI
+logo: /images/integrations/togetherai_icon.svg
 description: Learn how to integrate Together.ai with Langfuse using the OpenAI drop-in replacement.
 category: Integrations
-logo: /images/integrations/togetherai_icon.svg
 ---
 
 # Observability for Together.ai with Langfuse
@@ -20,11 +20,13 @@ This guide shows you how to integrate Together.ai with Langfuse. Together's API 
 
 Make sure you have installed the necessary Python packages:
 
+
 ```python
 %pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
+
 
 ```python
 import os
@@ -32,8 +34,8 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -47,6 +49,7 @@ os.environ["TOGETHER_API_KEY"] = "..."
 In this step we use the native [OpenAI drop-in replacement](https://langfuse.com/docs/integrations/openai/python/get-started) by importing `from langfuse.openai import openai`.
 
 To start using Together with OpenAI's client libraries, pass in your Together API key to the `api_key` option, and change the `base_url` to `https://api.together.xyz/v1`:
+
 
 ```python
 # instead of import openai:
@@ -63,6 +66,7 @@ client = openai.OpenAI(
 ## Step 4: Run An Example
 
 The following cell demonstrates how to call Together.ai's chat model using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
+
 
 ```python
 client = openai.OpenAI(
@@ -93,7 +97,6 @@ After running the example model call, you can see the traces in Langfuse. You wi
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-togetherai/togetherai-example-trace.png)
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d3c13a6f-00c5-4090-8f18-6ce18c794950?timestamp=2025-02-25T15%3A43%3A52.800Z&observation=9eeb3b33-49f0-4557-ac00-d3cbe6bc051e)_
-
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

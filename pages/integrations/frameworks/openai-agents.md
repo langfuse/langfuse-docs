@@ -26,11 +26,10 @@ This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agen
   ></iframe>
 </div>
 
-Interested in how to evaluate your OpenAI Agents? Check out our [example notebook](/guides/cookbook/example_evaluating_openai_agents) on evaluating agents with Langfuse.
-
 ## 1. Install Dependencies
 
 Below we install the `openai-agents` library (the OpenAI Agents SDK), and the `pydantic-ai[logfire]` OpenTelemetry instrumentation.
+
 
 ```python
 %pip install openai-agents nest_asyncio "pydantic-ai[logfire]"
@@ -38,20 +37,20 @@ Below we install the `openai-agents` library (the OpenAI Agents SDK), and the `p
 
 ## 2. Configure Environment & Langfuse Credentials
 
-Next, we'll set environment variables to connect to Langfuse and your OpenAI API key.
-
+Next, we'll set environment variables to connect to Langfuse and your OpenAI API key. 
 - Replace `pk-lf-...` and `sk-lf-...` with your actual Langfuse keys.
 - Replace the `OPENAI_API_KEY` with your valid OpenAI API key.
 
 If you have multiple regions, use the correct `LANGFUSE_HOST` (EU or US).
+
 
 ```python
 import os
 import base64
 
 # Replace with your Langfuse keys.
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."  
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."  
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # or 'https://us.cloud.langfuse.com'
 
 # Build Basic Auth header.
@@ -64,17 +63,20 @@ os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
 # OpenAI API Key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
 ```
 
 ## 3. Instrumenting the Agent
 
 Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
 
+
+
 ```python
 import nest_asyncio
 nest_asyncio.apply()
 ```
+
 
 ```python
 import logfire
@@ -92,6 +94,8 @@ logfire.instrument_openai_agents()
 ## 4. Hello World Example
 
 Below we create an **OpenAI Agent** that always replies in **haiku** form. We run it with `Runner.run` and print the final output.
+
+
 
 ```python
 import asyncio
@@ -119,12 +123,12 @@ Clicking the link above (or your own project link) lets you view all sub-spans, 
 ## 5. Multi-agent Handoff Example
 
 Here we create:
-
 - A **Spanish agent** that responds only in Spanish.
 - An **English agent** that responds only in English.
 - A **Triage agent** that routes the request to the correct agent based on the input language.
 
 Any calls or handoffs are captured as part of the trace. That way, you can see which sub-agent or tool was used, as well as the final result.
+
 
 ```python
 from agents import Agent, Runner
@@ -157,6 +161,8 @@ print(result.final_output)
 ## 6. Functions Example
 
 The OpenAI Agents SDK allows the agent to call Python functions. With Langfuse instrumentation, you can see which **functions** are called, their arguments, and the return values. Here we define a simple function `get_weather(city: str)` and add it as a tool.
+
+
 
 ```python
 import asyncio
@@ -191,6 +197,8 @@ When viewing the trace, you’ll see a span capturing the function call `get_wea
 
 In some workflows, you want to group multiple calls into a single trace—for instance, when building a small chain of prompts that all relate to the same user request. You can use a `trace(...)` context manager to nest multiple calls under one top-level trace.
 
+
+
 ```python
 from agents import Agent, Runner, trace
 import asyncio
@@ -216,4 +224,4 @@ Each child call is represented as a sub-span under the top-level **Joke workflow
 
 ## Resources
 
-Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents) with Langfuse.
+Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents) with Langfuse. 

@@ -1,10 +1,10 @@
 ---
 source: Jupyter Notebook
-sidebarTitle: LlamaIndex Workflows
-logo: /images/integrations/llamaindex_icon.png
 title: Observability for LlamaIndex with Langfuse Integration
+sidebarTitle: LlamaIndex Workflows
 description: Discover how to integrate Langfuse with LlamaIndex for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
 category: Integrations
+logo: /images/integrations/llamaindex_icon.png
 ---
 
 # Observability for LlamaIndex Workflows
@@ -23,10 +23,9 @@ We'll walk through a simple example of using LlamaIndex Workflows and integratin
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="⚠️">
-  _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users
-  of Python SDK v2, please refer to our [legacy LlamaIndex integration
-  guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
+_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy LlamaIndex integration guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
 </Callout>
+
 
 ```python
 %pip install langfuse openai llama-index-workflows llama-index-core llama-index-llms-openai openinference-instrumentation-llama_index llama-index-instrumentation
@@ -36,12 +35,13 @@ We'll walk through a simple example of using LlamaIndex Workflows and integratin
 
 Configure your Langfuse API keys. You can get them by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
+
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -51,11 +51,12 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
+
 ```python
 from langfuse import get_client
-
+ 
 langfuse = get_client()
-
+ 
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -68,6 +69,7 @@ else:
 
 Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
+
 ```python
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
@@ -78,6 +80,7 @@ LlamaIndexInstrumentor().instrument()
 ### Step 4: Create a Simple LlamaIndex Workflows Application
 
 In LlamaIndex Workflows, you build event-driven AI agents by defining steps with the `@step` decorator. Each step processes an event and, if appropriate, emits new events. In this example, we create a simple workflow with two steps: one that pre-processes an incoming event and another that generates a reply.
+
 
 ```python
 from llama_index.core.llms import ChatMessage
@@ -106,6 +109,7 @@ class MyWorkflow(Workflow):
 w = MyWorkflow()
 ```
 
+
 ```python
 response = await w.run(input="Hello, what is Langfuse?")
 print(response)
@@ -113,18 +117,15 @@ print(response)
 
 ### Step 5: View Traces in Langfuse
 
-After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths.
+After running your workflow, log in to [Langfuse](https://cloud.langfuse.com) to explore the generated traces. You will see logs for each workflow step along with metrics such as token counts, latencies, and execution paths. 
 
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-llamaindex-workflows/llamaindex-workflows-example-trace.png)
 
 _[Public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e0987dce85c8c49602030599b84e77e8?timestamp=2025-07-01T09%3A42%3A54.701Z&display=details)_
-
 </Steps>
 
 <Callout type="info" emoji="ℹ️">
-  _**Note:** To add additional trace attributes like tags or metadata or use
-  LlamaIndex Workflows together with other Langfuse features please refer to
-  [this guide](https://langfuse.com/docs/integrations/llama-index/get-started)._
+_**Note:** To add additional trace attributes like tags or metadata or use LlamaIndex Workflows together with other Langfuse features please refer to [this guide](https://langfuse.com/docs/integrations/llama-index/get-started)._
 </Callout>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
@@ -133,4 +134,4 @@ import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
 ## References
 
-- [LlamaIndex Workflows Documentation](https://docs.llamaindex.ai/en/stable/module_guides/workflow/)
+- [LlamaIndex Workflows Documentation](https://docs.llamaindex.ai/en/stable/module_guides/workflow/)  
