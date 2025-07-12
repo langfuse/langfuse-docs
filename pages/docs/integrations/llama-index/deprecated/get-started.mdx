@@ -47,6 +47,7 @@ At the root of your LlamaIndex application, register Langfuse's `LlamaIndexInstr
 
 <Tabs items={["Trace all executions", "Trace specific executions / with params"]} >
 <Tab>
+
 ```python
 from langfuse.llama_index import LlamaIndexInstrumentor
 
@@ -67,11 +68,12 @@ index.as_query_engine().query("What is the capital of France?")
 # Flush events to langfuse
 
 instrumentor.flush()
+```
 
-````
 </Tab>
 
 <Tab>
+
 ```python
 from langfuse.llama_index import LlamaIndexInstrumentor
 
@@ -90,7 +92,7 @@ trace.score(name="my-score", value=0.5)
 
 # Flush events to langfuse
 instrumentor.flush()
-````
+```
 
 </Tab>
 
@@ -102,18 +104,6 @@ instrumentor.flush()
   LLM with your documents in context, your traces and metrics are immediately
   visible in the Langfuse UI.
 </Callout>
-
-Check out the notebook for end-to-end examples of the integration:
-
-import { FileCode } from "lucide-react";
-
-<Cards>
-  <Card
-    title="Example Notebook"
-    href="/docs/integrations/llama-index/example-python-instrumentation-module"
-    icon={<FileCode />}
-  />
-</Cards>
 
 ## Additional configuration
 
@@ -153,7 +143,6 @@ with instrumentor.observe(trace_id='custom-trace-id', session_id="my-session", u
     # ... your LlamaIndex index creation ...
 
     index.as_query_engine().query("What is the capital of France?")
-
 ```
 
 ### Interoperability with Langfuse SDK
@@ -216,7 +205,6 @@ def my_func():
   with instrumentor.observe(trace_id=root_trace.id, update_parent=False):
     # Your LlamaIndex code here
     ...
-
 ```
 
 </Tab>
