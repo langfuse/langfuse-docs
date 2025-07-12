@@ -87,7 +87,7 @@ const config: DocsThemeConfig = {
 
     const description = frontMatter.description ?? "";
 
-    const title = frontMatter.title ?? pageTitle;
+    const title = frontMatter.seoTitle ?? frontMatter.title ?? pageTitle;
 
     const section = asPath.startsWith("/docs")
       ? "Docs"
@@ -204,12 +204,11 @@ const config: DocsThemeConfig = {
     content: (
       <Link href="/blog/2025-06-04-open-sourcing-langfuse-product">
         {/* mobile */}
-        <span className="sm:hidden">
-          Doubling Down on Open Source →
-        </span>
+        <span className="sm:hidden">Doubling Down on Open Source →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Doubling Down on Open Source: All Product Features Now in Self-Hosted →
+          Doubling Down on Open Source: All Product Features Now in Self-Hosted
+          →
         </span>
       </Link>
     ),

@@ -1,0 +1,283 @@
+---
+title: Integrating Langfuse with Spring AI Using OpenTelemetry
+sidebarTitle: Spring AI
+logo: /images/integrations/spring_icon.svg
+description: Learn how to integrate Langfuse with Spring AI using OpenTelemetry for enhanced observability and performance monitoring in your AI applications.
+---
+
+# Integrating Langfuse with Spring AI
+
+This guide shows how to integrate [Langfuse](/) with [Spring AI](https://docs.spring.io/spring-ai/reference) using OpenTelemetry.
+
+**Spring AI**: Spring-based framework for AI development with built-in OTel tracing for AI calls.
+
+**Langfuse**: Open source LLM engineering platform for observability, evals and prompt management.
+
+<Callout type="info" emoji="💡">
+  Checkout the [Langfuse Example
+  Repo](https://github.com/langfuse/langfuse-examples/tree/main/applications/spring-ai-demo)
+  for a fully instrumented example application.
+</Callout>
+
+## Step 1: Enable OpenTelemetry in Spring AI
+
+**Add OpenTelemetry and Spring Observability Dependencies** (Maven):
+
+Make sure your project includes Spring Boot Actuator and the Micrometer tracing libraries for OpenTelemetry. Spring Boot Actuator is required to enable Micrometer’s observation and tracing features.
+
+You’ll also need the Micrometer -> OpenTelemetry bridge and an OTLP exporter. For Maven, add the following to your `pom.xml` (Gradle users can include equivalent coordinates in Gradle):
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-bom</artifactId>
+            <version>2.17.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-bom</artifactId>
+            <version>1.0.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-starter-model-openai</artifactId>
+    </dependency>
+    <!-- Spring AI needs a reactive web server to run for some reason-->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-spring-boot-starter</artifactId>
+    </dependency>
+    <!-- Spring Boot Actuator for observability support -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <!-- Micrometer Observation -> OpenTelemetry bridge -->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <!-- OpenTelemetry OTLP exporter for traces -->
+    <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-exporter-otlp</artifactId>
+    </dependency>
+</dependencies>
+```
+
+**Enable Span Export and Configure Spring AI Observations** (`application.yml`):
+
+With the above dependencies, Spring Boot will auto-configure tracing using OpenTelemetry as long as we provide the proper settings. We need to specify where to send the spans (the OTLP endpoint) and ensure Spring AI is set up to include the desired data in those spans. Create or update your `application.yml` (or `application.properties`) with the following configurations:
+
+```yaml
+spring:
+  application:
+    name: spring-ai-llm-app # Service name for tracing (appears in Langfuse UI as the source service)
+  ai:
+    chat:
+      observations:
+        log-prompt: true # Include prompt content in tracing (disabled by default for privacy)
+        log-completion: true # Include completion content in tracing (disabled by default)
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # Sample 100% of requests for full tracing (adjust in production as needed)
+  observations:
+    annotations:
+      enabled: true # Enable @Observed (if you use observation annotations in code)
+```
+
+**Add Custom Span Processor** (`ChatModelCompletionContentObservationFilter.java`):
+
+Add a custom span processor to include prompt and completion properties on the spans emitted by OpenTelemetry.
+
+```java
+package com.langfuse.springai;
+
+import io.micrometer.common.KeyValue;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationFilter;
+import org.springframework.ai.chat.observation.ChatModelObservationContext;
+import org.springframework.ai.content.Content;
+import org.springframework.ai.observation.ObservabilityHelper;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+
+@Component
+public class ChatModelCompletionContentObservationFilter implements ObservationFilter {
+
+    @Override
+    public Observation.Context map(Observation.Context context) {
+        if (!(context instanceof ChatModelObservationContext chatModelObservationContext)) {
+            return context;
+        }
+
+        var prompts = processPrompts(chatModelObservationContext);
+        var completions = processCompletion(chatModelObservationContext);
+
+        chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
+            @Override
+            public String getKey() {
+                return "gen_ai.prompt";
+            }
+
+            @Override
+            public String getValue() {
+                return ObservabilityHelper.concatenateStrings(prompts);
+            }
+        });
+
+        chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
+            @Override
+            public String getKey() {
+                return "gen_ai.completion";
+            }
+
+            @Override
+            public String getValue() {
+                return ObservabilityHelper.concatenateStrings(completions);
+            }
+        });
+
+        return chatModelObservationContext;
+    }
+
+    private List<String> processPrompts(ChatModelObservationContext chatModelObservationContext) {
+            return CollectionUtils.isEmpty((chatModelObservationContext.getRequest()).getInstructions()) ? List.of() : (chatModelObservationContext.getRequest()).getInstructions().stream().map(Content::getText).toList();
+    }
+
+    private List<String> processCompletion(ChatModelObservationContext context) {
+        if (context.getResponse() != null && (context.getResponse()).getResults() != null && !CollectionUtils.isEmpty((context.getResponse()).getResults())) {
+            return !StringUtils.hasText((context.getResponse()).getResult().getOutput().getText()) ? List.of() : (context.getResponse()).getResults().stream().filter((generation) -> generation.getOutput() != null && StringUtils.hasText(generation.getOutput().getText())).map((generation) -> generation.getOutput().getText()).toList();
+        } else {
+            return List.of();
+        }
+    }
+}
+```
+
+With these configurations and dependencies in place, your Spring Boot application is ready to produce OpenTelemetry traces. Spring AI’s internal calls (e.g. when you invoke a chat model or generate an embedding) will be recorded as spans.
+
+Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content​
+
+## Step 2: Configure Langfuse
+
+Now that your Spring AI application is emitting OpenTelemetry trace data, the next step is to direct that data to Langfuse.
+
+Langfuse will act as the “backend” for OpenTelemetry in this setup – essentially replacing a typical Jaeger/Zipkin/OTel-Collector with Langfuse’s trace ingestion API.
+
+**Langfuse Setup**
+
+- Sign up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosted Langfuse](https://langfuse.com/self-hosting).
+- Set the OTLP endpoint (e.g. `https://cloud.langfuse.com/api/public/otel`) and API keys.
+
+Configure these via environment variables:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT: set this to the Langfuse OTLP URL (e.g. https://cloud.langfuse.com/api/public/otel).
+OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 public:secret>.
+```
+
+<Callout type="info">
+  You can find more on authentication via Basic Auth in the
+  [here](/docs/opentelemetry/get-started).
+</Callout>
+
+## Step 3: Run a Test AI Operation
+
+Start your Spring Boot application. Trigger an AI operation that Spring AI handles – for example, call a service or controller that uses a `ChatModel` to generate a completion, or an `EmbeddingModel` to generate embeddings.
+
+```java
+@Autowired
+private ChatService chatService;
+
+@EventListener(ApplicationReadyEvent.class)
+public void testAiCall() {
+    String answer = chatService.chat("Hello, Spring AI!");
+    System.out.println("AI answered: " + answer);
+}
+```
+
+## Setting userId and sessionId
+
+This section covers how to associate spans from Spring AI with [users](/docs/tracing-features/users) and [sessions](/docs/tracing-features/sessions).
+Create a custom span and set the Langfuse-specific attributes directly:
+
+```java
+public String processUserRequest(String userInput, String userId) {
+    // Create a new span with user and session attributes
+    Span span = tracer.spanBuilder("user-interaction")
+            .setAttribute("langfuse.user.id", userId)
+            .setAttribute("langfuse.session.id", UUID.randomUUID().toString())
+            .startSpan();
+
+    // Make sure to set the new span as active.
+    try (Scope ignored = span.makeCurrent()) {
+        // Your AI processing logic here
+        // Any spans created within this scope will be children of the parent span
+        String result = performAiOperation(userInput);
+        return result;
+    } finally {
+        span.end();
+    }
+}
+
+private String performAiOperation(String userInput) {
+    // Your Spring AI code here
+    // For example:
+    List<Message> messages = new ArrayList<>();
+    messages.add(new SystemMessage("You are a helpful assistant."));
+    messages.add(new UserMessage(userInput));
+
+    Prompt prompt = new Prompt(messages);
+    ChatResponse response = chatClient.call(prompt);
+    return response.getResult().getOutput().getContent();
+}
+```
+
+<Callout type="info">
+  Note that for proper user tracking in Langfuse, the `langfuse.user.id` and
+  `langfuse.session.id` attributes should ideally be set on the root span. If
+  you're unable to add these attributes to the root span directly, you can use
+  the [Langfuse Java SDK](https://github.com/langfuse/langfuse-java) to update
+  the trace after it has been written.
+</Callout>
+
+## Troubleshooting
+
+**No Traces:**
+
+- Check endpoint/credentials and confirm AI calls are invoked.
+- Don’t mix multiple tracer implementations.
+
+**Missing Prompt/Completion:**
+
+- Ensure `log-prompt` and `log-completion` are `true`.
+- Sampling probability must be high enough.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-spring-ai"]} />

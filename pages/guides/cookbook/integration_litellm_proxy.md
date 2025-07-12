@@ -82,8 +82,8 @@ In this example, we'll use GPT-3.5-turbo directly from OpenAI, and llama3 and mi
         litellm_params:
           model: ollama/mistral
     ```
-3. Ensure that you installed Ollama and have pulled the llama3 (8b) and mistral (7b) models: `ollama pull llama3 && ollama pull mistral`
-4. Run the following cli command to start the proxy: `litellm --config litellm_config.yaml`
+2. Ensure that you installed Ollama and have pulled the llama3 (8b) and mistral (7b) models: `ollama pull llama3 && ollama pull mistral`
+3. Run the following cli command to start the proxy: `litellm --config litellm_config.yaml`
 
 The Lite LLM Proxy should be now running on http://0.0.0.0:4000
 

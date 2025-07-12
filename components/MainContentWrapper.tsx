@@ -20,7 +20,19 @@ import Link from "next/link";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
 
-const pathsWithoutFooterWidgets = ["/imprint", "/blog", "/customers", "/careers"];
+const pathsWithoutFooterWidgets = [
+  "/imprint",
+  "/blog",
+  "/customers",
+  "/careers",
+];
+const pathsWithCopyAsMarkdownButton = [
+  "/docs",
+  "/self-hosting",
+  "/guide",
+  "/faq",
+  "/integrations",
+];
 const isCustomerStory = (pathname: string) =>
   pathname.startsWith("/customers/");
 
@@ -183,8 +195,7 @@ export const MainContentWrapper = (props) => {
 
   const versionLabel = frontMatter.label;
 
-  const allowedPrefixes = ["/docs", "/self-hosting", "/guide", "/faq"];
-  const shouldShowCopyButton = allowedPrefixes.some((prefix) =>
+  const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
     router.pathname.startsWith(prefix)
   );
 

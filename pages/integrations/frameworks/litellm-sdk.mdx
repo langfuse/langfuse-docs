@@ -1,0 +1,188 @@
+---
+title: LiteLLM SDK Integration
+seoTitle: Open Source Observability for LiteLLM SDK
+sidebarTitle: LiteLLM SDK
+logo: /images/integrations/litellm_icon.png
+---
+
+# Integration: 🚅 LiteLLM SDK
+
+**LiteLLM** ([GitHub](https://github.com/BerriAI/litellm)): Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs).
+
+<Callout type="info">
+  This integration is for the LiteLLM SDK. If you are looking for the LiteLLM
+  Proxy integration, see the [LiteLLM Proxy
+  Integration](/docs/integrations/gateways/tracing) page.
+</Callout>
+
+The LiteLLM SDK is a Python library that allows you to use any LLM as a drop in replacement for the OpenAI SDK.
+
+This integration is covered by the LiteLLM [integration docs](https://litellm.vercel.app/docs/observability/langfuse_integration).
+
+## Get Started
+
+<Callout type="warning">
+  LiteLLM relies on the <strong>Langfuse Python SDK v2</strong>. It is currently
+  <strong>not compatible</strong> with the newer
+  <strong>[Python SDK v3](/docs/sdk/python/sdk-v3)</strong>. Please refer to the
+  [v2 documentation](/docs/sdk/python/low-level-sdk) and pin the SDK version
+  during installation:
+</Callout>
+
+```
+pip install "langfuse>=2,<3" litellm
+```
+
+```python filename="main.py"
+from litellm import completion
+
+## set env variables
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+
+# Langfuse host
+os.environ["LANGFUSE_HOST"]="https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"]="https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Model API keys (example)
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["COHERE_API_KEY"] = ""
+
+# set callbacks
+litellm.success_callback = ["langfuse"]
+litellm.failure_callback = ["langfuse"]
+```
+
+### Quick Example
+
+```python filename="main.py"
+import litellm
+
+# openai call
+openai_response = litellm.completion(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm openai"}
+  ]
+)
+
+print(openai_response)
+
+# cohere call
+cohere_response = litellm.completion(
+  model="command-nightly",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm cohere"}
+  ]
+)
+print(cohere_response)
+
+```
+
+### Use within decorated function
+
+If you want to use the LiteLLM SDK within a decorated function ([observe() decorator](/docs/sdk/python/decorators)), you can use the `langfuse.get_current_trace_id()` and `langfuse.get_current_observation_id()` methods to pass the correct nesting information to the LiteLLM SDK.
+
+```python filename="main.py"
+from litellm import completion
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def fn():
+  # set custom langfuse trace params and generation params
+  response = completion(
+    model="gpt-3.5-turbo",
+    messages=[
+      {"role": "user", "content": "Hi 👋 - i'm openai"}
+    ],
+    metadata={
+        "existing_trace_id": langfuse.get_current_trace_id(),   # set langfuse trace ID
+        "parent_observation_id": langfuse.get_current_observation_id(),
+    },
+  )
+
+  print(response)
+```
+
+[GitHub issue](https://github.com/langfuse/langfuse/issues/2238) tracking a native integration that will automatically capture nested traces when the LiteLLM SDK is used within a decorated function.
+
+### Set Custom Trace ID, Trace User ID and Tags
+
+<Callout type="info">
+
+You can add additional Langfuse attributes to the requests in order to group requests into traces, add userIds, tags, sessionIds, and more. These attributes are shared across LiteLLM Proxy and SDK, please refer to both documentation pages to learn about all potential options:
+
+- [LiteLLM Proxy docs](https://docs.litellm.ai/docs/proxy/logging#langfuse)
+- [LiteLLM Python SDK docs](https://litellm.vercel.app/docs/observability/langfuse_integration#advanced)
+
+</Callout>
+
+```python filename="main.py"
+from litellm import completion
+
+# set custom langfuse trace params and generation params
+response = completion(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "user", "content": "Hi 👋 - i'm openai"}
+  ],
+  metadata={
+      "generation_name": "test-generation",   # set langfuse Generation Name
+      "generation_id": "gen-id",              # set langfuse Generation ID
+      "trace_id": "trace-id",                 # set langfuse Trace ID
+      "trace_user_id": "user-id",             # set langfuse Trace User ID
+      "session_id": "session-id",             # set langfuse Session ID
+      "tags": ["tag1", "tag2"]                # set langfuse Tags
+  },
+)
+
+print(response)
+
+```
+
+### Use LangChain ChatLiteLLM + Langfuse
+
+```sh
+pip install langchain
+```
+
+```python filename="main.py"
+from langchain.chat_models import ChatLiteLLM
+from langchain.schema import HumanMessage
+import litellm
+
+
+chat = ChatLiteLLM(
+  model="gpt-3.5-turbo"
+  model_kwargs={
+      "metadata": {
+        "trace_user_id": "user-id", # set Langfuse Trace User ID
+        "session_id": "session-id", # set Langfuse Session ID
+        "tags": ["tag1", "tag2"] # set Langfuse Tags
+      }
+    }
+  )
+messages = [
+    HumanMessage(
+        content="what model are you"
+    )
+]
+chat(messages)
+
+```
+
+### Customize Langfuse Python SDK via Environment Variables
+
+To customize Langfuse settings, use the [Langfuse environment variables](/docs/sdk/python/low-level-sdk#initialize-client). These will be picked up by the LiteLLM SDK on initialization as it uses the Langfuse Python SDK under the hood.
+
+import LitellmAbout from "@/components-mdx/litellm-about.mdx";
+
+<LitellmAbout />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-litellm"]} />

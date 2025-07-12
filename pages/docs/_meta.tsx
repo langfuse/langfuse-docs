@@ -17,7 +17,11 @@ export default {
   "get-started": "Quickstart",
   "tracing-features": "Tracing Features",
   sdk: "SDKs",
-  integrations: "Integrations",
+  integrations: {
+    title: "Integrations ↗",
+    href: "/integrations",
+    newWindow: false,
+  },
   opentelemetry: "OpenTelemetry",
   "model-usage-and-cost": "LLM Usage & Cost Tracking",
   analytics: "Production Analytics",

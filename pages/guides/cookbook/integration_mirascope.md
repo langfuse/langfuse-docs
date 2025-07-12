@@ -89,7 +89,7 @@ generate_facts(3)
     Frogs can breathe through their skin! This adaptation allows them to absorb oxygen directly from water, which is especially useful when they're submerged.
 
 
-Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfuse.com ) to see the entire chat history, token counts, cost, model, latencies and more
+Head over to the Langfuse Traces table [in Langfuse Cloud](https://cloud.langfuse.com) to see the entire chat history, token counts, cost, model, latencies and more
 
 [**Example trace**](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/71eba8c4-3088-4af2-8d35-5b19d668d6aa)
 

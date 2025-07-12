@@ -1,0 +1,93 @@
+---
+title: Observability and Tracing for Flowise
+sidebarTitle: Flowise
+logo: /images/integrations/flowise_icon.svg
+description: Open source observability for Flowise applications. Automatically capture detailed traces and metrics for every request.
+---
+
+# Flowise Observability & Tracing
+
+**Flowise** ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. It lets you build customized LLM flows with a drag & drop editor.
+
+With the native integration, you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to monitor and improve them.
+
+The integration supports all use cases of Flowise, including: interactively in the UI, API, and embeds.
+
+## Integration
+
+<Steps>
+
+### Obtain Langfuse API keys
+
+<Tabs items={["Langfuse cloud", "local or self-hosted"]}>
+<Tab>
+
+1. Create account and project on
+   [cloud.langfuse.com](https://cloud.langfuse.com/auth/sign-up)
+2. Copy API keys for your
+   project
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/docs/get-started/) on self-hosting or local setups
+2. Copy API keys for your
+   project
+
+</Tab>
+</Tabs>
+
+### Run Flowise
+
+```sh
+# install
+npm install -g flowise
+
+# start
+npx flowise start
+```
+
+### Add Langfuse
+
+<CloudflareVideo
+  videoId="958f4fd18821c4bc9fe3034d9aa6ef98"
+  aspectRatio={4.185 / 3}
+  gifStyle
+/>
+
+You can optionally add `release` to tag the current version of the flow. You usually don't need to change the other options.
+
+</Steps>
+
+## Mapping of Flowise to Langfuse
+
+The integration automatically maps the following fields from Flowise to Langfuse:
+
+| Flowise                                                                    | Langfuse                                     | Required version                                                                     |
+| -------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [chatId](https://docs.flowiseai.com/integrations/langchain/memory/threads) | [sessionId](/docs/tracing-features/sessions) | [Flowise 1.4.10](https://github.com/FlowiseAI/Flowise/releases/tag/flowise%401.4.10) |
+
+## Override Config
+
+The Flowise allows you to pass additional parameters as `overrideConfig` to the Langfuse API. This can be used to pass additional information to Langfuse, such as `userId` for user-level tracking.
+
+Learn more about `overrideConfig` in the [Flowise Prediction API documentation](https://docs.flowiseai.com/using-flowise/api#prediction-api).
+
+```json
+{
+  "question": "hi there",
+  "overrideConfig": {
+    "analytics": {
+      "langFuse": {
+        "userId": "user1"
+      }
+    }
+  }
+}
+```
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-flowise"]} />

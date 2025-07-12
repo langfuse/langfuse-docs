@@ -1,0 +1,144 @@
+---
+title: Observability for Mastra with Langfuse
+sidebarTitle: Mastra
+logo: /images/integrations/mastra_icon.png
+description: Learn how to integrate Langfuse with Mastra, a TypeScript agent framework, to monitor, debug, and analyze your AI applications.
+---
+
+# Observability for Mastra With Langfuse
+
+This guide shows you how to integrate **Langfuse** with **Mastra** for observability and tracing. By following these steps, you'll be able to monitor and debug your Mastra agents in the Langfuse dashboard.
+
+> **What is Mastra?** [Mastra](https://mastra.ai) is the TypeScript agent framework designed to provide the essential primitives for building AI applications. It enables developers to create AI agents with memory and tool-calling capabilities, implement deterministic LLM workflows, and leverage RAG for knowledge integration.
+
+## Integration
+
+<Steps>
+
+### Create a Mastra project
+
+If you don't have a Mastra project yet, you can create one using the Mastra CLI:
+
+```bash
+npx create-mastra
+```
+
+Move into the project directory:
+
+```bash
+cd your-mastra-project
+```
+
+You can get the full Mastra installation instructions [here](https://mastra.ai/docs/getting-started/installation)
+
+### Set up Langfuse project
+
+Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys from the project settings page.
+
+### Add environment variables
+
+Create or update your `.env.development` file with the following variables:
+
+```bash
+# Your LLM API key
+OPENAI_API_KEY=your-api-key
+
+# Langfuse credentials
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
+```
+
+### Install the `langfuse-vercel` package
+
+Add the `langfuse-vercel` package to your project:
+
+```bash
+npm install langfuse-vercel
+```
+
+### Set up an agent
+
+Create an agent in your project. For example, create a file `agents/chefAgent.ts`:
+
+```typescript
+import { Agent } from "@mastra/core/agent";
+import { openai } from "@ai-sdk/openai";
+
+export const chefAgent = new Agent({
+  name: "chef-agent",
+  instructions:
+    "You are Michel, a practical and experienced home chef " +
+    "You help people cook with whatever ingredients they have available.",
+  model: openai("gpt-4o-mini"),
+});
+```
+
+{" "}
+
+<Callout type="info">You can use any model provider from `ai-sdk`.</Callout>
+
+### Register agent and configure Langfuse
+
+Create or update your Mastra instance configuration to register the agent and configure Langfuse integration. For example, create a file `mastra.ts`:
+
+```typescript
+import { Mastra } from "@mastra/core";
+import { LangfuseExporter } from "langfuse-vercel";
+import { chefAgent } from "./agents/chefAgent";
+
+export const mastra = new Mastra({
+  agents: { chefAgent },
+  telemetry: {
+    serviceName: "ai", // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace
+    enabled: true,
+    export: {
+      type: "custom",
+      exporter: new LangfuseExporter({
+        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+        secretKey: process.env.LANGFUSE_SECRET_KEY,
+        baseUrl: process.env.LANGFUSE_HOST,
+      }),
+    },
+  },
+});
+```
+
+{" "}
+
+<Callout type="info">
+  The `telemetry.serviceName` field must be set to "ai" so that the
+  LangfuseExporter thinks it's an AI SDK trace.
+</Callout>
+
+### Run mastra dev server
+
+Start the Mastra development server:
+
+```bash
+npm run dev
+```
+
+Head over to the developer playground with the provided URL and start chatting with your agent.
+
+### View traces in Langfuse
+
+Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
+
+Here's an example of a trace:
+
+![Mastra trace in Langfuse UI](/images/docs/langfuse-mastra-trace.png)
+
+</Steps>
+
+## Troubleshooting
+
+- **NextJS Integration Issues**: If you encounter issues when using Mastra with Langfuse in NextJS applications, refer to the [Mastra NextJS tracing documentation](https://mastra.ai/en/docs/observability/nextjs-tracing) for NextJS-specific configuration and setup instructions.
+- **No Traces in Langfuse**: Ensure that your credentials are correct and follow this [troubleshooting guide](/faq/all/missing-traces)
+
+## References
+
+- [Project Repository](https://github.com/akuya-ekorot/langfuse-mastra)
+- [Mastra Documentation](https://mastra.ai/docs)
+- [Langfuse Documentation](https://langfuse.com/docs)
+- [langfuse-vercel package](https://www.npmjs.com/package/langfuse-vercel)

@@ -1,0 +1,108 @@
+---
+title: Observability & Tracing for Inferable (open source)
+sidebarTitle: Inferable
+logo: /images/integrations/inferable_icon.png
+description: Open source observability for Inferable applications. Automatically capture detailed traces and metrics for every request.
+---
+
+# Langfuse Integration for Inferable
+
+[**Inferable**](https://www.inferable.ai) ([GitHub](https://github.com/inferablehq/inferable)) is an open-source platform that helps you build reliable agentic automations at scale.
+
+With the native integration, you can use Inferable to quickly create distributed agentic automations and then use Langfuse to monitor and improve them. No code changes required.
+
+## Get Started
+
+<Steps>
+
+### Get Langfuse API keys
+
+<Tabs items={["Langfuse Cloud", "Local or self-hosted"]}>
+<Tab>
+
+1. Create account and project on [cloud.langfuse.com](https://cloud.langfuse.com)
+2. Copy API keys for your project
+
+</Tab>
+<Tab>
+
+1. Follow [instructions](/self-hosting) for self-hosting or local setups
+2. Copy API keys for your project
+
+</Tab>
+</Tabs>
+
+### Configure Inferable with Langfuse
+
+<Tabs items={["Inferable Cloud", "Local or self-hosted"]}>
+<Tab>
+
+1. Navigate to the Integrations tab of your preferred cluster in Inferable
+2. Add your Langfuse credentials:
+   - **Secret API Key**: Your Langfuse Secret API Key
+   - **Public API Key**: Your Langfuse Public API Key
+   - **Base URL**: Your Langfuse Base URL (e.g. `https://cloud.langfuse.com`)
+   - **Send Message Payloads**: Whether to send inputs and outputs of LLM calls and function calls to Langfuse
+
+</Tab>
+
+<Tab>
+
+If you're self-hosting Inferable in the headless mode, simply insert the Langfuse credentials into the `integrations` table.
+
+```sql
+INSERT INTO integrations (cluster_id, langfuse) VALUES
+(
+  '<local_cluster_id>',
+  '{"publicKey":"<your_public_api_key>","secretKey":"<your_secret_api_key>","baseUrl":"<your_langfuse_base_url>","sendMessagePayloads":false}'
+);
+```
+
+If you're self-hosting the console, you can follow the same instructions as the managed mode.
+
+</Tab>
+</Tabs>
+
+</Steps>
+
+## Features
+
+### Tracing
+
+Once you have enabled the Langfuse integration, you will start to see [traces](/docs/tracing) in the Langfuse dashboard. Every Run in Inferable will be mapped to its own trace in Langfuse.
+
+![Inferable trace in Langfuse](/images/docs/inferable-langfuse-trace.png)
+
+You will find two types of spans in the trace:
+
+- **Tool Calls**: Denoted by function name. These are spans created for each tool call made in the Run by the LLM.
+- **LLM Calls**: Denoted by `GENERATION`. This is the span created for the LLM call. Inferable will create a new span for each LLM call in the Run, including:
+  - Agent loop reasoning
+  - Utility calls (e.g., Summarization, Title generation)
+
+Learn more about the Langfuse Tracing data structure [here](/docs/tracing).
+
+### Evaluations
+
+Whenever you submit an evaluation on a Run via the Playground or the API, Inferable will send a [score](/docs/scores) to Langfuse on the trace for that Run.
+
+If you're using Langfuse for evaluation, this will help you correlate the evaluation back to the specific Trace in Langfuse.
+
+![Inferable evaluation in Langfuse](/images/docs/inferable-langfuse-eval.png)
+
+## Message Payload Security
+
+By default, Inferable will only send metadata about LLM calls and function calls. This includes the model, Run ID, token usage, latency etc.
+
+If you have **Send Message Payloads** enabled, Inferable will also send the inputs and outputs of the LLM calls and function calls. This includes:
+
+- Prompts
+- Responses
+- Tool calls
+- Tool call arguments
+- Tool call results
+
+## Other notes
+
+- The Langfuse traces may take up to 30 seconds to be sent to Langfuse. But usually appear in a few seconds.
+- You can report an issue on [Inferable GitHub](https://github.com/inferablehq/inferable/issues) if you're having trouble with the integration.
