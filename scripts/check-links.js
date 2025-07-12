@@ -2,8 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
-const http = require('http');
 const { promisify } = require('util');
 const markdownLinkCheck = require('markdown-link-check');
 const readFileAsync = promisify(fs.readFile);
@@ -67,84 +65,32 @@ function extractHrefLinks(content) {
     return links;
 }
 
-function checkHttpUrl(url) {
-    return new Promise((resolve, reject) => {
-        const isHttps = url.startsWith('https://');
-        const client = isHttps ? https : http;
-        
-        const request = client.request(url, {
-            method: 'HEAD',
-            timeout: 20000,
-            headers: {
-                'User-Agent': 'Langfuse-Link-Checker/1.0'
-            }
-        }, (response) => {
-            // Handle redirects
-            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                const redirectUrl = response.headers.location;
-                // Resolve relative redirects
-                const resolvedUrl = redirectUrl.startsWith('http') ? redirectUrl : new URL(redirectUrl, url).href;
-                checkHttpUrl(resolvedUrl).then(resolve).catch(reject);
+async function checkHrefLinks(links, filePath) {
+    if (links.length === 0) {
+        return false;
+    }
+    
+    // Create a fake markdown content with just the href links to reuse existing functionality
+    const fakeMarkdown = links.map(link => `[link](${link})`).join('\n');
+    
+    const results = await markdownLinkCheckAsync(fakeMarkdown, config);
+    
+    let hasErrors = false;
+    results.forEach(result => {
+        if (result.status === 'dead') {
+            // Skip reporting errors for obviously invalid URLs
+            if (result.link.includes('{') || result.link.includes('}') ||
+                result.link.includes('${') || result.link.includes('}}')) {
                 return;
             }
-            
-            resolve(response.statusCode);
-        });
-        
-        request.on('error', reject);
-        request.on('timeout', () => {
-            request.destroy();
-            reject(new Error(`Request timeout for ${url}`));
-        });
-        
-        request.end();
-    });
-}
-
-async function checkHrefLinks(links, filePath) {
-    let hasErrors = false;
-    
-    for (const link of links) {
-        // Apply the same replacement patterns as markdown links
-        let processedLink = link;
-        for (const pattern of config.replacementPatterns) {
-            processedLink = processedLink.replace(new RegExp(pattern.pattern), pattern.replacement);
-        }
-        
-        // Check if link should be ignored
-        let shouldIgnore = false;
-        for (const ignorePattern of config.ignorePatterns) {
-            if (new RegExp(ignorePattern.pattern).test(processedLink)) {
-                shouldIgnore = true;
-                break;
-            }
-        }
-        
-        if (shouldIgnore) {
-            continue;
-        }
-        
-        try {
-            const statusCode = await checkHttpUrl(processedLink);
-            
-            if (statusCode >= 400) {
-                hasErrors = true;
-                const relativePath = path.relative(process.cwd(), filePath);
-                console.error(`[${statusCode}] Dead href link in ${relativePath}: ${link}`);
-            }
-        } catch (error) {
-            // Skip template literals and variables
-            if (link.includes('{') || link.includes('}') ||
-                link.includes('${') || link.includes('}}')) {
-                continue;
-            }
-            
             hasErrors = true;
             const relativePath = path.relative(process.cwd(), filePath);
-            console.error(`[ERROR] Dead href link in ${relativePath}: ${link}`);
-            console.error(`  Error: ${error.message}`);
+            console.error(`[${result.statusCode}] Dead href link in ${relativePath}: ${result.link}`);
+            if (result.err) {
+                console.error(`  Error: ${result.err}`);
+            }
         }
-    }
+    });
     
     return hasErrors;
 }
