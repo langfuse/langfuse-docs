@@ -1,0 +1,127 @@
+---
+sidebarTitle: Haystack
+seoTitle: Open Source Observability for Haystack
+logo: /images/integrations/haystack_icon.png
+description: Langfuse integration to easily observe and monitor pipelines built with Haystack, an open-source Python framework developed by deepset.
+---
+
+# 🌾 Haystack Integration
+
+This integration allows you to easily [trace](/docs/tracing) your Haystack pipelines in the Langfuse UI.
+
+> [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
+
+<CloudflareVideo
+  videoId="36a42457d879923f84681f8fe62443e4"
+  aspectRatio={16 / 10.26}
+  title="Haystack Trace"
+  className="mt-8"
+  gifStyle
+/>
+
+Thanks to the team at deepset for developing this integration (`langfuse-haystack` package). These docs are adapted from their write up, which you can read [here](https://haystack.deepset.ai/blog/langfuse-integration).
+
+## How Can Langfuse Help?
+
+The `langfuse-haystack` package integrates [tracing](/docs/tracing) capabilities into Haystack (2.x) pipelines using Langfuse.
+
+This can be helpful in the following ways:
+
+- Capture comprehensive details of the execution trace and model performance
+  - Latency
+  - Token usage
+  - Cost
+  - Scores
+- Capture the full context of the execution, independently observe retrieval and summarization
+- Build fine-tuning and testing datasets
+- Monitor model performance
+- Pinpoint areas for improvement
+
+## Installation and Setup
+
+<Steps>
+
+### Install packages
+
+Install Haystack, Langfuse and the integration package.
+
+```bash
+pip install haystack-ai langfuse-haystack langfuse
+```
+
+### Set Environment Variables
+
+1. Langfuse: You can find your Langfuse public and private API keys in the project settings.
+2. Haystack: Enable `HAYSTACK_CONTENT_TRACING_ENABLED`. **You must set this variable before importing `LangfuseConnector`.**
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Enable Haystack content tracing
+os.environ["HAYSTACK_CONTENT_TRACING_ENABLED"] = "True"
+```
+
+### Add `LangfuseConnector` to your pipeline
+
+Add `LangfuseConnector` to the pipeline as a tracer. There's no need to connect it to any other component. The LangfuseConnector will automatically trace the operations and data flow within the pipeline. Then add the other components, like the text embedder, retriever, prompt builder and the model, and connect them together in the order they will be used in the pipeline.
+
+```python
+from haystack import Pipeline
+from haystack_integrations.components.connectors.langfuse import LangfuseConnector
+
+# Example pipeline
+example_pipeline = Pipeline()
+
+# Add LangfuseConnector to the pipeline
+example_pipeline.add_component("tracer", LangfuseConnector("Example Pipeline"))
+
+# Add other components and use the pipeline
+# ...
+```
+
+</Steps>
+
+<Callout type="info" emoji="✨">
+  Done! Traces and metrics from your Haystack application are now automatically
+  tracked in Langfuse. Whenever you run your application, traces and metrics are
+  immediately visible in the Langfuse UI.
+</Callout>
+
+## Example Usage
+
+We compiled a cookbook to showcase the integration:
+
+import { FileCode } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Cookbook"
+    href="/docs/integrations/haystack/example-python"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## Introduction Video
+
+<CloudflareVideo
+  videoId="aaa30e674c281a9c9591af03b5f668d2"
+  aspectRatio={16 / 10}
+  title="Haystack Integration Overview"
+/>
+
+## Acknowledgement
+
+We're thrilled to collaborate with the Haystack team to give the best possible experience to devs when building complex RAG applications. Thanks to them for developing this intgeration.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-haystack"]} />

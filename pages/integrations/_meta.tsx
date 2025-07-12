@@ -9,4 +9,5 @@ export default {
   frameworks: "Frameworks",
   "model-providers": "Model Providers",
   gateways: "Gateways",
+  "no-code": "No-Code Agent Builders",
 };

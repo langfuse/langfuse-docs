@@ -1,7 +1,7 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
 import { Cards } from "nextra/components";
-import { Puzzle, Globe, Server, Wrench } from "lucide-react";
+import { Puzzle, Globe, Server, Wrench, RectangleEllipsis } from "lucide-react";
 import Link from "next/link";
 
 const categoryConfig = {
@@ -20,11 +20,15 @@ const categoryConfig = {
     icon: <Globe />,
     description: "Connect through API gateways and proxies",
   },
-
   "no-code": {
     title: "No-Code",
     icon: <Wrench />,
     description: "No-code agent builders and tools",
+  },
+  other: {
+    title: "Other",
+    icon: <RectangleEllipsis />,
+    description: "Other integrations",
   },
 };
 
@@ -83,31 +87,36 @@ export const IntegrationIndex = () => {
                 </div>
               </div>
               <Cards num={3}>
-                {pages.map((page) => (
-                  <Cards.Card
-                    href={page.route}
-                    key={page.route}
-                    title={
+                {pages
+                  .map((page) => ({
+                    ...page,
+                    title:
                       page.frontMatter?.sidebarTitle ||
                       page.frontMatter?.title ||
-                      page.name
-                    }
-                    icon={
-                      page.frontMatter?.logo ? (
-                        <img
-                          src={page.frontMatter.logo}
-                          alt=""
-                          className="w-6 h-6 object-contain"
-                        />
-                      ) : (
-                        config.icon
-                      )
-                    }
-                    arrow
-                  >
-                    {""}
-                  </Cards.Card>
-                ))}
+                      page.name,
+                  }))
+                  .sort((a, b) => a.title.localeCompare(b.title))
+                  .map((page) => (
+                    <Cards.Card
+                      href={page.route}
+                      key={page.route}
+                      title={page.title}
+                      icon={
+                        page.frontMatter?.logo ? (
+                          <img
+                            src={page.frontMatter.logo}
+                            alt=""
+                            className="w-6 h-6 object-contain"
+                          />
+                        ) : (
+                          config.icon
+                        )
+                      }
+                      arrow
+                    >
+                      {""}
+                    </Cards.Card>
+                  ))}
               </Cards>
             </div>
           );
