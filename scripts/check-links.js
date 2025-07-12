@@ -2,6 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 const { promisify } = require('util');
 const markdownLinkCheck = require('markdown-link-check');
 const readFileAsync = promisify(fs.readFile);
@@ -48,10 +50,110 @@ const config = {
     fallbackRetryDelay: '30s'
 };
 
+function extractHrefLinks(content) {
+    // Extract href attributes from JSX components
+    const hrefRegex = /href=["']([^"']+)["']/g;
+    const links = [];
+    let match;
+    
+    while ((match = hrefRegex.exec(content)) !== null) {
+        const href = match[1];
+        // Only include internal links (starting with /)
+        if (href.startsWith('/')) {
+            links.push(href);
+        }
+    }
+    
+    return links;
+}
+
+function checkHttpUrl(url) {
+    return new Promise((resolve, reject) => {
+        const isHttps = url.startsWith('https://');
+        const client = isHttps ? https : http;
+        
+        const request = client.request(url, {
+            method: 'HEAD',
+            timeout: 20000,
+            headers: {
+                'User-Agent': 'Langfuse-Link-Checker/1.0'
+            }
+        }, (response) => {
+            // Handle redirects
+            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                const redirectUrl = response.headers.location;
+                // Resolve relative redirects
+                const resolvedUrl = redirectUrl.startsWith('http') ? redirectUrl : new URL(redirectUrl, url).href;
+                checkHttpUrl(resolvedUrl).then(resolve).catch(reject);
+                return;
+            }
+            
+            resolve(response.statusCode);
+        });
+        
+        request.on('error', reject);
+        request.on('timeout', () => {
+            request.destroy();
+            reject(new Error(`Request timeout for ${url}`));
+        });
+        
+        request.end();
+    });
+}
+
+async function checkHrefLinks(links, filePath) {
+    let hasErrors = false;
+    
+    for (const link of links) {
+        // Apply the same replacement patterns as markdown links
+        let processedLink = link;
+        for (const pattern of config.replacementPatterns) {
+            processedLink = processedLink.replace(new RegExp(pattern.pattern), pattern.replacement);
+        }
+        
+        // Check if link should be ignored
+        let shouldIgnore = false;
+        for (const ignorePattern of config.ignorePatterns) {
+            if (new RegExp(ignorePattern.pattern).test(processedLink)) {
+                shouldIgnore = true;
+                break;
+            }
+        }
+        
+        if (shouldIgnore) {
+            continue;
+        }
+        
+        try {
+            const statusCode = await checkHttpUrl(processedLink);
+            
+            if (statusCode >= 400) {
+                hasErrors = true;
+                const relativePath = path.relative(process.cwd(), filePath);
+                console.error(`[${statusCode}] Dead href link in ${relativePath}: ${link}`);
+            }
+        } catch (error) {
+            // Skip template literals and variables
+            if (link.includes('{') || link.includes('}') ||
+                link.includes('${') || link.includes('}}')) {
+                continue;
+            }
+            
+            hasErrors = true;
+            const relativePath = path.relative(process.cwd(), filePath);
+            console.error(`[ERROR] Dead href link in ${relativePath}: ${link}`);
+            console.error(`  Error: ${error.message}`);
+        }
+    }
+    
+    return hasErrors;
+}
+
 async function checkFile(filePath) {
     try {
         const content = await readFileAsync(filePath, 'utf8');
 
+        // Check markdown links using the existing library
         const results = await markdownLinkCheckAsync(content, config);
 
         let hasErrors = false;
@@ -70,6 +172,15 @@ async function checkFile(filePath) {
                 }
             }
         });
+
+        // Check href links in JSX components (for .mdx files)
+        if (filePath.endsWith('.mdx')) {
+            const hrefLinks = extractHrefLinks(content);
+            if (hrefLinks.length > 0) {
+                const hrefErrors = await checkHrefLinks(hrefLinks, filePath);
+                hasErrors = hasErrors || hrefErrors;
+            }
+        }
 
         return hasErrors;
     } catch (error) {
