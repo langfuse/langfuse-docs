@@ -36,6 +36,33 @@ jobs:
       - name: Run H1 heading check
         run: node scripts/check-h1-headings.js
 
+  check-prettier:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        id: pnpm-install
+        with:
+          version: 9.5.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check Prettier formatting
+        run: pnpm format:check
+
   check-notebook-docs-sync:
     needs:
       - pre-job
