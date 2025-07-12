@@ -1,10 +1,46 @@
 import { getPagesUnderRoute } from "nextra/context";
 import { type Page } from "nextra";
 import { Cards } from "nextra/components";
-import { Puzzle, Globe, Server, Wrench, RectangleEllipsis } from "lucide-react";
+import {
+  Puzzle,
+  Globe,
+  Server,
+  Wrench,
+  RectangleEllipsis,
+  ChartBar,
+  Code,
+} from "lucide-react";
 import Link from "next/link";
 
+// Pages that are not in the integrations directory, but are still integrations
+const nativeIntegrations = [
+  {
+    route: "/docs/sdk/python",
+    title: "Python",
+    logo: undefined,
+  },
+  {
+    route: "/docs/sdk/js",
+    title: "JS/TS",
+    logo: undefined,
+  },
+  {
+    route: "/docs/opentelemetry",
+    title: "OpenTelemetry",
+    logo: "/images/integrations/opentelemetry_icon.svg",
+  },
+].map((page) => ({
+  ...page,
+  frontMatter: { title: page.title, logo: page.logo },
+}));
+
 const categoryConfig = {
+  native: {
+    title: "Native",
+    icon: <Code />,
+    description: "Native integrations with Langfuse",
+    pages: nativeIntegrations,
+  },
   frameworks: {
     title: "Frameworks",
     icon: <Puzzle />,
@@ -25,6 +61,12 @@ const categoryConfig = {
     icon: <Wrench />,
     description: "No-code agent builders and tools",
   },
+  analytics: {
+    title: "Analytics",
+    icon: <ChartBar />,
+    description:
+      "Analytics tools that can visualize Langfuse traces and metrics",
+  },
   other: {
     title: "Other",
     icon: <RectangleEllipsis />,
@@ -43,22 +85,31 @@ export const IntegrationIndex = () => {
   >;
 
   categoryOrder.forEach((category) => {
-    try {
-      const pages = getPagesUnderRoute(`/integrations/${category}`) as Array<
+    const config = categoryConfig[category];
+
+    // Use predefined pages if they exist, otherwise load from filesystem
+    if (config.pages && config.pages.length > 0) {
+      categorizedPages[category] = config.pages as Array<
         Page & { frontMatter: any }
       >;
-      // Filter out any category index pages and only keep actual integration pages
-      const filteredPages = pages.filter(
-        (page) =>
-          page.route !== `/integrations/${category}` &&
-          page.route !== `/integrations/${category}/index`
-      );
+    } else {
+      try {
+        const pages = getPagesUnderRoute(`/integrations/${category}`) as Array<
+          Page & { frontMatter: any }
+        >;
+        // Filter out any category index pages and only keep actual integration pages
+        const filteredPages = pages.filter(
+          (page) =>
+            page.route !== `/integrations/${category}` &&
+            page.route !== `/integrations/${category}/index`
+        );
 
-      if (filteredPages.length > 0) {
-        categorizedPages[category] = filteredPages;
+        if (filteredPages.length > 0) {
+          categorizedPages[category] = filteredPages;
+        }
+      } catch (error) {
+        // Silently skip categories with no pages
       }
-    } catch (error) {
-      // Silently skip categories with no pages
     }
   });
 
