@@ -56,9 +56,13 @@ function extractHrefLinks(content) {
     
     while ((match = hrefRegex.exec(content)) !== null) {
         const href = match[1];
-        // Only include internal links (starting with /)
+        // Include internal links (starting with / or https://langfuse.com)
         if (href.startsWith('/')) {
             links.push(href);
+        } else if (href.startsWith('https://langfuse.com')) {
+            // Extract the relative path from langfuse.com URLs
+            const relativePath = href.replace('https://langfuse.com', '') || '/';
+            links.push(relativePath);
         }
     }
     
