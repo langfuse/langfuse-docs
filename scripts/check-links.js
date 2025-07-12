@@ -99,28 +99,31 @@ async function checkFile(filePath) {
     try {
         const content = await readFileAsync(filePath, 'utf8');
 
-        // Check markdown links using the existing library
-        const results = await markdownLinkCheckAsync(content, config);
-
         let hasErrors = false;
-        results.forEach(result => {
-            if (result.status === 'dead') {
-                // Skip reporting errors for obviously invalid URLs
-                if (result.link.includes('{') || result.link.includes('}') ||
-                    result.link.includes('${') || result.link.includes('}}')) {
-                    return;
-                }
-                hasErrors = true;
-                const relativePath = path.relative(process.cwd(), filePath);
-                console.error(`[${result.statusCode}] Dead link in ${relativePath}: ${result.link}`);
-                if (result.err) {
-                    console.error(`  Error: ${result.err}`);
-                }
-            }
-        });
 
-        // Check href links in JSX components (for .mdx files)
-        if (filePath.endsWith('.mdx')) {
+        // Check markdown links using the existing library (only for .md and .mdx files)
+        if (filePath.endsWith('.md') || filePath.endsWith('.mdx')) {
+            const results = await markdownLinkCheckAsync(content, config);
+
+            results.forEach(result => {
+                if (result.status === 'dead') {
+                    // Skip reporting errors for obviously invalid URLs
+                    if (result.link.includes('{') || result.link.includes('}') ||
+                        result.link.includes('${') || result.link.includes('}}')) {
+                        return;
+                    }
+                    hasErrors = true;
+                    const relativePath = path.relative(process.cwd(), filePath);
+                    console.error(`[${result.statusCode}] Dead link in ${relativePath}: ${result.link}`);
+                    if (result.err) {
+                        console.error(`  Error: ${result.err}`);
+                    }
+                }
+            });
+        }
+
+        // Check href links in JSX components (for .mdx and .tsx files)
+        if (filePath.endsWith('.mdx') || filePath.endsWith('.tsx')) {
             const hrefLinks = extractHrefLinks(content);
             if (hrefLinks.length > 0) {
                 const hrefErrors = await checkHrefLinks(hrefLinks, filePath);
@@ -146,7 +149,7 @@ async function main() {
     let hasErrors = false;
 
     try {
-        // Recursively find all .md and .mdx files
+        // Recursively find all .md, .mdx, and .tsx files
         const findFiles = (dir) => {
             let results = [];
             const files = fs.readdirSync(dir);
@@ -157,7 +160,7 @@ async function main() {
 
                 if (stat.isDirectory()) {
                     results = results.concat(findFiles(filePath));
-                } else if (file.endsWith('.md') || file.endsWith('.mdx')) {
+                } else if (file.endsWith('.md') || file.endsWith('.mdx') || file.endsWith('.tsx')) {
                     results.push(filePath);
                 }
             }
@@ -166,7 +169,7 @@ async function main() {
         };
 
         const files = findFiles(pagesDir);
-        console.log(`Found ${files.length} markdown files to check\n`);
+        console.log(`Found ${files.length} files to check (.md, .mdx, .tsx)\n`);
 
         // Process files in parallel with a limit of 10 concurrent checks
         const batchSize = 10;
