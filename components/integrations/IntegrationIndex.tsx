@@ -15,12 +15,12 @@ import Link from "next/link";
 // Pages that are not in the integrations directory, but are still integrations
 const nativeIntegrations = [
   {
-    route: "/docs/sdk/python",
+    route: "/docs/sdk/python/sdk-v3",
     title: "Python",
     logo: undefined,
   },
   {
-    route: "/docs/sdk/js",
+    route: "/docs/sdk/typescript/guide",
     title: "JS/TS",
     logo: undefined,
   },

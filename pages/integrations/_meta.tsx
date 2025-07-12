@@ -10,5 +10,6 @@ export default {
   "model-providers": "Model Providers",
   gateways: "Gateways",
   "no-code": "No-Code Agent Builders",
+  analytics: "Analytics",
   other: "Other",
 };
