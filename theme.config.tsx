@@ -170,6 +170,9 @@ const config: DocsThemeConfig = {
           sizes="16x16"
           href="/favicon-16x16.png"
         />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
 
         {canonical && <link rel="canonical" href={canonical} />}
         {noindex && <meta name="robots" content="noindex" />}
