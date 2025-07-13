@@ -184,16 +184,11 @@ jobs:
       ]
     if: always()
     steps:
-      - name: All checks skipped
-        if: ${{ needs.pre-job.outputs.should_skip == 'true' }}
-        run: |
-          echo "✅ All checks were skipped due to duplicate actions"
-          exit 0
       - name: Successful CI
-        if: ${{ needs.pre-job.outputs.should_skip != 'true' && !(contains(needs.*.result, 'failure')) && !(contains(needs.*.result, 'cancelled')) }}
+        if: ${{ !(contains(needs.*.result, 'failure')) }}
         run: exit 0
         working-directory: .
       - name: Failing CI
-        if: ${{ needs.pre-job.outputs.should_skip != 'true' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
         working-directory: .
