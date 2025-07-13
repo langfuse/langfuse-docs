@@ -169,3 +169,26 @@ jobs:
 
           # Exit with the sitemap checker's exit code
           exit $SITEMAP_CHECK_EXIT
+
+  # Summary job that depends on all other jobs
+  # This allows you to require only this single check in branch protection rules
+  all-checks-pass:
+    runs-on: ubuntu-latest
+    needs:
+      [
+        pre-job,
+        check_h1,
+        check-notebook-docs-sync,
+        build-and-check-links,
+        check-sitemap-links,
+      ]
+    if: always()
+    steps:
+      - name: Successful CI
+        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        run: exit 0
+        working-directory: .
+      - name: Failing CI
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: exit 1
+        working-directory: .
