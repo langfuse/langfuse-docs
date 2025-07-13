@@ -9,6 +9,7 @@ import {
   RectangleEllipsis,
   ChartBar,
   Code,
+  Database,
 } from "lucide-react";
 
 // Pages that are not in the integrations directory, but are still integrations
@@ -27,6 +28,32 @@ const nativeIntegrations = [
     route: "/docs/opentelemetry",
     title: "OpenTelemetry",
     logo: "/images/integrations/opentelemetry_icon.svg",
+  },
+].map((page) => ({
+  ...page,
+  frontMatter: { title: page.title, logo: page.logo },
+}));
+
+const dataIntegrations = [
+  {
+    route: "/docs/api",
+    title: "Public API",
+    logo: undefined,
+  },
+  {
+    route: "/docs/query-traces#blob-storage",
+    title: "Exports to S3",
+    logo: undefined,
+  },
+  {
+    route: "/docs/analytics/metrics-api",
+    title: "Metrics API",
+    logo: undefined,
+  },
+  {
+    route: "/docs/prompts/get-started#webhooks",
+    title: "Prompt Webhooks",
+    logo: undefined,
   },
 ].map((page) => ({
   ...page,
@@ -65,6 +92,13 @@ const categoryConfig = {
     icon: <ChartBar />,
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
+  },
+  data: {
+    title: "Data Platform",
+    icon: <Database />,
+    description:
+      "Use Langfuse data and metrics in your own application and data platform",
+    pages: dataIntegrations,
   },
   other: {
     title: "Other",
