@@ -20,7 +20,7 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
 <Tab>
 
 Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
@@ -293,72 +293,6 @@ function maskingFunction(params: { data: any }) {
 const handler = new CallbackHandler({
   mask: maskingFunction,
 });
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-</Callout>
-
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `mask` via the `instrumentor.observe()` context manager:
-
-```python
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-instrumentor = LlamaIndexInstrumentor(mask=masking_function)
-
-with instrumentor.observe():
-    # ... your LlamaIndex index creation ...
-
-    index.as_query_engine().query("What is the capital of France?")
-
-instrumentor.flush()
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the `mask` via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-langfuse_context.configure(mask=masking_function)
-
-@observe()
-def llama_index_fn(question: str):
-    # Get IDs
-    current_trace_id = langfuse_context.get_current_trace_id()
-    current_observation_id = langfuse_context.get_current_observation_id()
-
-    # Pass to instrumentor
-    with instrumentor.observe(
-        trace_id=current_trace_id,
-        parent_observation_id=current_observation_id,
-        update_parent=False
-    ) as trace:
-        # ... your LlamaIndex index creation ...
-
-        index.as_query_engine().query("What is the capital of France?")
-
-        # Run application
-        index = VectorStoreIndex.from_documents([doc1, doc2])
-        response = index.as_query_engine().query(question)
-
-        return response
 ```
 
 </Tab>

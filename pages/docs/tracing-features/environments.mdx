@@ -34,7 +34,7 @@ This means:
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
 <Tab>
 
 ```python
@@ -259,25 +259,6 @@ export function register() {
     traceExporter: new LangfuseExporter({ environment: "production" }),
   });
 }
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-</Callout>
-
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started)
-
-```python
-import os
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
-instrumentor = LlamaIndexInstrumentor(environment="production")
 ```
 
 </Tab>
