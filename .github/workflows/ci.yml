@@ -60,18 +60,18 @@ jobs:
           bash scripts/update_cookbook_docs.sh
 
           # Check if any files changed
-          if ! git diff --quiet pages/guides/cookbook/; then
-            echo "❌ Cookbook documentation is out of sync with notebooks!"
+          if ! git diff --quiet; then
+            echo "❌ Repository has changes after regenerating cookbook documentation!"
             echo "The following files have changes:"
-            git diff --name-only pages/guides/cookbook/
+            git diff --name-only
             echo ""
             echo "Please run 'bash scripts/update_cookbook_docs.sh' locally and commit the changes."
             echo ""
             echo "Detailed diff:"
-            git diff pages/guides/cookbook/
+            git diff
             exit 1
           else
-            echo "✅ Cookbook documentation is up to date with notebooks"
+            echo "✅ Repository is up to date after regenerating cookbook documentation"
           fi
 
   build-and-check-links:
