@@ -4,13 +4,94 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const markdownLinkCheck = require('markdown-link-check');
+const https = require('https');
+const http = require('http');
 const readFileAsync = promisify(fs.readFile);
 const markdownLinkCheckAsync = promisify(markdownLinkCheck);
 
+// Track redirects globally
+const redirectedUrls = [];
+
+/**
+ * Custom HTTP client that tracks redirects
+ */
+function fetchUrlWithRedirectTracking(url, redirectChain = []) {
+    return new Promise((resolve, reject) => {
+        const isHttps = url.startsWith('https://');
+        const client = isHttps ? https : http;
+
+        const request = client.get(url, {
+            timeout: 20000,
+            headers: {
+                'User-Agent': 'Langfuse-Link-Checker/1.0'
+            }
+        }, (response) => {
+            // Handle redirects
+            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                const redirectUrl = response.headers.location;
+                const resolvedUrl = redirectUrl.startsWith('http') ? redirectUrl : new URL(redirectUrl, url).href;
+
+                const newRedirectChain = [...redirectChain, { from: url, to: resolvedUrl, statusCode: response.statusCode }];
+
+                if (newRedirectChain.length > 10) {
+                    reject(new Error(`Too many redirects for ${url}`));
+                    return;
+                }
+
+                fetchUrlWithRedirectTracking(resolvedUrl, newRedirectChain).then(resolve).catch(reject);
+                return;
+            }
+
+            let data = '';
+            response.on('data', chunk => data += chunk);
+            response.on('end', () => {
+                resolve({
+                    statusCode: response.statusCode,
+                    finalUrl: url,
+                    redirectChain: redirectChain
+                });
+            });
+        });
+
+        request.on('error', reject);
+        request.on('timeout', () => {
+            request.destroy();
+            reject(new Error(`Request timeout for ${url}`));
+        });
+    });
+}
+
 // Configuration for the link checker
 const config = {
-    // Show progress bar
-    // showProgressBar: true,
+    // Custom HTTP client that tracks redirects
+    httpCustom: async (url, opts, callback) => {
+        try {
+            const result = await fetchUrlWithRedirectTracking(url);
+
+            // Track redirects for final reporting
+            if (result.redirectChain.length > 0) {
+                redirectedUrls.push({
+                    originalUrl: url,
+                    finalUrl: result.finalUrl,
+                    redirectChain: result.redirectChain
+                });
+            }
+
+            // Only fail for 4xx status codes
+            const isError = result.statusCode >= 400 && result.statusCode < 500;
+
+            callback(null, {
+                statusCode: result.statusCode,
+                status: isError ? 'dead' : 'alive'
+            });
+        } catch (error) {
+            callback(null, {
+                statusCode: null,
+                status: 'dead',
+                err: error.message
+            });
+        }
+    },
     // Replace patterns for internal and langfuse.com links
     replacementPatterns: [
         {
@@ -53,7 +134,7 @@ function extractHrefLinks(content) {
     const hrefRegex = /href=["']([^"']+)["']/g;
     const links = [];
     let match;
-    
+
     while ((match = hrefRegex.exec(content)) !== null) {
         const href = match[1];
         // Include internal links (starting with / or https://langfuse.com)
@@ -65,7 +146,7 @@ function extractHrefLinks(content) {
             links.push(relativePath);
         }
     }
-    
+
     return links;
 }
 
@@ -73,12 +154,12 @@ async function checkHrefLinks(links, filePath) {
     if (links.length === 0) {
         return false;
     }
-    
+
     // Create a fake markdown content with just the href links to reuse existing functionality
     const fakeMarkdown = links.map(link => `[link](${link})`).join('\n');
-    
+
     const results = await markdownLinkCheckAsync(fakeMarkdown, config);
-    
+
     let hasErrors = false;
     results.forEach(result => {
         if (result.status === 'dead') {
@@ -95,7 +176,7 @@ async function checkHrefLinks(links, filePath) {
             }
         }
     });
-    
+
     return hasErrors;
 }
 
@@ -181,6 +262,19 @@ async function main() {
             const batch = files.slice(i, i + batchSize);
             const results = await Promise.all(batch.map(file => checkFile(file)));
             hasErrors = hasErrors || results.some(result => result);
+        }
+
+        // Report redirects
+        if (redirectedUrls.length > 0) {
+            console.log(`\n=== Redirected URLs (${redirectedUrls.length}) ===`);
+            redirectedUrls.forEach(redirect => {
+                console.log(`🔄 ${redirect.originalUrl}`);
+                redirect.redirectChain.forEach((step, index) => {
+                    console.log(`   ${index + 1}. [${step.statusCode}] ${step.from} → ${step.to}`);
+                });
+                console.log(`   Final: ${redirect.finalUrl}`);
+                console.log('');
+            });
         }
 
         if (hasErrors) {
