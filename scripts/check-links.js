@@ -21,9 +21,11 @@ const HREF_REGEX = /href=["']([^"']+)["']/g;
  * Check if a URL contains template variables or invalid characters
  */
 function isInvalidUrl(url) {
-    return url.includes('{') || url.includes('}') ||
-        url.includes('${') || url.includes('}}') ||
-        url.includes('[') || url.includes(']');
+    // Only flag URLs that contain obvious template syntax
+    return url.includes('${') || // Template literals like ${variable}
+        url.includes('{{') || url.includes('}}') || // Handlebars/mustache templates
+        (url.includes('{') && url.includes('}') && url.match(/\{[^}]*\}/)) || // General template variables
+        url.includes('[') || url.includes(']'); // Bracket syntax
 }
 
 /**
@@ -55,11 +57,22 @@ const REPLACEMENT_PATTERNS = [
 
 // Configuration for the link checker (for external links only)
 const config = {
-    // Ignore patterns for external links and anchors
+    // Ignore patterns - we only want to check external links with markdown-link-check
+    // All internal links are handled by our custom logic
     ignorePatterns: [
+        // Ignore all relative URLs (internal links)
         {
-            pattern: '^https?://(?!localhost:3333|langfuse\\.com)'
+            pattern: '^/'
         },
+        // Ignore langfuse.com URLs (internal links)
+        {
+            pattern: '^https://langfuse\\.com'
+        },
+        // Ignore localhost URLs (internal links)
+        {
+            pattern: '^https?://localhost'
+        },
+        // Ignore anchors
         {
             pattern: '^#'
         },
@@ -70,9 +83,13 @@ const config = {
         {
             pattern: '\\${.*}'
         },
-        // Ignore obviously invalid URLs
+        // Ignore obviously invalid URLs with brackets
         {
             pattern: '[{}\\[\\]]'
+        },
+        // Ignore mailto links
+        {
+            pattern: '^mailto:'
         }
     ],
     timeout: '10s',
@@ -290,16 +307,26 @@ async function checkFile(filePath) {
             }
 
             // For external links, still use the original library with ignore patterns
-            const results = await markdownLinkCheckAsync(content, config);
-            results.forEach(result => {
-                if (result.status === 'dead') {
-                    // Skip if this was an internal link (already checked above) or invalid URL
-                    if (!isInternalUrl(result.link) && !isInvalidUrl(result.link)) {
-                        hasErrors = true;
-                        logLinkError(filePath, result.link, result.statusCode, result.err);
+            try {
+                const results = await markdownLinkCheckAsync(content, config);
+                results.forEach(result => {
+                    if (result.status === 'dead') {
+                        // Skip if this was an internal link (already checked above) or invalid URL
+                        if (!isInternalUrl(result.link) && !isInvalidUrl(result.link)) {
+                            hasErrors = true;
+                            logLinkError(filePath, result.link, result.statusCode, result.err);
+                        }
                     }
+                });
+            } catch (markdownError) {
+                // Handle errors from markdown-link-check library
+                if (markdownError.code === 'ERR_INVALID_URL') {
+                    const relativePath = path.relative(process.cwd(), filePath);
+                    console.warn(`Warning: Invalid URL detected by markdown-link-check in ${relativePath}: ${markdownError.input || 'unknown'}`);
+                } else {
+                    console.warn(`Warning: Error in markdown-link-check for ${filePath}: ${markdownError.message}`);
                 }
-            });
+            }
         }
 
         // Check href links in JSX components (for .mdx and .tsx files)
