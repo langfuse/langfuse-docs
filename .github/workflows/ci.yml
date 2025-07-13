@@ -169,3 +169,42 @@ jobs:
 
           # Exit with the sitemap checker's exit code
           exit $SITEMAP_CHECK_EXIT
+
+  # Summary job that depends on all other jobs
+  # This allows you to require only this single check in branch protection rules
+  all-checks-pass:
+    needs:
+      - pre-job
+      - check_h1
+      - check-notebook-docs-sync
+      - build-and-check-links
+      - check-sitemap-links
+    if: always() && needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all jobs status
+        run: |
+          # Check if any required job failed
+          if [[ "${{ needs.check_h1.result }}" == "failure" || \
+                "${{ needs.check-notebook-docs-sync.result }}" == "failure" || \
+                "${{ needs.build-and-check-links.result }}" == "failure" || \
+                "${{ needs.check-sitemap-links.result }}" == "failure" ]]; then
+            echo "❌ One or more CI checks failed"
+            exit 1
+          fi
+          
+          # Check if any required job was cancelled
+          if [[ "${{ needs.check_h1.result }}" == "cancelled" || \
+                "${{ needs.check-notebook-docs-sync.result }}" == "cancelled" || \
+                "${{ needs.build-and-check-links.result }}" == "cancelled" || \
+                "${{ needs.check-sitemap-links.result }}" == "cancelled" ]]; then
+            echo "❌ One or more CI checks were cancelled"
+            exit 1
+          fi
+          
+          # Note: check-sitemap-links only runs on main branch PRs, so it can be skipped
+          if [[ "${{ needs.check-sitemap-links.result }}" == "skipped" ]]; then
+            echo "ℹ️ Sitemap check was skipped (not a main branch PR)"
+          fi
+          
+          echo "✅ All CI checks passed successfully"
