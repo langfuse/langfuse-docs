@@ -53,25 +53,23 @@ jobs:
 
       - name: Check if notebook docs are up to date
         run: |
-          # Create a backup of the current state
-          cp -r pages/guides/cookbook pages/guides/cookbook.backup
-
           # Run the update script
           bash scripts/update_cookbook_docs.sh
 
-          # Check if any files changed
-          if ! git diff --quiet pages/guides/cookbook/; then
-            echo "❌ Cookbook documentation is out of sync with notebooks!"
+          # Check if any files changed (staged, unstaged, or untracked)
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "❌ Repository has changes after regenerating cookbook documentation!"
             echo "The following files have changes:"
-            git diff --name-only pages/guides/cookbook/
+            git status --porcelain
             echo ""
             echo "Please run 'bash scripts/update_cookbook_docs.sh' locally and commit the changes."
             echo ""
             echo "Detailed diff:"
-            git diff pages/guides/cookbook/
+            git diff
+            git diff --staged
             exit 1
           else
-            echo "✅ Cookbook documentation is up to date with notebooks"
+            echo "✅ Repository is up to date after regenerating cookbook documentation"
           fi
 
   build-and-check-links:
