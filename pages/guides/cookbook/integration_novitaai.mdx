@@ -18,13 +18,11 @@ This guide shows you how to integrate Novita AI with Langfuse. Novita AI's API e
 
 Make sure you have installed the necessary Python packages:
 
-
 ```python
 %pip install openai langfuse
 ```
 
 ## Step 2: Set Up Environment Variables
-
 
 ```python
 import os
@@ -32,7 +30,7 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..."
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
@@ -48,7 +46,6 @@ In this step we use the native [OpenAI drop-in replacement](https://langfuse.com
 
 To start using Novita AI with OpenAI's client libraries, pass in your Novita AI API key to the `api_key` option, and change the `base_url` to `https://api.novita.ai/v3/openai`:
 
-
 ```python
 # instead of import openai:
 from langfuse.openai import openai
@@ -60,13 +57,16 @@ client = openai.OpenAI(
 ```
 
 <Callout type="info" emoji="ℹ️">
-**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts of your application.
+  **Note:** The OpenAI drop-in replacement is fully compatible with the
+  [Low-Level Langfuse Python
+  SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()`
+  decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts
+  of your application.
 </Callout>
 
 ## Step 4: Run An Example
 
 The following cell demonstrates how to call Novita AI's chat model using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
-
 
 ```python
 client = openai.OpenAI(
@@ -97,6 +97,7 @@ After running the example model call, you can see the traces in Langfuse. You wi
 ![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration-novitaai/novitaai-example-trace.png)
 
 _[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cm7ua5l6e05wlad07qr6ce2wn/traces/039cc8b2-dba0-479f-9cd6-63672bc08c71?timestamp=2025-03-06T02%3A15%3A15.184Z)_
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

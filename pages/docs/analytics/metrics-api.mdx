@@ -26,13 +26,13 @@ The Metrics API supports querying across different views (traces, observations, 
 The API accepts a JSON query object passed as a URL-encoded parameter:
 
 | Parameter | Type        | Description                                                |
-|-----------|-------------|------------------------------------------------------------|
+| --------- | ----------- | ---------------------------------------------------------- |
 | `query`   | JSON string | The encoded query object defining what metrics to retrieve |
 
 ### Query Object Structure
 
 | Field           | Type   | Required | Description                                                                                                                                                              |
-|-----------------|--------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, or `"scores-categorical"`                                                                      |
 | `dimensions`    | array  | No       | Array of dimension objects to group by, e.g. `[{ "field": "name" }]`                                                                                                     |
 | `metrics`       | array  | Yes      | Array of metric objects to calculate, e.g. `[{ "measure": "latency", "aggregation": "p95" }]`                                                                            |
@@ -55,6 +55,7 @@ The API accepts a JSON query object passed as a URL-encoded parameter:
 ```
 
 Common measure types include:
+
 - `count` - Count of records
 - `latency` - Duration/latency metrics
 
@@ -115,7 +116,13 @@ curl \
 Response:
 
 ```json
-{"data":[{"name":"trace-test-2","count_count":"10"},{"name":"trace-test-3","count_count":"5"},{"name":"trace-test-1","count_count":"3"}]}
+{
+  "data": [
+    { "name": "trace-test-2", "count_count": "10" },
+    { "name": "trace-test-3", "count_count": "5" },
+    { "name": "trace-test-1", "count_count": "3" }
+  ]
+}
 ```
 
 ## Data Model
@@ -125,7 +132,7 @@ The Metrics API provides access to several data views, each with its own set of 
 ### Available Views
 
 | View                 | Description                         |
-|----------------------|-------------------------------------|
+| -------------------- | ----------------------------------- |
 | `traces`             | Query data at the trace level       |
 | `observations`       | Query data at the observation level |
 | `scores-numeric`     | Query numeric and boolean scores    |
@@ -134,7 +141,7 @@ The Metrics API provides access to several data views, each with its own set of 
 ### Trace Dimensions
 
 | Dimension         | Type     | Description                             |
-|-------------------|----------|-----------------------------------------|
+| ----------------- | -------- | --------------------------------------- |
 | `id`              | string   | Trace ID                                |
 | `name`            | string   | Trace name                              |
 | `tags`            | string[] | Trace tags                              |
@@ -149,7 +156,7 @@ The Metrics API provides access to several data views, each with its own set of 
 ### Trace Metrics
 
 | Metric              | Description                         |
-|---------------------|-------------------------------------|
+| ------------------- | ----------------------------------- |
 | `count`             | Count of traces                     |
 | `observationsCount` | Count of observations within traces |
 | `scoresCount`       | Count of scores within traces       |
@@ -160,7 +167,7 @@ The Metrics API provides access to several data views, each with its own set of 
 ### Observation Dimensions
 
 | Dimension             | Type   | Description                             |
-|-----------------------|--------|-----------------------------------------|
+| --------------------- | ------ | --------------------------------------- |
 | `id`                  | string | Observation ID                          |
 | `traceId`             | string | Associated trace ID                     |
 | `traceName`           | string | Name of the parent trace                |
@@ -182,7 +189,7 @@ The Metrics API provides access to several data views, each with its own set of 
 ### Observation Metrics
 
 | Metric             | Description                          |
-|--------------------|--------------------------------------|
+| ------------------ | ------------------------------------ |
 | `count`            | Count of observations                |
 | `latency`          | Observation duration in milliseconds |
 | `totalTokens`      | Total tokens used                    |
@@ -193,7 +200,7 @@ The Metrics API provides access to several data views, each with its own set of 
 ### Score Dimensions (Common)
 
 | Dimension                  | Type   | Description                                |
-|----------------------------|--------|--------------------------------------------|
+| -------------------------- | ------ | ------------------------------------------ |
 | `id`                       | string | Score ID                                   |
 | `name`                     | string | Score name                                 |
 | `environment`              | string | Environment                                |
@@ -215,29 +222,28 @@ The Metrics API provides access to several data views, each with its own set of 
 #### Numeric Scores
 
 | Metric  | Description         |
-|---------|---------------------|
+| ------- | ------------------- |
 | `count` | Count of scores     |
 | `value` | Numeric score value |
 
 #### Categorical Scores
 
 | Metric  | Description     |
-|---------|-----------------|
+| ------- | --------------- |
 | `count` | Count of scores |
 
 Categorical scores have an additional dimension:
 
 | Dimension     | Type   | Description                           |
-|---------------|--------|---------------------------------------|
+| ------------- | ------ | ------------------------------------- |
 | `stringValue` | string | String value of the categorical score |
 
 ## Daily Metrics API (Legacy) [#daily-metrics]
 
-
 <Callout type="warning">
 
-  This API is a legacy API. For new use cases, please use the [Metrics API](/docs/analytics/metrics-api) instead.
-  It has higher rate-limits and offers more flexibility.
+This API is a legacy API. For new use cases, please use the [Metrics API](/docs/analytics/metrics-api) instead.
+It has higher rate-limits and offers more flexibility.
 
 </Callout>
 

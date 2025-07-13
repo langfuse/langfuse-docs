@@ -12,7 +12,8 @@ This guide shows how to integrate [Langfuse](/) with [Quarkus LangChain4j](https
 **Langfuse**: Open source LLM engineering platform for observability, evals and prompt management.
 
 <Callout type="info" emoji="🐞">
-Please raise an Issue on [GitHub](/issues) if you face any issues with this integration.
+  Please raise an Issue on [GitHub](/issues) if you face any issues with this
+  integration.
 </Callout>
 
 ## Step 1: Enable OpenTelemetry in Quarkus LangChain4j
@@ -52,10 +53,10 @@ Now that your Quarkus application is emitting OpenTelemetry trace data, the next
 
 Langfuse will act as the “backend” for OpenTelemetry in this setup – essentially replacing a typical Jaeger/Zipkin/OTel-Collector with Langfuse’s trace ingestion API.
 
-
 **Langfuse Setup**
-   - Sign up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosted Langfuse](https://langfuse.com/self-hosting).
-   - Set the OTLP endpoint (e.g. `https://cloud.langfuse.com/api/public/otel`) and API keys.
+
+- Sign up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosted Langfuse](https://langfuse.com/self-hosting).
+- Set the OTLP endpoint (e.g. `https://cloud.langfuse.com/api/public/otel`) and API keys.
 
 <Tabs items={["Env Variables", "Configuration in `application.properties`"]}>
 <Tab>
@@ -81,11 +82,9 @@ quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
 </Tab>
 </Tabs>
 
-
-
-
 <Callout type="info">
-You can find more on authentication via Basic Auth [here](/docs/opentelemetry/get-started).
+  You can find more on authentication via Basic Auth
+  [here](/docs/opentelemetry/get-started).
 </Callout>
 
 ## Step 3: Run a Test AI Operation
@@ -126,5 +125,6 @@ public class Startup {
 ## Troubleshooting
 
 **No Traces:**
-  - Check the logs of the application for potential clues
-  - Check [Troubleshooting](https://langfuse.com/self-hosting/troubleshooting#missing-events-after-post-apipublicingestion) page
+
+- Check the logs of the application for potential clues
+- Check [Troubleshooting](https://langfuse.com/self-hosting/troubleshooting#missing-events-after-post-apipublicingestion) page

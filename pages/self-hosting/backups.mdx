@@ -20,6 +20,7 @@ Backup strategies vary depending on whether you use a managed service or self-ho
 ### ClickHouse Cloud (Managed Service)
 
 **Automatic Backups**: ClickHouse Cloud automatically manages backups for you with:
+
 - Continuous incremental backups
 - Point-in-time recovery capabilities
 - Cross-region replication options
@@ -138,39 +139,39 @@ metadata:
   name: postgres-backup
   namespace: langfuse
 spec:
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: postgres-backup
-            image: postgres:15
-            env:
-            - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-credentials
-                  key: password
-            command:
-            - /bin/bash
-            - -c
-            - |
-              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-              pg_dump -h postgres-service -U langfuse -d langfuse > /backup/langfuse-backup-$TIMESTAMP.sql
+            - name: postgres-backup
+              image: postgres:15
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: password
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  pg_dump -h postgres-service -U langfuse -d langfuse > /backup/langfuse-backup-$TIMESTAMP.sql
 
-              # Upload to S3 (optional)
-              aws s3 cp /backup/langfuse-backup-$TIMESTAMP.sql s3://langfuse-backups/postgres/
+                  # Upload to S3 (optional)
+                  aws s3 cp /backup/langfuse-backup-$TIMESTAMP.sql s3://langfuse-backups/postgres/
 
-              # Clean up local files older than 3 days
-              find /backup -name "langfuse-backup-*.sql" -mtime +3 -delete
-            volumeMounts:
-            - name: backup-storage
-              mountPath: /backup
+                  # Clean up local files older than 3 days
+                  find /backup -name "langfuse-backup-*.sql" -mtime +3 -delete
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
           volumes:
-          - name: backup-storage
-            persistentVolumeClaim:
-              claimName: postgres-backup-pvc
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc
           restartPolicy: OnFailure
 ```
 
@@ -232,6 +233,7 @@ For most production deployments, we recommend using managed cloud storage instea
 ### When MinIO is Used
 
 MinIO is typically used in:
+
 - Air-gapped environments
 - On-premises deployments without cloud access
 - Development environments
@@ -280,41 +282,41 @@ metadata:
   name: minio-backup-sync
   namespace: langfuse
 spec:
-  schedule: "0 3 * * *"  # Daily at 3 AM
+  schedule: "0 3 * * *" # Daily at 3 AM
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: minio-backup
-            image: minio/mc:latest
-            command:
-            - /bin/sh
-            - -c
-            - |
-              mc alias set source http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
-              mc alias set backup s3://backup-bucket $AWS_ACCESS_KEY $AWS_SECRET_KEY
-              mc mirror source/langfuse backup/langfuse-backup/$(date +%Y%m%d)
-            env:
-            - name: MINIO_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: minio-credentials
-                  key: access-key
-            - name: MINIO_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: minio-credentials
-                  key: secret-key
-            - name: AWS_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: access-key
-            - name: AWS_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-credentials
-                  key: secret-key
+            - name: minio-backup
+              image: minio/mc:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  mc alias set source http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+                  mc alias set backup s3://backup-bucket $AWS_ACCESS_KEY $AWS_SECRET_KEY
+                  mc mirror source/langfuse backup/langfuse-backup/$(date +%Y%m%d)
+              env:
+                - name: MINIO_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: minio-credentials
+                      key: access-key
+                - name: MINIO_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: minio-credentials
+                      key: secret-key
+                - name: AWS_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: access-key
+                - name: AWS_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: secret-key
           restartPolicy: OnFailure
 ```

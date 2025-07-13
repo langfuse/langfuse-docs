@@ -7,7 +7,6 @@ category: Integrations
 
 # Cookbook: LangGraph Integration
 
-
 ## What is LangGraph?
 
 [LangGraph](https://langchain-ai.github.io/langgraph/) is an open-source framework by the LangChain team for building complex, stateful, multi-agent applications using large language models (LLMs). LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
@@ -18,37 +17,36 @@ This cookbook demonstrates how [Langfuse](https://langfuse.com/docs) helps to de
 
 **By the end of this cookbook, you will be able to:**
 
-
-*   Automatically trace LangGraph application via the Langfuse integration
-*   Monitor advanced multi-agent setups
-*   Add scores (like user feedback)
-*   Manage your prompts used in LangGraph with Langfuse
-
+- Automatically trace LangGraph application via the Langfuse integration
+- Monitor advanced multi-agent setups
+- Add scores (like user feedback)
+- Manage your prompts used in LangGraph with Langfuse
 
 ## Initialize Langfuse
 
 Initialize the Langfuse client with your [API keys](https://langfuse.com/faq/all/where-are-langfuse-api-keys) from the project settings in the Langfuse UI and add them to your environment.
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of Python SDK v2, please refer to our [legacy LangGraph integration guide](https://github.com/langfuse/langfuse-docs/blob/662509b3296daddcddb292f14b10a62e7c39407d/cookbook/integration_langgraph.ipynb)._
+  _**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of
+  Python SDK v2, please refer to our [legacy LangGraph integration
+  guide](https://github.com/langfuse/langfuse-docs/blob/662509b3296daddcddb292f14b10a62e7c39407d/cookbook/integration_langgraph.ipynb)._
 </Callout>
 
 <Callout type="info" emoji="ℹ️">
-_**Note:** You need to run at least Python 3.11 ([GitHub Issue](https://github.com/langfuse/langfuse/issues/1926))._
+  _**Note:** You need to run at least Python 3.11 ([GitHub
+  Issue](https://github.com/langfuse/langfuse/issues/1926))._
 </Callout>
-
 
 ```python
 %pip install langfuse langchain langgraph langchain_openai langchain_community
 ```
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -58,12 +56,11 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -75,15 +72,14 @@ else:
 
 **What we will do in this section:**
 
-*   Build a support chatbot in LangGraph that can answer common questions
-*   Tracing the chatbot's input and output using Langfuse
+- Build a support chatbot in LangGraph that can answer common questions
+- Tracing the chatbot's input and output using Langfuse
 
 We will start with a basic chatbot and build a more advanced multi agent setup in the next section, introducing key LangGraph concepts along the way.
 
 ### Create Agent
 
 Start by creating a `StateGraph`. A `StateGraph` object defines our chatbot's structure as a state machine. We will add nodes to represent the LLM and functions the chatbot can call, and edges to specify how the bot transitions between these functions.
-
 
 ```python
 from typing import Annotated
@@ -125,7 +121,6 @@ graph = graph_builder.compile()
 
 Now, we will add then [Langfuse callback handler for LangChain](https://langfuse.com/docs/integrations/langchain/tracing) to trace the steps of our application: `config={"callbacks": [langfuse_handler]}`
 
-
 ```python
 from langfuse.langchain import CallbackHandler
 
@@ -141,13 +136,11 @@ for s in graph.stream({"messages": [HumanMessage(content = "What is Langfuse?")]
 
 Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/85b0c53c4414f22ed8bfc9eb35f917c4
 
-
 ![Trace view of chat app in Langfuse](https://langfuse.com/images/cookbook/integration-langgraph/integration_langgraph_chatapp_trace.png)
 
 ### Visualize the chat app
 
 You can visualize the graph using the `get_graph` method along with a "draw" method
-
 
 ```python
 from IPython.display import Image, display
@@ -171,7 +164,6 @@ graph TD;
 You can add Langfuse as callback when using [LangGraph Server](https://langchain-ai.github.io/langgraph/concepts/langgraph_server/)
 
 When using the LangGraph Server, the LangGraph Server handles graph invocation automatically. Therefore, you should add the Langfuse callback when declaring the graph.
-
 
 ```python
 from typing import Annotated
@@ -211,10 +203,9 @@ graph = graph_builder.compile().with_config({"callbacks": [langfuse_handler]})
 
 **What we will do in this section**:
 
-*   Build 2 executing agents: One research agent using the LangChain WikipediaAPIWrapper to search Wikipedia and one that uses a custom tool to get the current time.
-*   Build an agent supervisor to help delegate the user questions to one of the two agents
-*   Add Langfuse handler as callback to trace the steps of the supervisor and executing agents
-
+- Build 2 executing agents: One research agent using the LangChain WikipediaAPIWrapper to search Wikipedia and one that uses a custom tool to get the current time.
+- Build an agent supervisor to help delegate the user questions to one of the two agents
+- Add Langfuse handler as callback to trace the steps of the supervisor and executing agents
 
 ```python
 %pip install langfuse langgraph langchain langchain_openai langchain_experimental pandas wikipedia
@@ -223,7 +214,6 @@ graph = graph_builder.compile().with_config({"callbacks": [langfuse_handler]})
 ### Create tools
 
 For this example, you build an agent to do wikipedia research, and one agent to tell you the current time. Define the tools they will use below:
-
 
 ```python
 from typing import Annotated
@@ -247,7 +237,6 @@ datetime_tool = Tool(
 ### Helper utilities
 
 Define a helper function below to simplify adding new agent worker nodes.
-
 
 ```python
 from langchain.agents import AgentExecutor, create_openai_tools_agent
@@ -278,7 +267,6 @@ def agent_node(state, agent, name):
 ### Create agent supervisor
 
 It will use function calling to choose the next worker node OR finish processing.
-
 
 ```python
 from langchain_core.output_parsers.openai_functions import JsonOutputFunctionsParser
@@ -341,7 +329,6 @@ supervisor_chain = (
 
 Now we are ready to start building the graph. Below, define the state and worker nodes using the function we just defined. Then we connect all the edges in the graph.
 
-
 ```python
 import functools
 import operator
@@ -392,7 +379,6 @@ graph_2 = workflow.compile()
 
 Add [Langfuse handler](https://langfuse.com/docs/integrations/langchain/tracing) as callback: `config={"callbacks": [langfuse_handler]}`
 
-
 ```python
 from langfuse.langchain import CallbackHandler
 
@@ -406,7 +392,6 @@ for s in graph_2.stream({"messages": [HumanMessage(content = "How does photosynt
     print(s)
     print("----")
 ```
-
 
 ```python
 # Add Langfuse handler as callback: config={"callbacks": [langfuse_handler]}
@@ -428,7 +413,6 @@ Example traces in Langfuse:
 ### Visualize the agent
 
 You can visualize the graph using the `get_graph` method along with a "draw" method
-
 
 ```python
 from IPython.display import Image, display
@@ -455,17 +439,16 @@ graph TD;
 
 ## Multiple LangGraph Agents
 
-There are setups where one LangGraph agent uses one or multiple other LangGraph agents. To combine all corresponding spans in one single trace for the multi agent execution, we can pass a custom `trace_id`. 
+There are setups where one LangGraph agent uses one or multiple other LangGraph agents. To combine all corresponding spans in one single trace for the multi agent execution, we can pass a custom `trace_id`.
 
 First, we generate a trace_id that can be used for both agents to group the agent executions together in one Langfuse trace.
-
 
 ```python
 from langfuse import get_client, Langfuse
 from langfuse.langchain import CallbackHandler
- 
+
 langfuse = get_client()
- 
+
 # Generate deterministic trace ID from external system
 predefined_trace_id = Langfuse.create_trace_id()
 
@@ -474,7 +457,6 @@ langfuse_handler = CallbackHandler()
 ```
 
 Next, we set up the sub-agent.
-
 
 ```python
 from typing import Annotated
@@ -502,7 +484,6 @@ sub_agent = graph_builder.compile()
 
 Then, we set the tool that uses the research-sub-agent to answer questions.
 
-
 ```python
 from langchain_core.tools import tool
 
@@ -518,14 +499,13 @@ def langgraph_research(question):
 
       response = sub_agent.invoke({"messages": [HumanMessage(content = question)]},
                         config={"callbacks": [langfuse_handler]})
-    
+
       span.update_trace(output= response["messages"][1].content)
 
   return response["messages"][1].content
 ```
 
-Set up a second simple LangGraph agent that uses the new `langgraph_research`. 
-
+Set up a second simple LangGraph agent that uses the new `langgraph_research`.
 
 ```python
 from langgraph.prebuilt import create_react_agent
@@ -539,7 +519,6 @@ main_agent = create_react_agent(
 )
 ```
 
-
 ```python
 user_question = "What is Langfuse?"
 
@@ -549,13 +528,13 @@ with langfuse.start_as_current_span(
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
     span.update_trace(input=user_question)
- 
+
     # LangChain execution will be part of this trace
     response = main_agent.invoke({"messages": [{"role": "user", "content": user_question}]},
                             config={"callbacks": [langfuse_handler]})
 
     span.update_trace(output=response["messages"][1].content)
- 
+
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 ```
 
@@ -573,17 +552,16 @@ In the example below, we demonstrate how to score a specific span for `relevance
 
 **→ Learn more about [Custom Scores in Langfuse](https://langfuse.com/docs/scores/custom).**
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Option 1: Use the yielded span object from the context manager
 with langfuse.start_as_current_span(
     name="langgraph-request") as span:
     # ... LangGraph execution ...
- 
+
     # Score using the span object
     span.score_trace(
         name="user-feedback",
@@ -591,18 +569,18 @@ with langfuse.start_as_current_span(
         data_type="NUMERIC",
         comment="This was correct, thank you"
     )
- 
+
 # Option 2: Use langfuse.score_current_trace() if still in context
 with langfuse.start_as_current_span(name="langgraph-request") as span:
     # ... LangGraph execution ...
- 
+
     # Score using current context
     langfuse.score_current_trace(
         name="user-feedback",
         value=1,
         data_type="NUMERIC"
     )
- 
+
 # Option 3: Use create_score() with trace ID (when outside context)
 langfuse.create_score(
     trace_id=predefined_trace_id,
@@ -625,16 +603,15 @@ Use [Langfuse prompt management](https://langfuse.com/docs/prompts/example-langc
 
 Langfuse prompt management is basically a Prompt CMS (Content Management System). Alternatively, you can also edit and version the prompt in the Langfuse UI.
 
-*   `Name` that identifies the prompt in Langfuse Prompt Management
-*   Prompt with prompt template incl. `{{input variables}}`
-*   `labels` to include `production` to immediately use prompt as the default
+- `Name` that identifies the prompt in Langfuse Prompt Management
+- Prompt with prompt template incl. `{{input variables}}`
+- `labels` to include `production` to immediately use prompt as the default
 
 In this example, we create a system prompt for an assistant that translates every user message into Spanish.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
 
 langfuse.create_prompt(
@@ -648,9 +625,7 @@ langfuse.create_prompt(
 
 Use the utility method `.get_langchain_prompt()` to transform the Langfuse prompt into a string that can be used in Langchain.
 
-
 **Context:** Langfuse declares input variables in prompt templates using double brackets (`{{input variable}}`). Langchain uses single brackets for declaring input variables in PromptTemplates (`{input variable}`). The utility method `.get_langchain_prompt()` replaces the double brackets with single brackets. In this example, however, we don't use any variables in our prompt.
-
 
 ```python
 # Get current production version of prompt and transform the Langfuse prompt into a string that can be used in Langchain
@@ -661,7 +636,6 @@ print(langchain_system_prompt)
 ```
 
 Now we can use the new system prompt string to update our assistant.
-
 
 ```python
 from typing import Annotated
@@ -693,7 +667,6 @@ graph_builder.set_entry_point("chatbot")
 graph_builder.set_finish_point("chatbot")
 graph = graph_builder.compile()
 ```
-
 
 ```python
 from langfuse.langchain import CallbackHandler

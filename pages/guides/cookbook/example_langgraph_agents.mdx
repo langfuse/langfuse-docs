@@ -12,19 +12,20 @@ In this tutorial, we will learn how to **monitor the internal steps (traces) of 
 This guide covers **online** and **offline** evaluation metrics used by teams to bring agents to production fast and reliably. To learn more about evaluation strategies, check out our [blog post](https://langfuse.com/blog/2025-03-04-llm-evaluation-101-best-practices-and-challenges).
 
 **Why AI agent Evaluation is important:**
+
 - Debugging issues when tasks fail or produce suboptimal results
 - Monitoring costs and performance in real-time
 - Improving reliability and safety through continuous feedback
-
 
 ## Step 0: Install the Required Libraries
 
 Below we install the `langgraph` library, `langfuse` and the Hugging Face `datasets` library
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of Python SDK v2, please refer to our [legacy LangGraph integration guide](https://github.com/langfuse/langfuse-docs/blob/662509b3296daddcddb292f14b10a62e7c39407d/pages/docs/integrations/langchain/example-langgraph-agents.md#L4)._
+  _**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of
+  Python SDK v2, please refer to our [legacy LangGraph integration
+  guide](https://github.com/langfuse/langfuse-docs/blob/662509b3296daddcddb292f14b10a62e7c39407d/pages/docs/integrations/langchain/example-langgraph-agents.md#L4)._
 </Callout>
-
 
 ```python
 %pip install langfuse langchain langgraph langchain_openai langchain_community langchain_huggingface
@@ -32,15 +33,14 @@ _**Note:** This notebook utilizes the Langfuse Python SDK v3. For users of Pytho
 
 ## Step 1: Set Environment Variables
 
-Get your Langfuse API keys by signing up for Langfuse cloud or self-hosting Langfuse. 
-
+Get your Langfuse API keys by signing up for Langfuse cloud or self-hosting Langfuse.
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -50,12 +50,11 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -67,50 +66,48 @@ else:
 
 Here is a simple Q&A agent. We run it to confirm that the instrumentation is working correctly. If everything is set up correctly, you will see logs/spans in your observability dashboard.
 
-
 ```python
 from typing import Annotated
- 
+
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from typing_extensions import TypedDict
- 
+
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
- 
+
 class State(TypedDict):
     # Messages have the type "list". The `add_messages` function in the annotation defines how this state key should be updated
     # (in this case, it appends messages to the list, rather than overwriting them)
     messages: Annotated[list, add_messages]
- 
+
 graph_builder = StateGraph(State)
- 
+
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0.2)
- 
+
 # The chatbot node function takes the current State as input and returns an updated messages list. This is the basic pattern for all LangGraph node functions.
 def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
- 
+
 # Add a "chatbot" node. Nodes represent units of work. They are typically regular python functions.
 graph_builder.add_node("chatbot", chatbot)
- 
+
 # Add an entry point. This tells our graph where to start its work each time we run it.
 graph_builder.set_entry_point("chatbot")
- 
+
 # Set a finish point. This instructs the graph "any time this node is run, you can exit."
 graph_builder.set_finish_point("chatbot")
- 
+
 # To be able to run our graph, call "compile()" on the graph builder. This creates a "CompiledGraph" we can use invoke on our state.
 graph = graph_builder.compile()
 ```
-
 
 ```python
 from langfuse.langchain import CallbackHandler
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
- 
+
 for s in graph.stream(
     {"messages": [HumanMessage(content = "What is Langfuse?")]},
     config={"callbacks": [langfuse_handler]}):
@@ -129,7 +126,6 @@ _[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja
 
 Now that you have confirmed your instrumentation works, let's try a more complex query so we can see how advanced metrics (token usage, latency, costs, etc.) are tracked.
 
-
 ```python
 import os
 from typing import TypedDict, List, Dict, Any, Optional
@@ -138,17 +134,15 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 ```
 
-
 ```python
 class EmailState(TypedDict):
-    email: Dict[str, Any]           
-    is_spam: Optional[bool]         
-    spam_reason: Optional[str]      
-    email_category: Optional[str]   
-    draft_response: Optional[str]   
-    messages: List[Dict[str, Any]] 
+    email: Dict[str, Any]
+    is_spam: Optional[bool]
+    spam_reason: Optional[str]
+    email_category: Optional[str]
+    draft_response: Optional[str]
+    messages: List[Dict[str, Any]]
 ```
-
 
 ```python
 # Initialize LLM
@@ -168,7 +162,7 @@ def read_email(state: EmailState):
 
 def classify_email(state: EmailState):
     email = state["email"]
-    
+
     prompt = f"""
 As Alfred the butler of Mr wayne and it's SECRET identity Batman, analyze this email and determine if it is spam or legitimate and should be brought to Mr wayne's attention.
 
@@ -183,11 +177,11 @@ Answer :
     """
     messages = [HumanMessage(content=prompt)]
     response = model.invoke(messages)
-    
+
     response_text = response.content.lower()
     print(response_text)
     is_spam = "spam" in response_text and "ham" not in response_text
-    
+
     if not is_spam:
         new_messages = state.get("messages", []) + [
             {"role": "user", "content": prompt},
@@ -195,7 +189,7 @@ Answer :
         ]
     else :
         new_messages = state.get("messages", [])
-    
+
     return {
         "is_spam": is_spam,
         "messages": new_messages
@@ -208,7 +202,7 @@ def handle_spam(state: EmailState):
 
 def drafting_response(state: EmailState):
     email = state["email"]
-    
+
     prompt = f"""
 As Alfred the butler, draft a polite preliminary response to this email.
 
@@ -219,15 +213,15 @@ Body: {email['body']}
 
 Draft a brief, professional response that Mr. Wayne can review and personalize before sending.
     """
-    
+
     messages = [HumanMessage(content=prompt)]
     response = model.invoke(messages)
-    
+
     new_messages = state.get("messages", []) + [
         {"role": "user", "content": prompt},
         {"role": "assistant", "content": response.content}
     ]
-    
+
     return {
         "draft_response": response.content,
         "messages": new_messages
@@ -235,7 +229,7 @@ Draft a brief, professional response that Mr. Wayne can review and personalize b
 
 def notify_mr_wayne(state: EmailState):
     email = state["email"]
-    
+
     print("\n" + "="*50)
     print(f"Sir, you've received an email from {email['sender']}.")
     print(f"Subject: {email['subject']}")
@@ -243,7 +237,7 @@ def notify_mr_wayne(state: EmailState):
     print("-"*50)
     print(state["draft_response"])
     print("="*50 + "\n")
-    
+
     return {}
 
 # Define routing logic
@@ -259,12 +253,11 @@ email_graph = StateGraph(EmailState)
 # Add nodes
 email_graph.add_node("read_email", read_email) # the read_email node executes the read_mail function
 email_graph.add_node("classify_email", classify_email) # the classify_email node will execute the classify_email function
-email_graph.add_node("handle_spam", handle_spam) #same logic 
+email_graph.add_node("handle_spam", handle_spam) #same logic
 email_graph.add_node("drafting_response", drafting_response) #same logic
 email_graph.add_node("notify_mr_wayne", notify_mr_wayne) # same logic
 
 ```
-
 
 ```python
 # Add edges
@@ -289,12 +282,10 @@ email_graph.add_edge("notify_mr_wayne", END) # after notifyinf Me wayne, we can 
 
 ```
 
-
 ```python
 # Compile the graph
 compiled_graph = email_graph.compile()
 ```
-
 
 ```python
  # Example emails for testing
@@ -311,7 +302,6 @@ spam_email = {
 }
 
 ```
-
 
 ```python
 from langfuse.langchain import CallbackHandler
@@ -341,12 +331,13 @@ spam_result = compiled_graph.invoke(
         "messages": []
         },
     config={"callbacks": [langfuse_handler]}
-) 
+)
 ```
 
 ### Trace Structure
 
 Langfuse records a **trace** that contains **spans**, which represent each step of your agent’s logic. Here, the trace contains the overall agent run and sub-spans for:
+
 - The tool call (get_weather)
 - The LLM calls (Responses API with 'gpt-4o')
 
@@ -389,19 +380,18 @@ _[Link to the trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja
 
 #### 3. User Feedback
 
-If your agent is embedded into a user interface, you can record direct user feedback (like a thumbs-up/down in a chat UI). 
-
+If your agent is embedded into a user interface, you can record direct user feedback (like a thumbs-up/down in a chat UI).
 
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Option 1: Use the yielded span object from the context manager
 with langfuse.start_as_current_span(
     name="langgraph-request") as span:
     # ... LangGraph execution ...
- 
+
     # Score using the span object
     span.score_trace(
         name="user-feedback",
@@ -409,18 +399,18 @@ with langfuse.start_as_current_span(
         data_type="NUMERIC",
         comment="This was correct, thank you"
     )
- 
+
 # Option 2: Use langfuse.score_current_trace() if still in context
 with langfuse.start_as_current_span(name="langgraph-request") as span:
     # ... LangGraph execution ...
- 
+
     # Score using current context
     langfuse.score_current_trace(
         name="user-feedback",
         value=1,
         data_type="NUMERIC"
     )
- 
+
 # Option 3: Use create_score() with trace ID (when outside context)
 langfuse.create_score(
     trace_id="predefined-trace-id", # Needs to be a valid trace id format (see docs)
@@ -440,16 +430,16 @@ User feedback is then captured in Langfuse:
 LLM-as-a-Judge is another way to automatically evaluate your agent's output. You can set up a separate LLM call to gauge the output’s correctness, toxicity, style, or any other criteria you care about.
 
 **Workflow**:
+
 1. You define an **Evaluation Template**, e.g., "Check if the text is toxic."
 2. You set a model that is used as judge-model; in this case `gpt-4o-mini`.
-2. Each time your agent generates output, you pass that output to your "judge" LLM with the template.
-3. The judge LLM responds with a rating or label that you log to your observability tool.
+3. Each time your agent generates output, you pass that output to your "judge" LLM with the template.
+4. The judge LLM responds with a rating or label that you log to your observability tool.
 
 Example from Langfuse:
 
 ![LLM-as-a-Judge Evaluation Template](https://langfuse.com/images/cookbook/integration_openai-agents/evaluator-template.png)
 ![LLM-as-a-Judge Evaluator](https://langfuse.com/images/cookbook/integration_openai-agents/evaluator.png)
-
 
 ```python
 # Process spam email
@@ -462,8 +452,9 @@ spam_result = compiled_graph.invoke(
         "messages": []
         },
     config={"callbacks": [langfuse_handler]}
-) 
+)
 ```
+
 Processing spam email...
 Alfred is processing an email from Crypto bro with subject: The best investment of 2025
 spam
@@ -486,17 +477,17 @@ Online evaluation is essential for live feedback, but you also need **offline ev
 ### Dataset Evaluation
 
 In offline evaluation, you typically:
+
 1. Have a benchmark dataset (with prompt and expected output pairs)
 2. Run your agent on that dataset
 3. Compare outputs to the expected results or use an additional scoring mechanism
 
 Below, we demonstrate this approach with the [q&a-dataset](https://huggingface.co/datasets/junzhang1207/search-dataset), which contains questions and expected answers.
 
-
 ```python
 import pandas as pd
 from datasets import load_dataset
- 
+
 # Fetch search-dataset from Hugging Face
 dataset = load_dataset("junzhang1207/search-dataset", split = "train")
 df = pd.DataFrame(dataset)
@@ -506,13 +497,12 @@ print(df.head())
 
 Next, we create a dataset entity in Langfuse to track the runs. Then, we add each item from the dataset to the system.
 
-
 ```python
 from langfuse import Langfuse
 langfuse = Langfuse()
- 
+
 langfuse_dataset_name = "qa-dataset_langgraph-agent"
- 
+
 # Create a dataset in Langfuse
 langfuse.create_dataset(
     name=langfuse_dataset_name,
@@ -523,7 +513,6 @@ langfuse.create_dataset(
     }
 )
 ```
-
 
 ```python
 df_30 = df.sample(30) # For this example, we upload only 30 dataset questions
@@ -540,29 +529,28 @@ for idx, row in df_30.iterrows():
 
 #### Running the Agent on the Dataset
 
-First, we assemble a simple LangGraph agent that answers questions using OpenAI models. 
-
+First, we assemble a simple LangGraph agent that answers questions using OpenAI models.
 
 ```python
 from typing import Annotated
- 
+
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from typing_extensions import TypedDict
- 
+
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
- 
+
 class State(TypedDict):
     messages: Annotated[list, add_messages]
- 
+
 graph_builder = StateGraph(State)
- 
+
 llm = ChatOpenAI(model = "gpt-4.5-preview")
 
 def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
- 
+
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.set_entry_point("chatbot")
 graph_builder.set_finish_point("chatbot")
@@ -571,10 +559,10 @@ graph = graph_builder.compile()
 ```
 
 Then, we define a helper function `my_agent()` that:
-1. Creates a Langfuse trace 
-2. Fetches the `langfuse_handler_trace` to instrument the LangGraph execution. 
-3. Runs our agent and passing `langfuse_handler_trace` to the invocation. 
 
+1. Creates a Langfuse trace
+2. Fetches the `langfuse_handler_trace` to instrument the LangGraph execution.
+3. Runs our agent and passing `langfuse_handler_trace` to the invocation.
 
 ```python
 from langfuse import get_client
@@ -584,35 +572,35 @@ from langchain_core.prompts import ChatPromptTemplate
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
- 
+
 graph_builder = StateGraph(State)
 llm = ChatOpenAI(model = "gpt-4o")
 langfuse = get_client()
 
 def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
- 
+
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.set_entry_point("chatbot")
 graph_builder.set_finish_point("chatbot")
 graph = graph_builder.compile()
 
 def my_agent(question, langfuse_handler):
-    
+
     # Create a trace via Langfuse spans and use Langchain within it
     with langfuse.start_as_current_span(name="my-langgraph-agent") as root_span:
-    
+
         # Step 2: LangChain processing
         response = graph.invoke(
         input={"messages": [HumanMessage(content = question)]},
         config={"callbacks": [langfuse_handler]}
         )
-    
+
         # Update trace output
         root_span.update_trace(
             input=question,
             output=response["messages"][1].content)
-        
+
         print(question)
         print(response["messages"][1].content)
 
@@ -621,11 +609,10 @@ def my_agent(question, langfuse_handler):
 
 Finally, we loop over each dataset item, run the agent, and link the trace to the dataset item. We can also attach a quick evaluation score if desired.
 
-
 ```python
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
- 
+
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 langfuse = get_client()
@@ -640,8 +627,8 @@ for item in dataset.items:
         run_metadata={"model": "gpt-4o"},
     ) as root_span:
         # All operations within this block are part of the trace for this dataset item
-        
-        # Call your application logic - this can use any combination of decorators, 
+
+        # Call your application logic - this can use any combination of decorators,
         # context managers, or manual observations
         with langfuse.start_as_current_generation(
             name="llm-call",
@@ -651,19 +638,20 @@ for item in dataset.items:
             # Your LLM application logic here
             output = my_agent(str(item.input), langfuse_handler)
             generation.update(output=output)
- 
+
         # Optionally, score the result against the expected output
         root_span.score_trace(
             name="user-feedback",
             value=1,
             comment="This is a comment",  # optional, useful to add reasoning
         )
- 
+
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 langfuse.flush()
 ```
 
 You can repeat this process with different agent configurations such as:
+
 - Models (gpt-4o-mini, o1, etc.)
 - Prompts
 - Tools (search vs. no search)
@@ -673,4 +661,3 @@ Then compare them side-by-side in Langfuse. In this example, I did run the agent
 
 ![Dataset run overview](https://langfuse.com/images/cookbook/example-langgraph-evaluation/dataset_runs.png)
 ![Dataset run comparison](https://langfuse.com/images/cookbook/example-langgraph-evaluation/dataset-run-comparison.png)
-

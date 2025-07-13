@@ -61,7 +61,6 @@ GRANT DROP TABLE ON default.* TO 'user';
 
 Replace `'user'` with your actual ClickHouse username and adjust the database name if you're using a different database than `default`.
 
-
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.
@@ -160,6 +159,7 @@ CLICKHOUSE_PASSWORD=changeme
 - **NOT_ENOUGH_SPACE error**: This error occurs when ClickHouse runs out of disk space. In Kubernetes environments, this typically means the persistent volume claims (PVCs) need to be expanded. Here's how to resolve it:
 
   **1. Check current disk usage:**
+
   ```bash
   # Check PVC status
   kubectl get pvc -l app.kubernetes.io/name=clickhouse
@@ -169,6 +169,7 @@ CLICKHOUSE_PASSWORD=changeme
   ```
 
   **2. Expand the PVC (requires storage class with allowVolumeExpansion: true):**
+
   ```bash
   # Edit the PVC directly
   kubectl edit pvc data-<chart-name>-clickhouse-0
@@ -180,6 +181,7 @@ CLICKHOUSE_PASSWORD=changeme
   ```
 
   **3. Monitor expansion progress:**
+
   ```bash
   # Watch PVC status
   kubectl get pvc -w
@@ -189,6 +191,7 @@ CLICKHOUSE_PASSWORD=changeme
   ```
 
   **4. Restart StatefulSet:**
+
   ```bash
   # Restart all pods individually to make use of the larger volumes
   kubectl rollout restart statefulset <chart-name>-clickhouse
@@ -242,13 +245,13 @@ Keep in mind that metadata is still stored on local disk, i.e. you need to use a
 
 <Callout type="warning">
 
-  We recommend the following settings when using Blob Storage as a disk for your ClickHouse deployment:
+We recommend the following settings when using Blob Storage as a disk for your ClickHouse deployment:
 
-  - **Do not enable bucket versioning**: ClickHouse will write and update many files within its merge processing. Having versioned buckets will retain the full history and quickly grow your storage consumption.
-  - **Do not enable lifecycle policies for deletion**: Avoid deletion lifecycle policies as this may break ClickHouse's internal consistency model. Instead, delete data via the Langfuse application or using ClickHouse TTLs.
-  - **Enable lifecycle policies for aborted multi-part uploads**: If ClickHouse attempts an upload, but aborts it before completion undesirable artifacts may remain.
+- **Do not enable bucket versioning**: ClickHouse will write and update many files within its merge processing. Having versioned buckets will retain the full history and quickly grow your storage consumption.
+- **Do not enable lifecycle policies for deletion**: Avoid deletion lifecycle policies as this may break ClickHouse's internal consistency model. Instead, delete data via the Langfuse application or using ClickHouse TTLs.
+- **Enable lifecycle policies for aborted multi-part uploads**: If ClickHouse attempts an upload, but aborts it before completion undesirable artifacts may remain.
 
-  This is being derived from this [ClickHouse issue](https://github.com/ClickHouse/clickhouse-docs/issues/1385).
+This is being derived from this [ClickHouse issue](https://github.com/ClickHouse/clickhouse-docs/issues/1385).
 
 </Callout>
 
@@ -267,7 +270,8 @@ Create a config.xml file with the following contents in your local working direc
                 <type>object_storage</type>
                 <object_storage_type>s3</object_storage_type>
                 <metadata_type>local</metadata_type>
-                <endpoint>https://s3.eu-central-1.amazonaws.com/example-bucket-name/data/</endpoint>
+                <endpoint
+        >https://s3.eu-central-1.amazonaws.com/example-bucket-name/data/</endpoint>
                 <access_key_id>ACCESS_KEY</access_key_id>
                 <secret_access_key>ACCESS_KEY_SECRET</secret_access_key>
             </s3>
@@ -332,10 +336,12 @@ The credentials below are the default [Azurite](https://github.com/Azure/Azurite
                 <type>object_storage</type>
                 <object_storage_type>azure_blob_storage</object_storage_type>
                 <metadata_type>local</metadata_type>
-                <storage_account_url>http://azurite:10000/devstoreaccount1</storage_account_url>
+                <storage_account_url
+        >http://azurite:10000/devstoreaccount1</storage_account_url>
                 <container_name>langfuse</container_name>
                 <account_name>devstoreaccount1</account_name>
-                <account_key>Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==</account_key>
+                <account_key
+        >Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==</account_key>
             </blob_storage_disk>
         </disks>
         <policies>

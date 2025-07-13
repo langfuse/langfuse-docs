@@ -141,8 +141,8 @@ for item in dataset.items:
         run_metadata={"model": "llama3"},
     ) as root_span:
         # All operations within this block are part of the trace for this dataset item
-        
-        # Call your application logic - this can use any combination of decorators, 
+
+        # Call your application logic - this can use any combination of decorators,
         # context managers, or manual observations
         with langfuse.start_as_current_generation(
             name="llm-call",
@@ -352,27 +352,26 @@ const runMyLLMApplication = async (input: string, traceId: string) => {
       },
     },
   });
-  return output
-}
+  return output;
+};
 
 // fetch the dataset
 const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
- 
+
 // iterate over the dataset items
 for (const item of dataset.items) {
-
   // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
-  const trace = langfuse.trace({name: "new experiment trace"})
+  const trace = langfuse.trace({ name: "new experiment trace" });
 
   // run application on the dataset item input
   const output = await runMyLLMApplication(item.input, trace.id);
- 
+
   // link the execution trace to the dataset item and give it a run_name
   await item.link(trace, "<run_name>", {
     description: "My first run", // optional run description
     metadata: { model: "gpt-4o" }, // optional run metadata
   });
- 
+
   // optionally, evaluate the output to compare different runs more easily
   trace.score({
     name: "<score_name>",
@@ -380,12 +379,10 @@ for (const item of dataset.items) {
     comment: "This is a comment", // optional, useful to add reasoning
   });
 }
- 
+
 // Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 await langfuse.flushAsync();
-
 ```
-
 
 </Tab>
 </Tabs>

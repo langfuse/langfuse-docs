@@ -13,12 +13,15 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
       )
         .filter((page) => page.route !== "/cookbook")
         .filter((page) => page.route !== "/guides/cookbook")
-        .reduce((acc, page) => {
-          const category = page.frontMatter?.category || "Other";
-          if (!acc[category]) acc[category] = [];
-          acc[category].push(page);
-          return acc;
-        }, {} as Record<string, Array<Page & { frontMatter: any }>>)
+        .reduce(
+          (acc, page) => {
+            const category = page.frontMatter?.category || "Other";
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(page);
+            return acc;
+          },
+          {} as Record<string, Array<Page & { frontMatter: any }>>
+        )
     )
       .sort(([categoryA], [categoryB]) => {
         // if categories are provided, use the order of the provided categories

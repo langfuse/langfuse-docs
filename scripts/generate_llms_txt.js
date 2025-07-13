@@ -1,104 +1,113 @@
-const fs = require('fs');
-const xml2js = require('xml2js');
-const path = require('path');
+const fs = require("fs");
+const xml2js = require("xml2js");
+const path = require("path");
 
-const SITEMAP_PATH = 'public/sitemap-0.xml';
-const TITLE = 'Langfuse';
-const INTRO_DESCRIPTION = 'Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.';
-const MAIN_SECTIONS = [
-    'docs',
-];
-const OPTIONAL_SECTIONS = [
-    'self-hosting'
-];
+const SITEMAP_PATH = "public/sitemap-0.xml";
+const TITLE = "Langfuse";
+const INTRO_DESCRIPTION =
+  "Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
+const MAIN_SECTIONS = ["docs"];
+const OPTIONAL_SECTIONS = ["self-hosting"];
 
 async function generateLLMsList() {
-    try {
-        const sitemapContent = fs.readFileSync(SITEMAP_PATH, 'utf-8');
+  try {
+    const sitemapContent = fs.readFileSync(SITEMAP_PATH, "utf-8");
 
-        const parser = new xml2js.Parser();
-        const result = await parser.parseStringPromise(sitemapContent);
+    const parser = new xml2js.Parser();
+    const result = await parser.parseStringPromise(sitemapContent);
 
-        // Start building markdown content with the title and blockquote
-        let markdownContent = `# ${TITLE}\n\n`;
-        markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
+    // Start building markdown content with the title and blockquote
+    let markdownContent = `# ${TITLE}\n\n`;
+    markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
-        // Add Settings section with MCP server information
-        markdownContent += `## Langfuse Docs MCP Server\n\n`;
-        markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
-        markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
-        markdownContent += `- **Transport**: \`streamableHttp\`\n`;
-        markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
-        markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
+    // Add Settings section with MCP server information
+    markdownContent += `## Langfuse Docs MCP Server\n\n`;
+    markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
+    markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
+    markdownContent += `- **Transport**: \`streamableHttp\`\n`;
+    markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
+    markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
 
-        // Create a map to store URLs by section
-        const urlsBySection = {
-            other: [],
-            optional: []
-        };
-        MAIN_SECTIONS.forEach(section => {
-            urlsBySection[section] = [];
+    // Create a map to store URLs by section
+    const urlsBySection = {
+      other: [],
+      optional: [],
+    };
+    MAIN_SECTIONS.forEach((section) => {
+      urlsBySection[section] = [];
+    });
+
+    // Sort URLs into sections
+    const urls = result.urlset.url.map((url) => url.loc[0]);
+    urls.forEach((url) => {
+      const urlPath = new URL(url).pathname.split("/")[1]; // Get first part of path
+
+      if (MAIN_SECTIONS.includes(urlPath)) {
+        urlsBySection[urlPath].push({
+          title: url
+            .split("/")
+            .pop()
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase()),
+          url: url,
         });
-
-        // Sort URLs into sections
-        const urls = result.urlset.url.map(url => url.loc[0]);
-        urls.forEach(url => {
-            const urlPath = new URL(url).pathname.split('/')[1]; // Get first part of path
-
-            if (MAIN_SECTIONS.includes(urlPath)) {
-                urlsBySection[urlPath].push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
-            } else if (OPTIONAL_SECTIONS.includes(urlPath)) {
-                urlsBySection.optional.push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
-            } else {
-                urlsBySection.other.push({
-                    title: url.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    url: url
-                });
-            }
+      } else if (OPTIONAL_SECTIONS.includes(urlPath)) {
+        urlsBySection.optional.push({
+          title: url
+            .split("/")
+            .pop()
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase()),
+          url: url,
         });
-
-        // Generate markdown for main sections
-        MAIN_SECTIONS.forEach(section => {
-            if (urlsBySection[section].length > 0) {
-                markdownContent += `## ${section.charAt(0).toUpperCase() + section.slice(1)}\n\n`;
-                urlsBySection[section].forEach(({ title, url }) => {
-                    markdownContent += `- [${title}](${url})\n`;
-                });
-                markdownContent += '\n';
-            }
+      } else {
+        urlsBySection.other.push({
+          title: url
+            .split("/")
+            .pop()
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase()),
+          url: url,
         });
+      }
+    });
 
-        // Add optional integrations section at the end
-        if (urlsBySection.optional.length > 0) {
-            markdownContent += '## Optional\n\n';
-            urlsBySection.optional.forEach(({ title, url }) => {
-                markdownContent += `- [${title}](${url})\n`;
-            });
-        }
+    // Generate markdown for main sections
+    MAIN_SECTIONS.forEach((section) => {
+      if (urlsBySection[section].length > 0) {
+        markdownContent += `## ${section.charAt(0).toUpperCase() + section.slice(1)}\n\n`;
+        urlsBySection[section].forEach(({ title, url }) => {
+          markdownContent += `- [${title}](${url})\n`;
+        });
+        markdownContent += "\n";
+      }
+    });
 
-        // // Add other section
-        // if (urlsBySection.other.length > 0) {
-        //     markdownContent += '## Other\n\n';
-        //     urlsBySection.other.forEach(({ title, url }) => {
-        //         markdownContent += `- [${title}](${url})\n`;
-        //     });
-        //     markdownContent += '\n';
-        // }
-
-        // Write to llms.txt
-        const outputPath = path.join(process.cwd(), 'public', 'llms.txt');
-        fs.writeFileSync(outputPath, markdownContent);
-
-        console.log('Successfully generated llms.txt');
-    } catch (error) {
-        console.error('Error generating llms.txt:', error);
+    // Add optional integrations section at the end
+    if (urlsBySection.optional.length > 0) {
+      markdownContent += "## Optional\n\n";
+      urlsBySection.optional.forEach(({ title, url }) => {
+        markdownContent += `- [${title}](${url})\n`;
+      });
     }
+
+    // // Add other section
+    // if (urlsBySection.other.length > 0) {
+    //     markdownContent += '## Other\n\n';
+    //     urlsBySection.other.forEach(({ title, url }) => {
+    //         markdownContent += `- [${title}](${url})\n`;
+    //     });
+    //     markdownContent += '\n';
+    // }
+
+    // Write to llms.txt
+    const outputPath = path.join(process.cwd(), "public", "llms.txt");
+    fs.writeFileSync(outputPath, markdownContent);
+
+    console.log("Successfully generated llms.txt");
+  } catch (error) {
+    console.error("Error generating llms.txt:", error);
+  }
 }
 
-generateLLMsList(); 
+generateLLMsList();

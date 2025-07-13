@@ -19,9 +19,8 @@ All in-ui Langfuse features next to tracing (playground, llm-as-a-judge evaluati
 There are a few ways through which you can capture traces and metrics for Google Vertex AI:
 
 1. via an application framework that is integrated with Langfuse:
-
    - [Langchain](https://langfuse.com/docs/integrations/langchain)
-   - [Llama Index](https://langfuse.com/docs/integrations/llama-index) 
+   - [Llama Index](https://langfuse.com/docs/integrations/llama-index)
    - [Haystack](https://langfuse.com/docs/integrations/haystack/get-started)
    - [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk)
 
@@ -34,7 +33,6 @@ This is an example notebook which illustrates the different ways to capture trac
 
 ### Install Requirements
 
-
 ```python
 # install requirements for this notebook
 %pip install langchain langchain-google-vertexai langfuse anthropic[vertex] google-cloud-aiplatform
@@ -45,7 +43,6 @@ This is an example notebook which illustrates the different ways to capture trac
 **Authenticate your notebook environment (Colab only)**
 
 If you are running this notebook on Google Colab, run the cell below to authenticate your environment.
-
 
 ```python
 import sys
@@ -62,7 +59,6 @@ To get started using Vertex AI, you must have an existing Google Cloud project a
 
 Learn more about setting up a [project and a development environment](https://cloud.google.com/vertex-ai/docs/start/cloud-environment).
 
-
 ```python
 PROJECT_ID = "vertex-gemini-credentials"
 LOCATION = "us-central1"
@@ -74,13 +70,12 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 ### Authenticate with Langfuse
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
@@ -92,7 +87,6 @@ The langfuse [`@observe()` decorator for Python](https://langfuse.com/docs/sdk/p
 In the following example, we wrap the Vertex AI SDK with the Langfuse decorator once (`vertex_generate_content`) to capture token counts and model metadata, and then reuse the decorated function.
 
 ### Wrap SDK
-
 
 ```python
 import base64
@@ -132,7 +126,6 @@ def vertex_generate_content(input, model_name = "gemini-pro"):
 
 ### Run example
 
-
 ```python
 @observe()
 def assemble_prompt():
@@ -156,16 +149,14 @@ Alternatively, you can use one of the native Langfuse integrations.
 
 Here, we'll use the [LangChain integration](https://langfuse.com/docs/integrations/langchain/tracing) to gain detailed traces of the LLM calls made to Google Vertex.
 
-
 ```python
 from langfuse.langchain import CallbackHandler
- 
+
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 ```
 
 ### Gemini Models
-
 
 ```python
 from langchain_google_vertexai import VertexAI
@@ -176,19 +167,13 @@ model = VertexAI(model_name="gemini-pro", project=PROJECT_ID)
 model.invoke("What are some of the pros and cons of Python as a programming language?", config={"callbacks": [langfuse_handler]})
 ```
 
-
-
-
     "## Pros of Python \n\n* **Easy to learn:** Python has a simple and elegant syntax, making it one of the easiest programming languages to learn, even for beginners. This makes it a popular choice for teaching programming concepts and for rapid prototyping.\n* **Versatile:** Python is a general-purpose language, meaning it can be used for a wide range of tasks, from web development and data science to machine learning and game development. This versatility makes it a valuable tool for developers of all skill levels.\n* **Large and active community:** Python has a large and active community of developers, which provides a wealth of resources, libraries, and support for users. This makes it easy to find help and inspiration when working on Python projects.\n* **Extensive libraries:** Python has a vast collection of libraries and frameworks available for various tasks, including data analysis, web development, machine learning, and scientific computing. This makes it easier to find pre-built solutions for common problems, saving developers time and effort.\n* **Open-source:** Python is an open-source language, which means it is free to use and distribute. This makes it accessible to everyone and allows developers to contribute to the language's development.\n* **Portable:** Python code can run on a wide range of platforms, including Windows, macOS, Linux, and Unix. This makes it a portable language that can be used on different systems without modification.\n* **Focus on readability:** Python's syntax is designed to be clear and readable, with a focus on using plain English keywords and a consistent style. This makes it easier to understand and maintain code, especially for collaborative projects.\n\n## Cons of Python\n\n* **Speed:** Python is an interpreted language, which means it is typically slower than compiled languages like C++ or Java. This can be a disadvantage for performance-critical applications.\n* **Dynamic typing:** Python is a dynamically typed language, which means that variable types are not declared explicitly. This can lead to errors if a variable is used with an incorrect data type.\n* **Limited memory management:** Python has automatic memory management, which can simplify development but can also lead to memory leaks if not used carefully.\n* **Global Interpreter Lock (GIL):** The GIL is a feature of Python that prevents multiple threads from executing Python code simultaneously. This can limit the performance of Python applications in multi-core environments.\n* **Maturity:** Although Python is a mature language, it is still evolving, and its libraries and frameworks can be subject to frequent changes and updates. This can make it challenging to maintain code over time.\n\n\nOverall, Python is a powerful and versatile language with a wide range of uses. Its ease of use, large community, and extensive libraries make it a popular choice for many developers. However, its slower speed and dynamic typing can be limitations for certain applications."
-
-
 
 See [example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0a0381d9-e8b4-4478-b5c0-7a71dd5cd296?timestamp=2024-12-02T14%3A59%3A42.809Z) in Langfuse.
 
 ![Trace](https://static.langfuse.com/cookbooks%2Fgoogle-vertex%2Flangchain-gemini-pro.png)
 
 ### Anthropic Models via Vertex Model Garden
-
 
 ```python
 from langchain_google_vertexai.model_garden import ChatAnthropicVertex

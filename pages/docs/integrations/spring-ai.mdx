@@ -12,7 +12,9 @@ This guide shows how to integrate [Langfuse](/) with [Spring AI](https://docs.sp
 **Langfuse**: Open source LLM engineering platform for observability, evals and prompt management.
 
 <Callout type="info" emoji="💡">
-  Checkout the [Langfuse Example Repo](https://github.com/langfuse/langfuse-examples/tree/main/applications/spring-ai-demo) for a fully instrumented example application.
+  Checkout the [Langfuse Example
+  Repo](https://github.com/langfuse/langfuse-examples/tree/main/applications/spring-ai-demo)
+  for a fully instrumented example application.
 </Callout>
 
 ## Step 1: Enable OpenTelemetry in Spring AI
@@ -253,8 +255,11 @@ private String performAiOperation(String userInput) {
 ```
 
 <Callout type="info">
-  Note that for proper user tracking in Langfuse, the `langfuse.user.id` and `langfuse.session.id` attributes should ideally be set on the root span.
-  If you're unable to add these attributes to the root span directly, you can use the [Langfuse Java SDK](https://github.com/langfuse/langfuse-java) to update the trace after it has been written.
+  Note that for proper user tracking in Langfuse, the `langfuse.user.id` and
+  `langfuse.session.id` attributes should ideally be set on the root span. If
+  you're unable to add these attributes to the root span directly, you can use
+  the [Langfuse Java SDK](https://github.com/langfuse/langfuse-java) to update
+  the trace after it has been written.
 </Callout>
 
 ## Troubleshooting

@@ -31,7 +31,9 @@ export default function InkeepCustomTrigger() {
   useEffect(() => {
     const loadCustomTrigger = async () => {
       try {
-        const { InkeepModalSearchAndChat } = await import("@inkeep/cxkit-react");
+        const { InkeepModalSearchAndChat } = await import(
+          "@inkeep/cxkit-react"
+        );
         setCustomTrigger(() => InkeepModalSearchAndChat);
       } catch (error) {
         console.error("Failed to load CustomTrigger:", error);

@@ -32,13 +32,13 @@ export function Carousel({
   }, []);
 
   const goToPrevious = React.useCallback(() => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? totalSlides - 1 : prevIndex - 1
     );
   }, [totalSlides]);
 
   const goToNext = React.useCallback(() => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === totalSlides - 1 ? 0 : prevIndex + 1
     );
   }, [totalSlides]);
@@ -73,7 +73,7 @@ export function Carousel({
   }, [goToPrevious, goToNext, isActive]);
 
   return (
-    <div 
+    <div
       ref={carouselRef}
       className={cn("relative w-full", className)}
       onMouseEnter={() => setIsActive(true)}
@@ -140,4 +140,4 @@ export function Carousel({
       )}
     </div>
   );
-} 
+}

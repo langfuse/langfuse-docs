@@ -26,14 +26,17 @@ export const FaqIndex = () => {
   >;
   const categorizedPages = pages
     .filter((page) => page.route !== "/faq/all")
-    .reduce((acc, page) => {
-      const tags = page.frontMatter?.tags || ["Other"];
-      tags.forEach((tag: string) => {
-        if (!acc[tag]) acc[tag] = [];
-        acc[tag].push(page);
-      });
-      return acc;
-    }, {} as Record<string, Array<Page & { frontMatter: any }>>);
+    .reduce(
+      (acc, page) => {
+        const tags = page.frontMatter?.tags || ["Other"];
+        tags.forEach((tag: string) => {
+          if (!acc[tag]) acc[tag] = [];
+          acc[tag].push(page);
+        });
+        return acc;
+      },
+      {} as Record<string, Array<Page & { frontMatter: any }>>
+    );
 
   return (
     <>

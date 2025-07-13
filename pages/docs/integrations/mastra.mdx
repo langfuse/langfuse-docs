@@ -3,7 +3,7 @@ title: Observability for Mastra with Langfuse
 description: Learn how to integrate Langfuse with Mastra, a TypeScript agent framework, to monitor, debug, and analyze your AI applications.
 ---
 
-#  Observability for Mastra With Langfuse
+# Observability for Mastra With Langfuse
 
 This guide shows you how to integrate **Langfuse** with **Mastra** for observability and tracing. By following these steps, you'll be able to monitor and debug your Mastra agents in the Langfuse dashboard.
 
@@ -13,111 +13,115 @@ This guide shows you how to integrate **Langfuse** with **Mastra** for observabi
 
 <Steps>
 
-  ### Create a Mastra project
-  If you don't have a Mastra project yet, you can create one using the Mastra CLI:
+### Create a Mastra project
 
-  ```bash
-  npx create-mastra
-  ```
+If you don't have a Mastra project yet, you can create one using the Mastra CLI:
 
-  Move into the project directory:
+```bash
+npx create-mastra
+```
 
-  ```bash
-  cd your-mastra-project
-  ```
+Move into the project directory:
 
-  You can get the full Mastra installation instructions [here](https://mastra.ai/docs/getting-started/installation)
+```bash
+cd your-mastra-project
+```
 
-  ### Set up Langfuse project
-  Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys from the project settings page.
+You can get the full Mastra installation instructions [here](https://mastra.ai/docs/getting-started/installation)
 
+### Set up Langfuse project
 
-  ### Add environment variables
-  Create or update your `.env.development` file with the following variables:
+Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys from the project settings page.
 
-  ```bash
-  # Your LLM API key
-  OPENAI_API_KEY=your-api-key
+### Add environment variables
 
-  # Langfuse credentials
-  LANGFUSE_SECRET_KEY=sk-lf-...
-  LANGFUSE_PUBLIC_KEY=pk-lf-...
-  LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
-  ```
+Create or update your `.env.development` file with the following variables:
 
-  ### Install the `langfuse-vercel` package
-  Add the `langfuse-vercel` package to your project:
+```bash
+# Your LLM API key
+OPENAI_API_KEY=your-api-key
 
-  ```bash
-  npm install langfuse-vercel
-  ```
+# Langfuse credentials
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_HOST=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
+```
 
-  ### Set up an agent
-  Create an agent in your project. For example, create a file `agents/chefAgent.ts`:
+### Install the `langfuse-vercel` package
 
-  ```typescript
-  import { Agent } from "@mastra/core/agent";
-  import { openai } from "@ai-sdk/openai";
+Add the `langfuse-vercel` package to your project:
 
-  export const chefAgent = new Agent({
-    name: "chef-agent",
-    instructions:
-      "You are Michel, a practical and experienced home chef " +
-      "You help people cook with whatever ingredients they have available.",
-    model: openai("gpt-4o-mini"),
-  });
-  ```
+```bash
+npm install langfuse-vercel
+```
 
-  <Callout type="info">
-  You can use any model provider from `ai-sdk`.
-  </Callout>
+### Set up an agent
 
+Create an agent in your project. For example, create a file `agents/chefAgent.ts`:
 
-  ### Register agent and configure Langfuse
-  Create or update your Mastra instance configuration to register the agent and configure Langfuse integration. For example, create a file `mastra.ts`:
+```typescript
+import { Agent } from "@mastra/core/agent";
+import { openai } from "@ai-sdk/openai";
 
-  ```typescript
-  import { Mastra } from "@mastra/core";
-  import { LangfuseExporter } from "langfuse-vercel";
-  import { chefAgent } from "./agents/chefAgent";
+export const chefAgent = new Agent({
+  name: "chef-agent",
+  instructions:
+    "You are Michel, a practical and experienced home chef " +
+    "You help people cook with whatever ingredients they have available.",
+  model: openai("gpt-4o-mini"),
+});
+```
 
-  export const mastra = new Mastra({
-    agents: { chefAgent },
-    telemetry: {
-      serviceName: "ai", // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace
-      enabled: true,
-      export: {
-        type: "custom",
-        exporter: new LangfuseExporter({
-            publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-            secretKey: process.env.LANGFUSE_SECRET_KEY,
-            baseUrl: process.env.LANGFUSE_HOST,
-        }),
-      },
+<Callout type="info">You can use any model provider from `ai-sdk`.</Callout>
+
+### Register agent and configure Langfuse
+
+Create or update your Mastra instance configuration to register the agent and configure Langfuse integration. For example, create a file `mastra.ts`:
+
+```typescript
+import { Mastra } from "@mastra/core";
+import { LangfuseExporter } from "langfuse-vercel";
+import { chefAgent } from "./agents/chefAgent";
+
+export const mastra = new Mastra({
+  agents: { chefAgent },
+  telemetry: {
+    serviceName: "ai", // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace
+    enabled: true,
+    export: {
+      type: "custom",
+      exporter: new LangfuseExporter({
+        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+        secretKey: process.env.LANGFUSE_SECRET_KEY,
+        baseUrl: process.env.LANGFUSE_HOST,
+      }),
     },
-  });
-  ```
+  },
+});
+```
 
-  <Callout type="info">
-    The `telemetry.serviceName` field must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace.
-  </Callout>
+<Callout type="info">
+  The `telemetry.serviceName` field must be set to "ai" so that the
+  LangfuseExporter thinks it's an AI SDK trace.
+</Callout>
 
-  ### Run mastra dev server
-  Start the Mastra development server:
+### Run mastra dev server
 
-  ```bash
-  npm run dev
-  ```
+Start the Mastra development server:
 
-  Head over to the developer playground with the provided URL and start chatting with your agent.
+```bash
+npm run dev
+```
 
+Head over to the developer playground with the provided URL and start chatting with your agent.
 
-  ### View traces in Langfuse
-  Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
+### View traces in Langfuse
 
-  Here's an example of a trace:
+Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
 
-  ![Mastra trace in Langfuse UI](/images/docs/langfuse-mastra-trace.png)
+Here's an example of a trace:
+
+![Mastra trace in Langfuse UI](/images/docs/langfuse-mastra-trace.png)
 
 </Steps>
 

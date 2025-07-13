@@ -10,9 +10,9 @@ export const CustomerStoryCTA = () => {
           Ready to get started with Langfuse?
         </h3>
         <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-          Join thousands of teams building better LLM applications with Langfuse's 
-          open-source observability platform. Start monitoring, debugging, and improving 
-          your AI applications today.
+          Join thousands of teams building better LLM applications with
+          Langfuse's open-source observability platform. Start monitoring,
+          debugging, and improving your AI applications today.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button size="lg" variant="cta" asChild>
@@ -21,14 +21,15 @@ export const CustomerStoryCTA = () => {
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/docs">
-              View documentation
-            </Link>
+            <Link href="/docs">View documentation</Link>
           </Button>
         </div>
         <div className="mt-4">
           <span className="text-sm text-muted-foreground">or </span>
-          <Link href="/talk-to-us" className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">
+          <Link
+            href="/talk-to-us"
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+          >
             Talk to an expert
           </Link>
         </div>
@@ -38,4 +39,4 @@ export const CustomerStoryCTA = () => {
       </div>
     </div>
   );
-}; 
+};

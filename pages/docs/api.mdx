@@ -125,6 +125,7 @@ Install Langfuse by adding the following to your `pom.xml`:
 ```
 
 Instantiate and use the Java SDK via:
+
 ```java
 import com.langfuse.client.LangfuseClient;
 import com.langfuse.client.resources.prompts.types.PromptMetaListResponse;
@@ -155,11 +156,13 @@ If you want to use tracing via the API, such as to build your own Langfuse clien
 ```
 POST /api/public/ingestion
 ```
+
 _API Reference: [POST /api/public/ingestion](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion)_
 
 Within each batch, there can be multiple events. Each event has a type, an id, a timestamp, metadata and a body. Internally, we refer to this as the "event envelope" as it tells us something about the event but not the trace. We use the event id within this envelope to deduplicate messages to avoid processing the same event twice, i.e. the event id should be unique per request. The event.body.id is the ID of the actual trace and will be used for updates and will be visible within the Langfuse App. I.e. if you want to update a trace, you'd use the same body id, but separate event IDs.
 
 **Notes:**
+
 - Introduction to data model: https://langfuse.com/docs/tracing-data-model
 - Batch sizes are limited to 3.5 MB in total. You need to adjust the number of events per batch accordingly.
 - The API does not return a 4xx status code for input errors. Instead, it responds with a 207 status code, which includes a list of the encountered errors.

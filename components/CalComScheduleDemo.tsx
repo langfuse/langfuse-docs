@@ -19,7 +19,8 @@ export function ScheduleDemo({
     })();
   }, []);
 
-  const calLink = region === "us" ? "team/langfuse/intro" : "team/langfuse/intro-eu";
+  const calLink =
+    region === "us" ? "team/langfuse/intro" : "team/langfuse/intro-eu";
 
   return (
     <Cal

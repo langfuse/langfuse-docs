@@ -1,22 +1,14 @@
 import { BookOpen, UserPlus, Video as VideoIcon } from "lucide-react";
 
-import IntegrationsGrid from '@/components/home/IntegrationsGrid';
+import IntegrationsGrid from "@/components/home/IntegrationsGrid";
 
 ---
 
 **Learn more about Langfuse**
 
 <Cards num={4}>
-  <Card 
-    title="Docs" 
-    href="/docs" 
-    icon={<BookOpen />}    
-  />
-  <Card
-    title="Video introduction"
-    href="/watch-demo"
-    icon={<VideoIcon />}
-  />
+  <Card title="Docs" href="/docs" icon={<BookOpen />} />
+  <Card title="Video introduction" href="/watch-demo" icon={<VideoIcon />} />
   <Card
     title="Sign Up (Free)"
     href="https://cloud.langfuse.com/"
@@ -35,17 +27,18 @@ from langfuse.openai import openai # OpenAI integration
 
 @observe()
 def story():
-    return openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": "Once upon a time in a galaxy far, far away..."}],
-    ).choices[0].message.content
+return openai.chat.completions.create(
+model="gpt-4o",
+messages=[{"role": "user", "content": "Once upon a time in a galaxy far, far away..."}],
+).choices[0].message.content
 
 @observe()
 def main():
-    return story()
+return story()
 
 main()
-```
+
+````
 </Tab>
 
 <Tab>
@@ -74,12 +67,13 @@ const chatCompletion = await llm.respond(prompt);
 generation.end({
   output: chatCompletion,
 });
-```
+````
+
 </Tab>
 
 <Tab>
 
-<IntegrationsGrid /> 
+<IntegrationsGrid />
 
 </Tab>
 

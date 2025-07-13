@@ -7,7 +7,7 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,jsx,ts,tsx,mdx}",
     "./theme.config.tsx",
-    "./lib/**/*.{js,jsx,ts,tsx,mdx}"
+    "./lib/**/*.{js,jsx,ts,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -19,8 +19,8 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ['var(--font-geist-sans)'],
-        mono: ['var(--font-geist-mono)'],
+        sans: ["var(--font-geist-sans)"],
+        mono: ["var(--font-geist-mono)"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -72,7 +72,7 @@ module.exports = {
         meteor: "meteor 5s linear infinite",
         spin: "spin calc(var(--speed) * 2) infinite linear",
         slide: "slide var(--speed) ease-in-out infinite alternate",
-        "gradient": 'gradient 6s linear infinite',
+        gradient: "gradient 6s linear infinite",
         marquee: "marquee var(--duration) linear infinite",
         grid: "grid 20s linear infinite",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
@@ -111,8 +111,8 @@ module.exports = {
           from: { transform: "translateY(0)" },
           to: { transform: "translateY(calc(-100% - var(--gap)))" },
         },
-        "gradient": {
-          to: { 'background-position': '200% center' },
+        gradient: {
+          to: { "background-position": "200% center" },
         },
         spin: {
           "0%": {
@@ -135,9 +135,9 @@ module.exports = {
         },
       },
       perspective: {
-        '1000': '1000px',
+        1000: "1000px",
       },
     },
     plugins: [require("tailwindcss-animate")],
-  }
-}
+  },
+};

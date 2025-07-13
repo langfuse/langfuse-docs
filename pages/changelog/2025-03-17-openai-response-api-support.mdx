@@ -20,14 +20,16 @@ from langfuse import get_client
 client = openai.OpenAI()
 
 client.responses.create(
-    model="gpt-4o",
-    input="Tell me a three sentence bedtime story about a unicorn.",
+model="gpt-4o",
+input="Tell me a three sentence bedtime story about a unicorn.",
 )
 
 # Flush via global client
+
 langfuse = get_client()
 langfuse.flush()
-```
+
+````
 </Tab>
 
 <Tab>
@@ -42,14 +44,17 @@ const response = await client.responses.create({
 });
 
 await client.flushAsync();
-```
+````
+
 </Tab>
 </Tabs>
 
 **Releases**
+
 - [Python SDK](https://github.com/langfuse/langfuse-python/releases/tag/v2.60.0)
 - [JS/TS SDK](https://github.com/langfuse/langfuse-js/releases/tag/v3.37.0)
 
 **Learn more**
+
 - [OpenAI Response API](https://platform.openai.com/docs/api-reference/responses)
 - [Langfuse OpenAI integration](/docs/integrations/openai)

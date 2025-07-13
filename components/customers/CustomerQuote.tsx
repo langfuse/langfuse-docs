@@ -13,13 +13,13 @@ interface CustomerQuoteProps {
   className?: string;
 }
 
-export const CustomerQuote = ({ 
-  quote, 
-  name, 
-  role, 
-  company, 
+export const CustomerQuote = ({
+  quote,
+  name,
+  role,
+  company,
   image,
-  className = "" 
+  className = "",
 }: CustomerQuoteProps) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
@@ -65,28 +65,38 @@ export const CustomerQuote = ({
     }
   }, [isAnimating, quote]);
 
-  const quoteMarkStyle = "font-serif text-[32px] leading-none text-gray-600 dark:text-gray-400";
-  const openingQuoteStyle = "font-serif text-[32px] leading-none -ml-3 text-gray-600 dark:text-gray-400";
+  const quoteMarkStyle =
+    "font-serif text-[32px] leading-none text-gray-600 dark:text-gray-400";
+  const openingQuoteStyle =
+    "font-serif text-[32px] leading-none -ml-3 text-gray-600 dark:text-gray-400";
 
   return (
     <div ref={ref} className={`my-24 ${className}`}>
       <blockquote className="text-2xl font-normal leading-relaxed mb-4 relative">
         {/* Hidden text to maintain layout height */}
         <span className="invisible" aria-hidden="true">
-          <span className={openingQuoteStyle}>"</span>{quote}<span className={quoteMarkStyle}>"</span>
+          <span className={openingQuoteStyle}>"</span>
+          {quote}
+          <span className={quoteMarkStyle}>"</span>
         </span>
-        
+
         {/* Visible streaming text positioned absolutely */}
         <span className="absolute inset-0 text-gray-600 dark:text-gray-400">
           <span className={`${openingQuoteStyle} mr-1`}>"</span>
-          <span className="text-2xl">{hasAnimated ? displayedText : quote}</span>
+          <span className="text-2xl">
+            {hasAnimated ? displayedText : quote}
+          </span>
           {hasAnimated && !isAnimating && (
             <span className={`${quoteMarkStyle} ml-1`}>"</span>
           )}
           {isAnimating && (
             <motion.span
               animate={{ opacity: [1, 0] }}
-              transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+              transition={{
+                duration: 0.8,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
               className="inline-block ml-1 text-2xl"
             >
               |
@@ -94,8 +104,8 @@ export const CustomerQuote = ({
           )}
         </span>
       </blockquote>
-      
-      <motion.div 
+
+      <motion.div
         className="flex items-center gap-4 justify-end"
         initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
@@ -113,10 +123,14 @@ export const CustomerQuote = ({
         )}
         <div>
           <div className="text-gray-600 dark:text-gray-400">
-            <span className="font-semibold text-gray-900 dark:text-gray-100">{name}</span>, {role}{company && ` at ${company}`}
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
+              {name}
+            </span>
+            , {role}
+            {company && ` at ${company}`}
           </div>
         </div>
       </motion.div>
     </div>
   );
-}; 
+};

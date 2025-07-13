@@ -20,11 +20,9 @@ Want to learn more? Check out our [documentation on LLM Security](https://langfu
 
 _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
-
 ```python
 %pip install llm-guard "langfuse<3.0.0" openai
 ```
-
 
 ```python
 import os
@@ -51,7 +49,6 @@ The following example walks through an example of kid-friendly storytelling appl
 #### Without Security
 
 Without security measures, it is possible to generate stories for inappropriate topics, such as those that include violence.
-
 
 ```python
 from langfuse.decorators import observe
@@ -84,7 +81,6 @@ The following example implements LLM Guard [Ban Topics](https://llm-guard.com/in
 LLM Guard uses the following [models](https://huggingface.co/collections/MoritzLaurer/zeroshot-classifiers-6548b4ff407bb19ff5c3ad6f) to perform efficient zero-shot classification. This allows users to specify any topic they want to detect.
 
 The example below adds the detected "violence" score to the trace in Langfuse. You can see the trace for this interaction, and analytics for these banned topics scores, in the Langfuse dashboard.
-
 
 ```python
 from langfuse.decorators import observe, langfuse_context
@@ -124,7 +120,6 @@ main()
 
 > This is not child safe, please request another topic
 
-
 ```python
 sanitized_prompt, is_valid, risk_score = violence_scanner.scan("war crimes")
 print(sanitized_prompt)
@@ -148,13 +143,11 @@ Use LLM Guard's [Anonymize scanner](https://llm-guard.com/input_scanners/anonymi
 
 In the example below Langfuse is used to track each of these steps separately to measure the accuracy and latency.
 
-
 ```python
 from llm_guard.vault import Vault
 
 vault = Vault()
 ```
-
 
 ```python
 from llm_guard.input_scanners import Anonymize
@@ -209,7 +202,6 @@ main()
 
 You can stack multiple scanners if you want to filter for multiple security risks.
 
-
 ```python
 from langfuse.decorators import observe, langfuse_context
 from langfuse.openai import openai # OpenAI integration
@@ -262,7 +254,6 @@ main()
 
 And you can also use the same methond to scan the model's output to ensure the quality of the response:
 
-
 ```python
 from llm_guard import scan_output
 from llm_guard.output_scanners import NoRefusal, Relevance, Sensitive
@@ -306,13 +297,12 @@ Prompt injection allows malicious actors to extract sensitive information, gener
 
 There are two types of prompt injection:
 
-*   **Direct**: attacker includes malicious content in the prompt, such as through invisible text or jailbreaks.
-*   **Indirect**: attacker indirectly influences a model by embedding malicious content in the data the model processes, rather than altering the prompt directly
+- **Direct**: attacker includes malicious content in the prompt, such as through invisible text or jailbreaks.
+- **Indirect**: attacker indirectly influences a model by embedding malicious content in the data the model processes, rather than altering the prompt directly
 
 Below is an example of the infamous "Grandma trick", which allows users to trick ChatGPT into outputting sensitive information by prompting the system to role-play as the user's grandmother.
 
 We use the LLM Guard [Prompt Injection scanner](https://llm-guard.com/input_scanners/prompt_injection/) to try to detect and block these types of prompts.
-
 
 ```python
 from llm_guard.input_scanners import PromptInjection
@@ -352,11 +342,9 @@ main()
 
 As you can see, LLM Guard fails to catch the injected Grandma Trick prompt. Let's see how another security library, Lakera, performs:
 
-
 ```python
 os.environ["LAKERA_GUARD_API_KEY"] = ""
 ```
-
 
 ```python
 import os
@@ -410,7 +398,6 @@ Luckily, Lakera Guard is able to catch and block the prompt injection. Langfuse 
 
 Here is another example which directly inject a malicious link into the prompt.
 
-
 ```python
 @observe()
 def answer_question(question: str, context: str):
@@ -457,7 +444,7 @@ def main():
 main()
 ```
 
-> No prompt injection detected   highest_score=0.0
+> No prompt injection detected highest_score=0.0
 >
 > Lakera Guard identified a prompt injection. No user was harmed by this LLM.
 

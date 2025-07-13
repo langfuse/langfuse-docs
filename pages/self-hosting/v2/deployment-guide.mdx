@@ -229,13 +229,11 @@ For encryption in transit, HTTPS is strongly recommended. Langfuse itself does n
 
 1. Load Balancer Termination:
    In this approach, HTTPS is terminated at the load balancer level. The load balancer handles the SSL/TLS certificates and encryption, then forwards the decrypted traffic to the Langfuse container over HTTP. This is a common and straightforward method, especially in cloud environments.
-
    - Pros: Simplifies certificate management as it is usually a fully managed service (e.g. AWS ALB), offloads encryption overhead from application servers.
    - Cons: Traffic between load balancer and Langfuse container is unencrypted (though typically within a secure network).
 
 2. Service Mesh Sidecar:
    This method involves using a service mesh like Istio or Linkerd. A sidecar proxy is deployed alongside each Langfuse container, handling all network traffic including HTTPS.
-
    - Pros: Provides end-to-end encryption (mutual TLS), offers advanced traffic management and observability.
    - Cons: Adds complexity to the deployment, requires understanding of service mesh concepts.
 
@@ -433,7 +431,6 @@ Notes:
 6.  Choose 'CPU Allocation and Pricing' as "CPU is only allocated during request processing" to scale down the instance to 0 when there are no requests.
 7.  Configure ingress control according to your needs. For most cases, 'All' should suffice.
 8.  "Container(s), Volumes, Networking & Security":
-
     - Specify container port as `3000`.
     - On "Variables & Secrets" tab, add the required environment variables (see table above): `SALT`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, and `DATABASE_URL`, etc.
 

@@ -14,19 +14,17 @@ In this example, we'll use the [Python OpenTelemetry SDK](https://opentelemetry.
 
 _**⚠️ Note:** We have a new OpenTelemetry native Langfuse SDK. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
-
 ```python
 %pip install opentelemetry-sdk opentelemetry-exporter-otlp opentelemetry-api
 ```
-
 
 ```python
 import os
 import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -40,7 +38,6 @@ os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}
 ```
 
 Configure `tracer_provider` and add a span processor to export traces to Langfuse. `OTLPSpanExporter()` uses the endpoint and headers from the environment variables.
-
 
 ```python
 from opentelemetry.sdk.trace import TracerProvider
@@ -64,12 +61,11 @@ Opentelemetry lets you attach a set of attributes to all spans by setting [`set_
 
 **GenAI Semantic Convention Attributes:**
 
-
 ```python
 with tracer.start_as_current_span("GenAI Attributes") as span:
     span.set_attribute("gen_ai.prompt.0.role", "system")
     span.set_attribute("gen_ai.prompt.0.content", "You are a coding assistant that helps write Python code.")
-    span.set_attribute("gen_ai.prompt.1.role", "user") 
+    span.set_attribute("gen_ai.prompt.1.role", "user")
     span.set_attribute("gen_ai.prompt.1.content", "Write a function that calculates the factorial of a number.")
 
     span.set_attribute("gen_ai.completion.0.role", "assistant")
@@ -88,8 +84,7 @@ with tracer.start_as_current_span("GenAI Attributes") as span:
 
 **Langfuse Attributes:**
 
- [`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span) allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
-
+[`set_attribute`](https://opentelemetry.io/docs/languages/python/instrumentation/#add-attributes-to-a-span) allows you to set properties like a Langfuse Session ID, to group traces into Langfuse Sessions or a User ID, to assign traces to a specific user. You can find a list of all supported attributes in the [here](/docs/opentelemetry/get-started#property-mapping).
 
 ```python
 with tracer.start_as_current_span("Langfuse Attributes") as span:
@@ -102,7 +97,6 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 ## JSON-serialized attributes
 
 Export a span using JSON-serialized attributes
-
 
 ```python
 with tracer.start_as_current_span("GenAI JSON-Serialized Attributes") as span:
@@ -137,7 +131,6 @@ You can also test your smolagents using [Langfuse Dataset Experiments](https://l
 
 Below, we demonstrate this approach with the [GSM8K dataset](https://huggingface.co/datasets/gsm8k), which contains math questions and solutions.
 
-
 ```python
 from opentelemetry.trace import format_trace_id
 
@@ -154,15 +147,14 @@ def otel_helper_function(input):
         formatted_trace_id = format_trace_id(trace_id)
 
         langfuse_trace = langfuse.trace(
-            id=formatted_trace_id, 
-            input=input, 
+            id=formatted_trace_id,
+            input=input,
             output=output
         )
     return langfuse_trace, output
 ```
 
 Then loop over the dataset items and run the application.
-
 
 ```python
 from langfuse import Langfuse
@@ -193,6 +185,7 @@ langfuse.flush()
 ```
 
 You can repeat this process with different:
+
 - Models (OpenAI GPT, local LLM, etc.)
 - Prompts (different system messages)
 

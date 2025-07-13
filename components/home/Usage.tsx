@@ -88,55 +88,55 @@ export const Usage = () => {
   ];
 
   return (
-  <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
-    <div className="py-14">
-      <h2 className="text-center text-lg font-semibold leading-8 mb-8">
-        Teams building complex LLM apps rely on Langfuse
-      </h2>
-      <div className="flex flex-col gap-8">
-        <div className="relative">
-          <div className="flex flex-wrap xl:flex-nowrap justify-between">
-            {users.map((user) => (
-              <a
-                key={user.name}
-                href={user.href}
-                className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-80 transition py-4 px-3"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Image
-                  src={user.lightImage}
-                  alt={user.name}
-                  className="object-contain h-full w-full hidden dark:block"
-                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                />
-                <Image
-                  src={user.darkImage}
-                  alt={user.name}
-                  className="object-contain h-full w-full dark:hidden"
-                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                />
-              </a>
+    <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
+      <div className="py-14">
+        <h2 className="text-center text-lg font-semibold leading-8 mb-8">
+          Teams building complex LLM apps rely on Langfuse
+        </h2>
+        <div className="flex flex-col gap-8">
+          <div className="relative">
+            <div className="flex flex-wrap xl:flex-nowrap justify-between">
+              {users.map((user) => (
+                <a
+                  key={user.name}
+                  href={user.href}
+                  className="overflow-hidden w-1/2 md:w-1/4 xl:w-[12%] h-16 hover:opacity-80 transition py-4 px-3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image
+                    src={user.lightImage}
+                    alt={user.name}
+                    className="object-contain h-full w-full hidden dark:block"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                  />
+                  <Image
+                    src={user.darkImage}
+                    alt={user.name}
+                    className="object-contain h-full w-full dark:hidden"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-row justify-around sm:justify-center sm:gap-10">
+            {stats.map((item) => (
+              <div key={item.name} className="text-center">
+                <p className="text-xl sm:text-2xl font-bold text-primary/80 font-mono">
+                  <NumberTicker value={item.value} />
+                  {item.showPlus && (
+                    <span className="ml-1 hidden sm:inline">{"+"}</span>
+                  )}
+                </p>
+                <p className="mt-2 text-xs sm:text-sm text-primary/70">
+                  {item.name}
+                </p>
+              </div>
             ))}
           </div>
         </div>
-        <div className="flex flex-row justify-around sm:justify-center sm:gap-10">
-          {stats.map((item) => (
-            <div key={item.name} className="text-center">
-              <p className="text-xl sm:text-2xl font-bold text-primary/80 font-mono">
-                <NumberTicker value={item.value} />
-                {item.showPlus && (
-                  <span className="ml-1 hidden sm:inline">{"+"}</span>
-                )}
-              </p>
-              <p className="mt-2 text-xs sm:text-sm text-primary/70">
-                {item.name}
-              </p>
-            </div>
-          ))}
-        </div>
       </div>
-    </div>
-  </HomeSection>
+    </HomeSection>
   );
 };

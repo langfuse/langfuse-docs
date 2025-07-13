@@ -22,17 +22,17 @@ Lanfuse and Langchain are under active development. Thus, we are constantly impr
 
 ## Python [#python]
 
-### From v2.x.x to v3.x.x 
+### From v2.x.x to v3.x.x
 
 Python SDK v3 introduces a completely revised Langfuse core with a new **observability API**. While the LangChain integration still relies on a `CallbackHandler`, nearly all ergonomics have changed. The table below highlights the most important breaking changes:
 
-| Topic | v2 | v3 |
-|-------|-----|-----|
-|Package import |`from langfuse.callback import CallbackHandler`|`from langfuse.langchain import CallbackHandler`|
-|Client handling | Multiple instantiated clients | Singleton pattern, access via `get_client()` |
-|Trace/Span context | `CallbackHandler` optionally accepted `root` to group runs | Use context managers `with langfuse.start_as_current_span(...)` |
-|Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `span.update_trace(user_id=...)` |
-|Constructor args | `CallbackHandler(sample_rate=..., user_id=...)` | No constructor args – use Langfuse client or spans |
+| Topic               | v2                                                                | v3                                                                     |
+| ------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Package import      | `from langfuse.callback import CallbackHandler`                   | `from langfuse.langchain import CallbackHandler`                       |
+| Client handling     | Multiple instantiated clients                                     | Singleton pattern, access via `get_client()`                           |
+| Trace/Span context  | `CallbackHandler` optionally accepted `root` to group runs        | Use context managers `with langfuse.start_as_current_span(...)`        |
+| Dynamic trace attrs | Pass via LangChain `config` (e.g. `metadata["langfuse_user_id"]`) | Use `metadata["langfuse_user_id"]` OR `span.update_trace(user_id=...)` |
+| Constructor args    | `CallbackHandler(sample_rate=..., user_id=...)`                   | No constructor args – use Langfuse client or spans                     |
 
 Minimal migration example:
 
@@ -67,7 +67,7 @@ prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
 response = chain.invoke(
-    {"topic": "cats"}, 
+    {"topic": "cats"},
     config={
         "callbacks": [handler],
         "metadata": {"langfuse_user_id": "user_123"}

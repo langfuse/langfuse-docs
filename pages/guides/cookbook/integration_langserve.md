@@ -7,6 +7,7 @@ category: Integrations
 # Cookbook: Langserve Integration (SDK v2)
 
 [Langserve](https://python.langchain.com/docs/langserve/) (Python)
+
 > LangServe helps developers deploy LangChain runnables and chains as a REST API.
 >
 > This library is integrated with FastAPI and uses pydantic for data validation.
@@ -19,11 +20,9 @@ This cookbook demonstrates how to trace applications deployed via Langserve with
 
 _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
-
 ```python
 !pip install fastapi sse_starlette httpx langserve "langfuse<3.0.0" langchain-openai langchain
 ```
-
 
 ```python
 import os
@@ -42,7 +41,6 @@ os.environ["OPENAI_API_KEY"] = ""
 ## Simple LLM Call Example
 
 Initialize the Langfuse client and configure the LLM with Langfuse as callback handler. Add to Fastapi via Langserve's `add_routes()`.
-
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -74,10 +72,7 @@ add_routes(
 )
 ```
 
-
-
-*Note: We use TestClient in this example to be able to run the server in a notebook*
-
+_Note: We use TestClient in this example to be able to run the server in a notebook_
 
 ```python
 from fastapi.testclient import TestClient
@@ -94,7 +89,6 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 ![Trace of Langserve Simple LLM Call](https://langfuse.com/images/cookbook/integration_langserve_simple.png)
 
 ## LCEL example
-
 
 ```python
 from langchain.prompts import ChatPromptTemplate
@@ -122,7 +116,6 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 ![Trace of Langserve LCEL Example](https://langfuse.com/images/cookbook/integration_langserve_chain.png)
 
 ## Agent Example
-
 
 ```python
 from langchain_core.tools import tool

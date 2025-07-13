@@ -47,6 +47,7 @@ Afterward, restart the migration via the UI.
 ### Migrations Stuck on Single Date
 
 If you observe repeated log lines that refer to the same date, e.g.
+
 ```
 langfuse-worker-1    | 2025-06-03T08:38:21.918Z info      [Background Migration] Acquired lock for background migration 20241024_1730_migrate_traces_from_pg_to_ch
 langfuse-worker-1    | 2025-06-03T08:38:21.949Z info      Migrating traces from postgres to clickhouse with {}
@@ -59,7 +60,9 @@ langfuse-worker-1    | 2025-06-03T08:38:23.815Z info      Processed batch in 896
 langfuse-worker-1    | 2025-06-03T08:38:24.256Z info      Got 1000 records from Postgres in 441ms
 langfuse-worker-1    | 2025-06-03T08:38:24.638Z info      Inserted 1000 traces into Clickhouse in 382ms
 ```
+
 this might be due to a couple of reasons:
+
 - You have many events that were created at exactly the same time.
 - Your instance was created before 2024-05-03 and rarely updated since.
 

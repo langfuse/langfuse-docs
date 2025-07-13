@@ -19,8 +19,11 @@ import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-
   className="max-w-2xl"
 />
 
-<Callout type='info'>
-This documentation has been updated to show examples for the new **[Python SDK v3](/docs/sdk/python/sdk-v3)**. If you are looking for documentation for the Python SDK version 2, [see here.](https://github.com/langfuse/langfuse-docs/blob/1c264cd5216d3e1008f0da2e33c11e44ae1d9d1c/pages/docs/integrations/langchain/tracing.mdx)
+<Callout type="info">
+  This documentation has been updated to show examples for the new **[Python SDK
+  v3](/docs/sdk/python/sdk-v3)**. If you are looking for documentation for the
+  Python SDK version 2, [see
+  here.](https://github.com/langfuse/langfuse-docs/blob/1c264cd5216d3e1008f0da2e33c11e44ae1d9d1c/pages/docs/integrations/langchain/tracing.mdx)
 </Callout>
 
 ## Add Langfuse to your Langchain Application
@@ -65,6 +68,7 @@ You can configure the integration via (1) constructor arguments or (2) environme
     response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
     print(response.content)
     ```
+
   </Tab>
   <Tab>
     ```bash
@@ -102,6 +106,7 @@ You can configure the integration via (1) constructor arguments or (2) environme
     # Flush events to Langfuse in short-lived applications
     langfuse.flush()
     ```
+
   </Tab>
   <Tab>
     <GetStartedLangchainJsArgs />
@@ -182,13 +187,13 @@ The `CallbackHandler` does not accept any constructor arguments for trace attrib
 
 The following optional constructor arguments are supported:
 
-| Parameter | Type    | Description                                                                            |
-| --------- | ------- | -------------------------------------------------------------------------------------- |
-| `userId`  | string  | The current [user](/docs/tracing-features/users).                                      |
-| `sessionId` | string | The current [session](/docs/tracing-features/sessions).                                |
-| `release` | string  | The [release](/docs/tracing-features/releases-and-versioning) tag of your application. |
-| `version` | string  | The [version](/docs/tracing-features/releases-and-versioning) of your application.     |
-| `enabled` | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                        |
+| Parameter   | Type    | Description                                                                            |
+| ----------- | ------- | -------------------------------------------------------------------------------------- |
+| `userId`    | string  | The current [user](/docs/tracing-features/users).                                      |
+| `sessionId` | string  | The current [session](/docs/tracing-features/sessions).                                |
+| `release`   | string  | The [release](/docs/tracing-features/releases-and-versioning) tag of your application. |
+| `version`   | string  | The [version](/docs/tracing-features/releases-and-versioning) of your application.     |
+| `enabled`   | boolean | Enable or disable the Langfuse integration. Defaults to `true`.                        |
 
 </Tab>
 </Tabs>
@@ -217,7 +222,7 @@ chain = prompt | llm
 
 # Set trace attributes dynamically via metadata
 response = chain.invoke(
-    {"topic": "cats"}, 
+    {"topic": "cats"},
     config={
         "callbacks": [langfuse_handler],
         "metadata": {
@@ -483,6 +488,7 @@ await langfuse.score({
 The Langchain integration works seamlessly with the Langfuse SDK to create comprehensive traces that combine Langchain operations with other application logic.
 
 **Common use cases:**
+
 - Add non-Langchain related observations to the trace
 - Group multiple Langchain runs into a single trace
 - Set trace-level attributes (user_id, session_id, etc.)
@@ -620,6 +626,7 @@ const langfuseHandlerTrace = new CallbackHandler({
 <Tab>
 
 **Decorator Approach (v2):**
+
 ```python
 from langfuse.decorators import langfuse_context, observe
 
@@ -641,6 +648,7 @@ main()
 ```
 
 **Low-level Approach (v2):**
+
 ```python
 from langfuse import Langfuse
 langfuse = Langfuse()

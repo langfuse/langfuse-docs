@@ -35,7 +35,6 @@ This cookbook walks through building a simple RAG pipeline using Haystack and ho
 
 _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
-
 ```python
 # install haystack, langfuse, and the langfuse-haystack integration package
 %pip install haystack-ai langfuse-haystack "langfuse<3.0.0"
@@ -46,13 +45,12 @@ _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK availa
 
 Then set the environment variables. You can find your Langfuse public and private API keys in the dashboard. Make sure to set `HAYSTACK_CONTENT_TRACING_ENABLED` to `true`. In this cookbook we are using OpenAI GPT 3.5-turbo so you will also need an OpenAI API key.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -71,7 +69,6 @@ First we build the pipeline. Add `LangfuseConnector` to the pipeline as a tracer
 
 **Note**: Make sure to set the `HAYSTACK_CONTENT_TRACING_ENABLED` environment variable before importing `LangfuseConnector`.
 
-
 ```python
 from datasets import load_dataset
 from haystack import Document, Pipeline
@@ -82,7 +79,6 @@ from haystack.components.retrievers import InMemoryEmbeddingRetriever
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack_integrations.components.connectors.langfuse import LangfuseConnector
 ```
-
 
 ```python
 def get_pipeline(document_store: InMemoryDocumentStore):
@@ -122,7 +118,6 @@ def get_pipeline(document_store: InMemoryDocumentStore):
 
 Then we load data into DocumentStore. In this example, we use the `trivia_qa_tiny` [dataset](https://huggingface.co/datasets/SpeedOfMagic/trivia_qa_tiny?row=26).
 
-
 ```python
 document_store = InMemoryDocumentStore()
 dataset = load_dataset("SpeedOfMagic/trivia_qa_tiny", split="train")
@@ -148,7 +143,6 @@ document_store.write_documents(docs_with_embeddings)
 
 Then ask a question based on the data we loaded in.
 
-
 ```python
 pipeline = get_pipeline(document_store)
 question = "What can you tell me about Truman Capote?"
@@ -161,8 +155,6 @@ response = pipeline.run({"text_embedder": {"text": question}, "prompt_builder": 
 
     Batches:   0%|          | 0/1 [00:00<?, ?it/s]
 
-
-
 ```python
 print("Trace url:", response["tracer"]["trace_url"])
 print("Response:", response["llm"]["replies"][0])
@@ -170,7 +162,6 @@ print("Response:", response["llm"]["replies"][0])
 
     Trace url: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5b1cb651-fe83-45b1-a73c-5e59f408cf2b
     Response: Truman Capote was an American author, known for his distinctive writing style and for pioneering the true crime genre. He was born on September 30, 1924, in New Orleans, Louisiana, as Truman Streckfus Persons. After his parents' divorce, his mother remarried and he was adopted by his stepfather, becoming Truman Garcia Capote. Capote is best known for his novella "Breakfast at Tiffany's" and his true crime novel "In Cold Blood," which he described as a "nonfiction novel." He cultivated a public persona as a socialite and was known for his flamboyant and witty personality. Capote passed away on August 25, 1984, in Los Angeles, California.
-
 
 The output should look like similar to this:
 
@@ -181,6 +172,7 @@ You will notice that the response contains trivia information Truman Capote, suc
 [Example trace in the Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/27c354cd-3d16-4dae-9b87-7740dd440cc7?observation=140dd6e9-750b-40ab-a6c3-5070ba34e7d4)
 
 For each trace, you can see:
+
 - Latency for each component of the pipeline
 - Input and output for each step
 - For generations, token usage and costs are automatically calculated.
@@ -192,7 +184,6 @@ Learn more about tracing in the [docs](https://langfuse.com/docs/tracing).
 Here is another example connecting a RAG pipeline to a chat generator. Using a component like Haystack's `ChatPromptBuilder` is a great way to add a chat component to your application, which can add a level of personalization and interactivity to your program.
 
 **Note**: Make sure to set the `HAYSTACK_CONTENT_TRACING_ENABLED` environment variable before importing `LangfuseConnector`.
-
 
 ```python
 from haystack import Pipeline
@@ -241,7 +232,6 @@ You can score traces using a number of methods:
 
 The example below walks through a simple way to score the chat generator's response via the Python SDK. It adds a score of 1 to the trace above with the comment "Cordial and relevant" because the model's response was very polite and factually correct. You can then sort these scores to identify low-quality output or to monitor the quality of responses.
 
-
 ```python
 from langfuse import get_client
 
@@ -268,4 +258,3 @@ Learn more:
 - [Haystack integration docs](https://langfuse.com/docs/integrations/haystack/get-started)
 - [Introduction to tracing in Langfuse](https://langfuse.com/docs/tracing)
 - [Langfuse platform overview](https://langfuse.com/docs)
-

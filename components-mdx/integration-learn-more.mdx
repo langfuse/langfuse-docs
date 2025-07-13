@@ -19,7 +19,7 @@ The [`@observe()` decorator](/docs/sdk/python/sdk-v3#observe-decorator) provides
 
 ```python
 from langfuse import observe, get_client
- 
+
 langfuse = get_client()
 
 @observe()
@@ -52,7 +52,7 @@ from langfuse import get_client
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="my-trace") as span:
-    
+
     # Run your application here
     output = my_llm_call(input)
 

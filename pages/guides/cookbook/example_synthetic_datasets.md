@@ -1,30 +1,33 @@
 ---
-description: Notebook on generating synthetic datasets for LLM application and AI agents evaluation. 
+description: Notebook on generating synthetic datasets for LLM application and AI agents evaluation.
 category: Evaluation
 ---
 
 # Synthetic Dataset Generation for LLM Evaluation
 
-In this notebook, we will explore how to **generate synthetic datasets** using language models and uploading them to [Langfuse](https://langfuse.com) for evaluation. 
+In this notebook, we will explore how to **generate synthetic datasets** using language models and uploading them to [Langfuse](https://langfuse.com) for evaluation.
 
 ## What are Langfuse Datasets?
 
-In Langfuse, a *dataset* is a collection of *dataset items*, each typically containing an `input` (e.g., user prompt/question), `expected_output` (the ground truth or ideal answer) and optional metadata.
+In Langfuse, a _dataset_ is a collection of _dataset items_, each typically containing an `input` (e.g., user prompt/question), `expected_output` (the ground truth or ideal answer) and optional metadata.
 
 Datasets are used for **evaluation**. You can run your LLM or application on each item in a dataset and compare the application's responses to the expected outputs. This way, you can track performance over time and across different application configs (e.g. model versions or prompt changes).
 
 ## Cases your Dataset Should Cover
 
 **Happy path** – straightforward or common queries:
+
 - "What is the capital of France?"
 - "Convert 5 USD to EUR."
 
 **Edge cases** – unusual or complex:
+
 - Very long prompts.
 - Ambiguous queries.
 - Very technical or niche.
 
 **Adversarial cases** – malicious or tricky:
+
 - Prompt injection attempts ("Ignore all instructions and ...").
 - Content policy violations (harassment, hate speech).
 - Logic traps (trick questions).
@@ -33,15 +36,15 @@ Datasets are used for **evaluation**. You can run your LLM or application on eac
 
 ### Example 1: Looping Over OpenAI API
 
-We'll use OpenAI's API in a simple loop to create synthetic questions for an airline chatbot. You could similarly prompt the model to generate *both* questions and answers.
+We'll use OpenAI's API in a simple loop to create synthetic questions for an airline chatbot. You could similarly prompt the model to generate _both_ questions and answers.
 %pip install openai langfuse
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -51,12 +54,11 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -65,8 +67,6 @@ else:
 ```
 
     Langfuse client is authenticated and ready!
-
-
 
 ```python
 from openai import OpenAI
@@ -81,7 +81,7 @@ def generate_airline_questions(num_questions=20):
 
     for i in range(num_questions):
         completion = client.chat.completions.create(
-            model="gpt-4o", 
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
@@ -105,10 +105,9 @@ airline_questions = generate_airline_questions(num_questions=20)
 df = pd.DataFrame({"Question": airline_questions})
 ```
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
 
 # Create a new dataset in Langfuse
@@ -131,22 +130,19 @@ for _, row in df.iterrows():
 
 ### Example 2: RAGAS Library
 
-For **RAG**, we often want questions that are *grounded in specific documents*. This ensures the question can be answered by the context, allowing us to evaluate how well a RAG pipeline retrieves and uses the context.
+For **RAG**, we often want questions that are _grounded in specific documents_. This ensures the question can be answered by the context, allowing us to evaluate how well a RAG pipeline retrieves and uses the context.
 
 [RAGAS](https://docs.ragas.io/en/stable/getstarted/rag_testset_generation/#testset-generation) is a library that can automate test set generation for RAG. It can take a corpus and produce relevant queries and answers. We'll do a quick example:
 
 _**Note**: This example is taken from the [RAGAS documentation](https://docs.ragas.io/en/stable/getstarted/rag_testset_generation/)_
 
-
 ```python
 %pip install ragas langchain-community langchain-openai unstructured
 ```
 
-
 ```python
 %git clone https://huggingface.co/datasets/explodinggradients/Sample_Docs_Markdown
 ```
-
 
 ```python
 from langchain_community.document_loaders import DirectoryLoader
@@ -156,7 +152,6 @@ loader = DirectoryLoader(path, glob="**/*.md")
 docs = loader.load()
 ```
 
-
 ```python
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
@@ -165,7 +160,6 @@ from langchain_openai import OpenAIEmbeddings
 generator_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o"))
 generator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 ```
-
 
 ```python
 from ragas.testset import TestsetGenerator
@@ -177,10 +171,9 @@ dataset = generator.generate_with_langchain_docs(docs, testset_size=10)
 df = dataset.to_pandas()
 ```
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
 
 # 5. Push the RAGAS-generated testset to Langfuse
@@ -202,13 +195,11 @@ for _, row in df.iterrows():
 
 ### Example 3: DeepEval Library
 
-[DeepEval](https://docs.confident-ai.com/docs/synthesizer-introduction) is a library that helps generate synthetic data systematically using the *Synthesizer* class.
-
+[DeepEval](https://docs.confident-ai.com/docs/synthesizer-introduction) is a library that helps generate synthetic data systematically using the _Synthesizer_ class.
 
 ```python
 %pip install deepeval
 ```
-
 
 ```python
 import os
@@ -216,7 +207,6 @@ from langfuse import get_client
 from deepeval.synthesizer import Synthesizer
 from deepeval.synthesizer.config import StylingConfig
 ```
-
 
 ```python
 # 1. Define the style we want for our synthetic data.
@@ -237,7 +227,6 @@ synthesizer.generate_goldens_from_scratch(num_goldens=20)
 # 4. Access the generated examples
 synthetic_goldens = synthesizer.synthetic_goldens
 ```
-
 
 ```python
 from langfuse import get_client

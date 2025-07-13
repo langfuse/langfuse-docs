@@ -6,6 +6,7 @@ category: Evaluation
 # Evaluation of RAG pipelines with Ragas
 
 Langfuse offers the feature to score your traces and spans. They can be used in multiple ways across Langfuse:
+
 1. Displayed on trace to provide a quick overview
 2. Segment all execution traces by scores to e.g. find all traces with a low-quality score
 3. Analytics: Detailed score reporting with drill downs into use cases and user segments
@@ -14,20 +15,18 @@ Ragas is an open-source tool that can help you run [Model-Based Evaluation](http
 
 ## The Environment
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-"
 ```
-
 
 ```python
 %pip install langfuse datasets ragas llama_index python-dotenv openai --upgrade
@@ -38,11 +37,11 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-"
 For this example, we are going to use a dataset that has already been prepared by querying a RAG system and gathering its outputs. See below for instruction on how to fetch your production data from Langfuse.
 
 The dataset contains the following columns
+
 - `question`: list[str] - These are the questions your RAG pipeline will be evaluated on.
 - `answer`: list[str] - The answer generated from the RAG pipeline and given to the user.
 - `contexts`: list[list[str]] - The contexts which were passed into the LLM to answer the question.
 - `ground_truths`: list[list[str]] - The ground truth answer to the questions. However, this can be ignored for online evaluations since we will not have access to ground-truth data in our case.
-
 
 ```python
 from datasets import load_dataset
@@ -51,17 +50,13 @@ fiqa_eval = load_dataset("explodinggradients/fiqa", "ragas_eval")['baseline']
 fiqa_eval
 ```
 
-
-
-
     Dataset({
         features: ['question', 'ground_truths', 'answer', 'contexts'],
         num_rows: 30
     })
 
-
-
 ## The Metrics
+
 For going to measure the following aspects of a RAG system. These metric are from the Ragas library:
 
 1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/faithfulness.html): This measures the factual consistency of the generated answer against the given context.
@@ -69,7 +64,6 @@ For going to measure the following aspects of a RAG system. These metric are fro
 3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
 
 Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metrics/index.html) to know more about these metrics and how they work.
-
 
 ```python
 # import metrics
@@ -89,7 +83,6 @@ metrics = [
 
 Now you have to initialize the metrics with LLMs and Embeddings of your choice. In this example we are going to use OpenAI.
 
-
 ```python
 from ragas.run_config import RunConfig
 from ragas.metrics.base import MetricWithLLM, MetricWithEmbeddings
@@ -105,7 +98,6 @@ def init_ragas_metrics(metrics, llm, embedding):
         run_config = RunConfig()
         metric.init(run_config)
 ```
-
 
 ```python
 from langchain_openai.chat_models import ChatOpenAI
@@ -126,7 +118,9 @@ init_ragas_metrics(
 ```
 
 ## The Setup
+
 You can use model-based evaluation with Ragas in 2 ways
+
 1. Score each Trace: This means you will run the evaluations for each trace item. This gives you much better idea since of how each call to your RAG pipelines is performing but can be expensive
 2. Score as Batch: In this method we will take a random sample of traces on a periodic basis and score them. This brings down cost and gives you a rough estimate the performance of your app but can miss out on important samples.
 
@@ -136,29 +130,21 @@ In this cookbook, we'll show you how to setup both.
 
 Lets take a small example of a single trace and see how you can score that with Ragas. First lets load the data
 
-
 ```python
 row = fiqa_eval[0]
 row['question'], row['answer']
 ```
 
-
-
-
     ('How to deposit a cheque issued to an associate in my business into my business account?',
      '\nThe best way to deposit a cheque issued to an associate in your business into your business account is to open a business account with the bank. You will need a state-issued "dba" certificate from the county clerk\'s office as well as an Employer ID Number (EIN) issued by the IRS. Once you have opened the business account, you can have the associate sign the back of the cheque and deposit it into the business account.')
 
-
-
 Now lets init a Langfuse client SDK to instrument you app.
-
 
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
 ```
-
 
 ```python
 # Verify connection
@@ -170,9 +156,7 @@ else:
 
     Langfuse client is authenticated and ready!
 
-
 Here we are defining a utility function to score your trace with the metrics you chose.
-
 
 ```python
 from ragas.dataset_schema import SingleTurnSample
@@ -191,12 +175,12 @@ async def score_with_ragas(query, chunks, answer):
 ```
 
 You compute the score with each request. Below I've outlined a dummy application that does the following steps
+
 1. gets a question from the user
 2. fetch context from the database or vector store that can be used to answer the question from the user
 3. pass the question and the contexts to the LLM to generate the answer
 
 All these step are logged as spans in a single trace in langfuse. You can read more about traces and spans from the [langfuse documentation](https://langfuse.com/docs/tracing).
-
 
 ```python
 # start a new trace when you get a question
@@ -207,24 +191,24 @@ answer = row['answer']
 with langfuse.start_as_current_span(name="rag") as trace:
     # Store trace_id for later use
     trace_id = trace.trace_id
-    
+
     # retrieve the relevant chunks
     # chunks = get_similar_chunks(question)
-    
+
     # pass it as span
     with trace.start_as_current_span(
-        name="retrieval", 
-        input={'question': question}, 
+        name="retrieval",
+        input={'question': question},
         output={'contexts': contexts}
     ):
         pass
 
     # use llm to generate a answer with the chunks
     # answer = get_response_from_llm(question, chunks)
-    
+
     with trace.start_as_current_span(
-        name="generation", 
-        input={'question': question, 'contexts': contexts}, 
+        name="generation",
+        input={'question': question, 'contexts': contexts},
         output={'answer': answer}
     ):
         pass
@@ -249,18 +233,15 @@ ragas_scores
      'answer_relevancy': np.float64(0.9825100521118072),
      'llm_context_precision_without_reference': 0.9999999999}
 
-
-
 Once the scores are computed you can add them to the trace in Langfuse:
-
 
 ```python
 # send the scores
 # Use the trace_id stored from the previous cell
 for m in metrics:
     langfuse.create_score(
-        name=m.name, 
-        value=ragas_scores[m.name], 
+        name=m.name,
+        value=ragas_scores[m.name],
         trace_id=trace_id
     )
 ```
@@ -279,14 +260,13 @@ You can run this periodically to keep track of how the scores are changing acros
 
 To create demo data in Langfuse, lets first create ~10 traces with the fiqa dataset.
 
-
 ```python
 # fiqa traces
 for interaction in fiqa_eval.select(range(10, 20)):
     question = interaction['question']
     contexts = interaction['contexts']
     answer = interaction['answer']
-    
+
     with langfuse.start_as_current_span(name="rag") as trace:
         with trace.start_as_current_span(
             name="retrieval",
@@ -294,7 +274,7 @@ for interaction in fiqa_eval.select(range(10, 20)):
             output={'contexts': contexts}
         ):
             pass
-        
+
         with trace.start_as_current_span(
             name="generation",
             input={'question': question, 'contexts': contexts},
@@ -307,7 +287,6 @@ langfuse.flush()
 ```
 
 Now that the dataset is uploaded to langfuse you can retrieve it as needed with this handy function.
-
 
 ```python
 def get_traces(name=None, limit=None, user_id=None):
@@ -328,7 +307,6 @@ def get_traces(name=None, limit=None, user_id=None):
     return all_data[:limit]
 ```
 
-
 ```python
 from random import sample
 
@@ -339,15 +317,9 @@ traces_sample = sample(traces, NUM_TRACES_TO_SAMPLE)
 len(traces_sample)
 ```
 
-
-
-
     3
 
-
-
 Now lets make a batch and score it. Ragas uses huggingface dataset object to build the dataset and run the evaluation. If you run this on your own production data, use the right keys to extract the question, contexts and answer from the trace
-
 
 ```python
 # score on a sample
@@ -374,7 +346,6 @@ for t in traces_sample:
     evaluation_batch['trace_id'].append(t.id)
 ```
 
-
 ```python
 # run ragas evaluate
 from datasets import Dataset
@@ -385,26 +356,17 @@ ds = Dataset.from_dict(evaluation_batch)
 r = evaluate(ds, metrics=[Faithfulness(), ResponseRelevancy()])
 ```
 
-
     Evaluating:   0%|          | 0/6 [00:00<?, ?it/s]
 
-
 And that is it! You can see the scores over a time period.
-
 
 ```python
 r
 ```
 
-
-
-
     {'faithfulness': 0.5516, 'answer_relevancy': 0.9294}
 
-
-
 You can also push the scores back into Langfuse or use the exported pandas dataframe to run further analysis.
-
 
 ```python
 df = r.to_pandas()
@@ -414,9 +376,6 @@ df["trace_id"] = ds["trace_id"]
 
 df.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -431,6 +390,7 @@ df.head()
     .dataframe thead th {
         text-align: right;
     }
+
 </style>
 <table border="1" class="dataframe">
   <thead>
@@ -475,9 +435,6 @@ df.head()
   </tbody>
 </table>
 </div>
-
-
-
 
 ```python
 for _, row in df.iterrows():

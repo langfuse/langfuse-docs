@@ -15,7 +15,12 @@ This cookbook shows two ways to interact with Groq models and trace them with La
 By following these examples, you'll learn how to log and trace interactions with Groq language models, enabling you to debug and evaluate the performance of your AI-driven applications.
 
 <Callout type="info" emoji="ℹ️">
-**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). If you use one of them, any use of Groq models is instrumented right away.*
+  **Note:** *Langfuse is also natively integrated with
+  [LangChain](https://langfuse.com/docs/integrations/langchain/tracing),
+  [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started),
+  [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other
+  frameworks](https://langfuse.com/docs/integrations/overview). If you use one
+  of them, any use of Groq models is instrumented right away.*
 </Callout>
 
 ## Overview
@@ -28,13 +33,12 @@ In this notebook, we will explore various use cases where Langfuse can be integr
 
 To get started, set up your environment variables for Langfuse and Groq:
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -44,10 +48,9 @@ os.environ["GROQ_API_KEY"] = "gsk_..."
 
 ## Option 1: Using the OpenAI SDK to interact with the Groq model
 
-**Note**: *This example shows how to use the OpenAI Python SDK. If you use JS/TS, have a look at our [OpenAI JS/TS SDK](https://langfuse.com/docs/integrations/openai/js/get-started).*
+**Note**: _This example shows how to use the OpenAI Python SDK. If you use JS/TS, have a look at our [OpenAI JS/TS SDK](https://langfuse.com/docs/integrations/openai/js/get-started)._
 
 ### Install Required Packages
-
 
 ```python
 %pip install langfuse openai --upgrade
@@ -56,7 +59,6 @@ os.environ["GROQ_API_KEY"] = "gsk_..."
 ### Import Necessary Modules
 
 Instead of importing `openai` directly, import it from `langfuse.openai`. Also, import any other necessary modules.
-
 
 ```python
 # Instead of: import openai
@@ -67,7 +69,6 @@ from langfuse.openai import OpenAI
 
 Initialize the OpenAI client but point it to the Groq model endpoint. Replace the access token with your own.
 
-
 ```python
 client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
@@ -77,9 +78,7 @@ client = OpenAI(
 
 ### Chat Completion Request
 
-Use the `client` to make a chat completion request to the Groq model. 
-
-
+Use the `client` to make a chat completion request to the Groq model.
 
 ```python
 completion = client.chat.completions.create(
@@ -95,7 +94,7 @@ completion = client.chat.completions.create(
 print(completion.choices[0].message.content)
 ```
 
-*[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)*
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cm0nywmaa005c3ol2msoisiho/traces/8c0fe015-2d87-46a8-87e6-e6bd439b35b5?timestamp=2025-01-10T12%3A55%3A11.990Z)_
 
 ## Option 2: Using the Groq SDK to interact with Groq models
 
@@ -103,14 +102,11 @@ For more detailed guidance on the Groq SDK or the **`@observe`** decorator from 
 
 ### Install Required Packages
 
-
-
 ```python
 %pip install groq langfuse
 ```
 
 ### Initialize the Groq client:
-
 
 ```python
 from groq import Groq
@@ -124,7 +120,6 @@ groq_client = Groq(api_key=os.environ["GROQ_API_KEY"])
 ### Basic LLM Calls
 
 We are integrating the Groq SDK with Langfuse using the [`@observe` decorator](https://langfuse.com/docs/sdk/python/decorators), which is crucial for logging and tracing interactions with large language models (LLMs). The `@observe(as_type="generation")` decorator specifically logs LLM interactions, capturing inputs, outputs, and model parameters. The resulting `groq_chat_completion` method can then be used across your project.
-
 
 ```python
 from langfuse import observe, get_client
@@ -180,7 +175,6 @@ def groq_chat_completion(**kwargs):
 
 In the following example, we also added the decorator to the top-level function `find_best_painter_from`. This function calls the `groq_chat_completion` function, which is decorated with `@observe(as_type="generation")`. This hierarchical setup helps to trace more complex applications that involve multiple LLM calls and other non-LLM methods decorated with `@observe`.
 
-
 ```python
 @observe()
 def find_best_painter_from(country="France"):
@@ -202,12 +196,11 @@ print(find_best_painter_from())
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/single-trace-example.png)
 
-*[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d5f7e896-a51c-4f70-b066-114f0cab9020?timestamp=2025-01-09T10%3A23%3A26.872Z&observation=3dee4a0f-e348-481f-a795-d46c90ffbea5)*
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/d5f7e896-a51c-4f70-b066-114f0cab9020?timestamp=2025-01-09T10%3A23%3A26.872Z&observation=3dee4a0f-e348-481f-a795-d46c90ffbea5)_
 
 ### Chained Completions
 
 This example demonstrates chaining multiple LLM calls using the `@observe()` decorator. The first call identifies the best painter from a specified country, and the second call uses that painter's name to find their most famous painting. Both interactions are logged by Langfuse as we use the wrapped `groq_chat_completion` method created above, ensuring full traceability across the chained requests.
-
 
 ```python
 from langfuse import observe, get_client
@@ -243,15 +236,13 @@ def find_best_painting_from(country="France"):
 print(find_best_painting_from("Germany"))
 ```
 
-
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/chained-trace.png)
 
-*[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5913c996-84b4-4f75-9043-8db81dd4d0a4?timestamp=2025-01-09T10%3A23%3A42.893Z)*
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/5913c996-84b4-4f75-9043-8db81dd4d0a4?timestamp=2025-01-09T10%3A23%3A42.893Z)_
 
 ### Streaming Completions
 
 The following example demonstrates how to handle streaming responses from the Groq model using the `@observe(as_type="generation")` decorator. The process is similar to the completion example but includes handling streamed data in real-time.
-
 
 ```python
 from langfuse import observe, get_client
@@ -297,7 +288,6 @@ def stream_groq_chat_completion(**kwargs):
 
 Usage:
 
-
 ```python
 @observe()
 def stream_find_best_five_painter_from(country="France"):
@@ -323,7 +313,7 @@ stream_find_best_five_painter_from("Spain")
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-groq/streaming-trace.png)
 
-*[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c21544f3-d837-4441-9a0c-a47b3fd5dcaf?timestamp=2025-01-09T13%3A02%3A14.362Z&observation=c0d9e820-377c-4c4d-b6cb-19dd6951bfa4)*
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c21544f3-d837-4441-9a0c-a47b3fd5dcaf?timestamp=2025-01-09T13%3A02%3A14.362Z&observation=c0d9e820-377c-4c4d-b6cb-19dd6951bfa4)_
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 

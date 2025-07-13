@@ -18,7 +18,6 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 <Steps>
 ## Step&nbsp;1: Install dependencies
 
-
 ```python
 %pip install langfuse google-adk -q
 ```
@@ -27,14 +26,13 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 
 Fill in the **Langfuse** and **OpenTelemetry** credentials for your project. Also set your **Gemini API key**.
 
-
 ```python
 import os
 import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -42,24 +40,23 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 LANGFUSE_AUTH = base64.b64encode(
     f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
 ).decode()
- 
+
 # Configure OpenTelemetry endpoint & headers
 os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
 
 # Gemini API Key (Get from Google AI Studio: https://aistudio.google.com/app/apikey)
-os.environ["GOOGLE_API_KEY"] = "..." 
+os.environ["GOOGLE_API_KEY"] = "..."
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -69,11 +66,9 @@ else:
 
     Langfuse client is authenticated and ready!
 
-
 ## Step 3: Build a hello world agent
 
 Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
-
 
 ```python
 from google.adk import Agent, Runner
@@ -91,7 +86,7 @@ agent = Agent(
     tools=[say_hello],
 )
 
-# 2. session service + runner 
+# 2. session service + runner
 session_service = InMemorySessionService()
 
 APP_NAME  = "hello_app"
@@ -105,7 +100,7 @@ session_service.create_session(
 
 runner = Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
 
-# 3.  single‑turn run 
+# 3.  single‑turn run
 user_msg = types.Content(role="user", parts=[types.Part(text="hi")])
 
 for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user_msg):
@@ -117,14 +112,13 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
 
 
     Hello Langfuse 👋!
-    
-
 
 ## Step 4: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
 
 ![Google ADK example trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

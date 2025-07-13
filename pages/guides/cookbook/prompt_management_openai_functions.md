@@ -9,11 +9,9 @@ Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version
 
 ## Setup
 
-
 ```python
 %pip install langfuse openai --upgrade
 ```
-
 
 ```python
 import os
@@ -27,19 +25,13 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
-
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
 ```
 
-
-
-
     True
-
-
 
 ## Add prompt to Langfuse Prompt Management
 
@@ -49,7 +41,6 @@ We add the prompt used in this example via the SDK. Alternatively, you can also 
 - Prompt with `json_schema` variable
 - Config including `model_name`, `temperature`, and `json_schema`
 - `labels` to include `production` to immediately use the prompt as the default
-
 
 ```python
 langfuse.create_prompt(
@@ -79,24 +70,17 @@ Prompt in Langfuse UI
 
 ### Get current prompt version from Langfuse
 
-
 ```python
 prompt = langfuse.get_prompt("story_summarization")
 ```
 
 We can now use the prompt to compile our system message
 
-
 ```python
 prompt.compile(json_schema="TEST SCHEMA")
 ```
 
-
-
-
     'Extract the key information from this text and return it in JSON format. Use the following schema: TEST SCHEMA'
-
-
 
 And it includes the config object
 
@@ -113,12 +97,11 @@ prompt.config
   'main_character': 'string (name of protagonist)',
   'critic_review_comment': 'string (write similar to a new york times critic)'},
  'temperature': 0}
- ```
+```
 
 ### Create example function
 
 In this example we use the native [Langfuse OpenAI integration](https://langfuse.com/docs/integrations/openai/get-started) by importing from `langfuse.openai`. This enables [tracing](https://langfuse.com/docs/tracing) in Langfuse and is not required for using Langfuse prompts management.
-
 
 ```python
 from langfuse.openai import OpenAI
@@ -128,7 +111,6 @@ client = OpenAI()
 Use Langfuse prompt to construct the `summarize_story` example function.
 
 **Note:** You can link the generation in Langfuse Tracing to the prompt version by passing the `langfuse_prompt` parameter to the `create` method. Have a look at our [prompt management docs](https://langfuse.com/docs/prompts/get-started#link-with-langfuse-tracing-optional) to learn how to link prompt and generation with other integrations and SDKs.
-
 
 ```python
 import json
@@ -167,7 +149,6 @@ def summarize_story(story):
 
 ### Execute it
 
-
 ```python
 # Thanks ChatGPT for the story
 STORY = """
@@ -176,7 +157,6 @@ Whisper, now carrying a peculiar power, started a journey that was unexpected. S
 As she carried on with her mysterious deed, she found an unanticipated reward. Joy started to kindle in her heart, born not from the invisibility, but from the result of her actions; the growing smiles on the faces of those she surreptitiously helped. Whisper might have remained unnoticed to the world, but amidst her secret kindness, she discovered her true happiness.
 """
 ```
-
 
 ```python
 summary = summarize_story(STORY)
@@ -194,7 +174,7 @@ summary = summarize_story(STORY)
  'critic_score': 9,
  'main_character': 'Whisper',
  'critic_review_comment': "Whisper's journey from loneliness to self-discovery through acts of kindness is a heartwarming and enchanting tale that captivates the reader with its magical elements and profound message about true happiness."}
- ```
+```
 
 ## View trace in Langfuse
 

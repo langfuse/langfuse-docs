@@ -1,16 +1,18 @@
-import remarkGfm from 'remark-gfm';
-import nextra from 'nextra';
-import NextBundleAnalyzer from '@next/bundle-analyzer'
+import remarkGfm from "remark-gfm";
+import nextra from "nextra";
+import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = NextBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})
+  enabled: process.env.ANALYZE === "true",
+});
 
 /**
  * CSP headers
  * img-src https to allow loading images from SSO providers
  */
-const cspHeader = process.env.NODE_ENV === 'production' ? `
+const cspHeader =
+  process.env.NODE_ENV === "production"
+    ? `
   default-src 'self' https: wss:;
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
   style-src 'self' 'unsafe-inline' https:;
@@ -25,41 +27,38 @@ const cspHeader = process.env.NODE_ENV === 'production' ? `
   frame-ancestors 'none';
   upgrade-insecure-requests;
   block-all-mixed-content;
-`: "";
+`
+    : "";
 
 // nextra config
 const withNextra = nextra({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
+  theme: "nextra-theme-docs",
+  themeConfig: "./theme.config.tsx",
   mdxOptions: {
     remarkPlugins: [remarkGfm],
   },
   defaultShowCopyCode: true,
-})
+});
 
 // next config
 const nextraConfig = withNextra({
   experimental: {
     scrollRestoration: true,
   },
-  transpilePackages: [
-    'react-tweet',
-    'react-syntax-highlighter',
-    'geist'
-  ],
+  transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'static.langfuse.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "static.langfuse.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'github.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "github.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
@@ -98,13 +97,13 @@ const nextraConfig = withNextra({
     ];
 
     // Do not index Vercel preview deployments
-    if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') {
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV === "preview") {
       headers.push({
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-Robots-Tag',
-            value: 'noindex',
+            key: "X-Robots-Tag",
+            value: "noindex",
           },
         ],
       });
@@ -123,18 +122,24 @@ const nextraConfig = withNextra({
       destination,
       permanent: false,
     })),
-  ]
+  ],
 });
 
 const nonPermanentRedirects = [
-  ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
+  [
+    "/analytics",
+    "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY",
+  ],
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/watch-demo"],
   ["/docs/video", "/watch-demo"],
   ["/roadmap", "/docs/roadmap"],
   ["/ph", "https://www.producthunt.com/products/langfuse"],
-  ["/loom-gpt4-PR", "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba"],
+  [
+    "/loom-gpt4-PR",
+    "https://www.loom.com/share/5c044ca77be44ff7821967834dd70cba",
+  ],
   ["/issue", "https://github.com/langfuse/langfuse/issues/new/choose"],
   ["/new-issue", "/issue"],
   ["/issues", "https://github.com/langfuse/langfuse/issues"],
@@ -150,14 +155,20 @@ const nonPermanentRedirects = [
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
   ["/new-idea", "/idea"],
   ["/ideas", "https://github.com/orgs/langfuse/discussions/categories/ideas"],
-  ["/gh-support", "https://github.com/orgs/langfuse/discussions/categories/support"],
+  [
+    "/gh-support",
+    "https://github.com/orgs/langfuse/discussions/categories/support",
+  ],
   ["/discussions", "https://github.com/orgs/langfuse/discussions"],
   ["/gh-discussions", "/discussions"],
   ["/docs/analytics", "/docs/analytics/overview"],
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
   ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
 
-  ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
+  [
+    "/public-metrics-dashboard",
+    "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99",
+  ],
   ["/join-us", "/careers"],
 
   ["/launch", "/blog/2025-05-19-launch-week-3"],
@@ -181,19 +192,55 @@ const nonPermanentRedirects = [
   ["/docs/langchain/typescript", "/docs/integrations/langchain/tracing"],
   ["/docs/integrations/vercel", "/docs/integrations/vercel-ai-sdk"],
   ["/docs/integrations/langchain", "/docs/integrations/langchain/tracing"],
-  ["/docs/integrations/langchain/python", "/docs/integrations/langchain/tracing"],
-  ["/docs/integrations/langchain/typescript", "/docs/integrations/langchain/tracing"],
-  ["/docs/integrations/langchain/overview", "/docs/integrations/langchain/tracing"],
-  ["/docs/integrations/langchain/get-started", "/docs/integrations/langchain/tracing"],
-  ["/docs/integrations/llama-index", "/docs/integrations/llama-index/get-started"],
-  ["/docs/integrations/llama-index/overview", "/docs/integrations/llama-index/get-started"],
-  ["/docs/integrations/llama-index/cookbook", "/docs/integrations/llama-index/get-started"],
-  ["/docs/integrations/llama-index/example-python", "/docs/integrations/llama-index/get-started"],
+  [
+    "/docs/integrations/langchain/python",
+    "/docs/integrations/langchain/tracing",
+  ],
+  [
+    "/docs/integrations/langchain/typescript",
+    "/docs/integrations/langchain/tracing",
+  ],
+  [
+    "/docs/integrations/langchain/overview",
+    "/docs/integrations/langchain/tracing",
+  ],
+  [
+    "/docs/integrations/langchain/get-started",
+    "/docs/integrations/langchain/tracing",
+  ],
+  [
+    "/docs/integrations/llama-index",
+    "/docs/integrations/llama-index/get-started",
+  ],
+  [
+    "/docs/integrations/llama-index/overview",
+    "/docs/integrations/llama-index/get-started",
+  ],
+  [
+    "/docs/integrations/llama-index/cookbook",
+    "/docs/integrations/llama-index/get-started",
+  ],
+  [
+    "/docs/integrations/llama-index/example-python",
+    "/docs/integrations/llama-index/get-started",
+  ],
   ["/docs/integrations/haystack", "/docs/integrations/haystack/get-started"],
-  ["/docs/integrations/openai/get-started", "/docs/integrations/openai/python/get-started"],
-  ["/docs/integrations/openai/examples", "/docs/integrations/openai/python/examples"],
-  ["/docs/integrations/openai/track-errors", "/docs/integrations/openai/python/track-errors"],
-  ["/docs/integrations/openai/python", "/docs/integrations/openai/python/get-started"],
+  [
+    "/docs/integrations/openai/get-started",
+    "/docs/integrations/openai/python/get-started",
+  ],
+  [
+    "/docs/integrations/openai/examples",
+    "/docs/integrations/openai/python/examples",
+  ],
+  [
+    "/docs/integrations/openai/track-errors",
+    "/docs/integrations/openai/python/track-errors",
+  ],
+  [
+    "/docs/integrations/openai/python",
+    "/docs/integrations/openai/python/get-started",
+  ],
   ["/docs/integrations/openai/js", "/docs/integrations/openai/js/get-started"],
   ["/docs/integrations/mirascope", "/docs/integrations/mirascope/tracing"],
   ["/docs/integrations/aws-bedrock", "/docs/integrations/amazon-bedrock"],
@@ -219,8 +266,14 @@ const nonPermanentRedirects = [
   ["/docs/scores/evals", "/docs/scores/model-based-evals"],
   ["/docs/scores/manually", "/docs/scores/annotation"],
   ["/docs/scores/model-based-evals/overview", "/docs/scores/model-based-evals"],
-  ["/docs/scores/model-based-evals/ragas", "/cookbook/evaluation_of_rag_with_ragas"],
-  ["/docs/scores/model-based-evals/langchain", "/cookbook/evaluation_with_langchain"],
+  [
+    "/docs/scores/model-based-evals/ragas",
+    "/cookbook/evaluation_of_rag_with_ragas",
+  ],
+  [
+    "/docs/scores/model-based-evals/langchain",
+    "/cookbook/evaluation_with_langchain",
+  ],
   ["/docs/scores/getting-started", "/docs/scores/overview"],
   ["/experimentation", "/docs/datasets/overview"],
   ["/docs/experimentation", "/docs/datasets/overview"],
@@ -241,19 +294,37 @@ const nonPermanentRedirects = [
   ["/guides/videos/2-min", "/guides/videos/introducing-langfuse-2.0"],
   ["/tos", "/terms"],
   ["/docs/export-and-fine-tuning", "/docs/query-traces"],
-  ["/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments", "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments"],
+  [
+    "/changelog/2024-09-04-headless-initialization-or-self-hosted-deployments",
+    "/changelog/2024-09-04-headless-initialization-of-self-hosted-deployments",
+  ],
   ["/docs/deployment/v3", "/docs/deployment/v3/overview"],
-  ["/docs/integrations/openai-agents", "/docs/integrations/openaiagentssdk/openai-agents"],
-  ["/docs/integrations/amazon-bedrock", "/docs/integrations/bedrock/amazon-bedrock"],
+  [
+    "/docs/integrations/openai-agents",
+    "/docs/integrations/openaiagentssdk/openai-agents",
+  ],
+  [
+    "/docs/integrations/amazon-bedrock",
+    "/docs/integrations/bedrock/amazon-bedrock",
+  ],
   ["/docs/open-source", "/open-source"],
   ["/faq/all/cloud-data-regions", "/security/data-regions"],
   ["/self-hosting/local", "/self-hosting/docker-compose"],
   ["/self-hosting/docker", "/self-hosting/kubernetes-helm"],
   ["/docs/analytics/posthog", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
-  ["/docs/analytics/daily-metrics-api", "/docs/analytics/metrics-api#daily-metrics"],
-  ["/docs/opentelemetry/example-opentelemetry-collector", "/docs/opentelemetry/get-started#export-from-opentelemetry-collector"],
-  ["/docs/sdk/python/decorators", "https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator"],
+  [
+    "/docs/analytics/daily-metrics-api",
+    "/docs/analytics/metrics-api#daily-metrics",
+  ],
+  [
+    "/docs/opentelemetry/example-opentelemetry-collector",
+    "/docs/opentelemetry/get-started#export-from-opentelemetry-collector",
+  ],
+  [
+    "/docs/sdk/python/decorators",
+    "https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator",
+  ],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
@@ -261,29 +332,45 @@ const nonPermanentRedirects = [
   ["/docs/deployment/local", "/self-hosting/local"],
   ["/docs/deployment/self-host", "/self-hosting"],
   ["/docs/deployment/v3/overview", "/self-hosting"],
-  ["/docs/deployment/v3/migrate-v2-to-v3", "/self-hosting/upgrade-guides/upgrade-v2-to-v3"],
+  [
+    "/docs/deployment/v3/migrate-v2-to-v3",
+    "/self-hosting/upgrade-guides/upgrade-v2-to-v3",
+  ],
   ["/docs/deployment/v3/troubleshooting", "/self-hosting/troubleshooting"],
   ["/docs/deployment/v3/guides/docker-compose", "/self-hosting/docker-compose"],
-  ["/docs/deployment/v3/guides/kubernetes-helm", "/self-hosting/kubernetes-helm"],
-  ["/docs/deployment/v3/components/clickhouse", "/self-hosting/infrastructure/clickhouse"],
-  ["/docs/deployment/v3/components/redis", "/self-hosting/infrastructure/cache"],
-  ["/docs/deployment/v3/components/blobstorage", "/self-hosting/infrastructure/blobstorage"],
+  [
+    "/docs/deployment/v3/guides/kubernetes-helm",
+    "/self-hosting/kubernetes-helm",
+  ],
+  [
+    "/docs/deployment/v3/components/clickhouse",
+    "/self-hosting/infrastructure/clickhouse",
+  ],
+  [
+    "/docs/deployment/v3/components/redis",
+    "/self-hosting/infrastructure/cache",
+  ],
+  [
+    "/docs/deployment/v3/components/blobstorage",
+    "/self-hosting/infrastructure/blobstorage",
+  ],
 
   // Reorder Tracing section
   ["/docs/tracing/overview", "/docs/tracing"],
   ["/docs/tracing-features", "/docs/tracing"],
-  ...[
-    "sessions",
-    "users",
-    "tags",
-    "url",
-  ].map((path) => [`/docs/tracing/${path}`, `/docs/tracing-features/${path}`]),
+  ...["sessions", "users", "tags", "url"].map((path) => [
+    `/docs/tracing/${path}`,
+    `/docs/tracing-features/${path}`,
+  ]),
 
   // User-reported broken links
   ["/superagent", "/docs/integrations/superagent"],
-  ["/guides/cookbook/langfuse_prompt_with_langchain", "/guides/cookbook/prompt_management_langchain"]
+  [
+    "/guides/cookbook/langfuse_prompt_with_langchain",
+    "/guides/cookbook/prompt_management_langchain",
+  ],
 ];
 
-const permanentRedirects = []
+const permanentRedirects = [];
 
 export default withBundleAnalyzer(nextraConfig);

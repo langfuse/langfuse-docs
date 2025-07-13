@@ -15,26 +15,23 @@ In this guide, we'll show you how to integrate [Langfuse](https://langfuse.com) 
 
 First, install the necessary Python packages:
 
-
 ```python
 %pip install langfuse firecrawl-py
 ```
 
 Next, configure your environment with your Langfuse API keys. You can obtain your keys from your Langfuse dashboard.
 
-
 ```python
 import os
 # Get keys for your project from the project settings page https://cloud.langfuse.com
 
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
 
 Initialize the Firecrawl application with your Firecrawl API key.
-
 
 ```python
 from firecrawl import FirecrawlApp
@@ -43,7 +40,6 @@ app = FirecrawlApp(api_key="fc-...")
 ```
 
 To monitor your Firecrawl scraper, we use the L[angfuse `@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators). In this example, the `@observe()` decorator captures the inputs, outputs, and execution time of the `scrape_website()` function. All trace data is automatically sent to Langfuse, allowing you to monitor your Firecrawl operations in real time.
-
 
 ```python
 from langfuse import observe
@@ -61,7 +57,7 @@ scrape_website("https://langfuse.com")
 
 ## See Traces in Langfuse
 
-After executing the traced function, log in to your [Langfuse Dashboard](https://cloud.langfuse.com) to view detailed trace logs. 
+After executing the traced function, log in to your [Langfuse Dashboard](https://cloud.langfuse.com) to view detailed trace logs.
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-firecrawl/firecrawl-example-trace.png)
 

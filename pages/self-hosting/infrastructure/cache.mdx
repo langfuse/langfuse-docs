@@ -33,7 +33,7 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 OR
 
 | Variable                | Required / Default | Description                                                                                                             |
-|-------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------|
+| ----------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | `REDIS_HOST`            | Required           | Redis host name.                                                                                                        |
 | `REDIS_PORT`            | `6379`             | Port of the Redis instance.                                                                                             |
 | `REDIS_AUTH`            |                    | Authentication string for the Redis instance.                                                                           |
@@ -54,11 +54,13 @@ This section covers different deployment options and provides example environmen
 Langfuse handles failovers between read-replicas and supports Redis cluster mode for horizontal scaling.
 
 For **standalone Redis instances**, use the standard configuration:
+
 ```bash
 REDIS_CONNECTION_STRING=redis://username:password@your-redis-endpoint:6379
 ```
 
 For **Redis cluster mode**, enable cluster support:
+
 ```bash
 REDIS_CLUSTER_ENABLED=true
 REDIS_CLUSTER_NODES=your-cluster-endpoint:6379
@@ -166,6 +168,7 @@ REDIS_AUTH=your-cluster-password
 <Callout type="warning">
 
 When using Redis cluster mode:
+
 - Ensure all cluster nodes are accessible from your Langfuse containers
 - Use the same authentication credentials across all cluster nodes
 - Monitor cluster health and handle node failures appropriately

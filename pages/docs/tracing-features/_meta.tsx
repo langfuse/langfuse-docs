@@ -1,8 +1,8 @@
 export default {
   sessions: "Sessions",
-  users: "Users", 
+  users: "Users",
   environments: "Environments",
-  tags: "Tags", 
+  tags: "Tags",
   metadata: "Metadata",
   "trace-ids": "Trace IDs & Distributed Tracing",
   "releases-and-versioning": "Releases & Versioning",
@@ -11,6 +11,6 @@ export default {
   "agent-graphs": "Agent Graphs",
   url: "Trace URLs",
   "log-levels": "Log Levels",
-  masking: "Masking",  
+  masking: "Masking",
   sampling: "Sampling",
-}; 
+};

@@ -5,25 +5,23 @@ description: Script to migrate data (prompts, traces, datasets) from a source La
 
 # Migrating Data from One Langfuse Project to Another
 
-This guide provides Python code  to migrate data (prompts, traces, datasets) from a source Langfuse project to a destination Langfuse project using the Langfuse Public API.
+This guide provides Python code to migrate data (prompts, traces, datasets) from a source Langfuse project to a destination Langfuse project using the Langfuse Public API.
 
 This is useful for scenarios such as:
-*   Moving data from Langfuse Cloud to a self-hosted instance (or vice-versa).
-*   Migrating between different Langfuse Cloud regions or compliance environments (e.g., non-HIPAA to HIPAA).
-*   Syncing production data to a development/staging environment for testing.
-*   Creating custom scripts to synchronize specific data types (like prompts) across instances.
+
+- Moving data from Langfuse Cloud to a self-hosted instance (or vice-versa).
+- Migrating between different Langfuse Cloud regions or compliance environments (e.g., non-HIPAA to HIPAA).
+- Syncing production data to a development/staging environment for testing.
+- Creating custom scripts to synchronize specific data types (like prompts) across instances.
 
 ## Prerequisites
 
-*   **Langfuse Projects:** Access to both the source and destination Langfuse projects.
-*   **Rate Limits:** Be mindful of API rate limits on your Langfuse instances (Cloud or self-hosted). Large migrations might require implementing back-off logic or running the script in batches.
-
-
+- **Langfuse Projects:** Access to both the source and destination Langfuse projects.
+- **Rate Limits:** Be mindful of API rate limits on your Langfuse instances (Cloud or self-hosted). Large migrations might require implementing back-off logic or running the script in batches.
 
 ```python
 %pip install "langfuse<3.0.0" -q
 ```
-
 
 ```python
 import os
@@ -46,7 +44,6 @@ os.environ["LANGFUSE_MIGRATE_TO_TIMESTAMP"] = "2025-03-30T10:00:00Z"
 ## Section I – Migrating Prompts
 
 This section covers migrating prompts, including their version history.
-
 
 ```python
 import os
@@ -245,7 +242,6 @@ if __name__ == "__main__":
 ## Section II – Migrating Traces, Observations & Scores
 
 This section handles the core tracing data: traces, their nested observations (spans, generations, events), and associated scores.
-
 
 ```python
 import os
@@ -717,7 +713,6 @@ if __name__ == "__main__":
 
 This section covers migrating datasets, dataset items, and dataset runs (used for evaluations and experiments).
 
-
 ```python
 import os
 import sys
@@ -947,14 +942,14 @@ if __name__ == "__main__":
 
 The Langfuse Public API allows migrating other configuration objects, although they are less commonly required than prompts, traces, and datasets. Implementing their migration follows a similar pattern (list from source, create in destination).
 
-*   **Score Configs (`/api/public/score-configs`):** Define configurations for how scores are calculated or displayed (e.g., category mappings, numeric ranges). Useful if you rely heavily on predefined score structures. [API Ref](https://api.reference.langfuse.com/#tag/Score-Configs)
-*   **Model Definitions (`/api/public/models`):** Define custom model pricing or metadata for models not built-in to Langfuse. [API Ref](https://api.reference.langfuse.com/#tag/Models)
-*   **Annotation Queues:** (https://api.reference.langfuse.com/#tag/annotationqueues)
+- **Score Configs (`/api/public/score-configs`):** Define configurations for how scores are calculated or displayed (e.g., category mappings, numeric ranges). Useful if you rely heavily on predefined score structures. [API Ref](https://api.reference.langfuse.com/#tag/Score-Configs)
+- **Model Definitions (`/api/public/models`):** Define custom model pricing or metadata for models not built-in to Langfuse. [API Ref](https://api.reference.langfuse.com/#tag/Models)
+- **Annotation Queues:** (https://api.reference.langfuse.com/#tag/annotationqueues)
 
 ## UI / Manual Migration
 
 Some Langfuse features are primarily managed through the UI and do not currently have direct Public API endpoints for creation or migration:
 
-*   **Model-Based Evaluators:** Configurations for running evaluations using LLMs (e.g., "LLM-as-a-Judge"). These need to be recreated manually in the destination project's UI.
-*   **Dashboards:** Custom analytics dashboards created in the UI. You can often export the dashboard configuration as JSON from the source UI and import it into the destination UI.
-*   **RBAC / Team Members:** User roles and permissions are managed at the project or organization level, typically through the UI or specific SSO/SCIM integrations (for self-hosted enterprise). They are not part of a standard project data migration via this script.
+- **Model-Based Evaluators:** Configurations for running evaluations using LLMs (e.g., "LLM-as-a-Judge"). These need to be recreated manually in the destination project's UI.
+- **Dashboards:** Custom analytics dashboards created in the UI. You can often export the dashboard configuration as JSON from the source UI and import it into the destination UI.
+- **RBAC / Team Members:** User roles and permissions are managed at the project or organization level, typically through the UI or specific SSO/SCIM integrations (for self-hosted enterprise). They are not part of a standard project data migration via this script.

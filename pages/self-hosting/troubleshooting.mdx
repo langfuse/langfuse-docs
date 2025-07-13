@@ -95,29 +95,31 @@ If you migrate again, the output will now be:
 Langfuse uses BullMQ for managing background job queues. The BullMQ admin endpoint allows you to monitor queue lengths, replay failed events, and remove unwanted events from the queue. This is particularly useful for troubleshooting event processing issues and managing queue backlogs.
 
 <Callout type="warning">
-  This API is meant for administrative purpose by instance owners and may change at any point in time.
-  We recommend not to develop against this API or build significant logic around it.
+  This API is meant for administrative purpose by instance owners and may change
+  at any point in time. We recommend not to develop against this API or build
+  significant logic around it.
 </Callout>
 
 ### Authentication Setup
 
 <Steps>
 
-  ### Configure an `ADMIN_API_KEY`
+### Configure an `ADMIN_API_KEY`
 
-  Configure an `ADMIN_API_KEY` in your environment configuration:
+Configure an `ADMIN_API_KEY` in your environment configuration:
 
-  ```bash filename="Environment"
-  ADMIN_API_KEY=your-admin-api-key
-  ```
+```bash filename="Environment"
+ADMIN_API_KEY=your-admin-api-key
+```
 
-  ### Authenticate with the API
+### Authenticate with the API
 
-  Then, authenticate with the API by setting the Authorization header:
+Then, authenticate with the API by setting the Authorization header:
 
-  ```bash
-  Authorization: Bearer $ADMIN_API_KEY
-  ```
+```bash
+Authorization: Bearer $ADMIN_API_KEY
+```
+
 </Steps>
 
 ### Monitoring Queue Lengths
@@ -167,88 +169,96 @@ Available status options: `completed`, `failed`, `active`, `delayed`, `prioritiz
 <details>
   <summary>Complete BullMQ Admin API Specification</summary>
 
-  ```yaml
-  openapi: 3.0.1
-  info:
-    title: Langfuse Admin BullMQ API
-    description: API for managing BullMQ jobs in Langfuse
-    version: '1.0.0'
-  paths:
-    /api/admin/bullmq:
-      get:
-        summary: Get job counts for all queues
-        operationId: bullmq_getCounts
-        tags:
-          - BullMQ
-        responses:
-          '200':
-            description: Job counts for all queues
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      queueName:
-                        type: string
-                      jobCount:
-                        type: object
-                        additionalProperties:
-                          type: number
-      post:
-        summary: Manage BullMQ jobs
-        operationId: bullmq_manageJobs
-        tags:
-          - BullMQ
-        requestBody:
-          required: true
+```yaml
+openapi: 3.0.1
+info:
+  title: Langfuse Admin BullMQ API
+  description: API for managing BullMQ jobs in Langfuse
+  version: "1.0.0"
+paths:
+  /api/admin/bullmq:
+    get:
+      summary: Get job counts for all queues
+      operationId: bullmq_getCounts
+      tags:
+        - BullMQ
+      responses:
+        "200":
+          description: Job counts for all queues
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    required:
-                      - action
-                      - queueNames
-                    properties:
-                      action:
-                        type: string
-                        enum: [retry]
-                      queueNames:
-                        type: array
-                        items:
-                          type: string
-                  - type: object
-                    required:
-                      - action
-                      - queueNames
-                      - bullStatus
-                    properties:
-                      action:
-                        type: string
-                        enum: [remove]
-                      queueNames:
-                        type: array
-                        items:
-                          type: string
-                      bullStatus:
-                        type: string
-                        enum: [completed, failed, active, delayed, prioritized, paused, wait]
-        responses:
-          '200':
-            description: Jobs successfully managed
-            content:
-              application/json:
-                schema:
+                type: array
+                items:
                   type: object
                   properties:
-                    message:
+                    queueName:
                       type: string
-  ```
+                    jobCount:
+                      type: object
+                      additionalProperties:
+                        type: number
+    post:
+      summary: Manage BullMQ jobs
+      operationId: bullmq_manageJobs
+      tags:
+        - BullMQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - action
+                    - queueNames
+                  properties:
+                    action:
+                      type: string
+                      enum: [retry]
+                    queueNames:
+                      type: array
+                      items:
+                        type: string
+                - type: object
+                  required:
+                    - action
+                    - queueNames
+                    - bullStatus
+                  properties:
+                    action:
+                      type: string
+                      enum: [remove]
+                    queueNames:
+                      type: array
+                      items:
+                        type: string
+                    bullStatus:
+                      type: string
+                      enum:
+                        [
+                          completed,
+                          failed,
+                          active,
+                          delayed,
+                          prioritized,
+                          paused,
+                          wait,
+                        ]
+      responses:
+        "200":
+          description: Jobs successfully managed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+```
 
 </details>
-
 
 ## FAQ
 

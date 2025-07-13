@@ -193,7 +193,7 @@ Key configuration options:
 | `media_upload_thread_count` | `LANGFUSE_MEDIA_UPLOAD_THREAD_COUNT` | Number of background threads for handling media uploads.                                                                              | `1`                            |
 | `sample_rate`               | `LANGFUSE_SAMPLE_RATE`               | [Sampling](/docs/tracing-features/sampling) rate for traces (float between 0.0 and 1.0). `1.0` means 100% of traces are sampled.      | `1.0`                          |
 | `mask`                      | -                                    | A function `(data: Any) -> Any` to [mask](/docs/tracing-features/masking) sensitive data in traces before sending to the API.         |                                |
-|       | `LANGFUSE_MEDIA_UPLOAD_ENABLED`      | Whether to upload media files to Langfuse S3. In self-hosted environments this might be useful to disable.                                                                               | `True`                         |
+|                             | `LANGFUSE_MEDIA_UPLOAD_ENABLED`      | Whether to upload media files to Langfuse S3. In self-hosted environments this might be useful to disable.                            | `True`                         |
 
 ### Accessing the Client Globally
 
@@ -804,8 +804,9 @@ response = client.chat.completions.create(
 ```
 
 The special metadata fields are:
+
 - `langfuse_session_id`: Sets the session ID for the trace
-- `langfuse_user_id`: Sets the user ID for the trace  
+- `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
 
 Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`
@@ -874,6 +875,7 @@ response = chain.invoke(
 ```
 
 The special metadata fields are:
+
 - `langfuse_session_id`: Sets the session ID for the trace
 - `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
@@ -1239,12 +1241,14 @@ When filtering instrumentation scopes, be aware that blocking certain libraries 
 For example, if you block parent spans but keep child spans from a separate library, you may see "orphaned" LLM spans whose parent spans were filtered out. This can make traces harder to interpret.
 
 Consider the impact on trace structure when choosing which scopes to filter.
+
 </Callout>
 
 ### Multi-Project Setup (Experimental)
 
 <Callout type="warning">
-Multi-project setups are **experimental** and have important limitations regarding third-party OpenTelemetry integrations.
+  Multi-project setups are **experimental** and have important limitations
+  regarding third-party OpenTelemetry integrations.
 </Callout>
 
 The Langfuse Python SDK supports routing traces to different projects within the same application by using multiple public keys. This works because the Langfuse SDK adds a specific span attribute containing the public key to all spans it generates.
@@ -1314,9 +1318,9 @@ result_a = process_data_for_project_a(
     langfuse_public_key="pk-lf-project-a-..."
 )
 
-# Route to Project B  
+# Route to Project B
 result_b = process_data_for_project_b(
-    data="input data", 
+    data="input data",
     langfuse_public_key="pk-lf-project-b-..."
 )
 ```
@@ -1368,7 +1372,7 @@ response_a = chain.invoke(
     config={"callbacks": [handler_a]}
 )
 
-# Route to Project B  
+# Route to Project B
 response_b = chain.invoke(
     {"topic": "data science"},
     config={"callbacks": [handler_b]}
@@ -1507,7 +1511,7 @@ response = openai.chat.completions.create(
     messages=[{"role": "user", "content": "Hello"}],
     metadata={
         "langfuse_user_id": "user_123",
-        "langfuse_session_id": "session_456", 
+        "langfuse_session_id": "session_456",
         "langfuse_tags": ["chat"],
         "source": "app"  # Regular metadata still works
     }
@@ -1570,7 +1574,7 @@ from langfuse.langchain import CallbackHandler
 handler = CallbackHandler()
 
 response = chain.invoke(
-    {"input": "Hello"}, 
+    {"input": "Hello"},
     config={
         "callbacks": [handler],
         "metadata": {
@@ -1695,34 +1699,28 @@ with langfuse.start_as_current_span(
 ### Key Migration Checklist
 
 1. **Update Imports**:
-
    - Use `from langfuse import get_client` to access global client instance configured via environment variables
    - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
    - Use `from langfuse import observe` to import the observe decorator
    - Update integration imports: `from langfuse.langchain import CallbackHandler`
 
 2. **Trace Attributes Pattern**:
-
    - **Option 1**: Use metadata fields (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`) directly in integration calls
    - **Option 2**: Move `user_id`, `session_id`, `tags` to enclosing spans and use `span.update_trace()` or `langfuse.update_current_trace()`
 
 3. **Trace Input/Output**:
-
    - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
    - Don't rely on automatic derivation from root observation if you need specific values
 
 4. **Context Managers**:
-
    - Replace manual `langfuse.trace()`, `trace.span()` with context managers if you want to use them
    - Use `with langfuse.start_as_current_span()` instead
 
 5. **LlamaIndex Migration**:
-
    - Replace Langfuse callback with third-party OTEL instrumentation
    - Install: `pip install openinference-instrumentation-llama-index`
 
 6. **ID Management**:
-
    - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
    - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
    - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
@@ -1748,29 +1746,24 @@ with langfuse.start_as_current_span(
 ### Detailed Change Summary
 
 1.  **Core Change: OpenTelemetry Foundation**
-
     - Built on OpenTelemetry standards for better ecosystem compatibility
 
 2.  **Trace Input/Output Behavior**
-
     - **v2**: Integrations could set trace input/output directly
     - **v3**: Trace input/output derived from root observation by default
     - **Migration**: Explicitly set via `span.update_trace(input=..., output=...)`
 
 3.  **Trace Attributes Location**
-
     - **v2**: Could be set directly on integration calls
     - **v3**: Must be set on enclosing spans
     - **Migration**: Wrap integration calls with `langfuse.start_as_current_span()`
 
 4.  **Creating Observations**:
-
     - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`
     - **v3**: `langfuse.start_as_current_span()`, `langfuse.start_as_current_generation()`
     - **Migration**: Use context managers, ensure `.end()` is called or use `with` statements
 
 5.  **IDs and Context**:
-
     - **v3**: W3C Trace Context format, automatic context propagation
     - **Migration**: Use `langfuse.get_current_trace_id()` instead of `get_trace_id()`
 

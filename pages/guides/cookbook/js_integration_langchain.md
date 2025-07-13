@@ -13,15 +13,14 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/langchain)
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
 
-
 ```typescript
-import { CallbackHandler } from "npm:langfuse-langchain"
+import { CallbackHandler } from "npm:langfuse-langchain";
 const langfuseLangchainHandler = new CallbackHandler({
-    publicKey: "",
-    secretKey: "",
-    baseUrl: "https://cloud.langfuse.com",
-    flushAt: 1 // cookbook-only: do not batch events, send them immediately
-})
+  publicKey: "",
+  secretKey: "",
+  baseUrl: "https://cloud.langfuse.com",
+  flushAt: 1, // cookbook-only: do not batch events, send them immediately
+});
 ```
 
 ## Langchain interfaces
@@ -33,10 +32,9 @@ Langfuse supports the following Langchain JS interfaces
 
 For this section we will use a very simple example prompt (from Langchain JS [docs](https://js.langchain.com/docs/expression_language/interface)) and ChatOpenAI. Langfuse works with any model.
 
-
 ```typescript
-import { ChatOpenAI } from "npm:@langchain/openai"
-import { PromptTemplate } from "npm:@langchain/core/prompts"
+import { ChatOpenAI } from "npm:@langchain/openai";
+import { PromptTemplate } from "npm:@langchain/core/prompts";
 
 const model = new ChatOpenAI({});
 const promptTemplate = PromptTemplate.fromTemplate(
@@ -46,39 +44,35 @@ const promptTemplate = PromptTemplate.fromTemplate(
 
 ### `invoke`
 
-
 ```typescript
 import { RunnableSequence } from "npm:@langchain/core/runnables";
 
 const chain = RunnableSequence.from([promptTemplate, model]);
 
 const res = await chain.invoke(
-    { topic: "bears" },
-    { callbacks: [langfuseLangchainHandler] }
+  { topic: "bears" },
+  { callbacks: [langfuseLangchainHandler] }
 );
 
-console.log(res.content)
+console.log(res.content);
 ```
 
     Why did the bear wear a fur coat to the BBQ?
     Because it was grizzly cold outside!
 
-
 ### `stream`
-
 
 ```typescript
 const chain = promptTemplate.pipe(model);
 const stream = await chain.stream(
-    { topic: "bears" },
-    { callbacks: [langfuseLangchainHandler] }
+  { topic: "bears" },
+  { callbacks: [langfuseLangchainHandler] }
 );
 for await (const chunk of stream) {
   console.log(chunk?.content);
 }
 ```
 
-    
     Why
      did
      the
@@ -90,9 +84,9 @@ for await (const chunk of stream) {
      the
      party
     ?
-     
-    
-    
+
+
+
     Because
      he
      wanted
@@ -106,8 +100,6 @@ for await (const chunk of stream) {
      the
      light
     !
-    
-
 
 ## Explore the trace in Langfuse
 

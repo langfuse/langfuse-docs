@@ -21,8 +21,8 @@ function InkeepEmbeddedChat() {
       theme: {
         styles: [
           {
-            key: '1',
-            type: 'style',
+            key: "1",
+            type: "style",
             value: css`
               .ikp-ai-chat-wrapper {
                 width: 100%;

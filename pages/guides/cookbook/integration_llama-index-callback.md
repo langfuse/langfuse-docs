@@ -13,19 +13,17 @@ This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse 
 
 Make sure you have both `llama-index` and `langfuse` installed.
 
-
 ```python
 %pip install llama-index "langfuse<3.0.0" --upgrade
 ```
 
 Initialize the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com).
 
-
 ```python
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
 from langfuse.llama_index import LlamaIndexCallbackHandler
- 
+
 langfuse_callback_handler = LlamaIndexCallbackHandler(
     public_key="pk-lf-...",
     secret_key="sk-lf-...",
@@ -36,7 +34,6 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
 This example uses OpenAI for embeddings and chat completions.
 
-
 ```python
 import os
 
@@ -44,7 +41,6 @@ os.environ["OPENAI_API_KEY"] = ""
 ```
 
 ## Index
-
 
 ```python
 # Example context, thx ChatGPT
@@ -58,7 +54,6 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 """)
 ```
 
-
 ```python
 # Example index construction + LLM query
 from llama_index.core import VectorStoreIndex
@@ -68,13 +63,11 @@ index = VectorStoreIndex.from_documents([doc1,doc2])
 
 ## Query
 
-
 ```python
 # Query
 response = index.as_query_engine().query("What did he do growing up?")
 print(response)
 ```
-
 
 ```python
 # Chat
@@ -84,7 +77,6 @@ print(response)
 
 ## Explore traces in Langfuse
 
-
 ```python
 # As we want to immediately see result in Langfuse, we need to flush the callback handler
 langfuse_callback_handler.flush()
@@ -93,6 +85,7 @@ langfuse_callback_handler.flush()
 Done! ✨ You see traces of your index and query in your Langfuse project.
 
 Example traces (public links):
+
 1. [Query](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/traces/f2e7f721-0940-4139-9b3a-e5cc9b0cb2d3)
 2. [Query (chat)](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/traces/89c62a4d-e992-4923-a6b7-e2f27ae4cff3)
 3. [Session](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/sessions/notebook-session-2)
@@ -100,7 +93,6 @@ Example traces (public links):
 Trace in Langfuse:
 
 ![Langfuse Traces](https://static.langfuse.com/llamaindex-langfuse-docs.gif)
-
 
 ## Interested in more advanced features?
 

@@ -92,12 +92,12 @@ const config: DocsThemeConfig = {
     const section = asPath.startsWith("/docs")
       ? "Docs"
       : asPath.startsWith("/changelog/")
-      ? "Changelog"
-      : asPath.startsWith("/cookbook/")
-      ? "Cookbook"
-      : asPath.startsWith("/faq/")
-      ? "FAQ"
-      : "";
+        ? "Changelog"
+        : asPath.startsWith("/cookbook/")
+          ? "Cookbook"
+          : asPath.startsWith("/faq/")
+            ? "FAQ"
+            : "";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
@@ -124,10 +124,10 @@ const config: DocsThemeConfig = {
       asPath === "/"
         ? "Langfuse"
         : asPath.startsWith("/blog/")
-        ? "%s - Langfuse Blog"
-        : asPath.startsWith("/docs/guides/")
-        ? "%s - Langfuse Guides"
-        : "%s - Langfuse";
+          ? "%s - Langfuse Blog"
+          : asPath.startsWith("/docs/guides/")
+            ? "%s - Langfuse Guides"
+            : "%s - Langfuse";
 
     const isDev =
       typeof process !== "undefined" && process.env.NODE_ENV === "development";

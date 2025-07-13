@@ -13,18 +13,16 @@ This notebook demonstrates how to run UpTrain's evaluation metrics on the traces
 
 You can get your Langfuse API keys [here](https://cloud.langfuse.com/) and OpenAI API key [here](https://platform.openai.com/api-keys)
 
-
 ```python
 %pip install langfuse datasets uptrain litellm openai rouge_score --upgrade
 ```
-
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -35,7 +33,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ## Sample Dataset
 
 We use this dataset to represent [traces](https://langfuse.com/docs/tracing) that you have logged to Langfuse. In a production environment, you would use your own data.
-
 
 ```python
 data = [
@@ -74,7 +71,6 @@ We have used the following 3 metrics from UpTrain's open-source library:
 
 You can look at the complete list of UpTrain's supported metrics [here](https://docs.uptrain.ai/predefined-evaluations/overview)
 
-
 ```python
 from uptrain import EvalLLM, Evals
 import json
@@ -101,7 +97,6 @@ res = eval_llm.evaluate(
     100%|██████████| 4/4 [00:01<00:00,  3.13it/s]
     [32m2025-06-17 10:43:22.148[0m | [1mINFO    [0m | [36muptrain.framework.evalllm[0m:[36mevaluate[0m:[36m376[0m - [1mLocal server not running, start the server to log data and visualize in the dashboard![0m
 
-
 ## Using Langfuse
 
 There are two main ways to run evaluations:
@@ -112,12 +107,11 @@ There are two main ways to run evaluations:
 
 ### Development: Score each trace while it's created
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -127,9 +121,7 @@ else:
 
     Langfuse client is authenticated and ready!
 
-
 We mock the instrumentation of your application by using the sample dataset. See the [quickstart](https://langfuse.com/docs/get-started) to integrate Langfuse with your application.
-
 
 ```python
 # start a new trace when you get a question
@@ -140,31 +132,30 @@ response = data[0]['response']
 with langfuse.start_as_current_span(name="uptrain trace") as trace:
     # Store trace_id for later use
     trace_id = trace.trace_id
-    
+
     # retrieve the relevant chunks
     # chunks = get_similar_chunks(question)
-    
+
     # pass it as span
     with trace.start_as_current_span(
-        name="retrieval", 
-        input={'question': question}, 
+        name="retrieval",
+        input={'question': question},
         output={'context': context}
     ):
         pass
 
     # use llm to generate a answer with the chunks
     # answer = get_response_from_llm(question, chunks)
-    
+
     with trace.start_as_current_span(
-        name="generation", 
-        input={'question': question, 'context': context}, 
+        name="generation",
+        input={'question': question, 'context': context},
         output={'response': response}
     ):
         pass
 ```
 
 We reuse the scores previously calculated for the traces in the sample dataset. In development, you would run the UpTrain evaluations for the single trace as it's created.
-
 
 ```python
 langfuse.create_score(name='context_relevance', value=res[0]['score_context_relevance'], trace_id=trace_id)
@@ -178,7 +169,6 @@ langfuse.create_score(name='response_completeness', value=res[0]['score_response
 
 To simulate a production environment, we will log our sample dataset to Langfuse.
 
-
 ```python
 for interaction in data:
     with langfuse.start_as_current_span(name="uptrain batch") as trace:
@@ -188,26 +178,25 @@ for interaction in data:
             output={'context': interaction['context']}
         ):
             pass
-        
+
         with trace.start_as_current_span(
             name="generation",
             input={'question': interaction['question'], 'context': interaction['context']},
             output={'response': interaction['response']}
         ):
             pass
- 
+
 # await that Langfuse SDK has processed all events before trying to retrieve it in the next step
 langfuse.flush()
 ```
 
 We can now retrieve the traces like regular production data and evaluate them using UpTrain.
 
-
 ```python
 def get_traces(name=None, limit=10000, user_id=None):
     all_data = []
     page = 1
- 
+
     while True:
         response = langfuse.api.trace.list(
             name=name, page=page, user_id=user_id, order_by=None
@@ -218,23 +207,21 @@ def get_traces(name=None, limit=10000, user_id=None):
         all_data.extend(response.data)
         if len(all_data) > limit:
             break
- 
+
     return all_data[:limit]
 ```
 
 Optional: create a random sample to reduce evaluation costs.
 
-
 ```python
 from random import sample
- 
+
 NUM_TRACES_TO_SAMPLE = 4
 traces = get_traces(name="uptrain batch")
 traces_sample = sample(traces, NUM_TRACES_TO_SAMPLE)
 ```
 
 Convert the data into a dataset to be used for evaluation with UpTrain.
-
 
 ```python
 evaluation_batch = {
@@ -243,7 +230,7 @@ evaluation_batch = {
     "response": [],
     "trace_id": [],
 }
- 
+
 for t in traces_sample:
     observations = [langfuse.api.observations.get(o) for o in t.observations]
     for o in observations:
@@ -262,7 +249,6 @@ data = [dict(zip(evaluation_batch,t)) for t in zip(*evaluation_batch.values())]
 ```
 
 Evaluate the batch using UpTrain.
-
 
 ```python
 
@@ -285,9 +271,7 @@ res = eval_llm.evaluate(
     100%|██████████| 4/4 [00:01<00:00,  3.87it/s]
     [32m2025-06-17 10:46:43.749[0m | [1mINFO    [0m | [36muptrain.framework.evalllm[0m:[36mevaluate[0m:[36m376[0m - [1mLocal server not running, start the server to log data and visualize in the dashboard![0m
 
-
 Add the `trace_id` back to the dataset as it was omitted in the previous step to be compatible with UpTrain.
-
 
 ```python
 df = pd.DataFrame(res)
@@ -297,9 +281,6 @@ df["trace_id"] = [d['trace_id'] for d in data]
 
 df.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -314,6 +295,7 @@ df.head()
     .dataframe thead th {
         text-align: right;
     }
+
 </style>
 <table border="1" class="dataframe">
   <thead>
@@ -388,10 +370,7 @@ df.head()
 </table>
 </div>
 
-
-
 Now that we have the evaluations, we can add them back to the traces in Langfuse as [scores](https://langfuse.com/docs/scores).
-
 
 ```python
 for _, row in df.iterrows():
@@ -406,5 +385,3 @@ for _, row in df.iterrows():
 In Langfuse, you can now see the scores for each trace and monitor them over time.
 
 ![UpTrain Evals on a list of traces in Langfuse](https://langfuse.com/images/cookbook/uptrain-batch.png)
-
-

@@ -21,10 +21,10 @@ Let's walk through a practical example of using LlamaIndex and integrating it wi
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="⚠️">
-_**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of Python SDK v2, please refer to our [legacy LlamaIndex integration guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
+  _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users
+  of Python SDK v2, please refer to our [legacy LlamaIndex integration
+  guide](https://langfuse.com/docs/integrations/llama-index/deprecated/get-started)._
 </Callout>
-
-
 
 ```python
 %pip install langfuse openinference-instrumentation-llama-index llama-index-llms-openai llama-index -U
@@ -35,15 +35,13 @@ _**Note:** This notebook utilizes the Langfuse OTel Python SDK v3. For users of 
 
 Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
-
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -54,13 +52,11 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -73,7 +69,6 @@ else:
 
 Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
-
 ```python
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
@@ -85,17 +80,15 @@ LlamaIndexInstrumentor().instrument()
 
 Let's create a straightforward LlamaIndex application. In this example, we'll create a simple query engine that can answer questions. This will serve as the foundation for demonstrating Langfuse tracing.
 
-
-
 ```python
 from llama_index.llms.openai import OpenAI
 
 llm = OpenAI(model="gpt-4o")
- 
+
 with langfuse.start_as_current_span(name="llama-index-trace"):
     response = llm.complete("Hello, world!")
     print(response)
- 
+
 langfuse.flush()
 ```
 
@@ -106,6 +99,7 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 ![Example Trace in Langfuse](https://langfuse.com/images/cookbook/integration_llama-index/llama-index-example-trace.png)
 
 [Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/12ea412956f99347b0503c1144acd0ec?timestamp=2025-06-05T15:45:52.971Z&display=details)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

@@ -13,25 +13,22 @@ Follow the [integration guide](https://langfuse.com/docs/integrations/openai/pyt
 
 The integration is compatible with OpenAI SDK versions `>=0.27.8`. It supports async functions and streaming for OpenAI SDK versions `>=1.0.0`.
 
-
 ```python
 %pip install langfuse openai --upgrade
 ```
-
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
 # Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
-
 
 ```python
 # instead of: import openai
@@ -41,7 +38,6 @@ from langfuse.openai import openai
 ## Examples
 
 ### Chat completion (text)
-
 
 ```python
 completion = openai.chat.completions.create(
@@ -57,8 +53,7 @@ completion = openai.chat.completions.create(
 
 ### Chat completion (image)
 
-Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages. 
-
+Simple example using the OpenAI vision's functionality. Images may be passed in the `user` messages.
 
 ```python
 completion = openai.chat.completions.create(
@@ -90,7 +85,6 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 Simple example using the OpenAI streaming functionality.
 
-
 ```python
 completion = openai.chat.completions.create(
   name="test-chat",
@@ -108,20 +102,18 @@ for chunk in completion:
 ```
 
     Why don't scientists trust atoms?
-    
+
     Because they make up everything!None
 
 ### Chat completion (async)
 
 Simple example using the OpenAI async client. It takes the Langfuse configurations either from the environment variables or from the attributes on the `openai` module.
 
-
 ```python
 from langfuse.openai import AsyncOpenAI
 
 async_client = AsyncOpenAI()
 ```
-
 
 ```python
 completion = await async_client.chat.completions.create(
@@ -143,11 +135,9 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 Simple example using Pydantic to generate the function schema.
 
-
 ```python
 %pip install pydantic --upgrade
 ```
-
 
 ```python
 from typing import List
@@ -158,7 +148,6 @@ class StepByStepAIResponse(BaseModel):
     steps: List[str]
 schema = StepByStepAIResponse.schema() # returns a dict like JSON schema
 ```
-
 
 ```python
 import json
@@ -185,11 +174,9 @@ Go to https://cloud.langfuse.com or your own instance to see your generation.
 
 ![Function](https://langfuse.com/images/docs/openai-function.png)
 
-
 ## Langfuse Features (User, Tags, Metadata, Session)
 
 You can access additional Langfuse features by adding the relevant attributes to the OpenAI request. The Langfuse integration will parse these attributes. See [docs](https://langfuse.com/docs/integrations/openai/python/get-started#custom-trace-properties) for details on all available features.
-
 
 ```python
 completion_with_attributes = openai.chat.completions.create(
@@ -212,28 +199,24 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 The integration also works with the `AzureOpenAI` and `AsyncAzureOpenAI` classes.
 
-
 ```python
 AZURE_OPENAI_KEY=""
 AZURE_ENDPOINT=""
 AZURE_DEPLOYMENT_NAME="cookbook-gpt-4o-mini" # example deployment name
 ```
 
-
 ```python
 # instead of: from openai import AzureOpenAI
 from langfuse.openai import AzureOpenAI
 ```
 
-
 ```python
 client = AzureOpenAI(
-    api_key=AZURE_OPENAI_KEY,  
+    api_key=AZURE_OPENAI_KEY,
     api_version="2023-03-15-preview",
     azure_endpoint=AZURE_ENDPOINT
 )
 ```
-
 
 ```python
 client.chat.completions.create(
@@ -252,7 +235,6 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 ## Group multiple generations into a single trace
 
 Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
-
 
 ```python
 from langfuse.openai import openai
@@ -287,33 +269,30 @@ def main(country: str, user_id: str, **kwargs) -> str:
 print(main("Bulgaria", "admin"))
 ```
 
-    In Sofia's embrace of time's gentle hand,  
-    Where ancient whispers in the cobblestones stand,  
-    The Vitosha's shadow kisses the town,  
-    As golden sunsets tie the day down.  
-    
-    Streets sing with echoes of footsteps past,  
-    Where stories linger, and memories cast,  
-    Beneath the banyan sky so wide,  
-    Cultures and histories peacefully collide.  
-    
-    The Alexander Nevsky, majestic and bold,  
-    A guardian of faith with domes of gold,  
-    Its silence speaks in volumes profound,  
-    In the heart of a city where old truths are found.  
-    
-    The rose-laden gardens in Boris' park,  
-    Perfume the air as day turns dark,  
-    While laughter and life dance at night,  
-    Under Sofia's tapestry of starlit light.  
-    
-    Markets bustle with the color of trade,  
-    Where lively exchanges and histories fade,  
-    A mosaic of tales in woven rhyme,  
-    Sofia stands timeless through passage of time.  
-    
-    
+    In Sofia's embrace of time's gentle hand,
+    Where ancient whispers in the cobblestones stand,
+    The Vitosha's shadow kisses the town,
+    As golden sunsets tie the day down.
 
+    Streets sing with echoes of footsteps past,
+    Where stories linger, and memories cast,
+    Beneath the banyan sky so wide,
+    Cultures and histories peacefully collide.
+
+    The Alexander Nevsky, majestic and bold,
+    A guardian of faith with domes of gold,
+    Its silence speaks in volumes profound,
+    In the heart of a city where old truths are found.
+
+    The rose-laden gardens in Boris' park,
+    Perfume the air as day turns dark,
+    While laughter and life dance at night,
+    Under Sofia's tapestry of starlit light.
+
+    Markets bustle with the color of trade,
+    Where lively exchanges and histories fade,
+    A mosaic of tales in woven rhyme,
+    Sofia stands timeless through passage of time.
 
 Go to https://cloud.langfuse.com or your own instance to see your trace.
 
@@ -324,11 +303,11 @@ Go to https://cloud.langfuse.com or your own instance to see your trace.
 The `trace` is a core object in Langfuse and you can add rich metadata to it. See [Python SDK docs](https://langfuse.com/docs/sdk/python#traces-1) for full documentation on this.
 
 Some of the functionality enabled by custom traces:
+
 - custom name to identify a specific trace-type
 - user-level tracking
 - experiment tracking via versions and releases
 - custom metadata
-
 
 ```python
 from langfuse.openai import openai
@@ -377,40 +356,38 @@ trace_id = langfuse.create_trace_id()
 print(main("Bulgaria", "admin", langfuse_observation_id=trace_id))
 ```
 
-    In the cradle of Balkan hills, she lies,  
-    A gem under cerulean skies,  
-    Sofia, where the ancient whispers blend,  
+    In the cradle of Balkan hills, she lies,
+    A gem under cerulean skies,
+    Sofia, where the ancient whispers blend,
     With modern souls, as time extends.
-    
-    Her heart beats with the rhythm of the past,  
-    Where cobblestones and new dreams cast,  
-    A tapestry of age and youth, entwined,  
-    In every corner, stories unsigned.
-    
-    The Vitosha stands like a guardian old,  
-    Whose peaks in winter snow enfold,  
-    The city below, glowing warm and bright,  
-    Under the embrace of evening light.
-    
-    St. Alexander’s domes in sunlight gleam,  
-    Golden crowns of a Byzantine dream,  
-    While beneath, a bustling world unfurls,  
-    In markets vast, where culture swirls.
-    
-    Winding streets where whispers linger,  
-    Liberty echoes from corner to finger,  
-    In the shadow of Soviet grandiosity,  
-    Bulgaria’s spirit claims its clarity.
-    
-    Cafés breathe tales in the aroma of brew,
 
+    Her heart beats with the rhythm of the past,
+    Where cobblestones and new dreams cast,
+    A tapestry of age and youth, entwined,
+    In every corner, stories unsigned.
+
+    The Vitosha stands like a guardian old,
+    Whose peaks in winter snow enfold,
+    The city below, glowing warm and bright,
+    Under the embrace of evening light.
+
+    St. Alexander’s domes in sunlight gleam,
+    Golden crowns of a Byzantine dream,
+    While beneath, a bustling world unfurls,
+    In markets vast, where culture swirls.
+
+    Winding streets where whispers linger,
+    Liberty echoes from corner to finger,
+    In the shadow of Soviet grandiosity,
+    Bulgaria’s spirit claims its clarity.
+
+    Cafés breathe tales in the aroma of brew,
 
 ## Programmatically add scores
 
 You can add [scores](https://langfuse.com/docs/scores) to the trace, to e.g. record user feedback or some programmatic evaluation. Scores are used throughout Langfuse to filter traces and on the dashboard. See the docs on scores for more details.
 
 The score is associated to the trace using the `trace_id`.
-
 
 ```python
 from langfuse import observe, get_client
