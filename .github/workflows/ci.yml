@@ -128,6 +128,8 @@ jobs:
     if: needs.pre-job.outputs.should_skip != 'true' && github.base_ref == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
