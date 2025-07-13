@@ -173,7 +173,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/pydantic-ai",
     icon: (
       <Image
-        src="/images/integrations/pydantic-ai_icon.svg"
+        src="/images/integrations/pydantic_ai_icon.svg"
         alt="Pydantic AI Icon"
         width={36}
         height={36}
@@ -209,7 +209,7 @@ const integrations: IntegrationTileProps[] = [
     href: "/docs/integrations/google-vertex-ai",
     icon: (
       <Image
-        src="/images/integrations/google_gemini.svg"
+        src="/images/integrations/google_gemini_icon.svg"
         alt="Google Gemini Icon"
         width={36}
         height={36}
