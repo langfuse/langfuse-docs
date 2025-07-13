@@ -255,7 +255,7 @@ const nonPermanentRedirects = [
   ["/docs/opentelemetry/example-opentelemetry-collector", "/docs/opentelemetry/get-started#export-from-opentelemetry-collector"],
   ["/docs/sdk/python/decorators", "https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator"],
 
-  ["/test", '/test2'],
+  ["/test", '/imprint'],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
