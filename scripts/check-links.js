@@ -13,19 +13,48 @@ const MAX_REDIRECTS = 5;
 const REQUEST_TIMEOUT = 10000; // 10 seconds - consistent with sitemap checker
 const LOCAL_SERVER_BASE = 'http://localhost:3333';
 
+// Compiled regex patterns for better performance
+const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
+const HREF_REGEX = /href=["']([^"']+)["']/g;
+
+/**
+ * Check if a URL contains template variables or invalid characters
+ */
+function isInvalidUrl(url) {
+    return url.includes('{') || url.includes('}') ||
+        url.includes('${') || url.includes('}}') ||
+        url.includes('[') || url.includes(']');
+}
+
+/**
+ * Log a link error with consistent formatting
+ */
+function logLinkError(filePath, link, statusCode, error) {
+    const relativePath = path.relative(process.cwd(), filePath);
+    if (statusCode) {
+        console.error(`[${statusCode}] Dead link in ${relativePath}: ${link}`);
+    } else {
+        console.error(`[ERROR] Dead link in ${relativePath}: ${link}`);
+    }
+    if (error) {
+        console.error(`  Error: ${error}`);
+    }
+}
+
+// Compiled replacement patterns for better performance
+const REPLACEMENT_PATTERNS = [
+    {
+        regex: /^\/(.*)$/,
+        replacement: 'http://localhost:3333/$1'
+    },
+    {
+        regex: /^https:\/\/langfuse\.com(.*)$/,
+        replacement: 'http://localhost:3333$1'
+    }
+];
+
 // Configuration for the link checker (for external links only)
 const config = {
-    // Replace patterns for internal and langfuse.com links
-    replacementPatterns: [
-        {
-            pattern: '^/',
-            replacement: 'http://localhost:3333/'
-        },
-        {
-            pattern: '^https://langfuse.com',
-            replacement: 'http://localhost:3333'
-        },
-    ],
     // Ignore patterns for external links and anchors
     ignorePatterns: [
         {
@@ -54,6 +83,10 @@ const config = {
 
 /**
  * Check a single URL with custom redirect handling
+ * @param {string} url - The URL to check
+ * @param {number} redirectCount - Current redirect count (for recursion tracking)
+ * @param {Array} redirectChain - Chain of redirects (for tracking)
+ * @returns {Promise<Object>} Result object with success status and redirect info
  */
 function checkUrlWithRedirects(url, redirectCount = 0, redirectChain = []) {
     return new Promise((resolve, reject) => {
@@ -121,6 +154,8 @@ function checkUrlWithRedirects(url, redirectCount = 0, redirectChain = []) {
 
 /**
  * Check if a URL is internal (localhost or langfuse.com)
+ * @param {string} url - The URL to check
+ * @returns {boolean} True if the URL is internal
  */
 function isInternalUrl(url) {
     return url.startsWith('/') ||
@@ -132,34 +167,40 @@ function isInternalUrl(url) {
  * Apply replacement patterns to convert internal URLs to localhost
  */
 function applyReplacements(url) {
-    let processedUrl = url;
-
-    for (const pattern of config.replacementPatterns) {
-        const regex = new RegExp(pattern.pattern);
-        if (regex.test(processedUrl)) {
-            processedUrl = processedUrl.replace(regex, pattern.replacement);
-            break;
+    for (const pattern of REPLACEMENT_PATTERNS) {
+        const match = url.match(pattern.regex);
+        if (match) {
+            return pattern.replacement;
         }
     }
-
-    return processedUrl;
+    return url;
 }
 
 function extractHrefLinks(content) {
     // Extract href attributes from JSX components
-    const hrefRegex = /href=["']([^"']+)["']/g;
     const links = [];
     let match;
 
-    while ((match = hrefRegex.exec(content)) !== null) {
+    // Reset regex lastIndex to ensure consistent behavior
+    HREF_REGEX.lastIndex = 0;
+
+    while ((match = HREF_REGEX.exec(content)) !== null) {
         const href = match[1];
+
+        // Skip invalid URLs
+        if (isInvalidUrl(href)) {
+            continue;
+        }
+
         // Include internal links (starting with / or https://langfuse.com)
-        if (href.startsWith('/')) {
-            links.push(href);
-        } else if (href.startsWith('https://langfuse.com')) {
-            // Extract the relative path from langfuse.com URLs
-            const relativePath = href.replace('https://langfuse.com', '') || '/';
-            links.push(relativePath);
+        if (isInternalUrl(href)) {
+            if (href.startsWith('https://langfuse.com')) {
+                // Extract the relative path from langfuse.com URLs
+                const relativePath = href.replace('https://langfuse.com', '') || '/';
+                links.push(relativePath);
+            } else {
+                links.push(href);
+            }
         }
     }
 
@@ -176,9 +217,8 @@ async function checkHrefLinks(links, filePath) {
 
     // Check each link individually with custom redirect handling
     for (const link of links) {
-        // Skip obviously invalid URLs
-        if (link.includes('{') || link.includes('}') ||
-            link.includes('${') || link.includes('}}')) {
+        // Skip invalid URLs
+        if (isInvalidUrl(link)) {
             continue;
         }
 
@@ -192,14 +232,11 @@ async function checkHrefLinks(links, filePath) {
 
             if (!result.success) {
                 hasErrors = true;
-                const relativePath = path.relative(process.cwd(), filePath);
-                console.error(`[${result.statusCode}] Dead href link in ${relativePath}: ${link}`);
+                logLinkError(filePath, link, result.statusCode);
             }
         } catch (error) {
             hasErrors = true;
-            const relativePath = path.relative(process.cwd(), filePath);
-            console.error(`[ERROR] Dead href link in ${relativePath}: ${link}`);
-            console.error(`  Error: ${error.message}`);
+            logLinkError(filePath, link, null, error.message);
         }
     }
 
@@ -216,13 +253,15 @@ async function checkFile(filePath) {
         // Check markdown links using the existing library (only for .md and .mdx files)
         if (filePath.endsWith('.md') || filePath.endsWith('.mdx')) {
             // Extract internal links manually for custom checking
-            const markdownLinkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
             const internalLinks = [];
             let match;
 
-            while ((match = markdownLinkRegex.exec(content)) !== null) {
+            // Reset regex lastIndex to ensure consistent behavior
+            MARKDOWN_LINK_REGEX.lastIndex = 0;
+
+            while ((match = MARKDOWN_LINK_REGEX.exec(content)) !== null) {
                 const link = match[2];
-                if (isInternalUrl(link)) {
+                if (isInternalUrl(link) && !isInvalidUrl(link)) {
                     internalLinks.push(link);
                 }
             }
@@ -230,11 +269,6 @@ async function checkFile(filePath) {
             // Check internal links with custom redirect handling
             if (internalLinks.length > 0) {
                 for (const link of internalLinks) {
-                    // Skip obviously invalid URLs
-                    if (link.includes('{') || link.includes('}') ||
-                        link.includes('${') || link.includes('}}')) {
-                        continue;
-                    }
 
                     try {
                         const processedUrl = applyReplacements(link);
@@ -246,14 +280,11 @@ async function checkFile(filePath) {
 
                         if (!result.success) {
                             hasErrors = true;
-                            const relativePath = path.relative(process.cwd(), filePath);
-                            console.error(`[${result.statusCode}] Dead link in ${relativePath}: ${link}`);
+                            logLinkError(filePath, link, result.statusCode);
                         }
                     } catch (error) {
                         hasErrors = true;
-                        const relativePath = path.relative(process.cwd(), filePath);
-                        console.error(`[ERROR] Dead link in ${relativePath}: ${link}`);
-                        console.error(`  Error: ${error.message}`);
+                        logLinkError(filePath, link, null, error.message);
                     }
                 }
             }
@@ -262,19 +293,10 @@ async function checkFile(filePath) {
             const results = await markdownLinkCheckAsync(content, config);
             results.forEach(result => {
                 if (result.status === 'dead') {
-                    // Skip if this was an internal link (already checked above)
-                    if (!isInternalUrl(result.link)) {
-                        // Skip reporting errors for obviously invalid URLs
-                        if (result.link.includes('{') || result.link.includes('}') ||
-                            result.link.includes('${') || result.link.includes('}}')) {
-                            return;
-                        }
+                    // Skip if this was an internal link (already checked above) or invalid URL
+                    if (!isInternalUrl(result.link) && !isInvalidUrl(result.link)) {
                         hasErrors = true;
-                        const relativePath = path.relative(process.cwd(), filePath);
-                        console.error(`[${result.statusCode}] Dead link in ${relativePath}: ${result.link}`);
-                        if (result.err) {
-                            console.error(`  Error: ${result.err}`);
-                        }
+                        logLinkError(filePath, result.link, result.statusCode, result.err);
                     }
                 }
             });
@@ -310,17 +332,34 @@ async function main() {
         // Recursively find all .md, .mdx, and .tsx files
         const findFiles = (dir) => {
             let results = [];
-            const files = fs.readdirSync(dir);
 
-            for (const file of files) {
-                const filePath = path.join(dir, file);
-                const stat = fs.statSync(filePath);
+            try {
+                const files = fs.readdirSync(dir);
 
-                if (stat.isDirectory()) {
-                    results = results.concat(findFiles(filePath));
-                } else if (file.endsWith('.md') || file.endsWith('.mdx') || file.endsWith('.tsx')) {
-                    results.push(filePath);
+                for (const file of files) {
+                    const filePath = path.join(dir, file);
+
+                    try {
+                        const stat = fs.statSync(filePath);
+
+                        if (stat.isDirectory()) {
+                            // Skip common directories that shouldn't contain docs
+                            if (!file.startsWith('.') && file !== 'node_modules') {
+                                results = results.concat(findFiles(filePath));
+                            }
+                        } else if (file.endsWith('.md') || file.endsWith('.mdx') || file.endsWith('.tsx')) {
+                            // Warn about large files (>1MB) that might cause memory issues
+                            if (stat.size > 1024 * 1024) {
+                                console.warn(`Warning: Large file detected (${(stat.size / 1024 / 1024).toFixed(1)}MB): ${filePath}`);
+                            }
+                            results.push(filePath);
+                        }
+                    } catch (statError) {
+                        console.warn(`Warning: Could not stat file ${filePath}: ${statError.message}`);
+                    }
                 }
+            } catch (readError) {
+                console.warn(`Warning: Could not read directory ${dir}: ${readError.message}`);
             }
 
             return results;
