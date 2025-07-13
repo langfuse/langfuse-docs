@@ -182,13 +182,18 @@ jobs:
         build-and-check-links,
         check-sitemap-links,
       ]
-    if: always() && needs.pre-job.outputs.should_skip != 'true'
+    if: always()
     steps:
+      - name: All checks skipped
+        if: ${{ needs.pre-job.outputs.should_skip == 'true' }}
+        run: |
+          echo "✅ All checks were skipped due to duplicate actions"
+          exit 0
       - name: Successful CI
-        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        if: ${{ needs.pre-job.outputs.should_skip != 'true' && !(contains(needs.*.result, 'failure')) && !(contains(needs.*.result, 'cancelled')) }}
         run: exit 0
         working-directory: .
       - name: Failing CI
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ needs.pre-job.outputs.should_skip != 'true' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
         run: exit 1
         working-directory: .
