@@ -29,6 +29,8 @@ jobs:
         run: pnpm install
 
       - name: Build sitemap and generate llms.txt
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm run build
         # The llms.txt generation happens automatically as part of the postbuild process
 

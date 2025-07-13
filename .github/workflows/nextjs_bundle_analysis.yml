@@ -53,6 +53,8 @@ jobs:
 
       - name: Build next.js app
         # change this if your site requires a custom build command
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./node_modules/.bin/next build
 
       # Here's the first place where next-bundle-analysis' own script is used
