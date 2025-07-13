@@ -129,6 +129,9 @@ const config: DocsThemeConfig = {
         ? "%s - Langfuse Guides"
         : "%s - Langfuse";
 
+    const isDev =
+      typeof process !== "undefined" && process.env.NODE_ENV === "development";
+
     return (
       <>
         <meta name="theme-color" content="#000" />
@@ -162,13 +165,13 @@ const config: DocsThemeConfig = {
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="/favicon-32x32.png"
+          href={isDev ? "/favicon-32x32-dev.png" : "/favicon-32x32.png"}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="/favicon-16x16.png"
+          href={isDev ? "/favicon-16x16-dev.png" : "/favicon-16x16.png"}
         />
 
         {canonical && <link rel="canonical" href={canonical} />}
