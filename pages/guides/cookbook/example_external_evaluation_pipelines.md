@@ -69,7 +69,7 @@ Since we don’t have real user data, our first step is to create a synthetic da
 
 You can get your Langfuse API keys [here](https://cloud.langfuse.com/) and OpenAI API key [here](https://platform.openai.com/api-keys)
 
-_**Note:** This notebook utilizes the [Langfuse OTel Python SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3). For users of [Python SDK v2](https://langfuse.com/docs/sdk/python/decorators), please refer to [our legacy notebook](https://github.com/langfuse/langfuse-docs/blob/366ec9395851da998d390eac4ab8c4dd2e985054/cookbook/example_external_evaluation_pipelines.ipynb)._
+_**Note:** This notebook utilizes the [Langfuse OTel Python SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3). For users of [Python SDK v2](https://langfuse.com/docs/sdk/python/decorators-v2), please refer to [our legacy notebook](https://github.com/langfuse/langfuse-docs/blob/366ec9395851da998d390eac4ab8c4dd2e985054/cookbook/example_external_evaluation_pipelines.ipynb)._
 
 
 ```python
