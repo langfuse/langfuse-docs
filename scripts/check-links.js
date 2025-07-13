@@ -170,7 +170,7 @@ function applyReplacements(url) {
     for (const pattern of REPLACEMENT_PATTERNS) {
         const match = url.match(pattern.regex);
         if (match) {
-            return pattern.replacement;
+            return url.replace(pattern.regex, pattern.replacement);
         }
     }
     return url;
