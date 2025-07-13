@@ -1,7 +1,7 @@
 ---
 title: Ollama Observability and Tracing for local LLMs using Langfuse
 sidebarTitle: Ollama
-description: Run Open Source LLMs locally on your machine with Ollama and trace ouputs with Langfuse for Open Source LLM Observability
+description: Run Open Source LLMs locally on your machine with Ollama and trace outputs with Langfuse for Open Source LLM Observability
 category: Integrations
 logo: /images/integrations/ollama_icon.svg
 ---
