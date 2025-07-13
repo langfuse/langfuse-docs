@@ -134,7 +134,7 @@ export const IntegrationIndex = () => {
         const filteredPages = pages.filter(
           (page) =>
             page.route !== `/integrations/${category}` &&
-            page.route !== `/integrations/${category}/index`
+            page.route !== `/integrations/${category}/index`,
         );
 
         if (filteredPages.length > 0) {
@@ -151,7 +151,7 @@ export const IntegrationIndex = () => {
       {categoryOrder
         .filter(
           (category) =>
-            categorizedPages[category] && categorizedPages[category].length > 0
+            categorizedPages[category] && categorizedPages[category].length > 0,
         )
         .map((category) => {
           const config = categoryConfig[category];
@@ -187,11 +187,13 @@ export const IntegrationIndex = () => {
                       title={page.title}
                       icon={
                         page.frontMatter?.logo ? (
-                          <img
-                            src={page.frontMatter.logo}
-                            alt=""
-                            className="w-6 h-6 object-contain"
-                          />
+                          <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
+                            <img
+                              src={page.frontMatter.logo}
+                              alt=""
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
                         ) : (
                           config.icon
                         )
