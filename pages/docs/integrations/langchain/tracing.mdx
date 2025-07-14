@@ -217,7 +217,7 @@ chain = prompt | llm
 
 # Set trace attributes dynamically via metadata
 response = chain.invoke(
-    {"topic": "cats"}, 
+    {"topic": "cats"},
     config={
         "callbacks": [langfuse_handler],
         "metadata": {
@@ -355,6 +355,8 @@ await chain.invoke(
 <Tabs items={["Python SDK v3", "JS/TS"]}>
 <Tab>
 
+To score a Langchain execution, you can capture the trace ID for the score by either wrapping the execution in a span that sets a predefined trace ID, or retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
+
 ```python
 from langfuse import get_client, Langfuse
 from langfuse.langchain import CallbackHandler
@@ -386,6 +388,7 @@ with langfuse.start_as_current_span(
     span.update_trace(output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
+print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
 ```
 
 </Tab>
