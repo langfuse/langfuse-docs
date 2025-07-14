@@ -8,4 +8,5 @@ export default {
     title: "Integrations ↗",
     href: "/integrations",
   },
+  "troubleshooting-and-faq": "Troubleshooting & FAQ",
 };

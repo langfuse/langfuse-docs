@@ -1,0 +1,32 @@
+---
+title: Prompt Composability
+sidebarTitle: Composability
+description: Reference other prompts in your prompts using a simple tag format.
+---
+
+# Prompt Composability
+
+<CloudflareVideo
+  videoId="6e9c25ba3d4c72363680af5dfb6a9bd2"
+  aspectRatio={16 / 9}
+/>
+
+You can reference other **text** prompts in your prompts using a simple tag format:
+
+```
+@@@langfusePrompt:name=PromptName|version=1@@@
+```
+
+or using a label instead of a specific version for dynamic resolution:
+
+```
+@@@langfusePrompt:name=PromptName|label=production@@@
+```
+
+When creating the prompt via the Langfuse UI, you can use the `Add prompt reference` button to insert a prompt reference tag into your prompt.
+
+When fetched via the SDK / API, these tags are automatically replaced with the referenced prompt content, enabling you to:
+
+- Create modular prompt components that can be reused across multiple prompts
+- Maintain common instructions, examples, or context in a single place
+- Update dependent prompts automatically when base prompts change

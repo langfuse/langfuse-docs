@@ -1,0 +1,195 @@
+---
+title: Message Placeholders in Chat Prompts
+sidebarTitle: Message Placeholders
+description: Use message placeholders in chat prompts to insert a list of chat messages at specific positions within a chat prompt.
+---
+
+# Message Placeholders in Chat Prompts
+
+Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt. You can define multiple placeholders in a prompt and resolve them with different values at runtime.
+Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
+
+**Note**: To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+
+<Steps>
+
+### Create prompt with placeholders
+
+<Tabs items={["UI","Python", "JS/TS"]}>
+<Tab>
+
+<Frame border>
+  ![Prompt placeholder in prompt editor](/images/docs/prompt-placeholder.png)
+</Frame>
+
+1. Create a placeholder in any prompt by using the `Add message placeholder` button.
+2. Select a `name` for the placeholder that will be used to reference it in your application.
+
+</Tab>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_prompt(
+    name="movie-critic-chat",
+    type="chat",
+    prompt=[
+      { "role": "system", "content": "You are an {{criticlevel}} movie critic" },
+      { "type": "placeholder", "name": "chat_history" },
+      { "role": "user", "content": "What should I watch next?" },
+    ],
+    labels=["production"],  # directly promote to production
+)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+await langfuse.createPrompt({
+  name: "movie-critic-chat",
+  type: "chat",
+  prompt: [
+    { role: "system", content: "You are an {{criticlevel}} movie critic" },
+    { type: "placeholder", name: "chat_history" },
+    { role: "user", content: "What should I watch next?" },
+  ],
+  labels: ["production"], // directly promote to production
+});
+```
+
+</Tab>
+</Tabs>
+
+### Resolve placeholders at runtime
+
+In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
+The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted as `compile` does not validate the format of the messages.
+
+<Tabs items={["Python", "JS/TS", "LangChain (Python)", "LangChain (JS/TS)"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Use prompt with placeholders in your application
+prompt = langfuse.get_prompt("movie-critic-chat")
+
+# Compile the variable and resolve the placeholder with a list of messages.
+compiled_prompt = prompt.compile(criticlevel="expert", chat_history=[
+  {"role": "user", "content": "I love Ron Fricke movies like Baraka"},
+  {"role": "user", "content": "Also, the Korean movie Memories of a Murderer"}
+])
+
+# -> compiled_prompt = [
+#   { "role": "system", "content": "You are an expert movie critic" },
+#   { "role": "user", "content": "I love Ron Fricke movies like Baraka" },
+#   { "role": "user", "content": "Also, the Korean movie Memories of a Murderer" },
+#   { "role": "user", "content": "What should I watch next?" },
+# ]
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const prompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+});
+
+// Compile the variable and resolve the placeholder with a list of messages.
+const compiledPrompt = prompt.compile(
+  // variables
+  { criticlevel: "expert" },
+  // placeholders
+  {
+    chat_history: [
+      { role: "user", content: "I love Ron Fricke movies like Baraka" },
+      {
+        role: "user",
+        content: "Also, the Korean movie Memories of a Murderer",
+      },
+    ],
+  }
+);
+
+// -> compiledPrompt = [
+//   { role: "system", content: "You are an expert movie critic" },
+//   { role: "user", content: "I love Ron Fricke movies like Baraka" },
+//   { role: "user", content: "Also, the Korean movie Memories of a Murderer" },
+//   { role: "user", content: "What should I watch next?" },
+// ]
+```
+
+</Tab>
+
+<Tab>
+
+```python
+from langfuse import get_client
+from langchain_core.prompts import ChatPromptTemplate
+
+langfuse = get_client()
+
+langfuse_prompt = langfuse.get_prompt("movie-critic-chat")
+
+# Using langchain, you can obtain a MessagesPlaceholder object for unresolved placeholders
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+
+# -> langchain_prompt = [
+#   SystemMessage(content="You are an expert movie critic"),
+#   MessagesPlaceholder(name="chat_history"),
+#   HumanMessage(content="What should I watch next?"),
+# ]
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new Langfuse();
+
+// Get current `production` version
+const langfusePrompt = await langfuse.getPrompt(
+  "movie-critic-chat",
+  undefined,
+  {
+    type: "chat",
+  }
+);
+
+// Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
+const langchainPrompt = ChatPromptTemplate.fromTemplate(
+  langfusePrompt.getLangchainPrompt()
+);
+
+// -> langchainPrompt = [
+//   SystemMessage(content="You are an expert movie critic"),
+//   MessagesPlaceholder(name="chat_history"),
+//   HumanMessage(content="What should I watch next?"),
+// ]
+```
+
+</Tab>
+</Tabs>
+
+</Steps>

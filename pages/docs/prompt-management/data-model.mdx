@@ -1,0 +1,30 @@
+# Langfuse Prompts Data Model
+
+## Prompt Object
+
+```json filename="Example prompt in Langfuse with custom config"
+{
+  "name": "movie-critic",
+  "type": "text",
+  "prompt": "As a {{criticLevel}} movie critic, do you like {{movie}}?",
+  "config": {
+    "model": "gpt-3.5-turbo",
+    "temperature": 0.5,
+    "supported_languages": ["en", "fr"]
+  },
+  "version": 1,
+  "labels": ["production", "staging", "latest"],
+  "tags": ["movies"]
+}
+```
+
+- `name`: Unique name of the prompt within a Langfuse project.
+- `type`: The type of the prompt content (`text` or `chat`). Default is `text`.
+- `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`). For chat prompts, this is a list of chat messages each with `role` and `content` but can also contain [placeholders](#message-placeholders).
+- `config`: Optional JSON object to store any parameters (e.g. model parameters or model tools).
+- `version`: Integer to indicate the version of the prompt. The version is automatically incremented when creating a new prompt version.
+- `labels`: [Labels](#labels) that can be used to fetch specific prompt versions in the SDKs.
+  - When using a prompt without specifying a label, Langfuse will serve the version with the `production` label.
+  - `latest` points to the most recently created version.
+  - You can create any additional labels, e.g. for different environments (`staging`, `production`) or tenants (`tenant-1`, `tenant-2`).
+- `tags`: Use tags to categorize prompts, e.g. to filter them in the UI or SDKs. All versions of a prompt share the same tags.
