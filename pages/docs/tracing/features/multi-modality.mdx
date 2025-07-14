@@ -1,6 +1,7 @@
 ---
 title: Multi-Modality & Attachments
 description: Langfuse fully supports multi-modal LLM traces, including text, images, audio, and attachments.
+sidebarTitle: Multi-Modality
 ---
 
 # Multi-Modality and Attachments
@@ -115,16 +116,19 @@ from langfuse import get_client, observe
 from langfuse.media import LangfuseMedia
 
 # Create a LangfuseMedia object from a file
+
 with open("static/bitcoin.pdf", "rb") as pdf_file:
-    pdf_bytes = pdf_file.read()
+pdf_bytes = pdf_file.read()
 
 # Wrap media in LangfuseMedia class
+
 pdf_media = LangfuseMedia(content_bytes=pdf_bytes, content_type="application/pdf")
 
 # Using with the decorator
+
 @observe()
 def process_document():
-    langfuse = get_client()
+langfuse = get_client()
 
     # Update the current trace with the media file
     langfuse.update_current_trace(
@@ -137,14 +141,14 @@ def process_document():
     )
 
 # Using with context managers
+
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="analyze-document") as span:
-    # Include media in the span input, output, or metadata
-    span.update(
-        input={"document": pdf_media},
-        metadata={"file_size": len(pdf_bytes)}
-    )
+with langfuse.start_as_current_span(name="analyze-document") as span: # Include media in the span input, output, or metadata
+span.update(
+input={"document": pdf_media},
+metadata={"file_size": len(pdf_bytes)}
+)
 
     # Process document...
 
@@ -153,7 +157,8 @@ with langfuse.start_as_current_span(name="analyze-document") as span:
         "summary": "This document explains Bitcoin...",
         "original": pdf_media
     })
-```
+
+````
 
 </Tab>
 <Tab>
@@ -185,7 +190,7 @@ def main():
     return # Limitation: LangfuseMedia object does not work in decorated function IO, needs to be set via update_current_trace or update_current_observation
 
 main()
-```
+````
 
 </Tab>
 <Tab>

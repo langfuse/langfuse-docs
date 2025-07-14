@@ -1,6 +1,7 @@
 ---
 title: Trace URLs
 description: Each trace has a unique URL that you can use to share it with others or to access it directly.
+sidebarTitle: Trace URLs
 ---
 
 # Trace URLs
@@ -162,7 +163,7 @@ from langfuse import observe, get_client
 @observe()
 def process_data():
     langfuse = get_client()
-    
+
     # Make the current trace public
     langfuse.update_current_trace(public=True)
 ```

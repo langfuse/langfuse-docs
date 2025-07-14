@@ -8,6 +8,8 @@ export default {
   index: "Overview",
   "core-features": "Core Features",
   demo: "Interactive Demo",
+  "ask-ai": "Ask AI",
+
   "-- Features": {
     type: "separator",
     title: "Features",
@@ -15,18 +17,15 @@ export default {
   tracing: "Tracing",
   "prompt-management": "Prompt Management",
   evaluation: "Evaluation",
-  platform: "Platform",
-
-  api: "API",
+  platform: "Data Platform",
+  administration: "Administration",
 
   "-- More": {
     type: "separator",
     title: "More",
   },
   roadmap: "Roadmap",
-  "ask-ai": "Ask AI",
   "docs-mcp": "Docs MCP Server",
-  administration: "Administration",
   references: "References",
 
   "security-compliance": {
