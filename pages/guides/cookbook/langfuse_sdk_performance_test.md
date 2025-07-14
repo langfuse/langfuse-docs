@@ -8,7 +8,6 @@ category: SDKs
 Langfuse shall have a minimal impact on latency. This is achieved by running almost entirely in the background and by batching all requests to the Langfuse API.
 
 Coverage of this performance test:
-
 - Langfuse SDK: trace(), generation(), span()
 - Langchain Integration
 - OpenAI Integration
@@ -20,9 +19,11 @@ Limitation: We test integrations using OpenAI's hosted models, making the experi
 
 _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
+
 ```python
 %pip install "langfuse<3.0.0" --upgrade
 ```
+
 
 ```python
 import os
@@ -33,11 +34,13 @@ os.environ["LANGFUSE_HOST"] = ""
 os.environ["OPENAI_API_KEY"] = ""
 ```
 
+
 ```python
 from langfuse import Langfuse
 
 langfuse = Langfuse()
 ```
+
 
 ```python
 import pandas as pd
@@ -60,9 +63,13 @@ def time_func(func, runs=100):
 
 `trace()`
 
+
 ```python
 time_func(lambda: langfuse.trace(name="perf-trace"))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.000266
@@ -74,13 +81,19 @@ time_func(lambda: langfuse.trace(name="perf-trace"))
     max (sec)       0.003784
     dtype: float64
 
+
+
 `span()`
+
 
 ```python
 trace = langfuse.trace(name="perf-trace")
 
 time_func(lambda: trace.span(name="perf-span"))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.000162
@@ -92,13 +105,19 @@ time_func(lambda: trace.span(name="perf-span"))
     max (sec)       0.001635
     dtype: float64
 
+
+
 `generation()`
+
 
 ```python
 trace = langfuse.trace(name="perf-trace")
 
 time_func(lambda: trace.generation(name="perf-generation"))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.000196
@@ -110,13 +129,19 @@ time_func(lambda: trace.generation(name="perf-generation"))
     max (sec)       0.001238
     dtype: float64
 
+
+
 `event()`
+
 
 ```python
 trace = langfuse.trace(name="perf-trace")
 
 time_func(lambda: trace.event(name="perf-generation"))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.000236
@@ -128,13 +153,17 @@ time_func(lambda: trace.event(name="perf-generation"))
     max (sec)       0.003144
     dtype: float64
 
+
+
 ## Langchain Integration
 
 Docs: https://langfuse.com/integrations/frameworks/langchain
 
+
 ```python
 %pip install langchain langchain-openai --upgrade
 ```
+
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -146,6 +175,7 @@ model = ChatOpenAI(max_tokens=10)
 chain = prompt | model | StrOutputParser()
 ```
 
+
 ```python
 from langfuse.langchain import CallbackHandler
 langfuse_handler = CallbackHandler()
@@ -153,10 +183,14 @@ langfuse_handler = CallbackHandler()
 
 ### Bechmark without Langfuse
 
+
 ```python
 langchain_stats_no_langfuse = time_func(lambda: chain.invoke({"person":"Paul Graham"}))
 langchain_stats_no_langfuse
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.529463
@@ -168,12 +202,18 @@ langchain_stats_no_langfuse
     max (sec)       7.107237
     dtype: float64
 
+
+
 ### With Langfuse Tracing
+
 
 ```python
 langchain_stats_with_langfuse = time_func(lambda: chain.invoke({"person":"Paul Graham"}, {"callbacks":[langfuse_handler]}))
 langchain_stats_with_langfuse
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.618286
@@ -185,19 +225,24 @@ langchain_stats_with_langfuse
     max (sec)       1.838614
     dtype: float64
 
+
+
 ## OpenAI Integration
 
 Docs: https://langfuse.com/integrations/model-providers/openai-py
 
+
 ```python
 %pip install langfuse openai --upgrade --quiet
 ```
+
 
 ```python
 import openai
 ```
 
 ### Benchmark without Langfuse
+
 
 ```python
 time_func(lambda: openai.chat.completions.create(
@@ -208,6 +253,9 @@ time_func(lambda: openai.chat.completions.create(
   max_tokens=10,
 ))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.524097
@@ -219,11 +267,15 @@ time_func(lambda: openai.chat.completions.create(
     max (sec)       1.789671
     dtype: float64
 
+
+
 ### With Langfuse Tracing
+
 
 ```python
 from langfuse.openai import openai
 ```
+
 
 ```python
 time_func(lambda: openai.chat.completions.create(
@@ -235,6 +287,9 @@ time_func(lambda: openai.chat.completions.create(
 ))
 ```
 
+
+
+
     count         100.000000
     mean (sec)      0.515243
     std (sec)       0.286902
@@ -245,15 +300,19 @@ time_func(lambda: openai.chat.completions.create(
     max (sec)       2.613779
     dtype: float64
 
+
+
 ## LlamaIndex Integration
 
 Docs: https://langfuse.com/integrations/frameworks/llamaindex
+
 
 ```python
 %pip install llama-index --upgrade --quiet
 ```
 
 Sample documents
+
 
 ```python
 from llama_index.core import Document
@@ -270,12 +329,16 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 
 Index
 
+
 ```python
 # Example index construction + LLM query
 from llama_index.core import VectorStoreIndex
 
 time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.171673
@@ -287,12 +350,18 @@ time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
     max (sec)       0.459417
     dtype: float64
 
+
+
 Query
+
 
 ```python
 index = VectorStoreIndex.from_documents([doc1,doc2])
 time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.795817
@@ -304,7 +373,10 @@ time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
     max (sec)       3.495263
     dtype: float64
 
+
+
 ### With Langfuse Tracing
+
 
 ```python
 from llama_index.core import Settings
@@ -317,9 +389,13 @@ Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
 Index
 
+
 ```python
 time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.178796
@@ -331,12 +407,18 @@ time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
     max (sec)       0.992403
     dtype: float64
 
+
+
 Query
+
 
 ```python
 index = VectorStoreIndex.from_documents([doc1,doc2])
 time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
 ```
+
+
+
 
     count         100.000000
     mean (sec)      0.802315
@@ -347,3 +429,5 @@ time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
     75% (sec)       0.945300
     max (sec)       2.164593
     dtype: float64
+
+

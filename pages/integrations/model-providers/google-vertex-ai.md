@@ -23,7 +23,7 @@ There are a few ways through which you can capture traces and metrics for Google
 1. via an application framework that is integrated with Langfuse:
 
    - [Langchain](https://langfuse.com/integrations/frameworks/langchain)
-   - [Llama Index](https://langfuse.com/docs/integrations/llama-index) 
+   - [Llama Index](https://langfuse.com/integrations/frameworks/llamaindex) 
    - [Haystack](https://langfuse.com/integrations/frameworks/haystack)
    - [Vercel AI SDK](https://langfuse.com/integrations/frameworks/vercel-ai-sdk)
 

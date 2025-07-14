@@ -11,18 +11,20 @@ Follow the [integration guide](https://langfuse.com/integrations/frameworks/lang
 
 ## Setup
 
+
 ```python
 %pip install langfuse langchain langchain_openai langchain_community --upgrade
 ```
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
 
+
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -30,9 +32,10 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 os.environ["OPENAI_API_KEY"] = "sk-proj-.."
 ```
 
+
 ```python
 from langfuse.langchain import CallbackHandler
-
+ 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 ```
@@ -44,6 +47,7 @@ langfuse_handler = CallbackHandler()
 ![Trace of Langchain LCEL](https://langfuse.com/images/cookbook/integration_langchain/langchain_LCEL.png)
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/dbe646b2b67957d22e8780c429b2d20f?timestamp=2025-06-11T09%3A09%3A58.823Z&display=details)
+
 
 ```python
 from operator import itemgetter
@@ -69,7 +73,12 @@ chain2 = (
 chain2.invoke({"person": "obama", "language": "spanish"}, config={"callbacks":[langfuse_handler]})
 ```
 
+
+
+
     'Barack Obama es de la ciudad de Chicago, Illinois, en los Estados Unidos.'
+
+
 
 #### Runnable methods
 
@@ -80,6 +89,7 @@ The examples below show how to use the following methods with Langfuse:
 - invoke/ainvoke: Transforms a single input into an output.
 - batch/abatch: Efficiently transforms multiple inputs into outputs.
 - stream/astream: Streams output from a single input as it’s produced.
+
 
 ```python
 # Async Invoke
@@ -107,14 +117,17 @@ async for chunk in chain2.astream({"person": "bill gates", "language": "english"
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/84e1ac07dedbce3b2a236b6ece6950d9?timestamp=2025-06-11T09:29:10.248Z&display=details)
 
+
 ```python
 import os
 os.environ["SERPAPI_API_KEY"] = "..."
 ```
 
+
 ```python
 %pip install unstructured selenium langchain-chroma --upgrade
 ```
+
 
 ```python
 from langchain_community.document_loaders import SeleniumURLLoader
@@ -144,10 +157,16 @@ chain = RetrievalQA.from_chain_type(
 chain.invoke(query, config={"callbacks":[langfuse_handler]})
 ```
 
+
+
+
     {'query': 'What did the president say about Ketanji Brown Jackson',
      'result': " The president nominated her to serve on the United States Supreme Court and praised her as one of the nation's top legal minds who will continue the legacy of retiring Justice Stephen Breyer."}
 
+
+
 ### AzureOpenAI
+
 
 ```python
 os.environ["AZURE_OPENAI_ENDPOINT"] = "<Azure OpenAI endpoint>"
@@ -156,11 +175,12 @@ os.environ["OPENAI_API_TYPE"] = "azure"
 os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
 ```
 
+
 ```python
 from langchain_openai import AzureChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langfuse.langchain import CallbackHandler
-
+ 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 

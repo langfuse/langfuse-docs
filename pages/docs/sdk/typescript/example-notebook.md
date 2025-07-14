@@ -88,7 +88,7 @@ trace.update({
 
 ## Step 3: Log LLM Calls
 
-You can use the low-level Langfuse SDK to log any LLM call or any of the [integrations](https://langfuse.com/docs/integrations) that are interoperable with it.
+You can use the low-level Langfuse SDK to log any LLM call or any of the [integrations](https://langfuse.com/integrations) that are interoperable with it.
 
 In the following, we will demonstrate how to log LLM calls using the low-level SDK, LangChain, and OpenAI integrations.
 
@@ -259,5 +259,5 @@ langfuse.score({
 ## Learn More
 
 - [Langfuse JS/TS SDK Guide](https://langfuse.com/docs/sdk/typescript/guide)
-- [Langfuse Integrations](https://langfuse.com/docs/integrations)
+- [Langfuse Integrations](https://langfuse.com/integrations)
 - [Support](/support)

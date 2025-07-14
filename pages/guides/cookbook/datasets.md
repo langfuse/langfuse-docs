@@ -7,7 +7,7 @@ category: Datasets
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.
 
-This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk/overview) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
+This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk/overview) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/integrations) (e.g. Langchain).
 
 _Simple example application_
 
@@ -19,16 +19,18 @@ _Simple example application_
 
 ## Setup
 
+
 ```python
 %pip install langfuse openai langchain_openai langchain --upgrade
 ```
+
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -38,11 +40,12 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 
 With the environment variables set, we can now initialize the Langfuse client. get_client() initializes the Langfuse client using the credentials provided in the environment variables.
 
+
 ```python
 from langfuse import get_client
-
+ 
 langfuse = get_client()
-
+ 
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -52,7 +55,9 @@ else:
 
     Langfuse client is authenticated and ready!
 
+
 ## Create a dataset
+
 
 ```python
 langfuse.create_dataset(name="capital_cities");
@@ -61,6 +66,7 @@ langfuse.create_dataset(name="capital_cities");
 ### Items
 
 Load local items into the Langfuse dataset. Alternatively you can add items from production via the Langfuse UI.
+
 
 ```python
 # example items, could also be json instead of strings
@@ -77,6 +83,7 @@ local_items = [
     {"input": {"country": "Egypt"}, "expected_output": "Cairo"},
 ]
 ```
+
 
 ```python
 # Upload to Langfuse
@@ -95,6 +102,7 @@ for item in local_items:
 ### Application
 
 This an example production application that we want to evaluate. It is instrumented with the Langfuse Decorator. We do not need to change the application code to evaluate it subsequently.
+
 
 ```python
 from langfuse.openai import openai
@@ -127,6 +135,7 @@ def run_my_custom_llm_app(input, system_prompt):
 
 This is a simple experiment runner that runs the application on each item in the dataset and evaluates the output.
 
+
 ```python
 # we use a very simple eval here, you can use any eval library
 # see https://langfuse.com/docs/scores/model-based-evals for details
@@ -135,6 +144,7 @@ This is a simple experiment runner that runs the application on each item in the
 def simple_evaluation(output, expected_output):
   return output == expected_output
 ```
+
 
 ```python
 def run_experiment(experiment_name, system_prompt):
@@ -162,6 +172,7 @@ def run_experiment(experiment_name, system_prompt):
 
 Now we can easily run experiments with different configurations to explore which yields the best results.
 
+
 ```python
 from langfuse import get_client
 langfuse = get_client()
@@ -188,27 +199,30 @@ langfuse.flush()
 langfuse.flush()
 ```
 
+    
     Finished processing dataset 'capital_cities' for run 'famous_city'.
-
+    
     Finished processing dataset 'capital_cities' for run 'directly_ask'.
-
+    
     Finished processing dataset 'capital_cities' for run 'asking_specifically'.
-
+    
     Finished processing dataset 'capital_cities' for run 'asking_specifically_2nd_try'.
 
+
 ## Example using Langchain
+
 
 ```python
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage
-
+ 
 def run_my_langchain_llm_app(input, system_message, callback_handler):
 
   # Create a trace via Langfuse spans and use Langchain within it
   with langfuse.start_as_current_span(name="my-langchain-agent") as root_span:
-
+        
     prompt = ChatPromptTemplate.from_messages(
       [("system", system_message), MessagesPlaceholder(variable_name="messages")]
     )
@@ -228,18 +242,19 @@ def run_my_langchain_llm_app(input, system_message, callback_handler):
   return result.content
 ```
 
+
 ```python
 from langfuse.langchain import CallbackHandler
 
 def run_langchain_experiment(experiment_name, system_prompt):
-
+  
   dataset = langfuse.get_dataset("capital_cities")
 
   # Initialize the Langfuse handler
   langfuse_handler = CallbackHandler()
 
   for item in dataset.items:
-
+  
       # Use the item.run() context manager
       with item.run(
           run_name = experiment_name,
@@ -247,15 +262,16 @@ def run_langchain_experiment(experiment_name, system_prompt):
           run_metadata={"model": "gpt-4o"},
       ) as root_span: # root_span is the root span of the new trace for this item and run.
           # All subsequent langfuse operations within this block are part of this trace.
-
+  
           # Call your application logic
           output = run_my_langchain_llm_app(item.input["country"], system_prompt, langfuse_handler)
-
+  
           # Optionally, score the result against the expected output
           root_span.score_trace(name="exact_match", value = simple_evaluation(output, item.expected_output))
 
   print(f"\nFinished processing dataset 'capital_cities' for run '{experiment_name}'.")
 ```
+
 
 ```python
 run_langchain_experiment(
