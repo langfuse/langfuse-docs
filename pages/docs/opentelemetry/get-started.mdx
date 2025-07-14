@@ -302,7 +302,7 @@ These mappings are based on OTel GenAI semantic conventions and vendor-specific 
 ## Metadata Properties
 
 Langfuse only supports filtering on top-level keys within the `metadata` of an event.
-Per default, all OpenTelemetry attributes and resource attributes are mapped into an `attributes` and `resourceAttributes` key within `metadata` and, therefore, not queryable.
+By default, all OpenTelemetry attributes and resource attributes are mapped into an `attributes` and `resourceAttributes` key within `metadata` and, therefore, not queryable.
 If you want to query on specific attributes, you can use the `langfuse.metadata` prefix to map them to the top-level `metadata` object.
 The following snippet will produce a filterable `user_name` property in the `metadata` object of the trace:
 
