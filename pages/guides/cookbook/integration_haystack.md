@@ -261,7 +261,7 @@ The previously created trace now includes this score:
 
 ## Next steps
 
-We're thrilled to collaborate with the Haystack team to give the best possible experience to devs when building complex RAG applications. Thanks to them for developing this intgeration.
+We're thrilled to collaborate with the Haystack team to give the best possible experience to devs when building complex RAG applications. Thanks to them for developing this integration.
 
 Learn more:
 
