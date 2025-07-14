@@ -14,4 +14,8 @@ find ./pages/guides/cookbook/ -type f -not -name "index.mdx" -not -name "_meta.t
 echo "Moving docs..."
 uv run --python 3.11 -- python ./scripts/move_docs.py
 
+# format all files
+echo "Formatting all files..."
+pnpm format
+
 echo "Done!"
