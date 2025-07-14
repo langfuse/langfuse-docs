@@ -205,3 +205,34 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 ## Optional: Guaranteed availability of prompts [#guaranteed-availability]
 
 While usually not necessary, you can ensure 100% availability of prompts by pre-fetching them on application startup and providing a fallback prompt. Please follow this [guide](/docs/prompt-management/features/guaranteed-availability) for more information.
+
+## Performance measurement of inital fetch
+
+We measured the execution time of the following snippet with fully disabled caching. You can run [this notebook](/guides/cookbook/prompt_management_performance_benchmark) yourself to verify the results.
+
+```python
+prompt = langfuse.get_prompt("perf-test", cache_ttl_seconds=0)
+prompt.compile(input="test")
+```
+
+Results from 1000 sequential executions using Langfuse Cloud (includes network latency):
+
+<div className="sm:grid sm:grid-cols-2 gap-4">
+
+<Frame className="max-w-md">
+  ![Performance Chart](/images/docs/prompt-performance-chart.png)
+</Frame>
+
+```
+count    1000.000000
+mean        0.039335 sec
+std         0.014172 sec
+min         0.032702 sec
+25%         0.035387 sec
+50%         0.037030 sec
+75%         0.041111 sec
+99%         0.068914 sec
+max         0.409609 sec
+```
+
+</div>

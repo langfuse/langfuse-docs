@@ -85,33 +85,3 @@ Depending on the scale of your experiments, there are different approaches you c
 </AccordionContent>
 </AccordionItem>
 </Accordion>
-
-## Performance measurement of inital fetch (empty client-side cache)
-
-We measured the execution time of the following snippet with fully disabled caching.
-
-```python
-prompt = langfuse.get_prompt("perf-test")
-prompt.compile(input="test")
-```
-
-Results from 1000 sequential executions in a local jupyter notebook using Langfuse Cloud (includes network latency):
-
-<div className="sm:grid sm:grid-cols-2 gap-4">
-
-<Frame className="max-w-md">
-  ![Performance Chart](/images/docs/prompt-performance-chart.png)
-</Frame>
-
-```
-count  1000.000000
-mean      0.178465 sec
-std       0.058125 sec
-min       0.137314 sec
-25%       0.161333 sec
-50%       0.165919 sec
-75%       0.171736 sec
-max       0.687994 sec
-```
-
-</div>
