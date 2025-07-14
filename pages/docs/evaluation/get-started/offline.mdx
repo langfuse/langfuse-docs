@@ -1,0 +1,402 @@
+---
+description: Get started with Langfuse Datasets. Follow the step by step guide.
+---
+
+# Dataset Getting Started
+
+This is a step by step guide on how to create your first dataset and run your first experiment. Please refer to the [overview](/docs/datasets/overview) for more conceptual introduction.
+
+<Steps>
+
+### Creating a dataset
+
+Datasets have a name which is unique within a project.
+
+import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
+
+<CreateDataset />
+
+### Create new dataset items
+
+Individual items can be added to a dataset by providing the input and optionally the expected output.
+
+import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
+
+<CreateDatasetItem />
+
+<details>
+<summary>Create synthetic examples</summary>
+
+Frequently, you want to create synthetic examples to test your application to bootstrap your dataset. LLMs are great at generating these by prompting for common questions/tasks.
+
+Once generated, you can upload them to Langfuse via the SDKs.
+
+To get started have a look at this [cookbook](/docs/datasets/example-synthetic-datasets) for examples on how to generate synthetic datasets.
+
+</details>
+
+<details>
+<summary>Create items from production data</summary>
+
+<Tabs items={["UI", "Python", "JS/TS"]}>
+<Tab>
+In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
+</Tab>
+<Tab>
+
+```python
+langfuse.create_dataset_item(
+    dataset_name="<dataset_name>",
+    input={ "text": "hello world" },
+    expected_output={ "text": "hello world" },
+    # link to a trace
+    source_trace_id="<trace_id>",
+    # optional: link to a specific span, event, or generation
+    source_observation_id="<observation_id>"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+langfuse.createDatasetItem({
+  datasetName: "<dataset_name>",
+  input: { text: "hello world" },
+  expectedOutput: { text: "hello world" },
+  // link to a trace
+  sourceTraceId: "<trace_id>",
+  // optional: link to a specific span, event, or generation
+  sourceObservationId: "<observation_id>",
+});
+```
+
+</Tab>
+</Tabs>
+</details>
+
+<details>
+<summary>Edit/archive items</summary>
+
+Archiving items will remove them from future experiment runs.
+
+<Tabs items={["UI", "Python", "JS/TS"]}>
+<Tab>
+In the UI, you can edit or archive items by clicking on the item in the table.
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```python
+langfuse.create_dataset_item(
+    id="<item_id>",
+    # example: update status to "ARCHIVED"
+    status="ARCHIVED"
+)
+```
+
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```ts
+langfuse.createDatasetItem({
+  id: "<item_id>",
+  // example: update status to "ARCHIVED"
+  status: "ARCHIVED",
+});
+```
+
+</Tab>
+</Tabs>
+</details>
+
+### Run experiment on a dataset
+
+When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
+
+Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
+
+- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
+- Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
+
+<div className="mt-6" />
+<Tabs items={["Python SDK v3", "Python SDK v2 (decorator)", "Python SDK v2 (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)", "Vercel AI SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Use the item.run() context manager for automatic trace linking
+    with item.run(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as root_span:
+        # All operations within this block are part of the trace for this dataset item
+        
+        # Call your application logic - this can use any combination of decorators, 
+        # context managers, or manual observations
+        with langfuse.start_as_current_generation(
+            name="llm-call",
+            model="gpt-4o",
+            input=item.input
+        ) as generation:
+            # Your LLM application logic here
+            output = my_llm_application.run(item.input)
+            generation.update(output=output)
+
+        # Optionally, score the result against the expected output
+        root_span.score_trace(
+            name="<example_eval>",
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+_See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTelemetry-based SDK._
+
+</Tab>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Make sure your application function is decorated with @observe decorator to automatically link the trace
+    with item.observe(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as trace_id:
+        # run your @observe() decorated application on the dataset item input
+        output = my_llm_application.run(item.input)
+
+        # optionally, evaluate the output to compare different runs more easily
+        langfuse.score(
+            trace_id=trace_id,
+            name="<example_eval>",
+            # any float value
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client and see the [Python decorator](/docs/sdk/python/decorators) docs on how to use the `@observe` decorator for your main application function._
+
+</Tab>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # execute application function and get langfuse_object (trace/span/generation/event)
+    # output also returned as it is used to evaluate the run
+    # you can also link using ids, see sdk reference for details
+    langfuse_object, output = my_llm_application.run(item.input)
+
+    # link the execution trace to the dataset item and give it a run_name
+    item.link(
+        langfuse_object,
+        "<run_name>",
+        run_description="My first run", # optional
+        run_metadata={ "model": "llama3" } # optional
+    )
+
+    # optionally, evaluate the output to compare different runs more easily
+    langfuse_object.score(
+        name="<example_eval>",
+        # any float value
+        value=my_eval_fn(
+            item.input,
+            output,
+            item.expected_output
+        ),
+        comment="This is a comment" # optional, useful to add reasoning
+    )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+_See [Python SDK v2 low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
+
+</Tab>
+<Tab>
+
+```ts
+const dataset = await langfuse.getDataset("<dataset_name>");
+
+for (const item of dataset.items) {
+  // execute application function and get langfuseObject (trace/span/generation/event)
+  // output also returned as it is used to evaluate the run
+  // you can also link using ids, see sdk reference for details
+  const [langfuseObject, output] = await myLlmApplication.run(item.input);
+
+  // link the execution trace to the dataset item and give it a run_name
+  await item.link(langfuseObject, "<run_name>", {
+    description: "My first run", // optional run description
+    metadata: { model: "llama3" }, // optional run metadata
+  });
+
+  // optionally, evaluate the output to compare different runs more easily
+  langfuseObject.score({
+    name: "<score_name>",
+    value: myEvalFunction(item.input, output, item.expectedOutput),
+    comment: "This is a comment", // optional, useful to add reasoning
+  });
+}
+
+// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+await langfuse.flushAsync();
+```
+
+</Tab>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Langchain callback handler that automatically links the execution trace to the dataset item
+    handler = item.get_langchain_handler(run_name="<run_name>")
+
+    # Execute application and pass custom handler
+    my_langchain_chain.run(item.input, callbacks=[handler])
+
+    # Add a score to the linked trace depending on the chain output and expected output
+    langfuse.score(trace_id=handler.get_trace_id(), name="my_score", value=1)
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+</Tab>
+
+<Tab>
+
+```typescript /createDatasetItemHandler/
+import { Langfuse } from "langfuse";
+import { createDatasetItemHandler } from "langfuse-langchain";
+...
+
+const langfuse = new Langfuse()
+const dataset = await langfuse.getDataset("my-dataset");
+const runName = "my-dataset-run";
+
+for (const item of dataset.items) {
+  // Create langchain handler that automatically links the execution trace to the dataset item run
+  const { handler, trace } = await createDatasetItemHandler({ item, runName, langfuseClient: langfuse });
+
+  // Pass the callback handler when invoking the chain
+  await chain.invoke({ country: item.input }, { callbacks: [handler] });
+
+  // Add score to the linked trace depending on the chain output and expected output
+  trace.score({
+    name: "test-score",
+    value: 0.5,
+  });
+}
+
+await langfuse.flushAsync();
+```
+
+</Tab>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # This context manager will automatically link the execution trace to the dataset item
+    with item.observe_llama_index(run_name="<run_name>"):
+        # Run your LlamaIndex application on the input
+        index = VectorStoreIndex.from_documents([doc1, doc2])
+        response = index.as_query_engine().query(item.input)
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+</Tab>
+<Tab>
+
+Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
+
+```typescript
+const runMyLLMApplication = async (input: string, traceId: string) => {
+  const output = await generateText({
+    model: openai("gpt-4o"),
+    maxTokens: 50,
+    prompt: input,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: "vercel-ai-sdk-example-trace",
+      metadata: {
+        langfuseTraceId: traceId,
+        langfuseUpdateParent: true, // Update the parent trace with execution results as the trace was created manually to enable linking
+      },
+    },
+  });
+  return output
+}
+
+// fetch the dataset
+const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
+ 
+// iterate over the dataset items
+for (const item of dataset.items) {
+
+  // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
+  const trace = langfuse.trace({name: "new experiment trace"})
+
+  // run application on the dataset item input
+  const output = await runMyLLMApplication(item.input, trace.id);
+ 
+  // link the execution trace to the dataset item and give it a run_name
+  await item.link(trace, "<run_name>", {
+    description: "My first run", // optional run description
+    metadata: { model: "gpt-4o" }, // optional run metadata
+  });
+ 
+  // optionally, evaluate the output to compare different runs more easily
+  trace.score({
+    name: "<score_name>",
+    value: myEvalFunction(item.input, output, item.expectedOutput),
+    comment: "This is a comment", // optional, useful to add reasoning
+  });
+}
+ 
+// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+await langfuse.flushAsync();
+
+```
+
+
+</Tab>
+</Tabs>
+
+### Analyze dataset runs
+
+After each experiment run on a dataset, you can check the aggregated score in the dataset runs table and compare results side-by-side.
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+</Steps>
