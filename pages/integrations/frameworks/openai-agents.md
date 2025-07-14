@@ -224,4 +224,4 @@ Each child call is represented as a sub-span under the top-level **Joke workflow
 
 ## Resources
 
-Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents) with Langfuse. 
+Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/guides/cookbook/example_evaluating_openai_agents) with Langfuse. 

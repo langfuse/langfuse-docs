@@ -1,7 +1,7 @@
 ---
 sidebarTitle: LangChain & LangGraph
 description: Open source tracing and monitoring for your LangChain application. Python and JS/TS. Automatically capture rich traces and metrics and evaluate outputs.
-seoTitle: Open Source Observability and Tracing for LangChain (Python & JS/TS)
+seoTitle: Open Source Observability and Tracing for LangChain & LangGraph (Python & JS/TS)
 logo: /images/integrations/langchain_icon.png
 ---
 
@@ -10,7 +10,7 @@ import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
 import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
 
-# Observability & Tracing for Langchain (Python & JS/TS)
+# Observability & Tracing for LangChain & LangGraph (Python & JS/TS)
 
 [Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/how_to/#callbacks), [JS](https://js.langchain.com/docs/how_to/#callbacks)). The Langfuse SDK automatically captures detailed traces of your Langchain executions, creating properly nested observations for chains, LLMs, tools, and retrievers. This allows you to monitor, analyze and debug your LangChain applications with full observability.
 
@@ -24,7 +24,7 @@ import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-
   This documentation has been updated to show examples for the new **[Python SDK
   v3](/docs/sdk/python/sdk-v3)**. If you are looking for documentation for the
   Python SDK version 2, [see
-  here.](https://github.com/langfuse/langfuse-docs/blob/1c264cd5216d3e1008f0da2e33c11e44ae1d9d1c/pages/docs/integrations/langchain/tracing.mdx)
+  here.](https://github.com/langfuse/langfuse-docs/blob/1c264cd5216d3e1008f0da2e33c11e44ae1d9d1c/pages/integrations/frameworks/langchain.mdx)
 </Callout>
 
 ## Add Langfuse to your Langchain Application
@@ -171,8 +171,8 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 
 ## Supported LangChain features
 
-- **🕸️ LangGraph**: Works with Langfuse Integration. Requires Python 3.11+ ([GH issue](https://github.com/langfuse/langfuse/issues/1926)). See notebook for [example integration](/docs/integrations/langchain/example-python-langgraph).
-- **🏓 LangServe**: See notebook for [example integration](/docs/integrations/langchain/example-python-langserve).
+- **🕸️ LangGraph**: Works with Langfuse Integration. Requires Python 3.11+ ([GH issue](https://github.com/langfuse/langfuse/issues/1926)). See notebook for [example integration](/guides/cookbook/integration_langgraph).
+- **🏓 LangServe**: See notebook for [example integration](/integrations/frameworks/langserve).
 
 ## Additional Configuration
 
@@ -677,7 +677,7 @@ chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler_t
 
 If you pass these callback handlers to your Langchain code, the events will be nested under the respective trace or span in the Langfuse.
 
-See the [Langchain observability cookbook](/docs/integrations/langchain/example-python) for an example of this in action (Python).
+See the [Langchain observability cookbook](/guides/cookbook/example_langchain) for an example of this in action (Python).
 
 ### Queuing and flushing
 
@@ -767,7 +767,7 @@ const llm = new AzureChatOpenAI({
 </Tab>
 </Tabs>
 
-## Upgrade Paths for Langchain Integration
+## Upgrade Paths for Langchain Integration [#upgrade-paths]
 
 <Callout type="info">
   This doc is a collection of upgrade paths for different versions of the
@@ -910,7 +910,7 @@ TRACE_2
 |   |   |-- GENERATION: ChatOpenAi
 ```
 
-If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
+If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/integrations/frameworks/langchain)).
 
 ```python
 from langfuse import Langfuse
@@ -999,7 +999,7 @@ TRACE_2
 |   |   |-- GENERATION: ChatOpenAi
 ```
 
-If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/docs/integrations/langchain/tracing)).
+If you still want to group multiple invocations on one trace, you can use the Langfuse SDK combined with the Langchain integration ([more details](/integrations/frameworks/langchain)).
 
 ```ts
 const trace = langfuse.trace({ id: "special-id" });

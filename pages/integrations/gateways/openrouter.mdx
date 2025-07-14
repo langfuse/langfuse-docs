@@ -11,7 +11,7 @@ In this guide, we'll show you how to integrate [Langfuse](/) with [OpenRouter](h
 
 [OpenRouter](https://openrouter.ai/) provides an OpenAI-compatible completion API to +280 language models and providers that you can call directly or using the OpenAI SDK. This allows developers to access a variety of LLMs through a single, unified interface.
 
-Since OpenRouter uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/docs/integrations/openai/python/get-started) and [TypeScript](/docs/integrations/openai/js/get-started).
+Since OpenRouter uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
 
 ## Get started
 
@@ -36,7 +36,7 @@ os.environ["OPENAI_API_KEY"] = "<YOUR_OPENROUTER_API_KEY>"
 
 ## Example 1: Simple LLM Call
 
-Since OpenRouter provides an OpenAI-compatible API, we can use the [Langfuse OpenAI SDK wrapper](/docs/integrations/openai/python/get-started) to automatically log OpenRouter calls as generations in Langfuse.
+Since OpenRouter provides an OpenAI-compatible API, we can use the [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py) to automatically log OpenRouter calls as generations in Langfuse.
 
 - The `base_url` is set to OpenRouter's API endpoint.
 - You can replace `"qwen/qwen-plus"` with any model available on OpenRouter.
@@ -138,5 +138,5 @@ _[Public link to example trace in Langfuse](https://cloud.langfuse.com/project/c
 ## Learn More
 
 - **OpenRouter Quick Start Guide**: [https://openrouter.ai/docs/quick-start](https://openrouter.ai/docs/quick-start)
-- **Langfuse OpenAI Integration**: [https://langfuse.com/docs/integrations/openai/python/get-started](/docs/integrations/openai/python/get-started)
+- **Langfuse OpenAI Integration**: [https://langfuse.com/integrations/model-providers/openai-py](/integrations/model-providers/openai-py)
 - **Langfuse `@observe()` Decorator**: [https://langfuse.com/docs/sdk/python/decorators](/docs/sdk/python/decorators)

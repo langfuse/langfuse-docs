@@ -10,7 +10,7 @@ logo: /images/integrations/ollama_icon.svg
 
 In this cookbook, we will show you how to trace local language models with Ollama and Langfuse.
 
-**Note: We'll use the Langfuse OpenAI SDK integration for Python in this example. This works the same for [JS/TS](https://langfuse.com/docs/integrations/openai/js/get-started) or via the Langfuse integrations with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing) and [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started).**
+**Note: We'll use the Langfuse OpenAI SDK integration for Python in this example. This works the same for [JS/TS](https://langfuse.com/integrations/model-providers/openai-js) or via the Langfuse integrations with [LangChain](https://langfuse.com/integrations/frameworks/langchain) and [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex).**
 
 ## What is Ollama?
 
@@ -81,7 +81,7 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 
 ### Step 3: Use the OpenAI Python SDK to call the Llama3.1 Model
 
-To use the Ollama model, we use the OpenAI Python SDK as Ollama has the same API (see above). To trace your LLM calls in Langfuse you can use the **drop-in replacement** ([docs](https://langfuse.com/docs/integrations/openai/python/get-started), this also works for JS/TS and via LangChain and LlamaIndex) to get full logging by changing only the import.
+To use the Ollama model, we use the OpenAI Python SDK as Ollama has the same API (see above). To trace your LLM calls in Langfuse you can use the **drop-in replacement** ([docs](https://langfuse.com/integrations/model-providers/openai-py), this also works for JS/TS and via LangChain and LlamaIndex) to get full logging by changing only the import.
 
 ```diff
 - import openai

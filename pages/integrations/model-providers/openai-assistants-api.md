@@ -10,7 +10,7 @@ logo: /images/integrations/openai_icon.svg
 
 This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with [Langfuse tracing](https://langfuse.com/docs/tracing).
 
-Note: The native [OpenAI SDK wrapper](https://langfuse.com/docs/integrations/openai/python/get-started) does not support tracing of the OpenAI assistants API, you need to instrument it via the decorator as shown in this notebook.
+Note: The native [OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py) does not support tracing of the OpenAI assistants API, you need to instrument it via the decorator as shown in this notebook.
 
 ## What is the Assistants API?
 
@@ -189,4 +189,4 @@ The Langfuse trace shows the flow of creating the assistant, running it on a thr
 
 ## Learn more
 
-If you use non-Assistants API endpoints, you can use the OpenAI SDK wrapper for tracing. Check out the [Langfuse documentation](https://langfuse.com/docs/integrations/openai/python/get-started) for more details.
+If you use non-Assistants API endpoints, you can use the OpenAI SDK wrapper for tracing. Check out the [Langfuse documentation](https://langfuse.com/integrations/model-providers/openai-py) for more details.

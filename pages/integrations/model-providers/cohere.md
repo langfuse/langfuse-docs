@@ -86,4 +86,4 @@ _[Public example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn
 
 - [Cohere Documentation](https://docs.cohere.com/docs/compatibility-api)
 - [Langfuse](https://langfuse.com)
-- [Langfuse OpenAI Integration Guide](https://langfuse.com/docs/integrations/openai/python/get-started)
+- [Langfuse OpenAI Integration Guide](https://langfuse.com/integrations/model-providers/openai-py)

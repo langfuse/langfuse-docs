@@ -5,7 +5,7 @@ category: Integrations
 
 # Cookbook LlamaIndex Integration
 
-This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/docs/integrations/llama-index/get-started). It uses a very simple Index and Query. We've recorded a short [video](https://langfuse.com/guides/videos/llama-index) to show you how to use this cookbook.
+This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex). It uses a very simple Index and Query. We've recorded a short [video](https://langfuse.com/guides/videos/llama-index) to show you how to use this cookbook.
 
 **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
 
@@ -104,7 +104,7 @@ Trace in Langfuse:
 
 ## Interested in more advanced features?
 
-See the full [integration docs](https://langfuse.com/docs/integrations/llama-index/get-started) to learn more about advanced features and how to use them:
+See the full [integration docs](https://langfuse.com/integrations/frameworks/llamaindex) to learn more about advanced features and how to use them:
 
 - Interoperability with Langfuse Python SDK and other integrations
 - Add custom metadata and attributes to the traces

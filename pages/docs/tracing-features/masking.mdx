@@ -172,7 +172,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
 
 ```python
 from langfuse.openai import openai
@@ -197,7 +197,7 @@ completion = openai.chat.completions.create(
 openai.flush_langfuse()
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set masking function via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set masking function via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -235,7 +235,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `mask` as a keyword argument:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` as a keyword argument:
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -251,7 +251,7 @@ handler = CallbackHandler(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `mask` via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `mask` via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -277,7 +277,7 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `mask` to the constructor:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
 
 ```typescript
 import { CallbackHandler } from "langfuse-langchain";

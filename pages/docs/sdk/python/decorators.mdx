@@ -10,7 +10,7 @@ description: A decorator-based integration to give you powerful tracing, evals, 
 
 Integrate [Langfuse Tracing](/docs/tracing) into your LLM applications with the Langfuse Python SDK using the `@observe()` decorator.
 
-The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index).
+The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/docs/integrations/llama-index).
 
 See the [reference](https://python.reference.langfuse.com/langfuse/decorators) for a comprehensive list of all available parameters and methods.
 
@@ -158,7 +158,7 @@ Optionally, you can parse some of the arguments to the LLM call and pass them to
 Model specific examples:
 
 - [Mistral SDK](/guides/cookbook/integration_mistral_sdk)
-- [Amazon Bedrock](/docs/integrations/amazon-bedrock)
+- [Amazon Bedrock](/integrations/model-providers/amazon-bedrock)
 
 _Example using the Anthropic SDK:_
 
@@ -405,11 +405,11 @@ main(
 
 ## Interoperability with framework integrations [#frameworks]
 
-The decorator is fully interoperable with our main integrations: [OpenAI](/docs/integrations/openai), [Langchain](/docs/integrations/langchain), [LlamaIndex](/docs/integrations/llama-index). Thereby you can easily trace and evaluate functions that use (a combination of) these integrations.
+The decorator is fully interoperable with our main integrations: [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/docs/integrations/llama-index). Thereby you can easily trace and evaluate functions that use (a combination of) these integrations.
 
 ### OpenAI
 
-The [drop-in OpenAI SDK integration](/docs/integrations/openai) is fully compatible with the `@observe()` decorator. It automatically adds a generation observation to the trace within the current context.
+The [drop-in OpenAI SDK integration](/integrations/model-providers/openai-py) is fully compatible with the `@observe()` decorator. It automatically adds a generation observation to the trace within the current context.
 
 ```python /openai/ /from langfuse.openai import openai/
 from langfuse.decorators import observe
@@ -435,7 +435,7 @@ main()
 
 ### LangChain
 
-The [native LangChain integration](/docs/integrations/langchain) is fully compatible with the `@observe()` decorator. It automatically adds a generation to the trace within the current context.
+The [native LangChain integration](/integrations/frameworks/langchain) is fully compatible with the `@observe()` decorator. It automatically adds a generation to the trace within the current context.
 
 `langfuse_context.get_current_langchain_handler()` exposes a callback handler scoped to the current trace context. Pass it to subsequent runs to your LangChain application to get full tracing within the scope of the current trace.
 

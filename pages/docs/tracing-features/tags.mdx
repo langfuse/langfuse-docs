@@ -128,7 +128,7 @@ completion = openai.chat.completions.create(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set tags via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -198,7 +198,7 @@ chain.invoke(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set tags via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -220,7 +220,7 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `tags` to the constructor:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `tags` to the constructor:
 
 ```ts
 const handler = new CallbackHandler({
@@ -241,7 +241,7 @@ const tags = ["tag-1", "tag-2"];
 await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], tags: tags });
 ```
 
-When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set tags via `langfuse.trace()`:
+When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set tags via `langfuse.trace()`:
 
 ```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";

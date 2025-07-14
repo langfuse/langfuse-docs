@@ -5,7 +5,7 @@ description: End-to-end example of how to use the Langfuse Open Source Tracing v
 
 # Cookbook: Langfuse JS/TS SDK
 
-JS/TS applications can either be traced via the [low-level Langfuse JS/TS SDK](https://langfuse.com/docs/sdk/typescript/guide), or by using one of the native integrations such as [OpenAI](https://langfuse.com/docs/integrations/openai/js/get-started), [LangChain](https://langfuse.com/docs/integrations/langchain) or [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk).
+JS/TS applications can either be traced via the [low-level Langfuse JS/TS SDK](https://langfuse.com/docs/sdk/typescript/guide), or by using one of the native integrations such as [OpenAI](https://langfuse.com/integrations/model-providers/openai-js), [LangChain](https://langfuse.com/integrations/frameworks/langchain) or [Vercel AI SDK](https://langfuse.com/integrations/frameworks/vercel-ai-sdk).
 
 In this notebook, we will walk you through a **simple end-to-end example** that:
 
@@ -150,7 +150,7 @@ console.log(chatCompletion.content[0].text);
 
 ### Option 2: Using LangChain
 
-This step shows how to trace LangChain applications using the [LangChain integration](https://langfuse.com/docs/integrations/langchain/tracing) which is fully interoperable with the Langfuse SDK.
+This step shows how to trace LangChain applications using the [LangChain integration](https://langfuse.com/integrations/frameworks/langchain) which is fully interoperable with the Langfuse SDK.
 
 Since this is a native integration, the model parameters and outputs are automatically captured.
 
@@ -199,7 +199,7 @@ console.log(res.content)
 
 ### Option 3: Using OpenAI
 
-This step shows how to trace OpenAI applications using the [OpenAI integration](https://langfuse.com/docs/integrations/openai/js/get-started) which is interoperable with the Langfuse SDK. 
+This step shows how to trace OpenAI applications using the [OpenAI integration](https://langfuse.com/integrations/model-providers/openai-js) which is interoperable with the Langfuse SDK. 
 
 Since this is a native integration, the model parameters and outputs are automatically captured.
 

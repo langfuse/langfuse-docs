@@ -16,7 +16,12 @@ This cookbook demonstrates how to monitor [DeepSeek](https://github.com/deepseek
 This guide will walk you through setting up the integration, making requests to DeepSeek models, and observing the interactions with Langfuse.
 
 <Callout type="info" emoji="ℹ️">
-**Note:** *Langfuse is also natively integrated with [LangChain](https://langfuse.com/docs/integrations/langchain/tracing), [LlamaIndex](https://langfuse.com/docs/integrations/llama-index/get-started), [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing), and [other frameworks](https://langfuse.com/docs/integrations/overview). These frameworks can be used as well to trace DeepSeek requests.*
+  **Note:** *Langfuse is also natively integrated with
+  [LangChain](https://langfuse.com/integrations/frameworks/langchain),
+  [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex),
+  [LiteLLM](https://langfuse.com/integrations/gateways/litellm), and [other
+  frameworks](https://langfuse.com/integrations). These frameworks can be used
+  as well to trace DeepSeek requests.*
 </Callout>
 
 ## Setup
@@ -24,7 +29,6 @@ This guide will walk you through setting up the integration, making requests to 
 ### Install Required Packages
 
 To get started, install the necessary packages. Ensure you have the latest versions of `langfuse` and `openai`.
-
 
 ```python
 %pip install langfuse openai --upgrade
@@ -34,13 +38,12 @@ To get started, install the necessary packages. Ensure you have the latest versi
 
 Set up your environment variables with the necessary keys. Obtain your Langfuse project keys from [Langfuse Cloud](https://cloud.langfuse.com). You will also need an access token from [DeepSeek](https://platform.deepseek.com/api_keys) to access their models.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
@@ -52,8 +55,7 @@ os.environ["DEEPSEEK_API_KEY"] = "sk-..."  # Replace with your DeepSeek API key
 
 Instead of importing `openai` directly, import it from `langfuse.openai`. Also, import any other necessary modules.
 
-Check out our [OpenAI integration docs](https://langfuse.com/docs/integrations/openai/python/get-started) to learn how to use this integration with other Langfuse [features](https://langfuse.com/docs/tracing#advanced-usage).
-
+Check out our [OpenAI integration docs](https://langfuse.com/integrations/model-providers/openai-py) to learn how to use this integration with other Langfuse [features](https://langfuse.com/docs/tracing#advanced-usage).
 
 ```python
 # Instead of: import openai
@@ -64,7 +66,6 @@ from langfuse import observe
 ### Initialize the OpenAI Client for DeepSeek Models
 
 Initialize the OpenAI client, pointing it to the DeepSeek model endpoint. Replace the model URL and APP key with your own.
-
 
 ```python
 # Initialize the OpenAI client, pointing it to the DeepSeek Inference API
@@ -80,11 +81,9 @@ client = OpenAI(
 
 Use the `client` to make a chat completion request to the DeepSeek model. The `model` parameter can be any identifier since the actual model is specified in the `base_url`.
 
-
-
 ```python
 completion = client.chat.completions.create(
-    model="deepseek-chat", 
+    model="deepseek-chat",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Why is AI cool? Answer in 20 words or less."}
@@ -95,16 +94,13 @@ print(completion.choices[0].message.content)
 
     AI is cool because it automates tasks, enhances creativity, and solves complex problems quickly—making life smarter and easier.
 
-
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_deepseek/deepseek-simple-trace.png)
 
-*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/83702a6c-ae0e-4317-87fa-dc82568a2d89?timestamp=2025-01-09T17%3A06%3A40.848Z)*
+_[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/83702a6c-ae0e-4317-87fa-dc82568a2d89?timestamp=2025-01-09T17%3A06%3A40.848Z)_
 
 ### Observe the Request with Langfuse
 
 By using the `OpenAI` client from `langfuse.openai`, your requests are automatically traced in Langfuse. You can also use the `@observe()` decorator to group multiple generations into a single trace.
-
-
 
 ```python
 @observe()  # Decorator to automatically create a trace and nest generations
@@ -124,24 +120,23 @@ story = generate_story()
 print(story)
 ```
 
-    **The Lost Token**  
-    
-    Timmy the Token was excited—today, he’d help the language model craft a story! But as he raced through the data pipeline, he took a wrong turn, tumbling into a forgotten cache.  
-    
-    "Hello?" Timmy echoed. Only silence replied.  
-    
-    Days passed. The model stuttered without him. Then, a cleanup script swept through. "Gotcha!" it chirped, rescuing Timmy.  
-    
-    Back in the prompt, Timmy gleamed. The model sparked to life: *"Once, a token got lost…"*  
-    
-    And so, Timmy’s adventure became the very story he was meant to tell.  
-    
-    (100 words exactly)
+    **The Lost Token**
 
+    Timmy the Token was excited—today, he’d help the language model craft a story! But as he raced through the data pipeline, he took a wrong turn, tumbling into a forgotten cache.
+
+    "Hello?" Timmy echoed. Only silence replied.
+
+    Days passed. The model stuttered without him. Then, a cleanup script swept through. "Gotcha!" it chirped, rescuing Timmy.
+
+    Back in the prompt, Timmy gleamed. The model sparked to life: *"Once, a token got lost…"*
+
+    And so, Timmy’s adventure became the very story he was meant to tell.
+
+    (100 words exactly)
 
 ![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_deepseek/deepseek-story-trace.png)
 
-*[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9a0dca39-9fac-4fce-ace9-52b85edfb0d8?timestamp=2025-01-09T17%3A08%3A25.698Z)*
+_[View the example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9a0dca39-9fac-4fce-ace9-52b85edfb0d8?timestamp=2025-01-09T17%3A08%3A25.698Z)_
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 

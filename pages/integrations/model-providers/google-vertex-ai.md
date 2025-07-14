@@ -22,12 +22,12 @@ There are a few ways through which you can capture traces and metrics for Google
 
 1. via an application framework that is integrated with Langfuse:
 
-   - [Langchain](https://langfuse.com/docs/integrations/langchain)
+   - [Langchain](https://langfuse.com/integrations/frameworks/langchain)
    - [Llama Index](https://langfuse.com/docs/integrations/llama-index) 
-   - [Haystack](https://langfuse.com/docs/integrations/haystack/get-started)
-   - [Vercel AI SDK](https://langfuse.com/docs/integrations/vercel-ai-sdk)
+   - [Haystack](https://langfuse.com/integrations/frameworks/haystack)
+   - [Vercel AI SDK](https://langfuse.com/integrations/frameworks/vercel-ai-sdk)
 
-2. via a Proxy such as [LiteLLM](https://langfuse.com/docs/integrations/litellm/tracing)
+2. via a Proxy such as [LiteLLM](https://langfuse.com/integrations/gateways/litellm)
 3. via wrapping the Vertex AI SDK with the [Langfuse Decorator](https://langfuse.com/docs/sdk/python/decorators) (_see example below_)
 
 ## Notebook Setup
@@ -156,7 +156,7 @@ See [example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4
 
 Alternatively, you can use one of the native Langfuse integrations.
 
-Here, we'll use the [LangChain integration](https://langfuse.com/docs/integrations/langchain/tracing) to gain detailed traces of the LLM calls made to Google Vertex.
+Here, we'll use the [LangChain integration](https://langfuse.com/integrations/frameworks/langchain) to gain detailed traces of the LLM calls made to Google Vertex.
 
 
 ```python

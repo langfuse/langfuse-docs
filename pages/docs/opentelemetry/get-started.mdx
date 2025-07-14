@@ -7,7 +7,7 @@ description: How to connect Langfuse with OpenTelemetry to observe LLM applicati
 
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
 
-Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
+Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/integrations), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
 
 As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/tracing-data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([property mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
 
@@ -147,14 +147,14 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 
 **Framework integrations powered by OpenTelemetry**
 
-- [Hugging Face smolagents](/docs/integrations/smolagents)
-- [CrewAI](/docs/integrations/crewai)
-- [AutoGen](/docs/integrations/autogen)
-- [Semantic Kernel](/docs/integrations/semantic-kernel)
-- [Pydantic AI](/docs/integrations/pydantic-ai)
-- [Spring AI](/docs/integrations/spring-ai)
+- [Hugging Face smolagents](/integrations/frameworks/smolagents)
+- [CrewAI](/integrations/frameworks/crewai)
+- [AutoGen](/integrations/frameworks/autogen)
+- [Semantic Kernel](/integrations/frameworks/semantic-kernel)
+- [Pydantic AI](/integrations/frameworks/pydantic-ai)
+- [Spring AI](/integrations/frameworks/spring-ai)
 - [LlamaIndex](/docs/integrations/llama-index)
-- [LlamaIndex Workflows](/docs/integrations/llama-index/workflows)
+- [LlamaIndex Workflows](/integrations/frameworks/llamaindex-workflows)
 
 ## Export from OpenTelemetry Collector
 

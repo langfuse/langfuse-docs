@@ -11,11 +11,9 @@ This cookbook demonstate use of Langfuse with Azure OpenAI and Langchain for pro
 
 _**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
 
-
 ```python
 %pip install --quiet "langfuse<3.0.0" langchain langchain-openai --upgrade
 ```
-
 
 ```python
 import os
@@ -33,8 +31,7 @@ os.environ["OPENAI_API_TYPE"] = "azure"
 os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
 ```
 
-We'll use the native Langfuse intgeration for Langchain. Learn more it in the [documentation](https://langfuse.com/docs/integrations/langchain).
-
+We'll use the native Langfuse intgeration for Langchain. Learn more it in the [documentation](https://langfuse.com/integrations/frameworks/langchain).
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -46,7 +43,6 @@ langfuse_handler.auth_check()
 ```
 
 Langchain imports
-
 
 ```python
 from langchain_openai import AzureChatOpenAI
@@ -61,7 +57,6 @@ from langchain.schema import HumanMessage
 ```
 
 ## Simple example
-
 
 ```python
 from langchain_openai import AzureChatOpenAI
@@ -86,15 +81,14 @@ chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]
 
 Learn more about Langfuse Prompt Management in the [docs](https://langfuse.com/docs/prompts).
 
-
 ```python
 # Initialize the Langfuse Client
 from langfuse import Langfuse
 langfuse = Langfuse()
 
 template = """
-You are an AI assistant travel assistant that provides vacation recommendations to users. 
-You should also be able to provide information about the weather, local customs, and travel restrictions. 
+You are an AI assistant travel assistant that provides vacation recommendations to users.
+You should also be able to provide information about the weather, local customs, and travel restrictions.
 """
 
 # Push the prompt to Langfuse and immediately promote it to production
@@ -107,7 +101,6 @@ langfuse.create_prompt(
 
 In your production environment, you can then fetch the production version of the prompt. The Langfuse client caches the prompt to improve performance. You can configure this behavior via a custom TTL or disable it completely.
 
-
 ```python
 # Get the prompt from Langfuse, cache it for 5 minutes
 langfuse_prompt = langfuse.get_prompt("travel_consultant", cache_ttl_seconds=300)
@@ -115,11 +108,9 @@ langfuse_prompt = langfuse.get_prompt("travel_consultant", cache_ttl_seconds=300
 
 We do not use the native Langfuse `prompt.compile()` but use the raw `prompt.prompt` as Langchain will insert the prompt variables (if any).
 
-
 ```python
 system_message_prompt = SystemMessagePromptTemplate.from_template(langfuse_prompt.prompt)
 ```
-
 
 ```python
 llm = AzureChatOpenAI(
@@ -143,7 +134,6 @@ print(result)
 ## Multiple Langchain runs in same Langfuse trace
 
 Langchain setup
-
 
 ```python
 from langchain_openai import AzureChatOpenAI
@@ -172,7 +162,6 @@ chain2 = (
 
 Run the chain multiple times within the same Langfuse trace.
 
-
 ```python
 # Create trace using Langfuse Client
 langfuse = Langfuse()
@@ -198,11 +187,9 @@ When evaluating traces of your LLM application in Langfuse, you need to add [sco
 
 Get the trace_id. We use the previous run where we created the trace using `langfuse.trace()`. You can also get the trace_id via `langfuse_handler.get_trace_id()`.
 
-
 ```python
 trace_id = trace.id
 ```
-
 
 ```python
 # Add score to the trace via the Langfuse Python Client

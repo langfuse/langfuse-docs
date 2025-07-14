@@ -294,7 +294,7 @@ run_langchain_experiment(
 
 ## More Examples
 
-- [LangGraph Dataset Experiment](https://langfuse.com/docs/integrations/langchain/example-langgraph-agents#offline-evaluation)
-- [OpenAI Agents SDK Dataset Experiment](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents#dataset-evaluation)
-- [CrewAI Dataset Experiment](https://langfuse.com/docs/integrations/crewai#dataset-experiments)
+- [LangGraph Dataset Experiment](https://langfuse.com/integrations/frameworks/langchain/example-langgraph-agents#offline-evaluation)
+- [OpenAI Agents SDK Dataset Experiment](https://langfuse.com/guides/cookbook/example_evaluating_openai_agents#dataset-evaluation)
+- [CrewAI Dataset Experiment](https://langfuse.com/integrations/frameworks/crewai#dataset-experiments)
 - [Smolagents Dataset Experiment](https://huggingface.co/learn/agents-course/en/bonus-unit2/monitoring-and-evaluating-agents-notebook#offline-evaluation)

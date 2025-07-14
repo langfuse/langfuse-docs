@@ -5,7 +5,7 @@ category: Integrations
 
 # Cookbook: Haystack Integration
 
-We're excited to highlight a Langfuse integration with Haystack ([docs](https://langfuse.com/docs/integrations/haystack/get-started))! This integration allows you to easily trace your Haystack pipelines in the Langfuse UI.
+We're excited to highlight a Langfuse integration with Haystack ([docs](https://langfuse.com/integrations/frameworks/haystack))! This integration allows you to easily trace your Haystack pipelines in the Langfuse UI.
 
 ## What is Haystack?
 
@@ -265,7 +265,7 @@ We're thrilled to collaborate with the Haystack team to give the best possible e
 
 Learn more:
 
-- [Haystack integration docs](https://langfuse.com/docs/integrations/haystack/get-started)
+- [Haystack integration docs](https://langfuse.com/integrations/frameworks/haystack)
 - [Introduction to tracing in Langfuse](https://langfuse.com/docs/tracing)
 - [Langfuse platform overview](https://langfuse.com/docs)
 
