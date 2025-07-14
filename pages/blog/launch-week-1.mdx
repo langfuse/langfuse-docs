@@ -48,7 +48,7 @@ const res = await openai.chat.completions.create({
 });
 ```
 
-We [launched](/changelog/2024-04-21-openai-integration-JS-SDK) a new wrapper for the OpenAI JS SDK. This integration, designed to enable easier monitoring of OpenAI API usage, features seamless observability with enhancements like automatic tracking of prompts, completions, and API errors, as well as insights into model usage and costs. After a soft launch that gathered user feedback for improvements, the integration is now fully available, complete with comprehensive [documentation](/docs/integrations/openai/js/get-started) and an [example notebook](/docs/integrations/openai/js/examples).
+We [launched](/changelog/2024-04-21-openai-integration-JS-SDK) a new wrapper for the OpenAI JS SDK. This integration, designed to enable easier monitoring of OpenAI API usage, features seamless observability with enhancements like automatic tracking of prompts, completions, and API errors, as well as insights into model usage and costs. After a soft launch that gathered user feedback for improvements, the integration is now fully available, complete with comprehensive [documentation](/integrations/model-providers/openai-js) and an [example notebook](/guides/cookbook/js_integration_openai).
 
 ### Day 1: PostHog Integration
 
@@ -58,7 +58,7 @@ We [launched](/changelog/2024-04-21-openai-integration-JS-SDK) a new wrapper for
   title="PostHog Integration"
 />
 
-We teamed up with [PostHog](https://posthog.com) (OSS product analytics) to integrate LLM-related product metrics into your existing PostHog dashboards. This integration is [now available](/changelog/2024-04-22-posthog-integration) in public beta on Langfuse cloud. You can configure it within your Langfuse project settings. When activated, Langfuse sends metrics related to traces, generations, and scores to PostHog. You can then build custom dashboards to visualize the data or use the _LLM Analytics_ dashboard template to get started quickly. See [docs](/docs/analytics/integrations/posthog) for more information.
+We teamed up with [PostHog](https://posthog.com) (OSS product analytics) to integrate LLM-related product metrics into your existing PostHog dashboards. This integration is [now available](/changelog/2024-04-22-posthog-integration) in public beta on Langfuse cloud. You can configure it within your Langfuse project settings. When activated, Langfuse sends metrics related to traces, generations, and scores to PostHog. You can then build custom dashboards to visualize the data or use the _LLM Analytics_ dashboard template to get started quickly. See [docs](/integrations/analytics/posthog) for more information.
 
 ### Day 2: LLM Playground
 
@@ -78,7 +78,7 @@ We're excited to introduce the [**LLM Playground**](/docs/playground) to Langfus
   title="Decorator Integration"
 />
 
-We're happy to share that the Decorator-based integration for Python now supports all Langfuse features and is the recommended way to use Langfuse in Python. The decorator makes integrating with Langfuse so much easier. Head over to the [Python Decorator docs](/docs/sdk/python/decorators) to learn more. All inputs, outputs, timings are captured automatically, and it works with all other [Langfuse integrations](/docs/integrations) (LangChain, LlamaIndex, OpenAI SDK, ...). To celebrate this milestone, we wrote a [blog post](/blog/2024-04-python-decorator) on the technical details and created the [example notebook](/guides/cookbook/example_decorator_openai_langchain) shown in the video as it demonstrates what's really cool about the decorator. Thanks again to [@lshalon](https://github.com/lshalon) and [@AshisGhosh](https://github.com/AshisGhosh) for your contributions to this!
+We're happy to share that the Decorator-based integration for Python now supports all Langfuse features and is the recommended way to use Langfuse in Python. The decorator makes integrating with Langfuse so much easier. Head over to the [Python Decorator docs](/docs/sdk/python/decorators) to learn more. All inputs, outputs, timings are captured automatically, and it works with all other [Langfuse integrations](/integrations) (LangChain, LlamaIndex, OpenAI SDK, ...). To celebrate this milestone, we wrote a [blog post](/blog/2024-04-python-decorator) on the technical details and created the [example notebook](/guides/cookbook/example_decorator_openai_langchain) shown in the video as it demonstrates what's really cool about the decorator. Thanks again to [@lshalon](https://github.com/lshalon) and [@AshisGhosh](https://github.com/AshisGhosh) for your contributions to this!
 
 ### Day 4: Datasets v2
 
@@ -116,21 +116,3 @@ You're invited to our first virtual town hall. We (Max, Marc and Clemens) will b
 We will end the week with the launch of **Langfuse 2.0** on Product Hunt on Friday, April 26th. After our initial launch last year – which led to a [Golden Kitty Award](https://www.producthunt.com/golden-kitty-awards/hall-of-fame?year=2023#ai-infra) – we are very excited to be back on Product Hunt.
 
 [Launch post](https://www.producthunt.com/posts/langfuse-2-0) (_Spoiler: Langfuse became the #1 product of the day 🥇_)
-
-## Learn More About Langfuse
-
-import { FileCode, BookOpen, Video } from "lucide-react";
-
-<Cards num={3}>
-  <Card
-    title="Docs"
-    href="/docs/integrations/llama-index/get-started"
-    icon={<BookOpen />}
-  />
-  <Card title="Quickstart" href="/docs/get-started" icon={<BookOpen />} />
-  <Card
-    title="Cookbooks"
-    href="/docs/integrations/llama-index/example-python"
-    icon={<FileCode />}
-  />
-</Cards>

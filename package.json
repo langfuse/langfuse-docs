@@ -13,7 +13,8 @@
     "postbuild:cleanup": "echo 'Removing .next/cache to resolve Nextra caching bug' && rm -rf .next/cache",
     "postbuild:llms-txt": "node scripts/generate_llms_txt.js",
     "link-check": "node scripts/check-links.js",
-    "sitemap-check": "node scripts/check-sitemap-links.js"
+    "sitemap-check": "node scripts/check-sitemap-links.js",
+    "nuke": "rm -rf .next && rm -rf node_modules && pnpm install"
   },
   "engines": {
     "node": "20"

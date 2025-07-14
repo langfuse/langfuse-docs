@@ -5,7 +5,7 @@ category: Integrations
 
 # Cookbook: OpenAI Integration (JS/TS)
 
-This cookbook provides examples of the Langfuse Integration for OpenAI (JS/TS). Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
+This cookbook provides examples of the Langfuse Integration for OpenAI (JS/TS). Follow the [integration guide](https://langfuse.com/integrations/model-providers/openai-js) to add this integration to your OpenAI project.
 
 ## Setup
 
@@ -342,4 +342,4 @@ Public trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trace
 
 ## Get started
 
-Follow the [integration guide](https://langfuse.com/docs/integrations/openai/js/get-started) to add this integration to your OpenAI project.
+Follow the [integration guide](https://langfuse.com/integrations/model-providers/openai-js) to add this integration to your OpenAI project.

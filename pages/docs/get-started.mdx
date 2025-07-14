@@ -17,7 +17,6 @@ This quickstart helps you to integrate your LLM application with [Langfuse Traci
 import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
 import GetStartedJsSdk from "@/components-mdx/get-started-js-sdk.mdx";
-import GetStartedLlamaindexPythonArgs from "@/components-mdx/get-started-llamaindex-python-constructor-args.mdx";
 import EnvPython from "@/components-mdx/env-python.mdx";
 import EnvJs from "@/components-mdx/env-js.mdx";
 import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
@@ -124,7 +123,7 @@ Example usage, most of the parameters are optional and depend on the use case. F
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}
-The [integration](/docs/integrations/openai) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
+The [integration](/integrations/model-providers/openai-py) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
 
 ```bash
 pip install langfuse
@@ -179,7 +178,7 @@ const res = await openai.chat.completions.create({
 <Tab>
 {/* LangChain */}
 
-The [integration](/docs/integrations/langchain) uses the Langchain callback system. **Note**: Trace attributes must be set on an enclosing span.
+The [integration](/integrations/frameworks/langchain) uses the Langchain callback system. **Note**: Trace attributes must be set on an enclosing span.
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -196,17 +195,17 @@ chain = prompt | llm
 response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
 ```
 
-For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+For more details, see the [Langchain integration docs](/integrations/frameworks/langchain).
 
 </Tab>
 <Tab>
 {/* Langchain (JS) */}
 
-The [integration](/docs/integrations/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
+The [integration](/integrations/frameworks/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
 
 <GetStartedLangchainJsArgs />
 
-For more details, see the [Langchain integration docs](/docs/integrations/langchain/tracing).
+For more details, see the [Langchain integration docs](/integrations/frameworks/langchain).
 
 </Tab>
 <Tab>
@@ -355,19 +354,19 @@ import IconOpenai from "@/components/icons/openai";
   <Card
     icon={<IconOpenai />}
     title="OpenAI SDK"
-    href="/docs/integrations/openai"
+    href="/integrations/model-providers/openai-py"
     arrow
   />
   <Card
     icon={<span>🦜🔗</span>}
     title="Langchain"
-    href="/docs/integrations/langchain/tracing"
+    href="/integrations/frameworks/langchain"
     arrow
   />
   <Card
     icon={<span>🦙</span>}
     title="LlamaIndex"
-    href="/docs/integrations/llama-index/get-started"
+    href="/integrations/frameworks/llamaindex"
     arrow
   />
   <Card
@@ -379,19 +378,19 @@ import IconOpenai from "@/components/icons/openai";
   <Card
     icon={<Code size="24" />}
     title="Flowise"
-    href="/docs/integrations/flowise"
+    href="/integrations/no-code/flowise"
     arrow
   />
   <Card
     icon={<Code size="24" />}
     title="Langflow"
-    href="/docs/integrations/langflow"
+    href="/integrations/no-code/langflow"
     arrow
   />
   <Card
     icon={<Code size="24" />}
     title="Litellm"
-    href="/docs/integrations/litellm/tracing"
+    href="/integrations/gateways/litellm"
     arrow
   />
 </Cards>

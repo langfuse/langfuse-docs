@@ -415,7 +415,7 @@ Cost inference by tokenizing the LLM input and output is not supported for reaso
 
 Reasoning models take multiple steps to arrive to a response. The result from each step generates reasoning tokens that are billed as output tokens. So the cost-effective output token count is the sum of all reasoning tokens and the token count for the final completion. Since Langfuse does not have visibility into the reasoning tokens, it cannot infer the correct cost for generations that have no token usage provided.
 
-To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations. When utilizing the [Langfuse OpenAI wrapper](/docs/integrations/openai/python/get-started) or integrations such as for [Langchain](/docs/integrations/langchain/tracing), [LlamaIndex](/docs/integrations/llama-index/get-started) or [LiteLLM](/docs/integrations/litellm/tracing), token usage is collected and provided automatically for you.
+To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations. When utilizing the [Langfuse OpenAI wrapper](/integrations/model-providers/openai-py) or integrations such as for [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex) or [LiteLLM](/integrations/gateways/litellm), token usage is collected and provided automatically for you.
 
 For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides/reasoning) on how reasoning models work.
 

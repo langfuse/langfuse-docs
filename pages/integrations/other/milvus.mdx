@@ -1,0 +1,114 @@
+---
+title: "Langfuse Integration with Milvus"
+sidebarTitle: Milvus
+logo: /images/integrations/milvus_icon.svg
+description: "Integrate Langfuse with Milvus for efficient AI monitoring and vector storage using the LlamaIndex integration."
+---
+
+# Use Milvus with Langfuse
+
+Thanks to the team at Milvus for developing this guide. These docs are adapted from their write up, which you can read [here](https://milvus.io/docs/integrate_with_langfuse.md).
+
+## What is Milvus?
+
+[Milvus](https://milvus.io/) is an open-source vector database that powers AI applications with vector embeddings and similarity search. It offers tools for efficient storage and retrieval of high-dimensional vectors, making it ideal for AI and machine learning applications.
+
+## Trace your queries with the Langfuse LlamaIndex integration
+
+In this quickstart, we'll show you how to set up a LlamaIndex application using [Milvus Lite](https://milvus.io/docs/milvus_lite.md) as the vector store. We'll also show you how to use the [Langfuse LlamaIndex integration](/integrations/frameworks/llamaindex) to trace your application.
+
+## Quick Start Guide
+
+<Steps>
+
+### Step 1: Create a Langfuse Account
+
+1. Visit [Langfuse](https://cloud.langfuse.com) and create an account.
+2. Create a new project and copy your Langfuse API keys.
+
+### Step 2: Install Required Packages
+
+Make sure you have both `llama-index` and `langfuse` installed.
+
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+
+```bash
+$ pip install llama-index "langfuse<3.0.0" llama-index-vector-stores-milvus --upgrade
+```
+
+### Step 3: Initialize Langfuse
+
+Visit [Langfuse](https://cloud.langfuse.com) to create an account. Create a new project and copy your Langfuse API keys. This example uses OpenAI for embeddings and chat completions, so you also need to specify your [OpenAI key](https://platform.openai.com/) in the environment variable.
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your OpenAI key
+os.environ["OPENAI_API_KEY"] = "sk-..."
+```
+
+### Step 4: Set Up Langfuse Callback Handler
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.llama_index import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+### Step 5: Index Using Milvus Lite
+
+```python
+from llama_index.core import Document
+from llama_index.core import VectorStoreIndex
+from llama_index.core import StorageContext
+from llama_index.vector_stores.milvus import MilvusVectorStore
+
+# Create documents
+doc1 = Document(text="Your document text here.")
+doc2 = Document(text="Another document text here.")
+
+# Set up Milvus vector store
+vector_store = MilvusVectorStore(
+    uri="tmp/milvus_demo.db", dim=1536, overwrite=False
+)
+storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+# Create index
+index = VectorStoreIndex.from_documents(
+    [doc1, doc2], storage_context=storage_context
+)
+```
+
+### Step 6: Query and Chat
+
+```python
+# Query
+response = index.as_query_engine().query("Your query here")
+print(response)
+
+# Chat
+response = index.as_chat_engine().chat("Your chat message here")
+print(response)
+```
+
+### Step 7: Explore Traces in Langfuse
+
+You can now see traces of your index and query in your Langfuse project.
+
+Example traces in Langfuse (public links):
+
+- [Query](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2b26fc72-044f-4b0b-a3c3-485328975161)
+- [Query (chat)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/72503163-2b25-4693-9cc9-56190b8e32b9)
+
+![Example traces in Langfuse](/images/docs/milvus-llamaindex-example-trace.png)
+
+</Steps>

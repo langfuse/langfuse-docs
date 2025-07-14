@@ -7,7 +7,7 @@ category: Datasets
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.
 
-This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk/overview) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
+This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk/overview) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/integrations) (e.g. Langchain).
 
 _Simple example application_
 
@@ -294,7 +294,7 @@ run_langchain_experiment(
 
 ## More Examples
 
-- [LangGraph Dataset Experiment](https://langfuse.com/docs/integrations/langchain/example-langgraph-agents#offline-evaluation)
-- [OpenAI Agents SDK Dataset Experiment](https://langfuse.com/docs/integrations/openaiagentssdk/example-evaluating-openai-agents#dataset-evaluation)
-- [CrewAI Dataset Experiment](https://langfuse.com/docs/integrations/crewai#dataset-experiments)
+- [LangGraph Dataset Experiment](https://langfuse.com/guides/cookbook/example_langgraph_agents#offline-evaluation)
+- [OpenAI Agents SDK Dataset Experiment](https://langfuse.com/guides/cookbook/example_evaluating_openai_agents#dataset-evaluation)
+- [CrewAI Dataset Experiment](https://langfuse.com/integrations/frameworks/crewai#dataset-experiments)
 - [Smolagents Dataset Experiment](https://huggingface.co/learn/agents-course/en/bonus-unit2/monitoring-and-evaluating-agents-notebook#offline-evaluation)

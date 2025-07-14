@@ -5,7 +5,7 @@ category: Integrations
 
 # Cookbook LlamaIndex Integration (Instrumentation Module)
 
-This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/docs/integrations/llama-index/get-started) using the [instrumentation module](https://docs.llamaindex.ai/en/stable/module_guides/observability/instrumentation/) by LlamaIndex (available in llama-index v0.10.20 and later).
+This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex) using the [instrumentation module](https://docs.llamaindex.ai/en/stable/module_guides/observability/instrumentation/) by LlamaIndex (available in llama-index v0.10.20 and later).
 
 **Note: This integration is in beta.** Please report any issues or feedback via [GitHub](/issues).
 
