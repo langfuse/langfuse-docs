@@ -5,7 +5,7 @@ category: Integrations
 
 # Cookbook LlamaIndex Integration
 
-This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex). It uses a very simple Index and Query. We've recorded a short [video](https://langfuse.com/guides/videos/llama-index) to show you how to use this cookbook.
+This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex). It uses a very simple Index and Query.
 
 **Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
 
