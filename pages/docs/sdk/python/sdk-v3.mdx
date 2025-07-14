@@ -805,7 +805,7 @@ response = client.chat.completions.create(
 
 The special metadata fields are:
 - `langfuse_session_id`: Sets the session ID for the trace
-- `langfuse_user_id`: Sets the user ID for the trace  
+- `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
 
 Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`
@@ -1241,6 +1241,36 @@ For example, if you block parent spans but keep child spans from a separate libr
 Consider the impact on trace structure when choosing which scopes to filter.
 </Callout>
 
+### Isolated TracerProvider
+
+You can configure a separate OpenTelemetry TracerProvider for use with Langfuse. This creates isolation between Langfuse tracing and your other observability systems.
+
+**Benefits of isolation:**
+- Langfuse spans won't be sent to your other observability backends (e.g., Datadog, Jaeger, Zipkin)
+- Third-party library spans won't be sent to Langfuse
+- Independent configuration and sampling rates
+
+<Callout type="warning">
+While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where:
+- A parent span from one TracerProvider might have children from another TracerProvider
+- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider
+- Trace hierarchies may be incomplete or confusing
+
+Plan your instrumentation carefully to avoid confusing trace structures.
+</Callout>
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+
+from langfuse import Langfuse
+
+langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
+
+langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
+
+langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
+```
+
 ### Multi-Project Setup (Experimental)
 
 <Callout type="warning">
@@ -1314,9 +1344,9 @@ result_a = process_data_for_project_a(
     langfuse_public_key="pk-lf-project-a-..."
 )
 
-# Route to Project B  
+# Route to Project B
 result_b = process_data_for_project_b(
-    data="input data", 
+    data="input data",
     langfuse_public_key="pk-lf-project-b-..."
 )
 ```
@@ -1368,7 +1398,7 @@ response_a = chain.invoke(
     config={"callbacks": [handler_a]}
 )
 
-# Route to Project B  
+# Route to Project B
 response_b = chain.invoke(
     {"topic": "data science"},
     config={"callbacks": [handler_b]}
@@ -1507,7 +1537,7 @@ response = openai.chat.completions.create(
     messages=[{"role": "user", "content": "Hello"}],
     metadata={
         "langfuse_user_id": "user_123",
-        "langfuse_session_id": "session_456", 
+        "langfuse_session_id": "session_456",
         "langfuse_tags": ["chat"],
         "source": "app"  # Regular metadata still works
     }
@@ -1570,7 +1600,7 @@ from langfuse.langchain import CallbackHandler
 handler = CallbackHandler()
 
 response = chain.invoke(
-    {"input": "Hello"}, 
+    {"input": "Hello"},
     config={
         "callbacks": [handler],
         "metadata": {
