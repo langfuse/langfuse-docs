@@ -643,7 +643,7 @@ const sections: Section[] = [
         name: "Native Frameworks Integrations",
         description:
           "Langfuse integrates natively with many LLM providers and agent frameworks such as LangChain, LlamaIndex, LangGraph, CrewAI, Semantic Kernel, ...",
-        href: "/docs/integrations/overview",
+        href: "/integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -669,7 +669,7 @@ const sections: Section[] = [
       },
       {
         name: "Proxy-based Logging (via LiteLLM)",
-        href: "/docs/integrations/litellm/tracing",
+        href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },

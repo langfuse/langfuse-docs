@@ -46,12 +46,12 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "OpenAI SDK",
-    href: "/docs/integrations/openai/get-started",
+    href: "/integrations/model-providers/openai-py",
     icon: <IconOpenai className="h-7 w-7" />,
   },
   {
     title: "LangChain, LangGraph",
-    href: "/docs/integrations/langchain/tracing",
+    href: "/integrations/frameworks/langchain",
     icon: (
       <Image
         src="/images/integrations/langchain_icon.png"
@@ -64,7 +64,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Llama-Index",
-    href: "/docs/integrations/llama-index/get-started",
+    href: "/integrations/frameworks/llamaindex",
     icon: (
       <Image
         src="/images/integrations/llamaindex_icon.png"
@@ -76,7 +76,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "CrewAI",
-    href: "/docs/integrations/crewai",
+    href: "/integrations/frameworks/crewai",
     icon: (
       <Image
         src="/images/integrations/crewai_icon.svg"
@@ -88,7 +88,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "LiteLLM",
-    href: "/docs/integrations/litellm/tracing",
+    href: "/integrations/gateways/litellm",
     icon: (
       <Image
         src="/images/integrations/litellm_icon.png"
@@ -100,7 +100,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "AI SDK",
-    href: "/docs/integrations/vercel-ai-sdk",
+    href: "/integrations/frameworks/vercel-ai-sdk",
     icon: (
       <span className="text-sm font-medium whitespace-nowrap font-mono">
         npm i ai
@@ -109,7 +109,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Haystack",
-    href: "/docs/integrations/haystack",
+    href: "/integrations/frameworks/haystack",
     icon: (
       <Image
         src="/images/integrations/haystack_icon.png"
@@ -121,7 +121,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Instructor",
-    href: "/docs/integrations/instructor",
+    href: "/integrations/frameworks/instructor",
     icon: (
       <Image
         src="/images/integrations/instructor_icon.svg"
@@ -134,7 +134,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Semantic Kernel",
-    href: "/docs/integrations/semantic-kernel",
+    href: "/integrations/frameworks/semantic-kernel",
     icon: (
       <Image
         src="/images/integrations/microsoft_icon.svg"
@@ -146,7 +146,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "DSPy",
-    href: "/docs/integrations/dspy",
+    href: "/integrations/frameworks/dspy",
     icon: (
       <Image
         src="/images/integrations/dspy_icon.png"
@@ -158,7 +158,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Smolagents",
-    href: "/docs/integrations/smolagents",
+    href: "/integrations/frameworks/smolagents",
     icon: (
       <Image
         src="/images/integrations/huggingface_icon.svg"
@@ -170,7 +170,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Pydantic AI",
-    href: "/docs/integrations/pydantic-ai",
+    href: "/integrations/frameworks/pydantic-ai",
     icon: (
       <Image
         src="/images/integrations/pydantic_ai_icon.svg"
@@ -182,7 +182,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "AutoGen",
-    href: "/docs/integrations/autogen",
+    href: "/integrations/frameworks/autogen",
     icon: (
       <Image
         src="/images/integrations/autogen_icon.svg"
@@ -194,7 +194,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Amazon Bedrock",
-    href: "/docs/integrations/amazon-bedrock",
+    href: "/integrations/model-providers/amazon-bedrock",
     icon: (
       <Image
         src="/images/integrations/bedrock_icon.png"
@@ -206,7 +206,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Google Vertex/Gemini",
-    href: "/docs/integrations/google-vertex-ai",
+    href: "/integrations/model-providers/google-vertex-ai",
     icon: (
       <Image
         src="/images/integrations/google_gemini_icon.svg"
@@ -218,7 +218,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Ollama",
-    href: "/docs/integrations/ollama",
+    href: "/integrations/model-providers/ollama",
     icon: (
       <Image
         src="/images/integrations/ollama_icon.png"
@@ -231,7 +231,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Flowise",
-    href: "/docs/integrations/flowise",
+    href: "/integrations/no-code/flowise",
     icon: (
       <Image
         src="/images/integrations/flowise_logo.png"
@@ -243,7 +243,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Langflow",
-    href: "/docs/integrations/langflow",
+    href: "/integrations/no-code/langflow",
     icon: (
       <Image
         src="/images/integrations/langflow_icon.svg"
@@ -256,7 +256,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "Dify",
-    href: "/docs/integrations/dify",
+    href: "/integrations/no-code/dify",
     icon: (
       <Image
         src="/images/integrations/dify_icon.png"
@@ -268,7 +268,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "OpenWeb UI",
-    href: "/docs/integrations/openwebui",
+    href: "/integrations/no-code/openwebui",
     icon: (
       <Image
         src="/images/integrations/openwebui_icon.png"
@@ -281,7 +281,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "More",
-    href: "/docs/integrations/overview",
+    href: "/integrations",
     icon: <MoreHorizontal className="h-5 w-5" />,
   },
 ];

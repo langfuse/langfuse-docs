@@ -4,13 +4,15 @@ description: A decorator-based integration to give you powerful tracing, evals, 
 
 # Decorator-Based Python Integration (v2)
 
-<Callout type='info'>
-**New Python SDK available (v3):** We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK.
+<Callout type="info">
+  **New Python SDK available (v3):** We have a new, improved SDK available based
+  on OpenTelemetry. Please check out the [SDK v3](/docs/sdk/python/sdk-v3) for a
+  more powerful and simpler to use SDK.
 </Callout>
 
 Integrate [Langfuse Tracing](/docs/tracing) into your LLM applications with the Langfuse Python SDK using the `@observe()` decorator.
 
-The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/docs/integrations/llama-index).
+The SDK supports both synchronous and asynchronous functions, automatically handling traces, spans, and generations, along with key execution details like inputs, outputs and timings. This setup allows you to concentrate on developing high-quality applications while benefitting from observability insights with minimal code. The decorator is fully interoperable with our main integrations (more on this below): [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex).
 
 See the [reference](https://python.reference.langfuse.com/langfuse/decorators) for a comprehensive list of all available parameters and methods.
 
@@ -227,19 +229,18 @@ By setting the `enabled` parameter to `False`, you can disable the decorator and
 
 You may also use environment variables to configure the Langfuse client:
 
-| Environment, Variable | Description   | Default value
-| --- | --- | ---
-| `LANGFUSE_PUBLIC_KEY`, `public_key` | Public key, get in project settings |
-| `LANGFUSE_SECRET_KEY`, `secret_key` | Secret key, get in project settings |
-| `LANGFUSE_HOST`, `host` | Host of the Langfuse API | `"https://cloud.langfuse.com"` |
-| no env, `enabled` | Optional. Manually enable/disable tracing. | If keys are provided, enabled defaults to `True`, otherwise `False` |
-| `LANGFUSE_RELEASE`, `release` | Optional. The release number/hash of the application to provide analytics grouped by release.	| [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py)
-| `LANGFUSE_DEBUG`, `debug` | Optional. Prints debug logs to the console | `False`
-| `LANGFUSE_THREADS`, `threads` | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1
-| `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing. | 3
-| `LANGFUSE_TIMEOUT`, `timeout` | Timeout in seconds for network requests | 20
-| `LANGFUSE_SAMPLE_RATE`, `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing. | 1.0
-
+| Environment, Variable                 | Description                                                                                                                                                                          | Default value                                                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_PUBLIC_KEY`, `public_key`   | Public key, get in project settings                                                                                                                                                  |
+| `LANGFUSE_SECRET_KEY`, `secret_key`   | Secret key, get in project settings                                                                                                                                                  |
+| `LANGFUSE_HOST`, `host`               | Host of the Langfuse API                                                                                                                                                             | `"https://cloud.langfuse.com"`                                                                                          |
+| no env, `enabled`                     | Optional. Manually enable/disable tracing.                                                                                                                                           | If keys are provided, enabled defaults to `True`, otherwise `False`                                                     |
+| `LANGFUSE_RELEASE`, `release`         | Optional. The release number/hash of the application to provide analytics grouped by release.                                                                                        | [common system environment names](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py) |
+| `LANGFUSE_DEBUG`, `debug`             | Optional. Prints debug logs to the console                                                                                                                                           | `False`                                                                                                                 |
+| `LANGFUSE_THREADS`, `threads`         | Specifies the number of consumer threads to execute network requests to the Langfuse server. Helps scaling the SDK for high load. Only increase this if you run into scaling issues. | 1                                                                                                                       |
+| `LANGFUSE_MAX_RETRIES`, `max_retries` | Specifies the number of times the SDK should retry network requests for tracing.                                                                                                     | 3                                                                                                                       |
+| `LANGFUSE_TIMEOUT`, `timeout`         | Timeout in seconds for network requests                                                                                                                                              | 20                                                                                                                      |
+| `LANGFUSE_SAMPLE_RATE`, `sample_rate` | [Sample rate](/docs/tracing-features/sampling) for tracing.                                                                                                                          | 1.0                                                                                                                     |
 
 See the [API Reference](https://python.reference.langfuse.com/langfuse/decorators#LangfuseDecorator.configure) for more details on the available parameters.
 
@@ -405,7 +406,7 @@ main(
 
 ## Interoperability with framework integrations [#frameworks]
 
-The decorator is fully interoperable with our main integrations: [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/docs/integrations/llama-index). Thereby you can easily trace and evaluate functions that use (a combination of) these integrations.
+The decorator is fully interoperable with our main integrations: [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex). Thereby you can easily trace and evaluate functions that use (a combination of) these integrations.
 
 ### OpenAI
 
@@ -463,7 +464,7 @@ langchain_fn("John Doe")
 
 ### LlamaIndex
 
-The [LlamaIndex integration](/docs/integrations/llama-index) is fully compatible with the `@observe()` decorator. It automatically adds a generation to the trace within the current context.
+The [LlamaIndex integration](/integrations/frameworks/llamaindex) is fully compatible with the `@observe()` decorator. It automatically adds a generation to the trace within the current context.
 
 Via `Settings.callback_manager` you can configure the callback to use for tracing of the subsequent LlamaIndex executions. `langfuse_context.get_current_llama_index_handler()` exposes a callback handler scoped to the current trace context.
 
