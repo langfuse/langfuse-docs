@@ -7,7 +7,7 @@ category: Integrations
 
 We want to share a stack that's commonly used by the Langfuse community to quickly experiment with 100+ models from different providers without changing code. This stack includes:
 - [**LiteLLM Proxy**](https://docs.litellm.ai/docs/) ([GitHub](https://github.com/BerriAI/litellm)) which standardizes 100+ model provider APIs on the OpenAI API schema. It removes the complexity of direct API calls by centralizing interactions with these APIs through a single endpoint. You can also self-host the LiteLLM Proxy as it is open-source.
-- **Langfuse OpenAI SDK Wrapper** ([Python](https://langfuse.com/docs/integrations/openai/python/get-started), [JS](https://langfuse.com/docs/integrations/openai/js/get-started)) to natively instrument calls to all these 100+ models via the OpenAI SDK. This automatically captures token counts, latencies, streaming response times (time to first token), api errors, and more.
+- **Langfuse OpenAI SDK Wrapper** ([Python](https://langfuse.com/integrations/model-providers/openai-py), [JS](https://langfuse.com/integrations/model-providers/openai-js)) to natively instrument calls to all these 100+ models via the OpenAI SDK. This automatically captures token counts, latencies, streaming response times (time to first token), api errors, and more.
 - **Langfuse**: OSS LLM Observability, full overview [here](https://langfuse.com/docs).
 
 
@@ -82,8 +82,8 @@ In this example, we'll use GPT-3.5-turbo directly from OpenAI, and llama3 and mi
         litellm_params:
           model: ollama/mistral
     ```
-3. Ensure that you installed Ollama and have pulled the llama3 (8b) and mistral (7b) models: `ollama pull llama3 && ollama pull mistral`
-4. Run the following cli command to start the proxy: `litellm --config litellm_config.yaml`
+2. Ensure that you installed Ollama and have pulled the llama3 (8b) and mistral (7b) models: `ollama pull llama3 && ollama pull mistral`
+3. Run the following cli command to start the proxy: `litellm --config litellm_config.yaml`
 
 The Lite LLM Proxy should be now running on http://0.0.0.0:4000
 
@@ -92,7 +92,7 @@ To verify the connection you can run `litellm --test`
 ## Log single LLM Call via Langfuse OpenAI Wrapper
 The Langfuse SDK offers a wrapper function around the OpenAI SDK, automatically logging all OpenAI calls as generations to Langfuse.
 
-For more details, please refer to our [documentation](https://langfuse.com/docs/integrations/openai/python/get-started).
+For more details, please refer to our [documentation](https://langfuse.com/integrations/model-providers/openai-py).
 
 
 ```python
@@ -197,7 +197,7 @@ rap_battle("typography")
 
 Check out the docs to learn more about all components of this stack:
 - [LiteLLM Proxy](https://docs.litellm.ai/docs/)
-- [Langfuse OpenAI SDK Wrapper](https://langfuse.com/docs/integrations/openai/python/get-started)
+- [Langfuse OpenAI SDK Wrapper](https://langfuse.com/integrations/model-providers/openai-py)
 - [Langfuse @observe() decorator](https://langfuse.com/docs/sdk/python/decorators)
 - [Langfuse](https://langfuse.com/docs)
 

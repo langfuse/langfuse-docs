@@ -87,7 +87,7 @@ const config: DocsThemeConfig = {
 
     const description = frontMatter.description ?? "";
 
-    const title = frontMatter.title ?? pageTitle;
+    const title = frontMatter.seoTitle ?? frontMatter.title ?? pageTitle;
 
     const section = asPath.startsWith("/docs")
       ? "Docs"

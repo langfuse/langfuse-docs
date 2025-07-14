@@ -7,7 +7,7 @@ category: Integrations
 
 This is a cookbook with examples of the Langfuse Integration for Langchain (JS/TS).
 
-Follow the [integration guide](https://langfuse.com/docs/integrations/langchain) to add this integration to your Langchain project. The integration also supports Langchain Python.
+Follow the [integration guide](https://langfuse.com/integrations/frameworks/langchain) to add this integration to your Langchain project. The integration also supports Langchain Python.
 
 ## Setup
 

@@ -157,7 +157,7 @@ time_func(lambda: trace.event(name="perf-generation"))
 
 ## Langchain Integration
 
-Docs: https://langfuse.com/docs/integrations/langchain
+Docs: https://langfuse.com/integrations/frameworks/langchain
 
 
 ```python
@@ -229,7 +229,7 @@ langchain_stats_with_langfuse
 
 ## OpenAI Integration
 
-Docs: https://langfuse.com/docs/integrations/openai/python/get-started
+Docs: https://langfuse.com/integrations/model-providers/openai-py
 
 
 ```python
@@ -304,7 +304,7 @@ time_func(lambda: openai.chat.completions.create(
 
 ## LlamaIndex Integration
 
-Docs: https://langfuse.com/docs/integrations/llama-index
+Docs: https://langfuse.com/integrations/frameworks/llamaindex
 
 
 ```python

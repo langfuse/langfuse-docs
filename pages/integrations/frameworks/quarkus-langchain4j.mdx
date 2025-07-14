@@ -1,0 +1,132 @@
+---
+title: Integrating Langfuse with Quarkus LangChain4j Using OpenTelemetry
+sidebarTitle: Quarkus LangChain4j
+logo: /images/integrations/langchain4j_icon.svg
+description: Learn how to integrate Langfuse with Quarkus LangChain4j using OpenTelemetry for enhanced observability and performance monitoring in your AI applications.
+---
+
+# Integrating Langfuse with Quarkus LangChain4j
+
+This guide shows how to integrate [Langfuse](/) with [Quarkus LangChain4j](https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html) using OpenTelemetry.
+
+**Quarkus LangChain4j**: A [Quarkus](https://quarkus.io/) based integration of [LangChain4j](https://docs.langchain4j.dev/) for AI development with built-in OTel tracing for AI calls.
+
+**Langfuse**: Open source LLM engineering platform for observability, evals and prompt management.
+
+<Callout type="info" emoji="🐞">
+  Please raise an Issue on [GitHub](/issues) if you face any issues with this
+  integration.
+</Callout>
+
+## Step 1: Enable OpenTelemetry in Quarkus LangChain4j
+
+**Add Quarkus OpenTelemetry Dependency** (Maven):
+
+For Maven, add the following to your `pom.xml` (Gradle users can include equivalent coordinates in Gradle):
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-opentelemetry</artifactId>
+</dependency>
+```
+
+**Configure OpenTelemetry exporter** (`application.properties`):
+
+```properties
+quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
+```
+
+With these configurations and dependencies in place, your Quarkus application is ready to produce OpenTelemetry traces. Quarkus LangChain4j internal calls (e.g. when you invoke a chat model) will be recorded as spans.
+
+Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc.
+In order to enable events for the prompt and response content you need to activate the langchain4j prompt tracing.
+
+**Configure Langchain4j prompt tracing** (`application.properties`):
+
+```properties
+quarkus.langchain4j.tracing.include-prompt=true
+quarkus.langchain4j.tracing.include-completion=true
+```
+
+## Step 2: Configure Langfuse
+
+Now that your Quarkus application is emitting OpenTelemetry trace data, the next step is to direct that data to Langfuse.
+
+Langfuse will act as the “backend” for OpenTelemetry in this setup – essentially replacing a typical Jaeger/Zipkin/OTel-Collector with Langfuse’s trace ingestion API.
+
+**Langfuse Setup**
+
+- Sign up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosted Langfuse](https://langfuse.com/self-hosting).
+- Set the OTLP endpoint (e.g. `https://cloud.langfuse.com/api/public/otel`) and API keys.
+
+<Tabs items={["Env Variables", "Configuration in `application.properties`"]}>
+<Tab>
+
+Configure these via environment variables:
+
+```bash
+QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: set this to the Langfuse OTLP URL (e.g. https://cloud.langfuse.com/api/public/otel).
+QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 public:secret>.
+```
+
+</Tab>
+<Tab>
+
+Making the following configuration in `application.properties`:
+
+```bash
+quarkus.otel.exporter.otlp.headers=Authorization=Basic <base64 of public:key>
+quarkus.otel.exporter.otlp.endpoint=https://cloud.langfuse.com/api/public/otel
+quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
+```
+
+</Tab>
+</Tabs>
+
+<Callout type="info">
+  You can find more on authentication via Basic Auth
+  [here](/docs/opentelemetry/get-started).
+</Callout>
+
+## Step 3: Run a Test AI Operation
+
+Start your Quarkus application. Trigger an AI operation that Quarkus LangChain4j handles – for example, call a service or controller that uses a `ChatModel` to generate a completion.
+
+**Note**: A complete example can be found [here](https://github.com/langfuse/langfuse-examples/tree/main/applications/quarkus-langchain4j-demo)
+
+```java
+@RegisterAiService(tools = EmailService.class)
+public interface MyAiService {
+
+    /**
+     * Ask the LLM to create a poem about the given topic.
+     *
+     * @param topic the topic of the poem
+     * @param lines the number of line of the poem
+     * @return the poem
+     */
+    @SystemMessage("You are a professional poet")
+    @UserMessage("""
+            Write a single poem about {topic}. The poem should be {lines} lines long and your response should only include the poem itself, nothing else.
+            Then send this poem by email. Your response should include the poem.
+            """)
+    String writeAPoem(String topic, int lines);
+
+}
+
+@Singleton
+public class Startup {
+
+    public void writeAPoem(@Observes StartupEvent event, MyAiService service) {
+        System.out.println(service.writeAPoem("Langfuse", 4));
+    }
+}
+```
+
+## Troubleshooting
+
+**No Traces:**
+
+- Check the logs of the application for potential clues
+- Check [Troubleshooting](https://langfuse.com/self-hosting/troubleshooting#missing-events-after-post-apipublicingestion) page

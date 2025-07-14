@@ -34,7 +34,7 @@ This means:
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
 <Tab>
 
 ```python
@@ -149,7 +149,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai)
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py)
 
 Python SDK v3:
 
@@ -205,7 +205,7 @@ const openai = observeOpenAI(new OpenAI(), {
 });
 ```
 
-See [OpenAI Integration (JS/TS)](/docs/integrations/openai/js/get-started) for more details.
+See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
 
 </Tab>
 
@@ -241,13 +241,13 @@ const handler = new CallbackHandler({
 });
 ```
 
-See [Langchain Integration (JS/TS)](/docs/integrations/langchain/tracing) for more details.
+See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more details.
 
 </Tab>
 
 <Tab>
 
-When using the [Vercel AI SDK Integration](/docs/integrations/vercel-ai-sdk)
+When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sdk)
 
 ```ts filename="instrumentation.ts" {/environment: "production"/}
 import { registerOTel } from "@vercel/otel";
@@ -259,25 +259,6 @@ export function register() {
     traceExporter: new LangfuseExporter({ environment: "production" }),
   });
 }
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-</Callout>
-
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started)
-
-```python
-import os
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
-instrumentor = LlamaIndexInstrumentor(environment="production")
 ```
 
 </Tab>

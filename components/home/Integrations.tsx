@@ -89,7 +89,7 @@ export default function Integrations() {
         description="SDKs for Python & JS/TS and native integrations for popular libraries. Missing an integration? Let us know!"
         buttons={[
           {
-            href: "/docs/integrations/overview",
+            href: "/integrations",
             text: "Integration docs",
           },
         ]}
@@ -121,7 +121,7 @@ export default function Integrations() {
             <Circle
               ref={inOpenAiRef}
               title="OpenAI SDK"
-              href="/docs/integrations/openai/get-started"
+              href="/integrations/model-providers/openai-py"
             >
               <IconOpenai className="h-7 w-7" />
             </Circle>
@@ -130,7 +130,7 @@ export default function Integrations() {
             <Circle
               ref={inLangchainRef}
               title="Langchain"
-              href="/docs/integrations/langchain/tracing"
+              href="/integrations/frameworks/langchain"
             >
               <Image
                 src={LangchainIcon}
@@ -144,7 +144,7 @@ export default function Integrations() {
             <Circle
               ref={inLlamaindexRef}
               title="Llama-Index"
-              href="/docs/integrations/llama-index/get-started"
+              href="/integrations/frameworks/llamaindex"
             >
               <Image
                 src={LlamaindexIcon}
@@ -166,7 +166,7 @@ export default function Integrations() {
             <Circle
               ref={inLitellmRef}
               title="LiteLLM (proxy)"
-              href="/docs/integrations/litellm/tracing"
+              href="/integrations/gateways/litellm"
             >
               <Image
                 src={LitellmIcon}
@@ -180,7 +180,7 @@ export default function Integrations() {
             <Circle
               ref={inHaystackRef}
               title="Haystack"
-              href="/docs/integrations/haystack"
+              href="/integrations/frameworks/haystack"
             >
               <Image
                 src={HaystackIcon}
@@ -199,7 +199,7 @@ export default function Integrations() {
             <Circle
               ref={inMoreRef}
               title="DSPy, Dify, Flowise, Langflow, Instructor, Vercel AI SDK, Mirascope, ..."
-              href="/docs/integrations/overview"
+              href="/integrations"
             >
               <MoreHorizontal className="h-5 w-5" />
             </Circle>

@@ -33,7 +33,7 @@ os.environ["OPENAI_API_TYPE"] = "azure"
 os.environ["OPENAI_API_VERSION"] = "2023-09-01-preview"
 ```
 
-We'll use the native Langfuse intgeration for Langchain. Learn more it in the [documentation](https://langfuse.com/docs/integrations/langchain).
+We'll use the native Langfuse integration for Langchain. Learn more it in the [documentation](https://langfuse.com/integrations/frameworks/langchain).
 
 
 ```python
