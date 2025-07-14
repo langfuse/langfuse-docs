@@ -27,8 +27,19 @@ Langfuse accepts the following environment variables to fine-tune your Redis usa
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 | Variable                  | Required / Default | Description                                                                                        |
-| ------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+|---------------------------|--------------------|----------------------------------------------------------------------------------------------------|
 | `REDIS_CONNECTION_STRING` | Required           | Redis connection string with format `redis[s]://[[username][:password]@][host][:port][/db-number]` |
+
+### Cache Configuration Options
+
+Langfuse supports caching for API keys and prompts to improve performance. The following environment variables control caching behavior:
+
+| Variable                             | Required / Default | Description                                                                                                                                                 |
+|--------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `LANGFUSE_CACHE_API_KEY_ENABLED`     | `true`             | Enable or disable API key caching. Set to `false` to disable caching of API keys. Plain-text keys are never stored in Redis, only hashed or encrypted keys. |
+| `LANGFUSE_CACHE_API_KEY_TTL_SECONDS` | `300`              | Time-to-live (TTL) in seconds for cached API keys. Determines how long API keys remain in the cache before being refreshed.                                 |
+| `LANGFUSE_CACHE_PROMPT_ENABLED`      | `true`             | Enable or disable prompt caching. Set to `false` to disable caching of prompts.                                                                             |
+| `LANGFUSE_CACHE_PROMPT_TTL_SECONDS`  | `300`              | Time-to-live (TTL) in seconds for cached prompts. Determines how long prompts remain in the cache before being refreshed.                                   |
 
 OR
 
