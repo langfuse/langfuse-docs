@@ -10,7 +10,7 @@ import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain
 import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
 import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
 
-# Integration: LangChain (Python & JS/TS)
+# Observability & Tracing for Langchain (Python & JS/TS)
 
 [Langfuse Tracing](/docs/tracing) integrates with Langchain using Langchain Callbacks ([Python](https://python.langchain.com/docs/how_to/#callbacks), [JS](https://js.langchain.com/docs/how_to/#callbacks)). The Langfuse SDK automatically captures detailed traces of your Langchain executions, creating properly nested observations for chains, LLMs, tools, and retrievers. This allows you to monitor, analyze and debug your LangChain applications with full observability.
 
@@ -366,6 +366,8 @@ await chain.invoke(
 <Tabs items={["Python SDK v3", "JS/TS"]}>
 <Tab>
 
+To score a Langchain execution, you can capture the trace ID for the score by either wrapping the execution in a span that sets a predefined trace ID, or retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
+
 ```python
 from langfuse import get_client, Langfuse
 from langfuse.langchain import CallbackHandler
@@ -397,6 +399,7 @@ with langfuse.start_as_current_span(
     span.update_trace(output={"response": response})
 
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
+print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
 ```
 
 </Tab>
