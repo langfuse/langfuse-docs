@@ -202,16 +202,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-all",
+    key: "town-hall-2025-07-16",
     dismissible: true,
     content: (
-      <Link href="/blog/2025-06-04-open-sourcing-langfuse-product">
+      <Link href="https://lu.ma/esj3f95s">
         {/* mobile */}
-        <span className="sm:hidden">Doubling Down on Open Source →</span>
+        <span className="sm:hidden">Langfuse Town Hall on Wednesday →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Doubling Down on Open Source: All Product Features Now in Self-Hosted
-          →
+        Langfuse Town Hall on Wednesday - New Features and Q3 Roadmap →
         </span>
       </Link>
     ),
