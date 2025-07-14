@@ -8,39 +8,13 @@ export default {
   index: "Overview",
   "core-features": "Core Features",
   demo: "Interactive Demo",
-  "-- Tracing": {
+  "-- Core": {
     type: "separator",
-    title: "Tracing",
+    title: "Core Features",
   },
-  tracing: "Introduction",
-  "tracing-data-model": "Data Model",
-  "get-started": "Quickstart",
-  "tracing-features": "Tracing Features",
-  sdk: "SDKs",
-  "tracing-integrations": {
-    title: "Integrations ↗",
-    href: "/integrations",
-  },
-  opentelemetry: "OpenTelemetry",
-  "model-usage-and-cost": "LLM Usage & Cost Tracking",
-  analytics: "Production Analytics",
-  "query-traces": "Query Traces",
-
-  "-- Develop": {
-    type: "separator",
-    title: "Develop",
-  },
-  prompts: "Prompt Management",
-  playground: "Playground",
-  security: "LLM Security",
-  "fine-tuning": "Fine-tuning",
-
-  "-- Evaluation": {
-    type: "separator",
-    title: "Evaluation",
-  },
-  scores: "Evaluation",
-  datasets: "Datasets & Experiments",
+  tracing: "Tracing",
+  "prompt-management": "Prompt Management",
+  evaluation: "Evaluation",
 
   "-- References": {
     type: "separator",
