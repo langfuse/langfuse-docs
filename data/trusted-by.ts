@@ -30,7 +30,7 @@ export const trustedByData: TrustedByData = {
     "Enterprise": [
       { name: "Cinc Systems", logo: "/images/customers/picing-logos/cincsystems.png" },
       { name: "HG Capital", logo: "/images/customers/picing-logos/hgcapital.png" },
-      { name: "Dixa", logo: "/images/customers/picing-logos/dixa.png" },
+      //{ name: "Dixa", logo: "/images/customers/picing-logos/dixa.png" },
     ],
   },
 }; 
