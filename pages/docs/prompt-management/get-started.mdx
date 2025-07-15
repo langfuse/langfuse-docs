@@ -22,7 +22,7 @@ import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
 ### Use prompt [#use-prompt]
 
-At runtime, you can fetch the latest production version from Langfuse.
+At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/data-model).
 
 <Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
@@ -44,17 +44,6 @@ compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-Chat prompts
-
-```python
-# Get current `production` version of a chat prompt
-chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg infers the prompt type (default is 'text')
-
-# Insert variables into chat prompt template
-compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
-# -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
-```
-
 </Tab>
 <Tab>
 
@@ -72,6 +61,9 @@ compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> "As an expert movie critic, do you like Dune 2?"
 ```
 
+</Tab>
+</Tabs>
+
 Chat prompts
 
 ```python
@@ -82,9 +74,6 @@ chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat") # type arg i
 compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
-
-</Tab>
-</Tabs>
 
 Optional parameters
 
@@ -97,9 +86,6 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 
 # Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
 prompt = langfuse.get_prompt("movie-critic", label="latest")
-
-# Extend cache TTL from default 60 to 300 seconds
-prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 ```
 
 Attributes
@@ -164,11 +150,6 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   label: "latest",
 });
-
-// Extend cache TTL from default 1 to 5 minutes
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
-  cacheTtlSeconds: 300,
-});
 ```
 
 Attributes
@@ -225,9 +206,6 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 
 # Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
 prompt = langfuse.get_prompt("movie-critic", label="latest")
-
-# Extend cache TTL from default 60 to 300 seconds
-prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 ```
 
 Attributes
@@ -292,11 +270,6 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 const prompt = await langfuse.getPrompt("movie-critic", undefined, {
   label: "latest",
 });
-
-// Extend cache TTL from default 1 to 5 minutes
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
-  cacheTtlSeconds: 300,
-});
 ```
 
 Attributes
@@ -316,8 +289,6 @@ prompt.config;
 ### Link with Langfuse Tracing (optional)
 
 Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a [fallback prompt](#fallback) is used, no link will be created.
-
-This is currently unavailable when using the LlamaIndex integration.
 
 <Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>

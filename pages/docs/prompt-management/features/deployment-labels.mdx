@@ -54,7 +54,83 @@ await langfuse.updatePrompt({
 </Tab>
 </Tabs>
 
-### Protected prompt labels
+## Fetching prompts with specific labels or versions
+
+Once you have assigned labels to prompt versions, you can fetch them using the SDK:
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+
+# Get specific version
+prompt = langfuse.get_prompt("movie-critic", version=1)
+
+# Get specific label
+prompt = langfuse.get_prompt("movie-critic", label="staging")
+
+# Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+prompt = langfuse.get_prompt("movie-critic", label="latest")
+```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse()
+
+# Get specific version
+prompt = langfuse.get_prompt("movie-critic", version=1)
+
+# Get specific label
+prompt = langfuse.get_prompt("movie-critic", label="staging")
+
+# Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+prompt = langfuse.get_prompt("movie-critic", label="latest")
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+
+// Initialize the Langfuse client
+const langfuse = new Langfuse();
+
+// Get specific version of a prompt (here version 1)
+const prompt = await langfuse.getPrompt("movie-critic", 1);
+
+// Get specific label
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "staging",
+});
+
+// Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "latest",
+});
+```
+
+</Tab>
+
+</Tabs>
+
+## Protected prompt labels
 
 <AvailabilityBanner
   availability={{
