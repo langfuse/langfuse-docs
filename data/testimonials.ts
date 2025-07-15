@@ -121,7 +121,7 @@ export const testimonials: Testimonial[] = [
     id: "14",
     name: "Max Prilutskiy",
     handle: "@MaxPrilutskiy",
-    avatar: "/images/walloflove/maxprilutskiy.jpg",
+    avatar: "/images/walloflove/MaxPrilutskiy.jpg",
     platform: "producthunt",
     content: "Extremely reliable LLM Engineering Platform.",
     postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=262381",
