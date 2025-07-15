@@ -1660,6 +1660,15 @@ export default function Pricing({
                     "relative h-full flex flex-col"
                   )}
                 >
+                  {/* Unlimited Users callout for Core and Pro */}
+                  {variant === "cloud" && (tier.name === "Core" || tier.name === "Pro") && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium">
+                        Unlimited Users
+                      </div>
+                    </div>
+                  )}
+                  
                   <CardHeader className="p-4 lg:p-6 text-left">
                     <CardTitle className="text-lg text-foreground font-semibold">
                       {tier.name}
@@ -1702,18 +1711,31 @@ export default function Pricing({
                         >
                           <Link href={tier.href}>{tier.cta}</Link>
                         </Button>
-                        <div className="mt-2 h-[20px]" />
                       </>
                     )}
+                    
+                    {/* Startup discount callout for Core and Pro - always render container for alignment */}
+                    <div className="mt-3 h-[52px] flex items-center justify-center">
+                      {variant === "cloud" && (tier.name === "Core" || tier.name === "Pro") ? (
+                        <div className="px-3 py-2 bg-muted/30 rounded-md border border-muted/50">
+                          <div className="text-xs text-muted-foreground text-center">
+                            <span className="font-medium text-foreground">Startup?</span>{" "}
+                            <Link href="/startups" className="underline hover:text-primary">
+                              Get 50% off
+                            </Link>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
                   </CardContent>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
-                    <div>
+                    <div className="h-[60px] flex flex-col justify-start">
                       <span className="font-bold text-3xl">{tier.price}</span>
-                      {tier.price.includes("$") && (
-                        <span className="text-sm leading-4 mt-2">
-                          {tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month"}
-                        </span>
-                      )}
+                      <span className="text-sm leading-4 mt-1">
+                        {tier.price.includes("$") 
+                          ? (tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month")
+                          : " "}
+                      </span>
                     </div>
                     <ul className="mt-3 space-y-2.5 text-sm">
                       {tier.mainFeatures.map((feature) => (
@@ -1981,12 +2003,12 @@ const discounts = [
     },
   },
   {
-    name: "Education / Non-profits",
+    name: "Education / Non-profits / Students",
     description: "Up to 100% off, limits apply",
   },
   {
     name: "Open-source projects",
-    description: "USD 300 in credits, first year",
+    description: "USD 300 in credits / month, first year",
   },
 ];
 

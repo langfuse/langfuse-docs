@@ -1,0 +1,54 @@
+---
+title: Observability and Tracing for Langdock Assistants
+sidebarTitle: Langdock
+logo: /images/integrations/langdock_icon.svg
+description: "Langdock is an enterprise-ready AI platform for creating private assistants in minutes—no code required. Deploy via secure chat, Slack, or API. When connected to Langfuse, every assistant execution is automatically traced and visualized."
+---
+
+# Langdock Integration
+
+> **Langdock** is an enterprise-ready AI platform for creating private assistants in minutes—no code required. Deploy via secure chat, Slack, or API.
+
+When connected to Langfuse, every Langdock assistant execution is automatically traced and visualized.
+
+## Setup
+
+<Steps>
+
+### Get Langfuse API keys
+
+1. Sign up at [cloud.langfuse.com](https://cloud.langfuse.com) or self-host your own instance
+2. Go to **Project → Settings → API Keys** and copy your keys
+
+### Add Langfuse as logging provider in Langdock Assistant Settings
+
+1. Open the Langdock `Workspace Settings`
+2. Navigate to `Assistants` settings
+3. Enable `Allow assistant logs`
+4. Add your Langfuse host as `Tracing cloud URL`, e.g. `https://cloud.langfuse.com` or `https://us.cloud.langfuse.com`
+
+<Frame border>
+  ![Enable assistant logs in
+  Langdock](/images/docs/langdock_1_enable_assistant_logs.png)
+</Frame>
+
+### Enable tracing when creating an assistant
+
+1. Open **Assistants** → **New assistant** in Langdock
+2. Configure your assistant
+3. `Enable Langfuse tracing` and add your Langfuse keys
+4. Click `Save`
+
+<Frame border>
+  ![Enable tracing for assistant in
+  Langdock](/images/docs/langdock_2_enable_tracing_for_assistant.png)
+</Frame>
+
+</Steps>
+
+Your assistant conversations will now stream traces to Langfuse automatically.
+
+## Resources
+
+- [Langdock Documentation](https://docs.langdock.com)
+- [Langfuse Tracing Documentation](/docs/tracing)
