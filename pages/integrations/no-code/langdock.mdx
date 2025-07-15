@@ -1,15 +1,15 @@
 ---
-title: "Observability and Tracing for Langdock"
+title: Observability and Tracing for Langdock Assistants
 sidebarTitle: Langdock
 logo: /images/integrations/langdock_icon.svg
-description: "Enterprise-ready AI platform with no-code assistant builder. Automatically capture detailed traces and metrics for every assistant execution with Langfuse integration."
+description: "Langdock is an enterprise-ready AI platform for creating private assistants in minutes—no code required. Deploy via secure chat, Slack, or API. When connected to Langfuse, every assistant execution is automatically traced and visualized."
 ---
 
 # Langdock Integration
 
-**Langdock** is an enterprise-ready AI platform for creating private assistants in minutes—no code required. Deploy via secure chat, Slack, or API.
+> **Langdock** is an enterprise-ready AI platform for creating private assistants in minutes—no code required. Deploy via secure chat, Slack, or API.
 
-When connected to Langfuse, every assistant execution is automatically traced and visualized.
+When connected to Langfuse, every Langdock assistant execution is automatically traced and visualized.
 
 ## Setup
 
@@ -17,13 +17,26 @@ When connected to Langfuse, every assistant execution is automatically traced an
 
 ### Get Langfuse API keys
 
-1. Sign up at [cloud.langfuse.com](https://cloud.langfuse.com)
+1. Sign up at [cloud.langfuse.com](https://cloud.langfuse.com) or self-host your own instance
 2. Go to **Project → Settings → API Keys** and copy your keys
 
-### Create an assistant in Langdock
+### Add Langfuse as logging provider in Langdock Assistant Settings
+
+1. Open the Langdock `Workspace Settings`
+2. Navigate to `Assistants` settings
+3. Enable `Allow assistant logs`
+4. Add your Langfuse host as `Tracing cloud URL`, e.g. `https://cloud.langfuse.com` or `https://us.cloud.langfuse.com`
+
+// img 1
+
+### Enable tracing when creating an assistant
 
 1. Open **Assistants** → **New assistant** in Langdock
-2. Configure your assistant and click **Save**
+2. Configure your assistant
+3. `Enable Langfuse tracing` and add your Langfuse keys
+4. Click `Save`
+
+// img 2
 
 ### Connect Langfuse
 
