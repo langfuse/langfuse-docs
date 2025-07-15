@@ -69,6 +69,7 @@ export const WallOfLove = () => {
   const getButtonText = () => {
     if (cardsPerColumn === CARDS_CONFIG.INITIAL) return 'Show more';
     if (cardsPerColumn === CARDS_CONFIG.EXPANDED) return 'Show all';
+    if (cardsPerColumn === CARDS_CONFIG.ALL) return 'Show less';
     return null;
   };
 
@@ -77,6 +78,8 @@ export const WallOfLove = () => {
       setCardsPerColumn(CARDS_CONFIG.EXPANDED);
     } else if (cardsPerColumn === CARDS_CONFIG.EXPANDED) {
       setCardsPerColumn(CARDS_CONFIG.ALL);
+    } else if (cardsPerColumn === CARDS_CONFIG.ALL) {
+      setCardsPerColumn(CARDS_CONFIG.INITIAL);
     }
   };
 
