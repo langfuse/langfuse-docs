@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useState, useMemo } from "react";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
-import { testimonials, type Testimonial } from "../../data/testimonials";
+import { testimonials } from "../../data/testimonials";
 
 const PLATFORMS = {
   xcom: {

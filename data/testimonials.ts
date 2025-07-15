@@ -3,7 +3,7 @@ export interface Testimonial {
   name: string;
   handle: string;
   avatar: string;
-  platform: "xcom" | "producthunt" | "github";
+  platform: "xcom" | "producthunt";
   content: string;
   postURL?: string;
 }
