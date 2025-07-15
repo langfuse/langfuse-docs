@@ -1,0 +1,24 @@
+```sh
+npm install langfuse openai
+```
+
+Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+<EnvJS />
+
+With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
+
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const openai = observeOpenAI(new OpenAI());
+
+const res = await openai.chat.completions.create({
+    messages: [{ role: "system", content: "Tell me a story about a dog." }],
+    model: "gpt-4o",
+    max_tokens: 300,
+});
+```

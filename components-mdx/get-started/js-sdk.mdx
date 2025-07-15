@@ -1,0 +1,68 @@
+```bash
+npm i langfuse
+```
+<Tabs items={["Environment variables", "Constructor parameters"]}>
+<Tab>
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-...";
+LANGFUSE_PUBLIC_KEY = "pk-lf-...";
+LANGFUSE_BASEURL = "https://cloud.langfuse.com"; 🇪🇺 EU region
+# LANGFUSE_BASEURL = "https://us.cloud.langfuse.com"; 🇺🇸 US region
+```
+
+```ts
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+const langfuse = new Langfuse();
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+const langfuse = new Langfuse({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+
+  // optional
+  release: "v1.0.0",
+  requestTimeout: 10000,
+  enabled: true, // set to false to disable sending events
+});
+```
+
+</Tab>
+</Tabs>
+
+
+```ts filename="server.ts"
+const trace = langfuse.trace({
+  name: "my-AI-application-endpoint",
+});
+
+// Example generation creation
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-4o",
+  input: messages,
+});
+
+// Application code
+const chatCompletion = await llm.respond(prompt);
+
+// End generation - sets endTime
+generation.end({
+  output: chatCompletion,
+});
+```
+
+<Callout type="info">
+  In short-lived environments (e.g. serverless functions), make sure to always
+  call `langfuse.shutdownAsync()` at the end to await all pending requests.
+  ([Learn more](#lambda))
+</Callout>
