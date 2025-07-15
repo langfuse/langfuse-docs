@@ -16,7 +16,6 @@ interface Testimonial {
 const platformLogos = {
   xcom: "/images/xcom.png",
   producthunt: "/images/producthunt.png",
-  github: "🐙", // Keep emoji for GitHub since no logo provided
 };
 
 const platformColors = {
@@ -59,7 +58,7 @@ const testimonials: Testimonial[] = [
   {
     id: "1",
     name: "Manu Hortet",
-    handle: "",
+    handle: "Foudner at Producta",
     avatar: "/images/walloflove/manuhortet.avif",
     platform: "producthunt",
     content: "Complete and simple, sweet product. We also love it is open source!",
@@ -67,30 +66,30 @@ const testimonials: Testimonial[] = [
   },
   {
     id: "2",
+    name: "Boris Arzentar",
+    handle: "Co-founder of Cognee",
+    avatar: "/images/walloflove/boris.avif",
+    platform: "producthunt",
+    content: "Langfuse is our choice when observability and tracing are the key. Our clients love their tool and we do too!",
+    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=301582",
+  },
+  {
+    id: "3",
+    name: "Dave Wilson",
+    handle: "Supabase",
+    avatar: "/images/walloflove/davewilson.avif",
+    platform: "producthunt",
+    content: "Brilliant product, this team is smashing it!",
+    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=762527",
+  },
+  {
+    id: "4",
     name: "Viktor Sarstrom",
     handle: "@viktorsarstrom",
     avatar: "/images/walloflove/vicstor.jpg",
     platform: "xcom",
     content: "@langfuse is goat llm observability 🐐",
     postURL: "https://x.com/viktorsarstrom/status/1941093292319670527",
-  },
-  {
-    id: "3",
-    name: "Nadeesha Cabral",
-    handle: "",
-    avatar: "/images/walloflove/nadeesha.png",
-    platform: "producthunt",
-    content: "Langfuse is the easiest way to add observability to your AI stack. We use Langfuse ourselves, and have a native integration for our customers to push their spans to Langfuse as well.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=209822",
-  },
-  {
-    id: "4",
-    name: "Jackson Golden",
-    handle: "AI Engineer",
-    avatar: "/images/walloflove/jackson.avif",
-    platform: "producthunt",
-    content: "Easy to use -- it \"just works\". Great open-source experience as well.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1105948",
   },
   {
     id: "5",
@@ -103,17 +102,17 @@ const testimonials: Testimonial[] = [
   },
   {
     id: "6",
-    name: "Dave Wilson",
-    handle: "",
-    avatar: "/images/walloflove/davewilson.avif",
+    name: "Nadeesha Cabral",
+    handle: "SVP of Engineering",
+    avatar: "/images/walloflove/nadeesha.png",
     platform: "producthunt",
-    content: "Brilliant product, this team is smashing it!",
-    postURL: "https://www.producthunt.com/@sausagebutty/upvotes",
+    content: "Langfuse is the easiest way to add observability to your AI stack. We use Langfuse ourselves, and have a native integration for our customers to push their spans to Langfuse as well.",
+    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=209822",
   },
   {
     id: "7",
     name: "Roman Geugelin",
-    handle: "Startup founder & tech enthusiast",
+    handle: "@RGeugelin",
     avatar: "/images/walloflove/RomanGeugelin.avif",
     platform: "producthunt",
     content: "Best LLM engineering platform out there by far. The speed with which they ship and how close they are to the community is mindblowing.",
@@ -121,12 +120,12 @@ const testimonials: Testimonial[] = [
   },
   {
     id: "8",
-    name: "Boris Arzentar",
-    handle: "Co-founder of Cognee",
-    avatar: "/images/walloflove/boris.avif",
+    name: "Jackson Golden",
+    handle: "AI Engineer",
+    avatar: "/images/walloflove/jackson.avif",
     platform: "producthunt",
-    content: "Langfuse is our choice when observability and tracing are the key. Our clients love their tool and we do too!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=301582",
+    content: "Easy to use -- it \"just works\". Great open-source experience as well.",
+    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1105948",
   },
   {
     id: "9",
@@ -176,7 +175,7 @@ const testimonials: Testimonial[] = [
   {
     id: "15",
     name: "Philipp Hövelmann",
-    handle: "",
+    handle: "Founder at Cortea AI",
     avatar: "/images/walloflove/PhilippHoevelmann.jpeg",
     platform: "producthunt",
     content: "Langfuse has been indispensable for us in leveraging LLMs. Its detailed tracing provides unrivaled clarity, streamlining our debug times and offering insights into both LLM and non-LLM actions. [...] It's the must-have tool for anyone in the LLM space.",
@@ -194,7 +193,7 @@ const testimonials: Testimonial[] = [
   {
     id: "17",
     name: "Fenil Suchak",
-    handle: "",
+    handle: "@fenilsuchak",
     avatar: "/images/walloflove/FenilSuchak.avif",
     platform: "producthunt",
     content: "LLM observability platform that just works!",
@@ -212,7 +211,7 @@ const testimonials: Testimonial[] = [
   {
     id: "19",
     name: "Maurice Burger",
-    handle: "",
+    handle: "Co-Founder @ Atla (YC S23)",
     avatar: "/images/walloflove/maurice.avif",
     platform: "producthunt",
     content: "These guys keep building really cool stuff!",
@@ -221,49 +220,56 @@ const testimonials: Testimonial[] = [
 ];
 
 export const WallOfLove = () => {
-  const [showAmount, setShowAmount] = useState<'third' | 'twoThirds' | 'all'>('third');
+  const [cardsPerColumn, setCardsPerColumn] = useState(3);
   
-  const getTestimonialsToShow = () => {
-    if (showAmount === 'third') return testimonials.slice(0, 6);
-    if (showAmount === 'twoThirds') return testimonials.slice(0, 12);
-    return testimonials;
+  // Split testimonials into 3 columns
+  const getColumns = () => {
+    const columns = [[], [], []];
+    testimonials.forEach((testimonial, index) => {
+      columns[index % 3].push(testimonial);
+    });
+    return columns;
   };
 
+  const columns = getColumns();
+  const maxCardsPerColumn = Math.ceil(testimonials.length / 3);
+
   const getButtonText = () => {
-    if (showAmount === 'third') return 'Show more';
-    if (showAmount === 'twoThirds') return 'Show all';
+    if (cardsPerColumn === 3) return 'Show more';
+    if (cardsPerColumn === 5) return 'Show all';
     return null;
   };
 
   const handleShowMore = () => {
-    if (showAmount === 'third') {
-      setShowAmount('twoThirds');
-    } else if (showAmount === 'twoThirds') {
-      setShowAmount('all');
+    if (cardsPerColumn === 3) {
+      setCardsPerColumn(5);
+    } else if (cardsPerColumn === 5) {
+      setCardsPerColumn(maxCardsPerColumn);
     }
   };
-
-  const testimonialsToShow = getTestimonialsToShow();
 
   return (
     <HomeSection>
       <Header
         title="Join the community"
-        description="80.000+ people built on Langfuse."
+        description="80.000+ people have built on Langfuse."
         buttons={[
-          { href: "/docs/get-started", text: "Get started" },
+          { href: "https://x.com/langfuse", text: "Follow @langfuse", target: "_blank" },
+          { href: "https://x.com/compose/post", text: "Share some love", target: "_blank" }
         ]}
       />
 
       {/* Testimonials Grid */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
-          {testimonialsToShow.map((testimonial) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {columns.map((column, columnIndex) => (
+          <div key={columnIndex} className="flex flex-col gap-4">
+            {column.slice(0, cardsPerColumn).map((testimonial) => (
             <a
               key={testimonial.id}
               href={testimonial.postURL}
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-card border rounded-lg p-6 break-inside-avoid mb-6  hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
+              className="block bg-card border rounded-lg p-6 break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
             >
               {/* Profile Header */}
               <div className="flex items-start gap-3 mb-4">
@@ -310,8 +316,10 @@ export const WallOfLove = () => {
                 {renderContent(testimonial.content, testimonial.platform, testimonial.postURL)}
               </p>
             </a>
-          ))}
-        </div>
+            ))}
+          </div>
+        ))}
+      </div>
 
       {/* Show More Button */}
       {getButtonText() && (
