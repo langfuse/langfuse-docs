@@ -30,6 +30,12 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +47,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/router";
+import { trustedByData } from "@/data/trusted-by";
 
 // Graduated pricing tiers
 const pricingTiers = [
@@ -437,7 +444,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Includes access to more history, usage and unlimited users.",
+        "For production projects. Longer data retention and unlimited users.",
       price: "$59",
       priceDiscountCta: {
         name: "Discounts available",
@@ -1673,7 +1680,7 @@ export default function Pricing({
                     <CardTitle className="text-lg text-foreground font-semibold">
                       {tier.name}
                     </CardTitle>
-                    <CardDescription className="text-left md:min-h-20 lg:min-h-16">
+                    <CardDescription className="text-left">
                       {tier.description}
                       {tier.learnMore && (
                         <>
@@ -1686,58 +1693,109 @@ export default function Pricing({
                       )}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="p-0 px-4 lg:px-6 mb-4">
-                    {tier.ctaCallout ? (
-                      <div className="flex gap-2">
-                        <Button
-                          className="flex-1"
-                          variant={tier.featured ? "default" : "outline"}
-                          asChild
-                        >
-                          <Link href={tier.href}>{tier.cta}</Link>
-                        </Button>
-                        <Button className="flex-1" variant="secondary" asChild>
-                          <Link href={tier.ctaCallout.href}>
-                            {tier.ctaCallout.text}
-                          </Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <Button
-                          className="w-full"
-                          variant={tier.featured ? "default" : "outline"}
-                          asChild
-                        >
-                          <Link href={tier.href}>{tier.cta}</Link>
-                        </Button>
-                      </>
-                    )}
+                  <CardContent className="p-0 px-4 lg:px-6">
+                    {/* Price information */}
+                    <div className="h-[60px] flex items-baseline">
+                      <span className="font-bold text-3xl">{tier.price}</span>
+                      <span className="text-sm leading-4 ml-1">
+                        {tier.price.includes("$") 
+                          ? (tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month")
+                          : ""}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      {tier.ctaCallout ? (
+                        <div className="flex gap-2">
+                          <Button
+                            className="flex-1"
+                            variant={tier.featured ? "default" : "outline"}
+                            asChild
+                          >
+                            <Link href={tier.href}>{tier.cta}</Link>
+                          </Button>
+                          <Button className="flex-1" variant="secondary" asChild>
+                            <Link href={tier.ctaCallout.href}>
+                              {tier.ctaCallout.text}
+                            </Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <Button
+                            className="w-full"
+                            variant={tier.featured ? "default" : "outline"}
+                            asChild
+                          >
+                            <Link href={tier.href}>{tier.cta}</Link>
+                          </Button>
+                        </>
+                      )}
+                    </div>
                     
                     {/* Startup discount callout for Core and Pro - always render container for alignment */}
-                    <div className="mt-3 h-[52px] flex items-center justify-center">
+                    <div className="p-6 h-[30px] flex items-center justify-center">
                       {variant === "cloud" && (tier.name === "Core" || tier.name === "Pro") ? (
-                        <div className="px-3 py-2 bg-muted/30 rounded-md border border-muted/50">
-                          <div className="text-xs text-muted-foreground text-center">
-                            <span className="font-medium text-foreground">Startup?</span>{" "}
-                            <Link href="/startups" className="underline hover:text-primary">
-                              Get 50% off
-                            </Link>
-                          </div>
+                        <div className="text-xs text-muted-foreground text-center">
+                          <Link href="/startups" className="underline hover:text-primary">
+                            Startup? Get 50% off
+                          </Link>
                         </div>
                       ) : null}
                     </div>
-                  </CardContent>
+                    
+                                                              </CardContent>
+                    
+                    {/* Trusted by section for cloud tiers */}
+                    {variant === "cloud" && (
+                      <>
+                        <div className="border-t"></div>
+                        <div className="px-4 lg:px-6 h-[64px] flex items-center">
+                          <div className="flex items-center w-full">
+                            <div className="text-xs text-muted-foreground">
+                              Trusted by:
+                            </div>
+                            <div className="flex items-center pl-4">
+                              {trustedByData.cloud[tier.name] && trustedByData.cloud[tier.name].length > 0 ? (
+                                <TooltipProvider delayDuration={200}>
+                                  <div className="flex items-center">
+                                    {trustedByData.cloud[tier.name].map((customer, index) => (
+                                      <Tooltip key={index}>
+                                        <TooltipTrigger asChild>
+                                          <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-200 hover:scale-125 hover:z-50 cursor-pointer shadow-md"
+                                            style={{
+                                              marginLeft: index > 0 ? '-10px' : '0',
+                                              zIndex: trustedByData.cloud[tier.name].length - index,
+                                            }}
+                                          >
+                                            <img
+                                              src={customer.logo}
+                                              alt={customer.name}
+                                              className="w-8 h-8 object-contain"
+                                            />
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>{customer.name}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    ))}
+                                  </div>
+                                </TooltipProvider>
+                              ) : (
+                                <div className="text-xs text-muted-foreground">
+                                  40,000+ builders
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  <div className="border-t"></div>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
-                    <div className="h-[60px] flex flex-col justify-start">
-                      <span className="font-bold text-3xl">{tier.price}</span>
-                      <span className="text-sm leading-4 mt-1">
-                        {tier.price.includes("$") 
-                          ? (tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month")
-                          : " "}
-                      </span>
-                    </div>
-                    <ul className="mt-3 space-y-2.5 text-sm">
+                    <ul className="space-y-2.5 text-sm">
                       {tier.mainFeatures.map((feature) => (
                         <li key={feature} className="flex space-x-2">
                           <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
