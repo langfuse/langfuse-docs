@@ -6,10 +6,37 @@ description: Reference other prompts in your prompts using a simple tag format.
 
 # Prompt Composability
 
+As you create more prompts, you will often find yourself using the same snippets of text or instructions in multiple prompts. To avoid duplication, you can compose prompts by referencing other prompts.
+
 <CloudflareVideo
   videoId="6e9c25ba3d4c72363680af5dfb6a9bd2"
   aspectRatio={16 / 9}
 />
+
+## How Composability Works
+
+The following diagram illustrates how prompt composability works in Langfuse:
+
+```mermaid
+flowchart TD
+    A["Main Prompt<br/>Contains: System instructions<br/>@@@langfusePrompt:name=CommonInstructions|label=production@@@<br/>@@@langfusePrompt:name=Examples|version=2@@@<br/>User question: {{question}}"] --> B[Langfuse SDK/API]
+
+    C["CommonInstructions Prompt<br/>(label: production)<br/>Always be helpful and accurate.<br/>Format responses clearly."] --> B
+
+    D["Examples Prompt<br/>(version: 2)<br/>Example 1: Q: Hello A: Hi there!<br/>Example 2: Q: Help A: I'm here to help!"] --> B
+
+    B --> E["Final Composed Prompt<br/>System instructions<br/>Always be helpful and accurate.<br/>Format responses clearly.<br/>Example 1: Q: Hello A: Hi there!<br/>Example 2: Q: Help A: I'm here to help!<br/>User question: {{question}}"]
+
+    style A fill:#e1f5fe
+    style C fill:#f3e5f5
+    style D fill:#f3e5f5
+    style E fill:#e8f5e8
+    style B fill:#fff3e0
+```
+
+When you fetch a prompt that contains references to other prompts, the Langfuse SDK/API automatically resolves these references and replaces the tags with the actual content from the referenced prompts.
+
+## Reference Syntax
 
 You can reference other **text** prompts in your prompts using a simple tag format:
 
