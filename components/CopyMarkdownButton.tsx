@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
+import { useTheme } from "nextra-theme-docs";
 import config from "../theme.config";
 import {
   Copy as CopyIcon,
@@ -17,6 +18,7 @@ import {
 
 export const CopyMarkdownButton = () => {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const { docsRepositoryBase } = config;
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
@@ -204,7 +206,7 @@ export const CopyMarkdownButton = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56"
+        className="w-56 bg-card border-border"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -221,7 +223,7 @@ export const CopyMarkdownButton = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleChatGPT} className="cursor-pointer">
           <Image 
-            src="/images/logos/OpenAI.png" 
+            src={resolvedTheme === 'dark' ? "/images/logos/OpenAI light.png" : "/images/logos/OpenAI.png"}
             alt="OpenAI" 
             width={16} 
             height={16} 
