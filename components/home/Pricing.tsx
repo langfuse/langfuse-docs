@@ -1663,14 +1663,15 @@ export default function Pricing({
                   )}
                 >
                   {/* Unlimited Users callout for Core and Pro */}
-                  {variant === "cloud" && (tier.name === "Core" || tier.name === "Pro") && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium">
-                        Unlimited Users
+                  {variant === "cloud" &&
+                    (tier.name === "Core" || tier.name === "Pro") && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium">
+                          Unlimited Users
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
+                    )}
+
                   <CardHeader className="p-4 lg:p-6 text-left">
                     <CardTitle className="text-lg text-foreground font-semibold">
                       {tier.name}
@@ -1693,12 +1694,14 @@ export default function Pricing({
                     <div className="h-[60px] flex items-baseline">
                       <span className="font-bold text-3xl">{tier.price}</span>
                       <span className="text-sm leading-4 ml-1">
-                        {tier.price.includes("$") 
-                          ? (tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month")
+                        {tier.price.includes("$")
+                          ? tier.priceUnit
+                            ? `/ ${tier.priceUnit}`
+                            : "/ month"
                           : ""}
                       </span>
                     </div>
-                    
+
                     <div>
                       {tier.ctaCallout ? (
                         <div className="flex gap-2">
@@ -1709,7 +1712,11 @@ export default function Pricing({
                           >
                             <Link href={tier.href}>{tier.cta}</Link>
                           </Button>
-                          <Button className="flex-1" variant="secondary" asChild>
+                          <Button
+                            className="flex-1"
+                            variant="secondary"
+                            asChild
+                          >
                             <Link href={tier.ctaCallout.href}>
                               {tier.ctaCallout.text}
                             </Link>
@@ -1727,27 +1734,30 @@ export default function Pricing({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Startup discount callout for Core and Pro - always render container for alignment */}
                     <div className="p-6 h-[30px] flex items-center justify-center">
-                      {variant === "cloud" && (tier.name === "Core" || tier.name === "Pro") ? (
+                      {variant === "cloud" &&
+                      (tier.name === "Core" || tier.name === "Pro") ? (
                         <div className="text-xs text-muted-foreground text-center">
-                          <Link href="/startups" className="underline hover:text-primary">
+                          <Link
+                            href="/startups"
+                            className="underline hover:text-primary"
+                          >
                             Startup? Get 50% off
                           </Link>
                         </div>
                       ) : null}
                     </div>
-                    
-                                                              </CardContent>
-                    
-                    {/* Trusted by section for cloud tiers */}
-                    {variant === "cloud" && (
-                      <>
-                        <div className="border-t"></div>
-                        <TrustedBy customers={trustedByData.cloud[tier.name]} />
-                      </>
-                    )}
+                  </CardContent>
+
+                  {/* Trusted by section for cloud tiers */}
+                  {variant === "cloud" && (
+                    <>
+                      <div className="border-t"></div>
+                      <TrustedBy customers={trustedByData.cloud[tier.name]} />
+                    </>
+                  )}
                   <div className="border-t"></div>
                   <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
                     <ul className="space-y-2.5 text-sm">
@@ -2011,8 +2021,8 @@ const discounts = [
     name: "Early-stage startups",
     description: "50% off, first year",
     cta: {
-      text: "Request startup discount",
-      href: "https://forms.gle/eJAYjRWeCZU1Mn6j8",
+      text: "Learn more and apply",
+      href: "/startups",
     },
   },
   {
