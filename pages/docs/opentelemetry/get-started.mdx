@@ -247,35 +247,185 @@ Please [raise an issue on GitHub](/issues) if an integration does not work as ex
 
 </Callout>
 
-Langfuse accepts any span that adheres to the OpenTelemetry specification.
-In addition, we map many GenAI specific properties to properties in the Langfuse data model to provide a seamless experience when using OpenTelemetry with Langfuse.
-First and foremost, we stick to the [OpenTelemetry Gen AI Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/), but also map vendor specific properties from common frameworks.
-All attributes and resourceAttributes are available within the Langfuse `metadata` property as a fallback.
+Langfuse uses attributes within the `langfuse.*` namespace to map OpenTelemetry span attributes directly to the Langfuse data model. These specific attributes always take precedence over the generic OpenTelemetry conventions.
 
-LLM Calls are tracked as `GENERATION` spans (see [data model](/docs/tracing-data-model)). Any span that includes an attribute mapped to `model` is considered a LLM call and thus tracked as a `GENERATION` span.
 
-Langfuse uses the `langfuse.*` namespace to map properties from OpenTelemetry to the Langfuse data model.
-This enables features like linking [Prompts](/docs/prompts/get-started) to spans, adding [tags](/docs/tracing-features/tags), or marking traces as public.
-Attributes in the Langfuse namespace take precedence over the generic mapping we specify below.
-Some of the attributes are only taken into consideration if they are set on the root span. We mark those in the table below.
-The following Langfuse specific properties are supported:
+### Trace-Level Attributes
 
-| OpenTelemetry Attribute   | Langfuse Property | Type       | Root Span only | Description                                                                                                                                                                       |
-| ------------------------- | ----------------- | ---------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse.session.id`     | `sessionId`       | `string`   | `true`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                                                |
-| `langfuse.user.id`        | `userId`          | `string`   | `true`         | The [user ID](/docs/tracing-features/users) for the request.                                                                                                                      |
-| `langfuse.public`         | `public`          | `boolean`  | `true`         | Mark the trace as public to be able to [share it via url](/docs/tracing-features/url). This can be changed later in the Langfuse UI.                                              |
-| `langfuse.release`        | `release`         | `string`   | `true`         | The [release](/docs/tracing-features/releases-and-versioning) for the request.                                                                                                    |
-| `langfuse.version`        | `version`         | `string`   | `true`         | The [version](/docs/tracing-features/releases-and-versioning) for the request.                                                                                                    |
-| `langfuse.tags`           | `tags`            | `string[]` | `true`         | The [tags](/docs/tracing-features/tags) for the request.                                                                                                                          |
-| `langfuse.prompt.name`    | `promptName`      | `string`   | `false`        | The [prompt name](/docs/prompts/get-started) for the request.                                                                                                                     |
-| `langfuse.prompt.version` | `promptVersion`   | `int`      | `false`        | The [prompt version](/docs/prompts/get-started) for the request.                                                                                                                  |
-| `langfuse.environment`    | `environment`     | `string`   | `false`        | The environment for the request.                                                                                                                                                  |
-| `langfuse.metadata`       | `metadata`        | `string`   | `false`        | Accepts a JSON string. All keys within the `langfuse.metadata` object on attributes or resourceAttributes are mapped to the top-level metadata object on traces and observations. |
-| `langfuse.metadata.*`     | `metadata`        | `string`   | `false`        | All keys prefixed with `langfuse.metadata` on attributes or resourceAttributes are mapped to the top-level metadata object on traces and observations.                            |
+These attributes are applied to the trace record in Langfuse. They may be set on any span in the trace.
+
+#### `name`
+
+The name of the trace.
+
+* `langfuse.trace.name`: `string`
+
+#### `userId`
+
+The unique identifier for the end-user.
+
+* `langfuse.user.id`: `string`
+* `user.id`: `string`
+
+#### `sessionId`
+
+The unique identifier for the user session.
+
+* `langfuse.session.id`: `string`
+* `session.id`: `string`
+
+#### `release`
+
+The release version of your application.
+
+* `langfuse.release`: `string`
+
+#### `public`
+
+A boolean flag to mark a trace as public, allowing it to be shared via a URL.
+
+* `langfuse.trace.public`: `boolean`
+
+#### `tags`
+
+An array of strings to categorize or label the trace.
+
+* `langfuse.trace.tags`: `string[]`
+
+#### `metadata`
+
+A flexible object for storing any additional, unstructured data on the trace.
+
+* `langfuse.trace.metadata.*`: `string`
+
+#### `input`
+
+The initial input for the entire trace.
+
+* `langfuse.trace.input`: `string`
+
+#### `output`
+
+The final output for the entire trace.
+
+* `langfuse.trace.output`: `string`
+
+
+### Observation-Level Attributes
+
+These attributes are applied to individual observations (spans) within a trace.
+
+#### `type`
+
+The type of observation
+
+* `langfuse.observation.type`: `"span" | "generation" | "event"`, default: `"span"`
+
+#### `level`
+
+The severity level of the observation
+
+* `langfuse.observation.level`: `"DEBUG" | "DEFAULT" | "WARNING" | "ERROR"`, default: `"DEFAULT"`
+
+#### `statusMessage`
+
+A message describing the status of the observation, often used for errors.
+
+* `langfuse.observation.status_message`: `string`
+
+#### `metadata`
+
+A flexible object for storing any additional, unstructured data on the observation. Example key: `langfuse.observation.metadata.user_name`.
+
+* `langfuse.observation.metadata.*`: `string`
+
+#### `input`
+
+The input data for this specific observation.
+
+* `langfuse.observation.input`: `(JSON) string`
+
+#### `output`
+
+The output data from this specific observation.
+
+* `langfuse.observation.output`: `(JSON) string`
+
+
+#### `model`
+
+**Only applies to observations of type `generation`**
+
+The name of the generative model used.
+
+* `langfuse.observation.model.name`: `string`
+
+#### `modelParameters`
+
+**Only applies to observations of type `generation`**
+
+Key-value pairs representing the settings used for the model invocation.
+
+* `langfuse.observation.model.parameters`: `JSON string of Record<string, string>`
+
+#### `usage`
+
+**Only applies to observations of type `generation`**
+
+An object detailing the token counts for the generation.
+
+* `langfuse.observation.usage_details`: `JSON string of Record<string, integer>`
+
+#### `cost`
+
+**Only applies to observations of type `generation`**
+
+The calculated cost of the generation in USD.
+
+* `langfuse.observation.cost_details`: `JSON string of Record<string, float>`
+
+#### `prompt`
+
+**Only applies to observations of type `generation`**
+
+The name of a versioned prompt managed in Langfuse.
+
+* `langfuse.observation.prompt.name`: `string`
+* `langfuse.observation.prompt.version`: `integer`
+
+
+#### `completionStartTime`
+
+**Only applies to observations of type `generation`**
+
+The timestamp for when the model began generating the completion.
+
+* `langfuse.observation.completion_start_time`: `ISO 8601 date string`
+
+
+### General Attributes
+
+This attribute can be applied to any span.
+
+#### `version`
+
+The version of the trace or observation, useful for tracking changes to your application logic. The root span's version will be used for the trace.
+
+* `langfuse.version`: `string`
+
+
+#### `environment`
+
+The deployment environment where the trace or observation was generated. The root span's environment will be used for the trace.
+
+* `langfuse.environment`: `string`
+
+### Additional Mappings
 
 Below, we present a non-exhaustive list of additional mappings that Langfuse applies.
 These mappings are based on OTel GenAI semantic conventions and vendor-specific implementations that deviate from these conventions:
+
+LLM Calls are tracked as `GENERATION` observations (see [data model](/docs/tracing-data-model)). Any OpenTelemetry span that includes an attribute mapped to `model` is considered a LLM call and thus tracked as a `GENERATION` observation.
 
 | OpenTelemetry Attribute       | Langfuse Property   | Description                                                                                                                                                      |
 | ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -303,12 +453,12 @@ These mappings are based on OTel GenAI semantic conventions and vendor-specific 
 
 Langfuse only supports filtering on top-level keys within the `metadata` of an event.
 By default, all OpenTelemetry attributes and resource attributes are mapped into an `attributes` and `resourceAttributes` key within `metadata` and, therefore, not queryable.
-If you want to query on specific attributes, you can use the `langfuse.metadata` prefix to map them to the top-level `metadata` object.
+If you want to query on specific attributes, you can use the `langfuse.trace.metadata` prefix to map them to the top-level `metadata` object of the trace.
 The following snippet will produce a filterable `user_name` property in the `metadata` object of the trace:
 
 ```python
 with tracer.start_as_current_span("Langfuse Attributes") as span:
-    span.set_attribute("langfuse.metadata.user_name", "user-123")
+    span.set_attribute("langfuse.trace.metadata.user_name", "user-123")
 ```
 
 ## Troubleshooting
