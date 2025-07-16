@@ -78,40 +78,43 @@ Subscribe to our mailing list to get occasional email updates about new features
 ## 🚧 In progress
 
 - Tracing
-  - Make Langfuse SDKs OpenTelemetry native, Langfuse Server already supports OpenTelemetry ([docs](/docs/opentelemetry/get-started))
+  - Unified agent graphs
+  - New JS SDK based on OpenTelemetry ([#1291](https://github.com/orgs/langfuse/discussions/1291))
 - Evaluation
   - Improvements to core eval views (e.g. compare run view)
   - Annotate dataset experiments
-- UI/UX: improvements of all core product features
 
 ## 🔮 Planned
 
-- Agent Observability: Improve native support for agentic applications
-  - Generalized agent graphs ([#2669](https://github.com/orgs/langfuse/discussions/2669)), beta available for LangGraph ([docs](/docs/tracing-features/agent-graphs))
-  - Filtering for tool calls used within an execution
-  - Opinionated agent evaluations
+- Agent Observability
+  - Unified agent graphs ([#2669](https://github.com/orgs/langfuse/discussions/2669)) (beta for LangGraph ([docs](/docs/tracing-features/agent-graphs)))
+  - New span types for tool calls ([#2624](https://github.com/orgs/langfuse/discussions/2624))
+  - Agent evaluations: conversation, response, turn, and trajectory levels
 - Evaluation
-  - Non-LLM evaluators: classifiers, custom code, regex, etc. ([#4671](https://github.com/orgs/langfuse/discussions/4671), [#6087](https://github.com/orgs/langfuse/discussions/6087))
-  - Evals on repeated spans/observations within a trace
-  - Comparisons of different evaluation metrics
-  - Improvements to Langfuse SDK to simplify creation of experiments
-  - End-to-end examples on how to run Langfuse Experiments as regression tests in CI/CD pipelines
-  - Add tracing to LLM-as-a-judge evals for better observability (debugging and cost tracking)
-- Prompt Management
-  - Placeholders for chat messages ([#2210](https://github.com/orgs/langfuse/discussions/2210))
-  - Track prompt variables in production tracing, simplify adding to datasets and running prompt experiments ([#5242](https://github.com/orgs/langfuse/discussions/5242))
-  - LLM-assisted prompt engineering
-  - A/B testing
-  - Native support for tool calls ([#2624](https://github.com/orgs/langfuse/discussions/2624))
-- Data Platform
-  - Webhooks to subscribe to changes within your Langfuse project ([#1033](https://github.com/orgs/langfuse/discussions/1033))
-  - Alerts: Create alerts for custom metric thresholds, errors, etc. ([#3997](https://github.com/orgs/langfuse/discussions/3997))
-  - Rule-based routing between Langfuse product features
-- Prompt Experiments & Playground
-  - Split view to compare different LLMs and prompts side by side before running a [prompt experiment](/docs/datasets/prompt-experiments)
-  - Add tool-call and structured output support to prompt experiments ([#5958](https://github.com/orgs/langfuse/discussions/5958))
-- Langfuse Cloud
-  - Usage based billing alerts
+  - Rule‑based evaluators (regex, structural checks) ([#4671](https://github.com/orgs/langfuse/discussions/4671), [#4484](https://github.com/orgs/langfuse/discussions/4484))
+  - Trace LLM‑as‑judge evaluations for debugging & cost tracking
+  - Evaluation comparison dashboard: correlation, confusion matrix, overlap histogram
+  - SDK abstraction for easy experiment setup and UI‑triggered external runners
+  - Sessions & observations support for annotation queues ([#7551](https://github.com/orgs/langfuse/discussions/7551))
+  - Session-level and observation-level llm-as-a-judge
+- Datasets
+  - Multi‑modal dataset support ([#6883](https://github.com/orgs/langfuse/discussions/6883))
+  - Run comparison view: filterable, sortable dataset runs with annotation support
+  - Bulk add traces to datasets ([#7691](https://github.com/orgs/langfuse/discussions/7691))
+  - Dataset folders ([#3935](https://github.com/orgs/langfuse/discussions/3935))
+  - Input/output schema validation
+- Playground
+  - Multi‑modal message support ([#6017](https://github.com/orgs/langfuse/discussions/6017))
+  - Dataset experiments in playground
+- Prompt Management
+  - Track prompt variables in production tracing ([#5242](https://github.com/orgs/langfuse/discussions/5242))
+  - Prompt experiments with structured outputs and tool/function support ([#5958](https://github.com/orgs/langfuse/discussions/5958))
+  - Exports & imports for prompts ([#1696](https://github.com/orgs/langfuse/discussions/1696))
+- Data Platform
+  - Webhooks for tracing, dataset, and admin events ([#1033](https://github.com/orgs/langfuse/discussions/1033)) in addition to the existing prompt webhooks
+  - In-app routing (e.g. add to annotation queue, trigger evals)
+  - Metric‑threshold alerts ([#3997](https://github.com/orgs/langfuse/discussions/3997))
+  - Langfuse Cloud usage-based billing alerts
 
 ## 🙏 Feature requests and bug reports
 
