@@ -1,3 +1,14 @@
+/**
+ * Customer data for the "Trusted by" section in pricing cards.
+ * 
+ * This displays customer logos in overlapping circular containers for each pricing tier.
+ * When customers are available, shows logos with hover tooltips.
+ * When no customers are assigned to a tier, falls back to "40,000+ builders" text.
+ * 
+ * Used by: components/home/components/TrustedBy.tsx
+ * Displayed in: components/home/Pricing.tsx (cloud pricing cards only)
+ */
+
 export type TrustedByCustomer = {
   name: string;
   logo: string;

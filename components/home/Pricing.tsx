@@ -30,12 +30,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TrustedBy } from "./components/TrustedBy";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -1750,47 +1745,7 @@ export default function Pricing({
                     {variant === "cloud" && (
                       <>
                         <div className="border-t"></div>
-                        <div className="px-4 lg:px-6 h-[64px] flex items-center">
-                          <div className="flex items-center w-full">
-                            <div className="text-xs text-muted-foreground">
-                              Trusted by:
-                            </div>
-                            <div className="flex items-center pl-4">
-                              {trustedByData.cloud[tier.name] && trustedByData.cloud[tier.name].length > 0 ? (
-                                <TooltipProvider delayDuration={200}>
-                                  <div className="flex items-center">
-                                    {trustedByData.cloud[tier.name].map((customer, index) => (
-                                      <Tooltip key={index}>
-                                        <TooltipTrigger asChild>
-                                          <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-200 hover:scale-125 hover:z-50 cursor-pointer shadow-md"
-                                            style={{
-                                              marginLeft: index > 0 ? '-10px' : '0',
-                                              zIndex: trustedByData.cloud[tier.name].length - index,
-                                            }}
-                                          >
-                                            <img
-                                              src={customer.logo}
-                                              alt={customer.name}
-                                              className="w-8 h-8 object-contain"
-                                            />
-                                          </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          <p>{customer.name}</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    ))}
-                                  </div>
-                                </TooltipProvider>
-                              ) : (
-                                <div className="text-xs text-muted-foreground">
-                                  40,000+ builders
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                        <TrustedBy customers={trustedByData.cloud[tier.name]} />
                       </>
                     )}
                   <div className="border-t"></div>
