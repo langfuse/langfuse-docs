@@ -4,396 +4,317 @@ description: Get started with LLM observability with Langfuse in minutes before 
 
 # Get Started with Langfuse Tracing
 
-This quickstart helps you to integrate your LLM application with [Langfuse Tracing](/docs/tracing). If you are looking for other features, see the [overview](/docs).
+This quickstart helps you to ingest your first trace in Langfuse.
 
-## Create new project in Langfuse
+<Steps>
 
-1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host](/self-hosting)
-2.  Create a new project
-3.  Create new API credentials in the project settings
+## Get API keys
 
-## Integrate with Langfuse
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
 
-import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
-import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
-import GetStartedJsSdk from "@/components-mdx/get-started-js-sdk.mdx";
-import EnvPython from "@/components-mdx/env-python.mdx";
-import EnvJs from "@/components-mdx/env-js.mdx";
-import GetStartedDecoratorOpenai from "@/components-mdx/get-started-python-decorator-openai.mdx";
-import GetStartedDecoratorAnyLlm from "@/components-mdx/get-started-python-decorator-any-llm.mdx";
+## Ingest your first trace
+
 import { CopyAgentOnboardingPrompt } from "@/components/agentic-onboarding/CopyAgentOnboardingPrompt";
 import DocsMcpServerInstallation from "@/components-mdx/docs-mcp-server-installation.mdx";
+import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
+import GetStartedJsSdk from "@/components-mdx/get-started/js-sdk.mdx";
+import GetStartedOpenaiSdk from "@/components-mdx/get-started/openai-sdk.mdx";
+import GetStartedLangchain from "@/components-mdx/get-started/langchain.mdx";
+import GetStartedJsOpenaiSdk from "@/components-mdx/get-started/js-openai-sdk.mdx";
+import GetStartedJsLangchain from "@/components-mdx/get-started/js-langchain.mdx";
+import EnvPython from "@/components-mdx/env-python.mdx";
 
-<Tabs items={["Manual", "✨ Agentic: Cursor, Claude Code, Copilot, Windsurf, etc"]}>
+import { BookOpen, Code} from "lucide-react";
+
+<Tabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "✨ Auto Install", "More integrations"]}>
 
 <Tab>
+{/* PYTHON - OPENAI*/}
 
-<Tabs items={["Python SDK","Python SDK + any LLM","JS/TS","OpenAI SDK (Python)","OpenAI SDK (JS)", "Langchain","Langchain (JS)","LlamaIndex","API"]}>
+Use the drop-in replacement for the OpenAI Python SDK to get full observability.
 
-<Tab>
-{/* Python SDK + Decorator */}
-The [`@observe()` decorator](/docs/sdk/python/sdk-v3#observe-decorator) is the recommended way to get started with Langfuse. It automatically captures traces with minimal code changes and works with any LLM provider.
+<GetStartedOpenaiSdk/>
 
-```bash
-pip install langfuse
-```
-
-<EnvPython />
-
-```python /@observe()/ /from langfuse.openai import openai/ filename="main.py"
-from langfuse import observe, get_client
-from langfuse.openai import openai # OpenAI integration
-
-@observe()
-def story():
-    return openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-          {"role": "system", "content": "You are a great storyteller."},
-          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
-        ],
-    ).choices[0].message.content
-
-@observe()
-def main():
-    return story()
-
-main()
-```
-
-For more advanced use cases with manual control, see the [Python SDK v3 documentation](/docs/sdk/python/sdk-v3).
-
-</Tab>
-<Tab>
-{/* Python SDK + any LLM */}
-
-**Recommended approach**: Use third-party, OTEL-based instrumentation packages for automatic tracing with popular LLM providers and frameworks. The Langfuse SDK will pick up emitted spans and process them accordingly.
-
-<EnvPython />
-
-In this example, we are using the [`opentelemetry-instrumentation-anthropic` library](https://pypi.org/project/opentelemetry-instrumentation-anthropic/).
-
-```python
-from langfuse import get_client
-
-from anthropic import Anthropic
-from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
-
-
-# This will automatically emit OTEL-spans for all Anthropic API calls
-AnthropicInstrumentor().instrument()
-
-# Initialize Langfuse
-langfuse = get_client()
-
-# This will be traced as a Langfuse generation nested under the current span
-message = Anthropic().messages.create(
-    model="claude-3-7-sonnet-20250219",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Hello, Claude"}],
-)
-
-print(message.content)
-```
-
-**Alternative**: Manual tracing with `@observe(as_type="generation")` for custom implementations. See [decorator documentation](/docs/sdk/python/decorators) for details.
-
-</Tab>
-<Tab>
-{/* JS/TS */}
-
-```sh
-npm i langfuse
-# or
-yarn add langfuse
-
-# Node.js < 18
-npm i langfuse-node
-
-# Deno
-import { Langfuse } from "https://esm.sh/langfuse"
-```
-
-<EnvJs />
-
-Example usage, most of the parameters are optional and depend on the use case. For more information, see the [JS/TS SDK docs](/docs/sdk/typescript/guide) or [end-to-end example notebook](/docs/sdk/typescript/example-notebook).
-
-<GetStartedJsSdk />
-
-</Tab>
-<Tab>
-{/* OpenAI SDK (Python) */}
-The [integration](/integrations/model-providers/openai-py) is a drop-in replacement for the OpenAI Python SDK. By changing the import, Langfuse will capture all LLM calls and send them to Langfuse asynchronously (for Azure OpenAI, use `from langfuse.openai import AzureOpenAI`).
-
-```bash
-pip install langfuse
-```
-
-<EnvPython />
-
-```diff filename=".py"
-- import openai
-+ from langfuse.openai import openai
-
-Alternative imports:
-+ from langfuse.openai import OpenAI, AsyncOpenAI, AzureOpenAI, AsyncAzureOpenAI
-```
-
-Use the OpenAI SDK as you would normally.
-
-```python
-from langfuse.openai import openai
-
-completion = openai.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "You are a very accurate calculator."},
-        {"role": "user", "content": "1 + 1 = "}
-    ],
-)
-```
-
-</Tab>
-<Tab>
-{/* OpenAI (JS/TS) */}
-
-<EnvJs />
-
-With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
-
-```ts
-import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
-
-const openai = observeOpenAI(new OpenAI());
-
-const res = await openai.chat.completions.create({
-  messages: [{ role: "system", content: "Tell me a story about a dog." }],
-  model: "gpt-4o",
-  max_tokens: 300,
-});
-```
-
-</Tab>
-<Tab>
-{/* LangChain */}
-
-The [integration](/integrations/frameworks/langchain) uses the Langchain callback system. **Note**: Trace attributes must be set on an enclosing span.
-
-```python
-from langfuse.callback import CallbackHandler
-
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-
-langfuse_handler = CallbackHandler()
-
-llm = ChatOpenAI(model_name="gpt-4o")
-prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
-chain = prompt | llm
-
-response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
-```
-
-For more details, see the [Langchain integration docs](/integrations/frameworks/langchain).
-
-</Tab>
-<Tab>
-{/* Langchain (JS) */}
-
-The [integration](/integrations/frameworks/langchain) uses the Langchain callback system to automatically capture detailed traces of your Langchain executions.
-
-<GetStartedLangchainJsArgs />
-
-For more details, see the [Langchain integration docs](/integrations/frameworks/langchain).
-
-</Tab>
-<Tab>
-{/* LlamaIndex */}
-
-Use third-party OTEL-based instrumentation for LlamaIndex. In this example, we use the [`openinference-instrumentation-llama-index` library](https://pypi.org/project/openinference-instrumentation-llama-index/).
-
-```bash
-pip install langfuse llama-index openinference-instrumentation-llama-index
-```
-
-<EnvPython />
-
-```python
-from langfuse import get_client
-
-from llama_index.core.llms.openai import OpenAI
-from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
-
-# Enable OTEL-based instrumentation
-LlamaIndexInstrumentor().instrument()
-
-# Initialize Langfuse
-langfuse = get_client()
-
-response = OpenAI(model="gpt-4o").complete("Hello, world!")
-```
-
-</Tab>
-<Tab>
-{/* API */}
-
-All features are available via the public API. See documentation below:
-
-<Cards num={3}>
-  <Card title="API Reference" href="https://api.reference.langfuse.com" arrow />
+<Cards num={2}>
   <Card
-    title="OpenAPI Specification (download)"
-    href="https://cloud.langfuse.com/generated/api/openapi.yml"
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/integrations/model-providers/openai-py"
     arrow
   />
   <Card
-    title="Postman Collection (download)"
-    href="https://cloud.langfuse.com/generated/postman/collection.json"
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/colab_icon.png" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="Notebook"
+    href="https://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_openai_sdk.ipynb"
     arrow
   />
 </Cards>
 
 </Tab>
 
-</Tabs>
+<Tab>
+{/* JS/TS - OpenAI */}
+
+Use the Langfuse wrapper function around the OpenAI JS/TS SDK for full observability.
+
+<GetStartedJsOpenaiSdk/>
+
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/integrations/model-providers/openai-js"
+    arrow
+  />
+  <Card
+    icon={<Code />}
+    title="Notebook"
+    href="/guides/cookbook/js_integration_openai"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+
+<Tab>
+{/* LANGCHAIN */}
+
+Use the Langfuse CallbackHandler to get full observability of the LangChain Python SDK.
+
+<GetStartedLangchain/>
+
+
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/integrations/frameworks/langchain"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/colab_icon.png" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="Notebook"
+    href="https://colab.research.google.com/github/langfuse/langfuse-docs/blob/main/cookbook/integration_langchain.ipynb"
+    arrow
+  />
+</Cards>
 
 </Tab>
 
 <Tab>
+{/* LANGCHAIN (JS/TS) */}
+
+Use the Langfuse CallbackHandler to get full observability of the LangChain JS/TS SDK.
+
+<GetStartedJsLangchain/>
+
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/integrations/frameworks/langchain"
+    arrow
+  />
+  <Card
+    icon={<Code />}
+    title="Notebook"
+    href="/guides/cookbook/js_integration_langchain"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+{/* PYTHON SDK */}
+
+Use the Langfuse Python SDK to wrap any LLM or Agent
+
+```bash
+pip install langfuse
+```
+
+<EnvPython />
+
+There are three main ways of creating traces with the Python SDK:
+
+<GetStartedPythonSdk/>
+
+<Cards num={1}>
+  <Card
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/docs/sdk/python/sdk-v3"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+{/* JS/TS SDK */}
+
+Use the Langfuse JS/TS SDK to wrap any LLM or Agent
+
+<GetStartedJsSdk/>
+
+<Cards num={2}>
+  <Card
+    icon={<BookOpen />}
+    title="Documentation"
+    href="/docs/sdk/typescript/guide"
+    arrow
+  />
+  <Card
+    icon={<Code />}
+    title="Notebook"
+    href="/docs/sdk/typescript/example-notebook"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+{/* AUTO INSTALL */}
 
 Use the agent mode of your editor to integrate Langfuse into your existing codebase.
 
 <Callout type="warning" emoji="🤖">
-
 This might or might not work very well (depending on your code base). Please share any feedback or issues on [GitHub](/issues).
-
 </Callout>
 
-<Steps>
-
-### Install the Langfuse Docs MCP Server (optional)
+**1. Install the Langfuse Docs MCP Server (optional)**
 
 The agent will use the Langfuse `searchLangfuseDocs` tool ([docs](/docs/docs-mcp)) to find the correct documentation for the integration you are looking for. This is optional, alternatively the agent can use its native websearch capabilities.
 
 <DocsMcpServerInstallation />
 
-### Run Agent
+**2. Run Agent**
 
 Copy and execute the following prompt in the agent mode of your editor:
 
 <CopyAgentOnboardingPrompt />
 
-</Steps>
+</Tab>
+
+<Tab>
+{/* MORE INTEGRATIONS */}
+
+Explore all integrations and frameworks that Langfuse supports.
+
+
+<Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/vercel_ai_sdk_icon.png" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="Vercel AI SDK"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/llamaindex_icon.png" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="Llamaindex"
+    href="/integrations/frameworks/llamaindex"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/crewai_icon.svg" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="CrewAI"
+    href="/integrations/frameworks/crewai"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/ollama_icon.svg" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="Ollama"
+    href="/integrations/model-providers/ollama"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/litellm_icon.png" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="LiteLLM"
+    href="/integrations/gateways/litellm"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/autogen_icon.svg" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="AutoGen"
+    href="/integrations/frameworks/autogen"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img src="/images/integrations/google_adk_icon.png" className="w-full h-full object-contain" />
+      </div>
+    }
+    title="Google ADK"
+    href="/integrations/frameworks/google-adk"
+    arrow
+  />
+  <Card
+    title="All integrations"
+    href="/integrations"
+    arrow
+  />
+</Cards>
+
 
 </Tab>
 
 </Tabs>
 
-<Callout type="info" emoji="✅">
-  Done. After running your application, visit the Langfuse interface to view the
-  trace you just created.
-</Callout>
+## See your trace in Langfuse
 
-## All Langfuse platform features
+After running your application, visit the Langfuse interface to view the trace you just created. _[(Example LangGraph trace in Langfuse)](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/7d5f970573b8214d1ca891251e42282c)_
 
-This was a very brief introduction to get started with Langfuse. Explore all Langfuse platform features in detail.
+<CloudflareVideo
+  videoId="80d78d99dc1ca12276dbc5c43edb1583"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
 
-**Develop**
+</Steps>
 
-<Cards num={3}>
-  <Card title="Tracing" href="/docs/tracing" arrow />
-  <Card title="Prompt Management" href="/docs/prompts/get-started" arrow />
-  <Card
-    title="Export & Fine-tuning"
-    href="/docs/export-and-fine-tuning"
-    arrow
-  />
-</Cards>
+## Next Steps
 
-**Monitor**
+import NextSteps from "@/components-mdx/get-started/next-steps.mdx";
 
-<Cards num={3}>
-  <Card title="Analytics" href="/docs/analytics" arrow />
-  <Card title="Model Usage & Cost" href="/docs/model-usage-and-cost" arrow />
-  <Card title="Evaluation" href="/docs/scores/overview" arrow />
-</Cards>
+<NextSteps />
 
-**Test**
-
-<Cards num={3}>
-  <Card title="Datasets" href="/docs/datasets/overview" arrow />
-</Cards>
-
-## References
-
-import { Code } from "lucide-react";
-import IconPython from "@/components/icons/python";
-import IconTypescript from "@/components/icons/typescript";
-import IconOpenai from "@/components/icons/openai";
-
-<Cards num={2}>
-  <Card
-    icon={<IconPython />}
-    title="Python Decorator"
-    href="/docs/sdk/python/decorators"
-    arrow
-  />
-  <Card
-    icon={<IconPython />}
-    title="Python SDK (v3)"
-    href="/docs/sdk/python/sdk-v3"
-    arrow
-  />
-  <Card
-    icon={<IconTypescript />}
-    title="JS/TS SDK"
-    href="/docs/sdk/typescript/guide"
-    arrow
-  />
-  <Card
-    icon={<IconOpenai />}
-    title="OpenAI SDK"
-    href="/integrations/model-providers/openai-py"
-    arrow
-  />
-  <Card
-    icon={<span>🦜🔗</span>}
-    title="Langchain"
-    href="/integrations/frameworks/langchain"
-    arrow
-  />
-  <Card
-    icon={<span>🦙</span>}
-    title="LlamaIndex"
-    href="/integrations/frameworks/llamaindex"
-    arrow
-  />
-  <Card
-    icon={<Code size="24" />}
-    title="API reference"
-    href="https://api.reference.langfuse.com/"
-    arrow
-  />
-  <Card
-    icon={<Code size="24" />}
-    title="Flowise"
-    href="/integrations/no-code/flowise"
-    arrow
-  />
-  <Card
-    icon={<Code size="24" />}
-    title="Langflow"
-    href="/integrations/no-code/langflow"
-    arrow
-  />
-  <Card
-    icon={<Code size="24" />}
-    title="Litellm"
-    href="/integrations/gateways/litellm"
-    arrow
-  />
-</Cards>
 
 ## FAQ
 

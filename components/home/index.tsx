@@ -17,6 +17,9 @@ const OpenSource = dynamic(() => import("./OpenSource"), {
 const Pricing = dynamic(() => import("./Pricing"), {
   ssr: false,
 });
+const WallOfLove = dynamic(() => import("./WallOfLove"), {
+  ssr: false,
+});
 
 export const Home = () => (
   <>
@@ -28,6 +31,7 @@ export const Home = () => (
       <OpenSource />
       <Security />
       <Pricing />
+      <WallOfLove />
       <CTASocial />
       {/* <FromTheBlog /> */}
       {/* <CTA /> */}

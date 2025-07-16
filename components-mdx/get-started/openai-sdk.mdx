@@ -1,0 +1,28 @@
+import Env from "@/components-mdx/env-python.mdx";
+
+```bash
+pip install langfuse
+```
+
+Add you Langfuse credentials as environment variables.
+
+<Env />
+
+Change the import to use the OpenAI drop-in replacement.
+
+```python
+from langfuse.openai import openai
+```
+
+Use the OpenAI SDK as usual.
+
+```python
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-4o",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 1 = "}],
+  metadata={"someMetadataKey": "someValue"},
+)
+```

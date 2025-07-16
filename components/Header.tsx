@@ -13,7 +13,7 @@ export const Header = ({
 }: {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  buttons?: { href: string; text: string }[];
+  buttons?: { href: string; text: string; target?: string }[];
   h?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
 }) => {
@@ -39,9 +39,15 @@ export const Header = ({
         <div className="mt-6 flex flex-row gap-2 justify-center flex-wrap">
           {buttons.map((button) => (
             <Button key={button.href} variant="ghost" asChild>
-              <Link href={button.href}>
-                {button.text} <ArrowRight size={14} className="ml-2" />
-              </Link>
+              {button.target ? (
+                <a href={button.href} target={button.target} rel="noopener noreferrer">
+                  {button.text} <ArrowRight size={14} className="ml-2" />
+                </a>
+              ) : (
+                <Link href={button.href}>
+                  {button.text} <ArrowRight size={14} className="ml-2" />
+                </Link>
+              )}
             </Button>
           ))}
         </div>
