@@ -3,38 +3,44 @@ title: Open Source Prompt Management
 description: Manage and version your prompts in Langfuse (open source). When retrieved, they are cached by the Langfuse SDKs for low latency.
 ---
 
-# Prompt Management
+# What is prompt management?
 
-Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is a **Prompt CMS** (Content Management System).
+Prompt management is a systematic approach to storing, versioning and retrieving prompts in LLM applications.
+
+## What prompt management allows you to do:
+
+- Involve non-technical users through UI
+- Decoupling: edit prompts without redeploying
+- Quickly rollback to a previous version of a prompt
+- Compare different prompt versions side-by-side
+- No latency impact after first use of a prompt due to [client-side caching](/docs/prompt-management/features/caching)
+
+## How it looks
 
 import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
 
 <PromptOverview />
 
-## What is prompt management?
+## Where to start
 
-**Prompt management is a systematic approach to storing, versioning and retrieving prompts in LLM applications.** Key aspects of prompt management include version control, decoupling prompts from code, monitoring, logging and optimizing prompts as well as integrating prompts with the rest of your application and tool stack.
+Follow the quickstart to create your first prompt and use it in your application.
 
-## Why use prompt management?
+import { Rocket, BookOpen, Joystick } from "lucide-react";
 
-> Can't I just hardcode my prompts in my application and track them in Git? Yes, well... you can and all of us have done it.
-
-Typical benefits of using a CMS apply here:
-
-- Decoupling: deploy new prompts without redeploying your application.
-- Non-technical users can create and update prompts via Langfuse Console.
-- Quickly rollback to a previous version of a prompt.
-- Compare different prompt versions side-by-side.
-
-Platform benefits:
-
-- Track performance of prompt versions in [Langfuse Tracing](/docs/tracing).
-
-Performance benefits compared to other implementations:
-
-- No latency impact after first use of a prompt due to client-side caching and asynchronous cache refreshing.
-- Support for text and chat prompts.
-- Edit/manage via UI, SDKs, or API.
+<Cards num={2}>
+  <Card
+    icon={<Rocket size="24" />}
+    title="Quickstart"
+    href="/docs/prompt-management/get-started"
+    arrow
+  />
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Data Model"
+    href="/docs/prompt-management/data-model"
+    arrow
+  />
+</Cards>
 
 ## Prompt Engineering FAQ
 

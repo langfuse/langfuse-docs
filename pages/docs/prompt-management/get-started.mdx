@@ -4,17 +4,18 @@ sidebarTitle: Get Started
 description: Get started with Langfuse Prompt Management.
 ---
 
-# Get Started with Prompt Management
+# Get Started with Langfuse Prompt Management
 
-Langfuse Prompt Management is a powerful tool for managing prompts in your applications. It allows you to create, update, and version prompts in a centralized location, and use them in your applications. Learn more [here](/docs/prompt-management/overview) or get started by following the steps below.
-
-## How it works
+This quickstart helps you to create your first prompt and use it in your application.
 
 <Steps>
 
-### Create/update prompt [#create-update-prompt]
+## Get API keys
 
-If you already have a prompt with the same `name`, the prompt will be added as a new version.
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+## Create a prompt [#create-update-prompt]
 
 import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
@@ -25,9 +26,6 @@ import PromptCreate from "@/components-mdx/prompt-create.mdx";
 At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/data-model).
 
 <Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
-<Tab>
-
-<Tabs items={["Python SDK v3", "Python SDK v2"]}>
 <Tab>
 
 ```python
@@ -43,26 +41,6 @@ prompt = langfuse.get_prompt("movie-critic")
 compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> "As an expert movie critic, do you like Dune 2?"
 ```
-
-</Tab>
-<Tab>
-
-```python
-from langfuse import Langfuse
-
-# Initialize Langfuse client
-langfuse = Langfuse()
-
-# Get current `production` version of a text prompt
-prompt = langfuse.get_prompt("movie-critic")
-
-# Insert variables into prompt template
-compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
-# -> "As an expert movie critic, do you like Dune 2?"
-```
-
-</Tab>
-</Tabs>
 
 Chat prompts
 
@@ -288,7 +266,13 @@ prompt.config;
 
 ### Link with Langfuse Tracing (optional)
 
-Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a [fallback prompt](#fallback) is used, no link will be created.
+You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best. 
+
+<Callout type="info">
+If a [fallback prompt](#fallback) is used, no link will be created.
+</Callout>
+
+
 
 <Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
@@ -583,14 +567,6 @@ import { Terminal, FileCode } from "lucide-react";
 
 We also used Prompt Management for our Docs Q&A Chatbot and traced it with Langfuse. You can get view-only access to the project by signing up to the [public demo](/docs/demo).
 
-## FAQ
+## Advanced features
 
-import { FaqPreview } from "@/components/faq/FaqPreview";
-
-<FaqPreview tags={["prompt-management"]} />
-
-## GitHub Discussions
-
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
-
-<GhDiscussionsPreview labels={["feat-prompt-management"]} />
+// tbd: add advanced features from /features folder
