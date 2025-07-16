@@ -14,7 +14,7 @@ export default {
     type: "separator",
     title: "Features",
   },
-  tracing: "Tracing",
+  observability: "Observability",
   "prompt-management": "Prompt Management",
   evaluation: "Evaluation",
   platform: "Data Platform",
