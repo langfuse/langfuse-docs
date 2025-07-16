@@ -1,0 +1,151 @@
+---
+title: Guaranteed Availability of Prompts
+sidebarTitle: Guaranteed Availability
+description: Ensure 100% availability of prompts by pre-fetching them on application startup and providing a fallback prompt.
+---
+
+# Guaranteed Availability
+
+<Callout>
+
+Implementing this is usually not necessary as it adds complexity to your application. The Langfuse Prompt Management is highly available due to multiple [caching layers](/docs/prompt-management/features/caching) and we closely monitor its performance ([status page](https://status.langfuse.com)). However, if you require 100% availability, you can use the following options.
+
+</Callout>
+
+The Langfuse API has high uptime and prompts are [cached locally](/docs/prompt-management/features/caching) in the SDKs to prevent network issues from affecting your application.
+
+However, `get_prompt()`/`getPrompt()` will throw an exception if:
+
+1. No local (fresh or stale) cached prompt is available -> new application instance fetching prompt for the first time
+2. _and_ network request fails -> networking or Langfuse API issue (after retries)
+
+To guarantee 100% availability, there are two options:
+
+1. Pre-fetch prompts on application startup and exit the application if the prompt is not available.
+2. Provide a `fallback` prompt that will be used in these cases.
+
+#### Option 1: Pre-fetch prompts on application startup and exit if not available
+
+_Example implementations:_
+
+<Tabs items={["Python (Flask)", "JS/TS (Express)"]}>
+<Tab>
+
+```python
+from flask import Flask, jsonify
+from langfuse import Langfuse
+
+# Initialize the Flask app and Langfuse client
+app = Flask(__name__)
+langfuse = Langfuse()
+
+def fetch_prompts_on_startup():
+    try:
+        # Fetch and cache the production version of the prompt
+        langfuse.get_prompt("movie-critic")
+    except Exception as e:
+        print(f"Failed to fetch prompt on startup: {e}")
+        sys.exit(1)  # Exit the application if the prompt is not available
+
+# Call the function during application startup
+fetch_prompts_on_startup()
+
+@app.route('/get-movie-prompt/<movie>', methods=['GET'])
+def get_movie_prompt(movie):
+    prompt = langfuse.get_prompt("movie-critic")
+    compiled_prompt = prompt.compile(criticlevel="expert", movie=movie)
+    return jsonify({"prompt": compiled_prompt})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import express from "express";
+import { Langfuse } from "langfuse";
+
+// Initialize the Express app and Langfuse client
+const app = express();
+const langfuse = new Langfuse();
+
+async function fetchPromptsOnStartup() {
+  try {
+    // Fetch and cache the production version of the prompt
+    await langfuse.getPrompt("movie-critic");
+  } catch (error) {
+    console.error("Failed to fetch prompt on startup:", error);
+    process.exit(1); // Exit the application if the prompt is not available
+  }
+}
+
+// Call the function during application startup
+fetchPromptsOnStartup();
+
+app.get("/get-movie-prompt/:movie", async (req, res) => {
+  const movie = req.params.movie;
+  const prompt = await langfuse.getPrompt("movie-critic");
+  const compiledPrompt = prompt.compile({ criticlevel: "expert", movie });
+  res.json({ prompt: compiledPrompt });
+});
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
+```
+
+</Tab>
+</Tabs>
+
+#### Option 2: Fallback [#fallback]
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python /fallback="Do you like {{movie}}?"/ /fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]/
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Get `text` prompt with fallback
+prompt = langfuse.get_prompt(
+  "movie-critic",
+  fallback="Do you like {{movie}}?"
+)
+
+# Get `chat` prompt with fallback
+chat_prompt = langfuse.get_prompt(
+  "movie-critic-chat",
+  type="chat",
+  fallback=[{"role": "system", "content": "You are an expert on {{movie}}"}]
+)
+
+# True if the prompt is a fallback
+prompt.is_fallback
+```
+
+</Tab>
+<Tab>
+
+```ts /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+// Get `text` prompt with fallback
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  fallback: "Do you like {{movie}}?",
+});
+
+// Get `chat` prompt with fallback
+const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+  fallback: [{ role: "system", content: "You are an expert on {{movie}}" }],
+});
+
+// True if the prompt is a fallback
+prompt.isFallback;
+```
+
+</Tab>
+</Tabs>

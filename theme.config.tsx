@@ -210,7 +210,7 @@ const config: DocsThemeConfig = {
         <span className="sm:hidden">Langfuse Town Hall on Wednesday →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        Langfuse Town Hall on Wednesday - New Features and Q3 Roadmap →
+          Langfuse Town Hall on Wednesday - New Features and Q3 Roadmap →
         </span>
       </Link>
     ),
