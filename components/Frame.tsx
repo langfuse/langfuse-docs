@@ -26,7 +26,7 @@ export const Frame = ({
         "inline-block rounded overflow-hidden bg-primary/5 max-w-2xl [&>*]:mt-0",
         fullWidth && "max-w-full",
         transparent && "bg-transparent",
-        border && "[&>*]:-mb-1"
+        border 
       )}
     >
       {children}
