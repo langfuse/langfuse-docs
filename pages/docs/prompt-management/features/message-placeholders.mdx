@@ -6,14 +6,18 @@ description: Use message placeholders in chat prompts to insert a list of chat m
 
 # Message Placeholders in Chat Prompts
 
-Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt. You can define multiple placeholders in a prompt and resolve them with different values at runtime.
+Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt. 
+
+You can define multiple placeholders in a prompt and resolve them with different values at runtime.
 Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
 
-**Note**: To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+<Callout type="info">
+To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+</Callout>
 
 <Steps>
 
-### Create prompt with placeholders
+## Create prompt with placeholders
 
 <Tabs items={["UI","Python", "JS/TS"]}>
 <Tab>
@@ -69,7 +73,7 @@ await langfuse.createPrompt({
 </Tab>
 </Tabs>
 
-### Resolve placeholders at runtime
+## Resolve placeholders at runtime
 
 In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
 The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted as `compile` does not validate the format of the messages.

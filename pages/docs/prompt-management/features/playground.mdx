@@ -4,48 +4,80 @@ description: Test, iterate, and compare different prompts and models within the 
 
 # LLM Playground
 
-
 Test and iterate on your prompts directly in the Langfuse Prompt Playground. Tweak the prompt and the model parameters to see how different models responds to these changes inputs. This allows you to quickly iterate on your prompts and optimize them for the best results in your LLM app without having to switch between tools or use any code.
 
 <CloudflareVideo
   videoId="3cfab665df39518f15fc18813cf82e3f"
   aspectRatio={16 / 10.47}
-  className="max-w-3xl"
   title="LLM Playground"
 />
 
-**Core features**
+## Core features
 
-- `{{variables}}` in prompts
-- tool calling
-- structured outputs
-- OpenAI, Anthropic, Bedrock, Google Vertex AI, Google AI Studio, and more
-- Linked to [prompt management](/docs/prompts/get-started)
+### Open your prompt in the playground
 
-We'll be adding more features and models in the future. If you have any feedback or feature requests, please let us know!
-
-## Jump from prompt management to the playground
-
-You can either start from scratch or jump into the playground from an existing prompt in [Langfuse Prompt Management](/docs/prompts/get-started).
+You can either start from scratch or open a prompt you created with [Langfuse Prompt Management](/docs/prompt-management/get-started) in the playground.
 
 <CloudflareVideo
-  videoId="44bbf8b87ae2dfa815d0bf0769eea542"
+  videoId="e0b7f4d5aa2da38fc9c2c36d0f2b3883"
   gifStyle
-  aspectRatio={16 / 9.68}
-  className="max-w-3xl"
+  aspectRatio={16 / 9}
 />
 
-## Tool calling and structured outputs
+### Open a generation in the playground
 
-The Langfuse Prompt Playground supports tool calling and structured outputs. Tool call results can be mocked directly in the playground to prompt the LLM for a final response.
+You can open a generation in the playground by clicking the `Open in Playground` button in the generation details page.
+
+<CloudflareVideo
+  videoId="707d08e15f28fcced0acbbadd5d123df"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+### Tool calling and structured outputs
+
+The Langfuse Playground supports tool calling and structured output schemas, enabling you to define, test, and validate LLM executions that rely on tool calls and enforce specific response formats.
 
 <CloudflareVideo
   videoId="8a19028067239a8e9ffe929d6dfd426e"
   gifStyle
-  className="max-w-3xl"
 />
 
-## Supported Models
+**Tool Calling**
+
+- Define custom tools with JSON schema definitions
+- Test prompts relying on tools in real-time by mocking tool responses
+- Save tool definitions to your project
+
+**Structured Output**
+
+- Enforce response formats using JSON schemas
+- Save schemas to your project
+- Jump into the playground from your OpenAI generation using structured output
+
+### Add prompt variables
+
+You can add prompt variables in the playground to simulate different inputs to your prompt.
+
+<Frame border fullWidth>
+  ![Add prompt variables](/images/docs/playground-variables.png)
+</Frame>
+
+### Select a model
+
+You can use your favorite model by adding the API key for the model you want to use in the Langfuse project settings. 
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+
+<Accordion>
+<AccordionItem value="supported-models">
+<AccordionTrigger>Supported models</AccordionTrigger>
+<AccordionContent>
 
 Currently the playground supports the following models by default. You may configure additional custom model names when adding your LLM API Key in the Langfuse project settings, e.g. when using a custom model or proxy.
 
@@ -118,6 +150,14 @@ export function ModelList() {
     <div>
       <ul>
         <li>
+          <strong>Any model that supports the OpenAI API schema:</strong> The
+          Playground and LLM-as-a-Judge evaluations can be used by any framework
+          that supports the OpenAI API schema such as Groq, OpenRouter, LiteLLM,
+          Hugging Face, and more. Just replace the API Base URL with the
+          appropriate endpoint for the model you want to use and add the
+          providers API keys for authentication.
+        </li>
+        <li>
           <strong>OpenAI / Azure OpenAI:</strong> {openAIModels.join(", ")}
         </li>
         <li>
@@ -136,20 +176,19 @@ export function ModelList() {
           <strong>Amazon Bedrock:</strong> All Amazon Bedrock models are
           supported. The required permission on AWS is `bedrock:InvokeModel`.
         </li>
-        <li>
-          <strong>Any model that supports the OpenAI API:</strong> The
-          Playground and LLM-as-a-Judge evaluations can be used by any framework
-          that supports the OpenAI API schema such as Groq, OpenRouter, LiteLLM,
-          Hugging Face, and more. Just replace the API Base URL with the
-          appropriate endpoint for the model you want to use and add the
-          providers API keys for authentication.
-        </li>
       </ul>
     </div>
   );
 }
 
 <ModelList />
+</AccordionContent>
+</AccordionItem>
+</Accordion>
+
+<Frame border fullWidth>
+  ![Select the model you want to use](/images/docs/playground-model-selection.png)
+</Frame>
 
 ## GitHub Discussions
 

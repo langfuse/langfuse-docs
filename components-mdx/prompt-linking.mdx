@@ -1,0 +1,291 @@
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tab>
+
+**Decorators**
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe(as_type="generation")
+def nested_generation():
+    prompt = langfuse.get_prompt("movie-critic")
+
+    langfuse.update_current_generation(
+        prompt=prompt,
+    )
+
+@observe()
+def main():
+  nested_generation()
+
+main()
+```
+
+**Context Managers**
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+prompt = langfuse.get_prompt("movie-critic")
+
+with langfuse.start_as_current_generation(
+    name="movie-generation",
+    model="gpt-4o",
+    prompt=prompt
+) as generation:
+    # Your LLM call here
+    generation.update(output="LLM response")
+```
+
+</Tab>
+<Tab>
+
+**Decorators**
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe(as_type="generation")
+def nested_generation():
+    prompt = langfuse.get_prompt("movie-critic")
+
+    langfuse_context.update_current_observation(
+        prompt=prompt,
+    )
+
+@observe()
+def main():
+  nested_generation()
+
+main()
+```
+
+**Low-level SDK**
+
+```diff
+langfuse.generation(
+    ...
++   prompt=prompt
+    ...
+)
+```
+
+</Tab>
+
+<Tab>
+
+```diff
+langfuse.generation({
+    ...
++   prompt: prompt
+    ...
+})
+```
+
+</Tab>
+
+<Tab>
+
+```python /langfuse_prompt=prompt/
+from langfuse.openai import openai
+from langfuse import get_client
+
+langfuse = get_client()
+
+prompt = langfuse.get_prompt("calculator")
+
+openai.chat.completions.create(
+  model="gpt-4o",
+  messages=[
+    {"role": "system", "content": prompt.compile(base=10)},
+    {"role": "user", "content": "1 + 1 = "}],
+  langfuse_prompt=prompt
+)
+```
+
+</Tab>
+
+<Tab>
+
+```ts /langfusePrompt,/
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
+
+const res = await observeOpenAI(new OpenAI(), {
+  langfusePrompt,
+}).completions.create({
+  prompt: langfusePrompt.prompt,
+  model: "gpt-4o",
+  max_tokens: 300,
+});
+```
+
+</Tab>
+
+<Tab>
+
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_openai import ChatOpenAI, OpenAI
+ 
+langfuse = get_client()
+
+# Initialize the Langfuse handler
+langfuse_handler = CallbackHandler()
+```
+
+**Text prompts**
+
+```python /"langfuse_prompt"/
+langfuse_text_prompt = langfuse.get_prompt("movie-critic")
+ 
+## Pass the langfuse_text_prompt to the PromptTemplate as metadata to link it to generations that use it
+langchain_text_prompt = PromptTemplate.from_template(
+    langfuse_text_prompt.get_langchain_prompt(),
+    metadata={"langfuse_prompt": langfuse_text_prompt},
+)
+ 
+## Use the text prompt in a Langchain chain
+llm = OpenAI()
+completion_chain = langchain_text_prompt | llm
+ 
+completion_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"}, config={"callbacks": [langfuse_handler]})
+```
+
+**Chat prompts**
+
+```python /"langfuse_prompt"/
+langfuse_chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
+ 
+## Manually set the metadata on the langchain_chat_prompt to link it to generations that use it
+langchain_chat_prompt = ChatPromptTemplate.from_messages(
+    langfuse_chat_prompt.get_langchain_prompt()
+)
+
+langchain_chat_prompt.metadata = {"langfuse_prompt": langfuse_chat_prompt}
+ 
+## or use the ChatPromptTemplate constructor directly.
+## Note that using ChatPromptTemplate.from_template led to issues in the past
+## See: https://github.com/langfuse/langfuse/issues/5374
+langchain_chat_prompt = ChatPromptTemplate(
+    langfuse_chat_prompt.get_langchain_prompt(),
+    metadata={"langfuse_prompt": langfuse_prompt}
+)
+ 
+## Use the chat prompt in a Langchain chain
+chat_llm = ChatOpenAI()
+chat_chain = langchain_chat_prompt | chat_llm
+ 
+chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"}, config={"callbacks": [langfuse_handler]})
+```
+
+<Callout type="info">
+  If you use the `with_config` method on the PromptTemplate to create a new
+  Langchain Runnable with updated config, please make sure to pass the
+  `langfuse_prompt` in the `metadata` key as well.
+</Callout>
+
+<Callout type="info">
+  Set the `langfuse_prompt` metadata key only on PromptTemplates and not
+  additionally on the LLM calls or elsewhere in your chains.
+</Callout>
+
+</Tab>
+
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+import { PromptTemplate } from "@langchain/core/prompts";
+import { ChatOpenAI, OpenAI } from "@langchain/openai";
+import { CallbackHandler } from "langfuse-langchain";
+ 
+const langfuseHandler = new CallbackHandler({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+});
+
+const langfuse = new Langfuse();
+```
+
+**Text prompts**
+
+```ts /metadata: { langfusePrompt:/
+const langfuseTextPrompt = await langfuse.getPrompt("movie-critic"); // Fetch a previously created text prompt
+
+// Pass the langfuseTextPrompt to the PromptTemplate as metadata to link it to generations that use it
+const langchainTextPrompt = PromptTemplate.fromTemplate(
+  langfuseTextPrompt.getLangchainPrompt()
+).withConfig({
+  metadata: { langfusePrompt: langfuseTextPrompt },
+});
+
+const model = new OpenAI();
+const chain = langchainTextPrompt.pipe(model);
+
+await chain.invoke({ movie: "Dune 2", criticlevel: "expert" }, { callbacks: [langfuseHandler] });
+
+```
+
+**Chat prompts**
+
+```ts /metadata: { langfusePrompt:/
+const langfuseChatPrompt = await langfuse.getPrompt(
+  "movie-critic-chat",
+  undefined,
+  {
+    type: "chat",
+  }
+); // type option infers the prompt type as chat (default is 'text')
+
+const langchainChatPrompt = ChatPromptTemplate.fromMessages(
+  langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
+).withConfig({
+  metadata: { langfusePrompt: langfuseChatPrompt },
+});
+
+const chatModel = new ChatOpenAI();
+const chatChain = langchainChatPrompt.pipe(chatModel);
+
+await chatChain.invoke({ movie: "Dune 2", criticlevel: "expert" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+<Tab>
+
+Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field:
+
+```typescript /langfusePrompt: fetchedPrompt.toJSON()/
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt,
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(),
+    },
+  },
+});
+```
+
+</Tab>
+
+</Tabs>

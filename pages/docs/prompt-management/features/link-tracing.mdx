@@ -5,3 +5,29 @@ description: Link Langfuse Prompts to Traces.
 ---
 
 # Link Traces to Langfuse Prompts
+
+You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best. 
+
+## How it works
+
+<Callout type="info">
+If a [fallback prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is used, no link will be created.
+</Callout>
+
+import PromptLinking from "@/components-mdx/prompt-linking.mdx";
+
+<PromptLinking />
+
+## Aggregate metrics by prompt version
+
+When navigating to the generation in Langfuse, you can see the prompt that was used to generate the response. This lets you also analyze aggregated metrics by prompt version to see which version of the prompt performed best.
+
+<Callout type="info" emoji="💡">
+For a structured analysis of different prompt versions you can run a [Prompt Experiment](/docs/evaluation/features/prompt-experiments) on Langfuse Datasets.
+</Callout>
+
+<CloudflareVideo
+  videoId="690135d64495c12c0eb0493f620e126f"
+  aspectRatio={16 / 9}
+  gifStyle
+/>

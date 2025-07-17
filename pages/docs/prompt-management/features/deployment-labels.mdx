@@ -8,25 +8,36 @@ description: Use labels to fetch specific prompt versions in the SDKs.
 
 Labels can be used to fetch specific prompt versions in the SDKs. When [using a prompt](#use-prompt) without specifying a label, Langfuse will serve the version with the `production` label. The `latest` label points to the most recently created version. You can create any additional labels, for example for different environments (`staging`, `production`), tenants (`tenant-1`, `tenant-2`), or experiments (`prod-a`, `prod-b`).
 
-**How to assign a label to a prompt:**
+## Assign a label to a prompt
 
 <Tabs items={["UI","Python", "JS/TS"]}>
 <Tab>
 
+Use the Langfuse UI to assign labels to a prompt.
+
 <CloudflareVideo
-  videoId="2141209791bd771000103d9703e2557b"
-  aspectRatio={1696 / 1080}
+  videoId="6d28a7e38b3ab12f5437e3eed803e2b5"
+  aspectRatio={16 / 9}
   gifStyle
 />
 
 </Tab>
 <Tab>
 
-You can assign labels when [creating a new prompt (version)](#create-update-prompt).
+Use the Python SDK to assign labels to a prompt when creating a new prompt version.
 
-Alternatively, you can also update the labels of an existing prompt version:
+```python {5}
+langfuse.create_prompt(
+    name="movie-critic",
+    type="text",
+    prompt="As a {{criticlevel}} movie critic, do you like {{movie}}?",
+    labels=["production"],  # add the label "production" to the prompt version
+)
+```
 
-```python
+Alternatively, you can also update the labels of an existing prompt version using the Python SDK:
+
+```python {5}
 langfuse = Langfuse()
 langfuse.update_prompt(
     name="movie-critic",
@@ -38,11 +49,20 @@ langfuse.update_prompt(
 </Tab>
 <Tab>
 
-You can assign labels when [creating a new prompt (version)](#create-update-prompt).
+Use the JS/TS SDK to assign labels to a prompt when creating a new prompt version.
 
-Alternatively, you can also update the labels of an existing prompt version:
+```ts {5}
+await langfuse.createPrompt({
+  name: "movie-critic",
+  type: "text",
+  prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
+  labels: ["production"], // add the label "production" to the prompt version
+});
+```
 
-```ts
+Alternatively, you can also update the labels of an existing prompt version using the JS/TS SDK:
+
+```ts {5}
 langfuse = Langfuse();
 await langfuse.updatePrompt({
   name: "movie-critic",
@@ -54,14 +74,11 @@ await langfuse.updatePrompt({
 </Tab>
 </Tabs>
 
-## Fetching prompts with specific labels or versions
+## Fetch prompts with specific label or version
 
 Once you have assigned labels to prompt versions, you can fetch them using the SDK:
 
 <Tabs items={["Python", "JS/TS"]}>
-<Tab>
-
-<Tabs items={["Python SDK v3", "Python SDK v2"]}>
 <Tab>
 
 ```python
@@ -79,28 +96,6 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 # Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
 prompt = langfuse.get_prompt("movie-critic", label="latest")
 ```
-
-</Tab>
-<Tab>
-
-```python
-from langfuse import Langfuse
-
-# Initialize Langfuse client
-langfuse = Langfuse()
-
-# Get specific version
-prompt = langfuse.get_prompt("movie-critic", version=1)
-
-# Get specific label
-prompt = langfuse.get_prompt("movie-critic", label="staging")
-
-# Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
-prompt = langfuse.get_prompt("movie-critic", label="latest")
-```
-
-</Tab>
-</Tabs>
 
 </Tab>
 
