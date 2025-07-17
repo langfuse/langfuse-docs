@@ -1802,6 +1802,25 @@ export default function Pricing({
 
             {isPricingPage && (
               <>
+                {/* Special offers callout */}
+                <div className="mt-4 mb-4 text-center">
+                  <div className="inline-flex items-center gap-6 px-4 py-2 bg-muted/30 rounded-full text-sm text-muted-foreground">
+                    <Link 
+                      href="/startups" 
+                      className="hover:text-primary transition-colors underline"
+                    >
+                      Startup discounts available
+                    </Link>
+                    <span className="text-muted-foreground/50">|</span>
+                    <Link 
+                      href="/research" 
+                      className="hover:text-primary transition-colors underline"
+                    >
+                      Academic & research benefits
+                    </Link>
+                  </div>
+                </div>
+
                 {/* Feature comparison (up to lg) */}
                 <section
                   aria-labelledby="mobile-comparison-heading"
@@ -1991,8 +2010,8 @@ export default function Pricing({
         {isPricingPage ? (
           <>
             <div className="relative">
-              <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-                <DiscountOverview className="mt-10" />
+              <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
+                <DiscountOverview className="mt-0" />
                 <PricingFAQ />
               </div>
             </div>
@@ -2026,8 +2045,12 @@ const discounts = [
     },
   },
   {
-    name: "Education / Non-profits / Students",
+    name: "Research / Students",
     description: "Up to 100% off, limits apply",
+    cta: {
+      text: "Learn more and apply",
+      href: "/research",
+    },
   },
   {
     name: "Open-source projects",
@@ -2037,7 +2060,7 @@ const discounts = [
 
 const DiscountOverview = ({ className }: { className?: string }) => (
   <div
-    className={cn("mx-auto max-w-7xl px-6 lg:px-8 pt-20", className)}
+    className={cn("mx-auto max-w-7xl px-6 lg:px-8 pt-8", className)}
     id="discounts"
   >
     <div className="mx-auto max-w-4xl">
