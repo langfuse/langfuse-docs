@@ -135,3 +135,22 @@ details>summary {
   --muted-magenta: 330 90% 70%;
   --muted-blue: 239 84% 67%;
 }
+
+/* Enhanced styling for Core and Advanced separators - applied via JavaScript */
+li._font-semibold.separator-enhanced {
+  color: hsl(var(--muted-foreground)) !important;
+  font-weight: 500 !important;
+  font-size: 0.5rem !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0 !important;
+  margin-top: 0.7rem !important;
+  border-bottom:1px solid hsl(var(--muted)) !important;
+  border-left:1px solid hsl(var(--muted)) !important;
+  background-color: hsl(var(--muted-background)) !important;
+  border-bottom-left-radius: 5px !important;
+}
+
+/* Dark mode: match enhanced separators color with regular separators */
+.dark li._font-semibold.separator-enhanced {
+  color: hsl(var(--primary)) !important;
+}
