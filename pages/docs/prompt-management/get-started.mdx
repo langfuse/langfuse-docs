@@ -33,7 +33,11 @@ from langfuse import get_client
 
 # Initialize Langfuse client
 langfuse = get_client()
+```
 
+**Text prompt**
+
+```python
 # Get current `production` version of a text prompt
 prompt = langfuse.get_prompt("movie-critic")
 
@@ -42,7 +46,7 @@ compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```python
 # Get current `production` version of a chat prompt
@@ -53,7 +57,7 @@ compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```python
 # Get specific version
@@ -66,7 +70,7 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 prompt = langfuse.get_prompt("movie-critic", label="latest")
 ```
 
-Attributes
+**Attributes**
 
 ```python
 # Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -85,7 +89,11 @@ import { Langfuse } from "langfuse";
 
 // Iniitialize the Langfuse client
 const langfuse = new Langfuse();
+```
 
+**Text prompt**
+
+```ts
 // Get current `production` version
 const prompt = await langfuse.getPrompt("movie-critic");
 
@@ -97,7 +105,7 @@ const compiledPrompt = prompt.compile({
 // -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```ts
 // Get current `production` version of a chat prompt
@@ -113,7 +121,7 @@ const compiledChatPrompt = chatPrompt.compile({
 // -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```ts
 // Get specific version of a prompt (here version 1)
@@ -130,7 +138,7 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 });
 ```
 
-Attributes
+**Attributes**
 
 ```ts
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -152,7 +160,11 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # Initialize Langfuse client
 langfuse = Langfuse()
+```
 
+**Text prompt**
+
+```python
 # Get current `production` version
 langfuse_prompt = langfuse.get_prompt("movie-critic")
 
@@ -163,7 +175,7 @@ langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchai
 langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt(strictness='tough'))
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```python
 # Get current `production` version of a chat prompt
@@ -173,7 +185,7 @@ langfuse_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
 langchain_prompt = ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```python
 # Get specific version
@@ -186,7 +198,7 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 prompt = langfuse.get_prompt("movie-critic", label="latest")
 ```
 
-Attributes
+**Attributes**
 
 ```python
 # Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -207,7 +219,11 @@ import { Langfuse } from "langfuse";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 const langfuse = new Langfuse();
+```
 
+**Text prompt**
+
+```ts
 // Get current `production` version
 const langfusePrompt = await langfuse.getPrompt("movie-critic");
 
@@ -217,7 +233,7 @@ const promptTemplate = PromptTemplate.fromTemplate(
 );
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```ts
 // Get current `production` version of a chat prompt
@@ -233,7 +249,7 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 );
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```ts
 // Get specific version of a prompt (here version 1)
@@ -250,7 +266,7 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 });
 ```
 
-Attributes
+**Attributes**
 
 ```ts
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
