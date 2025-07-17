@@ -17,7 +17,7 @@ export const Frame = ({
     className={cn(
       "my-4",
       border &&
-        "p-1 pb-0 bg-gradient-to-tr from-blue-300/50 via-green-200/50 to-yellow-300/50 inline-block rounded",
+        "p-2 md:p-5 md:pb-3 bg-gradient-to-tr from-blue-300/50 via-green-200/50 to-yellow-300/50 inline-block rounded",
       className
     )}
   >
