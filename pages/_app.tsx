@@ -32,8 +32,30 @@ export default function App({ Component, pageProps }) {
       hsPageView(path);
     };
     router.events.on("routeChangeComplete", handleRouteChange);
+    
+    // Style separators based on text content (both desktop and mobile)
+    const styleSeparators = () => {
+      const separators = document.querySelectorAll('li._font-semibold');
+      separators.forEach((separator) => {
+        const text = separator.textContent?.trim();
+        if (text === 'Core' || text === 'Advanced') {
+          separator.classList.add('separator-enhanced');
+        }
+      });
+    };
+
+    // Style separators on route changes and initial load
+    const handleSeparatorStyling = () => {
+      // Small delay to ensure DOM is updated
+      setTimeout(styleSeparators, 100);
+    };
+    
+    router.events.on("routeChangeComplete", handleSeparatorStyling);
+    handleSeparatorStyling(); // Run on initial load
+    
     return () => {
       router.events.off("routeChangeComplete", handleRouteChange);
+      router.events.off("routeChangeComplete", handleSeparatorStyling);
     };
   }, []);
   return (

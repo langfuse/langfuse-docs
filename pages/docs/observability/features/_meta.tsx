@@ -10,11 +10,11 @@ export default {
     metadata: "Metadata",
     "trace-ids": "Trace IDs",
 
-
-    "-- Other": {
+    "-- Advanced": {
       type: "separator",
-      title: "Other",
+      title: "Advanced",
     },
+    "log-levels": "Log Levels",
     "*": {
       layout: "default",
     },
