@@ -1,4 +1,4 @@
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
 **Decorators**
@@ -39,39 +39,6 @@ with langfuse.start_as_current_generation(
 ) as generation:
     # Your LLM call here
     generation.update(output="LLM response")
-```
-
-</Tab>
-<Tab>
-
-**Decorators**
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe(as_type="generation")
-def nested_generation():
-    prompt = langfuse.get_prompt("movie-critic")
-
-    langfuse_context.update_current_observation(
-        prompt=prompt,
-    )
-
-@observe()
-def main():
-  nested_generation()
-
-main()
-```
-
-**Low-level SDK**
-
-```diff
-langfuse.generation(
-    ...
-+   prompt=prompt
-    ...
-)
 ```
 
 </Tab>

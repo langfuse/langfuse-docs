@@ -23,7 +23,7 @@ import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
 ### Use prompt [#use-prompt]
 
-At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/data-model).
+At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/features/deployment-labels).
 
 <Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
@@ -284,13 +284,13 @@ prompt.config;
 
 You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best. 
 
-<Callout type="info">
-If a [fallback prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is used, no link will be created.
-</Callout>
-
 import PromptLinking from "@/components-mdx/prompt-linking.mdx";
 
 <PromptLinking />
+
+<Callout type="info">
+If a [fallback prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is used, no link will be created.
+</Callout>
 
 ### Rollbacks (optional)
 
