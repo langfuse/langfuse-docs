@@ -8,19 +8,51 @@ description: Reference other prompts in your prompts using a simple tag format.
 
 As you create more prompts, you will often find yourself using the same snippets of text or instructions in multiple prompts. To avoid duplication, you can compose prompts by referencing other prompts.
 
-## What composability can do
+{/* I think this video is way too long and doesn't describe prompt composability in a focused way.  */}
+<Frame border fullWidth>
+  <img src="/images/docs/prompt-composability.png" alt="Composability" />
+</Frame>
+
+## Why Use Composed Prompts?
 
 - Create modular **prompt components** that can be reused across multiple prompts
 - **Maintain** common instructions, examples, or context in a single place
 - **Update dependent prompts** automatically when base prompts change
 
+## Get started
+
+<Tabs items={["Langfuse UI", "Python SDK"]}>
+
+<Tab>
+When creating the prompt via the Langfuse UI, you can use the `Add prompt reference` button to insert a prompt reference into your prompt.
 
 <CloudflareVideo
-  videoId="6e9c25ba3d4c72363680af5dfb6a9bd2"
+  videoId="442e83cda5a94c08faf20b8365f73726"
   aspectRatio={16 / 9}
+  gifStyle
 />
 
-## How composability works
+</Tab>
+
+<Tab>
+
+You can reference other **text** prompts in your prompts the following format:
+
+```bash
+@@@langfusePrompt:name=PromptName|version=1@@@
+```
+
+You can also use a label instead of a specific version for dynamic resolution:
+
+```bash
+@@@langfusePrompt:name=PromptName|label=production@@@
+```
+
+</Tab>
+
+</Tabs>
+
+## How Composed Prompts Resolve
 
 When you fetch a prompt that contains references to other prompts, the Langfuse SDK/API automatically resolves these references and replaces the tags with the actual content from the referenced prompts.
 
@@ -40,36 +72,3 @@ flowchart TD
     class A,C,D,E,B default;
     style B fill:#e1f5fe
 ```
-
-## Get started
-
-<Tabs items={["Langfuse UI", "Python SDK"]}>
-
-<Tab>
-When creating the prompt via the Langfuse UI, you can use the `Add prompt reference` button to insert a prompt reference tag into your prompt.
-
-<CloudflareVideo
-  videoId="442e83cda5a94c08faf20b8365f73726"
-  aspectRatio={16 / 9}
-  gifStyle
-/>
-
-</Tab>
-
-<Tab>
-
-You can reference other **text** prompts in your prompts using a simple tag format:
-
-```bash
-@@@langfusePrompt:name=PromptName|version=1@@@
-```
-
-You can also use a label instead of a specific version for dynamic resolution:
-
-```bash
-@@@langfusePrompt:name=PromptName|label=production@@@
-```
-
-</Tab>
-
-</Tabs>
