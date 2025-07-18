@@ -1333,6 +1333,35 @@ response_b = chain.invoke(
 - Missing public key parameters may result in traces being routed to the default project or lost
 - Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
 
+### Self-signed SSL certificates (self-hosted Langfuse)
+
+
+If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:
+
+<Callout type='warning'>
+Changing SSL settings has major security implications depending on your environment. Be sure you understand these implications before you proceed.
+</Callout>
+
+**1. Set OpenTelemetry span exporter to trust self-signed certificate**
+
+```bash filename=".env"
+OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE="/path/to/my-selfsigned-cert.crt"
+```
+
+**2. Set HTTPX to trust certificate for all other API requests to Langfuse instance**
+
+```python filename="main.py"
+import os
+
+import httpx
+
+from langfuse import Langfuse
+
+httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE"])
+
+langfuse = Langfuse(httpx_client=httpx_client)
+```
+
 ## OTEL and Langfuse
 
 The Langfuse v3 SDK is built upon [OpenTelemetry (OTEL)](https://opentelemetry.io/), a standard for observability. Understanding the relation between OTEL and Langfuse is not required to use the SDK, but it is helpful to have a basic understanding of the concepts. OTEL related concepts are abstracted away and you can use the SDK without being deeply familiar with them.
