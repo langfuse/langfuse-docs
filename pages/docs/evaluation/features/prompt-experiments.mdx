@@ -42,14 +42,20 @@ For prompt experiments to work correctly, you must ensure:
 3. **Dataset items must have their input formatted as valid JSON**
 </Callout>
 
-### Variable Mapping Example
+
+### Variable Mapping
+
+For Prompt Experiments, you need to map the variables in your prompt to the keys in your dataset items.
+
+<details>
+<summary>Example:</summary>
 
 The following example demonstrates how prompt variables are mapped to dataset item inputs:
 
 <div className="grid md:grid-cols-2 gap-4">
 <div>
 
-**Prompt:**
+<br/>**Prompt:**
 ```bash
 You are a Langfuse expert. Answer based on:
 {{documentation}}
@@ -60,7 +66,7 @@ Question: {{question}}
 </div>
 <div>
 
-**Dataset Item:**
+<br/>**Dataset Item:**
 ```json
 {
   "documentation": "Langfuse is an LLM Engineering Platform",
@@ -76,6 +82,8 @@ In this example:
 - The prompt variable `{{question}}` maps to the JSON key `"question"`
 - Both keys must exist in the dataset item's input JSON for the experiment to run successfully
 
+</details>
+
 
 ### Chat Message Placeholder Mapping Example [#message-placeholders]
 
@@ -83,7 +91,8 @@ In addition to variables, you can also map placeholders in chat message prompts 
 This is useful when the dataset item also contains for example a chat message history to use.
 Your chat prompt needs to contain a placeholder with a name. Variables within placeholders are not resolved.
 
-Here is an example:
+<details>
+<summary>Example:</summary>
 
 **Chat Prompt:**
 Placeholder named: `message_history`
@@ -105,11 +114,12 @@ Placeholder named: `message_history`
 }
 ```
 
-In this example:
+In this example: 
 - The chat prompt placeholder `message_history` maps to the JSON key `"message_history"`.
 - The prompt variable `{{question}}` maps to the JSON key `"question"` in a variable not within a placeholder message.
 - Both keys must exist in the dataset item's input JSON for the experiment to run successfully
 
+</details>
 
 ## Setup
 
