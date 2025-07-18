@@ -8,45 +8,23 @@ description: Reference other prompts in your prompts using a simple tag format.
 
 As you create more prompts, you will often find yourself using the same snippets of text or instructions in multiple prompts. To avoid duplication, you can compose prompts by referencing other prompts.
 
-## What composability can do
+{/* I think this video is way too long and doesn't describe prompt composability in a focused way.  */}
+<Frame border fullWidth>
+  <img src="/images/docs/prompt-composability.png" alt="Composability" />
+</Frame>
+
+## Why Use Composed Prompts?
 
 - Create modular **prompt components** that can be reused across multiple prompts
 - **Maintain** common instructions, examples, or context in a single place
 - **Update dependent prompts** automatically when base prompts change
-
-
-<CloudflareVideo
-  videoId="6e9c25ba3d4c72363680af5dfb6a9bd2"
-  aspectRatio={16 / 9}
-/>
-
-## How composability works
-
-When you fetch a prompt that contains references to other prompts, the Langfuse SDK/API automatically resolves these references and replaces the tags with the actual content from the referenced prompts.
-
-The following diagram illustrates how prompt composability works in Langfuse:
-
-```mermaid
-flowchart TD
-    A["<b>Main Prompt</b><br/> (Contains: System instructions):<br/><br/>@@@langfusePrompt:name=<b>CommonInstructions</b>|label=production@@@<br/>@@@langfusePrompt:name=<b>Examples</b>|version=2@@@<br/>User question: {{question}}"] --> B[Langfuse SDK/API]
-
-    C["<b>CommonInstructions Prompt</b><br/> (label: production):<br/><br/>'Always be helpful and accurate.<br/>Format responses clearly.'"] --> B
-
-    D["<b>Examples Prompt</b><br/> (version: 2):<br/><br/>'Example 1: Q: Hello A: Hi there!<br/>Example 2: Q: Help A: I'm here to help!'"\] --> B
-
-    B --> E["<b>Final Composed Prompt:</b><br/><br/>'Always be helpful and accurate.<br/>Format responses clearly.<br/>Example 1: Q: Hello A: Hi there!<br/>Example 2: Q: Help A: I'm here to help!<br/>User question: {{question}}'"]
-
-    classDef default fill:#fff,stroke:#333,color:#000;
-    class A,C,D,E,B default;
-    style B fill:#e1f5fe
-```
 
 ## Get started
 
 <Tabs items={["Langfuse UI", "Python SDK"]}>
 
 <Tab>
-When creating the prompt via the Langfuse UI, you can use the `Add prompt reference` button to insert a prompt reference tag into your prompt.
+When creating the prompt via the Langfuse UI, you can use the `Add prompt reference` button to insert a prompt reference into your prompt.
 
 <CloudflareVideo
   videoId="442e83cda5a94c08faf20b8365f73726"
@@ -58,7 +36,7 @@ When creating the prompt via the Langfuse UI, you can use the `Add prompt refere
 
 <Tab>
 
-You can reference other **text** prompts in your prompts using a simple tag format:
+You can reference other **text** prompts in your prompts the following format:
 
 ```bash
 @@@langfusePrompt:name=PromptName|version=1@@@
@@ -73,3 +51,24 @@ You can also use a label instead of a specific version for dynamic resolution:
 </Tab>
 
 </Tabs>
+
+## How Composed Prompts Resolve
+
+When you fetch a prompt that contains references to other prompts, the Langfuse SDK/API automatically resolves these references and replaces the tags with the actual content from the referenced prompts.
+
+The following diagram illustrates how prompt composability works in Langfuse:
+
+```mermaid
+flowchart TD
+    A["<b>Main Prompt</b><br/> (Contains: System instructions):<br/><br/>@@@langfusePrompt:name=<b>CommonInstructions</b>|label=production@@@<br/>@@@langfusePrompt:name=<b>Examples</b>|version=2@@@<br/>User question: {{question}}"] --> B[Langfuse SDK/API]
+
+    C["<b>CommonInstructions Prompt</b><br/> (label: production):<br/><br/>'Always be helpful and accurate.<br/>Format responses clearly.'"] --> B
+
+    D["<b>Examples Prompt</b><br/> (version: 2):<br/><br/>'Example 1: Q: Hello A: Hi there!<br/>Example 2: Q: Help A: I'm here to help!'] --> B
+
+    B --> E["<b>Final Composed Prompt:</b><br/><br/>'Always be helpful and accurate.<br/>Format responses clearly.<br/>Example 1: Q: Hello A: Hi there!<br/>Example 2: Q: Help A: I'm here to help!<br/>User question: {{question}}'"]
+
+    classDef default fill:#fff,stroke:#333,color:#000;
+    class A,C,D,E,B default;
+    style B fill:#e1f5fe
+```
