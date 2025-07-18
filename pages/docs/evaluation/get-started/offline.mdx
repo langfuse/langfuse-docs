@@ -18,7 +18,7 @@ import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
 
 ### Create new dataset items
 
-Individual items can be added to a dataset by providing the input and optionally the expected output.
+Dataset items can be added to a dataset by providing the input and optionally the expected output.
 
 import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
 
@@ -29,9 +29,17 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 
 Frequently, you want to create synthetic examples to test your application to bootstrap your dataset. LLMs are great at generating these by prompting for common questions/tasks.
 
-Once generated, you can upload them to Langfuse via the SDKs.
+To get started have a look at this cookbook for examples on how to generate synthetic datasets:
 
-To get started have a look at this [cookbook](/docs/datasets/example-synthetic-datasets) for examples on how to generate synthetic datasets.
+import { FileCode } from "lucide-react";
+
+<Cards num={1}>
+  <Card
+    title="Example Synthetic Datasets"
+    href="/guides/cookbook/datasets_synthetic_datasets"
+    icon={<FileCode />}
+  />
+</Cards>
 
 </details>
 
@@ -132,7 +140,6 @@ Assume you already have a Langfuse-instrumented LLM-app:
 from langfuse import get_client, observe
 from langfuse.openai import OpenAI
 
-
 @observe
 def my_llm_function(question: str):
     response = OpenAI().chat.completions.create(
@@ -150,7 +157,6 @@ You may then execute that LLM-app for each dataset item to create a dataset run:
 
 ```python filename="execute_dataset.py"
 from langfuse import get_client
-
 from .app import my_llm_application
 
 dataset = get_client().get_dataset("<dataset_name>")

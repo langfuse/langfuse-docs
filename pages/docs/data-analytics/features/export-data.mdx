@@ -1,0 +1,64 @@
+---
+title: Export Data
+sidebarTitle: Export Data
+description: Export your Langfuse observability data for analysis, fine-tuning, and integration with external tools.
+---
+
+# Export Data
+
+Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. Export your observability data for analysis, fine-tuning, model training, or integration with external tools.
+
+You can export data via multiple methods:
+- [Export via UI](#ui) - Manual exports from the Langfuse interface
+- [Export via Blob Storage](#blob-storage) - Scheduled automated exports to cloud storage
+- [Export via SDKs or API](/docs/data-analytics/features/public-api) - Programmatic access using Langfuse SDKs or API
+
+## Export via UI [#ui]
+
+All filters applied to the table will be applied to the export.
+
+Available export formats:
+
+- CSV
+- JSON
+
+<CloudflareVideo
+  videoId="c24c32f19cfa9c90f71b3c4b9eebea59"
+  aspectRatio={1844 / 1080}
+  gifStyle
+/>
+
+## Export via Blob Storage Integration [#blob-storage]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, and `scores`.
+
+Those exports can run on an `hourly`, `daily`, or `weekly` schedule.
+Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
+Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
+
+### Start exporting via Blob Storage
+
+To set up the export navigate to `Your Project` > `Settings` > `Integrations` > `Blob Storage`.
+
+Fill in the settings to authenticate with your vendor, enable the integration, and press save.
+Within an hour an initial export should start and continue based on the schedule you have selected.
+The export supports CSV, JSON, and JSONL file formats.
+Read [our blob storage documentation](/self-hosting/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
+
+<Frame className="my-10" fullWidth border>
+  ![Blob Storage Integration Setup](/images/docs/blob-storage.png)
+</Frame>
+
+## Trouble exporting?
+
+If you're having trouble exporting data, please [let us know](#contact) and we'll help you out.

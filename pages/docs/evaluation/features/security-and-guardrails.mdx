@@ -1,0 +1,196 @@
+---
+description: Survey of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate LLM safety risks.
+---
+
+# Monitor LLM Security
+
+There are a host of potential safety risks involved with LLM-based applications. These include prompt injection, leakage of personally identifiable information (PII), or harmful prompts. Langfuse can be used to monitor and protect against these security risks, and investigate incidents when they occur.
+
+<CloudflareVideo
+  videoId="3a89dd733399f0c9da4aa5ac9da80d78"
+  title="LLM Security Monitoring with Langfuse"
+  aspectRatio={16 / 9}
+  className="mt-6"
+  posterStartTime={112}
+/>
+
+## What is LLM Security?
+
+LLM Security involves implementing protective measures to safeguard LLMs and their infrastructure from unauthorized access, misuse, and adversarial attacks, ensuring the integrity and confidentiality of both the model and data. This is crucial in AI/ML systems to maintain ethical usage, prevent security risks like prompt injections, and ensure reliable operation under safe conditions.
+
+## How does LLM Security work?
+
+<Callout type="info">
+
+LLM Security can be addressed with a combination of
+
+- LLM Security libraries for run-time security measures
+- Langfuse for the ex-post evaluation of the effectiveness of these measures
+
+</Callout>
+
+### 1. Run-time security measures
+
+There are several popular security libraries that can be used to mitigate security risks in LLM-based applications. These include: [LLM Guard](https://llm-guard.com), [Prompt Armor](https://promptarmor.com), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), [Lakera](https://www.lakera.ai). These libraries help with security measures in the following ways:
+
+1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
+2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
+3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
+
+### 2. Monitoring and evaluation of security measures with Langfuse
+
+Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
+
+1. Manually inspect traces to investigate security issues.
+2. Monitor security scores over time in the Langfuse Dashboard.
+3. Validate security checks. You can use Langfuse [scores](/docs/scores) to evaluate the effectiveness of security tools. Integrating Langfuse into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
+   - [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
+   - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
+4. Track Latency. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help disect the latencies of these checks within a trace to understand whether the checks are worth the wait.
+
+# Getting Started with LLM Security
+
+LLM Security can be addressed with a combination of:
+
+- LLM Security libraries for run-time security measures
+- Langfuse for the ex-post evaluation of the effectiveness of these measures
+
+Learn more about this conceptually in our [LLM Security Overview](/docs/security/overview).
+
+## Example: Anonymizing Personally Identifiable Information (PII)
+
+Exposing PII to LLMs can pose serious security and privacy risks, such as violating contractual obligations or regulatory compliance requirements, or mitigating the risks of data leakage or a data breach.
+
+Personally Identifiable Information (PII) includes:
+
+- Credit card number
+- Full name
+- Phone number
+- Email address
+- Social Security number
+- IP Address
+
+The example below shows a simple application that summarizes a given court transcript. For privacy reasons, the application wants to anonymize PII before the information is fed into the model, and then un-redact the response to produce a coherent summary.
+
+To read more about other security risks, including prompt injection, banned topics, or malicious URLs, please check out the docs of the various libraries or read our [security cookbook](/docs/security/example-python) which includes more examples.
+
+<Steps>
+
+### Install packages
+
+In this example we use the open source library [LLM Guard](https://llm-guard.com/) for run-time security checks. All examples easily translate to other libraries such as [Prompt Armor](https://promptarmor.com), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), and [Lakera](https://www.lakera.ai).
+
+First, import the security packages and Langfuse tools.
+
+```bash
+pip install llm-guard langfuse openai
+```
+
+```python
+from llm_guard.input_scanners import Anonymize
+from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
+from langfuse.openai import openai # OpenAI integration
+from langfuse import observe
+from llm_guard.output_scanners import Deanonymize
+from llm_guard.vault import Vault
+```
+
+### Anonymize and deanonymize PII and trace with Langfuse
+
+We break up each step of the process into its own function so we can track each step separately in Langfuse.
+
+By decorating the functions with `@observe()`, we can trace each step of the process and monitor the risk scores returned by the security tools. This allows us to see how well the security tools are working and whether they are catching the PII as expected.
+
+```python
+vault = Vault()
+
+@observe()
+def anonymize(input: str):
+  scanner = Anonymize(vault, preamble="Insert before prompt", allowed_names=["John Doe"], hidden_names=["Test LLC"],
+                    recognizer_conf=BERT_LARGE_NER_CONF, language="en")
+  sanitized_prompt, is_valid, risk_score = scanner.scan(prompt)
+  return sanitized_prompt
+
+@observe()
+def deanonymize(sanitized_prompt: str, answer: str):
+  scanner = Deanonymize(vault)
+  sanitized_model_output, is_valid, risk_score = scanner.scan(sanitized_prompt, answer)
+
+  return sanitized_model_output
+```
+
+### Instrument LLM call
+
+In this example, we use the native OpenAI SDK integration, to instrument the LLM call. Thereby, we can automatically collect token counts, model parameters, and the exact prompt that was sent to the model.
+
+Note: Langfuse [natively integrates](/integrations) with a number of frameworks (e.g. LlamaIndex, LangChain, Haystack, ...) and you can easily instrument any LLM via the [SDKs](/docs/sdk).
+
+```python
+@observe()
+def summarize_transcript(prompt: str):
+  sanitized_prompt = anonymize(prompt)
+
+  answer = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        max_tokens=100,
+        messages=[
+          {"role": "system", "content": "Summarize the given court transcript."},
+          {"role": "user", "content": sanitized_prompt}
+        ],
+    ).choices[0].message.content
+
+  sanitized_model_output = deanonymize(sanitized_prompt, answer)
+
+  return sanitized_model_output
+```
+
+### Execute the application
+
+Run the function. In this example, we input a section of a court transcript. Applications that handle sensitive information will often need to use anonymize and deanonymize functionality to comply with data privacy policies such as HIPAA or GDPR.
+
+```python
+prompt = """
+Plaintiff, Jane Doe, by and through her attorneys, files this complaint
+against Defendant, Big Corporation, and alleges upon information and belief,
+except for those allegations pertaining to personal knowledge, that on or about
+July 15, 2023, at the Defendant's manufacturing facility located at 123 Industrial Way, Springfield, Illinois, Defendant negligently failed to maintain safe working conditions,
+leading to Plaintiff suffering severe and permanent injuries. As a direct and proximate
+result of Defendant's negligence, Plaintiff has endured significant physical pain, emotional distress, and financial hardship due to medical expenses and loss of income. Plaintiff seeks compensatory damages, punitive damages, and any other relief the Court deems just and proper.
+"""
+summarize_transcript(prompt)
+```
+
+### Inspect trace in Langfuse
+
+In this trace ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/43213866-3038-4706-ae3a-d39e9df459a2)), we can see how the name of the plaintiff is anonymized before being sent to the model, and then un-redacted in the response. We can now evaluate run evaluations in Langfuse to control for the effectiveness of these measures.
+
+<CloudflareVideo
+  videoId="68fb440bb7f5f7dbea1b4fa2829fffde"
+  title="LLM Security Monitoring with Langfuse"
+  aspectRatio={16 / 10.775}
+  className="mt-6"
+  gifStyle
+/>
+
+</Steps>
+
+## More Examples
+
+Find more examples of LLM security monitoring in our cookbook.
+
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Cookbook: Observing LLM Security"
+    href="/docs/security/example-python"
+    icon={<FileCode />}
+  />
+</Cards>
+
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-llm-security"]} />
