@@ -1,0 +1,41 @@
+---
+title: Prompt Config
+sidebarTitle: Config
+description: The prompt config in Langfuse is an optional JSON object attached to each prompt that stores structured data such as model parameters (like model name, temperature), function/tool parameters, or JSON schemas.
+---
+
+# Prompt Config
+
+The prompt config in Langfuse is an **optional JSON object** attached to each prompt that stores structured data such as model parameters (like model name, temperature), function/tool parameters, or JSON schemas. 
+
+This config is **versioned** together with the prompt and allows you to manage all parameters associated with a prompt in one place, making it easier to deploy, update, and track prompt behavior and performance across different versions and environments.
+
+<Frame border fullWidth>
+  ![Prompt config](/images/docs/prompt-management-config.png)
+</Frame>
+
+## Use cases
+
+- Change the model your application uses without touching code
+- Manage and version the function/tool JSON schemas your application uses
+- Define the JSON schema for your application's responses
+- Set and manage you model parameters such as temperature, top_p, max_tokens, etc.
+
+## Cookbooks
+
+The following two example cookbooks demonstrate how to use the `config` attribute:
+
+import { Terminal, FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Example OpenAI Functions"
+    href="/guides/cookbook/prompt_management_openai_functions"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example Langchain (Python)"
+    href="/guides/cookbook/prompt_management_langchain"
+    icon={<FileCode />}
+  />
+</Cards>

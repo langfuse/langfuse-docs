@@ -6,28 +6,26 @@ description: Get started with Langfuse Prompt Management.
 
 # Get Started with Prompt Management
 
-Langfuse Prompt Management is a powerful tool for managing prompts in your applications. It allows you to create, update, and version prompts in a centralized location, and use them in your applications. Learn more [here](/docs/prompt-management/overview) or get started by following the steps below.
-
-## How it works
+This quickstart helps you to create your first prompt and use it in your application.
 
 <Steps>
 
-### Create/update prompt [#create-update-prompt]
+## Get API keys
 
-If you already have a prompt with the same `name`, the prompt will be added as a new version.
+1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+## Create a prompt [#create-update-prompt]
 
 import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
 <PromptCreate />
 
-### Use prompt [#use-prompt]
+## Use prompt [#use-prompt]
 
-At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/data-model).
+At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/features/deployment-labels).
 
-<Tabs items={["Python", "JS/TS", "Langchain (Python)", "Langchain (JS)"]}>
-<Tab>
-
-<Tabs items={["Python SDK v3", "Python SDK v2"]}>
+<Tabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
 
 ```python
@@ -35,24 +33,11 @@ from langfuse import get_client
 
 # Initialize Langfuse client
 langfuse = get_client()
-
-# Get current `production` version of a text prompt
-prompt = langfuse.get_prompt("movie-critic")
-
-# Insert variables into prompt template
-compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
-# -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-</Tab>
-<Tab>
+**Text prompt**
 
 ```python
-from langfuse import Langfuse
-
-# Initialize Langfuse client
-langfuse = Langfuse()
-
 # Get current `production` version of a text prompt
 prompt = langfuse.get_prompt("movie-critic")
 
@@ -61,10 +46,7 @@ compiled_prompt = prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-</Tab>
-</Tabs>
-
-Chat prompts
+**Chat prompt**
 
 ```python
 # Get current `production` version of a chat prompt
@@ -75,7 +57,7 @@ compiled_chat_prompt = chat_prompt.compile(criticlevel="expert", movie="Dune 2")
 # -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```python
 # Get specific version
@@ -88,7 +70,7 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 prompt = langfuse.get_prompt("movie-critic", label="latest")
 ```
 
-Attributes
+**Attributes**
 
 ```python
 # Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -107,7 +89,11 @@ import { Langfuse } from "langfuse";
 
 // Iniitialize the Langfuse client
 const langfuse = new Langfuse();
+```
 
+**Text prompt**
+
+```ts
 // Get current `production` version
 const prompt = await langfuse.getPrompt("movie-critic");
 
@@ -119,7 +105,7 @@ const compiledPrompt = prompt.compile({
 // -> "As an expert movie critic, do you like Dune 2?"
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```ts
 // Get current `production` version of a chat prompt
@@ -135,7 +121,7 @@ const compiledChatPrompt = chatPrompt.compile({
 // -> [{"role": "system", "content": "You are an expert movie critic"}, {"role": "user", "content": "Do you like Dune 2?"}]
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```ts
 // Get specific version of a prompt (here version 1)
@@ -152,7 +138,7 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 });
 ```
 
-Attributes
+**Attributes**
 
 ```ts
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -174,7 +160,11 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # Initialize Langfuse client
 langfuse = Langfuse()
+```
 
+**Text prompt**
+
+```python
 # Get current `production` version
 langfuse_prompt = langfuse.get_prompt("movie-critic")
 
@@ -185,7 +175,7 @@ langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchai
 langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt(strictness='tough'))
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```python
 # Get current `production` version of a chat prompt
@@ -195,7 +185,7 @@ langfuse_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
 langchain_prompt = ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```python
 # Get specific version
@@ -208,7 +198,7 @@ prompt = langfuse.get_prompt("movie-critic", label="staging")
 prompt = langfuse.get_prompt("movie-critic", label="latest")
 ```
 
-Attributes
+**Attributes**
 
 ```python
 # Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -229,7 +219,11 @@ import { Langfuse } from "langfuse";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 const langfuse = new Langfuse();
+```
 
+**Text prompt**
+
+```ts
 // Get current `production` version
 const langfusePrompt = await langfuse.getPrompt("movie-critic");
 
@@ -239,7 +233,7 @@ const promptTemplate = PromptTemplate.fromTemplate(
 );
 ```
 
-Chat prompts
+**Chat prompt**
 
 ```ts
 // Get current `production` version of a chat prompt
@@ -255,7 +249,7 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 );
 ```
 
-Optional parameters
+**Optional parameters**
 
 ```ts
 // Get specific version of a prompt (here version 1)
@@ -272,7 +266,7 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 });
 ```
 
-Attributes
+**Attributes**
 
 ```ts
 // Raw prompt including {{variables}}. For chat prompts, this is a list of chat messages.
@@ -286,274 +280,17 @@ prompt.config;
 
 </Tabs>
 
-### Link with Langfuse Tracing (optional)
+## Link with Langfuse Tracing (optional)
 
-Add the prompt object to the `generation` call in the SDKs to link the generation in [Langfuse Tracing](/docs/tracing) to the prompt version. This linkage enables tracking of metrics by prompt version and name, such as "movie-critic", directly in the Langfuse UI. Metrics like scores per prompt version provide insights into how modifications to prompts impact the quality of the generations. If a [fallback prompt](#fallback) is used, no link will be created.
+You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best. 
 
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK", "OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
-<Tab>
+import PromptLinking from "@/components-mdx/prompt-linking.mdx";
 
-**Decorators**
-
-```python
-from langfuse import observe, get_client
-
-langfuse = get_client()
-
-@observe(as_type="generation")
-def nested_generation():
-    prompt = langfuse.get_prompt("movie-critic")
-
-    langfuse.update_current_generation(
-        prompt=prompt,
-    )
-
-@observe()
-def main():
-  nested_generation()
-
-main()
-```
-
-**Context Managers**
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-prompt = langfuse.get_prompt("movie-critic")
-
-with langfuse.start_as_current_generation(
-    name="movie-generation",
-    model="gpt-4o",
-    prompt=prompt
-) as generation:
-    # Your LLM call here
-    generation.update(output="LLM response")
-```
-
-</Tab>
-<Tab>
-
-**Decorators**
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe(as_type="generation")
-def nested_generation():
-    prompt = langfuse.get_prompt("movie-critic")
-
-    langfuse_context.update_current_observation(
-        prompt=prompt,
-    )
-
-@observe()
-def main():
-  nested_generation()
-
-main()
-```
-
-**Low-level SDK**
-
-```diff
-langfuse.generation(
-    ...
-+   prompt=prompt
-    ...
-)
-```
-
-</Tab>
-
-<Tab>
-
-```diff
-langfuse.generation({
-    ...
-+   prompt: prompt
-    ...
-})
-```
-
-</Tab>
-
-<Tab>
-
-```python /langfuse_prompt=prompt/
-prompt = langfuse.get_prompt("calculator")
-
-openai.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": prompt.compile(base=10)},
-    {"role": "user", "content": "1 + 1 = "}],
-  langfuse_prompt=prompt
-)
-```
-
-</Tab>
-
-<Tab>
-
-```ts /langfusePrompt,/
-import { observeOpenAI } from "langfuse";
-import OpenAI from "openai";
-
-const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
-
-const res = await observeOpenAI(new OpenAI(), {
-  langfusePrompt,
-}).completions.create({
-  prompt: langfusePrompt.prompt,
-  model: "gpt-3.5-turbo-instruct",
-  max_tokens: 300,
-});
-```
-
-</Tab>
-
-<Tab>
-
-```python /"langfuse_prompt"/
-from langfuse import Langfuse
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_openai import ChatOpenAI, OpenAI
-
-langfuse = Langfuse()
-
-# Text prompts:
-langfuse_text_prompt = langfuse.get_prompt("movie-critic")
-
-## Pass the langfuse_text_prompt to the PromptTemplate as metadata to link it to generations that use it
-langchain_text_prompt = PromptTemplate.from_template(
-    langfuse_text_prompt.get_langchain_prompt(),
-    metadata={"langfuse_prompt": langfuse_text_prompt},
-)
-
-## Use the text prompt in a Langchain chain
-llm = OpenAI()
-completion_chain = langchain_text_prompt | llm
-
-completion_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
-
-# Chat prompts:
-langfuse_chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
-
-## Manually set the metadata on the langchain_chat_prompt to link it to generations that use it
-langchain_chat_prompt = ChatPromptTemplate.from_messages(
-    langfuse_chat_prompt.get_langchain_prompt()
-)
-langchain_chat_prompt.metadata = {"langfuse_prompt": langfuse_chat_prompt}
-
-## or use the ChatPromptTemplate constructor directly.
-## Note that using ChatPromptTemplate.from_template led to issues in the past
-## See: https://github.com/langfuse/langfuse/issues/5374
-langchain_chat_prompt = ChatPromptTemplate(
-    langfuse_chat_prompt.get_langchain_prompt(),
-    metadata={"langfuse_prompt": langfuse_prompt}
-)
-
-## Use the chat prompt in a Langchain chain
-chat_llm = ChatOpenAI()
-chat_chain = langchain_chat_prompt | chat_llm
-
-chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"})
-```
+<PromptLinking />
 
 <Callout type="info">
-  If you use the `with_config` method on the PromptTemplate to create a new
-  Langchain Runnable with updated config, please make sure to pass the
-  `langfuse_prompt` in the `metadata` key as well.
+If a [fallback prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is used, no link will be created.
 </Callout>
-
-<Callout type="info">
-  Set the `langfuse_prompt` metadata key only on PromptTemplates and not
-  additionally on the LLM calls or elsewhere in your chains.
-</Callout>
-
-</Tab>
-
-<Tab>
-
-```ts /metadata: { langfusePrompt:/
-import { Langfuse } from "langfuse";
-import { PromptTemplate } from "@langchain/core/prompts";
-import { ChatOpenAI, OpenAI } from "@langchain/openai";
-
-const langfuse = new Langfuse();
-
-// Text prompts
-const langfuseTextPrompt = await langfuse.getPrompt("movie-critic"); // Fetch a previously created text prompt
-
-// Pass the langfuseTextPrompt to the PromptTemplate as metadata to link it to generations that use it
-const langchainTextPrompt = PromptTemplate.fromTemplate(
-  langfuseTextPrompt.getLangchainPrompt()
-).withConfig({
-  metadata: { langfusePrompt: langfuseTextPrompt },
-});
-
-const model = new OpenAI();
-const chain = langchainTextPrompt.pipe(model);
-
-await chain.invoke({ movie: "Dune 2", criticlevel: "expert" });
-
-// Chat prompts
-const langfuseChatPrompt = await langfuse.getPrompt(
-  "movie-critic-chat",
-  undefined,
-  {
-    type: "chat",
-  }
-); // type option infers the prompt type as chat (default is 'text')
-
-const langchainChatPrompt = ChatPromptTemplate.fromMessages(
-  langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
-).withConfig({
-  metadata: { langfusePrompt: langfuseChatPrompt },
-});
-
-const chatModel = new ChatOpenAI();
-const chatChain = langchainChatPrompt.pipe(chatModel);
-
-await chatChain.invoke({ movie: "Dune 2", criticlevel: "expert" });
-```
-
-</Tab>
-
-<Tab>
-
-Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field:
-
-```typescript /langfusePrompt: fetchedPrompt.toJSON()/
-import { generateText } from "ai";
-import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-const fetchedPrompt = await langfuse.getPrompt("my-prompt");
-
-const result = await generateText({
-  model: openai("gpt-4o"),
-  prompt: fetchedPrompt.prompt,
-  experimental_telemetry: {
-    isEnabled: true,
-    metadata: {
-      langfusePrompt: fetchedPrompt.toJSON(),
-    },
-  },
-});
-```
-
-</Tab>
-
-</Tabs>
-
-### Rollbacks (optional)
-
-When a prompt has a `production` label, then that version will be served by default in the SDKs. You can quickly rollback to a previous version by setting the `production` label to that previous version in the Langfuse UI.
 
 </Steps>
 
@@ -563,7 +300,7 @@ The following example notebooks include end-to-end examples of prompt management
 
 import { Terminal, FileCode } from "lucide-react";
 
-<Cards num={3}>
+<Cards num={2}>
   <Card
     title="Example OpenAI Functions"
     href="/guides/cookbook/prompt_management_openai_functions"
@@ -582,15 +319,3 @@ import { Terminal, FileCode } from "lucide-react";
 </Cards>
 
 We also used Prompt Management for our Docs Q&A Chatbot and traced it with Langfuse. You can get view-only access to the project by signing up to the [public demo](/docs/demo).
-
-## FAQ
-
-import { FaqPreview } from "@/components/faq/FaqPreview";
-
-<FaqPreview tags={["prompt-management"]} />
-
-## GitHub Discussions
-
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
-
-<GhDiscussionsPreview labels={["feat-prompt-management"]} />

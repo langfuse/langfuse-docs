@@ -3,12 +3,25 @@ export default {
     type: "separator",
     title: "Core",
   },
-  caching: "Caching",
+  "prompt-version-control": {},
+  composability: {},
+  "message-placeholders": {},
+  playground: {},
 
-  "-- Other": {
+  "-- Advanced": {
     type: "separator",
-    title: "Other",
+    title: "Advanced",
   },
+  "link-tracing": {},
+  folders: {},
+  config: {},
+  "a-b-testing": {},
+  caching: {},
+  "guaranteed-availability": {},
+  metrics: {},
+  webhooks: {},
+  "mcp-server": {},
+  "n8n-node": {},
   "*": {
     layout: "default",
   },
