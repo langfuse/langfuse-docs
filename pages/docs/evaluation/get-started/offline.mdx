@@ -140,7 +140,6 @@ Assume you already have a Langfuse-instrumented LLM-app:
 from langfuse import get_client, observe
 from langfuse.openai import OpenAI
 
-
 @observe
 def my_llm_function(question: str):
     response = OpenAI().chat.completions.create(
@@ -158,7 +157,6 @@ You may then execute that LLM-app for each dataset item to create a dataset run:
 
 ```python filename="execute_dataset.py"
 from langfuse import get_client
-
 from .app import my_llm_application
 
 dataset = get_client().get_dataset("<dataset_name>")
