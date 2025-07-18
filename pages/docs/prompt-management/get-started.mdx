@@ -21,7 +21,7 @@ import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
 <PromptCreate />
 
-### Use prompt [#use-prompt]
+## Use prompt [#use-prompt]
 
 At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/features/deployment-labels).
 
@@ -280,7 +280,7 @@ prompt.config;
 
 </Tabs>
 
-### Link with Langfuse Tracing (optional)
+## Link with Langfuse Tracing (optional)
 
 You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best. 
 
@@ -292,10 +292,6 @@ import PromptLinking from "@/components-mdx/prompt-linking.mdx";
 If a [fallback prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is used, no link will be created.
 </Callout>
 
-### Rollbacks (optional)
-
-When a prompt has a `production` label, then that version will be served by default in the SDKs. You can quickly rollback to a previous version by setting the `production` label to that previous version in the Langfuse UI.
-
 </Steps>
 
 ## End-to-end examples
@@ -304,7 +300,7 @@ The following example notebooks include end-to-end examples of prompt management
 
 import { Terminal, FileCode } from "lucide-react";
 
-<Cards num={3}>
+<Cards num={2}>
   <Card
     title="Example OpenAI Functions"
     href="/guides/cookbook/prompt_management_openai_functions"
@@ -323,7 +319,3 @@ import { Terminal, FileCode } from "lucide-react";
 </Cards>
 
 We also used Prompt Management for our Docs Q&A Chatbot and traced it with Langfuse. You can get view-only access to the project by signing up to the [public demo](/docs/demo).
-
-## Advanced features
-
-// tbd: add advanced features from /features folder

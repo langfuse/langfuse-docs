@@ -6,7 +6,6 @@ export default {
   "prompt-version-control": {},
   composability: {},
   "message-placeholders": {},
-  changes: {},
   playground: {},
 
   "-- Advanced": {

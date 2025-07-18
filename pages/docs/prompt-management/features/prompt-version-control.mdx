@@ -6,13 +6,13 @@ description: Use prompt labels to fetch specific prompt versions in the SDKs.
 
 # Prompt Version Control
 
-In Langfuse, version control of prompts is managed via `deployment labels`.
+In Langfuse, version control & deployment of prompts is managed via `deployment labels`.
 
-When [using a prompt](#use-prompt) without specifying a label, Langfuse will serve the version with the `production` label. Labels can be used to fetch specific prompt versions in the SDKs. 
+## Assign Deployment Labels
+
+When using a prompt without specifying a label, Langfuse will serve the version with the `production` label. Labels can be used to fetch specific prompt versions in the SDKs. 
 
 The `latest` label points to the most recently created version. You can create any additional labels, for example for different environments (`staging`, `production`), tenants (`tenant-1`, `tenant-2`), or experiments (`prod-a`, `prod-b`).
-
-## Assign a label to a prompt
 
 <Tabs items={["UI","Python", "JS/TS"]}>
 <Tab>
@@ -78,7 +78,7 @@ await langfuse.updatePrompt({
 </Tab>
 </Tabs>
 
-## Fetch prompts with specific label or version
+## Fetching by Label or Version
 
 Once you have assigned labels to prompt versions, you can fetch them using the SDK:
 
@@ -128,6 +128,20 @@ const prompt = await langfuse.getPrompt("movie-critic", undefined, {
 </Tab>
 
 </Tabs>
+
+## Rollbacks
+
+When a prompt has a `production` label, then that version will be served by default in the SDKs. You can quickly rollback to a previous version by setting the `production` label to that previous version in the Langfuse UI.
+
+## Prompt Diffs
+
+The prompt version diff view shows you the changes you made to the prompt over time. This helps you understand how the prompt has evolved and what changes have been made to debug issues or understand the impact of changes.
+
+<CloudflareVideo
+  videoId="0fa94454207aee0e898551a25d156808"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
 
 ## Protected prompt labels
 
