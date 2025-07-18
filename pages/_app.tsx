@@ -32,51 +32,8 @@ export default function App({ Component, pageProps }) {
       hsPageView(path);
     };
     router.events.on("routeChangeComplete", handleRouteChange);
-    
-    // Style separators based on text content (both desktop and mobile)
-    const styleSeparators = () => {
-      const separators = document.querySelectorAll('li._font-semibold');
-      separators.forEach((separator) => {
-        const text = separator.textContent?.trim();
-        if (text === 'Core' || text === 'Advanced') {
-          separator.classList.add('separator-enhanced');
-        }
-      });
-    };
-
-    // Create MutationObserver to watch for DOM changes
-    const observer = new MutationObserver((mutations) => {
-      // Check if any mutations involved navigation elements
-      const hasNavigationChanges = mutations.some(mutation => 
-        mutation.addedNodes.length > 0 || 
-        (mutation.target as Element)?.querySelector?.('li._font-semibold')
-      );
-      
-      if (hasNavigationChanges) {
-        styleSeparators();
-      }
-    });
-
-    // Start observing navigation changes
-    const handleNavigationObserving = () => {
-      // Start observing the document for changes
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: false
-      });
-      
-      // Also run immediately in case elements are already present
-      styleSeparators();
-    };
-    
-    router.events.on("routeChangeComplete", handleNavigationObserving);
-    handleNavigationObserving(); // Run on initial load
-    
     return () => {
       router.events.off("routeChangeComplete", handleRouteChange);
-      router.events.off("routeChangeComplete", handleNavigationObserving);
-      observer.disconnect();
     };
   }, []);
   return (

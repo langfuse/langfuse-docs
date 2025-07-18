@@ -1,7 +1,7 @@
 export default {
   overview: "Overview",
-  "get-started": "Get Started",
   "data-model": "Data Model",
+  "get-started": "Get Started",
   features: "Features",
   sdk: "SDKs",
   integrations: {

@@ -3,49 +3,41 @@ title: LLM Observability & Application Tracing (open source)
 description: Open Source LLM Observability and Tracing with Langfuse. Integrates with OpenAI, LlamaIndex, LangChain, Python Decorators and more.
 ---
 
-# Observability & Tracing
+# What is Tracing?
 
-Langfuse is a platform for observability and tracing of LLM applications. It captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs. 
+Tracing captures everything happening during an LLM interaction: inputs, outputs, tool usage, retries, latencies and costs. It’s all tied to a unique trace ID and visualized step-by-step.
 
-**Observability** is the broader concept of understanding what is happening under the hood of you LLM application. **Traces** are the Langfuse object used to achieve deep observability.
+## What tracing can do for you
 
-<Frame border fullWidth>
-  <img src="/images/docs/tracing-overview.png" alt="Tracing Overview" />
-</Frame>
-
-## Why Tracing?
-- Faster development & debugging 
+- Faster debugging 
 - Cost tracking for each model call
-- Reduce application latency
-- Set foundation for evaluations 
-- Save hours in customer support
+- Performance tuning by spotting latency bottlenecks
+- Saving hours in customer support
+- Setting foundation for evaluations 
 
-## Why Trace with Langfuse?
-- Open Source: Langfuse is the fastest growing open source LLM observability platform.
-- Multi-Modal: Langfuse supports text, images, audio, and more.
-- Multi-Model: Langfuse supports all major LLM providers.
-- Framework Agnostic: Langfuse supports LangChain, OpenAI, LlamaIndex, and more. 
-- Language Agnostic: Langfuse supports Python, JavaScript, and more.
+## How it looks
 
-{/* I actually think we should remove the shallow feature videos here, we will have a page with all these videos so users can experience highlevel functionality in a visual way - midterm we sill probably have marketing landing pages for each feature */}
+import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
+
+<TracingOverview />
 
 ## Where to start
 
-Follow the quickstart to add tracing to your LLM app.
+Follow the quickstart to add Langfuse tracing to your LLM app.
 
 import { Rocket, BookOpen, Joystick } from "lucide-react";
 
-<Cards num={1}>
+<Cards num={3}>
   <Card
     icon={<Rocket size="24" />}
-    title="Get Started with Tracing"
-    href="/docs/observability/get-started"
+    title="Quickstart"
+    href="/docs/get-started"
     arrow
   />
   <Card
-    icon={<Database size="24" />}
-    title="Understand the Data Model"
-    href="/docs/observability/data-model"
+    icon={<BookOpen size="24" />}
+    title="Data Model"
+    href="/docs/tracing-data-model"
     arrow
   />
   <Card
@@ -56,17 +48,9 @@ import { Rocket, BookOpen, Joystick } from "lucide-react";
   />
 </Cards>
 
-## Core Features
+## Advanced concepts
 
-Essential tracing features that form the foundation of observability in Langfuse:
-
-import ObservabilityCoreFeatures from "@/components-mdx/observability-core-features.mdx";
-
-<ObservabilityCoreFeatures />
-
-## Advanced Features
-
-Extended capabilities for sophisticated tracing and analysis:
+You can extend the tracing capabilities of Langfuse by using the following features:
 
 import {
   Users,
@@ -79,67 +63,62 @@ import {
   Database,
   FileDigit,
   GitCompare,
-  MapPin,
-  BarChart3,
-  Filter,
-  BadgeDollarSign,
-  EyeOff,
-  MessageCircle,
 } from "lucide-react";
 
-<Cards num={2}>
+<Cards num={3}>
   <Card
-    title="Log Levels"
-    href="/docs/observability/features/log-levels"
-    icon={<BarChart3 />}
+    title="Sessions"
+    href="/docs/tracing-features/sessions"
+    icon={<MessagesSquare />}
     arrow
   />
   <Card
     title="Multi-Modality"
-    href="/docs/observability/features/multi-modality"
+    href="/docs/tracing-features/multi-modality"
     icon={<Images />}
     arrow
   />
   <Card
+    title="Users"
+    href="/docs/tracing-features/users"
+    icon={<Users />}
+    arrow
+  />
+  <Card title="Tags" href="/docs/tracing-features/tags" icon={<Tag />} arrow />
+  <Card
+    title="Metadata"
+    href="/docs/tracing-features/metadata"
+    icon={<Braces />}
+    arrow
+  />
+  <Card
     title="Releases & Versioning"
-    href="/docs/observability/features/releases-and-versioning"
+    href="/docs/tracing-features/releases-and-versioning"
     icon={<GitGraph />}
     arrow
   />
   <Card
     title="Trace URLs"
-    href="/docs/observability/features/url"
+    href="/docs/tracing-features/url"
     icon={<Globe />}
     arrow
   />
   <Card
+    title="Trace IDs & Distributed Tracing"
+    href="/docs/tracing-features/trace-ids"
+    icon={<FileDigit />}
+    arrow
+  />
+  <Card
+    title="Export traces"
+    href="/docs/query-traces"
+    icon={<Database />}
+    arrow
+  />
+  <Card
     title="Agent Graphs"
-    href="/docs/observability/features/agent-graphs"
+    href="/docs/tracing-features/agent-graphs"
     icon={<GitCompare />}
-    arrow
-  />
-  <Card
-    title="Sampling"
-    href="/docs/observability/features/sampling"
-    icon={<Filter />}
-    arrow
-  />
-  <Card
-    title="Token & Cost Tracking"
-    href="/docs/observability/features/token-and-cost-tracking"
-    icon={<BadgeDollarSign />}
-    arrow
-  />
-  <Card
-    title="Masking"
-    href="/docs/observability/features/masking"
-    icon={<EyeOff />}
-    arrow
-  />
-  <Card
-    title="Comments"
-    href="/docs/observability/features/comments"
-    icon={<MessageCircle />}
     arrow
   />
 </Cards>

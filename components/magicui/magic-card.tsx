@@ -92,7 +92,6 @@ const MagicContainer = ({ children, className }: MagicContainerProps) => {
       mouse.current.x = x;
       mouse.current.y = y;
       boxes.forEach((box) => {
-        if (!box) return; // Add null check to avoid null reference errors
         const boxX =
           -(box.getBoundingClientRect().left - rect.left) + mouse.current.x;
         const boxY =

@@ -8,13 +8,13 @@ export default {
     environments: "Environments",
     tags: "Tags",
     metadata: "Metadata",
-
-    "-- Advanced": {
-      type: "separator",
-      title: "Advanced",
-    },
     "trace-ids": "Trace IDs",
-    "log-levels": "Log Levels",
+
+
+    "-- Other": {
+      type: "separator",
+      title: "Other",
+    },
     "*": {
       layout: "default",
     },
