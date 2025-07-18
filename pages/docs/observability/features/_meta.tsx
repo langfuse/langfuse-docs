@@ -1,36 +1,36 @@
 export default {
-    "-- Core": {
-      type: "separator",
-      title: "Core",
+  "-- Core": {
+    type: "separator",
+    title: "Core",
+  },
+  sessions: "Sessions",
+  users: "Users",
+  environments: "Environments",
+  tags: "Tags",
+  metadata: "Metadata",
+
+  "-- Advanced": {
+    type: "separator",
+    title: "Advanced",
+  },
+  "trace-ids": "Trace IDs",
+  "log-levels": "Log Levels",
+  "*": {
+    layout: "default",
+  },
+  "query-traces": {
+      title: "Query Data ↗",
+      href: "/docs/platform/features/query-traces",
     },
-    sessions: "Sessions",
-    users: "Users",
-    environments: "Environments",
-    tags: "Tags",
-    metadata: "Metadata",
-    "trace-ids": "Trace IDs",
 
-
-    "-- Other": {
-      type: "separator",
-      title: "Other",
+  "metrics-api": {
+      title: "Metrics API ↗",
+      href: "/docs/platform/features/metrics-api",
     },
-    "*": {
-      layout: "default",
+
+  "custom-dashboards": {
+      title: "Custom Dashboards ↗",
+      href: "/docs/platform/features/custom-dashboards",
     },
-    "query-traces": {
-        title: "Query Data ↗",
-        href: "/docs/data-analytics/features/query-traces",
-      },
 
-    "metrics-api": {
-        title: "Metrics API ↗",
-        href: "/docs/data-analytics/features/metrics-api",
-      },
-
-    "custom-dashboards": {
-        title: "Custom Dashboards ↗",
-        href: "/docs/data-analytics/features/custom-dashboards",
-      },
-
-  };
+};
