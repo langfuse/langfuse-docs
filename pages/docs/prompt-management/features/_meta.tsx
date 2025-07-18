@@ -3,9 +3,9 @@ export default {
     type: "separator",
     title: "Core",
   },
+  "prompt-version-control": {},
   composability: {},
   "message-placeholders": {},
-  "deployment-labels": {},
   changes: {},
   playground: {},
 
