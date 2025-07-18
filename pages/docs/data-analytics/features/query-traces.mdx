@@ -1,11 +1,12 @@
 ---
-title: Query all traces via the Langfuse API/SDKs
+title: Query Traces
+sidebarTitle: Query Traces
 description: Conveniently fetch your LLM Observability traces for few-shotting, fine-tuning or further analysis.
 ---
 
 # Query Traces
 
-Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. You can query/export data via: [SDKs](#sdks), [API](#api), and [Langfuse UI](#ui).
+Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. You can query data via: [SDKs](#sdks) and [API](#api). For export functionality, see [Export Data](/docs/data-analytics/features/export).
 
 Common use cases:
 
@@ -198,46 +199,6 @@ GET /api/public/scores
 GET /api/public/scores/:scoreId
 ```
 
-## Export via UI [#ui]
+## Export Data
 
-All filters applied to the table will be applied to the export.
-
-Available export formats:
-
-- CSV
-- JSON
-
-<CloudflareVideo
-  videoId="c24c32f19cfa9c90f71b3c4b9eebea59"
-  aspectRatio={1844 / 1080}
-  gifStyle
-/>
-
-## Export via Blob Storage Integration [#blob-storage]
-
-<AvailabilityBanner
-  availability={{
-    hobby: "not-available",
-    core: "not-available",
-    pro: "team-add-on",
-    enterprise: "full",
-    selfHosted: "full",
-  }}
-/>
-
-You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, and `scores`.
-Those exports can run on an `hourly`, `daily`, or `weekly` schedule.
-Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
-Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
-Fill in the settings to authenticate with your vendor, enable the integration, and press save.
-Within an hour an initial export should start and continue based on the schedule you have selected.
-The export supports CSV, JSON, and JSONL file formats.
-Read [our blob storage documentation](/self-hosting/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
-
-<Frame className="my-10" fullWidth border>
-  ![Blob Storage Integration Setup](/images/docs/blob-storage-integration.png)
-</Frame>
-
-## Trouble exporting?
-
-If you're having trouble exporting data, please [let us know](#contact) and we'll help you out.
+For comprehensive export capabilities including UI exports, scheduled blob storage exports, and programmatic access via SDKs and APIs, see the dedicated [Export Data](/docs/data-analytics/features/export) page.
