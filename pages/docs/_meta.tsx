@@ -6,7 +6,6 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
-  "core-features": "Core Features",
   demo: "Interactive Demo",
   "ask-ai": "Ask AI",
 
