@@ -1,6 +1,9 @@
 export default {
-  "self-hosting": {
-    title: "Self-hosting ↗",
-    href: "/self-hosting",
+  rbac: {},
+  "audit-logs": {},
+  "data-deletion": {},
+  "data-retention": {},
+  "*": {
+    layout: "default",
   },
-};
+}; 
