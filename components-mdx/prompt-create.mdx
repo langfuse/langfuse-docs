@@ -1,14 +1,18 @@
-<Tabs items={["Langfuse UI", "Python", "JS/TS"]}>
+<Tabs items={["Langfuse UI", "Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
 
+Use the Langfuse UI to create a new prompt or update an existing one.
+
 <CloudflareVideo
-  videoId="a7f111d588feb35b347e05557bfcf46d"
-  aspectRatio={1392 / 1080}
+  videoId="3b4dd4eedfcf8e6dabad7c9c21816792"
+  aspectRatio={16 / 9}
   gifStyle
 />
 
 </Tab>
 <Tab>
+
+Use the Python SDK to create a new prompt or update an existing one.
 
 ```python
 # Create a text prompt
@@ -41,11 +45,13 @@ langfuse.create_prompt(
 )
 ```
 
-If you already have a prompt with the same name, the prompt will be added as a new version.
+If you already have a prompt with the same `name`, the prompt will be added as a new version.
 
 </Tab>
 
 <Tab>
+
+Use the JS/TS SDK to create a new prompt or update an existing one.
 
 ```ts
 // Create a text prompt
@@ -78,7 +84,48 @@ await langfuse.createPrompt({
 });
 ```
 
-If you already have a prompt with the same name, the prompt will be added as a new version.
+If you already have a prompt with the same `name`, the prompt will be added as a new version.
+
+</Tab>
+
+<Tab>
+
+Use the [Public API](https://api.reference.langfuse.com/#tag/prompts/post/api/public/v2/prompts) to create a new prompt or update an existing one.
+
+```bash
+curl https://cloud.langfuse.com/api/public/v2/prompts \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "type": "chat",
+  "name": "",
+  "prompt": [
+    {
+      "type": "chatmessage",
+      "role": "",
+      "content": ""
+    }
+  ],
+  "config": null,
+  "labels": [
+    ""
+  ],
+  "tags": [
+    ""
+  ],
+  "commitMessage": null
+}'
+
+```
+
+<Cards num={1}>
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com/#tag/prompts/post/api/public/v2/prompts"
+    arrow
+  />
+</Cards>
+
 
 </Tab>
 

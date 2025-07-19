@@ -1,0 +1,179 @@
+---
+title: Prompt Version Control
+sidebarTitle: Version Control
+description: Use prompt labels to fetch specific prompt versions in the SDKs.
+---
+
+# Prompt Version Control
+
+In Langfuse, version control & deployment of prompts is managed via `version labels`.
+
+## Versions & Version Labels
+
+Each prompt version is automatically assigned a `version ID`. Additionally, you can assign `version labels` to follow your own versioning scheme.
+
+Version labels can be used to assign prompts to environments (staging, production), tenants (tenant-1, tenant-2), or experiments (prod-a, prod-b).
+
+
+<Tabs items={["UI","Python", "JS/TS"]}>
+<Tab>
+
+Use the Langfuse UI to assign labels to a prompt.
+
+<CloudflareVideo
+  videoId="6d28a7e38b3ab12f5437e3eed803e2b5"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+<Tab>
+
+Use the Python SDK to assign labels to a prompt when creating a new prompt version.
+
+```python {5}
+langfuse.create_prompt(
+    name="movie-critic",
+    type="text",
+    prompt="As a {{criticlevel}} movie critic, do you like {{movie}}?",
+    labels=["production"],  # add the label "production" to the prompt version
+)
+```
+
+Alternatively, you can also update the labels of an existing prompt version using the Python SDK:
+
+```python {5}
+langfuse = Langfuse()
+langfuse.update_prompt(
+    name="movie-critic",
+    version=1,
+    new_labels=["john", "doe"], # assign these labels to the prompt version
+)
+```
+
+</Tab>
+<Tab>
+
+Use the JS/TS SDK to assign labels to a prompt when creating a new prompt version.
+
+```ts {5}
+await langfuse.createPrompt({
+  name: "movie-critic",
+  type: "text",
+  prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
+  labels: ["production"], // add the label "production" to the prompt version
+});
+```
+
+Alternatively, you can also update the labels of an existing prompt version using the JS/TS SDK:
+
+```ts {5}
+langfuse = Langfuse();
+await langfuse.updatePrompt({
+  name: "movie-critic",
+  version: 1,
+  newLabels: ["john", "doe"],
+});
+```
+
+</Tab>
+</Tabs>
+
+## Fetching by Label or Version
+
+When fetching prompts to use them in your application you can either do you by fetching a specific version or label.
+Here are code examples for fetching prompts by label or version.
+
+**To "deploy" a prompt version**, you have to assign the label `production` or any environment label you created to that prompt version.
+
+Some notes on fetching prompts:
+- The `latest` label points to the most recently created version.
+- When using a prompt without specifying a label, Langfuse will serve the version with the `production` label.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+# Initialize Langfuse client
+langfuse = get_client()
+
+# Get specific version
+prompt = langfuse.get_prompt("movie-critic", version=1)
+
+# Get specific label
+prompt = langfuse.get_prompt("movie-critic", label="staging")
+
+# Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+prompt = langfuse.get_prompt("movie-critic", label="latest")
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+
+// Initialize the Langfuse client
+const langfuse = new Langfuse();
+
+// Get specific version of a prompt (here version 1)
+const prompt = await langfuse.getPrompt("movie-critic", 1);
+
+// Get specific label
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "staging",
+});
+
+// Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
+const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+  label: "latest",
+});
+```
+
+</Tab>
+
+</Tabs>
+
+## Rollbacks
+
+When a prompt has a `production` label, then that version will be served by default in the SDKs. You can quickly rollback to a previous version by setting the `production` label to that previous version in the Langfuse UI.
+
+## Prompt Diffs
+
+The prompt version diff view shows you the changes you made to the prompt over time. This helps you understand how the prompt has evolved and what changes have been made to debug issues or understand the impact of changes.
+
+<CloudflareVideo
+  videoId="0fa94454207aee0e898551a25d156808"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+## Protected prompt labels
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Protected prompt labels give project admins and owners ([RBAC docs](/docs/rbac)) the ability to prevent labels from being modified or deleted, ensuring better control over prompt deployment.
+
+Once a label such as `production` is marked as protected:
+
+- `viewer` and `member` roles cannot modify or delete the label from prompts, preventing changes to the `production` prompt version. This also blocks the deletion of the prompt.
+- `admin` and `owner` roles can still modify or delete the label, effectively changing the `production` prompt version.
+
+Admins and owners can update a label's protection status in the project settings.
+
+<CloudflareVideo
+  videoId="512685314ff082abb62233baba411395"
+  aspectRatio={16 / 9}
+  gifStyle
+/>

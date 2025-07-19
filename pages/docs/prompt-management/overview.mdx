@@ -5,36 +5,158 @@ description: Manage and version your prompts in Langfuse (open source). When ret
 
 # Prompt Management
 
-Use Langfuse to effectively **manage** and **version** your prompts. Langfuse prompt management is a **Prompt CMS** (Content Management System).
+Prompt management is a systematic approach to storing, versioning and retrieving prompts in LLM applications.
 
-import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
+<Frame border fullWidth>
+  <img src="/images/docs/prompt-management.png" alt="Prompt Management" />
+</Frame>
 
-<PromptOverview />
+## Why Prompt Management?
 
-## What is prompt management?
+- Involve non-technical users through UI
+- Decoupling: edit prompts without redeploying
+- Quickly rollback to a previous version of a prompt
+- Compare different prompt versions side-by-side
+- No latency impact after first use of a prompt due to [client-side caching](/docs/prompt-management/features/caching)
 
-**Prompt management is a systematic approach to storing, versioning and retrieving prompts in LLM applications.** Key aspects of prompt management include version control, decoupling prompts from code, monitoring, logging and optimizing prompts as well as integrating prompts with the rest of your application and tool stack.
+## Where to start
 
-## Why use prompt management?
+Follow the quickstart to create your first prompt and use it in your application.
 
-> Can't I just hardcode my prompts in my application and track them in Git? Yes, well... you can and all of us have done it.
+import {
+  Rocket,
+  BookOpen,
+  Joystick,
+  Layers,
+  MessageSquare,
+  Tag,
+  GitPullRequestArrow,
+  FileDiff,
+  PlaySquare,
+  Link,
+  Folder,
+  Settings,
+  TestTube,
+  Zap,
+  Gauge,
+  BarChart3,
+  Webhook,
+  Server,
+  Workflow,
+} from "lucide-react";
 
-Typical benefits of using a CMS apply here:
+<Cards num={1}>
+  <Card
+    icon={<Rocket size="24" />}
+    title="Quickstart"
+    href="/docs/prompt-management/get-started"
+    arrow
+  />
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Data Model"
+    href="/docs/prompt-management/data-model"
+    arrow
+  />
+</Cards>
 
-- Decoupling: deploy new prompts without redeploying your application.
-- Non-technical users can create and update prompts via Langfuse Console.
-- Quickly rollback to a previous version of a prompt.
-- Compare different prompt versions side-by-side.
+## Core Features
 
-Platform benefits:
+Essential prompt management features that form the foundation of prompt operations in Langfuse:
 
-- Track performance of prompt versions in [Langfuse Tracing](/docs/tracing).
+<Cards num={2}>
+   <Card
+    title="Prompt Version Control"
+    href="/docs/prompt-management/features/prompt-version-control"
+    icon={<GitPullRequestArrow />}
+    arrow
+  />
+  <Card
+    title="Composability"
+    href="/docs/prompt-management/features/composability"
+    icon={<Layers />}
+    arrow
+  />
+  <Card
+    title="Message Placeholders"
+    href="/docs/prompt-management/features/message-placeholders"
+    icon={<MessageSquare />}
+    arrow
+  />
+  <Card
+    title="Playground"
+    href="/docs/prompt-management/features/playground"
+    icon={<PlaySquare />}
+    arrow
+  />
+</Cards>
 
-Performance benefits compared to other implementations:
+## Advanced Features
 
-- No latency impact after first use of a prompt due to client-side caching and asynchronous cache refreshing.
-- Support for text and chat prompts.
-- Edit/manage via UI, SDKs, or API.
+Extended capabilities for sophisticated prompt management and analysis:
+
+<Cards num={2}>
+  <Card
+    title="Link Tracing"
+    href="/docs/prompt-management/features/link-tracing"
+    icon={<Link />}
+    arrow
+  />
+  <Card
+    title="Folders"
+    href="/docs/prompt-management/features/folders"
+    icon={<Folder />}
+    arrow
+  />
+  <Card
+    title="Config"
+    href="/docs/prompt-management/features/config"
+    icon={<Settings />}
+    arrow
+  />
+  <Card
+    title="A/B Testing"
+    href="/docs/prompt-management/features/a-b-testing"
+    icon={<TestTube />}
+    arrow
+  />
+  <Card
+    title="Caching"
+    href="/docs/prompt-management/features/caching"
+    icon={<Zap />}
+    arrow
+  />
+  <Card
+    title="Availability"
+    href="/docs/prompt-management/features/guaranteed-availability"
+    icon={<Gauge />}
+    arrow
+  />
+  <Card
+    title="Metrics"
+    href="/docs/prompt-management/features/metrics"
+    icon={<BarChart3 />}
+    arrow
+  />
+  <Card
+    title="Webhooks"
+    href="/docs/prompt-management/features/webhooks"
+    icon={<Webhook />}
+    arrow
+  />
+  <Card
+    title="MCP Server"
+    href="/docs/prompt-management/features/mcp-server"
+    icon={<Server />}
+    arrow
+  />
+  <Card
+    title="n8n Node"
+    href="/docs/prompt-management/features/n8n-node"
+    icon={<Workflow />}
+    arrow
+  />
+</Cards>
 
 ## Prompt Engineering FAQ
 
@@ -45,7 +167,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 
-<Accordion>
+<Accordion type="single" collapsible>
 <AccordionItem value="what-is-prompt-engineering">
 <AccordionTrigger>What is prompt engineering?</AccordionTrigger>
 <AccordionContent>

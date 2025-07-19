@@ -6,18 +6,22 @@ export default {
     title: <MenuSwitcher />,
   },
   index: "Overview",
-  "core-features": "Core Features",
   demo: "Interactive Demo",
   "ask-ai": "Ask AI",
 
-  "-- Features": {
+  "-- Products": {
     type: "separator",
-    title: "Features",
+    title: "Products",
   },
   observability: "Observability",
   "prompt-management": "Prompt Management",
   evaluation: "Evaluation",
-  platform: "Data Platform",
+
+  "-- Platform": {
+    type: "separator",
+    title: "Platform",
+  },
+  "data-analytics": "Data & Analytics",
   administration: "Administration",
 
   "-- More": {
