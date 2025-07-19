@@ -87,7 +87,7 @@ const config: DocsThemeConfig = {
 
     const description = frontMatter.description ?? "";
 
-    const title = frontMatter.title ?? pageTitle;
+    const title = frontMatter.seoTitle ?? frontMatter.title ?? pageTitle;
 
     const section = asPath.startsWith("/docs")
       ? "Docs"
@@ -129,6 +129,9 @@ const config: DocsThemeConfig = {
         ? "%s - Langfuse Guides"
         : "%s - Langfuse";
 
+    const isDev =
+      typeof process !== "undefined" && process.env.NODE_ENV === "development";
+
     return (
       <>
         <meta name="theme-color" content="#000" />
@@ -162,13 +165,13 @@ const config: DocsThemeConfig = {
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="/favicon-32x32.png"
+          href={isDev ? "/favicon-32x32-dev.png" : "/favicon-32x32.png"}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="/favicon-16x16.png"
+          href={isDev ? "/favicon-16x16-dev.png" : "/favicon-16x16.png"}
         />
 
         {canonical && <link rel="canonical" href={canonical} />}
@@ -199,17 +202,15 @@ const config: DocsThemeConfig = {
     Video,
   },
   banner: {
-    key: "lw3-all",
+    key: "town-hall-2025-07-16",
     dismissible: true,
     content: (
-      <Link href="/blog/2025-06-04-open-sourcing-langfuse-product">
+      <Link href="https://lu.ma/frqm1umn">
         {/* mobile */}
-        <span className="sm:hidden">
-          Doubling Down on Open Source →
-        </span>
+        <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Doubling Down on Open Source: All Product Features Now in Self-Hosted →
+        San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
         </span>
       </Link>
     ),

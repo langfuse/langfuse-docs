@@ -7,15 +7,15 @@ description: How to connect Langfuse with OpenTelemetry to observe LLM applicati
 
 [OpenTelemetry](https://opentelemetry.io/) is a [CNCF](https://www.cncf.io/) project that provides a set of specifications, APIs, libraries that define a standard way to collect distributed traces and metrics from your application.
 
-Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/docs/integrations/overview), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
+Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/integrations), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
 
 As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/tracing-data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([property mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
 
 ## OpenTelemetry native Langfuse SDK v3
 
-The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring. 
+The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v3**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts all emitted spans into rich Langfuse observations (spans, generations, events) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
 
-Because it lives in the shared OpenTelemetry context, any other library that is already instrumented with OTEL (HTTP frameworks, databases, GenAI instrumentation like OpenLLMetry/OpenLIT, etc.) will seamlessly show up in the same Langfuse traces without additional configuration. 
+Because it lives in the shared OpenTelemetry context, any other library that is already instrumented with OTEL (HTTP frameworks, databases, GenAI instrumentation like OpenLLMetry/OpenLIT, etc.) will seamlessly show up in the same Langfuse traces without additional configuration.
 
 Get started by following the dedicated guide for the Python implementation here: [/docs/sdk/python/sdk-v3](/docs/sdk/python/sdk-v3).
 
@@ -147,14 +147,14 @@ Any OpenTelemetry compatible instrumentation can be used to export traces to Lan
 
 **Framework integrations powered by OpenTelemetry**
 
-- [Hugging Face smolagents](/docs/integrations/smolagents)
-- [CrewAI](/docs/integrations/crewai)
-- [AutoGen](/docs/integrations/autogen)
-- [Semantic Kernel](/docs/integrations/semantic-kernel)
-- [Pydantic AI](/docs/integrations/pydantic-ai)
-- [Spring AI](/docs/integrations/spring-ai)
-- [LlamaIndex](/docs/integrations/llama-index)
-- [LlamaIndex Workflows](/docs/integrations/llama-index/workflows)
+- [Hugging Face smolagents](/integrations/frameworks/smolagents)
+- [CrewAI](/integrations/frameworks/crewai)
+- [AutoGen](/integrations/frameworks/autogen)
+- [Semantic Kernel](/integrations/frameworks/semantic-kernel)
+- [Pydantic AI](/integrations/frameworks/pydantic-ai)
+- [Spring AI](/integrations/frameworks/spring-ai)
+- [LlamaIndex](/integrations/frameworks/llamaindex)
+- [LlamaIndex Workflows](/integrations/frameworks/llamaindex-workflows)
 
 ## Export from OpenTelemetry Collector
 
@@ -241,63 +241,255 @@ service:
 
 ## Property Mapping [#property-mapping]
 
-<Callout type="info">
+Langfuse aims to be compliant with the [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/) and support major LLM instrumentation frameworks.
 
-Please [raise an issue on GitHub](/issues) if an integration does not work as expected or does not parse the correct attributes.
+Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map OpenTelemetry span attributes directly to the Langfuse data model. These specific attributes always take precedence over the generic OpenTelemetry conventions and are recommended for all users that are manually instrumenting their applications.
+
+<Callout type="info">
+Please [raise an issue on GitHub](/issues) if any mapping or integration does not work as expected or does not parse the correct attributes.
+</Callout>
+
+Below is a non-exhaustive mapping of Langfuse data model attributes to OpenTelemetry span attributes.
+
+
+### Trace-Level Attributes
+
+These attributes are applied to the trace record in Langfuse. They may be set on any span in the trace.
+
+#### `name`
+
+The name of the trace.
+
+* `langfuse.trace.name`: `string`
+* Span name of the root span
+
+
+#### `userId`
+
+The unique identifier for the end-user.
+
+* `langfuse.user.id`: `string`
+* `user.id`: `string`
+
+#### `sessionId`
+
+The unique identifier for the user session.
+
+* `langfuse.session.id`: `string`
+* `session.id`: `string`
+
+#### `release`
+
+The release version of your application.
+
+* `langfuse.release`: `string`
+
+#### `public`
+
+A boolean flag to mark a trace as public, allowing it to be shared via a URL.
+
+* `langfuse.trace.public`: `boolean`
+
+#### `tags`
+
+An array of strings to categorize or label the trace.
+
+* `langfuse.trace.tags`: `string[]`
+
+#### `metadata`
+
+A flexible object for storing any additional, unstructured data on the trace.
+
+* `langfuse.trace.metadata.*`: `string`
+* Root span's observation metadata (see below for mapping)
+
+<Callout type="info">
+**Filtering by metadata key in Langfuse**
+
+Langfuse only supports filtering on top-level keys within the `metadata` of an event.
+
+By default, all OpenTelemetry attributes and resource attributes are mapped into an `attributes` and `resourceAttributes` key within `metadata` and are thus not queryable.
+
+If you want to query on specific attributes, you can use the `langfuse.trace.metadata` prefix to map them to the top-level `metadata` object of the trace.
+The following snippet will produce a filterable `user_name` property in the `metadata` object of the trace:
+
+```python
+with tracer.start_as_current_span("Langfuse Attributes") as span:
+    span.set_attribute("langfuse.trace.metadata.user_name", "user-123")
+```
 
 </Callout>
 
-Langfuse accepts any span that adheres to the OpenTelemetry specification.
-In addition, we map many GenAI specific properties to properties in the Langfuse data model to provide a seamless experience when using OpenTelemetry with Langfuse.
-First and foremost, we stick to the [OpenTelemetry Gen AI Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/), but also map vendor specific properties from common frameworks.
-All attributes and resourceAttributes are available within the Langfuse `metadata` property as a fallback.
+#### `input`
 
-LLM Calls are tracked as `GENERATION` spans (see [data model](/docs/tracing-data-model)). Any span that includes an attribute mapped to `model` is considered a LLM call and thus tracked as a `GENERATION` span.
+The initial input for the entire trace.
 
-Langfuse uses the `langfuse.*` namespace to map properties from OpenTelemetry to the Langfuse data model.
-This enables features like linking [Prompts](/docs/prompts/get-started) to spans, adding [tags](/docs/tracing-features/tags), or marking traces as public.
-Attributes in the Langfuse namespace take precedence over the generic mapping we specify below.
-Some of the attributes are only taken into consideration if they are set on the root span. We mark those in the table below.
-The following Langfuse specific properties are supported:
+* `langfuse.trace.input`: `string`
+* Root span's observation input (see below for mapping)
 
-| OpenTelemetry Attribute   | Langfuse Property | Type       | Root Span only | Description                                                                                                                                                                       |
-| ------------------------- | ----------------- | ---------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse.session.id`     | `sessionId`       | `string`   | `true`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                                                |
-| `langfuse.user.id`        | `userId`          | `string`   | `true`         | The [user ID](/docs/tracing-features/users) for the request.                                                                                                                      |
-| `langfuse.public`         | `public`          | `boolean`  | `true`         | Mark the trace as public to be able to [share it via url](/docs/tracing-features/url). This can be changed later in the Langfuse UI.                                              |
-| `langfuse.release`        | `release`         | `string`   | `true`         | The [release](/docs/tracing-features/releases-and-versioning) for the request.                                                                                                    |
-| `langfuse.version`        | `version`         | `string`   | `true`         | The [version](/docs/tracing-features/releases-and-versioning) for the request.                                                                                                    |
-| `langfuse.tags`           | `tags`            | `string[]` | `true`         | The [tags](/docs/tracing-features/tags) for the request.                                                                                                                          |
-| `langfuse.prompt.name`    | `promptName`      | `string`   | `false`        | The [prompt name](/docs/prompts/get-started) for the request.                                                                                                                     |
-| `langfuse.prompt.version` | `promptVersion`   | `int`      | `false`        | The [prompt version](/docs/prompts/get-started) for the request.                                                                                                                  |
-| `langfuse.environment`    | `environment`     | `string`   | `false`        | The environment for the request.                                                                                                                                                  |
-| `langfuse.metadata`       | `metadata`        | `string`   | `false`        | Accepts a JSON string. All keys within the `langfuse.metadata` object on attributes or resourceAttributes are mapped to the top-level metadata object on traces and observations. |
-| `langfuse.metadata.*`     | `metadata`        | `string`   | `false`        | All keys prefixed with `langfuse.metadata` on attributes or resourceAttributes are mapped to the top-level metadata object on traces and observations.                            |
+#### `output`
 
-Below, we present a non-exhaustive list of additional mappings that Langfuse applies.
-These mappings are based on OTel GenAI semantic conventions and vendor-specific implementations that deviate from these conventions:
+The final output for the entire trace.
 
-| OpenTelemetry Attribute       | Langfuse Property   | Description                                                                                                                                                      |
-| ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gen_ai.usage.cost`           | `costDetails.total` | The total [cost](/docs/model-usage-and-cost) of the request.                                                                                                     |
-| `gen_ai.usage.*`              | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) aside from `cost` to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`. |
-| `llm.token_count.*`           | `usageDetails.*`    | Maps all keys within [usage](/docs/model-usage-and-cost) to `usageDetails`. Token properties are simplified to `input`, `output`, and `total`.                   |
-| `gen_ai.request.model`        | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
-| `gen_ai.response.model`       | `model`             | The [model](/docs/model-usage-and-cost) used for the response.                                                                                                   |
-| `llm.model_name`              | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
-| `model`                       | `model`             | The [model](/docs/model-usage-and-cost) used for the request.                                                                                                    |
-| `gen_ai.request.*`            | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
-| `llm.invocation_parameters.*` | `modelParameters`   | Maps all keys within request to `modelParameters`.                                                                                                               |
-| `session.id`                  | `sessionId`         | The [session ID](/docs/tracing-features/sessions) for the request.                                                                                               |
-| `user.id`                     | `userId`            | The [user ID](/docs/tracing-features/users) for the request.                                                                                                     |
-| `gen_ai.prompt`               | `input`             | Input field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                                |
-| `gen_ai.completion`           | `output`            | Output field. Deprecated by OpenTelemetry as event properties should be preferred.                                                                               |
-| `input.value`                 | `input`             | Input field. Used by OpenInference based traces.                                                                                                                 |
-| `output.value`                | `output`            | Output field. Used by OpenInference based traces.                                                                                                                |
-| `mlflow.spanInputs`           | `input`             | Input field. Used by MLflow based traces.                                                                                                                        |
-| `mlflow.spanOutputs`          | `output`            | Output field. Used by MLflow based traces.                                                                                                                       |
-| `deployment.environment.name` | `environment`       | The environment for the request.                                                                                                                                 |
-| `deployment.environment`      | `environment`       | The environment for the request.                                                                                                                                 |
+* `langfuse.trace.output`: `string`
+* Root span's observation output (see below for mapping)
+
+#### `version`
+
+The version of the trace, useful for tracking changes to your application logic.
+
+* Root span's attributes mapped to `version`
+
+
+#### `environment`
+
+The deployment environment where the trace was generated.
+
+* Root span's attributes mapped to `environment`
+
+### Observation-Level Attributes
+
+These attributes are applied to individual observations (spans) within a trace.
+
+#### `type`
+
+The type of observation
+
+* `langfuse.observation.type`: `"span" | "generation" | "event"`, default: `"span"`
+* Any span that includes an attribute mapped to `model` is considered a LLM call and thus tracked as a `generation` observation.
+
+#### `level`
+
+The severity level of the observation
+
+* `langfuse.observation.level`: `"DEBUG" | "DEFAULT" | "WARNING" | "ERROR"`, default: `"DEFAULT"`
+* Inferred from OpenTelemetry `span.status.code`
+
+#### `statusMessage`
+
+A message describing the status of the observation, often used for errors.
+
+* `langfuse.observation.status_message`: `string`
+* Inferred from OpenTelemetry `span.status.message`
+
+#### `metadata`
+
+A flexible object for storing any additional, unstructured data on the observation. Example key: `langfuse.observation.metadata.user_name`.
+
+* `langfuse.observation.metadata.*`: `string`
+
+<Callout type="info">
+**Filtering by metadata key in Langfuse**
+
+Langfuse only supports filtering on top-level keys within the `metadata` of an event.
+
+By default, all OpenTelemetry attributes and resource attributes are mapped into an `attributes` and `resourceAttributes` key within `metadata` and are thus not queryable.
+
+If you want to query on specific attributes, you can use the `langfuse.trace.metadata` prefix to map them to the top-level `metadata` object of the trace.
+The following snippet will produce a filterable `user_name` property in the `metadata` object of the trace:
+
+```python
+with tracer.start_as_current_span("Langfuse Attributes") as span:
+    span.set_attribute("langfuse.trace.metadata.user_name", "user-123")
+```
+
+</Callout>
+
+#### `input`
+
+The input data for this specific observation.
+
+* `langfuse.observation.input`: `(JSON) string`
+* `gen_ai.prompt`: `string`; OTEL GenAI SemConv
+* `input.value`: `string`; used by OpenInference
+* `mlflow.spanInputs`: `string`; used by MLFlow
+
+
+#### `output`
+
+The output data from this specific observation.
+
+* `langfuse.observation.output`: `(JSON) string`
+* `gen_ai.completion`: `string`; OTEL GenAI SemConv
+* `output.value`: `string`; used by OpenInference
+* `mlflow.spanOutputs`: `string`; used by MLFlow
+
+
+#### `model`
+
+**Only applies to observations of type `generation`**
+
+The name of the generative model used.
+
+* `langfuse.observation.model.name`: `string`
+* `gen_ai.request.model`: `string`; OTEL GenAI SemConv
+* `gen_ai.response.model`: `string`; OTEL GenAI SemConv
+* `llm.model_name`: `string`
+* `model`: `string`
+
+#### `modelParameters`
+
+**Only applies to observations of type `generation`**
+
+Key-value pairs representing the settings used for the model invocation.
+
+* `langfuse.observation.model.parameters`: `JSON string of Record<string, string>`
+* `gen_ai.request.*`: string | int; OTEL GenAI SemConv
+* `llm.invocation_parameters.*`: string | int; OTEL GenAI SemConv
+
+#### `usage`
+
+**Only applies to observations of type `generation`**
+
+An object detailing the token counts for the generation.
+
+* `langfuse.observation.usage_details`: `JSON string of Record<string, integer>`
+* `gen_ai.usage.*`: integer
+* `llm.token_count.*`: integer
+
+#### `cost`
+
+**Only applies to observations of type `generation`**
+
+The calculated cost of the generation in USD.
+
+* `langfuse.observation.cost_details`: `JSON string of Record<string, float>`
+* `gen_ai.usage.cost`: float; will be set as the `total` cost key
+
+#### `prompt`
+
+**Only applies to observations of type `generation`**
+
+The name of a versioned prompt managed in Langfuse.
+
+* `langfuse.observation.prompt.name`: `string`
+* `langfuse.observation.prompt.version`: `integer`
+
+
+#### `completionStartTime`
+
+**Only applies to observations of type `generation`**
+
+The timestamp for when the model began generating the completion.
+
+* `langfuse.observation.completion_start_time`: `ISO 8601 date string`
+
+
+#### `version`
+
+The version of the observation, useful for tracking changes to your application logic.
+
+* `langfuse.version`: `string`
+
+
+#### `environment`
+
+The deployment environment where the observation was generated.
+
+* `langfuse.environment`: `string`
+* `deployment.environment`: `string`
+* `deployment.environment.name`: `string`
+
 
 ## Troubleshooting
 

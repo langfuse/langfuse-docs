@@ -31,6 +31,11 @@ export default {
     title: "Guides",
     // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
+  integrations: {
+    type: "page",
+    title: "Integrations",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
+  },
   faq: {
     type: "page",
     title: "FAQ",
@@ -110,6 +115,15 @@ export default {
   },
   enterprise: {
     title: "Enterprise",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
+  startups: {
+    title: "Startups",
     type: "page",
     display: "hidden",
     theme: {

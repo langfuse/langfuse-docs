@@ -40,7 +40,7 @@ Below we install the `openai-agents` library (the OpenAI Agents SDK [link text](
 
 In this notebook, we will use [Langfuse](https://langfuse.com/) to trace, debug and evaluate our agent.
 
-**Note:** If you are using LlamaIndex or LangGraph, you can find documentation on instrumenting them [here](https://langfuse.com/docs/integrations/llama-index/workflows) and [here](https://langfuse.com/docs/integrations/langchain/example-python-langgraph).
+**Note:** If you use another framework (such as LangGraph, LlamaIndex, or CrewAI), you can find documentation on instrumenting them in our [integration section](https://langfuse.com/integrations).
 
 
 ```python

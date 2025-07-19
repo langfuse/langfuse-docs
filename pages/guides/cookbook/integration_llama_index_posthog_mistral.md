@@ -24,7 +24,7 @@ LlamaIndex [(GitHub)](https://github.com/run-llama/llama_index) is a data framew
 
 ## How to Build a Simple RAG Application with LlamaIndex and Mistral
 
-In this tutorial, we demonstrate how to create a chat application that provides answers to questions about hedgehog care. LlamaIndex is used to vectorize a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) with the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). All model generations are then traced using Langfuse's [LlamaIndex integration](https://langfuse.com/docs/integrations/llama-index/get-started).
+In this tutorial, we demonstrate how to create a chat application that provides answers to questions about hedgehog care. LlamaIndex is used to vectorize a [hedgehog care guide](https://www.pro-igel.de/downloads/merkblaetter_engl/wildtier_engl.pdf) with the [Mistral 8x22B model](https://docs.mistral.ai/getting-started/models/). All model generations are then traced using Langfuse's [LlamaIndex integration](https://langfuse.com/integrations/frameworks/llamaindex).
 
 Finally, the [PostHog integration](https://langfuse.com/docs/analytics/posthog) allows you to view detailed analytics about your hedgehog application directly in PostHog.
 
@@ -107,7 +107,7 @@ else:
 
 Now, we initialize the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
 
-Find out more about the Langfuse's LlamaIndex integration [here](https://langfuse.com/docs/integrations/llama-index/get-started).
+Find out more about the Langfuse's LlamaIndex integration [here](https://langfuse.com/integrations/frameworks/llamaindex).
 
 
 ```python

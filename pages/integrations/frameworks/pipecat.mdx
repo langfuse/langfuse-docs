@@ -1,0 +1,165 @@
+---
+title: Open Source Observability for Pipecat
+sidebarTitle: Pipecat
+logo: /images/integrations/pipecat_icon.svg
+description: Trace real-time voice and multimodal conversations built with Pipecat using Langfuse.
+---
+
+# Pipecat Tracing Integration
+
+This guide shows you how to integrate **Langfuse** with **Pipecat** for [observability and tracing](/docs/tracing) of real-time voice agents. By following these steps, you'll be able to monitor, debug and evaluate your Pipecat agents in the Langfuse dashboard.
+
+> [Pipecat](https://www.pipecat.ai) ([repo](https://github.com/pipecat-ai/pipecat)) is an open-source Python framework for building real-time voice and multimodal conversational AI agents. Developed by Daily, it enables fully programmable AI voice agents and supports multimodal interactions, positioning itself as a flexible solution for developers looking to build conversational AI systems.
+
+_Example of a Pipecat agent conversation in Langfuse._
+
+<CloudflareVideo
+  videoId="bafe5bdcde0ad80bd4ad05ac6390280f"
+  aspectRatio={16 / 9}
+  title="Pipecat trace in Langfuse"
+  gifStyle
+/>
+
+## Features
+
+- **Hierarchical Tracing**: Track entire conversations, turns, and service calls
+- **Service Tracing**: Detailed spans for TTS, STT, and LLM services with rich context
+- **TTFB Metrics**: Capture Time To First Byte metrics for latency analysis
+- **Usage Statistics**: Track character counts for TTS and token usage for LLMs
+
+## Trace Structure
+
+Traces are organized hierarchically:
+
+```
+Conversation (conversation-uuid)
+├── turn-1
+│   ├── stt_deepgramsttservice
+│   ├── llm_openaillmservice
+│   └── tts_cartesiattsservice
+└── turn-2
+    ├── stt_deepgramsttservice
+    ├── llm_openaillmservice
+    └── tts_cartesiattsservice
+    turn-N
+    └── ...
+```
+
+This organization helps you track conversation-to-conversation and turn-to-turn.
+
+Learn more about Pipecat span attributes in the [Pipecat documentation](https://docs.pipecat.ai/server/utilities/opentelemetry).
+
+## End-to-end example
+
+We've created an end-to-end example of how to trace a Pipecat agent with Langfuse. You can find the code in the [Pipecat repository](https://github.com/pipecat-ai/pipecat/tree/main/examples/open-telemetry/langfuse).
+
+```bash filename="pipecat/examples/open-telemetry-tracing-langfuse"
+.
+├── README.md
+├── bot.py
+├── env.example
+├── requirements.txt
+└── run.py
+```
+
+## Get Started
+
+Pipecat supports OpenTelemetry tracing, and Langfuse has an [OpenTelemetry endpoint](/docs/opentelemetry/get-started). By following these steps, you can enable Langfuse tracing for your Pipecat application.
+
+<Steps>
+
+### Obtain Langfuse API keys
+
+Create a project in [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting) Langfuse and copy your API keys.
+
+### Environment Configuration
+
+Base64 encode your Langfuse public and secret key:
+
+```bash filename="terminal"
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
+
+Create a `.env` file with your API keys to enable tracing:
+
+```bash filename=".env"
+ENABLE_TRACING=true
+# OTLP endpoint (defaults to localhost:4317 if not set)
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic%20<base64_encoded_api_key>
+# Set to any value to enable console output for debugging
+# OTEL_CONSOLE_EXPORT=true
+```
+
+For more details, please refer to the Langfuse [OpenTelemetry documentation](/docs/opentelemetry/get-started).
+
+### Add OpenTelemetry to your Pipeline Task
+
+Enable tracing in your Pipecat application:
+
+```python filename="main.py"
+# Initialize OpenTelemetry with the http exporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+# Configured automatically from .env
+exporter = OTLPSpanExporter()
+
+setup_tracing(
+    service_name="pipecat-demo",
+    exporter=exporter,
+)
+
+# Enable tracing in your PipelineTask
+task = PipelineTask(
+    pipeline,
+    params=PipelineParams(
+        allow_interruptions=True,
+        enable_metrics=True,  # Required for some service metrics
+    ),
+    enable_tracing=True,  # Enables both turn and conversation tracing
+    conversation_id="customer-123",  # Optional - will auto-generate if not provided
+)
+```
+
+For more details, please refer to the [OpenTelemetry Python Documentation](https://opentelemetry-python.readthedocs.io/).
+
+</Steps>
+
+## Understanding the Traces
+
+- **Conversation Spans**: The top-level span representing an entire conversation
+- **Turn Spans**: Child spans of conversations that represent each turn in the dialog
+- **Service Spans**: Detailed service operations nested under turns
+- **Service Attributes**: Each service includes rich context about its operation:
+  - **TTS**: Voice ID, character count, service type
+  - **STT**: Transcription text, language, model
+  - **LLM**: Messages, tokens used, model, service configuration
+- **Metrics**: Performance data like `metrics.ttfb_ms` and processing durations
+
+## How It Works
+
+The tracing system consists of:
+
+1. **TurnTrackingObserver**: Detects conversation turns
+2. **TurnTraceObserver**: Creates spans for turns and conversations
+3. **Service Decorators**: `@traced_tts`, `@traced_stt`, `@traced_llm` for service-specific tracing
+4. **Context Providers**: Share context between different parts of the pipeline
+
+## Troubleshooting
+
+- **No Traces in Langfuse**: Ensure that your credentials are correct and follow this [troubleshooting guide](/faq/all/missing-traces)
+- **Missing Metrics**: Check that `enable_metrics=True` in PipelineParams
+- **Connection Errors**: Verify network connectivity to Langfuse
+- **Exporter Issues**: Try the Console exporter (`OTEL_CONSOLE_EXPORT=true`) to verify tracing works
+
+## References
+
+- [End to end example](https://github.com/pipecat-ai/pipecat/tree/main/examples/open-telemetry/langfuse)
+- [Pipecat Tracing Documentation](https://docs.pipecat.ai/server/utilities/opentelemetry)
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-pipecat"]} />

@@ -30,6 +30,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { TrustedBy } from "./components/TrustedBy";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +42,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/router";
+import { trustedByData } from "@/data/trusted-by";
 
 // Graduated pricing tiers
 const pricingTiers = [
@@ -437,7 +439,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "https://cloud.langfuse.com",
       featured: true,
       description:
-        "For production projects. Includes access to more history, usage and unlimited users.",
+        "For production projects. Longer data retention and unlimited users.",
       price: "$59",
       priceDiscountCta: {
         name: "Discounts available",
@@ -496,7 +498,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description: "Enterprise-grade support and security features.",
       price: "Custom",
       mainFeatures: [
-        "Everything in Team",
+        "Everything in Pro and Teams add-on",
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
@@ -643,7 +645,7 @@ const sections: Section[] = [
         name: "Native Frameworks Integrations",
         description:
           "Langfuse integrates natively with many LLM providers and agent frameworks such as LangChain, LlamaIndex, LangGraph, CrewAI, Semantic Kernel, ...",
-        href: "/docs/integrations/overview",
+        href: "/integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -669,7 +671,7 @@ const sections: Section[] = [
       },
       {
         name: "Proxy-based Logging (via LiteLLM)",
-        href: "/docs/integrations/litellm/tracing",
+        href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -1660,11 +1662,21 @@ export default function Pricing({
                     "relative h-full flex flex-col"
                   )}
                 >
+                  {/* Unlimited Users callout for Core and Pro */}
+                  {variant === "cloud" &&
+                    (tier.name === "Core" || tier.name === "Pro") && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium">
+                          Unlimited Users
+                        </div>
+                      </div>
+                    )}
+
                   <CardHeader className="p-4 lg:p-6 text-left">
                     <CardTitle className="text-lg text-foreground font-semibold">
                       {tier.name}
                     </CardTitle>
-                    <CardDescription className="text-left md:min-h-20 lg:min-h-16">
+                    <CardDescription className="text-left">
                       {tier.description}
                       {tier.learnMore && (
                         <>
@@ -1677,45 +1689,78 @@ export default function Pricing({
                       )}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="p-0 px-4 lg:px-6 mb-4">
-                    {tier.ctaCallout ? (
-                      <div className="flex gap-2">
-                        <Button
-                          className="flex-1"
-                          variant={tier.featured ? "default" : "outline"}
-                          asChild
-                        >
-                          <Link href={tier.href}>{tier.cta}</Link>
-                        </Button>
-                        <Button className="flex-1" variant="secondary" asChild>
-                          <Link href={tier.ctaCallout.href}>
-                            {tier.ctaCallout.text}
-                          </Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <Button
-                          className="w-full"
-                          variant={tier.featured ? "default" : "outline"}
-                          asChild
-                        >
-                          <Link href={tier.href}>{tier.cta}</Link>
-                        </Button>
-                        <div className="mt-2 h-[20px]" />
-                      </>
-                    )}
-                  </CardContent>
-                  <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
-                    <div>
+                  <CardContent className="p-0 px-4 lg:px-6">
+                    {/* Price information */}
+                    <div className="h-[60px] flex items-baseline">
                       <span className="font-bold text-3xl">{tier.price}</span>
-                      {tier.price.includes("$") && (
-                        <span className="text-sm leading-4 mt-2">
-                          {tier.priceUnit ? `/ ${tier.priceUnit}` : "/ month"}
-                        </span>
+                      <span className="text-sm leading-4 ml-1">
+                        {tier.price.includes("$")
+                          ? tier.priceUnit
+                            ? `/ ${tier.priceUnit}`
+                            : "/ month"
+                          : ""}
+                      </span>
+                    </div>
+
+                    <div>
+                      {tier.ctaCallout ? (
+                        <div className="flex gap-2">
+                          <Button
+                            className="flex-1"
+                            variant={tier.featured ? "default" : "outline"}
+                            asChild
+                          >
+                            <Link href={tier.href}>{tier.cta}</Link>
+                          </Button>
+                          <Button
+                            className="flex-1"
+                            variant="secondary"
+                            asChild
+                          >
+                            <Link href={tier.ctaCallout.href}>
+                              {tier.ctaCallout.text}
+                            </Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <Button
+                            className="w-full"
+                            variant={tier.featured ? "default" : "outline"}
+                            asChild
+                          >
+                            <Link href={tier.href}>{tier.cta}</Link>
+                          </Button>
+                        </>
                       )}
                     </div>
-                    <ul className="mt-3 space-y-2.5 text-sm">
+
+                    {/* Startup discount callout for Core and Pro - always render container for alignment */}
+                    <div className="p-6 h-[30px] flex items-center justify-center">
+                      {variant === "cloud" &&
+                      (tier.name === "Core" || tier.name === "Pro") ? (
+                        <div className="text-xs text-muted-foreground text-center">
+                          <Link
+                            href="/startups"
+                            className="underline hover:text-primary"
+                          >
+                            Startup? Get 50% off
+                          </Link>
+                        </div>
+                      ) : null}
+                    </div>
+                  </CardContent>
+
+                  {/* Trusted by section for cloud tiers */}
+                  {variant === "cloud" && (
+                    <>
+                      <div className="border-t"></div>
+                      <TrustedBy customers={trustedByData.cloud[tier.name]} />
+                    </>
+                  )}
+                  <div className="border-t"></div>
+                  <CardFooter className="p-4 lg:p-6 flex-col items-start gap-2">
+                    <ul className="space-y-2.5 text-sm">
                       {tier.mainFeatures.map((feature) => (
                         <li key={feature} className="flex space-x-2">
                           <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
@@ -1757,6 +1802,25 @@ export default function Pricing({
 
             {isPricingPage && (
               <>
+                {/* Special offers callout */}
+                <div className="mt-4 mb-4 text-center">
+                  <div className="inline-flex items-center gap-6 px-4 py-2 bg-muted/30 rounded-full text-sm text-muted-foreground">
+                    <Link 
+                      href="/startups" 
+                      className="hover:text-primary transition-colors underline"
+                    >
+                      Startup discounts available
+                    </Link>
+                    <span className="text-muted-foreground/50">|</span>
+                    <Link 
+                      href="/research" 
+                      className="hover:text-primary transition-colors underline"
+                    >
+                      Academic & research benefits
+                    </Link>
+                  </div>
+                </div>
+
                 {/* Feature comparison (up to lg) */}
                 <section
                   aria-labelledby="mobile-comparison-heading"
@@ -1946,8 +2010,8 @@ export default function Pricing({
         {isPricingPage ? (
           <>
             <div className="relative">
-              <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-                <DiscountOverview className="mt-10" />
+              <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
+                <DiscountOverview className="mt-0" />
                 <PricingFAQ />
               </div>
             </div>
@@ -1976,23 +2040,27 @@ const discounts = [
     name: "Early-stage startups",
     description: "50% off, first year",
     cta: {
-      text: "Request startup discount",
-      href: "https://forms.gle/eJAYjRWeCZU1Mn6j8",
+      text: "Learn more and apply",
+      href: "/startups",
     },
   },
   {
-    name: "Education / Non-profits",
+    name: "Research / Students",
     description: "Up to 100% off, limits apply",
+    cta: {
+      text: "Learn more and apply",
+      href: "/research",
+    },
   },
   {
     name: "Open-source projects",
-    description: "USD 300 in credits, first year",
+    description: "USD 300 in credits / month, first year",
   },
 ];
 
 const DiscountOverview = ({ className }: { className?: string }) => (
   <div
-    className={cn("mx-auto max-w-7xl px-6 lg:px-8 pt-20", className)}
+    className={cn("mx-auto max-w-7xl px-6 lg:px-8 pt-8", className)}
     id="discounts"
   >
     <div className="mx-auto max-w-4xl">

@@ -20,7 +20,7 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)" ]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
 <Tab>
 
 Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
@@ -172,7 +172,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
 
 ```python
 from langfuse.openai import openai
@@ -197,7 +197,7 @@ completion = openai.chat.completions.create(
 openai.flush_langfuse()
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/openai/get-started#use-traces)), set masking function via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set masking function via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -235,7 +235,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `mask` as a keyword argument:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` as a keyword argument:
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -251,7 +251,7 @@ handler = CallbackHandler(
 )
 ```
 
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `mask` via the `langfuse_context`:
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `mask` via the `langfuse_context`:
 
 ```python
 from langfuse.decorators import langfuse_context, observe
@@ -277,7 +277,7 @@ fn()
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `mask` to the constructor:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
 
 ```typescript
 import { CallbackHandler } from "langfuse-langchain";
@@ -293,72 +293,6 @@ function maskingFunction(params: { data: any }) {
 const handler = new CallbackHandler({
   mask: maskingFunction,
 });
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-</Callout>
-
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/get-started), set the `mask` via the `instrumentor.observe()` context manager:
-
-```python
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-instrumentor = LlamaIndexInstrumentor(mask=masking_function)
-
-with instrumentor.observe():
-    # ... your LlamaIndex index creation ...
-
-    index.as_query_engine().query("What is the capital of France?")
-
-instrumentor.flush()
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/get-started#interoperability-with-langfuse-sdk)), set the `mask` via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-langfuse_context.configure(mask=masking_function)
-
-@observe()
-def llama_index_fn(question: str):
-    # Get IDs
-    current_trace_id = langfuse_context.get_current_trace_id()
-    current_observation_id = langfuse_context.get_current_observation_id()
-
-    # Pass to instrumentor
-    with instrumentor.observe(
-        trace_id=current_trace_id,
-        parent_observation_id=current_observation_id,
-        update_parent=False
-    ) as trace:
-        # ... your LlamaIndex index creation ...
-
-        index.as_query_engine().query("What is the capital of France?")
-
-        # Run application
-        index = VectorStoreIndex.from_documents([doc1, doc2])
-        response = index.as_query_engine().query(question)
-
-        return response
 ```
 
 </Tab>

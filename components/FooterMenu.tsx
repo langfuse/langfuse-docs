@@ -46,7 +46,7 @@ const menuItems: {
     items: [
       {
         name: "Python SDK",
-        href: "/docs/sdk/python",
+        href: "/docs/sdk/python/sdk-v3",
       },
       {
         name: "JS/TS SDK",
@@ -54,43 +54,39 @@ const menuItems: {
       },
       {
         name: "OpenAI SDK",
-        href: "/docs/integrations/openai/get-started",
+        href: "/integrations/model-providers/openai-py",
       },
       {
         name: "Langchain",
-        href: "/docs/integrations/langchain/tracing",
+        href: "/integrations/frameworks/langchain",
       },
       {
         name: "Llama-Index",
-        href: "/docs/integrations/llama-index/get-started",
+        href: "/integrations/frameworks/llamaindex",
       },
       {
         name: "Litellm",
-        href: "/docs/integrations/litellm/tracing",
+        href: "/integrations/gateways/litellm",
       },
       {
         name: "Dify",
-        href: "/docs/integrations/dify",
+        href: "/integrations/no-code/dify",
       },
       {
         name: "Flowise",
-        href: "/docs/integrations/flowise",
+        href: "/integrations/no-code/flowise",
       },
       {
         name: "Langflow",
-        href: "/docs/integrations/langflow",
+        href: "/integrations/no-code/langflow",
       },
       {
         name: "Vercel AI SDK",
-        href: "/docs/integrations/vercel-ai-sdk",
+        href: "/integrations/frameworks/vercel-ai-sdk",
       },
       {
         name: "Instructor",
-        href: "/docs/integrations/instructor",
-      },
-      {
-        name: "Mirascope",
-        href: "/docs/integrations/mirascope",
+        href: "/integrations/frameworks/instructor",
       },
       {
         name: "API",

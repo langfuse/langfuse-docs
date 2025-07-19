@@ -1,0 +1,32 @@
+import Env from "@/components-mdx/env-python.mdx";
+
+```bash
+pip install langfuse langchain-openai
+```
+
+Add your Langfuse credentials as environment variables.
+
+<Env />
+
+Initialize the Langfuse callback handler.
+
+```python
+from langfuse.callback import CallbackHandler
+
+langfuse_handler = CallbackHandler()
+```
+
+Add the Langfuse callback handler to your chain.
+
+```python {10}
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+ 
+response = chain.invoke(
+    {"topic": "cats"}, 
+    config={"callbacks": [langfuse_handler]})
+```

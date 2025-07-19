@@ -7,7 +7,7 @@ category: Datasets
 
 In this cookbook, we'll iterate on systems prompts with the goal of getting only the capital of a given country. We use Langfuse datasets, to store a list of example inputs and expected outputs.
 
-This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk/overview) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/docs/integrations) (e.g. Langchain).
+This is a very simple example, you can run experiments on any LLM application that you either trace with the [Langfuse SDKs](https://langfuse.com/docs/sdk/overview) (Python, JS/TS) or via one of our [integrations](https://langfuse.com/integrations) (e.g. Langchain).
 
 _Simple example application_
 
@@ -34,7 +34,7 @@ os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# your openai key
+# Your openai key
 os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
@@ -106,21 +106,29 @@ This an example production application that we want to evaluate. It is instrumen
 
 ```python
 from langfuse.openai import openai
-from langfuse import observe
+from langfuse import observe, get_client
+
+langfuse = get_client()
 
 @observe()
 def run_my_custom_llm_app(input, system_prompt):
-  messages = [
-      {"role":"system", "content": system_prompt},
-      {"role":"user", "content": input["country"]}
-  ]
+    messages = [
+        {"role":"system", "content": system_prompt},
+        {"role":"user", "content": input["country"]}
+    ]
 
-  completion = openai.chat.completions.create(
-      model="gpt-4o",
-      messages=messages
-  ).choices[0].message.content
+    completion = openai.chat.completions.create(
+        model="gpt-4o",
+        messages=messages
+    ).choices[0].message.content
 
-  return completion
+    # Explicitly set trace input/output for evaluation features
+    langfuse.update_current_trace(
+        input=input,
+        output=completion
+    )
+
+    return completion
 ```
 
 ### Experiment runner
@@ -132,6 +140,7 @@ This is a simple experiment runner that runs the application on each item in the
 # we use a very simple eval here, you can use any eval library
 # see https://langfuse.com/docs/scores/model-based-evals for details
 # you can also use LLM-as-a-judge managed within Langfuse to evaluate the outputs
+
 def simple_evaluation(output, expected_output):
   return output == expected_output
 ```
@@ -139,28 +148,24 @@ def simple_evaluation(output, expected_output):
 
 ```python
 def run_experiment(experiment_name, system_prompt):
-  dataset = langfuse.get_dataset("capital_cities")
+    dataset = langfuse.get_dataset("capital_cities")
 
-  for item in dataset.items:
-  
-      # Use the item.run() context manager
-      with item.run(
-          run_name = experiment_name,
+    for item in dataset.items:
 
-      ) as root_span: # root_span is the root span of the new trace for this item and run.
-          # All subsequent langfuse operations within this block are part of this trace.
-  
-          # Call your application logic
-          output = run_my_custom_llm_app(item.input, system_prompt)
-  
-          # Optionally, score the result against the expected output
-          root_span.score_trace(name="exact_match", value = simple_evaluation(output, item.expected_output))
+        # Use the item.run() context manager
+        with item.run(
+            run_name = experiment_name,
 
-  
-  print(f"\nFinished processing dataset 'capital_cities' for run '{experiment_name}'.")
+        ) as root_span: # root_span is the root span of the new trace for this item and run.
+            # All subsequent langfuse operations within this block are part of this trace.
 
+            # Call your application logic
+            output = run_my_custom_llm_app(item.input, system_prompt)
 
-      
+            # Optionally, score the result against the expected output
+            root_span.score_trace(name="exact_match", value = simple_evaluation(output, item.expected_output))
+
+    print(f"\nFinished processing dataset 'capital_cities' for run '{experiment_name}'.")
 ```
 
 ### Run experiments
@@ -194,6 +199,16 @@ langfuse.flush()
 langfuse.flush()
 ```
 
+    
+    Finished processing dataset 'capital_cities' for run 'famous_city'.
+    
+    Finished processing dataset 'capital_cities' for run 'directly_ask'.
+    
+    Finished processing dataset 'capital_cities' for run 'asking_specifically'.
+    
+    Finished processing dataset 'capital_cities' for run 'asking_specifically_2nd_try'.
+
+
 ## Example using Langchain
 
 
@@ -204,24 +219,27 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage
  
 def run_my_langchain_llm_app(input, system_message, callback_handler):
-  prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            system_message,
-        ),
-        MessagesPlaceholder(variable_name="messages"),
-    ]
-  )
-  chat = ChatOpenAI()
-  chain = prompt | chat
 
-  res = chain.invoke(
-    { "messages": [HumanMessage(content=input)] },
-    config={"callbacks":[callback_handler]}
-  )
-  
-  return res
+  # Create a trace via Langfuse spans and use Langchain within it
+  with langfuse.start_as_current_span(name="my-langchain-agent") as root_span:
+        
+    prompt = ChatPromptTemplate.from_messages(
+      [("system", system_message), MessagesPlaceholder(variable_name="messages")]
+    )
+    chat = ChatOpenAI()
+    chain = prompt | chat
+
+    result = chain.invoke(
+      { "messages": [HumanMessage(content=input)] },
+      config={"callbacks":[callback_handler]}
+    )
+
+    # Update trace output
+    root_span.update_trace(
+        input=input,
+        output=result.content)
+
+  return result.content
 ```
 
 
@@ -229,6 +247,7 @@ def run_my_langchain_llm_app(input, system_message, callback_handler):
 from langfuse.langchain import CallbackHandler
 
 def run_langchain_experiment(experiment_name, system_prompt):
+  
   dataset = langfuse.get_dataset("capital_cities")
 
   # Initialize the Langfuse handler
@@ -239,7 +258,8 @@ def run_langchain_experiment(experiment_name, system_prompt):
       # Use the item.run() context manager
       with item.run(
           run_name = experiment_name,
-
+          run_description="My first run",
+          run_metadata={"model": "gpt-4o"},
       ) as root_span: # root_span is the root span of the new trace for this item and run.
           # All subsequent langfuse operations within this block are part of this trace.
   
@@ -249,7 +269,6 @@ def run_langchain_experiment(experiment_name, system_prompt):
           # Optionally, score the result against the expected output
           root_span.score_trace(name="exact_match", value = simple_evaluation(output, item.expected_output))
 
-  
   print(f"\nFinished processing dataset 'capital_cities' for run '{experiment_name}'.")
 ```
 
@@ -273,8 +292,9 @@ run_langchain_experiment(
 )
 ```
 
-## Evaluate experiments in Langfuse UI
+## More Examples
 
-- Average scores per experiment run
-- Browse each run for an individual item
-- Look at traces to debug issues
+- [LangGraph Dataset Experiment](https://langfuse.com/guides/cookbook/example_langgraph_agents#offline-evaluation)
+- [OpenAI Agents SDK Dataset Experiment](https://langfuse.com/guides/cookbook/example_evaluating_openai_agents#dataset-evaluation)
+- [CrewAI Dataset Experiment](https://langfuse.com/integrations/frameworks/crewai#dataset-experiments)
+- [Smolagents Dataset Experiment](https://huggingface.co/learn/agents-course/en/bonus-unit2/monitoring-and-evaluating-agents-notebook#offline-evaluation)

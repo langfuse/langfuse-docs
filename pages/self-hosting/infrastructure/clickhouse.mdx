@@ -77,6 +77,8 @@ You can provision it directly from [ClickHouse](https://clickhouse.cloud/) or th
 
 ClickHouse Cloud clusters will be provisioned outside your cloud environment and your VPC, but Clickhouse offers [private links](https://clickhouse.com/docs/en/cloud/security/private-link-overview) for AWS, GCP, and Azure.
 
+If you need assistance or want to talk to the ClickHouse team, you can reach out to them [here](https://clickhouse.com/company/contact).
+
 #### Example Configuration
 
 Set the following environment variables to connect to your ClickHouse instance:
@@ -229,6 +231,81 @@ CLICKHOUSE_MIGRATION_URL=clickhouse://localhost:9000
 CLICKHOUSE_USER=clickhouse
 CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
+```
+
+## Encryption
+
+ClickHouse supports disk encryption for data at rest, providing an additional layer of security for sensitive data.
+
+### Automatic Encryption with Blob Storage
+
+When using [blob storage as disk](#blob-storage-as-disk) (AWS S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
+
+- **AWS S3**: Uses AES-256 encryption by default
+- **Azure Blob Storage**: Uses AES-256 encryption by default
+- **Google Cloud Storage**: Uses AES-256 encryption by default
+
+### Manual Disk Encryption
+
+For local disk storage or additional encryption layers, ClickHouse supports configurable disk encryption using the AES_128_CTR algorithm.
+
+#### Kubernetes Configuration
+
+For Kubernetes deployments using the Bitnami ClickHouse Helm chart, you can configure disk encryption by creating a custom configuration file:
+
+```yaml
+# values.yaml
+clickhouse:
+  extraConfigmaps:
+    - name: encryption-config
+      mountPath: /etc/clickhouse-server/config.d/encrypted_storage.xml
+      data:
+        encryption.xml: |
+          <clickhouse>
+            <storage_configuration>
+              <disks>
+                <encrypted_disk>
+                  <type>encrypted</type>
+                  <disk>default</disk>
+                  <path>encrypted/</path>
+                  <algorithm>AES_128_CTR</algorithm>
+                  <key_hex id="0" from_env="CLICKHOUSE_ENCRYPTION_KEY"></key_hex>
+                </encrypted_disk>
+              </disks>
+              <policies>
+                <encrypted_policy>
+                  <volumes>
+                    <main>
+                      <disk>encrypted_disk</disk>
+                    </main>
+                  </volumes>
+                </encrypted_policy>
+              </policies>
+            </storage_configuration>
+            <merge_tree>
+              <storage_policy>encrypted_policy</storage_policy>
+            </merge_tree>
+          </clickhouse>
+```
+
+Set the encryption key as an environment variable:
+
+```yaml
+# values.yaml
+clickhouse:
+  extraEnvVars:
+    - name: CLICKHOUSE_ENCRYPTION_KEY
+      valueFrom:
+        secretKeyRef:
+          name: clickhouse-encryption-key
+          key: key
+```
+
+Create the encryption key secret:
+
+```bash
+kubectl create secret generic clickhouse-encryption-key \
+  --from-literal=key="00112233445566778899aabbccddeeff"
 ```
 
 ## Blob Storage as Disk

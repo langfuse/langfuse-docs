@@ -77,7 +77,7 @@ export const DocsContributors = () => {
           <a
             key={contributor.username}
             href={contributor.profileUrl}
-            className="group flex items-center gap-2.5 p-2 rounded-md hover:bg-accent transition-colors"
+            className="group flex items-center gap-2.5 p-1 rounded-md hover:bg-accent transition-colors mb-1"
             target="_blank"
             rel="noopener noreferrer"
           >

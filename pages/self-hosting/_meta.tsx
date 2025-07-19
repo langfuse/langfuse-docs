@@ -50,6 +50,7 @@ export default {
     title: "Features",
   },
   "automated-access-provisioning": "Automated Access Provisioning",
+  "caching-features": "Caching",
   "custom-base-path": "Custom Base Path",
   "headless-initialization": "Headless Initialization",
   "organization-creators": "Organization Creators (EE)",

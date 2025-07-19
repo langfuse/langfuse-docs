@@ -33,37 +33,24 @@ export default async function handler(req: NextRequest) {
   }
 
   try {
-    const [slackResponse, loopsResponse] = await Promise.all([
-      fetch(process.env.SLACK_WEBHOOK_URL, {
-        method: "POST",
-        body: JSON.stringify({ rawMessage: JSON.stringify(body, null, 2) }),
-        headers: {
-          "Content-Type": "application/json",
+    const loopsResponse = await fetch("https://app.loops.so/api/v1/contacts/create", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        source,
+        mailingLists: {
+          cmbzj9z64074z0iyj7jj38ra6: true, //Product Updates Loops List
         },
       }),
-      fetch("https://app.loops.so/api/v1/contacts/create", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          source,
-          mailingLists: {
-            cmbzj9z64074z0iyj7jj38ra6: true, //Product Updates Loops List
-          },
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
-        },
-      }),
-    ]);
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
+      },
+    });
 
-    if (
-      slackResponse.status === 200 &&
-      (loopsResponse.status === 200 || loopsResponse.status === 409)
-    ) {
+    if (loopsResponse.status === 200 || loopsResponse.status === 409) {
       return NextResponse.json({ status: "OK" });
     } else {
-      console.error("Slack", JSON.stringify(slackResponse));
       console.error("Loops", JSON.stringify(loopsResponse));
       return NextResponse.json(
         {},

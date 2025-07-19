@@ -4,9 +4,9 @@ description: Add any customer metadata to your traces to better understand your 
 
 # Metadata
 
-Traces and observations (see [Langfuse Data Model](/docs/tracing)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
+Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -138,7 +138,7 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai), pass `metadata` as an additional argument:
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), pass `metadata` as an additional argument:
 
 ```python
 from langfuse.openai import openai
@@ -159,7 +159,7 @@ completion = openai.chat.completions.create(
 </Tab>
 <Tab>
 
-When using the [OpenAI SDK Integration (JS)](/docs/integrations/openai/js), pass `metadata` as an additional argument:
+When using the [OpenAI SDK Integration (JS)](/integrations/model-providers/openai-js), pass `metadata` as an additional argument:
 
 ```ts
 import OpenAI from "openai";
@@ -177,7 +177,7 @@ const res = await observeOpenAI(new OpenAI(), {
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `metadata` as a keyword argument:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `metadata` as a keyword argument:
 
 ```python
 handler = CallbackHandler(
@@ -188,7 +188,7 @@ handler = CallbackHandler(
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing), you can pass `metadata` to the constructor:
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `metadata` to the constructor:
 
 ```ts
 const handler = new CallbackHandler({
@@ -196,7 +196,7 @@ const handler = new CallbackHandler({
 });
 ```
 
-When using the integration with the JS SDK (see [interop docs](/docs/integrations/langchain/tracing#interoperability)), set `metadata` via `langfuse.trace()`:
+When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `metadata` via `langfuse.trace()`:
 
 ```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
@@ -209,113 +209,6 @@ const langfuseHandler = new CallbackHandler({ root: trace });
 
 // Add Langfuse handler as callback to your langchain chain/agent
 await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-</Callout>
-
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/deprecated/get-started), set the `metadata` via the `instrumentor.observe()` context manager:
-
-```python
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-instrumentor = LlamaIndexInstrumentor()
-
-with instrumentor.observe(metadata={"key":"value"}):
-    # ... your LlamaIndex index creation ...
-
-    index.as_query_engine().query("What is the capital of France?")
-
-instrumentor.flush()
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated/get-started#interoperability-with-langfuse-sdk)), set the metadata via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-instrumentor = LlamaIndexInstrumentor()
-
-@observe()
-def llama_index_fn(question: str):
-    # Update context
-    langfuse_context.update_current_trace(metadata={"key":"value"})
-
-    # Get IDs
-    current_trace_id = langfuse_context.get_current_trace_id()
-    current_observation_id = langfuse_context.get_current_observation_id()
-
-    # Pass to instrumentor
-    with instrumentor.observe(
-        trace_id=current_trace_id,
-        parent_observation_id=current_observation_id,
-        update_parent=False
-    ) as trace:
-        # ... your LlamaIndex index creation ...
-
-        index.as_query_engine().query("What is the capital of France?")
-
-        # Run application
-        index = VectorStoreIndex.from_documents([doc1, doc2])
-        response = index.as_query_engine().query(question)
-
-        return response
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-
-The LlamaIndex callback integration is not supported in the Python SDK v3. Please use a community-maintained OTEL-based integration instead.
-
-</Callout>
-
-When using the (deprecated) [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback), set the `metadata` via `set_trace_params`. All LlamaIndex traces created after `set_trace_params` will include the `metadata`. Learn more about `set_trace_params` [here](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback#set-trace-params).
-
-```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse import langfuse
-
-# Instantiate a new LlamaIndexCallbackHandler and register it in the LlamaIndex Settings
-langfuse_callback_handler = LlamaIndexCallbackHandler()
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-
-langfuse_callback_handler.set_trace_params(
-  metadata={"key":"value"}
-)
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback#interoperability-with-langfuse-sdk)), set the metadata via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from llama_index.core import Document, VectorStoreIndex
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-
-@observe()
-def llama_index_fn(question: str):
-    langfuse_context.update_current_trace(
-        metadata={"key":"value"}
-    )
-
-    # Set callback manager for LlamaIndex, will apply to all LlamaIndex executions in this function
-    langfuse_handler = langfuse_context.get_current_llama_index_handler()
-    Settings.callback_manager = CallbackManager([langfuse_handler])
-
-    # Run application
-    index = VectorStoreIndex.from_documents([doc1,doc2])
-    response = index.as_query_engine().query(question)
-    return response
 ```
 
 </Tab>

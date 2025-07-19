@@ -10,7 +10,7 @@ You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environm
 
 The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)", "LlamaIndex (instrumentor)", "LlamaIndex (callback)"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
 <Tab>
 With Python SDK v3, you can configure sampling when initializing the client:
 
@@ -99,7 +99,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [OpenAI SDK Integration](/docs/integrations/openai) with Python SDK v2:
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py) with Python SDK v2:
 
 ```python
 # Either set the environment variable or configure the openai import. The latter takes precedence.
@@ -131,7 +131,7 @@ const openai = observeOpenAI(new OpenAI(), {
 });
 ```
 
-See [OpenAI Integration (JS/TS)](/docs/integrations/openai/js/get-started) for more details.
+See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
 
 </Tab>
 
@@ -145,7 +145,7 @@ See the Python SDK v3 tab for more details.
 
 </Callout>
 
-When using the [CallbackHandler](/docs/integrations/langchain/tracing) with Python SDK v2:
+When using the [CallbackHandler](/integrations/frameworks/langchain) with Python SDK v2:
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -169,13 +169,13 @@ const handler = new CallbackHandler({
 });
 ```
 
-See [Langchain Integration (JS/TS)](/docs/integrations/langchain/tracing) for more details.
+See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more details.
 
 </Tab>
 
 <Tab>
 
-When using the [Vercel AI SDK Integration](/docs/integrations/vercel-ai-sdk)
+When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sdk)
 
 ```ts filename="instrumentation.ts" {/sampleRate: 0.5/}
 import { registerOTel } from "@vercel/otel";
@@ -187,49 +187,6 @@ export function register() {
     traceExporter: new LangfuseExporter({ sampleRate: 0.5 }),
   });
 }
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-The LlamaIndex integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-</Callout>
-
-When using the [LlamaIndex Integration](/docs/integrations/llama-index/deprecated/get-started) with Python SDK v2:
-
-```python
-import os
-from langfuse.llama_index import LlamaIndexInstrumentor
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
-instrumentor = LlamaIndexInstrumentor(sample_rate=0.5)
-```
-
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-
-The LlamaIndex callback integration is not supported in the Python SDK v3. Please use a [community-maintained OTEL-based integration](/docs/integrations/llama-index/get-started) instead.
-
-</Callout>
-
-When using the deprecated [LlamaIndex Callback Integration](/docs/integrations/llama-index/deprecated/deprecated-llama-index-callback) with Python SDK v2:
-
-```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse import langfuse
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
-langfuse_callback_handler = LlamaIndexCallbackHandler(sample_rate=0.5)
-
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 ```
 
 </Tab>

@@ -1,0 +1,80 @@
+<Tabs items={["Observe Decorator", "Context Managers", "Manual Observations"]}>
+
+<Tab>
+The `@observe` decorator is the simplest way to instrument your application. It is a function decorator that can be applied to any function.
+
+It sets the current span in the context for automatic nesting of child spans and automatically ends it when the function returns. It also automatically captures the function name, arguments, and return value.
+
+```python
+from langfuse import observe, get_client
+
+@observe
+def my_function():
+    return "Hello, world!" # Input/output and timings are automatically captured
+
+my_function()
+
+# Flush events in short-lived applications
+langfuse = get_client()
+langfuse.flush()
+```
+
+</Tab>
+
+<Tab>
+Context managers are the recommended way to instrument chunks of work in your application as they automatically handle the start and end of spans, and set the current span in the context for automatic nesting of child spans. They provide more control than the `@observe` decorator.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Create a span using a context manager
+with langfuse.start_as_current_span(name="process-request") as span:
+    # Your processing logic here
+    span.update(output="Processing complete")
+
+    # Create a nested generation for an LLM call
+    with langfuse.start_as_current_generation(name="llm-response", model="gpt-3.5-turbo") as generation:
+        # Your LLM call logic here
+        generation.update(output="Generated response")
+
+# All spans are automatically closed when exiting their context blocks
+
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+</Tab>
+
+<Tab>
+Manual observations give you control over when spans start and end and do not set the current span in the context for automatic nesting of child spans. You must explicitly call `.end()` when they're complete.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Create a span without a context manager
+span = langfuse.start_span(name="user-request")
+
+# Your processing logic here
+span.update(output="Request processed")
+
+# Child spans must be created using the parent span object
+nested_span = span.start_span(name="nested-span")
+nested_span.update(output="Nested span output")
+
+# Important: Manually end the span
+nested_span.end()
+
+# Important: Manually end the parent span
+span.end()
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+</Tab>
+</Tabs>

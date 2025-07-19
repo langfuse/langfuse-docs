@@ -22,87 +22,9 @@ The v3 SDK introduces several key benefits:
 
 There are three main ways of instrumenting your application with the new Langfuse SDK. All of them are fully interoperable with each other.
 
-<Tabs items={["Observe Decorator", "Context Managers", "Manual Observations"]}>
+import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 
-<Tab>
-The `@observe` decorator is the simplest way to instrument your application. It is a function decorator that can be applied to any function.
-
-It sets the current span in the context for automatic nesting of child spans and automatically ends it when the function returns. It also automatically captures the function name, arguments, and return value.
-
-```python
-from langfuse import observe, get_client
-
-@observe
-def my_function():
-    return "Hello, world!" # Input/output and timings are automatically captured
-
-my_function()
-
-# Flush events in short-lived applications
-langfuse = get_client()
-langfuse.flush()
-```
-
-</Tab>
-
-<Tab>
-Context managers are the recommended way to instrument chunks of work in your application as they automatically handle the start and end of spans, and set the current span in the context for automatic nesting of child spans. They provide more control than the `@observe` decorator.
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# Create a span using a context manager
-with langfuse.start_as_current_span(name="process-request") as span:
-    # Your processing logic here
-    span.update(output="Processing complete")
-
-    # Create a nested generation for an LLM call
-    with langfuse.start_as_current_generation(name="llm-response", model="gpt-3.5-turbo") as generation:
-        # Your LLM call logic here
-        generation.update(output="Generated response")
-
-# All spans are automatically closed when exiting their context blocks
-
-
-# Flush events in short-lived applications
-langfuse.flush()
-```
-
-</Tab>
-
-<Tab>
-Manual observations give you control over when spans start and end and do not set the current span in the context for automatic nesting of child spans. You must explicitly call `.end()` when they're complete.
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# Create a span without a context manager
-span = langfuse.start_span(name="user-request")
-
-# Your processing logic here
-span.update(output="Request processed")
-
-# Child spans must be created using the parent span object
-nested_span = span.start_span(name="nested-span")
-nested_span.update(output="Nested span output")
-
-# Important: Manually end the span
-nested_span.end()
-
-# Important: Manually end the parent span
-span.end()
-
-
-# Flush events in short-lived applications
-langfuse.flush()
-```
-
-</Tab>
-</Tabs>
+<GetStartedPythonSdk/>
 
 ## Setup
 
@@ -805,7 +727,7 @@ response = client.chat.completions.create(
 
 The special metadata fields are:
 - `langfuse_session_id`: Sets the session ID for the trace
-- `langfuse_user_id`: Sets the user ID for the trace  
+- `langfuse_user_id`: Sets the user ID for the trace
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
 
 Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`
@@ -1241,6 +1163,36 @@ For example, if you block parent spans but keep child spans from a separate libr
 Consider the impact on trace structure when choosing which scopes to filter.
 </Callout>
 
+### Isolated TracerProvider
+
+You can configure a separate OpenTelemetry TracerProvider for use with Langfuse. This creates isolation between Langfuse tracing and your other observability systems.
+
+**Benefits of isolation:**
+- Langfuse spans won't be sent to your other observability backends (e.g., Datadog, Jaeger, Zipkin)
+- Third-party library spans won't be sent to Langfuse
+- Independent configuration and sampling rates
+
+<Callout type="warning">
+While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where:
+- A parent span from one TracerProvider might have children from another TracerProvider
+- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider
+- Trace hierarchies may be incomplete or confusing
+
+Plan your instrumentation carefully to avoid confusing trace structures.
+</Callout>
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+
+from langfuse import Langfuse
+
+langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
+
+langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
+
+langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
+```
+
 ### Multi-Project Setup (Experimental)
 
 <Callout type="warning">
@@ -1314,9 +1266,9 @@ result_a = process_data_for_project_a(
     langfuse_public_key="pk-lf-project-a-..."
 )
 
-# Route to Project B  
+# Route to Project B
 result_b = process_data_for_project_b(
-    data="input data", 
+    data="input data",
     langfuse_public_key="pk-lf-project-b-..."
 )
 ```
@@ -1368,7 +1320,7 @@ response_a = chain.invoke(
     config={"callbacks": [handler_a]}
 )
 
-# Route to Project B  
+# Route to Project B
 response_b = chain.invoke(
     {"topic": "data science"},
     config={"callbacks": [handler_b]}
@@ -1380,6 +1332,35 @@ response_b = chain.invoke(
 - Every Langfuse SDK execution across all integrations must include the appropriate public key parameter
 - Missing public key parameters may result in traces being routed to the default project or lost
 - Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
+
+### Self-signed SSL certificates (self-hosted Langfuse)
+
+
+If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:
+
+<Callout type='warning'>
+Changing SSL settings has major security implications depending on your environment. Be sure you understand these implications before you proceed.
+</Callout>
+
+**1. Set OpenTelemetry span exporter to trust self-signed certificate**
+
+```bash filename=".env"
+OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE="/path/to/my-selfsigned-cert.crt"
+```
+
+**2. Set HTTPX to trust certificate for all other API requests to Langfuse instance**
+
+```python filename="main.py"
+import os
+
+import httpx
+
+from langfuse import Langfuse
+
+httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE"])
+
+langfuse = Langfuse(httpx_client=httpx_client)
+```
 
 ## OTEL and Langfuse
 
@@ -1507,7 +1488,7 @@ response = openai.chat.completions.create(
     messages=[{"role": "user", "content": "Hello"}],
     metadata={
         "langfuse_user_id": "user_123",
-        "langfuse_session_id": "session_456", 
+        "langfuse_session_id": "session_456",
         "langfuse_tags": ["chat"],
         "source": "app"  # Regular metadata still works
     }
@@ -1570,7 +1551,7 @@ from langfuse.langchain import CallbackHandler
 handler = CallbackHandler()
 
 response = chain.invoke(
-    {"input": "Hello"}, 
+    {"input": "Hello"},
     config={
         "callbacks": [handler],
         "metadata": {

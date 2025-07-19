@@ -126,12 +126,34 @@ Optionally, the output of the application can be evaluated to compare different 
 <Tabs items={["Python SDK v3", "Python SDK v2 (decorator)", "Python SDK v2 (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)", "Vercel AI SDK"]}>
 <Tab>
 
-```python
+Assume you already have a Langfuse-instrumented LLM-app:
+
+```python filename="app.py"
+from langfuse import get_client, observe
+from langfuse.openai import OpenAI
+
+
+@observe
+def my_llm_function(question: str):
+    response = OpenAI().chat.completions.create(
+        model="gpt-4o", messages=[{"role": "user", "content": question}]
+    )
+    output = response.choices[0].message.content
+
+    # Update trace input / output
+    get_client().update_current_trace(input=question, output=output)
+
+    return output
+```
+
+You may then execute that LLM-app for each dataset item to create a dataset run:
+
+```python filename="execute_dataset.py"
 from langfuse import get_client
 
-langfuse = get_client()
+from .app import my_llm_application
 
-dataset = langfuse.get_dataset("<dataset_name>")
+dataset = get_client().get_dataset("<dataset_name>")
 
 for item in dataset.items:
     # Use the item.run() context manager for automatic trace linking
@@ -140,18 +162,8 @@ for item in dataset.items:
         run_description="My first run",
         run_metadata={"model": "llama3"},
     ) as root_span:
-        # All operations within this block are part of the trace for this dataset item
-        
-        # Call your application logic - this can use any combination of decorators, 
-        # context managers, or manual observations
-        with langfuse.start_as_current_generation(
-            name="llm-call",
-            model="gpt-4o",
-            input=item.input
-        ) as generation:
-            # Your LLM application logic here
-            output = my_llm_application.run(item.input)
-            generation.update(output=output)
+        # Execute your LLM-app against the dataset item input
+        output = my_llm_application.run(item.input)
 
         # Optionally, score the result against the expected output
         root_span.score_trace(
@@ -161,7 +173,7 @@ for item in dataset.items:
         )
 
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-langfuse.flush()
+get_client().flush()
 ```
 
 _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTelemetry-based SDK._
@@ -335,7 +347,7 @@ langfuse.flush()
 </Tab>
 <Tab>
 
-Please refer to the [Vercel AI SDK](/docs/integrations/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
+Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
 
 ```typescript
 const runMyLLMApplication = async (input: string, traceId: string) => {
@@ -357,7 +369,7 @@ const runMyLLMApplication = async (input: string, traceId: string) => {
 
 // fetch the dataset
 const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
- 
+
 // iterate over the dataset items
 for (const item of dataset.items) {
 
@@ -366,13 +378,13 @@ for (const item of dataset.items) {
 
   // run application on the dataset item input
   const output = await runMyLLMApplication(item.input, trace.id);
- 
+
   // link the execution trace to the dataset item and give it a run_name
   await item.link(trace, "<run_name>", {
     description: "My first run", // optional run description
     metadata: { model: "gpt-4o" }, // optional run metadata
   });
- 
+
   // optionally, evaluate the output to compare different runs more easily
   trace.score({
     name: "<score_name>",
@@ -380,7 +392,7 @@ for (const item of dataset.items) {
     comment: "This is a comment", // optional, useful to add reasoning
   });
 }
- 
+
 // Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 await langfuse.flushAsync();
 

@@ -109,7 +109,7 @@ const promptTemplate = PromptTemplate.fromTemplate(
 
 #### Setup Langfuse Tracing for Langchain JS
 
-We'll use the native [Langfuse Tracing for Langchain JS](https://langfuse.com/docs/integrations/langchain) when executing this chain. This is fully optional and can be used independently from Prompt Management.
+We'll use the native [Langfuse Tracing for Langchain JS](https://langfuse.com/integrations/frameworks/langchain) when executing this chain. This is fully optional and can be used independently from Prompt Management.
 
 
 ```typescript

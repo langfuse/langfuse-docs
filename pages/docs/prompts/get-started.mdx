@@ -106,7 +106,7 @@ Depending on the scale of your experiments, there are different approaches you c
 
 - `name`: Unique name of the prompt within a Langfuse project.
 - `type`: The type of the prompt content (`text` or `chat`). Default is `text`.
-- `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`). For chat prompts, this is a list of chat messages each with `role` and `content`.
+- `prompt`: The text template with variables (e.g. `This is a prompt with a {{variable}}`). For chat prompts, this is a list of chat messages each with `role` and `content` but can also contain [placeholders](#message-placeholders).
 - `config`: Optional JSON object to store any parameters (e.g. model parameters or model tools).
 - `version`: Integer to indicate the version of the prompt. The version is automatically incremented when creating a new prompt version.
 - `labels`: [Labels](#labels) that can be used to fetch specific prompt versions in the SDKs.
@@ -847,29 +847,202 @@ When fetched via the SDK / API, these tags are automatically replaced with the r
 - Maintain common instructions, examples, or context in a single place
 - Update dependent prompts automatically when base prompts change
 
+## Prompt Folders for Organization [#folders]
+
+Prompts can be organized into virtual folders to group prompts with similar purposes.
+To create a folder, add slashes (`/`) to a prompt name. The UI shows every segment ending with a `/` as a folder automatically.
+
+**Note**: accessing prompts in folders via the Python SDK requires `langfuse >= 3.0.2`.
+
 ## Message Placeholders in Chat Prompts [#message-placeholders]
 
-Message placeholders allow you to insert chat messages at specific positions within a chat prompt.
-This is for example useful to provide a message history as context to an LLM.
+Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt. You can define multiple placeholders in a prompt and resolve them with different values at runtime.
+Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
 
-A placeholder has the structure:
-```json
-{
-  "type": "placeholder",
-  "name": "PLACEHOLDER_NAME"
-}
+**Note**: To use placeholders in your application, you need at least `langfuse >= 3.1.0` (python) or `langfuse >= 3.38.0` (js).
+
+<Steps>
+
+### Create prompt with placeholders
+
+<Tabs items={["UI","Python", "JS/TS"]}>
+<Tab>
+
+<Frame border>
+  ![Prompt placeholder in prompt editor](/images/docs/prompt-placeholder.png)
+</Frame>
+
+1. Create a placeholder in any prompt by using the `Add message placeholder` button.
+2. Select a `name` for the placeholder that will be used to reference it in your application.
+
+</Tab>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_prompt(
+    name="movie-critic-chat",
+    type="chat",
+    prompt=[
+      { "role": "system", "content": "You are an {{criticlevel}} movie critic" },
+      { "type": "placeholder", "name": "chat_history" },
+      { "role": "user", "content": "What should I watch next?" },
+    ],
+    labels=["production"],  # directly promote to production
+)
 ```
 
-of which you use the defined `PLACEHOLDER_NAME` name as a key within your application to insert messages.
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+await langfuse.createPrompt({
+  name: "movie-critic-chat",
+  type: "chat",
+  prompt: [
+    { role: "system", content: "You are an {{criticlevel}} movie critic" },
+    { type: "placeholder", name: "chat_history" },
+    { role: "user", content: "What should I watch next?" },
+  ],
+  labels: ["production"], // directly promote to production
+});
+```
+
+</Tab>
+</Tabs>
+
+### Resolve placeholders at runtime
 
 In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
-The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted.
-When using Langchain, the `getLangchainPrompt(...)` method also takes placeholders as argument and returns unresolved placeholders as Langchain-native `MessagesPlaceholder` objects.
+The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted as `compile` does not validate the format of the messages.
 
-You can try-out message placeholders with your prompts in the Playground.
+<Tabs items={["Python", "JS/TS", "LangChain (Python)", "LangChain (JS/TS)"]}>
+<Tab>
 
-**Note**: To access message placeholders via SDK, you need at least `langfuse-python >= 3.1.0` or `langfuse-js >= 3.38.0`.
+```python
+from langfuse import get_client
 
+langfuse = get_client()
+
+# Use prompt with placeholders in your application
+prompt = langfuse.get_prompt("movie-critic-chat")
+
+# Compile the variable and resolve the placeholder with a list of messages.
+compiled_prompt = prompt.compile(criticlevel="expert", chat_history=[
+  {"role": "user", "content": "I love Ron Fricke movies like Baraka"},
+  {"role": "user", "content": "Also, the Korean movie Memories of a Murderer"}
+])
+
+# -> compiled_prompt = [
+#   { "role": "system", "content": "You are an expert movie critic" },
+#   { "role": "user", "content": "I love Ron Fricke movies like Baraka" },
+#   { "role": "user", "content": "Also, the Korean movie Memories of a Murderer" },
+#   { "role": "user", "content": "What should I watch next?" },
+# ]
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const prompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+  type: "chat",
+});
+
+// Compile the variable and resolve the placeholder with a list of messages.
+const compiledPrompt = prompt.compile(
+  // variables
+  { criticlevel: "expert" },
+  // placeholders
+  {
+    chat_history: [
+      { role: "user", content: "I love Ron Fricke movies like Baraka" },
+      {
+        role: "user",
+        content: "Also, the Korean movie Memories of a Murderer",
+      },
+    ],
+  }
+);
+
+// -> compiledPrompt = [
+//   { role: "system", content: "You are an expert movie critic" },
+//   { role: "user", content: "I love Ron Fricke movies like Baraka" },
+//   { role: "user", content: "Also, the Korean movie Memories of a Murderer" },
+//   { role: "user", content: "What should I watch next?" },
+// ]
+```
+
+</Tab>
+
+<Tab>
+
+```python
+from langfuse import get_client
+from langchain_core.prompts import ChatPromptTemplate
+
+langfuse = get_client()
+
+langfuse_prompt = langfuse.get_prompt("movie-critic-chat")
+
+# Using langchain, you can obtain a MessagesPlaceholder object for unresolved placeholders
+langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchain_prompt())
+
+# -> langchain_prompt = [
+#   SystemMessage(content="You are an expert movie critic"),
+#   MessagesPlaceholder(name="chat_history"),
+#   HumanMessage(content="What should I watch next?"),
+# ]
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+const langfuse = new Langfuse();
+
+// Get current `production` version
+const langfusePrompt = await langfuse.getPrompt(
+  "movie-critic-chat",
+  undefined,
+  {
+    type: "chat",
+  }
+);
+
+// Using langchain, you can obtain a ChatPromptTemplate with MessagesPlaceholder objects for unresolved placeholders
+const langchainPrompt = ChatPromptTemplate.fromTemplate(
+  langfusePrompt.getLangchainPrompt()
+);
+
+// -> langchainPrompt = [
+//   SystemMessage(content="You are an expert movie critic"),
+//   MessagesPlaceholder(name="chat_history"),
+//   HumanMessage(content="What should I watch next?"),
+// ]
+```
+
+</Tab>
+</Tabs>
+
+</Steps>
 
 ## Caching in client SDKs
 
@@ -1245,17 +1418,176 @@ max       0.687994 sec
 
 </div>
 
+## Webhooks
+
+Use webhooks to receive real‑time notifications whenever a prompt version is created, updated, or deleted in Langfuse. This lets you trigger CI/CD pipelines, sync prompt catalogues, or audit changes without polling the API.
+
+<Steps>
+
+### Select events to watch
+
+<Frame border className="max-w-md">
+  ![Select events](/images/docs/webhook-trigger.png)
+</Frame>
+
+1. Open Prompts ▸ Webhooks and click Create Webhook.
+2. Choose the prompt‑version actions that should fire the webhook:
+   - Created – a new version is added.
+   - Updated – labels or tags change (two events fire: one for the version that gains a label/tag, one for the version that loses it).
+   - Deleted – a version is removed.
+3. (Optional) Add filters to narrow the scope, e.g. labels contains "production".
+
+### Configure the request
+
+<Frame border className="max-w-md">
+  ![Configure request](/images/docs/webhook-action.png)
+</Frame>
+
+- **URL**: HTTPS endpoint that accepts POST requests.
+- **Headers**: Default headers include:
+  - `Content-Type: application/json`
+  - `User-Agent: Langfuse/1.0`
+  - `x-langfuse-signature: <sig>` (see note on HMAC signature verification below)
+- **Add custom static headers if required.**
+
+### Inspect the payload
+
+Your endpoint receives a JSON body like:
+
+```json filename="webhook-payload.json"
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2024-07-10T10:30:00Z",
+  "type": "prompt-version",
+  "apiVersion": "v1",
+  "action": "created",
+  "prompt": {
+    "id": "prompt_abc123",
+    "name": "movie-critic",
+    "version": 3,
+    "projectId": "xyz789",
+    "labels": ["production", "latest"],
+    "prompt": "As a {{criticLevel}} movie critic, rate {{movie}} out of 10.",
+    "type": "text",
+    "config": { "key": "value" },
+    "commitMessage": "Improved critic persona",
+    "tags": ["entertainment"],
+    "createdAt": "2024-07-10T10:30:00Z",
+    "updatedAt": "2024-07-10T10:30:00Z"
+  }
+}
+```
+
+### Acknowledge delivery
+
+Your handler must:
+
+- Return an HTTP 2xx status to confirm receipt.
+- Be idempotent—Langfuse may retry (exponential back‑off) until it receives a success response.
+
+### Verify authenticity (recommended)
+
+Each request carries an HMAC SHA‑256 signature in `x-langfuse-signature`.
+Retrieve the secret when you create the webhook (you can regenerate it later).
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+import hmac
+import hashlib
+from typing import Optional
+
+
+def verify_langfuse_signature(
+    raw_body: str,
+    signature_header: str,
+    secret: str,
+) -> bool:
+    """
+    Validate a Langfuse webhook/event signature.
+
+    Parameters
+    ----------
+    raw_body : str
+        The request body exactly as received (no decoding or reformatting).
+    signature_header : str
+        The value of the `Langfuse-Signature` header, e.g. "t=1720701136,s=0123abcd...".
+    secret : str
+        Your Langfuse signing secret.
+
+    Returns
+    -------
+    bool
+        True if the signature is valid, otherwise False.
+    """
+    # Split "t=timestamp,s=signature" into the two expected key/value chunks
+    try:
+        ts_pair, sig_pair = signature_header.split(",", 1)
+    except ValueError:  # wrong format / missing comma
+        return False
+
+    # Extract values (everything after the first "=")
+    if "=" not in ts_pair or "=" not in sig_pair:
+        return False
+    timestamp = ts_pair.split("=", 1)[1]
+    received_sig_hex = sig_pair.split("=", 1)[1]
+
+    # Recreate the message and compute the expected HMAC-SHA256 hex digest
+    message = f"{timestamp}.{raw_body}".encode("utf-8")
+    expected_sig_hex = hmac.new(
+        secret.encode("utf-8"), message, hashlib.sha256
+    ).hexdigest()
+
+    # Use constant-time comparison on the *decoded* byte strings
+    try:
+        return hmac.compare_digest(
+            bytes.fromhex(received_sig_hex), bytes.fromhex(expected_sig_hex)
+        )
+    except ValueError:  # received_sig_hex isn't valid hex
+        return False
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import crypto from "crypto";
+
+export function verifyLangfuseSignature(
+  rawBody: string,
+  signatureHeader: string,
+  secret: string
+): boolean {
+  const [tsPair, sigPair] = signatureHeader.split(",");
+  if (!tsPair || !sigPair) return false;
+
+  const timestamp = tsPair.split("=")[1];
+  const receivedSig = sigPair.split("=")[1];
+  const expectedSig = crypto
+    .createHmac("sha256", secret)
+    .update(`${timestamp}.${rawBody}`, "utf8")
+    .digest("hex");
+
+  return crypto.timingSafeEqual(
+    Buffer.from(receivedSig, "hex"),
+    Buffer.from(expectedSig, "hex")
+  );
+}
+```
+
+</Tab>
+
+</Tabs>
+
+</Steps>
+
 ## Additional Features
 
 - [Prompt Management MCP Server](/docs/prompts/mcp-server)
+- [n8n Node for Langfuse](/docs/prompts/n8n-node)
 - [Prompt A/B Testing](/docs/prompts/a-b-testing)
-
-### Prompt Folders for Organization
-
-Prompts can be organized into virtual folders to group prompts with similar purposes.
-To create a folder, add slashes (`/`) to a prompt name. The UI shows every segment ending with a `/` as a folder automatically.
-
-**Note**: accessing prompts in folders via the Python SDK requires `langfuse-python` version `3.0.2` or later.
 
 ## FAQ
 

@@ -24,8 +24,8 @@ To render them within the documentation site, we convert them to markdown using 
 
 Steps after updating notebooks:
 
-1. Load python shell/env which has jupyter installed, e.g. `poetry install && poetry shell`
-2. Run `bash scripts/update_cookbook_docs.sh`
+1. Ensure you have [uv](https://docs.astral.sh/uv/) installed
+2. Run `bash scripts/update_cookbook_docs.sh` (uv will automatically handle dependencies)
 3. Commit the changed markdown files
 
 **Note**: All `.md` files or `.mdx` files that contain "source: ⚠️ Jupyter Notebook" on top in the `pages/` directory are automatically generated from Jupyter notebooks. Do not edit them manually as they will be overwritten. Always edit the Jupyter notebooks and run the conversion script.

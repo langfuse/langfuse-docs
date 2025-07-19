@@ -12,7 +12,7 @@ export default {
   },
   encryption: "Encryption",
   "data-regions": "Data Regions & Availability",
-  networking: "Networking",
+  networking: "Networking & IP Ranges",
   dependencies: "Software Dependencies",
   "incident-and-breach": "Incident & Breach",
   "responsible-disclosure": "Responsible Disclosure",
