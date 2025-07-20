@@ -1,8 +1,9 @@
 ---
 description: Survey of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate LLM safety risks.
+sidebarTitle: LLM Security & Guardrails
 ---
 
-# Monitor LLM Security
+# LLM Security & Guardrails
 
 There are a host of potential safety risks involved with LLM-based applications. These include prompt injection, leakage of personally identifiable information (PII), or harmful prompts. Langfuse can be used to monitor and protect against these security risks, and investigate incidents when they occur.
 
@@ -34,7 +35,7 @@ LLM Security can be addressed with a combination of
 There are several popular security libraries that can be used to mitigate security risks in LLM-based applications. These include: [LLM Guard](https://llm-guard.com), [Prompt Armor](https://promptarmor.com), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), [Lakera](https://www.lakera.ai). These libraries help with security measures in the following ways:
 
 1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
-2. Redacting sensitive PII before being sent into the model and then un-redacting in the response
+2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
 3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
 
 ### 2. Monitoring and evaluation of security measures with Langfuse
@@ -46,18 +47,11 @@ Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each 
 3. Validate security checks. You can use Langfuse [scores](/docs/scores) to evaluate the effectiveness of security tools. Integrating Langfuse into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
    - [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
    - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
-4. Track Latency. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help dissect the latencies of these checks within a trace to understand whether the checks are worth the wait.
+4. Track Latency. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help disect the latencies of these checks within a trace to understand whether the checks are worth the wait.
 
-# Getting Started with LLM Security
+## Getting Started
 
-LLM Security can be addressed with a combination of:
-
-- LLM Security libraries for run-time security measures
-- Langfuse for the ex-post evaluation of the effectiveness of these measures
-
-Learn more about this conceptually in our [LLM Security Overview](/docs/security/overview).
-
-## Example: Anonymizing Personally Identifiable Information (PII)
+> Example: Anonymizing Personally Identifiable Information (PII)
 
 Exposing PII to LLMs can pose serious security and privacy risks, such as violating contractual obligations or regulatory compliance requirements, or mitigating the risks of data leakage or a data breach.
 
@@ -180,14 +174,13 @@ Find more examples of LLM security monitoring in our cookbook.
 
 import { FileCode, BookOpen } from "lucide-react";
 
-<Cards num={3}>
+<Cards num={2}>
   <Card
     title="Cookbook: Observing LLM Security"
-    href="/docs/security/example-python"
+    href="/guides/cookbook/example_llm_security_monitoring"
     icon={<FileCode />}
   />
 </Cards>
-
 
 ## GitHub Discussions
 
