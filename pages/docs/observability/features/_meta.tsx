@@ -1,7 +1,9 @@
+import { MenuSubSeparator } from "@/components/MenuSubSeparator";
+
 export default {
   "-- Core": {
     type: "separator",
-    title: "Core",
+    title: <MenuSubSeparator>Core</MenuSubSeparator>,
   },
   sessions: "Sessions",
   users: "Users",
@@ -11,7 +13,7 @@ export default {
 
   "-- Advanced": {
     type: "separator",
-    title: "Advanced",
+    title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
   "trace-ids": "Trace IDs",
   "log-levels": "Log Levels",
@@ -19,18 +21,17 @@ export default {
     layout: "default",
   },
   "query-traces": {
-      title: "Query Data ↗",
-      href: "/docs/platform/features/query-traces",
-    },
+    title: "Query Data ↗",
+    href: "/docs/platform/features/query-traces",
+  },
 
   "metrics-api": {
-      title: "Metrics API ↗",
-      href: "/docs/platform/features/metrics-api",
-    },
+    title: "Metrics API ↗",
+    href: "/docs/platform/features/metrics-api",
+  },
 
   "custom-dashboards": {
-      title: "Custom Dashboards ↗",
-      href: "/docs/platform/features/custom-dashboards",
-    },
-
+    title: "Custom Dashboards ↗",
+    href: "/docs/platform/features/custom-dashboards",
+  },
 };

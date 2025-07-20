@@ -1,7 +1,9 @@
+import { MenuSubSeparator } from "@/components/MenuSubSeparator";
+
 export default {
   "-- Core": {
     type: "separator",
-    title: "Core",
+    title: <MenuSubSeparator>Core</MenuSubSeparator>,
   },
   "prompt-version-control": {},
   composability: {},
@@ -10,7 +12,7 @@ export default {
 
   "-- Advanced": {
     type: "separator",
-    title: "Advanced",
+    title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
   "link-to-traces": {},
   config: {},
