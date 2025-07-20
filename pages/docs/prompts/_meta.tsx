@@ -7,6 +7,7 @@ export default {
     title: "Prompt Experiments ↗",
     href: "/docs/datasets/prompt-experiments",
   },
+  "github-webhook-sync": "GitHub Webhook Sync",
   "mcp-server": "Prompt MCP Server",
   "n8n-node": "Prompt n8n Node",
   "a-b-testing": "A/B Testing",
