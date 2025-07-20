@@ -1,48 +1,50 @@
 ---
-title: Observability for MCP-Use with Langfuse
-sidebarTitle: MCP-Use
-logo: /images/integrations/mcp-use_icon.png
-description: Monitor and trace your MCP-Use agents and tool executions with Langfuse for comprehensive observability and debugging capabilities.
+title: Observability for mcp-use with Langfuse
+sidebarTitle: mcp-use
+logo: /images/integrations/mcp-use_icon.svg
+description: Monitor and trace your mcp-use agents and tool executions with Langfuse for comprehensive observability and debugging capabilities.
 category: Integrations
 ---
 
-# MCP-Use Integration with Langfuse
+# mcp-use Integration with Langfuse
 
-[**MCP-Use**](https://docs.mcp-use.com) is a platform that implements the Model Context Protocol (MCP), an open standard developed by Anthropic for connecting AI agents to external data sources and tools. With Langfuse integration, you can monitor and trace your MCP-Use agent interactions for enhanced observability.
+[**mcp-use**](https://docs.mcp-use.com) is a platform that implements the Model Context Protocol (MCP), an open standard developed by Anthropic for connecting AI agents to external data sources and tools. With Langfuse integration, you can monitor and trace your mcp-use agent interactions for enhanced observability.
 
 > **What is MCP (Model Context Protocol)?** MCP is an open standard that enables AI agents to securely connect to external data sources and tools. It standardizes how AI applications communicate with external services, making it easier to build context-aware AI agents that can interact with databases, APIs, and other tools.
 
-> **What is MCP-Use?** MCP-Use is a platform that implements the Model Context Protocol, providing developers with tools to build and deploy AI agents that can seamlessly interact with external systems while maintaining proper governance and security.
+> **What is mcp-use?** mcp-use is a platform that implements the Model Context Protocol, providing developers with tools to build and deploy AI agents that can seamlessly interact with external systems while maintaining proper governance and security.
 
 ## Integration
 
+<Steps>
+
 ### Prerequisites
 
-- An MCP-Use account and configured agents
+- An mcp-use account and configured agents
 - A Langfuse project (sign up at [cloud.langfuse.com](https://cloud.langfuse.com) or self-host)
 
 ### Setup Langfuse Integration
 
 1. **Get your Langfuse API keys** from your Langfuse project settings page.
 
-2. **Configure Langfuse in MCP-Use** by navigating to your MCP-Use platform settings and adding your Langfuse credentials in the observability section:
+2. **Configure Langfuse in mcp-use** by navigating to your mcp-use platform settings and adding your Langfuse credentials in the observability section:
 
    ```bash
-   # Environment variables for MCP-Use
+   # Environment variables for mcp-use
    LANGFUSE_PUBLIC_KEY=pk-lf-...
    LANGFUSE_SECRET_KEY=sk-lf-...
    LANGFUSE_HOST=https://cloud.langfuse.com  # or your self-hosted URL
    ```
 
-3. **Enable observability** in your MCP-Use configuration to start sending traces to Langfuse.
+3. **Enable observability** in your mcp-use configuration to start sending traces to Langfuse.
 
 ### What Gets Traced
 
-With the Langfuse integration enabled, MCP-Use automatically captures:
+With the Langfuse integration enabled, mcp-use automatically captures:
 
 - **Agent Interactions**: Complete conversations and agent decision-making processes
 - **Tool Executions**: Detailed traces of external tool calls and their results
-- **Context Usage**: How context is managed and utilized across interactions  
+- **Context Usage**: How context is managed and utilized across interactions
 - **Performance Metrics**: Latency, token usage, and execution times
 - **Error Handling**: Failed requests and error recovery processes
 
@@ -56,19 +58,22 @@ Once configured, you'll see detailed traces in your Langfuse dashboard that incl
 - **Resource Access**: Details about external data sources and API calls
 
 Example trace structure:
+
 ```
 Agent Request
 ├── Context Preparation
 ├── Tool Discovery
 ├── External Tool Call
 │   ├── API Request
-│   └── Response Processing  
+│   └── Response Processing
 └── Agent Response
 ```
 
+</Steps>
+
 ## Benefits
 
-The MCP-Use and Langfuse integration provides:
+The mcp-use and Langfuse integration provides:
 
 - **Complete Observability**: Full visibility into agent behavior and tool usage
 - **Performance Optimization**: Identify bottlenecks in tool execution and context handling
@@ -100,7 +105,8 @@ You can customize the integration with additional configuration options:
 
 ### Metadata Enrichment
 
-MCP-Use can automatically enrich traces with metadata about:
+mcp-use can automatically enrich traces with metadata about:
+
 - Agent configurations and capabilities
 - Tool permissions and access levels
 - Context sources and data lineage
@@ -119,13 +125,13 @@ MCP-Use can automatically enrich traces with metadata about:
 If traces aren't appearing in Langfuse:
 
 1. **Verify Credentials**: Ensure your Langfuse API keys are correct and have proper permissions
-2. **Check Network**: Confirm MCP-Use can reach your Langfuse instance (firewall/proxy settings)
-3. **Review Configuration**: Validate that observability is enabled in your MCP-Use settings
-4. **Check Logs**: Review MCP-Use logs for any integration errors or warnings
+2. **Check Network**: Confirm mcp-use can reach your Langfuse instance (firewall/proxy settings)
+3. **Review Configuration**: Validate that observability is enabled in your mcp-use settings
+4. **Check Logs**: Review mcp-use logs for any integration errors or warnings
 
 ## Learn More
 
-- [MCP-Use Documentation](https://docs.mcp-use.com)
-- [MCP-Use Observability Guide](https://docs.mcp-use.com/development/observability)
+- [mcp-use Documentation](https://docs.mcp-use.com)
+- [mcp-use Observability Guide](https://docs.mcp-use.com/development/observability)
 - [Model Context Protocol Specification](https://modelcontextprotocol.io)
 - [Langfuse Tracing Guide](/docs/tracing)
