@@ -1,10 +1,15 @@
 ---
 description: Get started with Langfuse Datasets. Follow the step by step guide.
+sidebarTitle: Offline
 ---
 
-# Dataset Getting Started
+# Offline Evaluations
 
-This is a step by step guide on how to create your first dataset and run your first experiment. Please refer to the [overview](/docs/datasets/overview) for more conceptual introduction.
+This is a step by step guide on how to create your first dataset and run your first offline experiment. Please refer to the [overview](/docs/datasets/overview) for more conceptual introduction.
+
+If you want to test a single prompt, you can use [Prompt Experiments](/docs/evaluations/features/prompt-experiments) which does not require any code.
+
+## Get Started
 
 <Steps>
 
@@ -370,17 +375,16 @@ const runMyLLMApplication = async (input: string, traceId: string) => {
       },
     },
   });
-  return output
-}
+  return output;
+};
 
 // fetch the dataset
 const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
 
 // iterate over the dataset items
 for (const item of dataset.items) {
-
   // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
-  const trace = langfuse.trace({name: "new experiment trace"})
+  const trace = langfuse.trace({ name: "new experiment trace" });
 
   // run application on the dataset item input
   const output = await runMyLLMApplication(item.input, trace.id);
@@ -401,9 +405,7 @@ for (const item of dataset.items) {
 
 // Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 await langfuse.flushAsync();
-
 ```
-
 
 </Tab>
 </Tabs>

@@ -20,15 +20,53 @@ import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
 
 Langfuse provides a flexible [scoring system](/docs/scores/getting-started) to capture all your evaluations in one place and make them actionable.
 
+## The Continuous Evaluation Loop
+
+To build useful LLM applications, usually a continuous loop of online and offline evaluation is required.
+
+<Frame border fullWidth>
+  ![Continuous Evaluation
+  Loop](/images/docs/evaluation/continuous-evaluation-loop.png)
+</Frame>
+
+<span>
+  _Adapted from: "How to continuously improve LLM products?", Evidently_
+</span>
+
+### Inner loop: Offline evaluation
+
+To increase development speed, you can use datasets of test cases to evaluate your LLM application.
+These are usually **20-100 example inputs** that cover the distribution of what you expect to happen in production.
+We recommend to hand-craft these, as quality of the test cases drives a lot of the quality of your LLM application.
+The test cases **often contain an reference output or other expectations** that can be used to grade the output.
+
+-> Get Started with [Offline Evaluation](/docs/evaluation/get-started/offline)
+
+### Outer loop: Online evaluation
+
+Online evals is all about using real user data to:
+
+1. Look at interesting error traces flagged via evals/user-feedback.
+   - Thereby you can add to your offline evaluation datasets to align them with actual user behavior
+   - and get a better understanding for the generalization problems of your LLM application
+2. Monitor how quality/cost/latency changes over time
+3. Investigate LLM security issues flagged by guardrails
+
+-> Get Started with [Online Evaluation](/docs/evaluation/get-started/online)
+
 ## Data Model
+
+{/* Todo: add datasets */}
 
 Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. Learn more about the [data model](/docs/scores/data-model).
 
 This data model is utilized across all evaluation methods, both UI and API. It can also be accessed programmatically through the SDKs or API for custom workflows.
 
-## Common Evaluation Methods
+## Supported Evaluation Methods
 
-### 1. Model-based Evaluation (_LLM-as-a-Judge_)
+{/* Todo: align with eval methods folder */}
+
+### 1. LLM-as-a-Judge
 
 [Model-based evaluations](/docs/scores/model-based-evals) (LLM-as-a-judge) are a powerful tool to _automatically_ assess LLM applications integrated with Langfuse. With this approach, an LLMs scores a particular session, trace, or LLM call in Langfuse based on factors such as accuracy, toxicity, or hallucinations.
 

@@ -1,9 +1,13 @@
 ---
 description: Ingest custom scores via the Langfuse SDKs or API.
+sidebarTitle: Custom Scores (API/SDK)
 ---
 
 # Custom Scores via API/SDKs
 
+{/* todo: simplify this a lot */}
+
+{/* todo: add api focused instructions */}
 
 Langfuse gives you full flexibility to ingest custom [`scores`](/docs/scores/data-model) via the Langfuse SDKs or API. The scoring workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
 
@@ -57,7 +61,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
         data_type="NUMERIC",
         comment="Factually correct"
     )
-    
+
     # Score the trace
     span.score_trace(
         name="overall_quality",
@@ -448,7 +452,7 @@ langfuse.score(
     value="correct",
     comment="Factually correct", # optional
     id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="12345-6565-3453654-43543" # optional, to ensure that the score maps to a specific category defined in a score config 
+    config_id="12345-6565-3453654-43543" # optional, to ensure that the score maps to a specific category defined in a score config
     data_type="CATEGORICAL" # optional, possibly inferred
 )
 ```
