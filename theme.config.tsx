@@ -205,12 +205,12 @@ const config: DocsThemeConfig = {
     key: "town-hall-2025-07-16",
     dismissible: true,
     content: (
-      <Link href="https://lu.ma/esj3f95s">
+      <Link href="https://lu.ma/frqm1umn">
         {/* mobile */}
-        <span className="sm:hidden">Langfuse Town Hall on Wednesday →</span>
+        <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-          Langfuse Town Hall on Wednesday - New Features and Q3 Roadmap →
+          San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
         </span>
       </Link>
     ),

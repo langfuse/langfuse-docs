@@ -122,6 +122,15 @@ export default {
       timestamp: false,
     },
   },
+  startups: {
+    title: "Startups",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
   library: {
     title: "Library",
     type: "page",
