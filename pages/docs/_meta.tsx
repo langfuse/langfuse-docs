@@ -21,7 +21,8 @@ export default {
     type: "separator",
     title: "Platform",
   },
-  "data-analytics": "Data & Analytics",
+  metrics: "Metrics",
+  "api-and-data-platform": "API & Data Platform",
   administration: "Administration",
 
   "-- More": {
