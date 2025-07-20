@@ -87,7 +87,7 @@ Both prompt types support variable substitution using `{{variable}}` syntax and 
 
 ## Versioning and Labels [#versioning-and-labels]
 
-Langfuse prompt versioning automatically creates incremental versions (1, 2, 3...) each time you update a prompt with the same name, while labels act as pointers to specific versions for deployment management. The `production` label serves as the default version returned by SDKs when no specific label is requested, `latest` automatically points to the most recently created version, and you can create custom labels (like `staging`, `tenant-1`, or `prod-a`) to manage different environments, tenants, or A/B testing scenarios - allowing you to safely deploy, test, and rollback prompts by simply reassigning labels rather than changing code.
+Langfuse prompt [versioning](/docs/prompt-management/features/prompt-version-control) automatically creates incremental versions (1, 2, 3...) each time you update a prompt with the same name, while labels act as pointers to specific versions for deployment management. The `production` label serves as the default version returned by SDKs when no specific label is requested, `latest` automatically points to the most recently created version, and you can create custom labels (like `staging`, `tenant-1`, or `prod-a`) to manage different environments, tenants, or A/B testing scenarios - allowing you to safely deploy, test, and rollback prompts by simply reassigning labels rather than changing code.
 
 ```mermaid
 graph LR
@@ -122,8 +122,4 @@ graph LR
     class SDK sdk,sdk2
 ```
 
-## Other todos
-
-// todo explain composition
-
-// todo explain linking to traces
+{/* TODO: linking to traces, composition */}

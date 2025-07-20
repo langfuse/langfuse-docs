@@ -10,20 +10,20 @@ This quickstart helps you to create your first prompt and use it in your applica
 
 <Steps>
 
-## Get API keys
+### Get API keys
 
 1.  [Create Langfuse account](https://cloud.langfuse.com/auth/sign-up) or [self-host Langfuse](/self-hosting).
 2.  Create new API credentials in the project settings.
 
-## Create a prompt [#create-update-prompt]
+### Create a prompt [#create-update-prompt]
 
 import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
 <PromptCreate />
 
-## Use prompt [#use-prompt]
+### Use prompt [#use-prompt]
 
-At runtime, you can fetch the latest production version from Langfuse. Learn more about versions and labels [here](/docs/prompt-management/features/deployment-labels).
+At runtime, you can fetch the latest production version from Langfuse. Learn more about control (versions/labels) [here](/docs/prompt-management/features/prompt-version-control).
 
 <Tabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)", "Langchain (JS)"]}>
 <Tab>
@@ -280,16 +280,18 @@ prompt.config;
 
 </Tabs>
 
-## Link with Langfuse Tracing (optional)
+### Link with Langfuse Tracing (optional)
 
-You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best. 
+You can link the prompt to the LLM `generation` span that used the prompt. This linkage enables tracking of metrics by prompt version and name directly in the Langfuse UI and see which prompt performed best.
 
 import PromptLinking from "@/components-mdx/prompt-linking.mdx";
 
 <PromptLinking />
 
 <Callout type="info">
-If a [fallback prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is used, no link will be created.
+  If a [fallback
+  prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is
+  used, no link will be created.
 </Callout>
 
 </Steps>
