@@ -381,6 +381,119 @@ const nonPermanentRedirects = [
   ["/docs/integrations/databricks/example-python", "/guides/cookbook/integration_databricks"],
   ["/docs/integrations/openaiagentssdk/example-evaluating-openai-agents", "/guides/cookbook/example_evaluating_openai_agents"]
   // END OF MOVED INTEGRATION SECTION
+
+  // FILE REORGANIZATION REDIRECTS - Files moved to new directory structure
+  // Analytics section moved to metrics
+  ["/docs/analytics/custom-dashboards", "/docs/metrics/features/custom-dashboards"],
+  ["/docs/analytics/metrics-api", "/docs/metrics/features/metrics-api"],
+  ["/docs/analytics/overview", "/docs/metrics/overview"],
+  
+  // API docs moved to api-and-data-platform
+  ["/docs/api", "/docs/api-and-data-platform/features/public-api"],
+  
+  // Administration docs moved to administration section
+  ["/docs/audit-logs", "/docs/administration/audit-logs"],
+  ["/docs/data-deletion", "/docs/administration/data-deletion"],
+  ["/docs/data-retention", "/docs/administration/data-retention"],
+  ["/docs/rbac", "/docs/administration/rbac"],
+  
+  // Core features moved to observability
+  ["/docs/core-features", "/docs/observability/overview"],
+  
+  // Datasets moved to evaluation section
+  ["/docs/datasets/overview", "/docs/evaluation/overview"],
+  ["/docs/datasets/get-started", "/docs/evaluation/get-started/offline"],
+  ["/docs/datasets/prompt-experiments", "/docs/evaluation/features/prompt-experiments"],
+  ["/docs/datasets/example-synthetic-datasets", "/docs/evaluation/features/synthetic-datasets"],
+  ["/docs/datasets/python-cookbook", "/docs/evaluation/get-started/offline"], // Fallback to general datasets get-started
+  
+  // Fine-tuning moved to api-and-data-platform
+  ["/docs/fine-tuning", "/docs/api-and-data-platform/features/fine-tuning"],
+  
+  // Main get-started is now the docs index
+  ["/docs/get-started", "/docs/index"],
+  
+  // Model usage and cost moved to observability features
+  ["/docs/model-usage-and-cost", "/docs/observability/features/token-and-cost-tracking"],
+  
+  // OpenTelemetry docs moved to integrations
+  ["/docs/opentelemetry/get-started", "/integrations/native/opentelemetry"]
+  
+  // Playground moved to prompt-management
+  ["/docs/playground", "/docs/prompt-management/features/playground"],
+  
+  // Prompts moved to prompt-management
+  ["/docs/prompts/get-started", "/docs/prompt-management/get-started"],
+  ["/docs/prompts/a-b-testing", "/docs/prompt-management/features/a-b-testing"],
+  ["/docs/prompts/github-actions-webhook", "/docs/prompt-management/features/github-actions-webhook"],
+  ["/docs/prompts/github-webhook-sync", "/docs/prompt-management/features/github-webhook-sync"],
+  ["/docs/prompts/mcp-server", "/docs/prompt-management/features/mcp-server"],
+  ["/docs/prompts/n8n-node", "/docs/prompt-management/features/n8n-node"],
+  
+  // Prompt examples redirect to general prompt management get-started
+  ["/docs/prompts/example-langchain", "/docs/prompt-management/get-started"],
+  ["/docs/prompts/example-langchain-js", "/docs/prompt-management/get-started"],
+  ["/docs/prompts/example-openai-functions", "/docs/prompt-management/get-started"]
+  
+  // Query traces moved to api-and-data-platform
+  ["/docs/query-traces", "/docs/api-and-data-platform/features/query-via-sdk"],
+  
+  // Scores moved to evaluation section
+  ["/docs/scores/overview", "/docs/evaluation/overview"],
+  ["/docs/scores/annotation", "/docs/evaluation/features/evaluation-methods/annotation"],
+  ["/docs/scores/custom", "/docs/evaluation/features/evaluation-methods/custom"],
+  ["/docs/scores/data-model", "/docs/evaluation/data-model"],
+  ["/docs/scores/external-evaluation-pipelines", "/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines"],
+  ["/docs/scores/model-based-evals", "/docs/evaluation/features/evaluation-methods/llm-as-a-judge"],
+  ["/docs/scores/user-feedback", "/docs/evaluation/features/evaluation-methods/user-feedback"],
+  
+  // SDK moved to observability section
+  ["/docs/sdk/overview", "/docs/observability/sdk/overview"],
+  ["/docs/sdk/python/example", "/docs/observability/sdk/python/example"],
+  ["/docs/sdk/python/low-level-sdk", "/docs/observability/sdk/python/low-level-sdk"],
+  ["/docs/sdk/python/sdk-v3", "/docs/observability/sdk/python/sdk-v3"],
+  ["/docs/sdk/typescript/example-notebook", "/docs/observability/sdk/typescript/example-notebook"],
+  ["/docs/sdk/typescript/guide", "/docs/observability/sdk/typescript/guide"],
+  ["/docs/sdk/typescript/guide-web", "/docs/observability/sdk/typescript/guide-web"],
+  
+  // Security docs - most moved to /security/ instead of /docs/security/
+  ["/docs/security/overview", "/security"],
+  ["/docs/security/getting-started", "/security"],
+  ["/docs/security/example-python", "/docs/evaluation/features/security-and-guardrails"], // Security evaluation content
+  
+  // Tracing moved to observability
+  ["/docs/tracing", "/docs/observability/overview"],
+  ["/docs/tracing-data-model", "/docs/observability/data-model"],
+  
+  // Tracing features moved to observability features
+  ["/docs/tracing-features/agent-graphs", "/docs/observability/features/agent-graphs"],
+  ["/docs/tracing-features/comments", "/docs/observability/features/comments"],
+  ["/docs/tracing-features/environments", "/docs/observability/features/environments"],
+  ["/docs/tracing-features/log-levels", "/docs/observability/features/log-levels"],
+  ["/docs/tracing-features/masking", "/docs/observability/features/masking"],
+  ["/docs/tracing-features/metadata", "/docs/observability/features/metadata"],
+  ["/docs/tracing-features/multi-modality", "/docs/observability/features/multi-modality"],
+  ["/docs/tracing-features/releases-and-versioning", "/docs/observability/features/releases-and-versioning"],
+  ["/docs/tracing-features/sampling", "/docs/observability/features/sampling"],
+  ["/docs/tracing-features/sessions", "/docs/observability/features/sessions"],
+  ["/docs/tracing-features/tags", "/docs/observability/features/tags"],
+  ["/docs/tracing-features/trace-ids", "/docs/observability/features/trace-ids"],
+  ["/docs/tracing-features/url", "/docs/observability/features/url"],
+  ["/docs/tracing-features/users", "/docs/observability/features/users"],
+  
+  // FAQ redirects
+  ["/faq/all/api-authentication", "/faq/all/api-authentication"], // Should still exist, keeping as is
+  ["/faq/tag/setup", "/faq/tag/setup"], // Should still exist, keeping as is  
+  ["/faq/tag/features", "/faq/tag/features"], // Should still exist, keeping as is
+
+  // PLEASE DOUBLE-CHECK THESE REDIRECTS: The following redirects may need verification
+  // as I'm not certain about the exact destinations (may need to be redirected to specific cookbook pages)
+  ["/docs/analytics/example-intent-classification", "/docs/metrics/overview"], // Fallback to metrics overview - please check if cookbook exists
+  ["/docs/opentelemetry/example-arize", "/integrations/native/opentelemetry"], // Fallback to main OpenTelemetry page - please check if cookbook exists
+  ["/docs/opentelemetry/example-mlflow", "/integrations/native/opentelemetry"], // Fallback to main OpenTelemetry page - please check if cookbook exists  
+  ["/docs/opentelemetry/example-openlit", "/integrations/native/opentelemetry"], // Fallback to main OpenTelemetry page - please check if cookbook exists
+  ["/docs/opentelemetry/example-openllmetry", "/integrations/native/opentelemetry"], // Fallback to main OpenTelemetry page - please check if cookbook exists
+  ["/docs/opentelemetry/example-python-sdk", "/integrations/native/opentelemetry"], // Fallback to main OpenTelemetry page - please check if cookbook exists
 ];
 
 const permanentRedirects = []
