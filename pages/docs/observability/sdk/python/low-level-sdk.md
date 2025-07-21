@@ -285,6 +285,16 @@ Other generation methods:
 
 See documentation of spans above on how to use the langfuse client and ids if you cannot use the Langfuse objects to trace your application. This also fully applies to generations.
 
+**Link your prompt with the generation:**
+
+```diff
+langfuse.generation(
+    ...
++   prompt=prompt
+    ...
+)
+```
+
 ### Events
 
 Events are used to track discrete events in a trace.
