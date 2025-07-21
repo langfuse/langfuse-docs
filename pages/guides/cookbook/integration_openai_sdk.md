@@ -251,7 +251,7 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 ## Group multiple generations into a single trace
 
-Many applications require more than one OpenAI call. The `@observe()` decorator allows to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
+Many applications require more than one OpenAI call. The `@observe()` decorator allows you to nest all LLM calls of a single API invocation into the same `trace` in Langfuse.
 
 
 ```python

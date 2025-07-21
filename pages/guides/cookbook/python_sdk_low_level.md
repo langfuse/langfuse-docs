@@ -72,7 +72,7 @@ The Langfuse SDK and UI are designed to support complex LLM features which conta
 
 **Traces**
 
-A `Trace` represents a single execution of a LLM feature. It is a container for all succeeding objects.
+A `Trace` represents a single execution of an LLM feature. It is a container for all succeeding objects.
 
 **Observations**
 
@@ -113,7 +113,7 @@ trace.generation(name = "user-output");
 
 ### Traces
 
-Traces are the top-level entity in the Langfuse API. They represent an execution flow in a LLM application usually triggered by an external event.
+Traces are the top-level entity in the Langfuse API. They represent an execution flow in an LLM application usually triggered by an external event.
 
 | Parameter | Type   | Optional | Description
 | --- | --- | --- | ---
@@ -605,7 +605,7 @@ langfuse = Langfuse()
 
 @app.get("/generate/",tags=["APIs"])
 async def campaign(prompt: str = Query(..., max_length=20)):
-  # call to a LLM
+  # call to an LLM
   generation = langfuse.generation(
       name="llm-feature",
       metadata="test",
