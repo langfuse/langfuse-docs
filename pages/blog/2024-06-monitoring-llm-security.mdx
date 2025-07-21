@@ -53,13 +53,13 @@ There are several popular security libraries that can be used to mitigate securi
 
 ### 2. Asynchronous monitoring and evaluation of security measures with Langfuse
 
-Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
+Use Langfuse [tracing](/docs/observability/overview) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
 
 1. **Investigate security issues** by manually inspect traces.
 2. **Monitor security scores over time** in the Langfuse Dashboard.
-3. **Evaluate effectiveness of security measures**. Integrating Langfuse [scores](/docs/scores) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
-   - [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
-   - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
+3. **Evaluate effectiveness of security measures**. Integrating Langfuse [scores](/docs/evaluation/overview) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
+   - [Annotations (in UI)](/docs/evaluation/features/evaluation-methods/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
+   - [Automated evaluations](/docs/evaluation/features/evaluation-methods/llm-as-a-judge). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
 4. **Track latency to balance tradeoffs**. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help disect the latencies of these checks within a trace to understand whether the checks are worth the wait.
 
 ## Example Workflow: Anonymizing Personally Identifiable Information (PII)
@@ -122,7 +122,7 @@ def deanonymize(sanitized_prompt: str, answer: str):
 
 In this example, we use the native OpenAI SDK integration, to instrument the LLM call. Thereby, we can automatically collect token counts, model parameters, and the exact prompt that was sent to the model.
 
-Note: Langfuse [natively integrates](/integrations) with a number of frameworks (e.g. LlamaIndex, LangChain, Haystack, ...) and you can easily instrument any LLM via the [SDKs](/docs/sdk).
+Note: Langfuse [natively integrates](/integrations) with a number of frameworks (e.g. LlamaIndex, LangChain, Haystack, ...) and you can easily instrument any LLM via the [SDKs](/docs/observability/sdk/overview).
 
 ```python
 @observe()

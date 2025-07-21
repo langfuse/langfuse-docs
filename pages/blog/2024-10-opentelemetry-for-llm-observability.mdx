@@ -20,7 +20,7 @@ import Image from "next/image";
 
 <Callout type="info">
 
-**Update**: We have released the [Langfuse OTel Endpoint](/docs/opentelemetry/get-started) to increase compatibility with emerging OTel-based instrumentation libraries.
+**Update**: We have released the [Langfuse OTel Endpoint](/integrations/native/opentelemetry) to increase compatibility with emerging OTel-based instrumentation libraries.
 
 </Callout>
 
@@ -67,7 +67,7 @@ _Example trace of our [public demo](/docs/demo)_
 
 ### Unique Challenges
 
-LLM applications present distinct challenges compared to traditional software systems. Evaluating the quality of LLM outputs is inherently complex due to their non-deterministic nature. Metrics like [cost](/docs/model-usage-and-cost), [latency](/docs/analytics/overview), and [quality](/docs/scores/overview) must be balanced and cannot be purely derived from traces as they are in traditional applications.
+LLM applications present distinct challenges compared to traditional software systems. Evaluating the quality of LLM outputs is inherently complex due to their non-deterministic nature. Metrics like [cost](/docs/observability/features/token-and-cost-tracking), [latency](/docs/metrics/overview), and [quality](/docs/evaluation/overview) must be balanced and cannot be purely derived from traces as they are in traditional applications.
 
 Additionally, the interactive and context-sensitive nature of LLM tasks often requires real-time monitoring and rapid adaptation. Addressing these challenges demands robust tools and frameworks that can handle the dynamic and evolving nature of LLM applications.
 
@@ -89,7 +89,7 @@ Traditional observability focuses on identifying exceptions and compliance with 
 
 In development, experimentation with various models and configurations is crucial. Developers iterate on different approaches to fine-tune model behavior, optimize performance metrics, and explore new functionalities.
 
-Production monitoring, however, shifts the focus to real-time performance tracking. It involves constant vigilance to ensure the application runs smoothly, identifying any latency issues, [tracking costs](/docs/model-usage-and-cost), and integrating [user interactions and feedback](/docs/scores/user-feedback) to continuously improve the application. Both phases are essential, but they have distinct objectives and methodologies geared towards pushing the boundaries of what the LLM can achieve and ensuring it operates reliably in real-world scenarios.
+Production monitoring, however, shifts the focus to real-time performance tracking. It involves constant vigilance to ensure the application runs smoothly, identifying any latency issues, [tracking costs](/docs/observability/features/token-and-cost-tracking), and integrating [user interactions and feedback](/docs/evaluation/features/evaluation-methods/user-feedback) to continuously improve the application. Both phases are essential, but they have distinct objectives and methodologies geared towards pushing the boundaries of what the LLM can achieve and ensuring it operates reliably in real-world scenarios.
 
 | Development                                          | Production                                                                                  |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
@@ -137,12 +137,12 @@ We are committed to OTel and are happy to contribute to the SIG. We will continu
 
 <Callout type="info">
 
-**Update**: We have released a [Langfuse OTel Collector](/docs/opentelemetry/get-started) to increase compatibility with emerging OTel-based instrumentation libraries.
+**Update**: We have released a [Langfuse OTel Collector](/integrations/native/opentelemetry) to increase compatibility with emerging OTel-based instrumentation libraries.
 
 </Callout>
 
 ## Get Started
 
-If you want to get started with tracing your AI applications with Langfuse today, check out our [quickstart guide](/docs/get-started) on how to use Langfuse with multiple LLM building frameworks like [Langchain](/integrations/frameworks/langchain) or [LlamaIndex](/integrations/frameworks/llamaindex).
+If you want to get started with tracing your AI applications with Langfuse today, check out our [quickstart guide](/docs/observability/get-started) on how to use Langfuse with multiple LLM building frameworks like [Langchain](/integrations/frameworks/langchain) or [LlamaIndex](/integrations/frameworks/llamaindex).
 
 If you are curious about why Traces are a good fit for LLM observability, check out our [webinar](/guides/videos/webinar-observability-llm-systems) on the topic.

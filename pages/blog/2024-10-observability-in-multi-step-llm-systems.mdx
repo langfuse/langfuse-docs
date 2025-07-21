@@ -18,7 +18,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 Managing the complexity of Large Language Model (LLM) applications requires a focus on maintaining high performance, reliability, and efficiency. As these apps become **increasingly complex**, they introduce multiple points of failure that can affect quality, cost, and latency.
 
-This is where [observability](/docs/tracing) and traceability come into play. By implementing advanced techniques for monitoring and analyzing LLM systems, developers can gain deep **insights into their applications**, identify bottlenecks, and continuously improve their performance.
+This is where [observability](/docs/observability/overview) and traceability come into play. By implementing advanced techniques for monitoring and analyzing LLM systems, developers can gain deep **insights into their applications**, identify bottlenecks, and continuously improve their performance.
 
 This post shows strategies to enhance traceability and observability in **multi-step LLM systems**, including the importance of observability, feedback collection methods, and rigorous application testing. These insights will help optimize LLM applications for better quality, cost-efficiency, and latency.
 
@@ -63,7 +63,7 @@ F --> G[Final Output]
 
 Given the intricate nature of multi-step LLM applications, continuous **iteration and improvement** are necessary. As new features are added and workloads change, developers must frequently revisit and refine their systems.
 
-Through [**monitoring and analysis**](/docs/analytics/overview), developers can transform complex LLM systems into robust, high-performing applications.
+Through [**monitoring and analysis**](/docs/metrics/overview), developers can transform complex LLM systems into robust, high-performing applications.
 
 ## Leveraging Observability Data
 
@@ -72,7 +72,7 @@ By attaching rich **metadata** to observability data, developers can unlock info
 
 ### Attaching Metadata
 
-[Metadata](/docs/tracing-features/metadata), such as user IDs, request contexts, and operational metrics adds valuable context to observability data. This enriched data allows for more granular analysis, enabling developers to **correlate specific behaviors** with user actions or system states.
+[Metadata](/docs/observability/features/metadata), such as user IDs, request contexts, and operational metrics adds valuable context to observability data. This enriched data allows for more granular analysis, enabling developers to **correlate specific behaviors** with user actions or system states.
 
 ### Optimization Efforts
 
@@ -80,9 +80,9 @@ Observability data, enriched with metadata, provides a holistic view of the appl
 
 - **Identify Latency Bottlenecks:** By analyzing trace data, developers can pinpoint specific steps that are causing [delays](/changelog/2024-06-12-timeline-view) and focus their optimization efforts there.
 
-- **Optimize Quality:** Detailed [error metrics](/integrations/model-providers/openai-py) and [user feedback](/docs/scores/user-feedback) data help in refining the application's response generation processes, reducing inaccuracies, and improving overall quality.
+- **Optimize Quality:** Detailed [error metrics](/integrations/model-providers/openai-py) and [user feedback](/docs/evaluation/features/evaluation-methods/user-feedback) data help in refining the application's response generation processes, reducing inaccuracies, and improving overall quality.
 
-- **Manage Costs:** By understanding the resource consumption of each application component, developers can optimize their [infrastructure usage](/docs/model-usage-and-cost), balancing performance and cost-effectiveness.
+- **Manage Costs:** By understanding the resource consumption of each application component, developers can optimize their [infrastructure usage](/docs/observability/features/token-and-cost-tracking), balancing performance and cost-effectiveness.
 
 ```mermaid
 graph LR
@@ -107,7 +107,7 @@ In multi-step LLM systems, **latency bottlenecks** can significantly degrade app
 
 | Technique                   | Description                                                                                                                                                                                                                                       |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Detailed Tracing**        | Use detailed [tracing](/docs/tracing) to monitor each step of your LLM application. By capturing spans and traces, you can observe the time taken for each component, from query routing to document retrieval and response generation.           |
+| **Detailed Tracing**        | Use detailed [tracing](/docs/observability/overview) to monitor each step of your LLM application. By capturing spans and traces, you can observe the time taken for each component, from query routing to document retrieval and response generation.           |
 | **Latency Metrics**         | Collect and analyze latency metrics for each step in the application process. This helps in identifying which specific steps are contributing to delays. Metrics like time-to-first byte (TTFB) and total execution time are particularly useful. |
 | **Visualization Tools**     | Employ [visualization](/changelog/2024-06-12-timeline-view) tools to map out the application's execution flow. Visual timelines and aggregated trace views can help you quickly spot where delays are occurring.                                  |
 | **Load Testing**            | Conduct load testing to simulate high-traffic conditions and observe how your application performs under stress. This can reveal bottlenecks that may not be apparent under normal conditions.                                                    |
@@ -143,10 +143,10 @@ Feedback is essential for the continuous improvement of LLM applications. By sys
 
 | Method                                                      | Definition                                                                                                    | Benefits                                                                      | Challenges                                                                                   |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **[Explicit User Feedback](/docs/scores/user-feedback)**    | Direct feedback from users, typically through ratings, comments, or surveys.                                  | Provides clear, actionable insights directly from the end-users.              | Often has low response rates and can be biased or unrepresentative of the broader user base. |
-| **[Implicit User Feedback](/docs/scores/user-feedback)**    | Indirect feedback inferred from user interactions, such as clicks, time spent on tasks, or abandonment rates. | High frequency and less intrusive, providing a broad view of user behavior.   | Requires sophisticated analytics to interpret correctly and can sometimes be ambiguous.      |
-| **[Human Annotation](/docs/scores/annotation)**             | Manual review and annotation of application outputs by domain experts or trained annotators.                  | High accuracy and contextually rich feedback.                                 | Time-consuming and expensive, making it less scalable for large datasets.                    |
-| **[Automated Evaluations](/docs/scores/model-based-evals)** | Algorithmic assessments of application performance based on predefined criteria and metrics.                  | Scalable and relatively cheap, enabling continuous monitoring and evaluation. | May lack nuance and fail to capture complex or context-specific issues.                      |
+| **[Explicit User Feedback](/docs/evaluation/features/evaluation-methods/user-feedback)**    | Direct feedback from users, typically through ratings, comments, or surveys.                                  | Provides clear, actionable insights directly from the end-users.              | Often has low response rates and can be biased or unrepresentative of the broader user base. |
+| **[Implicit User Feedback](/docs/evaluation/features/evaluation-methods/user-feedback)**    | Indirect feedback inferred from user interactions, such as clicks, time spent on tasks, or abandonment rates. | High frequency and less intrusive, providing a broad view of user behavior.   | Requires sophisticated analytics to interpret correctly and can sometimes be ambiguous.      |
+| **[Human Annotation](/docs/evaluation/features/evaluation-methods/annotation)**             | Manual review and annotation of application outputs by domain experts or trained annotators.                  | High accuracy and contextually rich feedback.                                 | Time-consuming and expensive, making it less scalable for large datasets.                    |
+| **[Automated Evaluations](/docs/evaluation/features/evaluation-methods/llm-as-a-judge)** | Algorithmic assessments of application performance based on predefined criteria and metrics.                  | Scalable and relatively cheap, enabling continuous monitoring and evaluation. | May lack nuance and fail to capture complex or context-specific issues.                      |
 
 ```mermaid
 graph LR
@@ -194,7 +194,7 @@ By effectively collecting and utilizing feedback, developers can ensure that the
 
 ## Testing LLM Applications
 
-Effective [testing](/docs/datasets) is fundamental to the development and maintenance of robust LLM applications. One of the most reliable methods for testing these applications is by using [datasets](/docs/datasets/overview) of expected inputs and outputs, often referred to as "golden data."
+Effective [testing](/docs/evaluation/features/datasets) is fundamental to the development and maintenance of robust LLM applications. One of the most reliable methods for testing these applications is by using [datasets](/docs/evaluation/features/datasets) of expected inputs and outputs, often referred to as "golden data."
 
 ### The Concept of "Golden Data"
 

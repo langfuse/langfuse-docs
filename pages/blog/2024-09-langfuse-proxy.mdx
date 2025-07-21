@@ -20,7 +20,7 @@ LLM Proxies are popular tools that add much functionality like caching, rate lim
 
 ## TLDR; Should you use an LLM Proxy?
 
-In most production grade applications, the benefits do not outweigh the risks of using an LLM Proxy and thereby introducing a single point of failure. Thus, we [purposefully](/why) built Langfuse to not act as an LLM Proxy, but rather as an [asynchronous observability layer](/docs/tracing). This comes with the benefit of not limiting what you can observe (also non-LLM related).
+In most production grade applications, the benefits do not outweigh the risks of using an LLM Proxy and thereby introducing a single point of failure. Thus, we [purposefully](/why) built Langfuse to not act as an LLM Proxy, but rather as an [asynchronous observability layer](/docs/observability/overview). This comes with the benefit of not limiting what you can observe (also non-LLM related).
 
 Sometimes using a proxy is beneficial (see below); in these cases we recommend using [LiteLLM](https://litellm.ai) which is open-source, can be self-hosted and has a [first-class integration with Langfuse](/integrations/gateways/litellm).
 
@@ -88,7 +88,7 @@ sequenceDiagram
 
 Operating Langfuse as an asynchronous observability layer offers several advantages over functioning as a proxy:
 
-1. **Full Trace Logging**: Langfuse allows for the logging of [full traces](/docs/tracing), which are crucial for understanding the complete flow of requests and responses in your application. Traces help in identifying bottlenecks, debugging issues, and optimizing performance.
+1. **Full Trace Logging**: Langfuse allows for the logging of [full traces](/docs/observability/overview), which are crucial for understanding the complete flow of requests and responses in your application. Traces help in identifying bottlenecks, debugging issues, and optimizing performance.
 2. **Inclusion of Non-LLM Call Spans**: With Langfuse, you can add spans for non-LLM calls, such as retrieval operations, security screenings, and other auxiliary processes. These operations often have a significant impact on the overall latency and quality of the output, and including them in the trace provides a more comprehensive view of the application's performance.
 3. **No Added Latency**: Since Langfuse operates asynchronously, it does not introduce any additional latency to your application's requests. This is a critical advantage, especially for applications where response time is crucial.
 4. **No Impact on Uptime**: As an observability layer, Langfuse does not act as a single point of failure. It observes and logs interactions without affecting the uptime of your application, ensuring that your service remains reliable and available.

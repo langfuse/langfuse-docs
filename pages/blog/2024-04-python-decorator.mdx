@@ -27,7 +27,7 @@ When we initially built complex agents for web scraping and code generation whil
 
 This insight prompted us to start working on Langfuse. As many teams were experimenting, we prioritized easy integrations with frameworks like LangChain and LlamaIndex, as well as wrapping the OpenAI SDK to log individual LLM calls. As applications become increasingly complex and agents are deployed in production, the ability to trace complex applications is even more crucial.
 
-[Traces](/docs/tracing) are at the core of the Langfuse platform. Until now, generating a trace was straightforward if you used a framework. However, if you didn't, you had to use the low-level SDKs to manually create and nest trace objects, which added verbose instrumentation code to a project. Inspired by the developer experience of tools we admire, such as Sentry and Modal, we created the `@observe()` decorator for Langfuse to make tracing your Python code as simple as possible. Note: we plan to revamp our JS/TS tracing as well.
+[Traces](/docs/observability/overview) are at the core of the Langfuse platform. Until now, generating a trace was straightforward if you used a framework. However, if you didn't, you had to use the low-level SDKs to manually create and nest trace objects, which added verbose instrumentation code to a project. Inspired by the developer experience of tools we admire, such as Sentry and Modal, we created the `@observe()` decorator for Langfuse to make tracing your Python code as simple as possible. Note: we plan to revamp our JS/TS tracing as well.
 
 This post is a deep dive into the `@observe()` decorator, our design objectives, challenges we faced when implementing it, and how it can help you trace complex LLM applications.
 
@@ -153,7 +153,7 @@ main()
 
 The decorator completely replaces the need to use the low-level SDK. It allows for the creation and manipulation of traces, and you can add custom scores and evaluations to these traces as well. Have a look at the extensive [documentation](/docs/sdk/python/decorators) for more details.
 
-Langfuse is natively integrated with LangChain, LlamaIndex, and the OpenAI SDK and the decorator is [fully compatible](/docs/sdk/python/example#interoperability-with-other-integrations) with these integrations. As a result, you can, in a single trace, use the decorator on the outermost function, decorate function calls and API calls that are non-LLM related, and use the native instrumentation for the OpenAI SDK, LangChain and Llama Index.
+Langfuse is natively integrated with LangChain, LlamaIndex, and the OpenAI SDK and the decorator is [fully compatible](/guides/cookbook/python_sdk_low_level) with these integrations. As a result, you can, in a single trace, use the decorator on the outermost function, decorate function calls and API calls that are non-LLM related, and use the native instrumentation for the OpenAI SDK, LangChain and Llama Index.
 
 Example ([cookbook](/guides/cookbook/python_decorators#interoperability-with-other-integrations)):
 
@@ -231,7 +231,7 @@ import { FileCode, BookOpen, Video as VideoIcon } from "lucide-react";
   <Card title="Docs" href="/docs/sdk/python/decorators" icon={<BookOpen />} />
   <Card
     title="Example notebook"
-    href="/docs/sdk/python/example"
+    href="/guides/cookbook/python_sdk_low_level"
     icon={<FileCode />}
   />
   <Card

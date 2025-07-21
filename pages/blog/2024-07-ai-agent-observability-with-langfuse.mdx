@@ -65,9 +65,9 @@ Observing agents means tracking and analyzing the performance, behavior, and int
 
 #### Debugging and Edge Cases
 
-Agents use multiple steps to solve complex tasks, and inaccurate intermediary results can cause failures of the entire system. [Tracing](/docs/tracing) these intermediate steps and testing your application on known edge cases is essential.
+Agents use multiple steps to solve complex tasks, and inaccurate intermediary results can cause failures of the entire system. [Tracing](/docs/observability/overview) these intermediate steps and testing your application on known edge cases is essential.
 
-When deploying LLMs, some edge cases will always slip through in initial testing. A proper analytics set-up helps identify these cases, allowing you to add them to future test sets for more robust agent evaluations. With [Datasets](/docs/datasets/overview), Langfuse allows you to collect examples of inputs and expected outputs to benchmark new releases before deployment. Datasets can be incrementally updated with new edge cases found in production and integrated with existing CI/CD pipelines.
+When deploying LLMs, some edge cases will always slip through in initial testing. A proper analytics set-up helps identify these cases, allowing you to add them to future test sets for more robust agent evaluations. With [Datasets](/docs/evaluation/features/datasets), Langfuse allows you to collect examples of inputs and expected outputs to benchmark new releases before deployment. Datasets can be incrementally updated with new edge cases found in production and integrated with existing CI/CD pipelines.
 
 #### Tradeoff of Accuracy and Costs
 
@@ -75,13 +75,13 @@ LLMs are stochastic by nature, meaning they are a statistical process that can p
 
 However, this comes with a cost. The tradeoff between accuracy and costs in LLM-based agents is crucial, as higher accuracy often leads to increased operational expenses. Often, the agent decides autonomously how many LLM calls or paid external API calls it needs to make to solve a task, potentially leading to high costs for single-task executions. Therefore, it is important to monitor model usage and costs in real-time.
 
-Langfuse monitors both [costs](/docs/model-usage-and-cost) and [accuracy](/docs/scores/overview), enabling you to optimize your application for production.
+Langfuse monitors both [costs](/docs/observability/features/token-and-cost-tracking) and [accuracy](/docs/evaluation/overview), enabling you to optimize your application for production.
 
 #### Understanding User Interactions
 
 AI agents analytics allows you to capture how users interact with your LLM applications. This information is crucial for refining your AI application and tailoring responses to better meet user needs.
 
-[Langfuse Analytics](/docs/analytics/overview) derives insights from production data, helping you measure quality through user feedback and model-based [scoring](/docs/scores/overview) over time and across different versions. It also allows you to monitor cost and latency metrics in real-time, broken down by user, session, geography, and model version, enabling precise optimizations for your LLM application.
+[Langfuse Analytics](/docs/metrics/overview) derives insights from production data, helping you measure quality through user feedback and model-based [scoring](/docs/evaluation/overview) over time and across different versions. It also allows you to monitor cost and latency metrics in real-time, broken down by user, session, geography, and model version, enabling precise optimizations for your LLM application.
 
 ## Tools to build AI Agents
 

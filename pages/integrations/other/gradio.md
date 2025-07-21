@@ -45,13 +45,13 @@ This notebook will show you how to
 
 1. Build a simple chat interface in Python and rendering it in a Notebook using [Gradio `Chatbot`](https://www.gradio.app/docs/gradio/chatbot)
 2. Add [Langfuse Tracing](https://langfuse.com/docs/tracing) to the chatbot
-3. Implement additional Langfuse tracing features used frequently in chat applications: [chat sessions](https://langfuse.com/docs/tracing-features/sessions), [user feedback](https://langfuse.com/docs/scores/user-feedback)
+3. Implement additional Langfuse tracing features used frequently in chat applications: [chat sessions](https://langfuse.com/docs/tracing-features/sessions), [user feedback](https://langfuse.com/docs/evaluation/features/evaluation-methods/user-feedback)
 
 ## Setup
 
 Install requirements. We use OpenAI for this simple example. We could use any model here.
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
+_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/observability/sdk/python) for a more powerful and simpler to use SDK._
 
 
 ```python
@@ -172,7 +172,7 @@ async def respond(prompt: str, history):
 
 ### User feedback handler
 
-We implement user [feedback tracking in Langfuse](https://langfuse.com/docs/scores/user-feedback) via the `like` event for the Gradio chatbot ([reference](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This methdod reuses the current trace id available in the global state of this application.
+We implement user [feedback tracking in Langfuse](https://langfuse.com/docs/evaluation/features/evaluation-methods/user-feedback) via the `like` event for the Gradio chatbot ([reference](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This methdod reuses the current trace id available in the global state of this application.
 
 
 ```python
