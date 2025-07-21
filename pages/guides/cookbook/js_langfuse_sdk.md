@@ -55,7 +55,7 @@ const langfuse = new Langfuse();
 
 Langfuse observability is structured around [traces](https://langfuse.com/docs/tracing#introduction-to-observability--traces-in-langfuse). Each trace can contain multiple observations to log the individual steps of the execution. Observation can be `Events`, the basic building blocks which are used to track discrete events in a trace, `Spans`, representing durations of units of work in a trace,  or `Generations`, used to log model calls. 
 
-To log an LLM call, we will first create a trace. In this step, we can also assign the trace metadata such as the a user id or tags. The tracing documentation includes more details on all trace features.
+To log an LLM call, we will first create a trace. In this step, we can also assign the trace metadata such as a user id or tags. The tracing documentation includes more details on all trace features.
 
 
 ```typescript
