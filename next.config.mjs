@@ -384,7 +384,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/litellm/example-proxy-js", "/guides/cookbook/js_integration_litellm_proxy"],
   ["/docs/integrations/mirascope/example-python", "/guides/cookbook/integration_mirascope"],
   ["/docs/integrations/databricks/example-python", "/guides/cookbook/integration_databricks"],
-  ["/docs/integrations/openaiagentssdk/example-evaluating-openai-agents", "/guides/cookbook/example_evaluating_openai_agents"]
+  ["/docs/integrations/openaiagentssdk/example-evaluating-openai-agents", "/guides/cookbook/example_evaluating_openai_agents"],
   // END OF MOVED INTEGRATION SECTION
 
   // START MOVE OF MAIN DOCS INTO SUBMODULES
