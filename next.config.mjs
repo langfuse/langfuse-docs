@@ -168,6 +168,11 @@ const nonPermanentRedirects = [
     "/docs/scores",
     "/docs/datasets",
     "/docs/security",
+    "/docs/observability",
+    "/docs/evaluation",
+    "/docs/metrics",
+    "/docs/api-and-data-platform",
+    "/docs/prompt-management",
   ].map((path) => [path, path + "/overview"]),
 
   // Redirects to bridge all kinds of old links to new links
