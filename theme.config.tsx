@@ -88,6 +88,7 @@ const config: DocsThemeConfig = {
     const description = frontMatter.description ?? "";
 
     const title = frontMatter.seoTitle ?? frontMatter.title ?? pageTitle;
+    const browserTitle = frontMatter.sidebarTitle ?? title;
 
     const section = asPath.startsWith("/docs")
       ? "Docs"
@@ -176,7 +177,7 @@ const config: DocsThemeConfig = {
 
         {canonical && <link rel="canonical" href={canonical} />}
         {noindex && <meta name="robots" content="noindex" />}
-        <title>{titleTemplate.replace("%s", title)}</title>
+        <title>{titleTemplate.replace("%s", browserTitle)}</title>
       </>
     );
   },
