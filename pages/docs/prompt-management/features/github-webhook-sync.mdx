@@ -4,7 +4,7 @@ description: Automatically sync Langfuse prompt changes to GitHub using webhooks
 
 # Sync Your Langfuse Prompt with GitHub via Webhooks
 
-Automatically sync prompt changes from Langfuse to GitHub using [Prompt Version Webhooks](https://langfuse.com/docs/integrations/webhooks). This enables version control for prompts and can trigger CI/CD workflows.
+Automatically sync prompt changes from Langfuse to GitHub using [Prompt Version Webhooks](/docs/prompt-management/features/webhooks). This enables version control for prompts and can trigger CI/CD workflows.
 
 ## Overview of the Workflow
 
@@ -92,11 +92,10 @@ Replace placeholders with your actual values. The server will commit prompts to 
 
 For the webhook to work, your GitHub Personal Access Token needs **minimal permissions**:
 
-| Permission Type | Required Permissions |
-|----------------|---------------------|
-| Required Permissions | Contents: Read and write, Metadata: Read-only |
-| Legacy Token Scopes | For public repositories: `public_repo` scope, For private repositories: `repo` scope |
-
+| Permission Type      | Required Permissions                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| Required Permissions | Contents: Read and write, Metadata: Read-only                                        |
+| Legacy Token Scopes  | For public repositories: `public_repo` scope, For private repositories: `repo` scope |
 
 ## Step 3: Implement the FastAPI Webhook Server
 
@@ -122,7 +121,7 @@ class GitHubSettings(BaseSettings):
     GITHUB_BRANCH: str = "main"
 
     model_config = SettingsConfigDict(
-        env_file=".env", 
+        env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True
     )
@@ -140,25 +139,25 @@ class LangfuseEvent(BaseModel):
 async def sync(event: LangfuseEvent) -> Dict[str, Any]:
     """Synchronize prompt data to GitHub repository."""
     api_endpoint = f"https://api.github.com/repos/{config.GITHUB_REPO_OWNER}/{config.GITHUB_REPO_NAME}/contents/{config.GITHUB_FILE_PATH}"
-    
+
     request_headers = {
         "Authorization": f"Bearer {config.GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
-    
+
     content_json = json.dumps(event.prompt, indent=2)
     encoded_content = base64.b64encode(content_json.encode("utf-8")).decode("utf-8")
-    
+
     name = event.prompt.get("name", "unnamed")
     version = event.prompt.get("version", "unknown")
     message = f"{event.action}: {name} v{version}"
-    
+
     payload = {
         "message": message,
         "content": encoded_content,
         "branch": config.GITHUB_BRANCH
     }
-    
+
     async with httpx.AsyncClient() as http_client:
         try:
             existing = await http_client.get(api_endpoint, headers=request_headers, params={"ref": config.GITHUB_BRANCH})
@@ -166,7 +165,7 @@ async def sync(event: LangfuseEvent) -> Dict[str, Any]:
                 payload["sha"] = existing.json().get("sha")
         except Exception:
             pass
-        
+
         try:
             response = await http_client.put(api_endpoint, headers=request_headers, json=payload)
             response.raise_for_status()
@@ -225,4 +224,3 @@ Test the health endpoint at `http://localhost:8000/health`. Use ngrok or similar
 - **Verify signatures:** Use the signing secret and `x-langfuse-signature` header to validate requests
 - **Limit PAT scope:** Use fine-grained tokens restricted to specific repositories
 - **Handle retries:** The implementation is idempotent - duplicate events won't create conflicting commits
-
