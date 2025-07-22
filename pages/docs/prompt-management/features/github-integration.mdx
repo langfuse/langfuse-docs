@@ -193,9 +193,10 @@ GITHUB_REPO_OWNER=<github_username_or_org>
 GITHUB_REPO_NAME=<repo_name>
 # (Optional) GITHUB_FILE_PATH=langfuse_prompt.json
 # (Optional) GITHUB_BRANCH=main
+# (Optional) REQUIRED_LABEL=production
 ```
 
-Replace placeholders with your actual values. The server will commit prompts to `langfuse_prompt.json` on the `main` branch by default.
+Replace placeholders with your actual values. The server will commit prompts to `langfuse_prompt.json` on the `main` branch by default. If `REQUIRED_LABEL` is set, only prompts with that specific label will be synced to GitHub.
 
 #### GitHub PAT Permissions for Sync
 
@@ -228,6 +229,7 @@ class GitHubSettings(BaseSettings):
     GITHUB_REPO_NAME: str
     GITHUB_FILE_PATH: str = "langfuse_prompt.json"
     GITHUB_BRANCH: str = "main"
+    REQUIRED_LABEL: str = ""  # Optional: only sync prompts with this label
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -247,6 +249,12 @@ class LangfuseEvent(BaseModel):
 
 async def sync(event: LangfuseEvent) -> Dict[str, Any]:
     """Synchronize prompt data to GitHub repository."""
+    # Check if prompt has required label (if specified)
+    if config.REQUIRED_LABEL:
+        prompt_labels = event.prompt.get("labels", [])
+        if config.REQUIRED_LABEL not in prompt_labels:
+            return {"skipped": f"Prompt does not have required label '{config.REQUIRED_LABEL}'"}
+    
     api_endpoint = f"https://api.github.com/repos/{config.GITHUB_REPO_OWNER}/{config.GITHUB_REPO_NAME}/contents/{config.GITHUB_FILE_PATH}"
 
     request_headers = {
