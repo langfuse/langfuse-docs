@@ -1,12 +1,121 @@
 ---
-description: Automatically sync Langfuse prompt changes to GitHub using webhooks for version control and CI/CD integration
+description: Integrate Langfuse prompts with GitHub using webhooks for version control, CI/CD workflows, and automated synchronization
 ---
 
-# Sync Your Langfuse Prompt with GitHub via Webhooks
+# GitHub Integration for Langfuse Prompts
+
+There are two methods to integrate Langfuse prompts with GitHub:
+
+- [**GitHub Actions Webhook**](#trigger-github-actions) - Trigger CI/CD workflows when prompts change. This does not require additional infrastructure.
+- [**Sync Langfuse Prompts to a repository**](#sync-langfuse-prompts-to-a-repository) - Store prompts in a specific file in your repository. This involves a webhook server that listens for prompt version changes and commits them to the repository.
+
+---
+
+## Trigger GitHub Actions [#trigger-github-actions]
+
+Trigger GitHub Actions workflows when Langfuse prompts change using `repository_dispatch` events.
+
+```mermaid
+sequenceDiagram
+    participant User as User/Team
+    participant LF as Langfuse
+    participant GH as GitHub API
+    participant Actions as GitHub Actions
+
+    User->>LF: Update prompt in Langfuse
+    LF->>GH: POST /repos/owner/repo/dispatches
+    GH->>Actions: Trigger repository_dispatch event
+    Actions->>Actions: Run CI workflow (tests, deploy, etc.)
+    Note over User,Actions: Prompt changes trigger automated workflows
+```
+
+### 1. Create GitHub Workflow
+
+`.github/workflows/langfuse-ci.yml`:
+
+```yaml
+name: Langfuse Prompt CI
+on:
+  repository_dispatch:
+    types: [langfuse-prompt-update]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: |
+          echo "Testing prompt: ${{ github.event.client_payload.prompt.name }} v${{ github.event.client_payload.prompt.version }}"
+          # Add your test commands
+          # npm test
+          # python -m pytest
+          
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: contains(github.event.client_payload.prompt.labels, 'production')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo "Deploying ${{ github.event.client_payload.prompt.name }} v${{ github.event.client_payload.prompt.version }}"
+          # Your deployment commands
+```
+
+**Accessing webhook data:** Use `github.event.client_payload.*` to access prompt data:
+
+```yaml
+# Example: Access webhook data in your workflow
+- name: Process prompt data
+  run: |
+    echo "Action: ${{ github.event.client_payload.action }}"
+    echo "Prompt: ${{ github.event.client_payload.prompt.name }}"
+    echo "Version: ${{ github.event.client_payload.prompt.version }}"
+    echo "Labels: ${{ github.event.client_payload.prompt.labels }}"
+    
+- name: Deploy only production prompts
+  if: contains(github.event.client_payload.prompt.labels, 'production')
+  run: echo "Deploying production prompt"
+```
+
+### 2. Create GitHub Token for Actions
+
+**Steps:**
+1. **GitHub Settings > Developer settings > Personal access tokens**
+2. **Generate new token (classic or fine-grained)**
+3. **Select scope** (see table below)
+
+| Token Type | Required Permissions |
+|------------|-------------------|
+| Personal Access Token (classic) | `repo` scope (public repos) or `public_repo` scope (private repos) |
+| Fine-grained PAT or GitHub App | `read` and `write` to `actions` |
+
+### 3. Configure Langfuse Webhook for Actions
+
+1. Go to **Prompts > Webhooks** in your Langfuse project
+2. Click **Create Webhook**
+3. Set endpoint URL: `https://api.github.com/repos/{owner}/{repo}/dispatches`
+4. Add headers:
+   - `Accept: application/vnd.github+json`
+   - `Authorization: Bearer {your_github_token}`
+
+**Important:** Store your GitHub token securely in the Authorization header. Langfuse encrypts webhook headers and stores them securely.
+
+### 4. Test GitHub Actions Integration
+
+1. **Update a prompt** in Langfuse with the `production` label
+2. **Check GitHub Actions** tab for triggered workflow
+3. **Verify** that both test and deploy jobs run successfully
+
+---
+
+## Sync Langfuse Prompts to a repository [#sync-langfuse-prompts-to-a-repository]
 
 Automatically sync prompt changes from Langfuse to GitHub using [Prompt Version Webhooks](/docs/prompt-management/features/webhooks). This enables version control for prompts and can trigger CI/CD workflows.
 
-## Overview of the Workflow
+### Overview of the Sync Workflow
 
 Whenever you save a new prompt version in Langfuse, it's automatically committed to your GitHub repository. With this setup, you can also trigger CI/CD workflows when prompts change.
 
@@ -29,7 +138,7 @@ sequenceDiagram
     Note over User,GitHub: Prompt changes now version-controlled in GitHub
 ```
 
-## Prerequisites
+### Prerequisites for Sync
 
 1. **Langfuse Project:** [Prompt setup](/docs/prompts/get-started) with Project Owner access
 2. **GitHub Repository:** Public or private repo to store prompts
@@ -37,7 +146,7 @@ sequenceDiagram
 4. **Python 3.9+ (for the example below, can be any language)** with FastAPI, Uvicorn, httpx, Pydantic
 5. **Public HTTPS endpoint** for your webhook server (Render, Fly.io, Heroku, etc.)
 
-## Step 1: Configure a Prompt Webhook in Langfuse
+### Step 1: Configure a Prompt Webhook in Langfuse
 
 1. Go to **Prompts > Webhooks** in your Langfuse project
 2. Click **Create Webhook**
@@ -47,7 +156,7 @@ sequenceDiagram
 
 **Note:** Your endpoint must return 2xx status codes. Langfuse retries failed webhooks with exponential backoff.
 
-### Sample Webhook Payload
+#### Sample Webhook Payload
 
 Sample webhook payload:
 
@@ -74,7 +183,7 @@ Sample webhook payload:
 }
 ```
 
-## Step 2: Prepare Your GitHub Repo and Token
+### Step 2: Prepare Your GitHub Repo and Token for Sync
 
 Create a `.env` file with your GitHub credentials:
 
@@ -84,11 +193,12 @@ GITHUB_REPO_OWNER=<github_username_or_org>
 GITHUB_REPO_NAME=<repo_name>
 # (Optional) GITHUB_FILE_PATH=langfuse_prompt.json
 # (Optional) GITHUB_BRANCH=main
+# (Optional) REQUIRED_LABEL=production
 ```
 
-Replace placeholders with your actual values. The server will commit prompts to `langfuse_prompt.json` on the `main` branch by default.
+Replace placeholders with your actual values. The server will commit prompts to `langfuse_prompt.json` on the `main` branch by default. If `REQUIRED_LABEL` is set, only prompts with that specific label will be synced to GitHub.
 
-#### GitHub PAT Permissions
+#### GitHub PAT Permissions for Sync
 
 For the webhook to work, your GitHub Personal Access Token needs **minimal permissions**:
 
@@ -97,7 +207,7 @@ For the webhook to work, your GitHub Personal Access Token needs **minimal permi
 | Required Permissions | Contents: Read and write, Metadata: Read-only                                        |
 | Legacy Token Scopes  | For public repositories: `public_repo` scope, For private repositories: `repo` scope |
 
-## Step 3: Implement the FastAPI Webhook Server
+### Step 3: Implement the FastAPI Webhook Server
 
 Create `main.py` with this FastAPI server:
 
@@ -119,6 +229,7 @@ class GitHubSettings(BaseSettings):
     GITHUB_REPO_NAME: str
     GITHUB_FILE_PATH: str = "langfuse_prompt.json"
     GITHUB_BRANCH: str = "main"
+    REQUIRED_LABEL: str = ""  # Optional: only sync prompts with this label
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -138,6 +249,12 @@ class LangfuseEvent(BaseModel):
 
 async def sync(event: LangfuseEvent) -> Dict[str, Any]:
     """Synchronize prompt data to GitHub repository."""
+    # Check if prompt has required label (if specified)
+    if config.REQUIRED_LABEL:
+        prompt_labels = event.prompt.get("labels", [])
+        if config.REQUIRED_LABEL not in prompt_labels:
+            return {"skipped": f"Prompt does not have required label '{config.REQUIRED_LABEL}'"}
+    
     api_endpoint = f"https://api.github.com/repos/{config.GITHUB_REPO_OWNER}/{config.GITHUB_REPO_NAME}/contents/{config.GITHUB_FILE_PATH}"
 
     request_headers = {
@@ -193,7 +310,7 @@ async def health_status():
 
 The server validates webhook payloads, retrieves existing file SHAs if needed, and commits prompt changes to GitHub with descriptive commit messages.
 
-### Dependencies
+#### Dependencies
 
 Install dependencies:
 
@@ -201,7 +318,7 @@ Install dependencies:
 pip install fastapi uvicorn pydantic-settings httpx
 ```
 
-### Running Locally
+#### Running Locally
 
 Run locally:
 
@@ -211,7 +328,7 @@ uvicorn main:app --reload --port 8000
 
 Test the health endpoint at `http://localhost:8000/health`. Use ngrok or similar to expose localhost for webhook testing.
 
-## Step 4: Deploy and Connect the Server
+### Step 4: Deploy and Connect the Server
 
 1. **Deploy:** Use Render, Fly.io, Heroku, or similar. Set environment variables and ensure HTTPS is enabled.
 
@@ -219,7 +336,7 @@ Test the health endpoint at `http://localhost:8000/health`. Use ngrok or similar
 
 3. **Test:** Update a prompt in Langfuse and verify a new commit appears in your GitHub repository.
 
-## Security Considerations
+### Security Considerations
 
 - **Verify signatures:** Use the signing secret and `x-langfuse-signature` header to validate requests
 - **Limit PAT scope:** Use fine-grained tokens restricted to specific repositories
