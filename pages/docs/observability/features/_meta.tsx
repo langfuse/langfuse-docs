@@ -10,12 +10,12 @@ export default {
   environments: {},
   tags: {},
   metadata: {},
+  "trace-ids-and-distributed-tracing": {},
 
   "-- Advanced": {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
-  "trace-ids": {},
   "log-levels": {},
   "*": {
     layout: "default",
