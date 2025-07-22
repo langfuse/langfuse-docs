@@ -7,7 +7,6 @@ export default {
   },
   datasets: {},
   "evaluation-methods": "Evaluation Methods",
-  "experiment-comparison": {},
   "prompt-experiments": {},
 
   "-- Advanced": {
