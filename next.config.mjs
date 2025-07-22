@@ -424,7 +424,7 @@ const nonPermanentRedirects = [
   ["/docs/query-traces", "/docs/api-and-data-platform/features/query-via-sdk"],
   ["/docs/rbac", "/docs/administration/rbac"],
   ["/docs/scores/annotation", "/docs/evaluation/features/evaluation-methods/annotation"],
-  ["/docs/scores/custom", "/docs/evaluation/features/evaluation-methods/custom"],
+  ["/docs/scores/custom", "/docs/evaluation/features/evaluation-methods/custom-scores"],
   ["/docs/scores/data-model", "/docs/evaluation/data-model"],
   ["/docs/scores/external-evaluation-pipelines", "/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines"],
   ["/docs/scores/model-based-evals", "/docs/evaluation/features/evaluation-methods/llm-as-a-judge"],

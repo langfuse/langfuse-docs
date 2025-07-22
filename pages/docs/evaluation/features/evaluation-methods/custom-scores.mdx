@@ -9,13 +9,15 @@ sidebarTitle: Custom Scores (API/SDK)
 
 {/* todo: add api focused instructions */}
 
-Langfuse gives you full flexibility to ingest custom [`scores`](/docs/scores/data-model) via the Langfuse SDKs or API. The scoring workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
+Langfuse gives you full flexibility to ingest custom `Scores` [(see Evaluation Data Model)](/docs/evaluation/data-model) via the Langfuse SDKs or API. 
+
+The scoring workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
 
 Common use cases:
 
-- **Collecting user feedback** ([example](/docs/scores/user-feedback)): collect feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
-- **Custom evaluation data pipeline** ([example](/docs/scores/external-evaluation-pipelines)): continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
-- **Guardrails and security checks** ([example](/docs/security/overview)): check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
+- [**Collecting user feedback**](/docs/evaluation/features/evaluation-methods/user-feedback): collect feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
+- [**Custom evaluation data pipeline**](/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines): continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+- [**Guardrails and security checks**](/docs/evaluation/features/security-and-guardrails): check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
 - **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.
 
@@ -323,7 +325,9 @@ In some cases, you want to prevent this behavior or update an existing score. Th
 
 ### How to ensure your scores comply with a certain schema
 
-Given your scores are required to follow a specific schema such as data range, name or data type, you can define and reference a [`score configuration (config)`](/docs/scores/custom#creating-score-config-object-in-langfuse) on your scores. Configs are helpful when you want to standardize your scores for future analysis. They can be defined in the Langfuse UI or via our API.
+Given your scores are required to follow a specific schema such as data range, name or data type, you can define and reference a [score config](/docs/evaluation/features/evaluation-methods/custom-scores#creating-score-config-object-in-langfuse) on your scores. 
+
+Configs are helpful when you want to standardize your scores for future analysis. They can be defined in the Langfuse UI or via our API.
 
 Whenever you provide a config, the score data will be validated against the config. The following rules apply:
 
@@ -566,7 +570,11 @@ A `score config` includes the desired score name, data type, and constraints on 
 
 ### Detailed Score Ingestion Examples
 
-**Certain score properties might be inferred based on your input**. If you don't provide a score data type it will always be inferred. See tables below for details. For boolean and categorical scores, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below. On read for boolean scores both numerical and string representations of the score value will be returned, e.g. both 1 and True. For categorical scores, the string representation is always provided and a numerical mapping of the category will be produced only if a score config was provided.
+**Certain score properties might be inferred based on your input**. If you don't provide a score data type it will always be inferred. See tables below for details. 
+
+For boolean and categorical scores, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below. On read for boolean scores both numerical and string representations of the score value will be returned, e.g. both 1 and True. 
+
+For categorical scores, the string representation is always provided and a numerical mapping of the category will be produced only if a score config was provided.
 
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
 <Tab> 
@@ -625,13 +633,13 @@ Pipeline ->> Langfuse: Add score to trace via SDK/API
 Langfuse ->> User: Analyze evaluation scores via UI & API
 ```
 
-You can run custom evaluations on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as [`scores`](/docs/scores) back to the traces in Langfuse.
+You can run custom evaluations on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as `Scores` [(see Evaluation Data Model)](/docs/evaluation/data-model) back to the traces in Langfuse.
 
 The example notebook is a good template to get started with building your own evaluation pipeline.
 
 import { FileCode, BookOpen } from "lucide-react";
 
-<Cards num={2}>
+<Cards num={1}>
   <Card
     title="Example: External Evaluation Pipeline"
     href="/docs/scores/external-evaluation-pipelines"

@@ -236,7 +236,7 @@ span.end();
 
 ## Step 4: Score the Trace (Optional)
 
-After logging the trace, we can add [scores](https://langfuse.com/docs/scores/custom) to it. This can help in evaluating the quality of the interaction. Scores can be any metric that is important to your application. In this example, we are scoring the trace based on user feedback.
+After logging the trace, we can add [scores](https://langfuse.com/docs/evaluation/features/evaluation-methods/custom-scores) to it. This can help in evaluating the quality of the interaction. Scores can be any metric that is important to your application. In this example, we are scoring the trace based on user feedback.
 
 Since the scoring usually happens after the generation is complete, we use the user-defined trace id to score the trace.
 
