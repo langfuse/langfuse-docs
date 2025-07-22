@@ -1,0 +1,280 @@
+---
+description: Tags help to filter and organize traces in Langfuse based on use case, functions/apis used, environment and other criteria.
+sidebarTitle: Tags
+---
+
+# Tagging Traces
+
+Tags allow you to categorize and filter traces. You can tag traces (1) when they are created using the Langfuse SDKs and integrations or (2) from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
+
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tab>
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def my_function():
+    # ... processing logic ...
+    # Add tags to the trace
+    langfuse.update_current_trace(tags=["tag-1", "tag-2"])
+```
+
+When creating spans or generations directly:
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Add tags when creating the root span
+with langfuse.start_as_current_span(
+    name="my-operation"
+) as root_span:
+    # Add tags to the trace
+    root_span.update_trace(tags=["tag-1", "tag-2"])
+
+    # You can add more tags later from any span in the same trace
+    with root_span.start_as_current_generation(name="llm-call", model="gpt-4o") as gen:
+        # Processing...
+        gen.update_trace(tags=["llm-gen"])  # Adds another tag to the same trace
+```
+
+You can also update the tags of the current trace without a direct reference to a span:
+
+```python
+with langfuse.start_as_current_span(name="another-operation"):
+    # ... processing ...
+    langfuse.update_current_trace(tags=["processing", "beta-feature"])
+```
+
+</Tab>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+fn()
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    tags=["tag-1", "tag-2"]
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  tags: ["tag-1", "tag-2"],
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+**Python SDK v3 - use metadata:**
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"langfuse_tags": ["tag-1", "tag-2"]}
+)
+```
+
+**Python SDK v2 - pass as additional argument:**
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add tags as additional argument
+  tags=["tag-1", "tag-2"]
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set tags via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.openai import openai
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+    completion = openai.chat.completions.create(
+      name="test-chat",
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a calculator."},
+        {"role": "user", "content": "1 + 1 = "}],
+      temperature=0,
+    )
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+**Python SDK v3 - use metadata in chain invocation:**
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {"langfuse_tags": ["tag-1", "tag-2"]},
+    },
+)
+```
+
+**Python SDK v2 - pass as constructor argument:**
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler(
+  tags=["tag-1", "tag-2"]
+)
+```
+
+You can also set tags dynamically via the runnable configuration in the chain invocation:
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler()
+tags = ["tag-1", "tag-2"]
+
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "tags": tags,
+    },
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set tags via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        tags=["tag-1", "tag-2"]
+    )
+
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Pass handler to invoke of your langchain chain/agent
+    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `tags` to the constructor:
+
+```ts
+const handler = new CallbackHandler({
+  tags: ["tag-1", "tag-2"],
+});
+```
+
+You can also set tags dynamically via the runnable configuration in the chain invocation:
+
+```ts
+const langfuseHandler = new CallbackHandler()
+const tags = ["tag-1", "tag-2"];
+
+// Your existing Langchain code to create the chain
+...
+
+// Pass config to the chain invocation to be parsed as Langfuse trace attributes
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], tags: tags });
+```
+
+When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set tags via `langfuse.trace()`:
+
+```ts
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  tags: ["tag-1", "tag-2"],
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+</Tabs>
+
+### Working with tags
+
+Tags enable you to flexibly add metadata to your traces. You can filter for tags in the Langfuse UI and [GET API](https://api.reference.langfuse.com/).
+
+When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod'). See [Intent Classification Notebook](/docs/analytics/example-intent-classification) for an end-to-end example on how tags can be created programmatically.
+
+<CloudflareVideo
+  videoId="3c5431bdbb11980bfc1558766fe33923"
+  aspectRatio={1840 / 1080}
+  gifStyle
+/>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-tags"]} />

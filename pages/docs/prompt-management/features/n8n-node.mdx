@@ -1,0 +1,65 @@
+---
+title: Open Source Prompt Management for n8n
+sidebarTitle: n8n Node
+description: Community-maintained n8n node that enables seamless integration of Langfuse prompt management capabilities into n8n workflows.
+---
+
+# n8n Node for Langfuse Prompt Management
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+
+This is currently a community node that needs to be installed via the settings of a self-hosted n8n instance. The node is pending verification in order to be used on n8n cloud instances.
+
+NPM: [`@langfuse/n8n-nodes-langfuse`](https://www.npmjs.com/package/@langfuse/n8n-nodes-langfuse)
+
+</Callout>
+
+The Langfuse n8n node enables seamless integration of [Langfuse's Prompt Management](/docs/prompts/get-started) with n8n workflows. This community-maintained node allows you to fetch and use prompts directly from your Langfuse project within n8n workflows.
+
+> **What is n8n?** [n8n](https://github.com/n8n-io/n8n) is an open‑source, node‑based workflow automation platform that lets you visually connect and orchestrate APIs, apps, and data without writing full code.
+
+**Langfuse Node in example n8n workflow:**
+
+<Frame border fullWidth>
+  ![n8n node for
+  langfuse](/images/docs/prompt-management-node-in-n8n-workflow.png)
+</Frame>
+
+## GitHub Readme
+
+import { useData } from "nextra/hooks";
+import { Playground } from "nextra/components";
+
+export const getStaticProps = async () => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/langfuse/n8n-nodes-langfuse/refs/heads/master/README.md"
+  );
+  const readmeContent = await res.text();
+  return {
+    props: {
+      ssg: {
+        n8nReadme: readmeContent,
+      },
+    },
+  };
+};
+
+export function N8nNodeReadme() {
+  const { n8nReadme } = useData();
+  // Basic check to prevent errors if fetching failed or content is empty
+  if (!n8nReadme) {
+    return <p>Error loading README content.</p>;
+  }
+  // Ensure the source prop receives a string
+  const readmeString =
+    typeof n8nReadme === "string" ? n8nReadme : JSON.stringify(n8nReadme);
+  return <Playground source={readmeString} />;
+}
+
+<div className="p-6 mt-6 border bg-card rounded-md">
+  <N8nNodeReadme />
+</div>
+
+Source: [langfuse/n8n-nodes-langfuse](https://github.com/langfuse/n8n-nodes-langfuse)

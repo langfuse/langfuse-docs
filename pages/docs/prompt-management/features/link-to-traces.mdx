@@ -1,0 +1,42 @@
+---
+title: Link to Traces
+sidebarTitle: Link to Traces
+description: Link Langfuse Prompts to Traces.
+---
+
+# Link Prompts to Traces
+
+Linking prompts to [traces](/docs/observability) enables tracking of metrics and evaluations per prompt version. It's the foundation of improving prompt quality over time.
+
+After linking prompts and traces, navigating to a generation span in Langfuse will highlight the prompt that was used to generate the response. To access the metrics, navigate to your prompt and click on the `Metrics` tab.
+
+<CloudflareVideo
+  videoId="690135d64495c12c0eb0493f620e126f"
+  aspectRatio={16 / 9}
+  gifStyle
+  className="mt-4"
+/>
+
+## How to Link Prompts to Traces
+
+import PromptLinking from "@/components-mdx/prompt-linking.mdx";
+
+<PromptLinking />
+
+<Callout type="info">
+  If a [fallback
+  prompt](/docs/prompt-management/features/guaranteed-availability#fallback) is
+  used, no link will be created.
+</Callout>
+
+## Metrics Reference
+
+{/* TODO: add screenshot of metrics page which shows various scores and cost metrics for versions of a prompt from langfuse-docs project */}
+
+- Median generation latency
+- Median generation input tokens
+- Median generation output tokens
+- Median generation costs
+- Generation count
+- Median [score](/docs/evaluation/data-model) value
+- First and last generation timestamp

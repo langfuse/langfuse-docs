@@ -1,0 +1,79 @@
+---
+title: Organization-Key Scoped API Routes
+sidebarTitle: SCIM and Org API
+description: Langfuse is open and meant to be extended via custom workflows and integrations. You can use these endpoints to automate project and user management on your Langfuse organization.
+---
+
+# SCIM & Organization-Key Scoped API Routes
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Via organization-scoped API keys, you can administer projects, users, and project/organization memberships (see [RBAC docs](/docs/administration/rbac)).
+
+Langfuse is open and meant to be extended via custom workflows and integrations.
+You can use these endpoints to automate project and user management on your Langfuse organization.
+
+## Authentication
+
+Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
+Organization scoped API keys can be created via the [Organization Management API](/self-hosting/organization-management-api) or in the Organization Settings within the Langfuse UI.
+
+Example:
+
+```bash
+curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects/{projectId}/apiKeys
+```
+
+## Organization Management
+
+All applicable endpoints are marked with `(requires organization-scoped API key)`.
+Those include the following routes:
+
+- `POST /api/public/projects`
+- `PUT /api/public/projects/{projectId}`
+- `DELETE /api/public/projects/{projectId}`
+- `GET /api/public/projects/{projectId}/apiKeys`
+- `POST /api/public/projects/{projectId}/apiKeys`
+- `DELETE /api/public/projects/{projectId}/apiKeys/{apiKeyId}`
+- `PUT /api/public/organizations/memberships`
+- `GET /api/public/organizations/memberships`
+- `PUT /api/public/projects/{projectId}/memberships`
+- `DELETE /api/public/projects/{projectId}/memberships`
+
+## User Management via SCIM
+
+In addition, we implement the following [SCIM](https://datatracker.ietf.org/doc/html/rfc7642) compliant endpoints.
+Use `/api/public/scim` as the base URI for them.
+
+To create a new user within Langfuse, you can use the SCIM-style endpoints and `POST /Users`.
+This will create a new user if the email does not exist yet.
+Then it will add the user to the organization with role `NONE`.
+
+Afterward, the role can be updated using the membership endpoints either on an organization or a project level (see above).
+
+To remove a user from an organization, call the `DELETE /Users/{id}` endpoint.
+This will not delete the user itself, only its membership with the organization.
+
+You can either supply an initial password for users via the API and share it with them, or use Single Sign-On (SSO) to authenticate users.
+In the latter case, you need to:
+
+- Langfuse Cloud: configure an Enterprise SSO provider ([docs](/security/auth)).
+- Self-hosted: configure `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` for your SSO provider to ensure that the user accounts are linked correctly [SSO Docs](/self-hosting/authentication-and-sso#additional-configuration).
+
+The following SCIM endpoints are available:
+
+- `GET /ServiceProviderConfig`
+- `GET /ResourceTypes`
+- `GET /Schemas`
+- `GET /Users`
+- `POST /Users`
+- `GET /Users/{id}`
+- `DELETE /Users/{id}`

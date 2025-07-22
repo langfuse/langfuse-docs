@@ -1,0 +1,70 @@
+---
+description: Use Langfuse Datasets to create structured experiments to test and benchmark LLM applications.
+---
+
+# Datasets & Experiments
+
+Via Langfuse Datasets you can create test sets and benchmarks to evaluate the performance of your LLM application.
+
+- **Continuous improvement:** Create datasets from production edge cases to improve your application
+- **Pre-deployment testing:** Benchmark new releases before deploying to production
+- **Structured testing:** Run experiments on collections of inputs and expected outputs
+- **Flexible evaluation:** Add custom evaluation metrics or use llm-as-a-judge
+- **Integrates well:** Works with popular frameworks like LangChain and LlamaIndex
+
+import DatasetsOverview from "@/components-mdx/datasets-overview-gif.mdx";
+
+<DatasetsOverview />
+
+<Callout type="info">
+
+Follow the [**Get Started**](/docs/datasets/get-started) guide for step by step instructions on how to create your first dataset and run your first experiment.
+
+</Callout>
+
+## How to build a workflow around datasets
+
+This is a high-level example workflow of using datasets to continuously improve an LLM application:
+
+1. Create dataset items with inputs and expected outputs through:
+
+   - Manual creation or import of test cases
+   - Synthetic generation of questions/responses
+   - Production app traces with issues that need attention
+
+2. Make changes to your application that you want to test
+
+3. Run your application (or parts of it) on all dataset items
+
+4. Evaluate results:
+
+   - Compare against baseline/expected outputs if available
+   - Use custom evaluation metrics
+   - Leverage LLM-based evaluation
+
+5. Review aggregated results across the full dataset to:
+   - Identify improvements
+   - Catch regressions
+   - Make data-driven decisions about releases
+
+_Process diagram:_
+
+<Frame fullWidth>![Datasets](/images/docs/dataset-example-workflow.png)</Frame>
+
+## Data model
+
+import DatasetsDataModel from "@/components-mdx/datasets-datamodel.mdx";
+
+<DatasetsDataModel />
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["datasets"]} />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-datasets"]} />

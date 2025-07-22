@@ -1,0 +1,477 @@
+---
+description: Configure masking to redact sensitive information from inputs and outputs sent to the Langfuse server.
+sidebarTitle: Masking
+---
+
+# Masking of Sensitive LLM Data
+
+Masking is a feature that allows precise control over the [tracing](/docs/tracing/overview) data sent to the Langfuse server. With custom masking functions, you can control and sanitize the data that gets traced and sent to the server. Whether it's for **compliance reasons** or to protect **user privacy**, masking sensitive data is a crucial step in responsible application development. It enables you to:
+
+1. Redact sensitive information from trace or observation inputs and outputs.
+2. Customize the content of events before transmission.
+3. Implement fine-grained data filtering based on your specific requirements.
+
+Learn more about Langfuse's data security and privacy measures concerning the stored data in our [security and compliance overview](/security).
+
+## How it works
+
+1. You define a custom masking function and pass it to the Langfuse client constructor.
+2. All event inputs and outputs are processed through this function.
+3. The masked data is then sent to the Langfuse server.
+
+This approach ensures that you have complete control over the event input and output data traced by your application.
+
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tab>
+
+Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+```python
+def masking_function(data: any, **kwargs) -> any:
+    """Function to mask sensitive data before sending to Langfuse."""
+    if isinstance(data, str) and data.startswith("SECRET_"):
+        return "REDACTED"
+
+    # For more complex data structures
+    elif isinstance(data, dict):
+        return {k: masking_function(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [masking_function(item) for item in data]
+
+    return data
+```
+
+Apply the masking function when initializing the Langfuse client:
+
+```python
+from langfuse import Langfuse
+
+# Initialize with masking function
+langfuse = Langfuse(mask=masking_function)
+
+# Then get the client
+from langfuse import get_client
+langfuse = get_client()
+```
+
+With the decorator:
+
+```python
+from langfuse import observe
+
+langfuse = Langfuse(mask=masking_function)
+
+
+@observe()
+def my_function():
+    # This data will be masked before being sent to Langfuse
+    return "SECRET_DATA"
+
+result = my_function()
+print(result)  # Original: "SECRET_DATA"
+
+# The trace output in Langfuse will have the output masked as "REDACTED"
+```
+
+Using context managers:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(mask=masking_function)
+
+with langfuse.start_as_current_span(
+    name="sensitive-operation",
+    input="SECRET_INPUT_DATA"
+) as span:
+    # ... processing ...
+    span.update(output="SECRET_OUTPUT_DATA")
+
+# Both input and output will be masked as "REDACTED" in Langfuse
+```
+
+</Tab>
+<Tab>
+
+Define a masking function:
+
+```python
+def masking_function(data):
+  if isinstance(data, str) and data.startswith("SECRET_"):
+    return "REDACTED"
+
+  return data
+```
+
+Use with the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+langfuse_context.configure(mask=masking_function)
+
+@observe()
+def fn():
+    return "SECRET_DATA"
+
+fn()
+
+langfuse_context.flush()
+
+# The trace output in Langfuse will have the output masked as "REDACTED".
+```
+
+Use with the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(mask=masking_function)
+
+trace = langfuse.trace(output="SECRET_DATA")
+
+langfuse.flush()
+
+# The trace output in Langfuse will have the output masked as "REDACTED".
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { Langfuse } from "langfuse";
+
+function maskingFunction(params: { data: any }) {
+  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
+    return "REDACTED";
+  }
+
+  return params.data;
+}
+
+const langfuse = new Langfuse({ mask: maskingFunction });
+
+const trace = langfuse.trace({
+  output: "SECRET_DATA",
+});
+
+await langfuse.flushAsync();
+
+// The trace output in Langfuse will have the output masked as "REDACTED".
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+<Callout type="info">
+
+When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+See the Python SDK v3 tab for more details.
+
+</Callout>
+
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
+
+```python
+from langfuse.openai import openai
+
+def masking_function(data):
+  if isinstance(data, str) and data.startswith("SECRET_"):
+    return "REDACTED"
+
+  return data
+
+openai.langfuse_mask = masking_function
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a bot."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+)
+
+openai.flush_langfuse()
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set masking function via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.openai import openai
+
+def masking_function(data):
+  if isinstance(data, str) and data.startswith("SECRET_"):
+    return "REDACTED"
+
+  return data
+
+langfuse_context.configure(mask=masking_function)
+
+@observe()
+def fn():
+    completion = openai.chat.completions.create(
+      name="test-chat",
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a calculator."},
+        {"role": "user", "content": "1 + 1 = "}],
+      temperature=0,
+    )
+
+fn()
+```
+
+</Tab>
+<Tab>
+<Callout type="info">
+
+When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
+
+See the Python SDK v3 tab for more details.
+
+</Callout>
+
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` as a keyword argument:
+
+```python
+from langfuse.callback import CallbackHandler
+
+def masking_function(data):
+  if isinstance(data, str) and data.startswith("SECRET_"):
+    return "REDACTED"
+
+  return data
+
+handler = CallbackHandler(
+  mask=masking_function
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `mask` via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+def masking_function(data):
+  if isinstance(data, str) and data.startswith("SECRET_"):
+    return "REDACTED"
+
+  return data
+
+langfuse_context.configure(mask=masking_function)
+
+@observe()
+def fn():
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Pass handler to invoke of your langchain chain/agent
+    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
+
+```typescript
+import { CallbackHandler } from "langfuse-langchain";
+
+function maskingFunction(params: { data: any }) {
+  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
+    return "REDACTED";
+  }
+
+  return params.data;
+}
+
+const handler = new CallbackHandler({
+  mask: maskingFunction,
+});
+```
+
+</Tab>
+
+</Tabs>
+
+## Examples
+
+Now, we'll show you examples how to use the masking feature. We'll use the Langfuse decorator for this, but you can also use the low-level SDK or the JS/TS SDK analogously.
+
+### Example 1: Redacting Credit Card Numbers
+
+In this example, we'll demonstrate how to redact credit card numbers from strings using a [regular expression](https://docs.python.org/3/library/re.html). This helps in complying with PCI DSS by ensuring that credit card numbers are not transmitted or stored improperly.
+
+<Callout type="info">
+
+Langfuse's masking feature allows you to define a custom masking function with parameters, which you then pass to the Langfuse client constructor. This function is applied to **all event inputs and outputs**, processing each piece of data to mask or redact sensitive information according to your specifications. By ensuring that all events are processed through your masking function before being sent, Langfuse guarantees that only the masked data is transmitted to the Langfuse server.
+
+</Callout>
+
+**Steps:**
+
+1. **Import necessary modules**.
+2. **Define a masking function** that uses a regular expression to detect and replace credit card numbers.
+3. **Configure the masking function** in Langfuse.
+4. **Create a sample function** to simulate processing sensitive data.
+5. **Observe the trace** to see the masked output.
+
+```python
+import re
+from langfuse import Langfuse, observe, get_client
+
+# Step 2: Define the masking function
+def masking_function(data, **kwargs):
+    if isinstance(data, str):
+        # Regular expression to match credit card numbers (Visa, MasterCard, AmEx, etc.)
+        pattern = r'\b(?:\d[ -]*?){13,19}\b'
+        data = re.sub(pattern, '[REDACTED CREDIT CARD]', data)
+    return data
+
+# Step 3: Configure the masking function
+langfuse = Langfuse(mask=masking_function)
+
+# Step 4: Create a sample function with sensitive data
+@observe()
+def process_payment():
+    # Simulated sensitive data containing a credit card number
+    transaction_info = "Customer paid with card number 4111 1111 1111 1111."
+    return transaction_info
+
+# Step 5: Observe the trace
+result = process_payment()
+
+print(result)
+# Output: Customer paid with card number [REDACTED CREDIT CARD].
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+<Frame border>
+  ![Redacted trace in Langfuse 1](/images/docs/masking/masking_example_1.png)
+</Frame>
+
+[Link to the trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/540eb0a1-77dd-42e9-b27f-03cfee9feb12?timestamp=2025-01-17T09%3A13%3A18.335Z)
+
+### Example 2: Using the `llm-guard` library
+
+In this example, we'll use the `Anonymize` scanner from `llm-guard` to remove personal names and other PII from the data. This is useful for anonymizing user data and protecting privacy.
+
+Find our more about the `llm-guard` library in their [documentation](https://llm-guard.com/).
+
+**Steps:**
+
+1. **Install the `llm-guard` library**.
+2. **Import necessary modules**.
+3. **Initialize the Vault and configure the Anonymize scanner**.
+4. **Define a masking function** that uses the Anonymize scanner.
+5. **Configure the masking function** in Langfuse.
+6. **Create a sample function** to simulate processing data with PII.
+7. **Observe the trace** to see the masked output.
+
+```bash
+pip install llm-guard
+```
+
+```python
+from langfuse import Langfuse, observe, get_client
+from llm_guard.vault import Vault
+from llm_guard.input_scanners import Anonymize
+from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
+
+# Step 3: Initialize the Vault and configure the Anonymize scanner
+vault = Vault()
+
+def create_anonymize_scanner():
+    scanner = Anonymize(
+        vault,
+        recognizer_conf=BERT_LARGE_NER_CONF,
+        language="en"
+    )
+    return scanner
+
+# Step 4: Define the masking function
+def masking_function(data, **kwargs):
+    if isinstance(data, str):
+        scanner = create_anonymize_scanner()
+        # Scan and redact the data
+        sanitized_data, is_valid, risk_score = scanner.scan(data)
+        return sanitized_data
+    return data
+
+# Step 5: Configure the masking function
+langfuse = Langfuse(mask=masking_function)
+
+# Step 6: Create a sample function with PII
+@observe()
+def generate_report():
+    # Simulated data containing personal names
+    report = "John Doe met with Jane Smith to discuss the project."
+    return report
+
+# Step 7: Observe the trace
+result = generate_report()
+
+print(result)
+# Output: [REDACTED_PERSON] met with [REDACTED_PERSON] to discuss the project.
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+<Frame border>
+  ![Redacted trace in Langfuse](/images/docs/masking/masking_example_2.png)
+</Frame>
+
+[Link to the trace in Langfuse 2](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/4abb206f-f8fd-4492-86b9-801602513afd?timestamp=2025-01-17T09%3A30%3A04.127Z)
+
+### Example 3: Masking Email and Phone Numbers
+
+You can extend the masking function to redact other types of PII such as email addresses and phone numbers using regular expressions.
+
+```python
+import re
+from langfuse import Langfuse, observe, get_client
+
+def masking_function(data, **kwargs):
+    if isinstance(data, str):
+        # Mask email addresses
+        data = re.sub(r'\b[\w.-]+?@\w+?\.\w+?\b', '[REDACTED EMAIL]', data)
+        # Mask phone numbers
+        data = re.sub(r'\b\d{3}[-. ]?\d{3}[-. ]?\d{4}\b', '[REDACTED PHONE]', data)
+    return data
+
+langfuse = Langfuse(mask=masking_function)
+
+@observe()
+def contact_customer():
+    info = "Please contact John at john.doe@example.com or call 555-123-4567."
+    return info
+
+result = contact_customer()
+
+print(result)
+# Output: Please contact John at [REDACTED EMAIL] or call [REDACTED PHONE].
+
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+<Frame border>
+  ![Redacted trace in Langfuse 3](/images/docs/masking/masking_example_3.png)
+</Frame>
+
+[Link to the trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/dcc4d640-492e-47a6-b419-922c8b9e0f0f?timestamp=2025-01-17T09%3A38%3A06.814Z)
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-data-masking"]} />

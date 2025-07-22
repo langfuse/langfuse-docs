@@ -1,0 +1,111 @@
+---
+title: User Feedback Tracking in LLM apps
+sidebarTitle: User Feedback
+description: Capture feedback from users of your LLM application to measure overall quality and establish a baseline for your automated evaluations.
+---
+
+import FeedbackPreview from "@/components/feedbackPreview";
+
+# User Feedback Tracking
+
+User feedback is a great source to evaluate the quality of an LLM app's output.
+
+<details>
+<summary>What are common feedback types?</summary>
+
+Depending on the type of the application, there are different **types of feedback** that can be collected that vary in quality, detail, and quantity.
+
+- **Explicit Feedback**: Directly prompt the user to give feedback, this can be a rating, a like, a dislike, a scale or a comment. While it is simple to implement, quality and quantity of the feedback is often low.
+- **Implicit Feedback**: Measure the user's behavior, e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output. This type of feedback is more difficult to implement but is often more frequent and reliable.
+
+</details>
+
+<details>
+<summary>What is a common workflow of using user feedback?</summary>
+
+A common workflow is to:
+
+1. Collection of feedback alongside LLM traces in Langfuse
+   > Example: _Negative, Langfuse not included in response_
+2. Browsing of all user feedback, especially when collecting comments from users
+3. Identification of the root cause of the low-quality response (can be managed via [annotation queues](/docs/scores/annotation))
+   > Example: _Docs on Langfuse integration are not included in embedding similarity search_
+
+</details>
+
+## Demo
+
+Langfuse UI on the left, demo application on the right
+
+<CloudflareVideo
+  videoId="e36f0a43d27bf733122d639128677f82"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+→ [Try the Q&A chatbot yourself](/docs/demo) and browse the collected feedback in the public Langfuse project
+
+## Get started
+
+In Langfuse, any kind of user feedback can be collected as a [`score`](/docs/scores/data-model) via the [Langfuse SDKs or API](/docs/scores/custom) and attached to an execution trace or an individual LLM generation ([tracing data model](/docs/tracing)).
+
+Types of user feedback that can be collected as a score:
+
+- Be numeric (e.g. 1-5 stars)
+- Be categorical (e.g. thumbs up/down)
+- Be boolean (e.g. accept/reject)
+
+## Integration Example
+
+In this example, we use the [`LangfuseWeb` SDK](/docs/sdk/typescript/guide-web) to collect user feedback right from the browser.
+
+**Note:** You can also use the SDKs server-side or add scores via the API.
+
+<div className="mt-5 px-3 py-2 ring-1 rounded ring-gray-400">
+
+<h3 className="text-xl font-bold">User feedback on individual responses</h3>
+<span className="text-sm">Chat application</span>
+
+<div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+<div className="flex-1">
+
+**Integration**
+
+<div className="text-xs mt-2">
+
+```ts {1, 9, 17-18} filename="UserFeedbackComponent.tsx"
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</div>
+
+</div>
+<div className="flex-1">
+
+**Preview**
+
+<FeedbackPreview />
+
+</div>
+</div>
+</div>

@@ -210,7 +210,7 @@ const config: DocsThemeConfig = {
         <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
         {/* desktop */}
         <span className="hidden sm:inline">
-        San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
+          San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
         </span>
       </Link>
     ),
