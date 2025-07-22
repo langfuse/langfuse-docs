@@ -51,6 +51,11 @@ jobs:
         with:
           version: "latest"
 
+      - name: Install nbconvert with templates
+        run: |
+          # Install nbconvert and jupyter to ensure templates are available
+          uv pip install --system nbconvert jupyter
+
       - name: Check if notebook docs are up to date
         run: |
           # Run the update script
