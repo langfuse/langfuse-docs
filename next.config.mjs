@@ -430,6 +430,8 @@ const nonPermanentRedirects = [
   ["/docs/scores/model-based-evals", "/docs/evaluation/features/evaluation-methods/llm-as-a-judge"],
   ["/docs/scores/overview", "/docs/evaluation/overview"],
   ["/docs/scores/user-feedback", "/docs/evaluation/features/evaluation-methods/user-feedback"],
+  ["/docs/evaluation/features/evaluation-methods/custom", "/docs/evaluation/features/evaluation-methods/custom-scores"],
+  ["/docs/evaluation/features/experiment-comparison", "/docs/evaluation/features/datasets"],
   ["/docs/sdk/overview", "/docs/observability/sdk/overview"],
   ["/docs/sdk/python/example", "/docs/observability/sdk/python/example"],
   ["/docs/sdk/python/low-level-sdk", "/docs/observability/sdk/python/low-level-sdk"],
