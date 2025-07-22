@@ -57,15 +57,15 @@ const BentoBgImage = ({
 const features = [
   {
     Icon: TextQuote,
-    name: "Tracing",
+    name: "Observability",
     description: "Detailed production traces to debug LLM applications faster.",
-    href: "/docs/tracing",
+    href: "/docs/observability/overview",
     cta: "Learn more",
     background: (
       <BentoBgImage
         imgLight={bentoTracePng}
         imgDark={bentoTraceDarkPng}
-        alt="Tracing"
+        alt="Observability"
       />
     ),
     className: "md:row-start-1 md:row-end-4 md:col-start-2 md:col-end-2",
@@ -75,7 +75,7 @@ const features = [
     name: "Prompt Management",
     description:
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
-    href: "/docs/prompts/get-started",
+    href: "/docs/prompt-management/overview",
     cta: "Learn more",
     background: (
       <BentoBgImage
@@ -90,7 +90,7 @@ const features = [
     Icon: FlaskConical,
     name: "Playground",
     description: "Test different prompts and models right in the Langfuse UI.",
-    href: "/docs/playground",
+    href: "/docs/prompt-management/features/playground",
     cta: "Learn more",
     background: null,
     className: "md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4",
@@ -100,7 +100,7 @@ const features = [
     name: "Evaluation",
     description:
       "Collect user feedback, annotate in Langfuse, and run evaluation functions in Langfuse.",
-    href: "/docs/scores/overview",
+    href: "/docs/evaluation/overview",
     cta: "Learn more",
     background: null,
     className: "md:col-start-3 md:col-end-3 md:row-start-1 md:row-end-2",
@@ -110,7 +110,7 @@ const features = [
     name: "Datasets",
     description:
       "Derive datasets from production data to fine-tune models and test your LLM application.",
-    href: "/docs/datasets/overview",
+    href: "/docs/evaluation/features/datasets",
     cta: "Learn more",
     background: null,
     className: "md:col-start-3 md:col-end-3 md:row-start-2 md:row-end-3",
