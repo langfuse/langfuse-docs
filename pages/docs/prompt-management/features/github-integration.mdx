@@ -1,12 +1,121 @@
 ---
-description: Automatically sync Langfuse prompt changes to GitHub using webhooks for version control and CI/CD integration
+description: Integrate Langfuse prompts with GitHub using webhooks for version control, CI/CD workflows, and automated synchronization
 ---
 
-# Sync Your Langfuse Prompt with GitHub via Webhooks
+# GitHub Integration for Langfuse Prompts
+
+There are two methods to integrate Langfuse prompts with GitHub:
+
+- [**GitHub Actions Webhook**](#trigger-github-actions) - Trigger CI/CD workflows when prompts change. This does not require additional infrastructure.
+- [**Sync Langfuse Prompts to a repository**](#sync-langfuse-prompts-to-a-repository) - Store prompts in a specific file in your repository. This involves a webhook server that listens for prompt version changes and commits them to the repository.
+
+---
+
+# Trigger GitHub Actions [#trigger-github-actions]
+
+Trigger GitHub Actions workflows when Langfuse prompts change using `repository_dispatch` events.
+
+```mermaid
+sequenceDiagram
+    participant User as User/Team
+    participant LF as Langfuse
+    participant GH as GitHub API
+    participant Actions as GitHub Actions
+
+    User->>LF: Update prompt in Langfuse
+    LF->>GH: POST /repos/owner/repo/dispatches
+    GH->>Actions: Trigger repository_dispatch event
+    Actions->>Actions: Run CI workflow (tests, deploy, etc.)
+    Note over User,Actions: Prompt changes trigger automated workflows
+```
+
+## 1. Create GitHub Workflow
+
+`.github/workflows/langfuse-ci.yml`:
+
+```yaml
+name: Langfuse Prompt CI
+on:
+  repository_dispatch:
+    types: [langfuse-prompt-update]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: |
+          echo "Testing prompt: ${{ github.event.client_payload.prompt.name }} v${{ github.event.client_payload.prompt.version }}"
+          # Add your test commands
+          # npm test
+          # python -m pytest
+          
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: contains(github.event.client_payload.prompt.labels, 'production')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo "Deploying ${{ github.event.client_payload.prompt.name }} v${{ github.event.client_payload.prompt.version }}"
+          # Your deployment commands
+```
+
+**Accessing webhook data:** Use `github.event.client_payload.*` to access prompt data:
+
+```yaml
+# Example: Access webhook data in your workflow
+- name: Process prompt data
+  run: |
+    echo "Action: ${{ github.event.client_payload.action }}"
+    echo "Prompt: ${{ github.event.client_payload.prompt.name }}"
+    echo "Version: ${{ github.event.client_payload.prompt.version }}"
+    echo "Labels: ${{ github.event.client_payload.prompt.labels }}"
+    
+- name: Deploy only production prompts
+  if: contains(github.event.client_payload.prompt.labels, 'production')
+  run: echo "Deploying production prompt"
+```
+
+## 2. Create GitHub Token for Actions
+
+**Steps:**
+1. **GitHub Settings > Developer settings > Personal access tokens**
+2. **Generate new token (classic or fine-grained)**
+3. **Select scope** (see table below)
+
+| Token Type | Required Permissions |
+|------------|-------------------|
+| Personal Access Token (classic) | `repo` scope (public repos) or `public_repo` scope (private repos) |
+| Fine-grained PAT or GitHub App | `read` and `write` to `actions` |
+
+## 3. Configure Langfuse Webhook for Actions
+
+1. Go to **Prompts > Webhooks** in your Langfuse project
+2. Click **Create Webhook**
+3. Set endpoint URL: `https://api.github.com/repos/{owner}/{repo}/dispatches`
+4. Add headers:
+   - `Accept: application/vnd.github+json`
+   - `Authorization: Bearer {your_github_token}`
+
+**Important:** Store your GitHub token securely in the Authorization header. Langfuse encrypts webhook headers and stores them securely.
+
+## 4. Test GitHub Actions Integration
+
+1. **Update a prompt** in Langfuse with the `production` label
+2. **Check GitHub Actions** tab for triggered workflow
+3. **Verify** that both test and deploy jobs run successfully
+
+---
+
+# Sync Langfuse Prompts to a repository [#sync-langfuse-prompts-to-a-repository]
 
 Automatically sync prompt changes from Langfuse to GitHub using [Prompt Version Webhooks](/docs/prompt-management/features/webhooks). This enables version control for prompts and can trigger CI/CD workflows.
 
-## Overview of the Workflow
+## Overview of the Sync Workflow
 
 Whenever you save a new prompt version in Langfuse, it's automatically committed to your GitHub repository. With this setup, you can also trigger CI/CD workflows when prompts change.
 
@@ -29,7 +138,7 @@ sequenceDiagram
     Note over User,GitHub: Prompt changes now version-controlled in GitHub
 ```
 
-## Prerequisites
+## Prerequisites for Sync
 
 1. **Langfuse Project:** [Prompt setup](/docs/prompts/get-started) with Project Owner access
 2. **GitHub Repository:** Public or private repo to store prompts
@@ -74,7 +183,7 @@ Sample webhook payload:
 }
 ```
 
-## Step 2: Prepare Your GitHub Repo and Token
+## Step 2: Prepare Your GitHub Repo and Token for Sync
 
 Create a `.env` file with your GitHub credentials:
 
@@ -88,7 +197,7 @@ GITHUB_REPO_NAME=<repo_name>
 
 Replace placeholders with your actual values. The server will commit prompts to `langfuse_prompt.json` on the `main` branch by default.
 
-#### GitHub PAT Permissions
+### GitHub PAT Permissions for Sync
 
 For the webhook to work, your GitHub Personal Access Token needs **minimal permissions**:
 
