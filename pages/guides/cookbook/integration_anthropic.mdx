@@ -1,0 +1,167 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Anthropic with Langfuse Integration
+sidebarTitle: Anthropic
+logo: /images/integrations/anthropic_icon.png
+description: Learn how to integrate Langfuse with Anthropic for comprehensive tracing and debugging of your AI conversations.
+category: Integrations
+---
+
+# Trace Anthropic Models in Langfuse
+
+Anthropic provides advanced language models like Claude, known for their safety, helpfulness, and strong reasoning capabilities. By combining Anthropic's models with **Langfuse**, you can trace, monitor, and analyze your AI workloads in development and production.
+
+This notebook demonstrates **two** different ways to use Anthropic models with Langfuse:
+1. **Anthropic SDK:** Use Langfuse decorators to wrap Anthropic SDK calls for automatic tracing.
+2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via Langfuse's OpenAI SDK wrapper.
+
+> **What is Anthropic?**  
+Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
+
+> **What is Langfuse?**  
+[Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+
+
+<Steps>
+## Step 1: Install Dependencies
+
+Before you begin, install the necessary packages in your Python environment:
+
+- **anthropic**: The official Anthropic Python SDK for using Claude models.
+- **openai**: Needed to call Anthropic's OpenAI-compatible endpoints.
+- **langfuse**: Required for sending trace data to the Langfuse platform.
+
+
+
+```python
+%pip install anthropic openai langfuse
+```
+
+## Step 2: Configure Langfuse SDK
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+Also set your Anthropic API ([Anthropic Console](https://console.anthropic.com/)).
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+os.environ["ANTHROPIC_API_KEY"] = "sk-ant-..."  # Your Anthropic API key
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+## Approach 1: Using Native Anthropic SDK with Langfuse Decorators
+
+Langfuse decorators provide a simple way to trace function calls and automatically capture input/output data. This approach allows you to use the native Anthropic SDK while getting full observability through Langfuse.
+
+<Callout type="info" emoji="ℹ️">
+**Note:** For more examples on using Langfuse decorators, see the [Langfuse Python SDK documentation](https://langfuse.com/docs/sdk/python/decorators).
+</Callout>
+
+
+```python
+from langfuse import observe
+from anthropic import Anthropic
+
+# Initialize the Anthropic client
+anthropic = Anthropic(
+    api_key=os.environ.get("ANTHROPIC_API_KEY")
+)
+
+@observe()
+def chat_with_claude(messages: list, model: str = "claude-3-5-sonnet-20241022", max_tokens: int = 1024):
+    """Chat with Claude using the Anthropic SDK and trace with Langfuse."""
+    
+    # Make the API call to Anthropic
+    response = anthropic.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=messages
+    )
+    
+    # Update Langfuse observation with model details and usage
+    langfuse.update_current_generation(
+        model=model,
+        input=messages,
+        output=response.content[0].text,
+        usage_details={
+            "input": response.usage.input_tokens,
+            "output": response.usage.output_tokens,
+            "total": response.usage.input_tokens + response.usage.output_tokens
+        },
+        metadata={
+            "stop_reason": response.stop_reason
+        }
+    )
+    
+    return response
+```
+
+
+```python
+# Example usage with decorator
+messages = [
+    {"role": "user", "content": "What is Langfuse and how does it help with LLM observability?"}
+]
+
+response = chat_with_claude(messages)
+print(response.content[0].text)
+```
+
+## Approach 2: Using the Langfuse OpenAI SDK Drop-in Replacement
+
+Anthropic provides [OpenAI-compatible endpoints](https://docs.anthropic.com/en/api/openai-sdk) that allow you to use the OpenAI SDK to interact with Claude models. This is particularly useful if you have existing code using the OpenAI SDK that you want to switch to Claude.
+
+
+```python
+# Langfuse OpenAI client
+from langfuse.openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),  # Your Anthropic API key
+    base_url="https://api.anthropic.com/v1/"  # Anthropic's API endpoint
+)
+
+response = client.chat.completions.create(
+    model="claude-opus-4-20250514", # Anthropic model name
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Who are you?"}
+    ],
+)
+
+print(response.choices[0].message.content)
+```
+
+### View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the agent conversations, LLM calls, inputs, outputs, and performance metrics. 
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/integration_anthropic/anthropic-example-trace.png)
+
+You can also view the public trace here: 
+
+- [Approach 1](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c0265bd14c1142294bbbb50759cec2f9?timestamp=2025-07-22T15:59:24.590Z&display=details)
+- [Approach 2](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e8da1b2c15036ed9c25b37c604f2d29?timestamp=2025-07-22T16:05:47.602Z&display=details)
+</Steps>
