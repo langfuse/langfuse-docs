@@ -15,7 +15,8 @@ export default {
   },
   observability: "Observability",
   "prompt-management": "Prompt Management",
-  evaluation: "Evaluation",
+  evaluation: "Evaluation Methods",
+  "experiments" : "Experiments",
 
   "-- Platform": {
     type: "separator",

@@ -5,9 +5,9 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Core</MenuSubSeparator>,
   },
-  datasets: {},
-  "evaluation-methods": "Evaluation Methods",
-  "prompt-experiments": {},
+  "llm-as-a-judge": "LLM as a Judge",
+  "custom-scores": "Custom Evaluators",
+  "annotation": "Manual Annotation",
 
   "-- Advanced": {
     type: "separator",
