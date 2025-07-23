@@ -22,16 +22,16 @@ export default {
   },
   "query-traces": {
     title: "Query Data ↗",
-    href: "/docs/platform/features/query-traces",
+    href: "/docs/api-and-data-platform/overview",
   },
 
   "metrics-api": {
     title: "Metrics API ↗",
-    href: "/docs/platform/features/metrics-api",
+    href: "/docs/metrics/features/metrics-api",
   },
 
   "custom-dashboards": {
     title: "Custom Dashboards ↗",
-    href: "/docs/platform/features/custom-dashboards",
+    href: "/docs/metrics/features/custom-dashboards",
   },
 };
