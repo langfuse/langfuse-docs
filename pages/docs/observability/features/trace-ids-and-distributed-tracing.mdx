@@ -39,7 +39,7 @@ Trace IDs in Langfuse:
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "LiteLLM"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
 <Tab>
 The Python SDK v3 uses W3C Trace Context IDs by default, which are:
 
@@ -298,9 +298,47 @@ const completion = await openai.chat.completions.create({
 </Tab>
 <Tab>
 
-When using Langchain with Langfuse, you have two options for working with trace IDs:
+**Python SDK v3:**
 
-1. Using the [CallbackHandler](/integrations/frameworks/langchain) and langchain run config:
+To pass a custom trace ID to a Langchain execution, you can wrap the execution in a span that sets a predefined trace ID. You can also retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
+
+```python
+from langfuse import get_client, Langfuse
+from langfuse.langchain import CallbackHandler
+ 
+langfuse = get_client()
+ 
+# Generate deterministic trace ID from external system
+external_request_id = "req_12345"
+predefined_trace_id = Langfuse.create_trace_id(seed=external_request_id)
+ 
+langfuse_handler = CallbackHandler()
+ 
+# Use the predefined trace ID with trace_context
+with langfuse.start_as_current_span(
+    name="langchain-request",
+    trace_context={"trace_id": predefined_trace_id}
+) as span:
+    span.update_trace(
+        user_id="user_123",
+        input={"person": "Ada Lovelace"}
+    )
+ 
+    # LangChain execution will be part of this trace
+    response = chain.invoke(
+        {"person": "Ada Lovelace"},
+        config={"callbacks": [langfuse_handler]}
+    )
+ 
+    span.update_trace(output={"response": response})
+ 
+print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
+print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
+```
+
+**Python SDK v2:**
+
+Option 1: Using the [CallbackHandler](/integrations/frameworks/langchain) and langchain run config:
 
 ```python
 from langfuse.callback import CallbackHandler
@@ -320,7 +358,7 @@ chain.invoke(
 )
 ```
 
-2. Using the [`@observe()` decorator](/docs/sdk/python/decorators) for automatic trace management:
+Option 2: Using the [`@observe()` decorator](/docs/sdk/python/decorators) for automatic trace management:
 
 ```python
 from langfuse.decorators import langfuse_context, observe

@@ -7,7 +7,7 @@ sidebarTitle: Metadata
 
 Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Flowise"]}>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -178,7 +178,63 @@ const res = await observeOpenAI(new OpenAI(), {
 </Tab>
 <Tab>
 
-When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `metadata` as a keyword argument:
+**Python SDK v3:**
+
+Option 1: Via metadata fields in chain invocation (simplest approach):
+
+```python
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+langfuse_handler = CallbackHandler()
+ 
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+ 
+# Set trace attributes dynamically via metadata
+response = chain.invoke(
+    {"topic": "cats"},
+    config={
+        "callbacks": [langfuse_handler],
+        "metadata": {
+            "foo": "bar",
+            "baz": "qux"
+        }
+    }
+)
+```
+
+Option 2: Via enclosing span (for more control):
+
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+langfuse = get_client()
+langfuse_handler = CallbackHandler()
+ 
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+ 
+# Set trace attributes dynamically via enclosing span
+with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
+    span.update_trace(
+        metadata={"foo": "bar", "baz": "qux"}
+    )
+
+    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+ 
+    span.update_trace(output={"response": response.content})
+```
+
+**Python SDK v2:**
+
+Pass `metadata` as a keyword argument:
 
 ```python
 handler = CallbackHandler(
