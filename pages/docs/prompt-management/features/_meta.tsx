@@ -3,7 +3,7 @@ import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 export default {
   "-- Core": {
     type: "separator",
-    title: <MenuSubSeparator>Core</MenuSubSeparator>,
+    title: <MenuSubSeparator>Entry</MenuSubSeparator>,
   },
   "prompt-version-control": {},
   composability: {},
