@@ -12,11 +12,6 @@ export default {
     type: "page",
     display: "hidden",
   },
-  "find-us": {
-    title: "Find Us",
-    type: "page",
-    display: "hidden",
-  },
   docs: {
     type: "page",
     title: "Docs",
@@ -225,5 +220,29 @@ export default {
   security: {
     type: "page",
     title: "Security & Compliance",
+  },
+  "signup-flow": {
+    type: "page",
+    title: "Sign Up",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
+  },
+  "signup-flow-2": {
+    type: "page",
+    title: "Sign Up",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
+  },
+  "signup-flow-3": {
+    type: "page",
+    title: "Sign Up",
+    display: "hidden",
+    theme: {
+      layout: "raw",
+    },
   },
 };
