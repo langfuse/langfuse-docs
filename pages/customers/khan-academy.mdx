@@ -1,0 +1,100 @@
+---
+title: "How Khan Academy built AI observability ready for 120 million learners"
+date: July 24, 2025
+description: How Khan Academy built AI observability ready for 120 million learners using Langfuse for complete observability.
+ogImage: 
+tag: customer-story
+author: Felix
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+
+<BlogHeader
+  title="How Khan Academy built AI observability ready for 120 million learners"
+  description="How Khan Academy built AI observability ready for 120 million learners using Langfuse for complete observability."
+  customerLogo="/images/customers/khan-academy/khan-academy-logo.png"
+  authors={["felixkrauth"]}
+/>
+
+<Frame fullWidth>
+  ![Khan Academy Website](/images/customers/khan-academy/khanmigo.png)
+</Frame>
+
+## About Khan Academy
+[Khan Academy](https://www.khanacademy.org/) serves 120 million learners annually across 190 countries in 56 languages. It provides free online courses, lessons, and practice exercises covering subjects from elementary math to college-level topics like calculus, physics, economics, and computer science. Khan Academy also provides tools for teachers and parents to track student progress. The mission: "Free online education for everyone, everywhere."
+
+Khan Academy started their LLM journey in 2023 as an early access partner of OpenAI's GPT-4. They have learned many hard-won lessons and shipped dozens of cornerstone AI experiences led by their flagship AI product: [Khanmigo](https://www.khanmigo.ai/). 
+
+## Challenge: Go-Based Infrastructure Meets AI
+Running a nonprofit at this scale demands extreme resource efficiency. 
+
+Khan Academy migrated to Go from Python starting in 2019, and when it came time to implement AI observability, they faced a unique challenge. Most tracing tools required specific SDKs or wrappers that didn't fit their Go-based architecture.
+
+"What we really loved about Langfuse was the open API," says Walt from Khan Academy's engineering team. "While many tracing tools require specific SDKs or wrappers, Langfuse's open API enabled us to build our own Golang client around it. This was huge for our Go-based services."
+
+## LLM Observability Across Product Teams
+
+Since deploying Langfuse in April 2024 as one of our first enterprise customers, adoption has spread to over **100 users** across **7 product and 4 infrastructure teams**. The platform isn't supporting just one AI feature but dozens of AI interactions across different products.
+
+The integration runs deep:
+- **Internal UIs** link directly to Langfuse traces for user experience analysis
+- **Community support teams** access traces for incident investigation
+- **Engineers** share Langfuse URLs for collaborative debugging
+- **Senior leadership** uses the platform for product decision analysis.
+
+<CustomerQuote
+  quote="Langfuse has really enabled our developers to get extremely fast feedback. When building and deploying features, we can quickly watch how those experiences are going. It's become our primary way for developers to understand their AI implementations."
+  name="Walt Wells"
+  role="Staff Software Engineer / ML & Data Infrastructure"
+  company="Khan Academy"
+  image="/images/customers/khan-academy/walt-wells.jpeg"
+/>
+
+## Results: Speed Without Compromise
+
+For Khan Academy, Langfuse solved multiple challenges simultaneously. The company avoided the engineering overhead of hosting their own tracing infrastructure for millions of learners while maintaining the flexibility to work within their Go ecosystem.
+
+<ImpactChart
+  items={[
+    {
+      area: "Stack Flexibility",
+      impact:
+        "Langfuse plays well with Khan Academy's Go stack. They've built their custom Go client around the Langfuse API.",
+      learnMore:[
+        {
+          title: "Half a Million Lines of Go",
+          href: "https://blog.khanacademy.org/half-a-million-lines-of-go/"
+        }]
+    },
+    {
+      area: "Development Speed",
+      impact:
+        "Deep observability is the foundation for rapid iteration and debugging capabilities across products.",
+    },
+    {
+      area: "Hosting Simplicity",
+      impact:
+        "The nonprofit avoided the engineering overhead of hosting its own tracing infrastructure for millions of learners.",
+    },
+    {
+      area: "Platform across Teams",
+      impact:
+        "Development teams across the organization now share a common observability platform, preventing tool fragmentation.",
+    },
+  ]}
+/>
+
+<CustomerQuote
+  quote="In early 2024, Langfuse was a big bet for us, and we've been overwhelmingly happy with that bet. Everything about choosing Langfuse has paid off in spades."
+  name="Walt Wells"
+  role="Staff Software Engineer / ML & Data Infrastructure"
+  company="Khan Academy"
+  image="/images/customers/khan-academy/walt-wells.jpeg"
+/>
+
+
+
+
+
