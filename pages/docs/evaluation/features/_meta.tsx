@@ -3,7 +3,7 @@ import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 export default {
   "-- Core": {
     type: "separator",
-    title: <MenuSubSeparator>Entry</MenuSubSeparator>,
+    title: <MenuSubSeparator>Essential</MenuSubSeparator>,
   },
   datasets: {},
   "evaluation-methods": "Evaluation Methods",
