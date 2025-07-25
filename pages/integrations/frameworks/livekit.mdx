@@ -1,0 +1,328 @@
+---
+title: Open Source Observability for LiveKit Agents
+sidebarTitle: LiveKit
+logo: /images/integrations/livekit_icon.svg
+description: Trace real-time voice AI agents and multimodal conversations built with LiveKit Agents using Langfuse.
+---
+
+# LiveKit Agents Tracing Integration
+
+This guide shows you how to integrate **Langfuse** with **LiveKit Agents** for [observability and tracing](/docs/tracing) of real-time voice AI applications. By following these steps, you'll be able to monitor, debug and evaluate your LiveKit agents in the Langfuse dashboard.
+
+> [LiveKit Agents](https://docs.livekit.io/agents/) ([repo](https://github.com/livekit/agents)) is an open-source Python and Node.js framework for building production-grade multimodal and voice AI agents. It provides a complete set of tools and abstractions for feeding realtime media through AI pipelines, supporting both high-performance STT-LLM-TTS voice pipelines and speech-to-speech models with any AI provider.
+
+_Example of a LiveKit agent conversation with telemetry in Langfuse._
+
+<CloudflareVideo
+  videoId="bafe5bdcde0ad80bd4ad05ac6390280f"
+  aspectRatio={16 / 9}
+  title="LiveKit agent trace in Langfuse"
+  gifStyle
+/>
+
+## Features
+
+- **Session-Level Tracing**: Track entire agent sessions from start to finish
+- **Turn-Based Organization**: Detailed spans for each user turn and agent response
+- **Pipeline Tracing**: Monitor STT, LLM, TTS, and tool execution within the voice pipeline
+- **Performance Metrics**: Capture conversation latency, TTFT (Time To First Token), TTFB (Time To First Byte), and throughput metrics
+- **Multi-Agent Workflows**: Trace complex workflows with agent handoffs and delegation
+- **Tool Usage Tracking**: Monitor function tool calls and external service integrations
+
+## Trace Structure
+
+LiveKit agent traces are organized hierarchically around agent sessions and user turns:
+
+```
+Agent Session (session-uuid)
+├── agent-turn-1
+│   ├── stt_processing
+│   ├── llm_inference
+│   │   ├── tool_call_weather_lookup
+│   │   └── tool_call_calendar_check
+│   └── tts_synthesis
+├── agent-turn-2
+│   ├── eou_detection (end-of-utterance)
+│   ├── llm_inference
+│   └── tts_synthesis
+└── agent-handoff
+    └── new-agent-session
+```
+
+This structure enables you to track conversation flow, performance bottlenecks, and multi-agent interactions.
+
+Learn more about LiveKit's built-in telemetry in the [LiveKit documentation](https://docs.livekit.io/agents/build/metrics/).
+
+## End-to-end example
+
+We've created an end-to-end example of how to trace a LiveKit agent with Langfuse. You can find the code in our [cookbook repository](https://github.com/langfuse/langfuse-cookbook).
+
+```bash filename="langfuse-cookbook/livekit-agents-tracing"
+.
+├── README.md
+├── agent.py
+├── requirements.txt
+├── .env.example
+└── telemetry_setup.py
+```
+
+## Get Started
+
+LiveKit Agents includes built-in OpenTelemetry support, and Langfuse provides an [OpenTelemetry endpoint](/docs/opentelemetry/get-started). Follow these steps to enable comprehensive tracing for your LiveKit application.
+
+<Steps>
+
+### Obtain Langfuse API keys
+
+Create a project in [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting) Langfuse and copy your API keys.
+
+### Environment Configuration
+
+Base64 encode your Langfuse public and secret key:
+
+```bash filename="terminal"
+echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64
+```
+
+Create a `.env` file with your API keys and LiveKit configuration:
+
+```bash filename=".env"
+# LiveKit Configuration
+LIVEKIT_URL=wss://your-livekit-server.com
+LIVEKIT_API_KEY=your-api-key
+LIVEKIT_API_SECRET=your-api-secret
+
+# AI Provider Keys (example with OpenAI and Deepgram)
+OPENAI_API_KEY=your-openai-key
+DEEPGRAM_API_KEY=your-deepgram-key
+CARTESIA_API_KEY=your-cartesia-key
+
+# Langfuse Tracing Configuration
+LANGFUSE_PUBLIC_KEY=pk-lf-1234567890
+LANGFUSE_SECRET_KEY=sk-lf-1234567890
+LANGFUSE_HOST=https://cloud.langfuse.com
+```
+
+### Setup OpenTelemetry Tracer Provider
+
+Configure the OpenTelemetry tracer provider in your LiveKit agent entrypoint:
+
+```python filename="agent.py"
+import base64
+import os
+from livekit.agents import JobContext, WorkerOptions, cli
+from livekit.agents.telemetry import set_tracer_provider
+
+def setup_langfuse_tracing():
+    """Setup Langfuse as the OpenTelemetry tracer provider"""
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
+    secret_key = os.getenv("LANGFUSE_SECRET_KEY")
+    host = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
+
+    if not public_key or not secret_key:
+        raise ValueError("LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY must be set")
+
+    # Encode credentials for OTLP authentication
+    langfuse_auth = base64.b64encode(f"{public_key}:{secret_key}".encode()).decode()
+    
+    # Configure OTLP exporter
+    os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = f"{host.rstrip('/')}/api/public/otel"
+    os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {langfuse_auth}"
+
+    # Setup tracer provider
+    trace_provider = TracerProvider()
+    trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+    set_tracer_provider(trace_provider)
+
+async def entrypoint(ctx: JobContext):
+    # Enable telemetry before connecting
+    setup_langfuse_tracing()
+    
+    await ctx.connect()
+    
+    # Your agent implementation continues...
+    # (STT, LLM, TTS configuration, etc.)
+```
+
+### Enable Metrics Collection
+
+Configure your agent session to collect and forward metrics to Langfuse:
+
+```python filename="agent.py"
+from livekit.agents import AgentSession, Agent, metrics, MetricsCollectedEvent
+from livekit.plugins import openai, deepgram, cartesia, silero
+
+# Setup metrics collector
+usage_collector = metrics.UsageCollector()
+
+@session.on("metrics_collected")
+def on_metrics_collected(ev: MetricsCollectedEvent):
+    # Log metrics for debugging
+    metrics.log_metrics(ev.metrics)
+    
+    # Collect usage statistics
+    usage_collector.collect(ev.metrics)
+
+async def log_usage_summary():
+    """Log final usage summary"""
+    summary = usage_collector.get_summary()
+    logger.info(f"Session usage summary: {summary}")
+
+# Create agent session with telemetry
+session = AgentSession(
+    stt=deepgram.STT(model="nova-3"),
+    llm=openai.LLM(model="gpt-4o-mini"),
+    tts=cartesia.TTS(model="sonic-2"),
+    vad=silero.VAD.load(),
+)
+
+# Register shutdown callback for usage summary
+ctx.add_shutdown_callback(log_usage_summary)
+
+await session.start(
+    room=ctx.room,
+    agent=Agent(instructions="You are a helpful voice AI assistant."),
+)
+```
+
+</Steps>
+
+## Understanding the Traces
+
+LiveKit agent traces provide comprehensive insights into your voice AI application:
+
+- **Session Spans**: Top-level spans representing entire agent sessions with room and participant context
+- **Turn Spans**: Individual conversation turns with user input and agent response cycles
+- **Pipeline Spans**: Detailed operations within the voice pipeline:
+  - **STT Processing**: Speech-to-text conversion with audio duration and transcription accuracy
+  - **LLM Inference**: Language model processing with token usage, latency metrics, and tool calls
+  - **TTS Synthesis**: Text-to-speech generation with character counts and audio duration
+- **Tool Execution**: Function tool calls with parameters, results, and execution time
+- **Agent Handoffs**: Multi-agent workflow transitions and context passing
+- **Performance Metrics**: 
+  - Conversation latency (EOU delay + LLM TTFT + TTS TTFB)
+  - Token usage and costs
+  - Audio processing durations
+  - Turn detection accuracy
+
+## Key Metrics Tracked
+
+LiveKit automatically captures important performance metrics:
+
+```python
+# Conversation latency calculation
+total_latency = eou.end_of_utterance_delay + llm.ttft + tts.ttfb
+
+# Token usage tracking
+llm_metrics = {
+    "completion_tokens": tokens_generated,
+    "prompt_tokens": tokens_in_prompt,
+    "total_tokens": total_usage,
+    "tokens_per_second": generation_rate,
+}
+
+# Audio processing metrics
+stt_metrics = {
+    "audio_duration": input_audio_seconds,
+    "processing_duration": transcription_time,
+}
+
+tts_metrics = {
+    "characters_count": text_length,
+    "audio_duration": output_audio_seconds,
+    "ttfb": time_to_first_byte,
+}
+```
+
+## Multi-Agent Workflows
+
+LiveKit supports complex multi-agent workflows. Here's how to trace agent handoffs:
+
+```python filename="multi_agent_example.py"
+from livekit.agents import Agent, AgentSession
+
+class IntroAgent(Agent):
+    def __init__(self):
+        super().__init__(
+            instructions="Gather user information for personalized assistance."
+        )
+    
+    @function_tool
+    async def hand_off_to_specialist(self, context, user_query: str):
+        """Hand off to a specialist agent based on user needs."""
+        
+        # This handoff will be tracked in telemetry
+        if "technical" in user_query.lower():
+            return TechnicalAgent(), "Connecting you to our technical specialist"
+        elif "billing" in user_query.lower():
+            return BillingAgent(), "Transferring to billing support"
+        
+        return GeneralAgent(), "Let me help you with that"
+
+class TechnicalAgent(Agent):
+    def __init__(self):
+        super().__init__(
+            instructions="Provide technical support and troubleshooting."
+        )
+
+# Agent handoffs are automatically traced with context preservation
+```
+
+## Troubleshooting
+
+- **No Traces in Langfuse**: Verify your credentials and check the [troubleshooting guide](/faq/all/missing-traces)
+- **Missing Metrics**: Ensure metrics collection is enabled in your agent session
+- **WebRTC Connection Issues**: Check LiveKit server connectivity and API keys
+- **High Latency**: Use traces to identify bottlenecks in STT, LLM, or TTS processing
+- **Tool Call Failures**: Monitor function tool execution spans for error details
+
+## Advanced Configuration
+
+### Custom Span Attributes
+
+Add custom attributes to your traces for better organization:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+async def entrypoint(ctx: JobContext):
+    with tracer.start_as_current_span("agent_session") as span:
+        span.set_attribute("room.name", ctx.room.name)
+        span.set_attribute("agent.version", "1.0.0")
+        span.set_attribute("user.id", user_id)
+        
+        # Your agent logic here
+```
+
+### Performance Monitoring
+
+Set up alerts based on key performance indicators:
+
+```python
+# Monitor conversation latency
+if total_latency > 2.0:  # seconds
+    logger.warning(f"High conversation latency: {total_latency}s")
+
+# Track token usage for cost monitoring
+if llm_metrics["total_tokens"] > 1000:
+    logger.info(f"High token usage: {llm_metrics['total_tokens']}")
+```
+
+## References
+
+- [LiveKit Agents Documentation](https://docs.livekit.io/agents/)
+- [LiveKit Telemetry Guide](https://docs.livekit.io/agents/build/metrics/)
+- [OpenTelemetry Python Documentation](https://opentelemetry-python.readthedocs.io/)
+- [LiveKit Examples Repository](https://github.com/livekit/agents/tree/main/examples)
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-livekit"]} />
