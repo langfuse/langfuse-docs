@@ -1,25 +1,26 @@
 ---
 title: Trace IDs & Distributed Tracing
 description: Bring your own trace IDs for distributed tracing and linking traces across services.
-sidebarTitle: Trace IDs & Distributed Tracing
+sidebarTitle: Distributed Tracing
 ---
 
-# Trace IDs & Distributed Tracing
+# Distributed Tracing
 
-Langfuse allows you to bring your own trace IDs (e.g., messageId, traceId, correlationId) for
+Distributed tracing is the practice of assigning a unique `trace_id` to every user request and propagating that ID across every microservice, queue, or external API the request touches. 
 
-- distributed tracing
-- and linking traces across services for lookups between services.
+Each component records a span (an individual timed operation) with that same ID, so when the trace is viewed later you get an end-to-end timeline of the request flowing through the entire system.
 
-<Callout>
-
-By default, Langfuse assigns random IDs (uuid, cuid) to all logged events. For the new OTEL-based SDKs (Python v3), Langfuse assigns random 32 hexchar trace IDs and 16 hexchar observation IDs.
-
-</Callout>
+Langfuse enables you to use your own domain specific trace IDs and set them as the `trace_id` for a trace.
 
 <Callout type="info">
 
-It is recommended to use your own domain specific IDs (e.g., messageId, traceId, correlationId) as it helps with downstream use cases like:
+**By default, Langfuse assigns random IDs (uuid, cuid) to all logged events.** For the new OTEL-based SDKs (Python v3), Langfuse assigns random 32 hexchar trace IDs and 16 hexchar observation IDs.
+
+</Callout >
+
+<Callout type="info">
+
+It is recommended to use your own domain specific IDs (e.g., messageId, traceId, correlationId) as it **helps with downstream use cases like:**
 
 - [deeplinking](/docs/tracing-features/url) to the trace from your own ui or logs
 - [evaluating](/docs/scores) and adding custom metrics to the trace
@@ -37,7 +38,7 @@ Trace IDs in Langfuse:
 - Support upsert operations (creating or updating based on ID)
 - For the new OTEL-based SDKs (Python v3), trace IDs are 32 hexchar lowercase strings and observation IDs are 16 hexchar lowercase strings
 
-## Usage
+## How to apply Distributed Tracing
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
 <Tab>
