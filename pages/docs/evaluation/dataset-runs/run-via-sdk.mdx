@@ -5,19 +5,37 @@ description: Run dataset runs via the Langfuse SDK.
 
 # Dataset Runs via the SDK
 
+Once you [created a dataset](/docs/evaluation/dataset-runs/datasets), you can use the dataset to test how your application performs on different inputs.
+
+## Get started
 <Steps>
 
-### Run experiment on a dataset
+### Load the dataset
 
-When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
 
-Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
+```python
+from langfuse import get_client
 
-- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
-- Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
+dataset = get_client().get_dataset("<dataset_name>")
+```
 
-<div className="mt-6" />
-<Tabs items={["Python SDK v3", "Python SDK v2 (decorator)", "Python SDK v2 (low-level)", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "LlamaIndex (Python)", "Vercel AI SDK"]}>
+</Tab>
+<Tab>
+
+```ts
+const dataset = await langfuse.getDataset("<dataset_name>");
+```
+
+</Tab>
+</Tabs>
+
+### Instrument your application
+
+For a dataset run, it is important that your application creates traces in Langfuse for each execution. Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+
+<Tabs items={["Python SDK v3", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
 Assume you already have a Langfuse-instrumented LLM-app:
@@ -38,6 +56,64 @@ def my_llm_function(question: str):
 
     return output
 ```
+
+_See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for more details._
+
+</Tab>
+
+
+<Tab>
+
+```ts
+// Work in progress
+
+```
+
+</Tab>
+<Tab>
+
+```python
+# Work in progress
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+// Work in progress
+```
+
+</Tab>
+
+<Tab>
+
+Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
+
+```typescript
+// Work in progress
+```
+
+</Tab>
+</Tabs>
+
+
+
+
+
+### Loop over dataset items
+
+When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
+
+Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
+
+- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
+- Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
+
+<div className="mt-6" />
+
+<Tabs items={["Python SDK v3",  "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tab>
 
 You may then execute that LLM-app for each dataset item to create a dataset run:
 
@@ -71,75 +147,7 @@ get_client().flush()
 _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTelemetry-based SDK._
 
 </Tab>
-<Tab>
 
-```python
-dataset = langfuse.get_dataset("<dataset_name>")
-
-for item in dataset.items:
-    # Make sure your application function is decorated with @observe decorator to automatically link the trace
-    with item.observe(
-        run_name="<run_name>",
-        run_description="My first run",
-        run_metadata={"model": "llama3"},
-    ) as trace_id:
-        # run your @observe() decorated application on the dataset item input
-        output = my_llm_application.run(item.input)
-
-        # optionally, evaluate the output to compare different runs more easily
-        langfuse.score(
-            trace_id=trace_id,
-            name="<example_eval>",
-            # any float value
-            value=my_eval_fn(item.input, output, item.expected_output),
-            comment="This is a comment",  # optional, useful to add reasoning
-        )
-
-# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-langfuse.flush()
-```
-
-_See [low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client and see the [Python decorator](/docs/sdk/python/decorators) docs on how to use the `@observe` decorator for your main application function._
-
-</Tab>
-<Tab>
-
-```python
-dataset = langfuse.get_dataset("<dataset_name>")
-
-for item in dataset.items:
-    # execute application function and get langfuse_object (trace/span/generation/event)
-    # output also returned as it is used to evaluate the run
-    # you can also link using ids, see sdk reference for details
-    langfuse_object, output = my_llm_application.run(item.input)
-
-    # link the execution trace to the dataset item and give it a run_name
-    item.link(
-        langfuse_object,
-        "<run_name>",
-        run_description="My first run", # optional
-        run_metadata={ "model": "llama3" } # optional
-    )
-
-    # optionally, evaluate the output to compare different runs more easily
-    langfuse_object.score(
-        name="<example_eval>",
-        # any float value
-        value=my_eval_fn(
-            item.input,
-            output,
-            item.expected_output
-        ),
-        comment="This is a comment" # optional, useful to add reasoning
-    )
-
-# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-langfuse.flush()
-```
-
-_See [Python SDK v2 low-level SDK](/docs/sdk/python/low-level-sdk) docs for details on how to initialize the Python client._
-
-</Tab>
 <Tab>
 
 ```ts
@@ -222,43 +230,7 @@ await langfuse.flushAsync();
 </Tab>
 <Tab>
 
-```python
-dataset = langfuse.get_dataset("<dataset_name>")
-
-for item in dataset.items:
-    # This context manager will automatically link the execution trace to the dataset item
-    with item.observe_llama_index(run_name="<run_name>"):
-        # Run your LlamaIndex application on the input
-        index = VectorStoreIndex.from_documents([doc1, doc2])
-        response = index.as_query_engine().query(item.input)
-
-# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-langfuse.flush()
-```
-
-</Tab>
-<Tab>
-
-Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
-
 ```typescript
-const runMyLLMApplication = async (input: string, traceId: string) => {
-  const output = await generateText({
-    model: openai("gpt-4o"),
-    maxTokens: 50,
-    prompt: input,
-    experimental_telemetry: {
-      isEnabled: true,
-      functionId: "vercel-ai-sdk-example-trace",
-      metadata: {
-        langfuseTraceId: traceId,
-        langfuseUpdateParent: true, // Update the parent trace with execution results as the trace was created manually to enable linking
-      },
-    },
-  });
-  return output;
-};
-
 // fetch the dataset
 const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
 
@@ -291,7 +263,7 @@ await langfuse.flushAsync();
 </Tab>
 </Tabs>
 
-### Analyze dataset runs
+### Compare dataset runs
 
 After each experiment run on a dataset, you can check the aggregated score in the dataset runs table and compare results side-by-side.
 
