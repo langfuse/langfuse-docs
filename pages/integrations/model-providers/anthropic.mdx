@@ -12,8 +12,8 @@ category: Integrations
 Anthropic provides advanced language models like Claude, known for their safety, helpfulness, and strong reasoning capabilities. By combining Anthropic's models with **Langfuse**, you can trace, monitor, and analyze your AI workloads in development and production.
 
 This notebook demonstrates **two** different ways to use Anthropic models with Langfuse:
-1. **Anthropic SDK:** Use Langfuse decorators to wrap Anthropic SDK calls for automatic tracing.
-2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via Langfuse's OpenAI SDK wrapper.
+1. **OpenTelemetry Instrumentation:** Use the [`AnthropicInstrumentor`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) library to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
+2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via [Langfuse's OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py).
 
 > **What is Anthropic?**  
 Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
@@ -27,14 +27,10 @@ Anthropic is an AI safety company that develops Claude, a family of large langua
 
 Before you begin, install the necessary packages in your Python environment:
 
-- **anthropic**: The official Anthropic Python SDK for using Claude models.
-- **openai**: Needed to call Anthropic's OpenAI-compatible endpoints.
-- **langfuse**: Required for sending trace data to the Langfuse platform.
-
 
 
 ```python
-%pip install anthropic openai langfuse
+%pip install anthropic openai langfuse opentelemetry-instrumentation-anthropic
 ```
 
 ## Step 2: Configure Langfuse SDK
@@ -71,65 +67,51 @@ else:
     print("Authentication failed. Please check your credentials and host.")
 ```
 
-## Approach 1: Using Native Anthropic SDK with Langfuse Decorators
+    Langfuse client is authenticated and ready!
 
-Langfuse decorators provide a simple way to trace function calls and automatically capture input/output data. This approach allows you to use the native Anthropic SDK while getting full observability through Langfuse.
 
-<Callout type="info" emoji="ℹ️">
-**Note:** For more examples on using Langfuse decorators, see the [Langfuse Python SDK documentation](https://langfuse.com/docs/sdk/python/decorators).
-</Callout>
+## Approach 1: OpenTelemetry Instrumentation
+
+Use the [`AnthropicInstrumentor`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) library to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
 
 
 ```python
-from langfuse import observe
+from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+
+AnthropicInstrumentor().instrument()
+```
+
+
+```python
 from anthropic import Anthropic
 
 # Initialize the Anthropic client
-anthropic = Anthropic(
+client = Anthropic(
     api_key=os.environ.get("ANTHROPIC_API_KEY")
 )
 
-@observe()
-def chat_with_claude(messages: list, model: str = "claude-3-5-sonnet-20241022", max_tokens: int = 1024):
-    """Chat with Claude using the Anthropic SDK and trace with Langfuse."""
-    
-    # Make the API call to Anthropic
-    response = anthropic.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        messages=messages
-    )
-    
-    # Update Langfuse observation with model details and usage
-    langfuse.update_current_generation(
-        model=model,
-        input=messages,
-        output=response.content[0].text,
-        usage_details={
-            "input": response.usage.input_tokens,
-            "output": response.usage.output_tokens,
-            "total": response.usage.input_tokens + response.usage.output_tokens
-        },
-        metadata={
-            "stop_reason": response.stop_reason
+# Make the API call to Anthropic
+message = client.messages.create(
+    model="claude-opus-4-20250514",
+    max_tokens=1000,
+    temperature=1,
+    system="You are a world-class poet. Respond only with short poems.",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Why is the ocean salty?"
+                }
+            ]
         }
-    )
-    
-    return response
+    ]
+)
+print(message.content)
 ```
 
-
-```python
-# Example usage with decorator
-messages = [
-    {"role": "user", "content": "What is Langfuse and how does it help with LLM observability?"}
-]
-
-response = chat_with_claude(messages)
-print(response.content[0].text)
-```
-
-## Approach 2: Using the Langfuse OpenAI SDK Drop-in Replacement
+## Approach 2: OpenAI SDK Drop-in Replacement
 
 Anthropic provides [OpenAI-compatible endpoints](https://docs.anthropic.com/en/api/openai-sdk) that allow you to use the OpenAI SDK to interact with Claude models. This is particularly useful if you have existing code using the OpenAI SDK that you want to switch to Claude.
 
@@ -160,8 +142,13 @@ After executing the application, navigate to your Langfuse Trace Table. You will
 
 ![Langfuse Trace](https://langfuse.com/images/cookbook/integration_anthropic/anthropic-example-trace.png)
 
-You can also view the public trace here: 
+You can also view the trace in Langfuse here: 
 
-- [Approach 1](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c0265bd14c1142294bbbb50759cec2f9?timestamp=2025-07-22T15:59:24.590Z&display=details)
-- [Approach 2](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e8da1b2c15036ed9c25b37c604f2d29?timestamp=2025-07-22T16:05:47.602Z&display=details)
+- [Approach 1: OpenTelemetry Instrumentation](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/308aca9bc430ad872d474fc545889ee2?timestamp=2025-07-25T07:35:01.172Z&display=details)
+- [Approach 2: OpenAI SDK](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e8da1b2c15036ed9c25b37c604f2d29?timestamp=2025-07-22T16:05:47.602Z&display=details)
 </Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
