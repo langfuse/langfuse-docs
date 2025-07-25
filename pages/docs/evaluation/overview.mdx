@@ -87,6 +87,38 @@ Capturing [user feedback](/docs/scores/user-feedback) in your AI application can
 
 Langfuse gives you full flexibility to ingest [custom evaluation scores via the Langfuse SDKs or API](/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom external evaluation workflows.
 
+{/* To be Editted into a headline section not a details section */}
+
+<details>
+<summary>How are scores used across Langfuse?</summary>
+
+Scores can be used in multiple ways across Langfuse:
+
+1. Displayed on trace/session/dataset run to provide a quick overview
+2. Segment all execution traces by scores to e.g. find all traces with a low quality score
+3. Analytics: Detailed score reporting with drill downs into use cases and user segments
+
+</details>
+
+<details>
+<summary>Frequently used scores</summary>
+
+Scores in Langfuse are adaptable (it is just a `name`) and designed to cater to the unique requirements of specific LLM applications. They typically serve to measure the following aspects:
+
+- Quality
+  - Factual accuracy
+  - Completeness of the information provided
+  - Verification against hallucinations
+- Style
+  - Sentiment portrayed
+  - Tonality of the content
+  - Potential toxicity
+- Security
+  - Similarity to prevalent prompt injections
+  - Instances of model refusals (e.g., as a language model, ...)
+
+</details>
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
