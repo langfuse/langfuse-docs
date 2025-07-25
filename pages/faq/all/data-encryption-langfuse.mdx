@@ -1,0 +1,46 @@
+---
+title: How does Langfuse encrypt my data?
+tags: [security]
+---
+
+# How does Langfuse encrypt my data?
+
+Langfuse implements comprehensive encryption to protect your data both at rest and in transit.
+
+## Encryption at Rest
+
+All data stored in Langfuse is encrypted using **AES-256 encryption**, the industry standard for data protection:
+
+- **Database Encryption**: All database records are encrypted before being written to disk
+- **File Storage**: Any uploaded files or artifacts are encrypted using the same AES-256 standard
+- **Backup Encryption**: Database backups are also encrypted to ensure data protection
+
+## Encryption in Transit
+
+All data transmitted to and from Langfuse is protected using **TLS 1.2+** encryption:
+
+- **API Communications**: All API requests and responses are encrypted
+- **Web Interface**: The Langfuse dashboard uses HTTPS with strong cipher suites
+- **Database Connections**: Internal database connections use encrypted channels
+
+## Key Management
+
+- **Key Rotation**: Encryption keys are regularly rotated following security best practices
+- **Hardware Security Modules (HSM)**: Keys are protected using industry-standard HSMs
+- **Access Control**: Encryption keys are accessible only to authorized systems and personnel
+
+## Regional Data Storage
+
+For compliance with data residency requirements:
+- **EU Data**: European customer data is encrypted and stored in EU data centers
+- **US Data**: US customer data is encrypted and stored in US data centers
+- **Custom Regions**: Enterprise customers can specify preferred data regions
+
+## Self-Hosted Encryption
+
+For self-hosted deployments:
+- You maintain full control over encryption keys
+- Support for customer-managed encryption keys (CMEK)
+- Integration with your existing key management infrastructure
+
+For more details about our security practices, visit our [Security Center](/security) or [Encryption documentation](/security/encryption).

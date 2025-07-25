@@ -1,5 +1,6 @@
 export default {
   index: "Overview",
+  faq: "FAQ",
   "-- Security": {
     type: "separator",
     title: "Security",
