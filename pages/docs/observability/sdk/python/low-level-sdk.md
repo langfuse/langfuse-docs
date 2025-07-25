@@ -366,6 +366,42 @@ langfuse.score(
 )
 ```
 
+## Dataset Runs
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # execute application function and get langfuse_object (trace/span/generation/event)
+    # output also returned as it is used to evaluate the run
+    # you can also link using ids, see sdk reference for details
+    langfuse_object, output = my_llm_application.run(item.input)
+
+    # link the execution trace to the dataset item and give it a run_name
+    item.link(
+        langfuse_object,
+        "<run_name>",
+        run_description="My first run", # optional
+        run_metadata={ "model": "llama3" } # optional
+    )
+
+    # optionally, evaluate the output to compare different runs more easily
+    langfuse_object.score(
+        name="<example_eval>",
+        # any float value
+        value=my_eval_fn(
+            item.input,
+            output,
+            item.expected_output
+        ),
+        comment="This is a comment" # optional, useful to add reasoning
+    )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+
 ## Additional configurations
 
 ### Shutdown behavior

@@ -426,6 +426,32 @@ main(
 )
 ```
 
+## Dataset runs
+
+```python
+for item in dataset.items:
+    # Make sure your application function is decorated with @observe decorator to automatically link the trace
+    with item.observe(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as trace_id:
+        # run your @observe() decorated application on the dataset item input
+        output = my_llm_application.run(item.input)
+
+        # optionally, evaluate the output to compare different runs more easily
+        langfuse.score(
+            trace_id=trace_id,
+            name="<example_eval>",
+            # any float value
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
 ## Interoperability with framework integrations [#frameworks]
 
 The decorator is fully interoperable with our main integrations: [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex). Thereby you can easily trace and evaluate functions that use (a combination of) these integrations.

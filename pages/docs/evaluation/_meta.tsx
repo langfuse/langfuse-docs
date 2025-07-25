@@ -1,7 +1,6 @@
 export default {
   overview: "Overview",
-  "get-started": "Get Started",
-  "data-model": "Data Model",
-  features: "Features",
+  "evaluation-methods": "Evaluation Methods",
+  "dataset-runs": "Dataset Runs",
   "troubleshooting-and-faq": "Troubleshooting & FAQ",
 };
