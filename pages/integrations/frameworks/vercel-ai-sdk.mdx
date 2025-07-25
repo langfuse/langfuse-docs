@@ -52,6 +52,12 @@ const result = await generateText({
 
 ### Collect Traces With `LangfuseExporter`
 
+First, install the required package:
+
+```bash
+npm install langfuse-vercel
+```
+
 To collect the traces in Langfuse, you need to add the `LangfuseExporter` to your application.
 
 You can set the Langfuse credentials via environment variables or directly to the `LangfuseExporter` constructor. Create a project in the Langfuse dashboard to get your `secretKey` and `publicKey`.
@@ -127,6 +133,10 @@ export function register() {
 
 </Tab>
 <Tab>
+
+```bash
+npm install langfuse-vercel @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node
+```
 
 ```ts {5, 8, 31}
 import { openai } from "@ai-sdk/openai";
