@@ -12,6 +12,8 @@ Once you [created a dataset](/docs/evaluation/dataset-runs/datasets), you can us
 
 ### Load the dataset
 
+Use the Python or JS/TS SDK to load the dataset.
+
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
@@ -33,7 +35,11 @@ const dataset = await langfuse.getDataset("<dataset_name>");
 
 ### Instrument your application
 
-For a dataset run, it is important that your application creates traces in Langfuse for each execution. Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+First we create our application runner helper function. This function will be call for every dataset item in the next step. 
+
+<Callout type="info" emoji="ℹ️">
+For a dataset run, it is important that your application creates Langfuse traces for each execution so they can be linked to the dataset item. Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+</Callout>
 
 <Tabs items={["Python SDK v3", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
@@ -98,17 +104,9 @@ Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs
 </Tabs>
 
 
-
-
-
 ### Loop over dataset items
 
 When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
-
-Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
-
-- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
-- Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
 
 <div className="mt-6" />
 
@@ -117,7 +115,7 @@ Optionally, the output of the application can be evaluated to compare different 
 
 You may then execute that LLM-app for each dataset item to create a dataset run:
 
-```python filename="execute_dataset.py"
+```python filename="execute_dataset.py" /for item in dataset.items:/
 from langfuse import get_client
 from .app import my_llm_application
 
@@ -150,7 +148,7 @@ _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTe
 
 <Tab>
 
-```ts
+```ts /for (const item of dataset.items)/
 const dataset = await langfuse.getDataset("<dataset_name>");
 
 for (const item of dataset.items) {
@@ -180,7 +178,7 @@ await langfuse.flushAsync();
 </Tab>
 <Tab>
 
-```python
+```python /for item in dataset.items:/
 dataset = langfuse.get_dataset("<dataset_name>")
 
 for item in dataset.items:
@@ -201,7 +199,7 @@ langfuse.flush()
 
 <Tab>
 
-```typescript /createDatasetItemHandler/
+```typescript /createDatasetItemHandler/ /for (const item of dataset.items)/
 import { Langfuse } from "langfuse";
 import { createDatasetItemHandler } from "langfuse-langchain";
 ...
@@ -230,7 +228,7 @@ await langfuse.flushAsync();
 </Tab>
 <Tab>
 
-```typescript
+```typescript /for (const item of dataset.items)/
 // fetch the dataset
 const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
 
@@ -262,6 +260,13 @@ await langfuse.flushAsync();
 
 </Tab>
 </Tabs>
+
+### Optionally: Add an evaluation method
+
+Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
+
+- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
+- Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
 
 ### Compare dataset runs
 
