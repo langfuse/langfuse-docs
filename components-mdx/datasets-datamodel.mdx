@@ -1,8 +1,10 @@
 ## Dataset
 
-`Dataset` is a collection of `DatasetItem`s
+`Dataset` contains a `name`, `description`, and `metadata`. It is a collection of `DatasetItem`s.
 
-`DatasetItem` contains `input`, `expected_output`, and `metadata`
+`DatasetItem` contains `input`, `expected_output`, and `metadata`.
+
+<br />
 
 <div className="border rounded p-2">
 
@@ -28,10 +30,13 @@ direction LR
 
 ## DatasetRun
 
-`DatasetRun` is an experiment run on a `Dataset`, it is identified by a unique `name`
-  - `DatasetRunItem` links a `DatasetItem` to a `Trace` created during an experiment
-  - Evaluation metrics of a `DatasetRun` are based on `Scores` associated with the `Traces` linked to run
+`DatasetRun` is an experiment run on a `Dataset`, it is identified by a unique `name`.
 
+`DatasetRunItem` links a `DatasetItem` to a [`Trace`](/docs/observability/data-model#traces) created during an experiment.
+
+Evaluation metrics of a `DatasetRun` are based on [`Scores`](/docs/evaluation/evaluation-methods/data-model) associated with the `Traces` linked to run.
+
+<br />
 <div className="border rounded p-2">
 
 ```mermaid
@@ -78,17 +83,40 @@ direction LR
 
 ## Dataset and DatasetRun relations
 
+One `Dataset` can contain multiple `DatasetRun`s.
+
+Each `DatasetRunItem` links to a `DatasetItem` and a `Trace`.
+
+<br />
+
 <div className="border rounded p-2">
 
 ```mermaid
 classDiagram
 direction LR
+    class Dataset {
+        name
+        description
+        metadata
+    }
+
+    class DatasetItem {
+        input
+        expected_output
+        metadata
+    }
+
+    Dataset "1" --> "n" DatasetItem
+
+
+
     class DatasetRun {
         name
         description
         metadata
     }
 
+    Dataset "1" --> "n" DatasetRun
     DatasetRun "1" --> "n" DatasetRunItem
 
     class DatasetRunItem {
@@ -106,11 +134,17 @@ direction LR
         metadata
     }
 
+
+    DatasetRunItem "1" --> "1" DatasetItem
+
     Trace "1" --> "n" Observation
     DatasetRunItem "1" --> "1" Trace
     DatasetRunItem "1" --> "0..1" Observation
 
+
+
     Observation "1" --> "n" Score
+
     Trace "1" --> "n" Score
 
     class Score {
