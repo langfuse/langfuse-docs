@@ -1,8 +1,8 @@
-- `Dataset` is a collection of `DatasetItem`s
-  - `DatasetItem` contains `input`, `expected_output`, and `metadata`
-- `DatasetRun` is an experiment run on a `Dataset`, it is identified by a unique `name`
-  - `DatasetRunItem` links a `DatasetItem` to a `Trace` created during an experiment
-  - Evaluation metrics of a `DatasetRun` are based on `Scores` associated with the `Traces` linked to run
+## Dataset
+
+`Dataset` is a collection of `DatasetItem`s
+
+`DatasetItem` contains `input`, `expected_output`, and `metadata`
 
 <div className="border rounded p-2">
 
@@ -22,16 +22,27 @@ direction LR
     }
 
     Dataset "1" --> "n" DatasetItem
+```
 
+</div>
 
+## DatasetRun
 
+`DatasetRun` is an experiment run on a `Dataset`, it is identified by a unique `name`
+  - `DatasetRunItem` links a `DatasetItem` to a `Trace` created during an experiment
+  - Evaluation metrics of a `DatasetRun` are based on `Scores` associated with the `Traces` linked to run
+
+<div className="border rounded p-2">
+
+```mermaid
+classDiagram
+direction LR
     class DatasetRun {
         name
         description
         metadata
     }
 
-    Dataset "1" --> "n" DatasetRun
     DatasetRun "1" --> "n" DatasetRunItem
 
     class DatasetRunItem {
@@ -49,17 +60,11 @@ direction LR
         metadata
     }
 
-
-    DatasetRunItem "1" --> "1" DatasetItem
-
     Trace "1" --> "n" Observation
     DatasetRunItem "1" --> "1" Trace
     DatasetRunItem "1" --> "0..1" Observation
 
-
-
     Observation "1" --> "n" Score
-
     Trace "1" --> "n" Score
 
     class Score {
@@ -70,3 +75,50 @@ direction LR
 ```
 
 </div>
+
+## Dataset and DatasetRun relations
+
+<div className="border rounded p-2">
+
+```mermaid
+classDiagram
+direction LR
+    class DatasetRun {
+        name
+        description
+        metadata
+    }
+
+    DatasetRun "1" --> "n" DatasetRunItem
+
+    class DatasetRunItem {
+    }
+
+    class Trace {
+        input
+        output
+        metadata
+    }
+
+    class Observation {
+        input
+        output
+        metadata
+    }
+
+    Trace "1" --> "n" Observation
+    DatasetRunItem "1" --> "1" Trace
+    DatasetRunItem "1" --> "0..1" Observation
+
+    Observation "1" --> "n" Score
+    Trace "1" --> "n" Score
+
+    class Score {
+        name
+        value
+        comment
+    }
+```
+
+</div>
+
