@@ -108,8 +108,6 @@ Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs
 
 When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
 
-<div className="mt-6" />
-
 <Tabs items={["Python SDK v3",  "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
 <Tab>
 
@@ -118,8 +116,6 @@ You may then execute that LLM-app for each dataset item to create a dataset run:
 ```python filename="execute_dataset.py" /for item in dataset.items:/
 from langfuse import get_client
 from .app import my_llm_application
-
-dataset = get_client().get_dataset("<dataset_name>")
 
 for item in dataset.items:
     # Use the item.run() context manager for automatic trace linking
@@ -131,7 +127,7 @@ for item in dataset.items:
         # Execute your LLM-app against the dataset item input
         output = my_llm_application.run(item.input)
 
-        # Optionally, score the result against the expected output
+        # Optionally: Add scores
         root_span.score_trace(
             name="<example_eval>",
             value=my_eval_fn(item.input, output, item.expected_output),
@@ -149,8 +145,6 @@ _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTe
 <Tab>
 
 ```ts /for (const item of dataset.items)/
-const dataset = await langfuse.getDataset("<dataset_name>");
-
 for (const item of dataset.items) {
   // execute application function and get langfuseObject (trace/span/generation/event)
   // output also returned as it is used to evaluate the run
@@ -163,7 +157,7 @@ for (const item of dataset.items) {
     metadata: { model: "llama3" }, // optional run metadata
   });
 
-  // optionally, evaluate the output to compare different runs more easily
+  // Optionally: Add scores
   langfuseObject.score({
     name: "<score_name>",
     value: myEvalFunction(item.input, output, item.expectedOutput),
@@ -179,8 +173,6 @@ await langfuse.flushAsync();
 <Tab>
 
 ```python /for item in dataset.items:/
-dataset = langfuse.get_dataset("<dataset_name>")
-
 for item in dataset.items:
     # Langchain callback handler that automatically links the execution trace to the dataset item
     handler = item.get_langchain_handler(run_name="<run_name>")
@@ -188,7 +180,7 @@ for item in dataset.items:
     # Execute application and pass custom handler
     my_langchain_chain.run(item.input, callbacks=[handler])
 
-    # Add a score to the linked trace depending on the chain output and expected output
+    # Optionally: Add scores
     langfuse.score(trace_id=handler.get_trace_id(), name="my_score", value=1)
 
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
@@ -205,7 +197,6 @@ import { createDatasetItemHandler } from "langfuse-langchain";
 ...
 
 const langfuse = new Langfuse()
-const dataset = await langfuse.getDataset("my-dataset");
 const runName = "my-dataset-run";
 
 for (const item of dataset.items) {
@@ -215,7 +206,7 @@ for (const item of dataset.items) {
   // Pass the callback handler when invoking the chain
   await chain.invoke({ country: item.input }, { callbacks: [handler] });
 
-  // Add score to the linked trace depending on the chain output and expected output
+  // Optionally: Add scores
   trace.score({
     name: "test-score",
     value: 0.5,
@@ -229,9 +220,6 @@ await langfuse.flushAsync();
 <Tab>
 
 ```typescript /for (const item of dataset.items)/
-// fetch the dataset
-const dataset = await langfuse.getDataset("vercel-ai-sdk-example");
-
 // iterate over the dataset items
 for (const item of dataset.items) {
   // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
@@ -246,7 +234,7 @@ for (const item of dataset.items) {
     metadata: { model: "gpt-4o" }, // optional run metadata
   });
 
-  // optionally, evaluate the output to compare different runs more easily
+  // Optionally: Add scores
   trace.score({
     name: "<score_name>",
     value: myEvalFunction(item.input, output, item.expectedOutput),
@@ -261,12 +249,23 @@ await langfuse.flushAsync();
 </Tab>
 </Tabs>
 
-### Optionally: Add an evaluation method
+### Optionally: Add scores
 
 Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
 
-- Use any evaluation function and directly add a score while running the experiment. See below for implementation details.
-- Set up [LLM-as-a-judge](/docs/scores/model-based-evals) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
+<Tabs items={["In your code", "In Langfuse"]}>
+<Tab>
+
+Use any evaluation function and directly add a score while looping over the dataset items. See [above](#loop-over-dataset-items) for implementation details.
+
+</Tab>
+
+<Tab>
+
+Set up [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
+
+</Tab>
+</Tabs>
 
 ### Compare dataset runs
 
