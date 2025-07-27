@@ -84,7 +84,7 @@ chain.invoke({"person": "Satya Nadella"}, config={"callbacks":[langfuse_handler]
 
 ## Example using Langfuse Prompt Management and Langchain
 
-Learn more about Langfuse Prompt Management in the [docs](https://langfuse.com/docs/prompts).
+Learn more about Langfuse Prompt Management in the [docs](https://langfuse.com/docs/prompt-management/overview).
 
 
 ```python

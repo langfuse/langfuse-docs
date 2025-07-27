@@ -17,7 +17,7 @@ const menuItems: {
       },
       {
         name: "Prompt Management",
-        href: "/docs/prompts/get-started",
+        href: "/docs/prompt-management/get-started",
       },
       {
         name: "Evaluation",

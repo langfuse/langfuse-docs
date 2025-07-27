@@ -13,6 +13,6 @@ export default {
   },
   "prompt-webhooks": {
     title: "Prompt Webhooks",
-    href: "/docs/prompts/get-started#webhooks",
+    href: "/docs/prompt-management/features/webhooks",
   },
 };
