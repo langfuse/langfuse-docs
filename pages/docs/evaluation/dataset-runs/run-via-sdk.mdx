@@ -7,7 +7,14 @@ description: Run dataset runs via the Langfuse SDK.
 
 Once you [created a dataset](/docs/evaluation/dataset-runs/datasets), you can use the dataset to test how your application performs on different inputs.
 
+## Why use dataset runs via the SDK?
+
+- Full flexibility to use your own application logic
+- Use custom scoring functions to evaluate the outputs
+- Run multiple experiments on the same dataset in parallel
+
 ## Get started
+
 <Steps>
 
 ### Load the dataset
@@ -16,6 +23,7 @@ Use the Python or JS/TS SDK to load the dataset.
 
 <Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
+{/* PYTHON SDK */}
 
 ```python
 from langfuse import get_client
@@ -25,6 +33,7 @@ dataset = get_client().get_dataset("<dataset_name>")
 
 </Tab>
 <Tab>
+{/* JS/TS SDK */}
 
 ```ts
 const dataset = await langfuse.getDataset("<dataset_name>");
@@ -41,8 +50,9 @@ First we create our application runner helper function. This function will be ca
 For a dataset run, it is important that your application creates Langfuse traces for each execution so they can be linked to the dataset item. Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
 </Callout>
 
-<Tabs items={["Python SDK v3", "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tabs items={["Python SDK v3", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
 <Tab>
+{/* PYTHON SDK v3 */}
 
 Assume you already have a Langfuse-instrumented LLM-app:
 
@@ -69,38 +79,200 @@ _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for more details._
 
 
 <Tab>
+{/* JS/TS SDK */}
 
-```ts
-// Work in progress
 
+```ts filename="app.ts"
+const trace = langfuse.trace({
+  name: "my-AI-application-endpoint",
+});
+ 
+// Example generation creation
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-4o",
+  input: messages,
+});
+ 
+// Application code
+const chatCompletion = await llm.respond(prompt);
+ 
+// End generation - sets endTime
+generation.end({
+  output: chatCompletion,
+});
 ```
 
 </Tab>
 <Tab>
+{/* LANGCHAIN (PYTHON) */}
 
-```python
-# Work in progress
+```python filename="app.py" /config={"callbacks": [langfuse_handler]}/
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+def my_llm_function(question):
+  llm = ChatOpenAI(model_name="gpt-4o")
+  prompt = ChatPromptTemplate.from_template("Answer the question: {question}")
+  chain = prompt | llm
+
+  response = chain.invoke(
+      {"question": question}, 
+      config={"callbacks": [langfuse_handler]})
+  
+  return response
 ```
 
 </Tab>
 
 <Tab>
+{/* LANGCHAIN (JS/TS) */}
 
-```typescript
-// Work in progress
+```typescript filename="app.ts" /callbacks: [langfuseHandler]/
+import { CallbackHandler } from "langfuse-langchain";
+// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
+ 
+const langfuseHandler = new CallbackHandler();
+ 
+// Your Langchain code
+ 
+// Add Langfuse handler as callback to `run` or `invoke`
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 ```
 
 </Tab>
 
 <Tab>
+{/* Vercel AI SDK */}
 
 Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
 
-```typescript
-// Work in progress
+```ts filename="app.ts" 
+const runMyLLMApplication = async (input: string, traceId: string) => {
+  const output = await generateText({
+    model: openai("gpt-4o"),
+    maxTokens: 50,
+    prompt: input,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: "vercel-ai-sdk-example-trace",
+      metadata: {
+        langfuseTraceId: traceId,
+        langfuseUpdateParent: true, // Update the parent trace with execution results as the trace was created manually to enable linking
+      },
+    },
+  });
+  return output;
+};
+
 ```
 
+
 </Tab>
+
+
+<Tab>
+{/* OTHER FRAMEWORKS */}
+
+Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+
+<Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/vercel_ai_sdk_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Vercel AI SDK"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/llamaindex_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Llamaindex"
+    href="/integrations/frameworks/llamaindex"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/crewai_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="CrewAI"
+    href="/integrations/frameworks/crewai"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/ollama_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Ollama"
+    href="/integrations/model-providers/ollama"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/litellm_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="LiteLLM"
+    href="/integrations/gateways/litellm"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/autogen_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="AutoGen"
+    href="/integrations/frameworks/autogen"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/google_adk_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Google ADK"
+    href="/integrations/frameworks/google-adk"
+    arrow
+  />
+  <Card title="All integrations" href="/integrations" arrow />
+</Cards>
+
+</Tab>
+
 </Tabs>
 
 

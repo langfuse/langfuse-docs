@@ -1,26 +1,25 @@
 ---
-title: Prompt Experiments
-description: Run prompt experiments on datasets with LLM-as-a-Judge evaluations.
+title: Dataset Runs via the UI
+description: Experiment with different prompt versions and models on a dataset and compare the results side-by-side.
 ---
 
 # Dataset Runs via the UI
 
-You can execute Prompt Experiments in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or different models and compare the results side-by-side.
+You can execute Prompt Experiments in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
 
-Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to automatically evaluate the responses based on the expected outputs to further analyze the results on an aggregate level.
-
-## Why use Prompt Experiments?
-
-- **Feedback loop**: Quickly iterate on prompts by running experiments and directly comparing evaluation results side-by-side.
-- **Regression prevention**: When making prompt changes, run an experiment to make sure that the new version does not cause bad outputs.
-
-## Overview
+Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to automatically score the responses based on the expected outputs to further analyze the results on an aggregate level.
 
 <CloudflareVideo
   videoId="0e2811d0dbcd59000837773aef814963"
   aspectRatio={16 / 9}
   title="Introduction to Prompt Experiments"
 />
+
+## Why use Prompt Experiments?
+
+- Stucture your prompt testing by using a dataset to test different prompt versions and models
+- Quickly iterate on prompts by running experiments and directly comparing evaluation results side-by-side
+- Prevent regressions by running experiments when making prompt changes
 
 ## Get started
 
@@ -32,7 +31,7 @@ Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-
 ![Create a prompt](/images/docs/prompt-experiments-create-prompt.png)
 </Frame>
 
-Create a prompt that you want to test on the dataset. As you are testing your prompt using all dataset items as input, your prompt needs to contain variables that match the keys in the dataset items.
+Create a prompt that you want to test and evaluate. As you are testing your prompt by looping over all dataset items, your prompt needs to have variables that match the variables in the dataset items.
 
 import {FileJson} from "lucide-react";
 
@@ -125,7 +124,7 @@ In this example:
 ![Create a dataset](/images/docs/prompt-experiments-create-dataset-item.png)
 </Frame>
 
-Create a dataset with the inputs and expected outputs that you want to test your prompt on. Make sure that the dataset items include the input variables that should be inserted into the prompt.
+Create a dataset with the inputs and expected outputs you want to use for your prompt experiments. Make sure that the dataset items include the variable(s) that will be inserted into the prompt.
 
 import {Database} from "lucide-react";
 
@@ -163,7 +162,7 @@ Langfuse is the LLM Engineering Platform.
 ![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
 </Frame>
 
-Prompt Experiments runs LLM calls within Langfuse. Thus, you need to configure an LLM connection in the project settings.
+As your prompt will be executed for each dataset item, you need to configure an LLM connection in the project settings.
 
 import {KeyRound} from "lucide-react";
 
@@ -180,8 +179,7 @@ import {KeyRound} from "lucide-react";
 
 ### Optional: Set up LLM-as-a-judge
 
-You can set up an LLM-as-a-judge to score the responses based on the expected outputs. Make sure to set the target of the LLM-as-a-Judge to "Experiment runs" and optionally filter for the dataset you want to use.
-
+You can set up an LLM-as-a-judge evaluator to score the responses based on the expected outputs. Make sure to set the target of the LLM-as-a-Judge to "Experiment runs" and filter for the dataset you want to use.
 
 import {WandSparkles} from "lucide-react";
 
