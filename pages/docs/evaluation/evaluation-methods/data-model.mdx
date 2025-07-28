@@ -80,3 +80,16 @@ A score config includes:
 - **Score name**
 - **Data type:** `NUMERIC`, `CATEGORICAL`, `BOOLEAN`
 - **Constraints on score value range** (Min/Max for numerical, Custom categories for categorical data types
+
+### Score Config object
+
+| Attribute     | Type    | Description                                                                                     |
+| ------------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `id`          | string  | Unique identifier of the score config.                                                          |
+| `name`        | string  | Name of the score config, e.g. user_feedback, hallucination_eval                                |
+| `dataType`    | string  | Can be either `NUMERIC`, `CATEGORICAL` or `BOOLEAN`                                             |
+| `isArchived`  | boolean | Whether the score config is archived. Defaults to false                                         |
+| `minValue`    | number  | Optional: Sets minimum value for numerical scores. If not set, the minimum value defaults to -∞ |
+| `maxValue`    | number  | Optional: Sets maximum value for numerical scores. If not set, the maximum value defaults to +∞ |
+| `categories`  | list    | Optional: Defines categories for categorical scores. List of objects with label value pairs     |
+| `description` | string  | Optional: Provides further description of the score configuration     
