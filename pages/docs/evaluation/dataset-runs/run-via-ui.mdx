@@ -40,7 +40,7 @@ import {FileJson} from "lucide-react";
 
   <Card
     icon={<FileJson size="24" />}
-    title="Create a prompt"
+    title="How to create a prompt?"
     href="/docs/prompt-management/get-started"
     arrow
   />
@@ -133,7 +133,7 @@ import {Database} from "lucide-react";
 
   <Card
     icon={<Database size="24" />}
-    title="Create a dataset"
+    title="How to create a dataset?"
     href="/docs/evaluation/dataset-runs/datasets"
     arrow
   />
@@ -171,7 +171,7 @@ import {KeyRound} from "lucide-react";
 
   <Card
     icon={<KeyRound size="24" />}
-    title="Configure an LLM connection"
+    title="How to configure an LLM connection?"
     href="/faq/all/llm-connection"
     arrow
   />
@@ -189,7 +189,7 @@ import {WandSparkles} from "lucide-react";
 
   <Card
     icon={<WandSparkles size="24" />}
-    title="Set up LLM-as-a-judge"
+    title="How to set up LLM-as-a-judge?"
     href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
     arrow
   />
@@ -207,14 +207,24 @@ When viewing the prompt details or a dataset, use the following button to run a 
 
 Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.
 
-<Callout type="tip" emoji="ℹ️">
-**Troubleshooting:** If you see a warning about mismatched variables, ensure that:
+## Compare runs
+
+After each experiment run, you can check the aggregated score in the dataset runs table and compare results side-by-side.
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Steps>
+
+## Troubleshooting
+
+If you see a warning about mismatched variables, ensure that:
 - Every `{{variable}}` in your prompt has a matching key in your dataset items' input JSON
 - The names match exactly (including case sensitivity)
 - Your dataset input is valid JSON format
-</Callout>
-
-</Steps>
 
 
 ## GitHub Discussions
