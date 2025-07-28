@@ -24,7 +24,7 @@ LLM-as-a-judge is a technique to evaluate the quality of LLM applications by usi
 
 <Steps>
 
-## Pick an evaluator
+### Pick an Evaluator
 
 The first step is to select an evaluator. We offer two main ways to approach this:
 
@@ -44,7 +44,7 @@ When the library doesn't fit your specific needs, add your own:
 3. Optional: Pin a custom dedicated model for this evaluator. If no custom model is specified, it will use the default evaluation model (see Section 2).
 4. Save → the evaluator can now be reused across your project.
 
-## Set the default evaluation model
+### Set the default Evaluation Model
 
 Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
 
@@ -52,7 +52,7 @@ Next, you'll define the default model used for conducting the evaluations. The d
 - **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
 - **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
 
-## Choose which data to evaluate
+### Choose which Data to Evaluate
 
 With your evaluator and model selected, you now specify which data to run the evaluations on. Different questions need different slices of data.
 
@@ -84,7 +84,7 @@ Dataset experiments run on static items, perfect for regression testing. Please 
 </Tab>
 </Tabs>
 
-## Map variables & preview evaluation prompt
+### Map Variables & preview Evaluation Prompt
 
 You now need to teach Langfuse _which properties_ of your trace or dataset item represent the actual data to populate these variables for a sensible evaluation. For instance, you might map your system's logged trace input to the prompt's `{{input}}` variable, and the LLM response ie trace output to the prompt's `{{output}}` variable. This mapping is crucial for ensuring the evaluation is sensible and relevant.
 
