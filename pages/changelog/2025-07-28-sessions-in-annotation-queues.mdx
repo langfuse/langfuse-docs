@@ -1,0 +1,40 @@
+---
+date: 2025-07-28
+title: Sessions in Annotation Queues
+description: Annotation Queues now support session-level annotation, making it easier to evaluate multi-turn interactions in your LLM applications.
+author: Marlies
+# ogCloudflareVideo: e8d737729ba1c64823e3e86138f4e63f
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { MessageSquare, Users, CheckSquare } from "lucide-react";
+
+<ChangelogHeader />
+
+We have added session-level annotation support in Langfuse Annotation Queues. This extends our annotation workflow capabilities to handle multi-turn interactions, making it particularly valuable for evaluating conversational AI applications.
+
+## What's New
+
+Previously, Annotation Queues focused on individual traces. Now you can add entire sessions to annotation queues, enabling you to:
+
+- **Evaluate Full Conversations**: Annotate complete multi-turn conversations rather than isolated interactions
+- **Conversational Context**: Maintain conversation flow and context when reviewing and scoring LLM responses
+- **Streamlined Workflow**: Process conversational data more efficiently with session-level organization
+
+## Key Benefits for Conversational Use Cases
+
+- **Enhanced Context**: Reviewers can see the full conversation history when making annotation decisions
+- **Improved Consistency**: Session-level scoring ensures evaluation considers the entire interaction flow
+- **Better Insights**: Generate more meaningful evaluation datasets for conversational AI applications
+- **Efficient Processing**: Manage annotation tasks at the appropriate granularity for your use case
+
+This update builds upon our existing Annotation Queue capabilities while extending support to session-based workflows, making it easier to maintain high-quality standards for conversational AI applications.
+
+## Learn More
+
+import { Book, MessageSquare as MessageIcon } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Annotation Queue Documentation" href="/docs/scores/annotation" icon={<Book />} />
+  <Card title="Sessions Overview" href="/docs/tracing/sessions" icon={<MessageIcon />} />
+</Cards> 
