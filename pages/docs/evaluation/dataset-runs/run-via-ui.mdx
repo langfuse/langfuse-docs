@@ -3,15 +3,11 @@ title: Prompt Experiments
 description: Run prompt experiments on datasets with LLM-as-a-Judge evaluations.
 ---
 
-# Prompt Experiments
+# Dataset Runs via the UI
 
-You can execute Dataset Runs in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or different models and compare the results side-by-side.
+You can execute Prompt Experiments in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or different models and compare the results side-by-side.
 
 Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to automatically evaluate the responses based on the expected outputs to further analyze the results on an aggregate level.
-
-<Callout type="info">
-This is a no-code feature within Langfuse. You can run more complex experiments via the Langfuse SDKs/API. Follow [this guide](/docs/evaluation/dataset-runs/run-via-sdk) to get started.
-</Callout>
 
 ## Why use Prompt Experiments?
 
@@ -26,23 +22,34 @@ This is a no-code feature within Langfuse. You can run more complex experiments 
   title="Introduction to Prompt Experiments"
 />
 
-## Requirements
+## Get started
 
-<Callout type="warning">
-For prompt experiments to work correctly, you must ensure:
+<Steps>
 
-1. **Your prompt contains at least one variable** using the `{{variableName}}` syntax
-2. **Variable names in your prompt must exactly match the keys in your dataset items**
-3. **Dataset items must have their input formatted as valid JSON**
+### Create a prompt
+
+Create a prompt that you want to test on the dataset.
+
+<Callout type="info">
+As you are testing your prompt using all dataset items as input, your prompt needs to contain variables that match the keys in the dataset items.
 </Callout>
 
+import {FileJson} from "lucide-react";
 
-### Variable Mapping
+<Cards num={1}>
 
-For Prompt Experiments, you need to map the variables in your prompt to the keys in your dataset items.
+  <Card
+    icon={<FileJson size="24" />}
+    title="Create a prompt"
+    href="/docs/prompt-management/get-started"
+    arrow
+  />
+</Cards>
 
 <details>
-<summary>Example:</summary>
+<summary>Example: Prompt & Dataset Item Mapping</summary>
+
+For Prompt Experiments, you need to map the variables in your prompt to the keys in your dataset items.
 
 The following example demonstrates how prompt variables are mapped to dataset item inputs:
 
@@ -78,15 +85,12 @@ In this example:
 
 </details>
 
-
-### Chat Message Placeholder Mapping Example [#message-placeholders]
+<details>
+<summary>Example: Chat Message Placeholder Mapping</summary>
 
 In addition to variables, you can also map placeholders in chat message prompts to dataset item keys.
 This is useful when the dataset item also contains for example a chat message history to use.
 Your chat prompt needs to contain a placeholder with a name. Variables within placeholders are not resolved.
-
-<details>
-<summary>Example:</summary>
 
 **Chat Prompt:**
 Placeholder named: `message_history`
@@ -115,47 +119,26 @@ In this example:
 
 </details>
 
-## Setup
-
-<Callout type="info">
-
-If you already have a dataset and a prompt, you can skip the following steps.
-
-</Callout>
-
-In Prompt Experiments, the items of a dataset are mapped to the variables of the prompt. In the following example, the variables (`documentation` and `question`) are mapped to the `input` of the dataset which is a JSON object. The `expected output` contains a reference answer for the given dataset item.
-
-<Steps>
-
-### Configure LLM connection
-
-Prompt Experiments runs LLM calls within Langfuse. Thus, you need to configure an LLM connection in the project settings.
-
-<details>
-<summary>Supported LLM providers</summary>
-
-- OpenAI, or OpenAI-compatible providers (e.g. LiteLLM, Google Vertex AI)
-- Anthropic
-- Azure OpenAI
-- AWS Bedrock
-
-</details>
-
 ### Create a dataset
 
 Create a dataset with the inputs and expected outputs that you want to test your prompt on.
 
-import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
-
-<CreateDataset />
-
-### Create dataset items with test cases
-
+<Callout type="info">
 Dataset items include the input variables that should be inserted into the prompt.
-
-<Callout type="important">
-The input must be a JSON object where each key exactly matches a variable name in your prompt. For example, if your prompt contains `{{question}}`, your dataset item's input JSON must have a `"question"` key.
 </Callout>
+
+
+import {Database} from "lucide-react";
+
+<Cards num={1}>
+
+  <Card
+    icon={<Database size="24" />}
+    title="Create a dataset"
+    href="/docs/evaluation/dataset-runs/datasets"
+    arrow
+  />
+</Cards>
 
 <details>
 <summary>Example Dataset Item with variables</summary>
@@ -173,39 +156,42 @@ Langfuse is the LLM Engineering Platform.
 
 </details>
 
-import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
 
-<CreateDatasetItem />
 
-### Create a prompt with variables
+### Configure LLM connection
 
-Use `{{variables}}` to insert the dataset variables into the prompt during experiments.
-
-<Callout type="important">
-Each `{{variableName}}` in your prompt must have a corresponding key in your dataset items' input JSON. The names must match exactly (case-sensitive).
-</Callout>
+Prompt Experiments runs LLM calls within Langfuse. Thus, you need to configure an LLM connection in the project settings.
 
 <details>
-<summary>Example Prompt</summary>
+<summary>Supported LLM providers</summary>
 
-```text filename="system"
-You are a Langfuse expert. Please answer questions based on the following documentation:
-
-DOCUMENTATION
-{{documentation}}
-```
-
-```text filename="user"
-{{question}}
-```
+- OpenAI, or OpenAI-compatible providers (e.g. LiteLLM, Google Vertex AI)
+- Anthropic
+- Azure OpenAI
+- AWS Bedrock
 
 </details>
 
-import PromptCreate from "@/components-mdx/prompt-create.mdx";
 
-<PromptCreate />
+### Optional: Set up LLM-as-a-judge
 
-</Steps>
+You can set up an LLM-as-a-judge to score the responses based on the expected outputs.
+
+<Callout type="info">
+Make sure to set the target of the LLM-as-a-Judge to "Experiment runs" and optionally filter for the dataset you want to use.
+</Callout>
+
+import {WandSparkles} from "lucide-react";
+
+<Cards num={1}>
+
+  <Card
+    icon={<WandSparkles size="24" />}
+    title="Set up LLM-as-a-judge"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    arrow
+  />
+</Cards>
 
 ## Run a prompt experiment
 
@@ -213,10 +199,8 @@ Now that we have set up a prompt version and a dataset, we can run a prompt expe
 
 When viewing the prompt details or a dataset, use the following button to run a prompt experiment:
 
-<Frame className="my-10" fullWidth>
-
+<Frame border fullWidth>
 ![New Experiment Button](/images/docs/prompt-experiments-new-experiment.png)
-
 </Frame>
 
 Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.
@@ -227,6 +211,9 @@ Select the prompt version, dataset, and model configuration that you want to tes
 - The names match exactly (including case sensitivity)
 - Your dataset input is valid JSON format
 </Callout>
+
+</Steps>
+
 
 ## GitHub Discussions
 
