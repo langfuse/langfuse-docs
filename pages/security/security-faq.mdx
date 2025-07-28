@@ -1,0 +1,119 @@
+# Security FAQ
+
+Answers to common questions about Langfuse's security practices.
+
+> **How is data encrypted in transit and at rest?**
+
+TLS 1.2+ protects traffic; all stored data uses AES‑256 encryption, with optional BYOK/HSM for dedicated tenants. See [encryption documentation](/security/encryption) and [self-hosted encryption](/self-hosting/encryption) for more details.
+
+> **Do you ever use customer data to train models or analytics?**
+
+No—customer traces and prompts are processed only to provide the Langfuse service and are never used to train internal or third‑party ML models. See [security overview](/docs/security/overview) for more details.
+
+> **What retention, deletion and export controls exist?**
+
+Each project can set its own retention window; data older than that is purged nightly, and users/API can trigger immediate deletion or export. See [data retention](/docs/data-retention) and [data deletion](/docs/data-deletion) documentation.
+
+> **Can I deploy Langfuse in a single-tenant environment?**
+
+Langfuse Cloud is multi-tenant only. For strict infrastructure-level isolation, we recommend Self-hosting Langfuse.
+
+> **How is tenant isolation enforced?**
+
+Cloud tenants are logically isolated by project‑level RBAC; on-premise deployments can use a dedicated database. See [RBAC documentation](/docs/rbac) for more details.
+
+> **Can customers pin data to specific regions?**
+
+Yes—EU, US and HIPAA‑ready US zones are available, and self‑hosted deployments let you choose any region.
+
+## Compliance & Certifications
+
+> **Which audits and attestations are in place?**
+
+Langfuse Cloud is SOC 2 Type II and ISO 27001 compliant; GDPR & HIPAA controls are implemented. See [compliance overview](/security/soc2) for more details.
+
+> **How often are third‑party pen tests performed, and are results shareable?**
+
+Independent penetration tests occur annually, plus continuous vulnerability scans. See [penetration testing](/security/penetration-testing) for more details and past results.
+
+## Identity & Access Management
+
+> **Which authentication options are supported?**
+
+OIDC SSO, email/password, and SCIM provisioning; MFA or passkeys can be enforced via your IdP. See auth documentation for more details.
+
+> **How is least‑privilege enforced?**
+
+RBAC lets you scope roles to organisation or project. See [RBAC documentation](/docs/rbac) for more details.
+
+## Infrastructure & Network Security
+
+> **Where is Langfuse Cloud hosted and how is the perimeter protected?**
+
+Langfuse runs on AWS in isolated VPCs with WAF and AWS Shield for DDoS mitigation.
+
+## Application Security & SDLC
+
+> **What secure‑coding and testing practices are in place?**
+
+Every commit passes our CI pipeline of end-to-end, unit, and security tests.
+
+## Incident Response & Business Continuity
+
+> **What is the incident‑response process?**
+
+24 × 7 monitoring triggers an on‑call engineer; affected customers are notified and post‑mortems are published for larger incidents. See [incident and breach](/security/incident-and-breach) documentation for more details.
+
+## Vulnerability & Pen‑Testing
+
+> **How is the disclosure program run?**
+
+Langfuse maintains a public responsible‑disclosure policy; CVSS drives remediation SLAs. See [penetration testing](/security/penetration-testing) for more details.
+
+> **Can customers run their own pen‑tests?**
+
+Yes—please run penetration tests in self-hosted deployments.
+
+## Sub‑processors & Third‑Party Risk
+
+> **Which sub‑processors have access to customer data?**
+
+The live list is published [here](/security/subprocessors).
+
+## Customer Controls & Shared Responsibility for Self-hosted Langfuse
+
+> **Which obligations stay with the customer when I am self-hosting?**
+
+Endpoint security, webhook endpoint hardening, backups, monitoring, and IAM hygiene on your side remain your responsibility. See [security overview](/docs/security/overview) for more details.
+
+> **How should my backup strategy look like when I am self-hosting?**
+
+We have a full guide around backups available to enable zero dataloss backups. See [the backup guide here](/self-hosting/backups).
+
+> **Does Langfuse offer a managed Langfuse instance in my VPC?**
+
+While we can offer support in the Enterprise tier, we do not operate installations on customer infrastructure. If self-hosting is not possible, we recommend using Langfuse Cloud.
+
+## AI / LLM‑Specific Concerns
+
+> **Does Langfuse store PII or trade secrets from prompts?**
+
+Langfuse stores the data as-is. You can redact sensitive data via [data masking](/docs/observability/features/masking).
+
+> **Can long‑term retention be disabled?**
+
+Yes—you can configure custom [data retention](/docs/data-retention) policies.
+
+> **Is prompt/trace data ever used for benchmarking or training?**
+
+No. Langfuse does not repurpose customer data for external benchmarks or model training. See [security overview](/docs/security/overview) for more details.
+
+## Governance, People & Culture
+
+> **How are employees vetted and trained?**
+
+All staff pass background checks, sign NDAs and complete security training. See [SOC 2 compliance](/security/soc2) for more details.
+
+> **Who owns security inside Langfuse?**
+
+Langfuse CTO leads security efforts at Langfuse and reviews risk quarterly and drives continuous improvement. See [SOC 2 compliance](/security/soc2) for more details.

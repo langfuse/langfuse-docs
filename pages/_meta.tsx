@@ -131,6 +131,15 @@ export default {
       timestamp: false,
     },
   },
+  research: {
+    title: "Research",
+    type: "page",
+    display: "hidden",
+    theme: {
+      typesetting: "article",
+      timestamp: false,
+    },
+  },
   library: {
     title: "Library",
     type: "page",

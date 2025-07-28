@@ -1,0 +1,316 @@
+---
+description: User-level LLM observability to track token usage, usage volume and individual user feedback.
+sidebarTitle: User Tracking
+---
+
+# User Tracking
+
+The Users view provides an overview of all users. It also offers an in-depth look into individual users.
+
+<CloudflareVideo
+  videoId="1c8ab99f53799bcb24ce11982065a7d9"
+  aspectRatio={1696 / 1080}
+  gifStyle
+/>
+
+It's easy to map data in Langfuse to individual users. Just pass a unique identifier as the `userId` when you create a `trace`. This can be a username, email, or any other unique identifier. The `userId` is optional, but using it helps you get more from Langfuse. See the integration docs to learn more.
+
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tab>
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def process_user_request(user_query):
+    # Add user_id to the current trace
+    langfuse.update_current_trace(user_id="user_12345")
+
+    # ...your processing logic...
+    return result
+```
+
+When creating spans directly:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# You can set the user_id when creating the root span via update_trace
+with langfuse.start_as_current_span(
+    name="process-user-request"
+) as root_span:
+    # Add user_id to the trace
+    root_span.update_trace(user_id="user_12345")
+
+    # All spans in this trace will be associated with this user
+    with root_span.start_as_current_generation(
+        name="generate-response",
+        model="gpt-4o"
+    ) as gen:
+        # ...generate response...
+        pass
+```
+
+You can also update the user_id of the current trace without a direct reference to a span:
+
+```python
+with langfuse.start_as_current_span(name="handle-user-interaction"):
+    # Add user_id to the current trace
+    langfuse.update_current_trace(user_id="user_12345")
+```
+
+</Tab>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        user_id="user-id"
+    )
+
+fn()
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    user_id="user-id"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  userId: "user-id",
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+**Python SDK v3 - use metadata:**
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"langfuse_user_id": "user-id"}
+)
+```
+
+**Python SDK v2 - pass as additional argument:**
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add user_id as additional argument
+  user_id="user-id"
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set `user_id` via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+from langfuse.openai import openai
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        user_id="user-id"
+    )
+
+    completion = openai.chat.completions.create(
+      name="test-chat",
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "You are a calculator."},
+        {"role": "user", "content": "1 + 1 = "}],
+      temperature=0,
+    )
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+**Python SDK v3 - use metadata in chain invocation:**
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+# Pass langfuse_user_id as metadata to the chain invocation
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_user_id": "user-id",
+        },
+    },
+)
+```
+
+**Python SDK v2 - pass as constructor argument:**
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler(
+  user_id="user-id"
+)
+```
+
+You can also set the `user_id` dynamically via the runnable configuration in the chain invocation:
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler()
+
+# Pass user_id as metadata to the chain invocation to be parsed as the Langfuse user_id
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_user_id": "user-id",
+        },
+    },
+)
+```
+
+When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `user_id` via the `langfuse_context`:
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def fn():
+    langfuse_context.update_current_trace(
+        user_id="user-id"
+    )
+
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+
+    # Pass handler to invoke of your langchain chain/agent
+    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
+
+fn()
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `userId` to the constructor:
+
+```ts
+const handler = new CallbackHandler({
+  userId: "user-id",
+});
+```
+
+You can also set the `userId` dynamically via the runnable configuration in the chain invocation:
+
+```ts
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+// Your existing Langchain code to create the chain
+...
+
+// Pass langfuseUserId as metadata to the chain invocation to be parsed as the Langfuse user_id
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandler], metadata: { langfuseUserId: "user-id" } }
+);
+```
+
+When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `userId` via `langfuse.trace()`:
+
+```ts
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  userId: "user-id",
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+<Tab>
+You can set the `userId` via the override configs, see the [Flowise Integration docs](/docs/flowise) for more details.
+
+</Tab>
+
+</Tabs>
+
+## View all users
+
+The user list provides an overview of all users that have been tracked by Langfuse. It makes it simple to segment by overall token usage, number of traces, and user feedback.
+
+<Frame border fullWidth>
+  ![User List](/images/docs/users-list.png)
+</Frame>
+
+## Individual user view
+
+The individual user view provides an in-depth look into a single user. Explore aggregated metrics or view all traces and feedback for a user.
+
+<CloudflareVideo
+  videoId="f87b1175dfeeb7fdcbd8db04655a10b1"
+  aspectRatio={1592 / 1080}
+  gifStyle
+/>
+
+You can deep link to this view via the following URL format: `https://<hostname>/project/{projectId}/users/{userId}`
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-users"]} />

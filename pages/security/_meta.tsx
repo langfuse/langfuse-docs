@@ -19,6 +19,7 @@ export default {
   whistleblowing: "Whistleblowing",
   "penetration-testing": "Penetration Testing",
   "vulnerability-management": "Vulnerability Management",
+  "security-faq": "Security FAQ",
   "-- Compliance": {
     type: "separator",
     title: "Compliance",

@@ -1,0 +1,241 @@
+---
+title: Prompt Experiments
+description: Run prompt experiments on datasets with LLM-as-a-Judge evaluations.
+---
+
+# Prompt Experiments
+
+
+Prompt Experiments allows you to test a prompt version from [Prompt Management](/docs/prompt-management) on a [Dataset](/docs/evaluation/features/datasets) of inputs and expected outputs. Thereby, you can verify that the change yields the expected outputs and does not cause regressions. You can directly analyze the results of different prompt experiments side-by-side.
+
+Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/scores/model-based-evals) to automatically evaluate the responses based on the expected outputs to further analyze the results on an aggregate level.
+
+<Callout type="info">
+
+This is a no-code feature within Langfuse. You can run more complex experiments via the Langfuse SDKs/API. Follow [this guide](/docs/datasets/get-started) to get started.
+
+</Callout>
+
+<details>
+<summary>Key benefits</summary>
+
+- **Feedback loop**: Quickly iterate on prompts by running experiments and directly comparing evaluation results side-by-side.
+- **Regression prevention**: When making prompt changes, run an experiment to make sure that the new version does not cause bad outputs.
+
+</details>
+
+## Overview
+
+<CloudflareVideo
+  videoId="0e2811d0dbcd59000837773aef814963"
+  aspectRatio={16 / 9}
+  title="Introduction to Prompt Experiments"
+/>
+
+## Requirements
+
+<Callout type="warning">
+For prompt experiments to work correctly, you must ensure:
+
+1. **Your prompt contains at least one variable** using the `{{variableName}}` syntax
+2. **Variable names in your prompt must exactly match the keys in your dataset items**
+3. **Dataset items must have their input formatted as valid JSON**
+</Callout>
+
+
+### Variable Mapping
+
+For Prompt Experiments, you need to map the variables in your prompt to the keys in your dataset items.
+
+<details>
+<summary>Example:</summary>
+
+The following example demonstrates how prompt variables are mapped to dataset item inputs:
+
+<div className="grid md:grid-cols-2 gap-4">
+<div>
+
+<br/>**Prompt:**
+```bash
+You are a Langfuse expert. Answer based on:
+{{documentation}}
+
+Question: {{question}}
+```
+
+</div>
+<div>
+
+<br/>**Dataset Item:**
+```json
+{
+  "documentation": "Langfuse is an LLM Engineering Platform",
+  "question": "What is Langfuse?"
+}
+```
+
+</div>
+</div>
+
+In this example:
+- The prompt variable `{{documentation}}` maps to the JSON key `"documentation"`
+- The prompt variable `{{question}}` maps to the JSON key `"question"`
+- Both keys must exist in the dataset item's input JSON for the experiment to run successfully
+
+</details>
+
+
+### Chat Message Placeholder Mapping Example [#message-placeholders]
+
+In addition to variables, you can also map placeholders in chat message prompts to dataset item keys.
+This is useful when the dataset item also contains for example a chat message history to use.
+Your chat prompt needs to contain a placeholder with a name. Variables within placeholders are not resolved.
+
+<details>
+<summary>Example:</summary>
+
+**Chat Prompt:**
+Placeholder named: `message_history`
+
+**Dataset Item:**
+```json
+{
+  "message_history": [
+    {
+      "role": "user",
+      "content": "What is Langfuse?"
+    },
+    {
+      "role": "assistant",
+      "content": "Langfuse is a tool for tracking and analyzing the performance of language models."
+    }
+  ],
+  "question": "What is Langfuse?"
+}
+```
+
+In this example: 
+- The chat prompt placeholder `message_history` maps to the JSON key `"message_history"`.
+- The prompt variable `{{question}}` maps to the JSON key `"question"` in a variable not within a placeholder message.
+- Both keys must exist in the dataset item's input JSON for the experiment to run successfully
+
+</details>
+
+## Setup
+
+<Callout type="info">
+
+If you already have a dataset and a prompt, you can skip the following steps.
+
+</Callout>
+
+In Prompt Experiments, the items of a dataset are mapped to the variables of the prompt. In the following example, the variables (`documentation` and `question`) are mapped to the `input` of the dataset which is a JSON object. The `expected output` contains a reference answer for the given dataset item.
+
+<Steps>
+
+### Configure LLM connection
+
+Prompt Experiments runs LLM calls within Langfuse. Thus, you need to configure an LLM connection in the project settings.
+
+<details>
+<summary>Supported LLM providers</summary>
+
+- OpenAI, or OpenAI-compatible providers (e.g. LiteLLM, Google Vertex AI)
+- Anthropic
+- Azure OpenAI
+- AWS Bedrock
+
+</details>
+
+### Create a dataset
+
+Create a dataset with the inputs and expected outputs that you want to test your prompt on.
+
+import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
+
+<CreateDataset />
+
+### Create dataset items with test cases
+
+Dataset items include the input variables that should be inserted into the prompt.
+
+<Callout type="important">
+The input must be a JSON object where each key exactly matches a variable name in your prompt. For example, if your prompt contains `{{question}}`, your dataset item's input JSON must have a `"question"` key.
+</Callout>
+
+<details>
+<summary>Example Dataset Item with variables</summary>
+
+```json filename="input"
+{
+  "question": "What is Langfuse?",
+  "documentation": "Langfuse - the LLM Engineering Platform"
+}
+```
+
+```text filename="expected_output"
+Langfuse is the LLM Engineering Platform.
+```
+
+</details>
+
+import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
+
+<CreateDatasetItem />
+
+### Create a prompt with variables
+
+Use `{{variables}}` to insert the dataset variables into the prompt during experiments.
+
+<Callout type="important">
+Each `{{variableName}}` in your prompt must have a corresponding key in your dataset items' input JSON. The names must match exactly (case-sensitive).
+</Callout>
+
+<details>
+<summary>Example Prompt</summary>
+
+```text filename="system"
+You are a Langfuse expert. Please answer questions based on the following documentation:
+
+DOCUMENTATION
+{{documentation}}
+```
+
+```text filename="user"
+{{question}}
+```
+
+</details>
+
+import PromptCreate from "@/components-mdx/prompt-create.mdx";
+
+<PromptCreate />
+
+</Steps>
+
+## Run a prompt experiment
+
+Now that we have set up a prompt version and a dataset, we can run a prompt experiment in Langfuse for each prompt version that we want to test.
+
+When viewing the prompt details or a dataset, use the following button to run a prompt experiment:
+
+<Frame className="my-10" fullWidth>
+
+![New Experiment Button](/images/docs/prompt-experiments-new-experiment.png)
+
+</Frame>
+
+Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.
+
+<Callout type="tip" emoji="ℹ️">
+**Troubleshooting:** If you see a warning about mismatched variables, ensure that:
+- Every `{{variable}}` in your prompt has a matching key in your dataset items' input JSON
+- The names match exactly (including case sensitivity)
+- Your dataset input is valid JSON format
+</Callout>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-prompt-experiments"]} />
