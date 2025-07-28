@@ -1,0 +1,72 @@
+---
+title: How to create and manage Score Configs in Langfuse?
+description: Learn how to create and manage score configs in Langfuse.
+tags: [evaluation]
+---
+
+# How to Create and Manage ScoreConfigs?
+`ScoreConfigs` are used to ensure that your scores follow a specific schema. Using `ScoreConfigs` allows you to standardize your scoring schema across your team and ensure that scores are consistent and comparable for future analysis.
+
+`ScoreConfigs` are **required** for using [Human Annotation](/docs/evaluation/evaluation-methods/annotation) and **optional** for [Custom Evaluation via API/SDK](/docs/evaluation/evaluation-methods/custom-scores).
+
+To understand detailed properties of the `ScoreConfig` object, see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model#score-config).
+
+## Via SDK
+### Create a score config
+
+To create a `scoreConfig` via the Langfuse SDK you need to use the `api` property on the Langfuse client as specified [here](/docs/api-and-data-platform/features/public-api#access-via-sdks). The specific `POST` and `GET` API endpoints are documented in the [API reference](/docs/api).
+
+### Use score config
+
+Using `ScoreConfig` via the SDK most commonly happens in the context of [Custom Evaluation via API/SDK (find instructions how to do that here)](/docs/evaluation/evaluation-methods/custom-scores#score-ingestion-referencing-configs-via-sdk). 
+
+## Via Langfuse UI
+### Create a score config
+
+<Steps>
+
+#### Go to Project Settings
+Navigate to `Your Project` > `Project Settings` > `Scores / Evaluation` and click `Create new score config`.
+
+<Frame border className="mt-2" fullWidth>
+  ![Score Configs](/images/docs/scoreconfigs.png)
+</Frame>
+
+#### Add new score config
+
+<Frame border className="mt-2">
+  ![Score Configs](/images/docs/add_new_score_config.png)
+</Frame>
+
+Set the values:
+- **Score name**: 
+- **Data type**: NUMERIC, CATEGORICAL, BOOLEAN
+- **Constraints on score value range** (Min/Max for numerical, Custom categories for categorical data)
+
+Click **"submit"** to create the score config.
+</Steps>
+
+### Archive a score config
+
+<Steps>
+
+#### Go to Project Settings
+Navigate to `Your Project` > `Project Settings` > `Scores / Evaluation` and click on the "archive" icon of the score config you want to archive.
+
+<Frame border className="mt-2" fullWidth>
+  ![Score Configs](/images/docs/archive_score_config.png)
+</Frame>
+
+#### Archive score config
+
+- Archiving a score config will ensure that the score config is no longer selectable for [Human Annotation](/docs/evaluation/evaluation-methods/annotation).
+- You will be able to restore a config by clicking the "archive" icon of an archived config.
+- Scores associated with an archived config will still be shown in your project but can be deleted. 
+</Steps>
+
+
+
+
+
+
+
