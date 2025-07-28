@@ -9,19 +9,21 @@ tags: [evaluation]
 
 `ScoreConfigs` are **required** for using [Human Annotation](/docs/evaluation/evaluation-methods/annotation) and **optional** for [Custom Evaluation via API/SDK](/docs/evaluation/evaluation-methods/custom-scores).
 
+`ScoreConfigs` are immutable. However, you can archive configs if you no longer want to use them in annotation. Archived configs can be restored at any time.
+
 To understand detailed properties of the `ScoreConfig` object, see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model#score-config).
 
 ## Via SDK
-### Create a score config
+### Create a Score Config
 
 To create a `scoreConfig` via the Langfuse SDK you need to use the `api` property on the Langfuse client as specified [here](/docs/api-and-data-platform/features/public-api#access-via-sdks). The specific `POST` and `GET` API endpoints are documented in the [API reference](/docs/api).
 
-### Use score config
+### Use a Score Config
 
 Using `ScoreConfig` via the SDK most commonly happens in the context of [Custom Evaluation via API/SDK (find instructions how to do that here)](/docs/evaluation/evaluation-methods/custom-scores#score-ingestion-referencing-configs-via-sdk). 
 
 ## Via Langfuse UI
-### Create a score config
+### Create a Score Config
 
 <Steps>
 
@@ -45,6 +47,11 @@ Set the values:
 
 Click **"submit"** to create the score config.
 </Steps>
+
+### Use a Score Config
+
+Using `ScoreConfig` via the UI most commonly happens in the context of [Human Annotation](/docs/evaluation/evaluation-methods/annotation). 
+
 
 ### Archive a score config
 
