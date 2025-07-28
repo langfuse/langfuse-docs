@@ -5,7 +5,7 @@ category: Prompt Management
 
 # Example: Langfuse Prompt Management with Langchain (Python)
 
-[Langfuse Prompt Management](https://langfuse.com/docs/prompts) helps to version control and manage prompts collaboratively in one place. This example demostrates how to use prompts managed in Langchain applications.
+[Langfuse Prompt Management](https://langfuse.com/docs/prompt-management/overview) helps to version control and manage prompts collaboratively in one place. This example demostrates how to use prompts managed in Langchain applications.
 
 _In addition, we use [Langfuse Tracing](https://langfuse.com/docs/tracing) via the native [Langchain integration](https://langfuse.com/integrations/frameworks/langchain) to inspect and debug the Langchain application._
 

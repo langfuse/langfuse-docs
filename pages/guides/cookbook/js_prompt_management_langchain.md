@@ -5,7 +5,7 @@ category: Prompt Management
 
 # Example: Langfuse Prompt Management with Langchain (JS)
 
-Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version control and manage prompts collaboratively in one place.
+Langfuse [Prompt Management](https://langfuse.com/docs/prompt-management/overview) helps to version control and manage prompts collaboratively in one place.
 
 This example demonstrates how to use Langfuse Prompt Management together with Langchain JS.
 

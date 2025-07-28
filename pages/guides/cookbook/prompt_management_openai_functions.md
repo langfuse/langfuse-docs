@@ -5,7 +5,7 @@ category: Prompt Management
 
 # Example: Langfuse Prompt Management for OpenAI functions (Python)
 
-Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version control and manage prompts collaboratively in one place. This example demostrates how to use the flexible `config` object on Langfuse prompts to store function calling options and model parameters.
+Langfuse [Prompt Management](https://langfuse.com/docs/prompt-management/overview) helps to version control and manage prompts collaboratively in one place. This example demostrates how to use the flexible `config` object on Langfuse prompts to store function calling options and model parameters.
 
 ## Setup
 
@@ -127,7 +127,7 @@ client = OpenAI()
 
 Use Langfuse prompt to construct the `summarize_story` example function.
 
-**Note:** You can link the generation in Langfuse Tracing to the prompt version by passing the `langfuse_prompt` parameter to the `create` method. Have a look at our [prompt management docs](https://langfuse.com/docs/prompts/get-started#link-with-langfuse-tracing-optional) to learn how to link prompt and generation with other integrations and SDKs.
+**Note:** You can link the generation in Langfuse Tracing to the prompt version by passing the `langfuse_prompt` parameter to the `create` method. Have a look at our [prompt management docs](https://langfuse.com/docs/prompt-management/features/link-to-traces) to learn how to link prompt and generation with other integrations and SDKs.
 
 
 ```python

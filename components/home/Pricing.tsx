@@ -760,12 +760,12 @@ const sections: Section[] = [
   },
   {
     name: "Prompt Management",
-    href: "/docs/prompts",
+    href: "/docs/prompt-management/overview",
     features: [
       {
         name: "Prompt Versioning",
         description: "Manage prompts via UI, API, SDKs",
-        href: "/docs/prompts",
+        href: "/docs/prompt-management/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -789,7 +789,7 @@ const sections: Section[] = [
       {
         name: "Prompt Release Management",
         description: "Deploy and rollback prompts to different environments",
-        href: "/docs/prompts",
+        href: "/docs/prompt-management/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -799,7 +799,7 @@ const sections: Section[] = [
         name: "Prompt Composability",
         description:
           "Create shared snippets that can be reused in different prompts",
-        href: "/docs/prompts/get-started#composability",
+                  href: "/docs/prompt-management/features/composability",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -808,7 +808,7 @@ const sections: Section[] = [
       {
         name: "Prompt Caching (server and client)",
         description: "Use prompts with 0 latency and uptime impact",
-        href: "/docs/prompts/get-started#caching-in-client-sdks",
+        href: "/docs/prompt-management/features/caching",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -839,7 +839,7 @@ const sections: Section[] = [
         name: "Protected Deployment Labels",
         description:
           "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
-        href: "/docs/prompts/get-started#protected-prompt-labels",
+                  href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
           cloud: {
             Hobby: false,
