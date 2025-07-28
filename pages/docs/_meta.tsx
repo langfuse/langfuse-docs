@@ -24,6 +24,7 @@ export default {
   metrics: "Metrics",
   "api-and-data-platform": "API & Data Platform",
   administration: "Administration",
+  "security-and-guardrails": "Security & Guardrails",
 
   "-- More": {
     type: "separator",
