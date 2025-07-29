@@ -474,14 +474,10 @@ const nonPermanentRedirects = [
   ["/guides/cookbook/security-and-guardrails", "/docs/security-and-guardrails"],
   ["/docs/evaluation/features/prompt-experiments", "/docs/evaluation/dataset-runs/run-via-ui"],
   ["/docs/evaluation/data-model", "/docs/evaluation/dataset-runs/data-model"],
-
-  // END OF MOVED MAIN DOCS INTO SUBMODULES
-
-  // START OF REMOVE INTEGRATIONS FROM GUIDES SECTION
   ["/guides/cookbook/integration_mirascope", "/integrations/frameworks/mirascope"],
   ["/guides/cookbook/integration_mistral_sdk", "/integrations/model-providers/mistral-sdk"],
-
-  // END OF REMOVE INTEGRATIONS FROM GUIDES SECTION
+  // END OF MOVED MAIN DOCS INTO SUBMODULES
+  
 ];
 
 const permanentRedirects = []
