@@ -1,29 +1,39 @@
 ---
 title: Evaluation of LLM Applications
-description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), manual annotations or user feedback. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
+description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), manual annotations or fully custom evaluation workflows via API/SDKs. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
 ---
 
-# LLM Evaluation
+# Evaluation Overview
 
 Evaluation is a critical aspect of developing and deploying LLM applications. Usually, teams use a multitude of different evaluation methods to score the performance of their AI application depending on the use case and the stage of the development process.
 
-## Why are LLM Evals important?
+## Intro
+
+### Why are LLM Evals important?
 
 LLM evaluation is crucial for improving the accuracy and robustness of language models, ultimately enhancing the user experience and trust in your AI application. It helps detect hallucinations and measure performance across diverse tasks. A structured evaluation in production is vital for continuously improving your application.
 
-## How to think about LLM evaluation?
+### Core Concepts
 
-LLM evaluation is a broad field and includes different methods coming together to form a comprehensive evaluation strategy.
+| Concept | Description |
+|---------|-------------|
+| **Scores** | Scores are a flexible data object that can be used to store any evaluation metric and link it to other objects in Langfuse. |
+| **Evaluation Methods** | Evaluation methods are functions or tools to assign scores to other objects. |
+| **Datasets** | Datasets are a collection of inputs and, optionally, expected outputs that can be during Dataset runs. |
+| **Dataset Runs** | Dataset runs are used to run a dataset through your LLM application and optionally apply evaluation methods to the results. |
+
+### Online vs. Offline Evaluation
+TBD
 
 ## Evaluation Methods
 
-As soon as you have traces of your LLM application in Langfuse, you want add scores to them to help you understand the quality of your application.
+Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. 
 
-Langfuse offers a flexible scoring system to capture all your evaluations in one place and make them actionable.
+Learn more about the [data model](/docs/scores/data-model). This data model is utilized across all evaluation methods, both UI and API. It can also be accessed programmatically through the SDKs or API for custom workflows.
 
 import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
 
-<Cards num={3}>
+<Cards num={2}>
   <Card
     icon={<Lightbulb size="24" />}
     title="LLM-as-a-Judge"
@@ -44,128 +54,56 @@ import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
   />
 </Cards>
 
-Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. Learn more about the [data model](/docs/scores/data-model).
-This data model is utilized across all evaluation methods, both UI and API. It can also be accessed programmatically through the SDKs or API for custom workflows.
-
-### 1. LLM-as-a-Judge
-
-[Model-based evaluations](/docs/scores/model-based-evals) (LLM-as-a-judge) are a powerful tool to _automatically_ assess LLM applications integrated with Langfuse. With this approach, an LLMs scores a particular session, trace, or LLM call in Langfuse based on factors such as accuracy, toxicity, or hallucinations.
-
-There are two ways to run model-based evaluations in Langfuse:
-
-- [Via the Langfuse UI (beta)](/docs/scores/model-based-evals)
-- [Via external evaluation pipelines](/docs/scores/external-evaluation-pipelines) using the API/SDKs
-
-### 2. Manual Annotation / Data Labeling (in UI)
-
-With [manual annotations](/docs/scores/annotation), you can annotate a subset of traces and observations by hand. This allows you to collaborate with your team and add scores via the Langfuse UI. Annotations can be used to establish a baseline for your evaluation metrics and to compare them with automated evaluations.
-
-### 3. User Feedback
-
-Capturing [user feedback](/docs/scores/user-feedback) in your AI application can be a valuable evaluation metric. You can add explicit (e.g., thumbs up/down, 1-5 star rating) or implicit (e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output, human-in-the-loop) user feedback to your LLM traces in Langfuse.
-
-### 4. Custom Evaluation via SDKs/API
-
-Langfuse gives you full flexibility to ingest [custom evaluation scores via the Langfuse SDKs or API](/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom external evaluation workflows.
-
 ## Dataset runs
 
-To build useful LLM applications, usually a continuous loop of online and offline evaluation is required.
+Dataset Runs in Langfuse allow you to test your application on a dataset of inputs and expected outputs. You can then compare the results of different prompts, models, or other parameters side-by-side.
 
 <Frame border fullWidth>
-  ![Continuous Evaluation
-  Loop](/images/docs/evaluation/continuous-evaluation-loop.png)
+![Dataset Runs](/images/docs/dataset-runs-comparison.png)
 </Frame>
 
-<span>
-  _Adapted from: "How to continuously improve LLM products?", Evidently_
-</span>
 
-### Inner loop: Offline evaluation
+### Why Dataset Runs?
 
-To increase development speed, you can use datasets of test cases to evaluate your LLM application.
-These are usually **20-100 example inputs** that cover the distribution of what you expect to happen in production.
-We recommend to hand-craft these, as quality of the test cases drives a lot of the quality of your LLM application.
-The test cases **often contain an reference output or other expectations** that can be used to grade the output.
+- **Continuous improvement:** Create datasets from production edge cases to improve your application
+- **Pre-deployment testing:** Benchmark new releases before deploying to production
+- **Structured testing:** Run experiments on collections of inputs and expected outputs
+- **Flexible evaluation:** Add custom evaluation metrics or use llm-as-a-judge
+- **Integrates well:** Works with popular frameworks like LangChain and LlamaIndex
 
--> Get Started with [Offline Evaluation](/docs/evaluation/get-started/offline)
+### Where to start
 
-### Outer loop: Online evaluation
+Follow the quickstart to add tracing to your LLM app.
 
-Online evals is all about using real user data to:
+import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
 
-1. Look at interesting error traces flagged via evals/user-feedback.
-   - Thereby you can add to your offline evaluation datasets to align them with actual user behavior
-   - and get a better understanding for the generalization problems of your LLM application
-2. Monitor how quality/cost/latency changes over time
-3. Investigate LLM security issues flagged by guardrails
+<Cards num={2}>
+  <Card
+    icon={<Table size="24" />}
+    title="Create a dataset"
+    href="/docs/evaluation/dataset-runs/datasets"
+    arrow
+  />
+  <Card
+    icon={<Database size="24" />}
+    title="Datamodel"
+    href="/docs/evaluation/dataset-runs/data-model"
+    arrow
+  />
+  <Card
+    icon={<WandSparkles size="24" />}
+    title="Dataset runs via the UI"
+    href="/docs/evaluation/dataset-runs/run-via-ui"
+    arrow
+  />
+  <Card
+    icon={<CodeXml size="24" />}
+    title="Dataset runs via the SDK"
+    href="/docs/evaluation/dataset-runs/run-via-sdk"
+    arrow
+  />
+</Cards>
 
--> Get Started with [Online Evaluation](/docs/evaluation/get-started/online)
-
-## Data Model
-
-{/* Todo: add datasets */}
-
-Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. Learn more about the [data model](/docs/scores/data-model).
-
-This data model is utilized across all evaluation methods, both UI and API. It can also be accessed programmatically through the SDKs or API for custom workflows.
-
-## Supported Evaluation Methods
-
-{/* Todo: align with eval methods folder */}
-
-### 1. LLM-as-a-Judge
-
-[Model-based evaluations](/docs/scores/model-based-evals) (LLM-as-a-judge) are a powerful tool to _automatically_ assess LLM applications integrated with Langfuse. With this approach, an LLMs scores a particular session, trace, or LLM call in Langfuse based on factors such as accuracy, toxicity, or hallucinations.
-
-There are two ways to run model-based evaluations in Langfuse:
-
-- [Via the Langfuse UI (beta)](/docs/scores/model-based-evals)
-- [Via external evaluation pipelines](/docs/scores/external-evaluation-pipelines) using the API/SDKs
-
-### 2. Manual Annotation / Data Labeling (in UI)
-
-With [manual annotations](/docs/scores/annotation), you can annotate a subset of traces and observations by hand. This allows you to collaborate with your team and add scores via the Langfuse UI. Annotations can be used to establish a baseline for your evaluation metrics and to compare them with automated evaluations.
-
-### 3. User Feedback
-
-Capturing [user feedback](/docs/scores/user-feedback) in your AI application can be a valuable evaluation metric. You can add explicit (e.g., thumbs up/down, 1-5 star rating) or implicit (e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output, human-in-the-loop) user feedback to your LLM traces in Langfuse.
-
-### 4. Custom Evaluation via SDKs/API
-
-Langfuse gives you full flexibility to ingest [custom evaluation scores via the Langfuse SDKs or API](/docs/scores/custom). The scoring workflow allows you to run custom quality checks (e.g. valid structured output format) on the output of your workflows at runtime, or to run custom external evaluation workflows.
-
-{/* To be Editted into a headline section not a details section */}
-
-<details>
-<summary>How are scores used across Langfuse?</summary>
-
-Scores can be used in multiple ways across Langfuse:
-
-1. Displayed on trace/session/dataset run to provide a quick overview
-2. Segment all execution traces by scores to e.g. find all traces with a low quality score
-3. Analytics: Detailed score reporting with drill downs into use cases and user segments
-
-</details>
-
-<details>
-<summary>Frequently used scores</summary>
-
-Scores in Langfuse are adaptable (it is just a `name`) and designed to cater to the unique requirements of specific LLM applications. They typically serve to measure the following aspects:
-
-- Quality
-  - Factual accuracy
-  - Completeness of the information provided
-  - Verification against hallucinations
-- Style
-  - Sentiment portrayed
-  - Tonality of the content
-  - Potential toxicity
-- Security
-  - Similarity to prevalent prompt injections
-  - Instances of model refusals (e.g., as a language model, ...)
-
-</details>
 
 ## GitHub Discussions
 

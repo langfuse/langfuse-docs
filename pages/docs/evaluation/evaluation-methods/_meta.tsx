@@ -1,5 +1,4 @@
 export default {
-  overview: "Overview",
   "data-model": "Data Model",
   "llm-as-a-judge": "LLM-as-a-Judge",
   annotation: "Manual Annotations",
