@@ -7,13 +7,39 @@ description: With Langfuse you can capture all your LLM evaluations in one place
 
 Evaluation is a critical aspect of developing and deploying LLM applications. Usually, teams use a multitude of different evaluation methods to score the performance of their AI application depending on the use case and the stage of the development process.
 
-## Intro
+## Why use LLM Evaluation?
 
-### Why are LLM Evals important?
+LLM evaluation is crucial for improving the accuracy and robustness of language models, ultimately enhancing the user experience and trust in your AI application. Here are the key benefits:
 
-LLM evaluation is crucial for improving the accuracy and robustness of language models, ultimately enhancing the user experience and trust in your AI application. It helps detect hallucinations and measure performance across diverse tasks. A structured evaluation in production is vital for continuously improving your application.
+- **Quality Assurance**: Detect hallucinations, factual inaccuracies, and inconsistent outputs to ensure your AI app delivers reliable results
+- **Performance Monitoring**: Measure response quality, relevance, and user satisfaction across different scenarios and edge cases
+- **Continuous Improvement**: Identify areas for enhancement and track improvements over time through structured evaluation metrics
+- **User Trust**: Build confidence in your AI application by demonstrating consistent, high-quality outputs through systematic evaluation
+- **Risk Mitigation**: Catch potential issues before they reach production users, reducing the likelihood of poor user experiences or reputational damage
 
-### Core Concepts
+## Online & Offline Evaluation
+
+**Offline Evaluation involves** 
+- Evaluating the application in a controlled setting
+- Typically using curated test Datasets instead of live user queries 
+- Heavily used during development (can be part of CI/CD pipelines) to measure improvements / regressions
+- Repeatable and you can get clear accuracy metrics since you have ground truth.
+
+**Online Evaluation involves**
+- Evaluating the application in a live, real-world environment, i.e. during actual usage in production. 
+- Use Evaluation Methods that track success rates, user satisfaction scores, or other metrics on live traffic
+- Advantage of online evaluation is that it captures things you might not anticipate in a lab setting 
+- Can include collecting implicit and explicit user feedback, and possibly running shadow tests or A/B tests 
+
+**In practice, successful evaluation blends online and offline evaluations.** Many teams adopt a loop-like approach. This way, evaluation is continuous and ever-improving.
+
+<Frame border fullWidth>
+![Continuous evaluation loop](/images/docs/evaluation/online-offline-loop.png)
+</Frame>
+
+_Adapted from: “How to continuously improve LLM products?”, Evidently_
+
+## Core Concepts
 
 | Concept | Description |
 |---------|-------------|
@@ -22,55 +48,18 @@ LLM evaluation is crucial for improving the accuracy and robustness of language 
 | **Datasets** | Datasets are a collection of inputs and, optionally, expected outputs that can be during Dataset runs. |
 | **Dataset Runs** | Dataset runs are used to run a dataset through your LLM application and optionally apply evaluation methods to the results. |
 
-### Online & Offline Evaluation
-
-There are two categories of evaluations for AI Applications: **online evaluation** and **offline evaluation**. Both are valuable, and complement each other. We usually begin with offline evaluation, as this is the minimum step before deploying any application.
-
-#### Offline Evaluation
-
-This involves **evaluating the application in a controlled setting**, typically using test [datasets](/docs/evaluation/dataset-runs/datasets), not live user queries. 
-
-For instance, if you built a math solving application, you might perform a [Dataset Run](#dataset-run) over a test dataset of [100 math problems with known answers](https://huggingface.co/datasets/gsm8k). Offline evaluation is often done during development (and can be part of CI/CD pipelines) to check improvements or guard against regressions. The benefit is that it’s **repeatable and you can get clear accuracy metrics since you have ground truth**. 
-
-The key challenge with offline eval is ensuring your test dataset is comprehensive and stays relevant – the application might perform well on a fixed test set but encounter very different queries in production. Therefore, you should keep test sets [updated with new edge cases from production traces](/docs/evaluation/dataset-runs/datasets#create-items-from-production-data).
-
-#### Online Evaluation 
-
-This refers to **evaluating the application in a live, real-world environment**, i.e. during actual usage in production. 
-
-For example, you might use [evaluation methods](#evaluation-methods) that track success rates, user satisfaction scores, or other metrics on live traffic. The advantage of online evaluation is that it **captures things you might not anticipate in a lab setting** – you can observe model drift over time and catch unexpected queries or situations that weren’t in your test data​. 
-
-Online evaluation often involves collecting implicit and explicit user feedback, and possibly running shadow tests or A/B tests (where a new version of the application runs in parallel to compare against the old). 
-
-#### Combining online and offline evaluation
-
-In practice, successful evaluation blends **online** and **offline** methods​ any many teams adopt a loop. This way, evaluation is continuous and ever-improving.
-
-<Frame border fullWidth>
-![Continuous evaluation loop](/images/docs/evaluation/continuous-evaluation-loop.png)
-</Frame>
-
-_Adapted from: “How to continuously improve LLM products?”, Evidently_
-
 ## Evaluation Methods [#evaluation-methods]
+Evaluation methods are functions or tools to assign evaluation `Score`s to other objects. Langfuse uses the Scores to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. 
 
-Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. 
-
-Learn more about the [data model](/docs/scores/data-model). This data model is utilized across all evaluation methods, both UI and API. It can also be accessed programmatically through the SDKs or API for custom workflows.
+Langfuse currently supports: automatic scoring through **LLM-as-a-Judge**, manual **Human Annotations** or fully **Custom Scoring via API/SDKs**. We keep adding more evaluation methods fast, so stay tuned!
 
 import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
 
-<Cards num={2}>
+<Cards num={1}>
   <Card
     icon={<Lightbulb size="24" />}
     title="LLM-as-a-Judge"
     href="/docs/evaluation/dataset-runs/datasets"
-    arrow
-  />
-  <Card
-    icon={<SquarePercent size="24" />}
-    title="Custom Scores"
-    href="/docs/evaluation/dataset-runs/data-model"
     arrow
   />
   <Card
@@ -79,42 +68,43 @@ import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
     href="/docs/evaluation/dataset-runs/run-via-ui"
     arrow
   />
+    <Card
+    icon={<SquarePercent size="24" />}
+    title="Custom Scores"
+    href="/docs/evaluation/dataset-runs/data-model"
+    arrow
+  />
 </Cards>
 
+Learn more about the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model). 
+
 ## Dataset Runs [#dataset-runs]
-
-With Dataset Runs, you can test your application using different test Datasets. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side. 
-
-Optionally, you can use [evaluation methods](#evaluation-methods) to score the results of the Dataset Runs.
+**Dataset Runs** are used to loop your LLM application through **Datasets** and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions. 
 
 import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
 
-<Cards num={2}>
+<Cards num={1}>
   <Card
     icon={<Table size="24" />}
-    title="Create a dataset"
+    title="Create a Dataset"
     href="/docs/evaluation/dataset-runs/datasets"
     arrow
   />
   <Card
-    icon={<Database size="24" />}
-    title="Datamodel"
-    href="/docs/evaluation/dataset-runs/data-model"
-    arrow
-  />
-  <Card
     icon={<WandSparkles size="24" />}
-    title="Dataset runs via the UI"
+    title="Dataset Runs via the UI"
     href="/docs/evaluation/dataset-runs/run-via-ui"
     arrow
   />
   <Card
     icon={<CodeXml size="24" />}
-    title="Dataset runs via the SDK"
+    title="Dataset Runs via the SDK"
     href="/docs/evaluation/dataset-runs/run-via-sdk"
     arrow
   />
 </Cards>
+
+Learn more about the [Dataset Runs Data Model](/docs/evaluation/dataset-runs/data-model).
 
 
 ## GitHub Discussions
