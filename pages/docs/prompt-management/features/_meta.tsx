@@ -14,8 +14,8 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
-  "prompt-experiments": {
-    title: "Prompt Experiments ↗",
+  "evaluate-prompts": {
+    title: "Evaluate Prompts ↗",
     href: "/docs/evaluation/dataset-runs/run-via-ui",
   },
   "a-b-testing": {},
