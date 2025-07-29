@@ -442,8 +442,8 @@ const nonPermanentRedirects = [
   ["/docs/sdk/typescript/guide", "/docs/observability/sdk/typescript/guide"],
   ["/docs/sdk/typescript/guide-web", "/docs/observability/sdk/typescript/guide-web"],
   ["/docs/security/example-python", "/guides/cookbook/example_llm_security_monitoring"],
-  ["/docs/security/getting-started", "/docs/evaluation/features/security-and-guardrails"],
-  ["/docs/security/overview", "/docs/evaluation/features/security-and-guardrails"],
+  ["/docs/security/getting-started", "/docs/security-and-guardrails"],
+  ["/docs/security/overview", "/docs/security-and-guardrails"],
   ["/docs/tracing", "/docs/observability/overview"],
   ["/docs/tracing-data-model", "/docs/observability/data-model"],
   ["/docs/tracing-features/agent-graphs", "/docs/observability/features/agent-graphs"],
@@ -464,7 +464,25 @@ const nonPermanentRedirects = [
   ["/faq/all/compability-langfuse-ui-and-python-sdk", "/faq/all/compatibility-langfuse-ui-and-python-sdk"],
   ["/faq/tag/setup", "/faq"],
   ["/faq/tag/features", "/faq"],
+  ["/docs/evaluation/features/evaluation-methods/custom-scores", "/docs/evaluation/evaluation-methods/custom-scores"],
+  ["/docs/evaluation/features/evaluation-methods/annotation", "/docs/evaluation/evaluation-methods/annotation"],
+  ["/docs/evaluation/get-started/offline", "/docs/evaluation/overview"],
+  ["/docs/evaluation/features/datasets", "/docs/evaluation/dataset-runs/datasets"],
+  ["/docs/evaluation/features/synthetic-datasets", "/guides/cookbook/example_synthetic_datasets"],
+  ["/docs/datasets/dataset-runs/data-model", "/docs/evaluation/dataset-runs/data-model"],
+  ["/guides/cookbook/user-feedback", "/faq/all/user-feedback"],
+  ["/guides/cookbook/security-and-guardrails", "/docs/security-and-guardrails"],
+  ["/docs/evaluation/features/prompt-experiments", "/docs/evaluation/dataset-runs/run-via-ui"],
+  ["/docs/evaluation/data-model", "/docs/evaluation/dataset-runs/data-model"],
+  ["/guides/cookbook/integration_mirascope", "/integrations/frameworks/mirascope"],
+  ["/guides/cookbook/integration_mistral_sdk", "/integrations/model-providers/mistral-sdk"],
+  ["/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines", "/guides/cookbook/example_external_evaluation_pipelines"],
+  ["/docs/evaluation/features/evaluation-methods/llm-as-a-judge", "/docs/evaluation/evaluation-methods/llm-as-a-judge"],
+  ["/docs/evaluation/features/evaluation-methods/user-feedback", "/faq/all/user-feedback"],
+  ["/docs/evaluation/features/security-and-guardrails", "/docs/security-and-guardrails"],
+  ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
+
 ];
 
 const permanentRedirects = []
