@@ -30,7 +30,7 @@ There are two categories of evaluations for AI Applications: **online evaluation
 
 This involves **evaluating the application in a controlled setting**, typically using test [datasets](/docs/evaluation/dataset-runs/datasets.mdx), not live user queries. 
 
-For instance, if you built a math solving application, you might have a [test dataset](https://huggingface.co/datasets/gsm8k) of 100 math problems with known answers. Offline evaluation is often done during development (and can be part of CI/CD pipelines) to check improvements or guard against regressions. The benefit is that it’s **repeatable and you can get clear accuracy metrics since you have ground truth**. 
+For instance, if you built a math solving application, you might perform a [Dataset Run](dataset-run) over a test dataset of [100 math problems with known answers](https://huggingface.co/datasets/gsm8k). Offline evaluation is often done during development (and can be part of CI/CD pipelines) to check improvements or guard against regressions. The benefit is that it’s **repeatable and you can get clear accuracy metrics since you have ground truth**. 
 
 The key challenge with offline eval is ensuring your test dataset is comprehensive and stays relevant – the application might perform well on a fixed test set but encounter very different queries in production. Therefore, you should keep test sets [updated with new edge cases from production traces](/docs/evaluation/dataset-runs/datasets#create-items-from-production-data).
 
@@ -38,15 +38,13 @@ The key challenge with offline eval is ensuring your test dataset is comprehensi
 
 This refers to **evaluating the application in a live, real-world environment**, i.e. during actual usage in production. 
 
-For example, you might track success rates, user satisfaction scores, or other metrics on live traffic. The advantage of online evaluation is that it **captures things you might not anticipate in a lab setting** – you can observe model drift over time (if the application's effectiveness degrades as input patterns shift) and catch unexpected queries or situations that weren’t in your test data​. It provides a true picture of how the application behaves in the wild. 
+For example, you might use [evaluation methods](#evaluation-methods) that track success rates, user satisfaction scores, or other metrics on live traffic. The advantage of online evaluation is that it **captures things you might not anticipate in a lab setting** – you can observe model drift over time and catch unexpected queries or situations that weren’t in your test data​. 
 
-Online evaluation often involves collecting implicit and explicit user feedback, as discussed, and possibly running shadow tests or A/B tests (where a new version of the agent runs in parallel to compare against the old). 
+Online evaluation often involves collecting implicit and explicit user feedback, and possibly running shadow tests or A/B tests (where a new version of the application runs in parallel to compare against the old). 
 
 #### Combining online and offline evaluation
 
-In practice, successful evaluation blends **online** and **offline** methods​. You might run regular offline benchmarks to quantitatively score your application on defined tasks and continuously monitor live usage to catch things the benchmarks miss. 
-
-Many teams adopt a loop. This way, evaluation is continuous and ever-improving.
+In practice, successful evaluation blends **online** and **offline** methods​ any many teams adopt a loop. This way, evaluation is continuous and ever-improving.
 
 <Frame border fullWidth>
 ![Continuous evaluation loop](/images/docs/evaluation/continuous-evaluation-loop.png)
@@ -54,7 +52,7 @@ Many teams adopt a loop. This way, evaluation is continuous and ever-improving.
 
 _Adapted from: “How to continuously improve LLM products?”, Evidently_
 
-## Evaluation Methods
+## Evaluation Methods [#evaluation-methods]
 
 Langfuse uses the `score` object to store evaluation metrics, it is meant to be flexible to represent any evaluation metric. 
 
@@ -83,7 +81,7 @@ import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
   />
 </Cards>
 
-## Dataset runs
+## Dataset runs [#dataset-runs]
 
 Dataset Runs in Langfuse allow you to test your application on a dataset of inputs and expected outputs. You can then compare the results of different prompts, models, or other parameters side-by-side.
 
