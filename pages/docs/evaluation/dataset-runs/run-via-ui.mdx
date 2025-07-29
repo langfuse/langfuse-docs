@@ -5,7 +5,7 @@ description: Experiment with different prompt versions and models on a dataset a
 
 # Dataset Runs via the UI
 
-You can execute Prompt Experiments in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
+You can execute Dataset Runs (formerly Prompt Experiments) in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
 
 Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to automatically score the responses based on the expected outputs to further analyze the results on an aggregate level.
 
@@ -15,44 +15,27 @@ Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-
   title="Introduction to Prompt Experiments"
 />
 
-## Why use Prompt Experiments?
+## Why run Dataset Runs via the UI?
 
+- Quickly test different prompt versions or models
 - Stucture your prompt testing by using a dataset to test different prompt versions and models
-- Quickly iterate on prompts by running experiments and directly comparing evaluation results side-by-side
+- Quickly iterate on prompts through Dataset Runs
+- Optionally use LLM-as-a-Judge Evaluators to score the responses based on the expected outputs from the dataset
 - Prevent regressions by running experiments when making prompt changes
 
-## Get started
-
+## Prerequisites
 <Steps>
 
-### Create a prompt
 
-<Frame border fullWidth>
-![Create a prompt](/images/docs/prompt-experiments-create-prompt.png)
-</Frame>
-
-Create a prompt that you want to test and evaluate. As you are testing your prompt by looping over all dataset items, your prompt needs to have variables that match the variables in the dataset items.
-
-import {FileJson} from "lucide-react";
-
-<Cards num={1}>
-
-  <Card
-    icon={<FileJson size="24" />}
-    title="How to create a prompt?"
-    href="/docs/prompt-management/get-started"
-    arrow
-  />
-</Cards>
+### Create a usable prompt
+Create a prompt that you want to test and evaluate. [How to create a prompt?](/docs/prompt-management/get-started)
+<Callout type="info">
+**A prompt is usable when:** your prompt has variables that match the dataset item keys in the dataset that will be used for the dataset run. See the example below.
+</Callout>
 
 <details>
-<summary>Example: Prompt & Dataset Item Mapping</summary>
-
-For Prompt Experiments, you need to map the variables in your prompt to the keys in your dataset items.
-
-The following example demonstrates how prompt variables are mapped to dataset item inputs:
-
-<div className="grid md:grid-cols-2 gap-4">
+<summary>Example: Prompt Variables & Dataset Item Keys Mapping</summary>
+<div className="grid md:grid-cols-1 gap-4">
 <div>
 
 <br/>**Prompt:**
@@ -118,94 +101,100 @@ In this example:
 
 </details>
 
-### Create a dataset
+### Create a usable dataset
+Create a dataset with the inputs and expected outputs you want to use for your prompt experiments. [How to create a dataset?](/docs/evaluation/dataset-runs/datasets)
 
-<Frame border fullWidth>
-![Create a dataset](/images/docs/prompt-experiments-create-dataset-item.png)
-</Frame>
+<Callout type="info">
+**A dataset is usable when:** [1] the dataset items have JSON objects as input and [2] these objects have JSON keys that matches the prompt variables of the prompt(s) you will use. See the example below.
+</Callout>
 
-Create a dataset with the inputs and expected outputs you want to use for your prompt experiments. Make sure that the dataset items include the variable(s) that will be inserted into the prompt.
+ <details>
+<summary>Example: Prompt Variables & Dataset Item Keys Mapping</summary>
+<div className="grid md:grid-cols-1 gap-4">
+<div>
 
-import {Database} from "lucide-react";
+<br/>**Prompt:**
+```bash
+You are a Langfuse expert. Answer based on:
+{{documentation}}
 
-<Cards num={1}>
+Question: {{question}}
+```
 
-  <Card
-    icon={<Database size="24" />}
-    title="How to create a dataset?"
-    href="/docs/evaluation/dataset-runs/datasets"
-    arrow
-  />
-</Cards>
+</div>
+<div>
 
-<details>
-<summary>Example Dataset Item with variables</summary>
-
-```json filename="input"
+<br/>**Dataset Item:**
+```json
 {
-  "question": "What is Langfuse?",
-  "documentation": "Langfuse - the LLM Engineering Platform"
+  "documentation": "Langfuse is an LLM Engineering Platform",
+  "question": "What is Langfuse?"
 }
 ```
 
-```text filename="expected_output"
-Langfuse is the LLM Engineering Platform.
-```
+</div>
+</div>
+
+In this example:
+- The prompt variable `{{documentation}}` maps to the JSON key `"documentation"`
+- The prompt variable `{{question}}` maps to the JSON key `"question"`
+- Both keys must exist in the dataset item's input JSON for the experiment to run successfully
 
 </details>
 
-
-
 ### Configure LLM connection
 
-<Frame border fullWidth>
-![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
-</Frame>
-
-As your prompt will be executed for each dataset item, you need to configure an LLM connection in the project settings.
-
-import {KeyRound} from "lucide-react";
-
-<Cards num={1}>
-
-  <Card
-    icon={<KeyRound size="24" />}
-    title="How to configure an LLM connection?"
-    href="/faq/all/llm-connection"
-    arrow
-  />
-</Cards>
-
+As your prompt will be executed for each dataset item, you need to configure an LLM connection in the project settings. [How to configure an LLM connection?](/faq/all/llm-connection)
 
 ### Optional: Set up LLM-as-a-judge
 
-You can set up an LLM-as-a-judge evaluator to score the responses based on the expected outputs. Make sure to set the target of the LLM-as-a-Judge to "Experiment runs" and filter for the dataset you want to use.
+You can set up an LLM-as-a-judge evaluator to score the responses based on the expected outputs. Make sure to set the target of the LLM-as-a-Judge to "Experiment runs" and filter for the dataset you want to use. [How to set up LLM-as-a-judge?](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+</Steps>
 
-import {WandSparkles} from "lucide-react";
 
-<Cards num={1}>
+## Trigger a dataset run via UI
 
-  <Card
-    icon={<WandSparkles size="24" />}
-    title="How to set up LLM-as-a-judge?"
-    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
-    arrow
-  />
-</Cards>
+<Steps>
+### Navigate to the dataset
+Dataset Runs are currently started from the detail page of a dataset. 
 
-## Run a prompt experiment
-
-Now that we have set up a prompt version and a dataset, we can run a prompt experiment in Langfuse for each prompt version that we want to test.
-
-When viewing the prompt details or a dataset, use the following button to run a prompt experiment:
+- **Navigate to** `Your Project` > `Datasets`
+- **Click on** the dataset you want to start a Dataset Run for
 
 <Frame border fullWidth>
-![New Experiment Button](/images/docs/prompt-experiments-new-experiment.png)
+![New Experiment Button](/images/docs/navigate-to-dataset.png)
 </Frame>
 
-Select the prompt version, dataset, and model configuration that you want to test. Before running the experiment, you will see whether the prompt variables match the dataset variables.
+### Open the setup page
 
-## Compare runs
+**Click on** `Start Experiment` to open the setup page
+
+<Frame border fullWidth>
+![New Experiment Button](/images/docs/trigger-process.png)
+</Frame>
+
+**Click on** `Create` below `prompt Experiment`
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-process-2.png)
+</Frame>
+
+### Configure the Dataset Run
+
+1. **Set** a Dataset Run name
+2. **Select** the prompt you want to use
+3. **Set up or select** the LLM connection you want to use
+4. **Select** the dataset you want to use
+5. **Optionally select** the evaluator you want to use
+6. **Click on** `Create` to trigger the Dataset Run
+
+<Frame border>
+![New Experiment Button](/images/docs/configure_dataset_run.png)
+</Frame>
+
+This will trigger the Dataset Run and you will be redirected to the Dataset Runs page. The run might take a few seconds or minutes to complete depending on the prompt complexity and dataset size.
+
+### Compare runs
 
 After each experiment run, you can check the aggregated score in the dataset runs table and compare results side-by-side.
 
@@ -216,14 +205,6 @@ After each experiment run, you can check the aggregated score in the dataset run
 />
 
 </Steps>
-
-## Troubleshooting
-
-If you see a warning about mismatched variables, ensure that:
-- Every `{{variable}}` in your prompt has a matching key in your dataset items' input JSON
-- The names match exactly (including case sensitivity)
-- Your dataset input is valid JSON format
-
 
 ## GitHub Discussions
 
