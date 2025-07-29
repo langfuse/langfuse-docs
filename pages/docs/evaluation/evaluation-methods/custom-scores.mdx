@@ -5,40 +5,30 @@ sidebarTitle: Custom Scores (API/SDK)
 
 # Custom Scores via API/SDKs
 
-{/* todo: simplify this a lot */}
+Custom Scores are the most flexible way to implement evaluation workflows using Langfuse. As any other evaluation method the purpose of custom scores is to assign evaluations metrics to `Traces`, `Observations` or `Sessions`or `DatasetRuns` via the `Score` object (see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model)).
 
-{/* todo: add api focused instructions */}
+This is achieved by ingesting scores via the Langfuse SDKs or API. 
 
-Langfuse gives you full flexibility to ingest custom `Scores` [(see Evaluation Data Model)](/docs/evaluation/data-model) via the Langfuse SDKs or API. 
+## Common Use Cases
 
-The scoring workflow allows you to run custom quality checks on the output of your workflows at runtime, or to run custom human evaluation workflows.
-
-Common use cases:
-
-- [**Collecting user feedback**](/docs/evaluation/features/evaluation-methods/user-feedback): collect feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
-- [**Custom evaluation data pipeline**](/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines): continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
-- [**Guardrails and security checks**](/docs/evaluation/features/security-and-guardrails): check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
+- [**Collecting user feedback**](/faq/all/user-feedback): collect in-app feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
+- [**Custom evaluation data pipeline**](/guides/cookbook/example_external_evaluation_pipelines): continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+- [**Guardrails and security checks**](/docs/security-and-guardrails): check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
 - **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.
 
-## How to add scores
+## Ingesting Scores
 
-You can add scores via the Langfuse SDKs or API. Scores can take one of three data types:
+You can add scores via the Langfuse SDKs or API. Scores can take one of three data types: **Numeric**, **Categorical** or **Boolean**.
 
-- **Numeric**: used to record scores that fall into a numerical range
-- **Categorical**: used to record string score values
-- **Boolean**: used to record binary score values
+Here are examples by `Score` data types
 
-### SDK ingestion examples by data type
+<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tab>
 
 <Tabs items={["Numeric", "Categorical", "Boolean"]}>
 <Tab>
 Numeric score values must be provided as float.
-
-SDK examples
-
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
-<Tab>
 
 ```python
 from langfuse import get_client
@@ -92,46 +82,7 @@ with langfuse.start_as_current_span(name="my-operation"):
 
 </Tab>
 <Tab>
-
-```python
-langfuse.score(
-    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="correctness",
-    value=0.9,
-    data_type="NUMERIC", # optional, inferred if not provided
-    comment="Factually correct", # optional
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-await langfuse.score({
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "correctness",
-  value: 0.9,
-  dataType: "NUMERIC", // optional, inferred if not provided
-  comment: "Factually correct", // optional
-});
-```
-
-</Tab>
-</Tabs>
-
-</Tab>
-
-<Tab>
 Categorical score values must be provided as strings.
-
-SDK examples
-
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
-<Tab>
 
 ```python
 from langfuse import get_client
@@ -184,46 +135,7 @@ with langfuse.start_as_current_span(name="my-operation"):
 
 </Tab>
 <Tab>
-
-```python
-langfuse.score(
-    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="accuracy",
-    value="partially correct",
-    data_type="CATEGORICAL", # optional, inferred if not provided
-    comment="Factually correct", # optional
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-await langfuse.score({
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "accuracy",
-  value: "partially correct",
-  dataType: "CATEGORICAL", // optional, inferred if not provided
-  comment: "Factually correct", // optional
-});
-```
-
-</Tab>
-</Tabs>
-
-</Tab>
-
-<Tab>
 Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
-
-SDK examples
-
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
-<Tab>
 
 ```python
 from langfuse import get_client
@@ -274,7 +186,47 @@ with langfuse.start_as_current_span(name="my-operation"):
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
+
 <Tab>
+
+<Tabs items={["Numeric", "Categorical", "Boolean"]}>
+<Tab>
+Numeric score values must be provided as float.
+
+```python
+langfuse.score(
+    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    trace_id=message.trace_id,
+    observation_id=message.generation_id, # optional
+    name="correctness",
+    value=0.9,
+    data_type="NUMERIC", # optional, inferred if not provided
+    comment="Factually correct", # optional
+)
+```
+
+</Tab>
+<Tab>
+Categorical score values must be provided as strings.
+
+```python
+langfuse.score(
+    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
+    trace_id=message.trace_id,
+    observation_id=message.generation_id, # optional
+    name="accuracy",
+    value="partially correct",
+    data_type="CATEGORICAL", # optional, inferred if not provided
+    comment="Factually correct", # optional
+)
+```
+
+</Tab>
+<Tab>
+Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```python
 langfuse.score(
@@ -289,7 +241,47 @@ langfuse.score(
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
+
 <Tab>
+
+<Tabs items={["Numeric", "Categorical", "Boolean"]}>
+<Tab>
+Numeric score values must be provided as float.
+
+```ts
+await langfuse.score({
+  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "correctness",
+  value: 0.9,
+  dataType: "NUMERIC", // optional, inferred if not provided
+  comment: "Factually correct", // optional
+});
+```
+
+</Tab>
+<Tab>
+Categorical score values must be provided as strings.
+
+```ts
+await langfuse.score({
+  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "accuracy",
+  value: "partially correct",
+  dataType: "CATEGORICAL", // optional, inferred if not provided
+  comment: "Factually correct", // optional
+});
+```
+
+</Tab>
+<Tab>
+Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```ts
 await langfuse.score({
@@ -307,46 +299,36 @@ await langfuse.score({
 </Tabs>
 
 </Tab>
-→ More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
-
 </Tabs>
 
-### Update an existing score
+→ More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
-When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
-
-If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter when initially creating the score.
-
-### Prevent duplicated scores via an idempotency key
+### Preventing Duplicate Scores
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
-In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an idempotency key on the score and add this as an `id` when creating the score, e.g. `<trace_id>-<score_name>`.
+In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and add this as an `id` when creating the score, e.g. `<trace_id>-<score_name>`.
 
-### How to ensure your scores comply with a certain schema
+### Enforcing a Score Config
+Score configs are helpful when you want to standardize your scores for future analysis.
 
-Given your scores are required to follow a specific schema such as data range, name or data type, you can define and reference a [score config](/docs/evaluation/features/evaluation-methods/custom-scores#creating-score-config-object-in-langfuse) on your scores. 
+To enforce a score config, you can provide a `configId` when creating a score to reference a `ScoreConfig` that was previously created. `Score Configs` can be defined in the Langfuse UI or via our API. [See our guide on how to create and manage score configs](/faq/all/manage-score-configs).
 
-Configs are helpful when you want to standardize your scores for future analysis. They can be defined in the Langfuse UI or via our API.
-
-Whenever you provide a config, the score data will be validated against the config. The following rules apply:
+Whenever you provide a `ScoreConfig`, the score data will be validated against the config. The following rules apply:
 
 - **Score Name**: Must equal the config's name
 - **Score Data Type**: When provided, must match the config's data type
-- **Score Value**: Must match the config's data type and be within the config's value range:
-  - **Numeric**: Value must be within the min and max values defined in the config (if provided, min and max are optional and otherwise are assumed as -∞ and +∞ respectively)
-  - **Categorical**: Value must map to one of the categories defined in the config
-  - **Boolean**: Value must equal `0` or `1`
-
-#### Score ingestion referencing configs via SDK
-
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
-
-<Tab>
-When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
+- **Score Value when Type is numeric**: Value must be within the min and max values defined in the config (if provided, min and max are optional and otherwise are assumed as -∞ and +∞ respectively)
+- **Score Value when Type is categorical**: Value must map to one of the categories defined in the config
+- **Score Value when Type is boolean**: Value must equal `0` or `1`
 
 <Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+
 <Tab>
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
 
 ```python
 from langfuse import get_client
@@ -377,46 +359,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 
 </Tab>
 <Tab>
-
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="accuracy",
-    value=0.9,
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific min/max value range
-    data_type="NUMERIC" # optional, possibly inferred
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-await langfuse.score({
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "accuracy",
-  value: 0.9,
-  comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific min/max value range
-  dataType: "NUMERIC", // optional, possibly inferred
-});
-```
-
-</Tab>
-</Tabs>
-
-</Tab>
-
-<Tab>
 Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
-
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
-<Tab>
 
 ```python
 from langfuse import get_client
@@ -447,45 +390,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 
 </Tab>
 <Tab>
-
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="correctness",
-    value="correct",
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="12345-6565-3453654-43543" # optional, to ensure that the score maps to a specific category defined in a score config
-    data_type="CATEGORICAL" # optional, possibly inferred
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-await langfuse.score({
-  traceId: message.traceId,
-  observationId: message.generationId, // optional
-  name: "correctness",
-  value: "correct",
-  comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
-  configId: "12345-6565-3453654-43543", // optional, to ensure that a score maps to a specific category defined in a score config
-  dataType: "CATEGORICAL", // optional, possibly inferred
-});
-```
-
-</Tab>
-</Tabs>
-
-</Tab>
-<Tab>
 When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
-
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
-<Tab>
 
 ```python
 from langfuse import get_client
@@ -515,7 +420,49 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
+
 <Tab>
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
+
+```python
+langfuse.score(
+    trace_id=message.trace_id,
+    observation_id=message.generation_id, # optional
+    name="accuracy",
+    value=0.9,
+    comment="Factually correct", # optional
+    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific min/max value range
+    data_type="NUMERIC" # optional, possibly inferred
+)
+```
+
+</Tab>
+<Tab>
+Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
+
+```python
+langfuse.score(
+    trace_id=message.trace_id,
+    observation_id=message.generation_id, # optional
+    name="correctness",
+    value="correct",
+    comment="Factually correct", # optional
+    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
+    config_id="12345-6565-3453654-43543" # optional, to ensure that the score maps to a specific category defined in a score config
+    data_type="CATEGORICAL" # optional, possibly inferred
+)
+```
+
+</Tab>
+<Tab>
+When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
 
 ```python
 langfuse.score(
@@ -531,7 +478,49 @@ langfuse.score(
 ```
 
 </Tab>
+</Tabs>
+
+</Tab>
+
 <Tab>
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
+
+```ts
+await langfuse.score({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "accuracy",
+  value: 0.9,
+  comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific min/max value range
+  dataType: "NUMERIC", // optional, possibly inferred
+});
+```
+
+</Tab>
+<Tab>
+Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
+
+```ts
+await langfuse.score({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "correctness",
+  value: "correct",
+  comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  configId: "12345-6565-3453654-43543", // optional, to ensure that a score maps to a specific category defined in a score config
+  dataType: "CATEGORICAL", // optional, possibly inferred
+});
+```
+
+</Tab>
+<Tab>
+When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
 
 ```ts
 await langfuse.score({
@@ -551,31 +540,19 @@ await langfuse.score({
 
 </Tab>
 → More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+
 </Tabs>
 
-#### Creating Score Config object in Langfuse
+### Inferred Score Properties
 
-A `score config` includes the desired score name, data type, and constraints on score value range such as min and max values for numerical data types and custom categories for categorical data types. See [API reference](/docs/api) for more details on POST/GET score configs endpoints. Configs are crucial to ensure that scores comply with a specific schema therefore standardizing them for future analysis.
+Certain score properties might be inferred based on your input:
 
-| Attribute     | Type    | Description                                                                                     |
-| ------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `id`          | string  | Unique identifier of the score config.                                                          |
-| `name`        | string  | Name of the score config, e.g. user_feedback, hallucination_eval                                |
-| `dataType`    | string  | Can be either `NUMERIC`, `CATEGORICAL` or `BOOLEAN`                                             |
-| `isArchived`  | boolean | Whether the score config is archived. Defaults to false                                         |
-| `minValue`    | number  | Optional: Sets minimum value for numerical scores. If not set, the minimum value defaults to -∞ |
-| `maxValue`    | number  | Optional: Sets maximum value for numerical scores. If not set, the maximum value defaults to +∞ |
-| `categories`  | list    | Optional: Defines categories for categorical scores. List of objects with label value pairs     |
-| `description` | string  | Optional: Provides further description of the score configuration                               |
+- **If you don't provide a score data type** it will always be inferred. See tables below for details. 
+- **For boolean and categorical scores**, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below. 
+- **On read for boolean scores both** numerical and string representations of the score value will be returned, e.g. both 1 and True. 
+- **For categorical scores**, the string representation is always provided and a numerical mapping of the category will be produced only if a `ScoreConfig` was provided.
 
-### Detailed Score Ingestion Examples
-
-**Certain score properties might be inferred based on your input**. If you don't provide a score data type it will always be inferred. See tables below for details. 
-
-For boolean and categorical scores, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below. On read for boolean scores both numerical and string representations of the score value will be returned, e.g. both 1 and True. 
-
-For categorical scores, the string representation is always provided and a numerical mapping of the category will be produced only if a score config was provided.
-
+Detailed Examples:
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
 <Tab> 
 For example, let's assume you'd like to ingest a numeric score to measure **accuracy**. We have included a table of possible score ingestion scenarios below.
@@ -617,32 +594,8 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 </Tab>
 </Tabs>
 
-### Data pipeline example
+## Update Existing Scores
 
-```mermaid
-sequenceDiagram
-participant Application
-participant Langfuse
-participant Pipeline
-actor User
+When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
 
-Application ->> Langfuse: Ingest new traces
-Langfuse ->> Pipeline: Fetch traces via SDK/API
-Pipeline->>Pipeline: Run custom evaluation function/package
-Pipeline ->> Langfuse: Add score to trace via SDK/API
-Langfuse ->> User: Analyze evaluation scores via UI & API
-```
-
-You can run custom evaluations on data in Langfuse by fetching traces from Langfuse (e.g. via the Python SDK) and then adding evaluation results as `Scores` [(see Evaluation Data Model)](/docs/evaluation/data-model) back to the traces in Langfuse.
-
-The example notebook is a good template to get started with building your own evaluation pipeline.
-
-import { FileCode, BookOpen } from "lucide-react";
-
-<Cards num={1}>
-  <Card
-    title="Example: External Evaluation Pipeline"
-    href="/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines"
-    icon={<FileCode />}
-  />
-</Cards>
+If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter when initially creating the score.

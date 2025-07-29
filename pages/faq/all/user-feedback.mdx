@@ -7,32 +7,23 @@ tags: [evaluation]
 
 import FeedbackPreview from "@/components/feedbackPreview";
 
-# User Feedback Tracking
+# How to capture User Feedback for Evaluation of LLM apps?
 
 User feedback is a great source to evaluate the quality of an LLM app's output.
 
-<details>
-<summary>What are common feedback types?</summary>
-
+## What are common feedback types?
 Depending on the type of the application, there are different **types of feedback** that can be collected that vary in quality, detail, and quantity.
 
 - **Explicit Feedback**: Directly prompt the user to give feedback, this can be a rating, a like, a dislike, a scale or a comment. While it is simple to implement, quality and quantity of the feedback is often low.
 - **Implicit Feedback**: Measure the user's behavior, e.g., time spent on a page, click-through rate, accepting/rejecting a model-generated output. This type of feedback is more difficult to implement but is often more frequent and reliable.
 
-</details>
-
-<details>
-<summary>What is a common workflow of using user feedback?</summary>
+## What is a common workflow of using user feedback?
 
 A common workflow is to:
 
-1. Collection of feedback alongside LLM traces in Langfuse
-   > Example: _Negative, Langfuse not included in response_
+1. Collection of feedback alongside LLM traces in Langfuse. Example: Negative, Langfuse not included in response
 2. Browsing of all user feedback, especially when collecting comments from users
-3. Identification of the root cause of the low-quality response (can be managed via [annotation queues](/docs/scores/annotation))
-   > Example: _Docs on Langfuse integration are not included in embedding similarity search_
-
-</details>
+3. Identification of the root cause of the low-quality response (can be managed via [annotation queues](/docs/scores/annotation)). Example: Docs on Langfuse integration are not included in embedding similarity search
 
 ## Demo
 
@@ -48,7 +39,7 @@ Langfuse UI on the left, demo application on the right
 
 ## Get started
 
-In Langfuse, any kind of user feedback can be collected as a `score` (see [evaluation data model](/docs/evaluation/data-model)) via the [Langfuse SDKs or API](/docs/evaluation/features/evaluation-methods/custom-scores) and attached to an execution `trace` or an individual `observation` ([tracing data model](/docs/observability/data-model)).
+Capturing user feedback in Langfuse is done via the [External Evaluation Method](/docs/evaluation/evaluation-methods/custom-scores) which uses the SDK / API to attach scores to traces or observations.
 
 Types of user feedback that can be collected as a score:
 
