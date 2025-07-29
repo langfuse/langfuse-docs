@@ -30,7 +30,7 @@ There are two categories of evaluations for AI Applications: **online evaluation
 
 This involves **evaluating the application in a controlled setting**, typically using test [datasets](/docs/evaluation/dataset-runs/datasets.mdx), not live user queries. 
 
-For instance, if you built a math solving application, you might perform a [Dataset Run](dataset-run) over a test dataset of [100 math problems with known answers](https://huggingface.co/datasets/gsm8k). Offline evaluation is often done during development (and can be part of CI/CD pipelines) to check improvements or guard against regressions. The benefit is that it’s **repeatable and you can get clear accuracy metrics since you have ground truth**. 
+For instance, if you built a math solving application, you might perform a [Dataset Run](#dataset-run) over a test dataset of [100 math problems with known answers](https://huggingface.co/datasets/gsm8k). Offline evaluation is often done during development (and can be part of CI/CD pipelines) to check improvements or guard against regressions. The benefit is that it’s **repeatable and you can get clear accuracy metrics since you have ground truth**. 
 
 The key challenge with offline eval is ensuring your test dataset is comprehensive and stays relevant – the application might perform well on a fixed test set but encounter very different queries in production. Therefore, you should keep test sets [updated with new edge cases from production traces](/docs/evaluation/dataset-runs/datasets#create-items-from-production-data).
 
