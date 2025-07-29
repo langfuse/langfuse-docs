@@ -5,14 +5,14 @@ description: Experiment with different prompt versions and models on a dataset a
 
 # Dataset Runs via the UI
 
-You can execute Dataset Runs (formerly Prompt Experiments) in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
+You can execute Dataset Runs (also called Prompt Experiments) in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
 
 Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to automatically score the responses based on the expected outputs to further analyze the results on an aggregate level.
 
 <CloudflareVideo
   videoId="0e2811d0dbcd59000837773aef814963"
   aspectRatio={16 / 9}
-  title="Introduction to Prompt Experiments"
+  title="Introduction to Dataset Runs"
 />
 
 ## Why run Dataset Runs via the UI?
@@ -21,7 +21,7 @@ Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-
 - Stucture your prompt testing by using a dataset to test different prompt versions and models
 - Quickly iterate on prompts through Dataset Runs
 - Optionally use LLM-as-a-Judge Evaluators to score the responses based on the expected outputs from the dataset
-- Prevent regressions by running experiments when making prompt changes
+- Prevent regressions by running tests when making prompt changes
 
 ## Prerequisites
 <Steps>
@@ -30,7 +30,7 @@ Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-
 ### Create a usable prompt
 Create a prompt that you want to test and evaluate. [How to create a prompt?](/docs/prompt-management/get-started)
 <Callout type="info">
-**A prompt is usable when:** your prompt has variables that match the dataset item keys in the dataset that will be used for the dataset run. See the example below.
+**A prompt is usable when:** your prompt has variables that match the dataset item keys in the dataset that will be used for the Dataset Run. See the example below.
 </Callout>
 
 <details>
@@ -152,7 +152,7 @@ You can set up an LLM-as-a-judge evaluator to score the responses based on the e
 </Steps>
 
 
-## Trigger a dataset run via UI
+## Trigger a Dataset Run via UI
 
 <Steps>
 ### Navigate to the dataset
@@ -196,7 +196,7 @@ This will trigger the Dataset Run and you will be redirected to the Dataset Runs
 
 ### Compare runs
 
-After each experiment run, you can check the aggregated score in the dataset runs table and compare results side-by-side.
+After each experiment run, you can check the aggregated score in the Dataset Runs table and compare results side-by-side.
 
 <CloudflareVideo
   videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
