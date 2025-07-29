@@ -476,8 +476,13 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/data-model", "/docs/evaluation/dataset-runs/data-model"],
   ["/guides/cookbook/integration_mirascope", "/integrations/frameworks/mirascope"],
   ["/guides/cookbook/integration_mistral_sdk", "/integrations/model-providers/mistral-sdk"],
+  ["/docs/evaluation/features/evaluation-methods/external-evaluation-pipelines", "/guides/cookbook/example_external_evaluation_pipelines"],
+  ["/docs/evaluation/features/evaluation-methods/llm-as-a-judge", "/docs/evaluation/evaluation-methods/llm-as-a-judge"],
+  ["/docs/evaluation/features/evaluation-methods/user-feedback", "/faq/all/user-feedback"],
+  ["/docs/evaluation/features/security-and-guardrails", "/docs/security-and-guardrails"],
+  ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
-  
+
 ];
 
 const permanentRedirects = []
