@@ -11,9 +11,16 @@ This is achieved by ingesting scores via the Langfuse SDKs or API.
 
 ## Common Use Cases
 
-- [**Collecting user feedback**](/faq/all/user-feedback): collect in-app feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
-- [**Custom evaluation data pipeline**](/guides/cookbook/example_external_evaluation_pipelines): continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
-- [**Guardrails and security checks**](/docs/security-and-guardrails): check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
+- **Collecting user feedback**: collect in-app feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
+-> [Example Notebook](/guides/cookbook/user-feedback)
+
+- **Custom evaluation data pipeline**: continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+-> [Example Notebook](/guides/cookbook/example_external_evaluation_pipelines)
+
+
+- **Guardrails and security checks**: check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
+-> [Example Notebook](/guides/cookbook/security-and-guardrails)
+
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
 - **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.
 
@@ -301,7 +308,7 @@ await langfuse.score({
 </Tab>
 </Tabs>
 
-→ More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+→ More details in [Python SDK docs](/docs/observability/sdk/python/sdk-v3#scoring-traces-and-observations) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 ### Preventing Duplicate Scores
 
@@ -539,7 +546,8 @@ await langfuse.score({
 </Tabs>
 
 </Tab>
-→ More details in [Python SDK docs](/docs/sdk/python) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+
+→ More details in [Python SDK docs](/docs/observability/sdk/python/sdk-v3#scoring-traces-and-observations) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 </Tabs>
 

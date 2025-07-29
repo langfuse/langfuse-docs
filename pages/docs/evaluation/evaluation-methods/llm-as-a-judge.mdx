@@ -6,36 +6,58 @@ description: Configure, run, and monitor LLM-powered evaluators on traces and da
 
 # LLM-as-a-Judge
 
-LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The scores and reasoning are stored as [scores](/docs/scores/data-model) in Langfuse.
+LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The scores and reasoning are stored as [scores](/docs/evaluation/evaluation-methods/data-model) in Langfuse.
 
-## Video Walkthrough
+## Why use LLM-as-a-judge?
 
-<iframe
-  width="100%"
-  className="aspect-video rounded border mt-6"
-  src="https://www.youtube-nocookie.com/embed/KTRz9Tv4CEE"
-  title="Langfuse Evaluator Library"
-  frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-></iframe>
+* **Scalable & cost‑effective:** Judge thousands of outputs quickly and cheaply versus human panels.
+* **Human‑like judgments:** Captures nuance (helpfulness, safety, coherence) better than simple metrics, especially when rubric‑guided.
+* **Repeatable comparisons:** With a fixed rubric, you can rerun the same prompts to get consistent scores and short rationales.
 
 ## Set up step-by-step
 
 <Steps>
 
+### Create a new LLM-as-a-Judge evaluator
+
+Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
+
+<Frame border fullWidth>
+  ![Evaluator create](/images/docs/evaluator-create.png)
+</Frame>
+
+### Set the default model
+
+Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
+
+<Frame border fullWidth>
+  ![Evaluator default model](/images/docs/evaluator-default-model.png)
+</Frame>
+
+This step requires an LLM Connection to be set up. Please see [LLM Connections](/faq/all/llm-connection) for more information.
+
+- **Setup**: This default model needs to be set up once, though it can be changed at any point if needed.
+- **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
+- **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+
 ### Pick an Evaluator
 
-The first step is to select an evaluator. We offer two main ways to approach this:
+<Frame border fullWidth>
+  ![Evaluator select](/images/docs/evaluator-select.png)
+</Frame>
 
-**1. Managed evaluator from our library**
+Now we select an evaluator. There are two main ways:
+
+<Tabs items={["Managed Evaluator", "Custom Evaluator"]}>
+<Tab>
 
 Langfuse ships a growing catalog of evaluators built and maintained by us and partners like **Ragas**. Each evaluator captures best-practice evaluation prompts for a specific quality dimension—e.g. _Hallucination_, _Context-Relevance_, _Toxicity_, _Helpfulness_.
 
 - **Ready to use**: no prompt writing required.
 - **Continuously expanded**: by adding OSS partner-maintained evaluators and more evaluator types in the future (e.g. regex-based).
 
-**2. Custom evaluator**
+</Tab>
+<Tab>
 
 When the library doesn't fit your specific needs, add your own:
 
@@ -44,19 +66,14 @@ When the library doesn't fit your specific needs, add your own:
 3. Optional: Pin a custom dedicated model for this evaluator. If no custom model is specified, it will use the default evaluation model (see Section 2).
 4. Save → the evaluator can now be reused across your project.
 
-### Set the default Evaluation Model
-
-Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
-
-- **Setup**: This default model needs to be set up once, though it can be changed at any point if needed.
-- **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
-- **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+</Tab>
+</Tabs>
 
 ### Choose which Data to Evaluate
 
-With your evaluator and model selected, you now specify which data to run the evaluations on. Different questions need different slices of data.
+With your evaluator and model selected, you now specify which data to run the evaluations on. You can chose between running on **production tracing data** or **Datasets during Dataset Runs**.
 
-<Tabs items={["Production tracing data", "Dataset experiment runs"]}>
+<Tabs items={["Live Data", "Dataset Runs"]}>
 <Tab>
 
 Evaluating live production traffic allows you to monitor the performance of your LLM application in real-time.
@@ -66,20 +83,22 @@ Evaluating live production traffic allows you to monitor the performance of your
 - **Preview**: Langfuse shows a sample of traces from the last 24 hours that match your current filters, allowing you to sanity-check your selection.
 - **Sampling**: To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched traces.
 
-<Frame border className="mt-2">
+<Frame border fullWidth>
   ![Production tracing data](/images/docs/evaluator-trace-filter.png)
 </Frame>
 
 </Tab>
 <Tab>
 
-Dataset experiments run on static items, perfect for regression testing. Please refer to the [experiments](/docs/datasets/prompt-experiments) documentation for more details.
+LLM-as-a-Judge evaluators can score the results of your Dataset Runs.
 
-- **UI Prompt Experiments**: When running prompt experiments through the UI, you can simply select which evaluators you want to run. These selected evaluators will then automatically execute on the data generated by your next experiment run.
-- **API Prompt Experiments**: Before running prompt experiments through the API, you will need to set up which evaluators you want to run in UI. You will need to configure a running evaluator in the following format:
-  - **Dataset**: Define which source dataset needs to be linked in an experiment.
-  - **Scope**: Choose whether to run on _new_ experiment runs only and/or _past_ experiment runs once (for backfilling). When in doubt, we recommend running on _new_ experiment runs.
-  - **Sampling**: To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of experiment run items.
+**[Dataset Runs via UI](/docs/evaluation/dataset-runs/run-via-ui)**: When running Dataset Runs through the UI, you can simply select which evaluators you want to run. These selected evaluators will then automatically execute on the data generated by your next Dataset Run.
+
+**[Dataset Runs via SDK](/docs/evaluation/dataset-runs/run-via-sdk)**: Before running Dataset Runs through the SDKs, you will need to set up which evaluators you want to run in UI. You will need to configure a running evaluator in the following format: 
+
+- **Dataset**: Filter which source dataset the evaluator should run on.
+- **Scope**: Choose whether to target only new Dataset Runs and/or execute the evaluator on past Dataset Runs (for backfilling).
+- **Sampling**: To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of Dataset Run items.
 
 </Tab>
 </Tabs>
@@ -88,13 +107,13 @@ Dataset experiments run on static items, perfect for regression testing. Please 
 
 You now need to teach Langfuse _which properties_ of your trace or dataset item represent the actual data to populate these variables for a sensible evaluation. For instance, you might map your system's logged trace input to the prompt's `{{input}}` variable, and the LLM response ie trace output to the prompt's `{{output}}` variable. This mapping is crucial for ensuring the evaluation is sensible and relevant.
 
-<Tabs items={["Production tracing data", "Dataset experiment runs"]}>
+<Tabs items={["Live Data", "Dataset Runs"]}>
 <Tab>
 
 - **Prompt Preview**: As you configure the mapping, Langfuse shows a **live preview of the evaluation prompt populated with actual data**. This preview uses historical traces from the last 24 hours that matched your filters (from Step 3). You can navigate through several example traces to see how their respective data fills the prompt, helping you build confidence that the mapping is correct.
 - **JSONPath**: If the data is nested (e.g., within a JSON object), you can use a JSONPath expression (like `$.choices[0].message.content`) to precisely locate it.
 
-<Frame border className="mt-2">
+<Frame border fullWidth>
   ![Filter preview](/images/docs/evaluator-mapping.png)
 </Frame>
 
@@ -113,88 +132,27 @@ You now need to teach Langfuse _which properties_ of your trace or dataset item 
 
 <Callout type="info">
   Need custom logic? Use the SDK instead—see [Custom
-  evaluations](/docs/evaluation/features/evaluation-methods/custom-scores) or the [external pipeline
+  Scores](/docs/evaluation/evaluation-methods/custom-scores) or an [external pipeline
   example](/docs/scores/external-evaluation-pipelines).
 </Callout>
 
-## Monitor & iterate
+## Monitor & Iterate
 
-As our system evaluates your data it writes the results as [scores](/docs/scores/data-model). You can then:
+As our system evaluates your data it writes the results as [scores](/docs/evaluation/evaluation-methods/data-model). You can then:
 
 - **View Logs**: Check detailed logs for each evaluation, including status, any retry errors, and the full request/response bodies sent to the evaluation model.
 - **Use Dashboards**: Aggregate scores over time, filter by version or environment, and track the performance of your LLM application.
 - **Take Actions**: Pause, resume, or delete an evaluator.
 
-<Frame border className="mt-2">
+<Frame border fullWidth>
   ![View evaluator data](/images/docs/evaluator-overview.png)
 </Frame>
 
-### Troubleshooting
+## FAQ
 
-<details>
-<summary>Using an LLM proxy</summary>
+import { FaqPreview } from "@/components/faq/FaqPreview";
 
-You can use an LLM proxy to power LLM-as-a-judge in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
-
-For OpenAI compatible proxies, here is an example tool calling request that must be handled by the proxy in OpenAI format to support LLM-as-a-judge in Langfuse:
-
-```bash
-curl -X POST 'https://<host set in project settings>/chat/completions' \
--H 'accept: application/json' \
--H 'content-type: application/json' \
--H 'authorization: Bearer <api key entered in project settings>' \
--H 'x-test-header-1: <custom header set in project settings>' \
--H 'x-test-header-2: <custom header set in project settings>' \
--d '{
-  "model": "<model set in project settings>",
-  "temperature": 0,
-  "top_p": 1,
-  "frequency_penalty": 0,
-  "presence_penalty": 0,
-  "max_tokens": 256,
-  "n": 1,
-  "stream": false,
-  "tools": [
-    {
-      "type": "function",
-      "function": {
-        "name": "extract",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "score": {
-              "type": "string"
-            },
-            "reasoning": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "score",
-            "reasoning"
-          ],
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
-        }
-      }
-    }
-  ],
-  "tool_choice": {
-    "type": "function",
-    "function": {
-      "name": "extract"
-    }
-  },
-  "messages": [
-    {
-      "role": "user",
-      "content": "Evaluate the correctness of the generation on a continuous scale from 0 to 1. A generation can be considered correct (Score: 1) if it includes all the key facts from the ground truth and if every fact presented in the generation is factually supported by the ground truth or common sense.\n\nExample:\nQuery: Can eating carrots improve your vision?\nGeneration: Yes, eating carrots significantly improves your vision, especially at night. This is why people who eat lots of carrots never need glasses. Anyone who tells you otherwise is probably trying to sell you expensive eyewear or does not want you to benefit from this simple, natural remedy. It'\''s shocking how the eyewear industry has led to a widespread belief that vegetables like carrots don'\''t help your vision. People are so gullible to fall for these money-making schemes.\nGround truth: Well, yes and no. Carrots won'\''t improve your visual acuity if you have less than perfect vision. A diet of carrots won'\''t give a blind person 20/20 vision. But, the vitamins found in the vegetable can help promote overall eye health. Carrots contain beta-carotene, a substance that the body converts to vitamin A, an important nutrient for eye health.  An extreme lack of vitamin A can cause blindness. Vitamin A can prevent the formation of cataracts and macular degeneration, the world'\''s leading cause of blindness. However, if your vision problems aren'\''t related to vitamin A, your vision won'\''t change no matter how many carrots you eat.\nScore: 0.1\nReasoning: While the generation mentions that carrots can improve vision, it fails to outline the reason for this phenomenon and the circumstances under which this is the case. The rest of the response contains misinformation and exaggerations regarding the benefits of eating carrots for vision improvement. It deviates significantly from the more accurate and nuanced explanation provided in the ground truth.\n\n\n\nInput:\nQuery: {{query}}\nGeneration: {{generation}}\nGround truth: {{ground_truth}}\n\n\nThink step by step."
-    }
-  ]
-}'
-```
-
-</details>
+<FaqPreview tags={["LLM-as-a-Judge"]} />
 
 ## GitHub Discussions
 

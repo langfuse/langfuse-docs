@@ -1,6 +1,7 @@
 ---
 title: How to set up an LLM connection?
 description: How to set up an LLM connection in Langfuse to use in the Playground or for LLM-as-a-Judge evaluations.
+tags: ["LLM-as-a-Judge", "Playground"]
 ---
 
 # How to set up an LLM connection?
@@ -137,6 +138,68 @@ export function ModelList() {
 </AccordionContent>
 </AccordionItem>
 </Accordion>
+
+## How to use an LLM proxy? [#LLM-as-a-Judge]
+
+You can use an LLM proxy to power LLM-as-a-judge or the Playground in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
+
+For OpenAI compatible proxies, here is an example tool calling request that must be handled by the proxy in OpenAI format to support LLM-as-a-judge in Langfuse:
+
+```bash
+curl -X POST 'https://<host set in project settings>/chat/completions' \
+-H 'accept: application/json' \
+-H 'content-type: application/json' \
+-H 'authorization: Bearer <api key entered in project settings>' \
+-H 'x-test-header-1: <custom header set in project settings>' \
+-H 'x-test-header-2: <custom header set in project settings>' \
+-d '{
+  "model": "<model set in project settings>",
+  "temperature": 0,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "max_tokens": 256,
+  "n": 1,
+  "stream": false,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "extract",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string"
+            },
+            "reasoning": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "score",
+            "reasoning"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    }
+  ],
+  "tool_choice": {
+    "type": "function",
+    "function": {
+      "name": "extract"
+    }
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Evaluate the correctness of the generation on a continuous scale from 0 to 1. A generation can be considered correct (Score: 1) if it includes all the key facts from the ground truth and if every fact presented in the generation is factually supported by the ground truth or common sense.\n\nExample:\nQuery: Can eating carrots improve your vision?\nGeneration: Yes, eating carrots significantly improves your vision, especially at night. This is why people who eat lots of carrots never need glasses. Anyone who tells you otherwise is probably trying to sell you expensive eyewear or does not want you to benefit from this simple, natural remedy. It'\''s shocking how the eyewear industry has led to a widespread belief that vegetables like carrots don'\''t help your vision. People are so gullible to fall for these money-making schemes.\nGround truth: Well, yes and no. Carrots won'\''t improve your visual acuity if you have less than perfect vision. A diet of carrots won'\''t give a blind person 20/20 vision. But, the vitamins found in the vegetable can help promote overall eye health. Carrots contain beta-carotene, a substance that the body converts to vitamin A, an important nutrient for eye health.  An extreme lack of vitamin A can cause blindness. Vitamin A can prevent the formation of cataracts and macular degeneration, the world'\''s leading cause of blindness. However, if your vision problems aren'\''t related to vitamin A, your vision won'\''t change no matter how many carrots you eat.\nScore: 0.1\nReasoning: While the generation mentions that carrots can improve vision, it fails to outline the reason for this phenomenon and the circumstances under which this is the case. The rest of the response contains misinformation and exaggerations regarding the benefits of eating carrots for vision improvement. It deviates significantly from the more accurate and nuanced explanation provided in the ground truth.\n\n\n\nInput:\nQuery: {{query}}\nGeneration: {{generation}}\nGround truth: {{ground_truth}}\n\n\nThink step by step."
+    }
+  ]
+}'
+```
 
 
 
