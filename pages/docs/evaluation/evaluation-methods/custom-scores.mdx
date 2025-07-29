@@ -11,43 +11,15 @@ This is achieved by ingesting scores via the Langfuse SDKs or API.
 
 ## Common Use Cases
 
-import {
-  StickyNote,
-  FileCode2
-} from "lucide-react";
-
 - **Collecting user feedback**: collect in-app feedback from your users on application quality or performance. Can be captured in the frontend via our Browser SDK.
-
-    <Cards num={4}>
-    <Card
-        icon={<FileCode2 size="24" />}
-        title="Notebook"
-        href="/faq/all/user-feedback"
-        arrow
-    />
-    </Cards>
+-> [Example Notebook](/guides/cookbook/user-feedback)
 
 - **Custom evaluation data pipeline**: continuously monitor the quality by fetching traces from Langfuse, running custom evaluations, and ingesting scores back into Langfuse.
+-> [Example Notebook](/guides/cookbook/example_external_evaluation_pipelines)
 
-    <Cards num={4}>
-    <Card
-        icon={<FileCode2 size="24" />}
-        title="Notebook"
-        href="/guides/cookbook/example_external_evaluation_pipelines"
-        arrow
-    />
-    </Cards>
 
 - **Guardrails and security checks**: check if output contains a certain keyword, adheres to a specified structure/format or if the output is longer than a certain length.
-
-    <Cards num={4}>
-    <Card
-        icon={<FileCode2 size="24" />}
-        title="Notebook"
-        href="/docs/security-and-guardrails"
-        arrow
-    />
-    </Cards>
+-> [Example Notebook](/guides/cookbook/security-and-guardrails)
 
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
 - **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.

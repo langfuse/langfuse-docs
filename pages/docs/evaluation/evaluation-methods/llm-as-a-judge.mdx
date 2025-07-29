@@ -30,18 +30,46 @@ LLM-as-a-judge is a technique to evaluate the quality of LLM applications by usi
 
 <Steps>
 
+### Create a new evaluator
+
+Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
+
+<Frame border fullWidth>
+  ![Evaluator create](/images/docs/evaluator-create.png)
+</Frame>
+
+### Set the default Evaluation Model
+
+<Frame border fullWidth>
+  ![Evaluator default model](/images/docs/evaluator-default-model.png)
+</Frame>
+
+Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
+
+This step requires an LLM Connection to be set up. Please see [LLM Connections](/faq/all/llm-connection) for more information.
+
+- **Setup**: This default model needs to be set up once, though it can be changed at any point if needed.
+- **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
+- **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+
 ### Pick an Evaluator
 
-The first step is to select an evaluator. We offer two main ways to approach this:
+<Frame border fullWidth>
+  ![Evaluator select](/images/docs/evaluator-select.png)
+</Frame>
 
-**1. Managed evaluator from our library**
+Now we select an evaluator. There are two main ways:
+
+<Tabs items={["Managed evaluator from our library", "Custom evaluator"]}>
+<Tab>
 
 Langfuse ships a growing catalog of evaluators built and maintained by us and partners like **Ragas**. Each evaluator captures best-practice evaluation prompts for a specific quality dimension—e.g. _Hallucination_, _Context-Relevance_, _Toxicity_, _Helpfulness_.
 
 - **Ready to use**: no prompt writing required.
 - **Continuously expanded**: by adding OSS partner-maintained evaluators and more evaluator types in the future (e.g. regex-based).
 
-**2. Custom evaluator**
+</Tab>
+<Tab>
 
 When the library doesn't fit your specific needs, add your own:
 
@@ -50,13 +78,8 @@ When the library doesn't fit your specific needs, add your own:
 3. Optional: Pin a custom dedicated model for this evaluator. If no custom model is specified, it will use the default evaluation model (see Section 2).
 4. Save → the evaluator can now be reused across your project.
 
-### Set the default Evaluation Model
-
-Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
-
-- **Setup**: This default model needs to be set up once, though it can be changed at any point if needed.
-- **Change**: Existing evaluators keep evaluating with the new model—historic results stay preserved.
-- **Structured Output Support**: It's crucial that the chosen default model supports structured output. This is essential for our system to correctly interpret the evaluation results from the LLM judge.
+</Tab>
+</Tabs>
 
 ### Choose which Data to Evaluate
 
