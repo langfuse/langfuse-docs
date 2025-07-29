@@ -1,4 +1,5 @@
 ---
+source: ⚠️ Jupyter Notebook
 title: Trace the OpenAI Agents SDK with Langfuse
 sidebarTitle: OpenAI Agents
 logo: /images/integrations/openai_icon.svg
@@ -14,62 +15,36 @@ This notebook demonstrates how to **integrate Langfuse** into your **OpenAI Agen
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
-<br>
-
-<div style="position: relative; padding-top: 69.85769728331177%;">
-  <iframe
-    src="https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/1b048205cbf89ad4f14adf6248e970f7/iframe?muted=true&loop=true&autoplay=true&poster=https%3A%2F%2Fcustomer-xnej9vqjtgxpafyk.cloudflarestream.com%2F1b048205cbf89ad4f14adf6248e970f7%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false"
-    loading="lazy"
-    style="border: white; position: absolute; top: 0; left: 0; height: 100%; width: 100%; border-radius: 10px;"
-    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-    allowfullscreen="true"
-  ></iframe>
-</div>
-
 ## 1. Install Dependencies
 
 Below we install the `openai-agents` library (the OpenAI Agents SDK), and the `pydantic-ai[logfire]` OpenTelemetry instrumentation.
 
 
 ```python
-%pip install openai-agents nest_asyncio "pydantic-ai[logfire]"
+%pip install openai-agents langfuse nest_asyncio "pydantic-ai[logfire]"
 ```
 
 ## 2. Configure Environment & Langfuse Credentials
 
-Next, we'll set environment variables to connect to Langfuse and your OpenAI API key. 
-- Replace `pk-lf-...` and `sk-lf-...` with your actual Langfuse keys.
-- Replace the `OPENAI_API_KEY` with your valid OpenAI API key.
-
-If you have multiple regions, use the correct `LANGFUSE_HOST` (EU or US).
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
 
 
 ```python
 import os
-import base64
 
-# Replace with your Langfuse keys.
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."  
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."  
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # or 'https://us.cloud.langfuse.com'
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
 
-# Build Basic Auth header.
-LANGFUSE_AUTH = base64.b64encode(
-    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
-).decode()
-
-# Configure OpenTelemetry endpoint & headers
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
-# OpenAI API Key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 ```
 
 ## 3. Instrumenting the Agent
 
-Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to the [Langfuse OpenTelemetry Backend](https://langfuse.com/docs/opentelemetry/get-started).
-
+Pydantic Logfire offers an instrumentation for the OpenAi Agent SDK. We use this to send traces to Langfuse.
 
 
 ```python
@@ -84,11 +59,25 @@ import logfire
 # Configure logfire instrumentation.
 logfire.configure(
     service_name='my_agent_service',
-
     send_to_logfire=False,
 )
 # This method automatically patches the OpenAI Agents SDK to send logs via OTLP to Langfuse.
 logfire.instrument_openai_agents()
+```
+
+Now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
 ```
 
 ## 4. Hello World Example
@@ -222,6 +211,70 @@ await loop.create_task(main())
 
 Each child call is represented as a sub-span under the top-level **Joke workflow** span, making it easy to see the entire conversation or sequence of calls.
 
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
+## Link Langfuse Prompt
+
+If you manage your prompt with [Langfuse Prompt Management](https://langfuse.com/docs/prompt-management/overview), you can link the used prompt to the trace by setting up an OTel Span processor.
+
+<Callout type="info" emoji="⚠️">
+**Limitation:** This method links the Langfuse Prompt to all generation spans in the trace that start with the defined string (see next cell).
+</Callout>
+
+
+```python
+from contextvars import ContextVar
+from typing import Optional
+from opentelemetry import context as context_api
+from opentelemetry.sdk.trace.export import Span, SpanProcessor
+
+prompt_info_var = ContextVar("prompt_info", default=None)
+
+class LangfuseProcessor(SpanProcessor):
+    def on_start(
+        self,
+        span: 'Span',
+        parent_context: Optional[context_api.Context] = None,
+    ) -> None:
+        if span.name.startswith('Responses API'): # The name of the generation spans in your OpenAI Agent trace 
+            prompt_info = prompt_info_var.get()
+            if prompt_info:
+                span.set_attribute('langfuse.prompt.name', prompt_info.get("name"))
+                span.set_attribute('langfuse.prompt.version', prompt_info.get("version"))
+```
+
+
+```python
+import logfire
+from langfuse import get_client
+
+logfire.configure(
+    service_name='my_agent_service',
+    additional_span_processors=[LangfuseProcessor()], # Passing the LangfuseProcessor to the logfire configuration will automatically link the prompt to the trace
+    send_to_logfire=False,
+)
+
+logfire.instrument_openai_agents()
+langfuse = get_client()
+```
+
+
+```python
+# Fetch the prompt from Langfuse Prompt Management
+langfuse_prompt = langfuse.get_prompt("movie-critic")
+system_prompt = langfuse_prompt.compile(criticlevel = "expert", movie = "Dune 2")
+
+# Pass the prompt to the SpanProcessor
+prompt_info_var.set({
+    "name": langfuse_prompt.name,
+    "version": langfuse_prompt.version,
+})
+
+# Run the agent ...
+```
+
 ## Resources
 
-Once you instrumented your agent it is time to systematically evaluate the agent to make it ready for use in production. For this, check out our [example notebook on evaluating agents](https://langfuse.com/guides/cookbook/example_evaluating_openai_agents) with Langfuse. 
+- [Example notebook on evaluating agents](https://langfuse.com/guides/cookbook/example_evaluating_openai_agents) with Langfuse. 
