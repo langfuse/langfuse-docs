@@ -12,6 +12,16 @@ Use the Langfuse UI to create a new prompt or update an existing one.
 </Tab>
 <Tab>
 
+import Env from "@/components-mdx/env-python.mdx";
+
+```bash
+pip install langfuse
+```
+
+Add your Langfuse credentials as environment variables.
+
+<Env />
+
 Use the Python SDK to create a new prompt or update an existing one.
 
 ```python
@@ -50,6 +60,47 @@ If you already have a prompt with the same `name`, the prompt will be added as a
 </Tab>
 
 <Tab>
+
+```bash
+npm i langfuse
+```
+<Tabs items={["Environment variables", "Constructor parameters"]}>
+<Tab>
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-...";
+LANGFUSE_PUBLIC_KEY = "pk-lf-...";
+LANGFUSE_BASEURL = "https://cloud.langfuse.com"; 🇪🇺 EU region
+# LANGFUSE_BASEURL = "https://us.cloud.langfuse.com"; 🇺🇸 US region
+```
+
+```ts
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+const langfuse = new Langfuse();
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse"; // or "langfuse-node"
+
+const langfuse = new Langfuse({
+  secretKey: "sk-lf-...",
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+
+  // optional
+  release: "v1.0.0",
+  requestTimeout: 10000,
+  enabled: true, // set to false to disable sending events
+});
+```
+
+</Tab>
+</Tabs>
 
 Use the JS/TS SDK to create a new prompt or update an existing one.
 
