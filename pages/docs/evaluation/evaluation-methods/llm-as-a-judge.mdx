@@ -30,7 +30,7 @@ LLM-as-a-judge is a technique to evaluate the quality of LLM applications by usi
 
 <Steps>
 
-### Create a new evaluator
+### Create a new LLM-as-a-Judge evaluator
 
 Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
 
@@ -38,13 +38,13 @@ Navigate to the Evaluators page and click on the `+ Set up Evaluator` button.
   ![Evaluator create](/images/docs/evaluator-create.png)
 </Frame>
 
-### Set the default Evaluation Model
+### Set the default model
+
+Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
 
 <Frame border fullWidth>
   ![Evaluator default model](/images/docs/evaluator-default-model.png)
 </Frame>
-
-Next, you'll define the default model used for conducting the evaluations. The default is used by every managed evaluator; custom templates may override it.
 
 This step requires an LLM Connection to be set up. Please see [LLM Connections](/faq/all/llm-connection) for more information.
 
@@ -95,7 +95,7 @@ Evaluating live production traffic allows you to monitor the performance of your
 - **Preview**: Langfuse shows a sample of traces from the last 24 hours that match your current filters, allowing you to sanity-check your selection.
 - **Sampling**: To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of the matched traces.
 
-<Frame border className="mt-2">
+<Frame border fullWidth>
   ![Production tracing data](/images/docs/evaluator-trace-filter.png)
 </Frame>
 
@@ -123,7 +123,7 @@ You now need to teach Langfuse _which properties_ of your trace or dataset item 
 - **Prompt Preview**: As you configure the mapping, Langfuse shows a **live preview of the evaluation prompt populated with actual data**. This preview uses historical traces from the last 24 hours that matched your filters (from Step 3). You can navigate through several example traces to see how their respective data fills the prompt, helping you build confidence that the mapping is correct.
 - **JSONPath**: If the data is nested (e.g., within a JSON object), you can use a JSONPath expression (like `$.choices[0].message.content`) to precisely locate it.
 
-<Frame border className="mt-2">
+<Frame border fullWidth>
   ![Filter preview](/images/docs/evaluator-mapping.png)
 </Frame>
 
@@ -154,7 +154,7 @@ As our system evaluates your data it writes the results as [scores](/docs/evalua
 - **Use Dashboards**: Aggregate scores over time, filter by version or environment, and track the performance of your LLM application.
 - **Take Actions**: Pause, resume, or delete an evaluator.
 
-<Frame border className="mt-2">
+<Frame border fullWidth>
   ![View evaluator data](/images/docs/evaluator-overview.png)
 </Frame>
 
