@@ -506,6 +506,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Dedicated support engineer",
         "Architecture reviews",
         "Billing via AWS Marketplace",
+        "Billing via Invoice",
       ],
       cta: "Talk to sales",
     },
@@ -544,6 +545,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Dedicated support engineer",
         "Support SLA",
         "Billing via AWS Marketplace",
+        "Billing via Invoice",
       ],
       cta: "Talk to sales",
       ctaCallout: {

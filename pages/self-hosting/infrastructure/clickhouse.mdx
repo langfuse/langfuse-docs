@@ -98,7 +98,7 @@ CLICKHOUSE_MIGRATION_SSL=true
 
 ### ClickHouse on Kubernetes (Helm)
 
-The [Bitnami ClickHouse Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse) provides a production-ready deployment of ClickHouse using a given Kubernetes cluster.
+The [Bitnami ClickHouse Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse) provides a production ready deployment of ClickHouse using a given Kubernetes cluster.
 We use it as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
 See [Langfuse on Kubernetes (Helm)](/self-hosting/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
@@ -470,3 +470,11 @@ volumes:
 ```
 
 This will store ClickHouse data within the Azurite bucket.
+
+## FAQ
+
+### Is ClickHouse required for self-hosting Langfuse?
+
+Yes, ClickHouse is currently a required component for self-hosting Langfuse. There is no alternative OLAP database supported at this time. Langfuse cannot be self-hosted without using ClickHouse as the main storage solution for traces, observations, and scores.
+
+All self-hosted deployments must include a ClickHouse instance.
