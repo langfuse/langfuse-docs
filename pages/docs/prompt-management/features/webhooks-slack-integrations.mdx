@@ -1,16 +1,16 @@
 ---
-title: Webhooks on Prompt Changes
-sidebarTitle: Webhooks
+title: Webhooks/Slack Integrations
+sidebarTitle: Webhooks/Slack Integrations
 description: Use webhooks to receive real‑time notifications whenever a prompt version is created, updated, or deleted in Langfuse.
 ---
 
-# Webhooks on Prompt Changes
+# Webhooks/Slack Integrations
 
 Use webhooks to receive real‑time notifications whenever a prompt version is created, updated, or deleted in Langfuse. This lets you trigger CI/CD pipelines, sync prompt catalogues, or audit changes without polling the API.
 
 ## Create a webhook
 
-<Steps>
+
 
 ### Select events to watch
 
@@ -24,6 +24,14 @@ Use webhooks to receive real‑time notifications whenever a prompt version is c
    - Updated – labels or tags change (two events fire: one for the version that gains a label/tag, one for the version that loses it).
    - Deleted – a version is removed.
 3. (Optional) Add filters to narrow the scope, e.g. labels contains "production".
+
+<Tabs items={["Webhook", "Slack"]}>
+
+
+<Tab>
+
+<Steps>
+
 
 ### Configure the request
 
@@ -70,7 +78,7 @@ Your endpoint receives a JSON body like:
 
 Your handler must:
 
-- Return an HTTP 2xx status to confirm receipt.
+- Return an HTTP 2xx status to confirm receipt.
 - Be idempotent—Langfuse may retry (exponential back‑off) until it receives a success response.
 
 ### Verify authenticity (recommended)
@@ -168,5 +176,38 @@ export function verifyLangfuseSignature(
 </Tab>
 
 </Tabs>
-
 </Steps>
+
+</Tab>
+
+<Tab>
+### Authenticate Slack with Langfuse
+<Frame border className="max-w-md">
+  ![Configure request](/images/docs/slack-connection-auth-init.png)
+</Frame>
+
+- Langfuse connects to Slack via OAuth.
+- We store secrets to Slack encrypted in our database.
+
+### Select channels to send notifications to
+<Frame border className="max-w-md">
+  ![Configure request](/images/docs/slack-connection-channel-select.png)
+</Frame>
+
+- You can select a channel where you want to send notifications.
+- You can run a dry run to see that messages arrive in your channel.
+
+
+### See the message in Slack
+
+<Frame border className="max-w-md">
+  ![Configure request](/images/docs/slack-prompt-message.png)
+</Frame>
+
+
+</Tab>
+
+
+
+
+</Tabs>
