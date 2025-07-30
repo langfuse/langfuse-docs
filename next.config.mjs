@@ -485,6 +485,9 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
 
+  // Redirect old webhooks path to new webhooks/slack integrations path
+  ["/docs/prompt-management/features/webhooks", "/docs/prompt-management/features/webhooks-slack-integrations"],
+
 ];
 
 const permanentRedirects = []
