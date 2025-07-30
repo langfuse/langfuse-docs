@@ -1,0 +1,158 @@
+---
+title: Organization-Key Scoped API Routes
+sidebarTitle: SCIM and Org API
+description: Langfuse is open and meant to be extended via custom workflows and integrations. You can use these endpoints to automate project and user management on your Langfuse organization.
+---
+
+# SCIM & Organization-Key Scoped API Routes
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Via organization-scoped API keys, you can administer projects, users, and project/organization memberships (see [RBAC docs](/docs/administration/rbac)).
+
+Langfuse is open and meant to be extended via custom workflows and integrations.
+You can use these endpoints to automate project and user management on your Langfuse organization.
+
+This documentation covers organization management APIs, SCIM-compliant user provisioning endpoints, and includes a comprehensive guide for setting up Okta authentication and user provisioning with Langfuse.
+
+## Authentication
+
+Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
+Organization scoped API keys can be created via the [Organization Management API](/self-hosting/organization-management-api) or in the Organization Settings within the Langfuse UI.
+
+Example:
+
+```bash
+curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects/{projectId}/apiKeys
+```
+
+## Organization Management
+
+All applicable endpoints are marked with `(requires organization-scoped API key)`.
+Those include the following routes:
+
+- `POST /api/public/projects`
+- `PUT /api/public/projects/{projectId}`
+- `DELETE /api/public/projects/{projectId}`
+- `GET /api/public/projects/{projectId}/apiKeys`
+- `POST /api/public/projects/{projectId}/apiKeys`
+- `DELETE /api/public/projects/{projectId}/apiKeys/{apiKeyId}`
+- `PUT /api/public/organizations/memberships`
+- `GET /api/public/organizations/memberships`
+- `PUT /api/public/projects/{projectId}/memberships`
+- `DELETE /api/public/projects/{projectId}/memberships`
+
+## User Management via SCIM
+
+In addition, we implement the following [SCIM](https://datatracker.ietf.org/doc/html/rfc7642) compliant endpoints.
+Use `/api/public/scim` as the base URI for them.
+
+To create a new user within Langfuse, you can use the SCIM-style endpoints and `POST /Users`.
+This will create a new user if the email does not exist yet.
+Then it will add the user to the organization with role `NONE`.
+
+Afterward, the role can be updated using the membership endpoints either on an organization or a project level (see above).
+
+To remove a user from an organization, call the `DELETE /Users/{id}` endpoint.
+This will not delete the user itself, only its membership with the organization.
+
+You can either supply an initial password for users via the API and share it with them, or use Single Sign-On (SSO) to authenticate users.
+In the latter case, you need to:
+
+- Langfuse Cloud: configure an Enterprise SSO provider ([docs](/security/auth)).
+- Self-hosted: configure `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` for your SSO provider to ensure that the user accounts are linked correctly [SSO Docs](/self-hosting/authentication-and-sso#additional-configuration).
+
+The following SCIM endpoints are available:
+
+- `GET /ServiceProviderConfig`
+- `GET /ResourceTypes`
+- `GET /Schemas`
+- `GET /Users`
+- `POST /Users`
+- `GET /Users/{id}`
+- `DELETE /Users/{id}`
+
+## Okta Setup Guide
+
+This guide will cover how to setup Okta authentication and user provisioning for Langfuse.
+Authentication and provisioning are two separate steps in Okta.
+Follow the one that is applicable to your use case.
+
+<CloudflareVideo
+  videoId="3912534274101b16d15fd02dd251c2c0"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+### Authentication
+
+For authentication, Langfuse supports the [OpenID Connect (OIDC)](https://openid.net/connect/) protocol.
+This allows you to use Okta as an identity provider for Langfuse.
+To set up Okta authentication, follow these steps:
+
+1. **Create an Okta Application**:
+   - Log in to your Okta admin console.
+   - Navigate to **Applications** > **Create App Integration**.
+   - Choose **OIDC - OpenID Connect** as the sign-in method and click **Next**.
+   - Choose **Web Application** as the application type and click **Next**.
+   - Fill in the application settings. Use your self-hosted domain or one of the Langfuse Cloud domains.
+     - **App name**: `Langfuse`
+     - **Login redirect URIs**: `https://your-langfuse-domain.com/api/auth/callback/okta`
+     - **Logout redirect URIs**: `https://your-langfuse-domain.com/`
+   - Click **Save**.
+2. **Setup Langfuse (Cloud)**:
+   - Please reach out to the Langfuse support team at support@langfuse.com to configure Okta SSO.
+   - Once the SSO is configured, you can type in your email on the sign-in page and are automatically redirected to Okta.
+3. **Setup Langfuse (Self-Hosted)**:
+   - Follow the Langfuse [SSO guide](/self-hosting/authentication-and-sso#okta) to configure Okta as an identity provider.
+   - Once the environment variables are set, you will see an "Okta" button on your sign-in page.
+4. **Test the Integration**:
+   - Assign users to your Okta application and test the login flow.
+   - For any issues, please create an issue on [GitHub](/issues) or contact support.
+
+### User Provisioning
+
+For user provisioning, Langfuse supports the SCIM 2.0 protocol.
+To setup user provisioning in Okta, follow these steps:
+
+1. **Create a SAML/SCIM Application**:
+   - Log in to your Okta admin console.
+   - Navigate to **Applications** > **Browser App Catalog**.
+   - Search for **SCIM** and select **SCIM 2.0 Test App (Basic Auth)**.
+   - Click **Add integration**.
+   - Fill in the application settings:
+     - **Application label**: `Langfuse SCIM`
+   - Click **Next** and then **Done**. There is no need to configure the Sign-On Options.
+2. **Configure SCIM Settings**:
+   - In the **Provisioning** tab, click **Configure API Integration**.
+   - Enable the **Enable API Integration** checkbox.
+   - Enter your credentials:
+     - **SCIM 2.0 Base Url**: `https://your-langfuse-domain.com/api/public/scim`
+     - **Username**: Use a public key from your Organization settings.
+     - **Password**: Use a private key from your Organization settings.
+   - Turn off **Import Groups**.
+   - Test the API credentials and press **Save**.
+3. **Configure Provisioning**:
+   - In the **Provisioning** tab, enable the following options:
+     - **Create Users**
+     - **Update User Attributes**
+     - **Deactivate Users**
+   - Click **Save**.
+4. **Add Default User Permissions** (Optional):
+   - In the **Provisioning** tab, modify the `roles` attribute to set default permissions for new users.
+   - You can set it for all users of the application to provide a default. Set it to "NONE", "VIEWER", "MEMBER", or "ADMIN".
+5. **Assign Users**:
+   - Navigate to the **Assignments** tab.
+   - Click **Assign** > **Assign to People**.
+   - Select the users you want to assign to the Langfuse SCIM application. You can overwrite the role here.
+   - Click **Done** and then **Save**.
+   - Users should appear as Member within your Langfuse Organization.
+

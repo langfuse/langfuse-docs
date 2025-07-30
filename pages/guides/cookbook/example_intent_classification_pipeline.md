@@ -426,7 +426,7 @@ langfuse = Langfuse()
 
 ### 1. Fetch traces from Langfuse
 
-We will fetch 15,000 messages sent to the demo application in order to create meaningful clusters.
+We will fetch 15,000 messages sent to the demo application to create meaningful clusters.
 
 
 ```python

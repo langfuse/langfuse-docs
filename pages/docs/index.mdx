@@ -13,7 +13,7 @@ import { FeatureOverview } from "@/components/FeatureOverview";
 
 ## Tracing
 
-[Tracing](/docs/tracing) is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
+[Tracing](/docs/observability/overview) is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
 
 - Traces include all LLM and non-LLM calls, including retrieval, embedding, API calls, and more
 - Support for tracking multi-turn conversations as sessions and user tracking
@@ -22,22 +22,37 @@ import { FeatureOverview } from "@/components/FeatureOverview";
 
 Want to see an example? Play with the [interactive demo](/docs/demo).
 
+import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
+
+<div className="h-6" />
+<TracingOverview />
+
 ## Prompt Management
 
-Prompt Management is critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
+[Prompt Management](/docs/prompt-management/overview) is critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
 
-- [Get started](/docs/prompts/get-started) with prompt management
+- [Get started](/docs/prompt-management/get-started) with prompt management
 - Manage, version, and optimize your prompts throughout the development lifecycle
-- Test prompts interactively in the [LLM Playground](/docs/playground)
-- Run [prompt experiments](/docs/datasets/prompt-experiments) against datasets in order to test new prompt versions directly within Langfuse
+- Test prompts interactively in the [LLM Playground](/docs/prompt-management/features/playground)
+- Run [Prompt Experiments](/docs/evaluation/features/prompt-experiments) against datasets to test new prompt versions directly within Langfuse
+
+import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
+
+<div className="h-6" />
+<PromptOverview />
 
 ## Evaluations
 
-Evaluations are crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
+[Evals](/docs/evaluation/overview) are crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
 
-- Get started with different [evaluation methods](/docs/scores/overview): LLM-as-a-judge, user feedback, manual labeling, or custom
+- Get started with different [evaluation methods](/docs/evaluation/overview): LLM-as-a-judge, user feedback, manual labeling, or custom
 - Identify issues early by running evaluations on production traces
-- Create and manage [Datasets](/docs/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
+- Create and manage [Datasets](/docs/evaluation/features/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
+
+import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
+
+<div className="h-6" />
+<EvaluationOverview />
 
 ## Where to start?
 
@@ -61,6 +76,15 @@ _Simplified lifecycle from PoC to production:_
   ![Langfuse Features along the development
   lifecycle](/images/docs/features-dark.png)
 </Frame>
+
+## Why Langfuse?
+
+- **Open source:** Fully open source with public API for custom integrations
+- **Production optimized:** Designed with minimal performance overhead
+- **Best-in-class SDKs:** Native SDKs for Python and JavaScript
+- **Framework support:** Integrated with popular frameworks like OpenAI SDK, LangChain, and LlamaIndex
+- **Multi-modal:** Support for tracing text, images and other modalities
+- **Full platform:** Suite of tools for the complete LLM application development lifecycle
 
 ## Community & Contact
 

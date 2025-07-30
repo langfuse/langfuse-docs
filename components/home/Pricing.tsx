@@ -146,7 +146,7 @@ const GraduatedPricingWithCalculator = ({ planName }: { planName: string }) => {
   const planConfig = PLAN_CONFIGS.find((p) => p.name === planName);
   return (
     <>
-      Graduated pricing: $8-6/100k units (
+      $8/100k units. Lower with volume (
       <PricingCalculatorModal
         baseFee={planConfig?.baseFee || 0}
         planName={planName}
@@ -506,6 +506,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Dedicated support engineer",
         "Architecture reviews",
         "Billing via AWS Marketplace",
+        "Billing via Invoice",
       ],
       cta: "Talk to sales",
     },
@@ -544,6 +545,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Dedicated support engineer",
         "Support SLA",
         "Billing via AWS Marketplace",
+        "Billing via Invoice",
       ],
       cta: "Talk to sales",
       ctaCallout: {

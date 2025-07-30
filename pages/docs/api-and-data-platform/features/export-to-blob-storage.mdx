@@ -1,0 +1,43 @@
+---
+title: Export via Blob Storage Integration
+description: Export traces, observations, and scores to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
+sidebarTitle: Export to Blob Storage
+---
+
+# Export via Blob Storage Integration
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, and `scores`.
+
+Those exports can run on an `hourly`, `daily`, or `weekly` schedule.
+Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
+Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
+
+## Start exporting via Blob Storage
+
+To set up the export navigate to `Your Project` > `Settings` > `Integrations` > `Blob Storage`.
+
+Fill in the settings to authenticate with your vendor, enable the integration, and press save.
+Within an hour an initial export should start and continue based on the schedule you have selected.
+The export supports CSV, JSON, and JSONL file formats.
+Read [our blob storage documentation](/self-hosting/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
+
+<Frame className="my-10" fullWidth border>
+  ![Blob Storage Integration Setup](/images/docs/blob-storage.png)
+</Frame>
+
+## Alternatives
+
+You can also export data via:
+
+- [UI](/docs/api-and-data-platform/features/export-from-ui) - Manual batch-exports from the Langfuse UI
+- [SDKs/API](/docs/api-and-data-platform/features/public-api) - Programmatic access using Langfuse SDKs or API

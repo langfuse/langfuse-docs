@@ -201,20 +201,20 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  banner: {
-    key: "town-hall-2025-07-16",
-    dismissible: true,
-    content: (
-      <Link href="https://lu.ma/frqm1umn">
-        {/* mobile */}
-        <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
-        {/* desktop */}
-        <span className="hidden sm:inline">
-        San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
-        </span>
-      </Link>
-    ),
-  },
+  // banner: {
+  //   key: "town-hall-2025-07-16",
+  //   dismissible: true,
+  //   content: (
+  //     <Link href="https://lu.ma/frqm1umn">
+  //       {/* mobile */}
+  //       <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
+  //       {/* desktop */}
+  //       <span className="hidden sm:inline">
+  //         San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
+  //       </span>
+  //     </Link>
+  //   ),
+  // },
 };
 
 export default config;

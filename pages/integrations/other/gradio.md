@@ -2,11 +2,11 @@
 title: Open Source LLM Observability for Gradio
 sidebarTitle: Gradio
 logo: /images/integrations/gradio_icon.svg
-description: Build a LLM Chat UI with 🤗 Gradio and trace it with 🪢 Langfuse.
+description: Build an LLM Chat UI with 🤗 Gradio and trace it with 🪢 Langfuse.
 category: Integrations
 ---
 
-# Build a LLM Chat UI with 🤗 Gradio and trace it with 🪢 Langfuse
+# Build an LLM Chat UI with 🤗 Gradio and trace it with 🪢 Langfuse
 
 This is a simple end-to-end example notebook which showcases how to integrate a Gradio application with Langfuse for LLM Observability and Evaluation.
 
@@ -186,7 +186,7 @@ def handle_like(data: gr.LikeData):
 
 ### Retries
 
-Allow to retry a completion via the Gradio Chatbot `retry` event ([docs](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This is not specific to the integration with Langfuse.
+Allow you to retry a completion via the Gradio Chatbot `retry` event ([docs](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This is not specific to the integration with Langfuse.
 
 
 ```python

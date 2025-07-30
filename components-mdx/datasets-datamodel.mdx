@@ -1,0 +1,189 @@
+## Datasets
+Datasets are a collection of inputs and, optionally, expected outputs that can be during Dataset runs.
+
+`Dataset`s are a collection of `DatasetItem`s. 
+
+<div className="border rounded p-2 my-4">
+
+```mermaid
+classDiagram
+direction LR
+    class Dataset {
+        name
+        description
+        metadata
+    }
+
+    class DatasetItem {
+        datasetName
+        input
+        expectedOutput
+        metadata
+        sourceTraceId
+        sourceObservationId
+        id
+        status
+    }
+
+    Dataset "1" --> "n" DatasetItem
+```
+
+</div>
+
+### Dataset object
+
+| Attribute     | Type   | Required | Description                                                                 |
+| ------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| `name`        | string | Yes      | Name of the dataset                                                         |
+| `description` | string | No       | Description of the dataset                                                  |
+| `metadata`    | object | No       | Additional metadata for the dataset                                         |
+
+### DatasetItem object
+
+| Attribute          | Type           | Required | Description                                                                                                                                                                                               |
+| ------------------ | -------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `datasetName`      | string         | Yes      | Name of the dataset to add the item to                                                                                                                                                                    |
+| `input`            | object         | No       | Input data for the dataset item                                                                                                                                                                           |
+| `expectedOutput`   | object         | No       | Expected output data for the dataset item                                                                                                                                                                 |
+| `metadata`         | object         | No       | Additional metadata for the dataset item                                                                                                                                                                  |
+| `sourceTraceId`    | string         | No       | ID of the source trace to link this dataset item to                                                                                                                                                       |
+| `sourceObservationId` | string      | No       | ID of the source observation to link this dataset item to                                                                                                                                                 |
+| `id`               | string         | No       | Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets.                                              |
+| `status`           | DatasetStatus  | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                                                                            |
+
+
+
+
+
+
+## DatasetRun
+Dataset runs are used to run a dataset through your LLM application and optionally apply evaluation methods to the results.
+
+<br />
+<div className="border rounded p-2">
+
+```mermaid
+classDiagram
+direction LR
+    class DatasetRun {
+        name
+        description
+        metadata
+    }
+
+    DatasetRun "1" --> "n" DatasetRunItem
+
+    class DatasetRunItem {
+        runName
+        runDescription
+        metadata
+        datasetItemId
+        traceId
+        observationId
+       
+    }
+```
+
+</div>
+
+### DatasetRun object
+
+| Attribute      | Type   | Required | Description                                                                 |
+| -------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| `datasetName`  | string | Yes      | Name of the dataset                                                         |
+| `runName`      | string | Yes      | Name of the dataset run                                                     |
+
+### DatasetRunItem object
+
+| Attribute        | Type   | Required | Description                                                                                                                                                                                               |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runName`        | string | Yes      | Name of the dataset run to add the item to                                                                                                                                                               |
+| `runDescription` | string | No       | Description of the run. If run exists, description will be updated                                                                                                                                       |
+| `metadata`       | object | No       | Metadata of the dataset run, updates run if run already exists                                                                                                                                           |
+| `datasetItemId`  | string | Yes      | ID of the dataset item to link to this run                                                                                                                                                               |
+| `observationId`  | string | No       | ID of the observation to link to this run                                                                                                                                                                |
+| `traceId`        | string | No       | ID of the trace to link to this run. traceId should always be provided. For compatibility with older SDK versions it can also be inferred from the provided observationId. |
+
+<Callout type="info">
+Most of the time, we recommend that DatasetRunItems reference TraceIDs directly. The reference to ObservationID exists for backwards compatibility with older SDK versions. 
+</Callout>
+
+## End to end data relations
+
+DataSetRuns can combine a few Langfuse objects:
+- `DatasetRuns` are created by looping through all or selected `DatasetItem`s of a `Dataset` with your LLM application.
+- For each `DatasetItem` passed into the LLM application as an Input a `DatasetRunItem` & a `Trace` are created. 
+- Optionally `Score`s can be added to the `Trace`s to evaluate the output of the LLM application during the `DatasetRun`. 
+
+<br />
+
+<div className="border rounded p-2">
+
+```mermaid
+classDiagram
+direction LR
+	namespace Datasets {
+        class Dataset {
+        }
+        class DatasetItem {
+        }
+    }
+    namespace DatasetRuns {
+        class DatasetRun {
+        }
+        class DatasetRunItem {
+        }
+    }
+    namespace Observability {
+        class Trace {
+        }
+        class Observation {
+        }
+        }
+    namespace Evals {
+        class Score {
+        }    
+    }
+
+    
+    class DatasetRun {
+    }
+
+    class DatasetRunItem {
+    }
+	
+    class Dataset {
+    }
+
+    class DatasetItem {
+    }
+
+    class Trace {
+	    input
+	    output
+    }
+
+    class Observation {
+        input
+	    output
+    }
+
+    class Score {
+	    name
+	    value
+	    comment
+    }
+
+    Dataset "1" --> "n" DatasetItem
+    Dataset "1" --> "n" DatasetRun
+    DatasetRun "1" --> "n" DatasetRunItem
+    DatasetRunItem "1" --> "1" DatasetItem
+    Trace "1" --> "n" Observation
+    DatasetRunItem "1" --> "1" Trace
+    DatasetRunItem "1" --> "0..1" Observation
+    Observation "1" --> "n" Score
+    Trace "1" --> "n" Score
+```
+
+</div>
+

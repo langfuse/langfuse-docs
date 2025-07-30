@@ -21,19 +21,19 @@ export function Hero() {
           LLM Engineering Platform
         </h1>
         <span className="mt-2 text-primary/70 text-2xl sm:text-3xl lg:text-4xl md:text-balance font-semibold tracking-wide">
-          <Link href="/docs/tracing" className="underline">
+          <Link href="/docs/observability/overview" className="underline">
             Traces
           </Link>
           ,{" "}
-          <Link href="/docs/scores/overview" className="underline">
+          <Link href="/docs/evaluation/overview" className="underline">
             evals
           </Link>
           ,{" "}
-          <Link href="/docs/prompts/get-started" className="underline">
+          <Link href="/docs/prompt-management/overview" className="underline">
             prompt management
           </Link>{" "}
           and{" "}
-          <Link href="/docs/analytics/overview" className="underline">
+          <Link href="/docs/metrics/overview" className="underline">
             metrics
           </Link>{" "}
           to debug and improve your LLM application.

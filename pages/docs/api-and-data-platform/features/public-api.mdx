@@ -1,0 +1,176 @@
+---
+title: Public API
+sidebarTitle: Public API
+description: All Langfuse data and features are available via the API. Follow this guide to get started.
+---
+
+# Public API
+
+Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
+
+<Tabs items={["Path", "Cloud US", "Cloud EU", "HIPAA US"]}>
+
+<Tab>
+
+```
+/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://us.cloud.langfuse.com/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://cloud.langfuse.com/api/public
+```
+
+</Tab>
+<Tab>
+
+```
+https://hipaa.cloud.langfuse.com/api/public
+```
+
+</Tab>
+</Tabs>
+
+References:
+
+- API Reference: https://api.reference.langfuse.com
+- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
+- Postman collection: https://cloud.langfuse.com/generated/postman/collection.json
+
+## Authentication
+
+Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
+The API keys are available in the Langfuse project settings.
+
+- Username: Langfuse Public Key
+- Password: Langfuse Secret Key
+
+Example:
+
+```bash
+curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
+```
+
+## Access via SDKs
+
+Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+
+You can use your editor's Intellisense to explore the API methods and their parameters.
+
+<Callout type="info">
+
+When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
+
+</Callout>
+
+<Tabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
+<Tab>
+
+When using the [Python SDK v3](/docs/sdk/python/sdk-v3):
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+...
+# fetch a trace
+langfuse.api.trace.get(trace_id)
+
+# async client via asyncio
+await langfuse.async_api.trace(trace_id)
+
+# explore more endpoints via Intellisense
+langfuse.api.*
+await langfuse.async_api.*
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse"
+
+const langfuse = new Langfuse()
+...
+// fetch a trace
+await langfuse.api.traceGet(traceId)
+
+// explore more endpoints via Intellisense
+langfuse.api.*
+```
+
+</Tab>
+
+<Tab>
+
+Install Langfuse by adding the following to your `pom.xml`:
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.langfuse</groupId>
+    <artifactId>langfuse-java</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+
+<repositories>
+  <repository>
+    <id>github</id>
+    <name>GitHub Package Registry</name>
+    <url>https://maven.pkg.github.com/langfuse/langfuse-java</url>
+  </repository>
+</repositories>
+```
+
+Instantiate and use the Java SDK via:
+
+```java
+import com.langfuse.client.LangfuseClient;
+import com.langfuse.client.resources.prompts.types.PromptMetaListResponse;
+import com.langfuse.client.core.LangfuseClientApiException;
+
+LangfuseClient client = LangfuseClient.builder()
+  .url("https://cloud.langfuse.com") // 🇪🇺 EU data region
+  // .url("https://us.cloud.langfuse.com") // 🇺🇸 US data region
+  // .url("http://localhost:3000") // 🏠 Local deployment
+  .credentials("pk-lf-...", "sk-lf-...")
+  .build();
+
+try {
+  PromptMetaListResponse prompts = client.prompts().list();
+} catch (LangfuseClientApiException error) {
+  System.out.println(error.getBody());
+  System.out.println(error.getStatusCode());
+}
+```
+
+</Tab>
+</Tabs>
+
+## Ingest Traces via the API
+
+It is recommended to use the OpenTelemetry Endpoint to ingest traces. Please refer to the [OpenTelemetry docs](/integrations/native/opentelemetry) for more information.
+
+## Alternatives
+
+You can also export data via:
+
+- [UI](/docs/api-and-data-platform/features/export-from-ui) - Manual batch-exports from the Langfuse UI
+- [Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage) - Scheduled automated exports to cloud storage
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<FaqPreview tags={["api"]} />

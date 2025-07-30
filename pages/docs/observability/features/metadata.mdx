@@ -1,0 +1,284 @@
+---
+description: Add any customer metadata to your traces to better understand your users, application and experiments.
+sidebarTitle: Metadata
+---
+
+# Metadata
+
+Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
+
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tab>
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def process_data():
+    # Access the client and update the current trace metadata
+
+    # Add metadata to the trace level
+    langfuse.update_current_trace(
+        metadata={"source": "api", "version": "1.2.3"}
+    )
+
+    # Add metadata to the current span level
+    langfuse.update_current_span(
+        metadata={"processing_stage": "initial"}
+    )
+
+    # Process data...
+    return result
+```
+
+When creating spans directly:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Add metadata at trace level
+with langfuse.start_as_current_span(
+    name="process-request"
+) as root_span:
+    # Add metadata to the trace
+    root_span.update_trace(metadata={"request_id": "req_12345"})
+
+    # Add metadata to the current span
+    root_span.update(metadata={"stage": "parsing"})
+
+    # Create a child span with metadata
+    with root_span.start_as_current_generation(
+        name="generate-response",
+        model="gpt-4o",
+        metadata={"temperature": 0.7, "max_tokens": 1000}
+    ) as gen:
+        # Update metadata later if needed
+        gen.update(metadata={"completion_type": "creative"})
+```
+
+You can update metadata multiple times - new values are merged with existing ones up until the first level of the dictionary:
+
+```python
+with langfuse.start_as_current_span(name="operation") as span:
+    # First update
+    span.update(metadata={"step": 1, "status": "started"})
+
+    # Later update - will be merged with previous metadata
+    span.update(metadata={"step": 2, "error": None})
+
+    # Final metadata will be {"step": 2, "status": "started", "error": null}
+```
+
+</Tab>
+<Tab>
+
+When using the [`@observe()` decorator](/docs/sdk/python/decorators):
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe
+def nested():
+    # Update trace metadata from anywhere inside call stack
+    langfuse_context.update_current_trace(
+        metadata={"key":"value"}
+    )
+
+    # Update observation metadata for current observation
+    langfuse_context.update_current_observation(
+        metadata={"key": "value"}
+    )
+
+    return
+
+@observe
+def fn():
+    nested()
+
+fn()
+```
+
+When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    metadata={"key":"value"}
+)
+
+span = trace.span(
+    metadata={"key":"value"}
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  metadata: { key: "value" },
+});
+
+const span = trace.span({
+  metadata: { key: "value" },
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), pass `metadata` as an additional argument:
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+
+  # add metadata as additional argument
+  metadata={"key":"value"}
+)
+```
+
+</Tab>
+<Tab>
+
+When using the [OpenAI SDK Integration (JS)](/integrations/model-providers/openai-js), pass `metadata` as an additional argument:
+
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const res = await observeOpenAI(new OpenAI(), {
+  metadata: { someMetadataKey: "someValue" },
+}).chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+  model: "gpt-3.5-turbo",
+  max_tokens: 300,
+});
+```
+
+</Tab>
+<Tab>
+
+**Python SDK v3:**
+
+Option 1: Via metadata fields in chain invocation (simplest approach):
+
+```python
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+langfuse_handler = CallbackHandler()
+ 
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+ 
+# Set trace attributes dynamically via metadata
+response = chain.invoke(
+    {"topic": "cats"},
+    config={
+        "callbacks": [langfuse_handler],
+        "metadata": {
+            "foo": "bar",
+            "baz": "qux"
+        }
+    }
+)
+```
+
+Option 2: Via enclosing span (for more control):
+
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+langfuse = get_client()
+langfuse_handler = CallbackHandler()
+ 
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
+chain = prompt | llm
+ 
+# Set trace attributes dynamically via enclosing span
+with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
+    span.update_trace(
+        metadata={"foo": "bar", "baz": "qux"}
+    )
+
+    response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
+ 
+    span.update_trace(output={"response": response.content})
+```
+
+**Python SDK v2:**
+
+Pass `metadata` as a keyword argument:
+
+```python
+handler = CallbackHandler(
+  metadata={"key":"value"}
+)
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `metadata` to the constructor:
+
+```ts
+const handler = new CallbackHandler({
+  metadata: { key: "value" },
+});
+```
+
+When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `metadata` via `langfuse.trace()`:
+
+```ts
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  metadata: { key: "value" },
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+<Tab>
+You can set the `metadata` via the override configs, see the [Flowise Integration docs](/docs/flowise) for more details.
+
+</Tab>
+
+</Tabs>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-metadata"]} />
