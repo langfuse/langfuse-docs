@@ -402,8 +402,8 @@ const nonPermanentRedirects = [
   ["/docs/datasets/example-synthetic-datasets", "/guides/cookbook/example_synthetic_datasets"],
   ["/docs/datasets/get-started", "/docs/evaluation/dataset-runs/datasets"],
   ["/docs/datasets/overview", "/docs/evaluation/dataset-runs/datasets"],
-  ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/run-via-ui"],
-  ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/run-via-sdk"],
+  ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
+  ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/remote-run"],
   ["/docs/fine-tuning", "/docs/api-and-data-platform/features/fine-tuning"],
   ["/docs/get-started", "/docs"],
   ["/docs/model-usage-and-cost", "/docs/observability/features/token-and-cost-tracking"],
@@ -474,7 +474,7 @@ const nonPermanentRedirects = [
   ["/docs/datasets/dataset-runs/data-model", "/docs/evaluation/dataset-runs/data-model"],
   ["/guides/cookbook/user-feedback", "/faq/all/user-feedback"],
   ["/guides/cookbook/security-and-guardrails", "/docs/security-and-guardrails"],
-  ["/docs/evaluation/features/prompt-experiments", "/docs/evaluation/dataset-runs/run-via-ui"],
+  ["/docs/evaluation/features/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/evaluation/data-model", "/docs/evaluation/dataset-runs/data-model"],
   ["/guides/cookbook/integration_mirascope", "/integrations/frameworks/mirascope"],
   ["/guides/cookbook/integration_mistral_sdk", "/integrations/model-providers/mistral-sdk"],
@@ -487,6 +487,10 @@ const nonPermanentRedirects = [
 
   // Redirect old webhooks path to new webhooks/slack integrations path
   ["/docs/prompt-management/features/webhooks", "/docs/prompt-management/features/webhooks-slack-integrations"],
+
+  // Redirect renamed dataset run pages
+  ["/docs/evaluation/dataset-runs/run-via-ui", "/docs/evaluation/dataset-runs/native-run"],
+  ["/docs/evaluation/dataset-runs/run-via-sdk", "/docs/evaluation/dataset-runs/remote-run"],
 
 ];
 

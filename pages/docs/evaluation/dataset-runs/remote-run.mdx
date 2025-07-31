@@ -1,19 +1,23 @@
 ---
-title: Dataset Runs via the SDK
-description: Run dataset runs via the Langfuse SDK.
+title: Remote Dataset Runs via the SDK
+description: Start remote dataset runs via the Langfuse SDK to programmatically test prompt versions and models.
 ---
 
-# Dataset Runs via the SDK
+# Remote Dataset Runs
 
 Once you [created a dataset](/docs/evaluation/dataset-runs/datasets), you can use the dataset to test how your application performs on different inputs.
+Remote Dataset Runs are used to programmatically loop your applications or prompts through a dataset and optionally apply Evaluation Methods to the results.
 
-## Why use dataset runs via the SDK?
+They are called "Remote Dataset Runs" because they can make use of "remote" or external logic and code. 
+
+## Why use Remote Dataset Runs?
 
 - Full flexibility to use your own application logic
 - Use custom scoring functions to evaluate the outputs
 - Run multiple experiments on the same dataset in parallel
+- Easy to integrate with your existing evaluation infrastructure
 
-## Get started
+## Setup & Run via SDK
 
 <Steps>
 
@@ -474,3 +478,55 @@ After each experiment run on a dataset, you can check the aggregated score in th
   gifStyle
 />
 </Steps>
+
+## Run via UI
+
+<Callout type="info">
+You will need to first set up Remote Dataset Runs via the SDK or your own external code before setting up this option in the UI. 
+</Callout>
+
+<Steps>
+
+### Navigate to the dataset
+
+- **Navigate to** `Your Project` > `Datasets`
+- **Click on** the dataset you want to set up a remote experiment trigger for
+
+<Frame border fullWidth>
+![New Experiment Button](/images/docs/navigate-to-dataset.png)
+</Frame>
+
+### Open the setup page
+
+**Click on** `Start Experiment` to open the setup page
+
+<Frame border fullWidth>
+![New Experiment Button](/images/docs/trigger-process.png)
+</Frame>
+
+**Click on** `⚡` below `Custom Experiment`
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-remote-experiment-1.png)
+</Frame>
+
+### Configure the webhook
+
+**Enter** the URL of your external evaluation service that will receive the webhook when experiments are triggered.
+**Specify** a default config that will be sent to your webhook. Users can modify this when triggering experiments.
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-remote-experiment-2.png)
+</Frame>
+
+### Trigger experiments
+
+Once configured, team members can trigger remote experiments via the `Run` button under the **Custom Experiment** option. Langfuse will send the dataset metadata (ID and name) along with any custom configuration to your webhook.
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-remote-experiment-3.png)
+</Frame>
+
+</Steps>
+
+**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Dataset Run.
