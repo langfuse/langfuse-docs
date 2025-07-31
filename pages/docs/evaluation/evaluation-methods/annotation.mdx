@@ -7,7 +7,7 @@ sidebarTitle: Human Annotation
 # Human Annotation
 Human Annotation is a manual evaluation method. It is used to collaboratively annotate traces and observations with scores.
 
-In Langfuse you can either [annotate single traces](#single-trace) or observations or use [Annotation Queues](#annotation-queues) to work through larger batches of traces to score.
+In Langfuse you can use [Annotation Queues](#annotation-queues) to streamline working through reviewing larger batches of of [single interactions (trace-level)](#single-object), [multiple interactions (session-level)](#single-object) or even [single observations](#single-object), below the trace level. 
 
 <Frame border fullWidth>
 ![Annotate](/images/docs/annotation.gif)
@@ -19,22 +19,22 @@ In Langfuse you can either [annotate single traces](#single-trace) or observatio
 - **Evaluation of new product features**: This feature can be useful for new use cases where no other scores have been allocated yet.
 - **Benchmarking of other scores**: Establish a human baseline score that can be used as a benchmark to compare and evaluate other scores. This can provide a clear standard of reference and enhance the objectivity of your performance evaluations.
 
-## Annotation of Single Traces [#single-trace]
-Manual Annotation of single traces and observations is available in the trace detail view.
+## Annotation of Single Traces, Sessions and Observations [#single-object]
+Manual Annotation of single traces, sessions and observations is available in the trace, session and observation detail view.
 
 <Steps>
-#### Prerequisite: Create a ScoreConfig
+#### Prerequisite: Create a Score Config
 
-To use Human Annotation, you **need to have at least one score configuration (ScoreConfig) set up**. See [how to create and manage ScoreConfigs](/faq/all/manage-score-configs) for details.
+To use Human Annotation, you **need to have at least one score configuration (Score Config) set up**. See [how to create and manage Score Configs](/faq/all/manage-score-configs) for details.
 
-#### Trigger Annotation on a Trace or Observation
+#### Trigger Annotation on a Trace, Session or Observation
 
-On a Trace or Observation detail view **click on** `Annotate` to open the annotation form.
+On a Trace, Session or Observation detail view **click on** `Annotate` to open the annotation form.
 <Frame border fullWidth>
   ![Annotate](/images/docs/trigger_annotation.png)
 </Frame>
 
-#### Select ScoreConfigs to use
+#### Select Score Configs to use
 
 <Frame border fullWidth>
   ![Annotate](/images/docs/select_score_configs.png)
@@ -48,17 +48,25 @@ On a Trace or Observation detail view **click on** `Annotate` to open the annota
 
 #### See newly added Scores
 
-To see your newly added scores, **click on** the `Scores` tab on the trace or observation detail view.
+To see your newly added scores on traces or observations, **click on** the `Scores` tab on the trace or observation detail view.
 
 <Frame border fullWidth>
   ![Detail scores table](/images/docs/see_created_scores.png)
 </Frame>
 
+To see your newly added scores on sessions, **click on** the `Scores` tab on the session detail view.
+
+<Frame border fullWidth>
+  ![Detail scores table](/images/docs/see_created_scores_session.png)
+</Frame>
+
+All scores are also available in the traces, sessions and observations table views respectively.
+
 </Steps>
 
 ## Annotation Queues [#annotation-queues]
 
-Annotation queues allow you to manage and prioritize your annotation tasks in a structured way. This feature is particularly useful for large-scale projects that benefit of human-in-the-loop evaluation at some scale. Queues streamline this process by allowing for specifying which traces/observations you'd like to annotate on which dimensions.
+Annotation queues allow you to manage and prioritize your annotation tasks in a structured way. This feature is particularly useful for large-scale projects that benefit of human-in-the-loop evaluation at some scale. Queues streamline this process by allowing for specifying which traces, sessions or observations you'd like to annotate on which dimensions.
 
 <CloudflareVideo
   videoId="0154084df3c8ae0de290c60720dd1fb2"
@@ -67,9 +75,9 @@ Annotation queues allow you to manage and prioritize your annotation tasks in a 
 />
 ### Create Annotation Queues
 <Steps>
-#### Prerequisite: Create a ScoreConfig
+#### Prerequisite: Create a Score Config
 
-To use Human Annotation, you **need to have at least one score configuration (ScoreConfig) set up**. See [how to create and manage ScoreConfigs](/faq/all/manage-score-configs#create-a-score-config) for details.
+To use Human Annotation, you **need to have at least one score configuration (Score Config) set up**. See [how to create and manage Score Configs](/faq/all/manage-score-configs#create-a-score-config) for details.
 
 #### Go to Annotation Queues View
 
@@ -82,7 +90,7 @@ To use Human Annotation, you **need to have at least one score configuration (Sc
 
 #### Fill out Create Queue Form
 
-- **Select** the `ScoreConfigs` you want to use for this queue.
+- **Select** the `Score Configs` you want to use for this queue.
 - **Set** the `Queue name` and `Description` (optional).
 
 <Frame border fullWidth>
@@ -101,16 +109,16 @@ To use Human Annotation, you **need to have at least one score configuration (Sc
 
 #### Populate Annotation Queues
 
-Once you have created annotation queues, you can assign traces or observations to them. 
+Once you have created annotation queues, you can assign traces, sessions or observations to them. 
 
 <Tabs items={["Bulk Selection", "Single Item"]}>
 <Tab>
-To add multiple traces or observations to a queue:
-1. **Navigate to the trace table view** and optionally adjust the filters
-2. **Select** Traces or Observations via the checkboxes. 
+To add multiple traces, sessions or observations to a queue:
+1. **Navigate to the respective table view** and optionally adjust the filters
+2. **Select** Traces, Sessions or Observations via the checkboxes. 
 3. **Click on** the "Actions" dropdown menu
-4. **Click on** `Add to queue` to add the selected traces or observations to the queue.
-5. **Select** the queue you want to add the traces or observations to.
+4. **Click on** `Add to queue` to add the selected traces, sessions or observations to the queue.
+5. **Select** the queue you want to add the traces, sessions or observations to.
 
 <Frame border fullWidth>
   ![Annotate](/images/docs/add_multiple_items_to_queue.png)
@@ -119,10 +127,10 @@ To add multiple traces or observations to a queue:
 </Tab>
 <Tab>
 
-To add single traces or observations to a queue:
-1. **Navigate** to the trace or observation detail view
+To add single traces, sessions or observations to a queue:
+1. **Navigate** to the trace, session or observation detail view
 2. **Click on** the `Annotate` dropdown
-3. **Select** the queue you want to add the trace or observation to
+3. **Select** the queue you want to add the trace, session or observation to
 
 
 <Frame border fullWidth>
