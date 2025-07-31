@@ -65,7 +65,7 @@ import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
   <Card
     icon={<ClipboardPen size="24" />}
     title="Human Annotations"
-    href="/docs/evaluation/dataset-runs/run-via-ui"
+    href="/docs/evaluation/dataset-runs/native-run"
     arrow
   />
     <Card
@@ -79,9 +79,13 @@ import { Lightbulb, SquarePercent, ClipboardPen} from "lucide-react";
 Learn more about the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model). 
 
 ## Dataset Runs [#dataset-runs]
-**Dataset Runs** are used to loop your LLM application through **Datasets** and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions. 
+**Dataset Runs** are used to loop your LLM application through **Datasets** and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions.
 
-import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
+In Langfuse we differentiate between **Native** vs. **Remote** Dataset Runs. Native Dataset Runs rely on Dataset, Prompts and optionally LLM-as-a-Judge Evaluators all being on the Langfuse platform. Remote Dataset Runs rely only on Datasets being on the Langfuse platform, prompts and evaluation methods can managed off platform – they are run via code.
+
+All require managing the [Datasets](/docs/evaluation/dataset-runs/datasets) on the Langfuse platform.
+
+import { Table, WandSparkles, CodeXml, Database, MousePointerClick} from "lucide-react";
 
 <Cards num={1}>
   <Card
@@ -90,16 +94,16 @@ import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
     href="/docs/evaluation/dataset-runs/datasets"
     arrow
   />
-  <Card
-    icon={<WandSparkles size="24" />}
-    title="Dataset Runs via the UI"
-    href="/docs/evaluation/dataset-runs/run-via-ui"
+    <Card
+    icon={<CodeXml size="24" />}
+    title="Remote Dataset Runs"
+    href="/docs/evaluation/dataset-runs/remote-run"
     arrow
   />
   <Card
-    icon={<CodeXml size="24" />}
-    title="Dataset Runs via the SDK"
-    href="/docs/evaluation/dataset-runs/run-via-sdk"
+    icon={<WandSparkles size="24" />}
+    title="Native Dataset Runs"
+    href="/docs/evaluation/dataset-runs/native-run"
     arrow
   />
 </Cards>
