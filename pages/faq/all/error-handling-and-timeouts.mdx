@@ -1,0 +1,50 @@
+---
+title: How to configure retries and timeouts when fetching prompts?
+description: Learn how to adjust retry attempts and timeout settings when fetching prompts using the Langfuse Python and JavaScript/TypeScript SDKs.
+tags: [prompt-management]
+---
+
+# How to configure retries and timeouts when fetching prompts?
+
+By default, the Langfuse SDKs retry failed prompt-fetch operations twice and apply a 20-second timeout. You can override both settings if you need stricter (or more lenient) parameters.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+# Number of retries when fetching prompts from the server. Default is 2.
+prompt = langfuse.get_prompt("movie-critic", max_retries=3)
+
+# Timeout per call to the Langfuse API in seconds. Default is 20.
+prompt = langfuse.get_prompt("movie-critic", fetch_timeout_seconds=3)
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+// Number of retries when fetching prompts from the server. Default is 2.
+const promptWithMaxRetries = await langfuse.getPrompt(
+  "movie-critic",
+  undefined,
+  {
+    maxRetries: 5,
+  }
+);
+
+// Timeout per call to the Langfuse API in milliseconds. Default is 10 seconds.
+const promptWithFetchTimeout = await langfuse.getPrompt(
+  "movie-critic",
+  undefined,
+  {
+    fetchTimeoutMs: 5000,
+  }
+);
+```
+
+</Tab>
+
+</Tabs>
+
+The examples above demonstrate how to fine-tune reliability parameters for prompt retrieval. Adjust the values to balance resilience and latency according to your application’s requirements. 

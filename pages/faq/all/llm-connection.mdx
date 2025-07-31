@@ -1,0 +1,205 @@
+---
+title: How to set up an LLM connection?
+description: How to set up an LLM connection in Langfuse to use in the Playground or for LLM-as-a-Judge evaluations.
+tags: ["LLM-as-a-Judge", "Playground"]
+---
+
+# How to set up an LLM connection?
+
+LLM connections are used to call models in the Langfuse Playground or for LLM-as-a-Judge evaluations.
+
+## How to set up an LLM connection?
+
+Navigate to your Project Settings -> LLM Connections and click on "Add new LLM API key".
+
+<Frame border fullWidth>
+![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
+</Frame>
+
+Enter the name of the LLM connection and the API key for the model you want to use.
+
+## Which models are supported?
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+
+<Accordion type="single" collapsible>
+<AccordionItem value="supported-models">
+<AccordionTrigger>Supported models</AccordionTrigger>
+<AccordionContent>
+
+Currently the playground supports the following models by default. You may configure additional custom model names when adding your LLM API Key in the Langfuse project settings, e.g. when using a custom model or proxy.
+
+export function ModelList() {
+  const openAIModels = [
+    "o3",
+    "o3-2025-04-16",
+    "o4-mini",
+    "o4-mini-2025-04-16",
+    "gpt-4.1",
+    "gpt-4.1-2025-04-14",
+    "gpt-4.1-mini-2025-04-14",
+    "gpt-4.1-nano-2025-04-14",
+    "gpt-4o",
+    "gpt-4o-2024-08-06",
+    "gpt-4o-2024-05-13",
+    "gpt-4o-mini",
+    "gpt-4o-mini-2024-07-18",
+    "o3-mini",
+    "o3-mini-2025-01-31",
+    "o1-preview",
+    "o1-preview-2024-09-12",
+    "o1-mini",
+    "o1-mini-2024-09-12",
+    "gpt-4-turbo-preview",
+    "gpt-4-1106-preview",
+    "gpt-4-0613",
+    "gpt-4-0125-preview",
+    "gpt-4",
+    "gpt-3.5-turbo-16k-0613",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0613",
+    "gpt-3.5-turbo-0301",
+    "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo",
+  ];
+  const anthropicModels = [
+    "claude-3-7-sonnet-20250219",
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-sonnet-20240620",
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-5-haiku-20241022",
+    "claude-3-haiku-20240307",
+    "claude-2.1",
+    "claude-2.0",
+    "claude-instant-1.2",
+  ];
+  const vertexAIModels = [
+    "gemini-2.5-pro-exp-03-25",
+    "gemini-2.0-pro-exp-02-05",
+    "gemini-2.0-flash-001",
+    "gemini-2.0-flash-lite-preview-02-05",
+    "gemini-2.0-flash-exp",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash",
+    "gemini-1.0-pro",
+  ];
+  const googleAIStudioModels = [
+    "gemini-2.5-pro-exp-03-25",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite-preview-02-05",
+    "gemini-2.0-flash-thinking-exp-01-21",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+  ];
+  return (
+    <div>
+      <ul>
+        <li>
+          <strong>Any model that supports the OpenAI API schema:</strong> The
+          Playground and LLM-as-a-Judge evaluations can be used by any framework
+          that supports the OpenAI API schema such as Groq, OpenRouter, Vercel AI Gateway, LiteLLM,
+          Hugging Face, and more. Just replace the API Base URL with the
+          appropriate endpoint for the model you want to use and add the
+          providers API keys for authentication.
+        </li>
+        <li>
+          <strong>OpenAI / Azure OpenAI:</strong> {openAIModels.join(", ")}
+        </li>
+        <li>
+          <strong>Anthropic:</strong> {anthropicModels.join(", ")}
+        </li>
+        <li>
+          <strong>Google Vertex AI:</strong> {vertexAIModels.join(", ")}. You
+          may also add additional model names supported by Google Vertex AI
+          platform and enabled in your GCP account through the `Custom model
+          names` section in the LLM API Key creation form.
+        </li>
+        <li>
+          <strong>Google AI Studio:</strong> {vertexAIModels.join(", ")}
+        </li>
+        <li>
+          <strong>Amazon Bedrock:</strong> All Amazon Bedrock models are
+          supported. The required permission on AWS is `bedrock:InvokeModel`.
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+<ModelList />
+</AccordionContent>
+</AccordionItem>
+</Accordion>
+
+## How to use an LLM proxy? [#LLM-as-a-Judge]
+
+You can use an LLM proxy to power LLM-as-a-judge or the Playground in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
+
+For OpenAI compatible proxies, here is an example tool calling request that must be handled by the proxy in OpenAI format to support LLM-as-a-judge in Langfuse:
+
+```bash
+curl -X POST 'https://<host set in project settings>/chat/completions' \
+-H 'accept: application/json' \
+-H 'content-type: application/json' \
+-H 'authorization: Bearer <api key entered in project settings>' \
+-H 'x-test-header-1: <custom header set in project settings>' \
+-H 'x-test-header-2: <custom header set in project settings>' \
+-d '{
+  "model": "<model set in project settings>",
+  "temperature": 0,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "max_tokens": 256,
+  "n": 1,
+  "stream": false,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "extract",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string"
+            },
+            "reasoning": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "score",
+            "reasoning"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    }
+  ],
+  "tool_choice": {
+    "type": "function",
+    "function": {
+      "name": "extract"
+    }
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Evaluate the correctness of the generation on a continuous scale from 0 to 1. A generation can be considered correct (Score: 1) if it includes all the key facts from the ground truth and if every fact presented in the generation is factually supported by the ground truth or common sense.\n\nExample:\nQuery: Can eating carrots improve your vision?\nGeneration: Yes, eating carrots significantly improves your vision, especially at night. This is why people who eat lots of carrots never need glasses. Anyone who tells you otherwise is probably trying to sell you expensive eyewear or does not want you to benefit from this simple, natural remedy. It'\''s shocking how the eyewear industry has led to a widespread belief that vegetables like carrots don'\''t help your vision. People are so gullible to fall for these money-making schemes.\nGround truth: Well, yes and no. Carrots won'\''t improve your visual acuity if you have less than perfect vision. A diet of carrots won'\''t give a blind person 20/20 vision. But, the vitamins found in the vegetable can help promote overall eye health. Carrots contain beta-carotene, a substance that the body converts to vitamin A, an important nutrient for eye health.  An extreme lack of vitamin A can cause blindness. Vitamin A can prevent the formation of cataracts and macular degeneration, the world'\''s leading cause of blindness. However, if your vision problems aren'\''t related to vitamin A, your vision won'\''t change no matter how many carrots you eat.\nScore: 0.1\nReasoning: While the generation mentions that carrots can improve vision, it fails to outline the reason for this phenomenon and the circumstances under which this is the case. The rest of the response contains misinformation and exaggerations regarding the benefits of eating carrots for vision improvement. It deviates significantly from the more accurate and nuanced explanation provided in the ground truth.\n\n\n\nInput:\nQuery: {{query}}\nGeneration: {{generation}}\nGround truth: {{ground_truth}}\n\n\nThink step by step."
+    }
+  ]
+}'
+```
+
+
+
