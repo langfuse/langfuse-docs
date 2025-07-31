@@ -346,6 +346,8 @@ const nonPermanentRedirects = [
   ["/docs/integrations/litellm/tracing", "/integrations/gateways/litellm"],
   ["/docs/integrations/portkey", "/integrations/gateways/portkey"],
   ["/docs/integrations/other/openrouter", "/integrations/gateways/openrouter"],
+  ["/docs/integrations/other/vercel-ai-gateway", "/integrations/gateways/vercel-ai-gateway"],
+
 
   // No-code integrations - redirect to integration pages where they exist
   ["/docs/integrations/dify", "/integrations/no-code/dify"],
