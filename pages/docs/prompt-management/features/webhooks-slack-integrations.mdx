@@ -1,31 +1,49 @@
 ---
-title: Webhooks/Slack Integrations
-sidebarTitle: Webhooks/Slack Integrations
+title: Webhooks & Slack Integration
+sidebarTitle: Webhooks
 description: Use webhooks to receive real‑time notifications whenever a prompt version is created, updated, or deleted in Langfuse.
 ---
 
-# Webhooks/Slack Integrations
+# Webhooks & Slack Integration
 
 Use webhooks to receive real‑time notifications whenever a prompt version is created, updated, or deleted in Langfuse. This lets you trigger CI/CD pipelines, sync prompt catalogues, or audit changes without polling the API.
 
-## Create a webhook
+## Why use webhooks?
+
+- **Production Monitoring**: Get alerted when production prompts are updated
+- **Team Coordination**: Keep everyone informed about prompt changes
+- **Syncing**: Sync prompt catalogues with other systems
+
+## Get started
+
+Navigate to `Prompts` and click on `Automations`.
+
+<Frame border fullWidth>
+  ![Select events](/images/docs/webhook-navigation.png)
+</Frame>
+
+Click on `Create Automation`.
+
+<Frame border fullWidth>
+  ![Select events](/images/docs/webhook-create.png)
+</Frame>
 
 
-
-### Select events to watch
+Select events to watch. 
 
 <Frame border className="max-w-md">
   ![Select events](/images/docs/webhook-trigger.png)
 </Frame>
 
-1. Open Prompts ▸ Webhooks and click Create Webhook.
-2. Choose the prompt‑version actions that should fire the webhook:
-   - Created – a new version is added.
-   - Updated – labels or tags change (two events fire: one for the version that gains a label/tag, one for the version that loses it).
-   - Deleted – a version is removed.
-3. (Optional) Add filters to narrow the scope, e.g. labels contains "production".
+Choose the prompt‑version actions that should fire the webhook:
 
-<Tabs items={["Webhook", "Slack"]}>
+- **Created:** a new version is added.
+- **Updated:** labels or tags change (two events fire: one for the version that gains a label/tag, one for the version that loses it).
+- **Deleted:** a version is removed.
+
+(Optional) Add filters to narrow the scope, e.g. labels contains "production".
+
+<Tabs items={["Webhook Call", "Slack Message"]}>
 
 
 <Tab>
@@ -206,8 +224,6 @@ export function verifyLangfuseSignature(
 
 
 </Tab>
-
-
 
 
 </Tabs>
