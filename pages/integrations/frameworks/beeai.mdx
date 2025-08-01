@@ -1,0 +1,140 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for BeeAI Agents with Langfuse
+sidebarTitle: BeeAI
+logo: /images/integrations/beeai_icon.png
+description: Learn how to integrate Langfuse with the BeeAI Framework for comprehensive tracing and debugging of your AI agent applications.
+category: Integrations
+---
+
+# Trace BeeAI Agents in Langfuse
+
+This notebook shows how to trace and observe BeeAI Framework applications with Langfuse using OpenTelemetry instrumentation.
+
+> **What is BeeAI?** [BeeAI Framework](https://beeai.dev/) is a comprehensive toolkit, developed by [IBM Research](https://research.ibm.com/blog/bee-ai-app), for building intelligent, autonomous agents and multi-agent systems. It provides everything you need to create agents that can reason, take actions, and collaborate to solve complex problems in both Python and TypeScript.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+
+
+<Steps>
+## Step 1: Install Dependencies
+
+Before you begin, install the necessary packages in your Python environment:
+
+
+```python
+%pip install beeai-framework langfuse openinference-instrumentation-beeai "beeai-framework[wikipedia]"
+```
+
+## Step 2: Configure Langfuse SDK
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+You will also need to configure your LLM provider credentials. BeeAI Framework supports multiple providers including OpenAI, Ollama, watsonx.ai, and others.
+
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your LLM provider API key (example with OpenAI, adjust for your provider)
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+# For Ollama (local), no API key needed
+# For other providers, set appropriate environment variables
+
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+
+```python
+from langfuse import get_client
+
+# Initialise Langfuse client and verify connectivity
+langfuse = get_client()
+assert langfuse.auth_check(), "Langfuse auth failed - check your keys ✋"
+
+```
+
+## Step 3: OpenTelemetry Instrumentation
+
+Use the [`BeeAIInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-beeai) library to wrap [BeeAI Framework](https://framework.beeai.dev) calls and send OpenTelemetry spans to Langfuse.
+
+
+
+```python
+from openinference.instrumentation.beeai import BeeAIInstrumentor
+
+BeeAIInstrumentor().instrument()
+```
+
+## Step 4: Run an Example
+
+
+```python
+import asyncio
+from beeai_framework.agents.react import ReActAgent
+from beeai_framework.agents.types import AgentExecutionConfig
+from beeai_framework.backend.chat import ChatModel
+from beeai_framework.backend.types import ChatModelParameters
+from beeai_framework.memory import TokenMemory
+from beeai_framework.tools.search.wikipedia import WikipediaTool
+from beeai_framework.tools.weather.openmeteo import OpenMeteoTool
+
+# Initialize the language model
+llm = ChatModel.from_name(
+    "openai:gpt-4o-mini",  # or "ollama:granite3.3:8b" for local Ollama
+    ChatModelParameters(temperature=0.7),
+)
+
+# Create tools for the agent
+tools = [
+    WikipediaTool(),
+    OpenMeteoTool(),
+]
+
+# Create a ReAct agent with memory
+agent = ReActAgent(
+    llm=llm, 
+    tools=tools, 
+    memory=TokenMemory(llm)
+)
+
+# Run the agent
+async def main():
+    response = await agent.run(
+        prompt="I'm planning a trip to Barcelona, Spain. Can you research key attractions and landmarks I should visit, and also tell me what the current weather conditions are like there?",
+        execution=AgentExecutionConfig(
+            max_retries_per_step=3, 
+            total_max_retries=10, 
+            max_iterations=5
+        ),
+    )
+    print("Agent Response:", response.result.text)
+    return response
+
+# Run the example
+response = await main()
+
+```
+
+### View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the agent conversations, tool calls, LLM interactions, inputs, outputs, and performance metrics.
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/integration_beeai/beeai-trace.png)
+
+[View trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/096fc09a30ab90d2431778f9ee2b3936?timestamp=2025-08-01T13%3A56%3A54.163Z&display=details)
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
