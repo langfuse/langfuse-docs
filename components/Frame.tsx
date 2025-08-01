@@ -78,7 +78,6 @@ export const Frame = ({
         const src = target.src;
         const alt = target.alt || 'Image';
         if (src) {
-          console.log('Image clicked in Frame:', src);
           setZoomedImage({ src, alt });
         }
       }
