@@ -3,19 +3,36 @@ title: Customers
 description: Langfuse customers share their experiences with the platform.
 ---
 
-import { BlogIndex } from "@/components/blog/BlogIndex";
+import { CustomerIndex } from "@/components/customers/CustomerIndex";
 import { Header } from "@/components/Header";
+import { TestimonialsGrid } from "@/components/home/TestimonialsGrid";
+import { Button } from "@/components/ui/button";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
-<div className="md:container">
+<div className="mx-auto max-w-7xl px-5 sm:px-7 xl:px-10">
   <div className="flex flex-col items-center content-center text-center my-10">
     <Header
-      title="Customers"
+      title="Customer Stories"
       description={
         <>Langfuse customers share their experiences with the platform.</>
       }
       className="mb-8"
       h="h1"
     />
+    
   </div>
-  <BlogIndex path="/customers" />
+  <CustomerIndex path="/customers" />
+  <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
+    More coming soon! Thousands of teams are building on Langfuse – we are just getting started telling their stories.
+  </div>
+  
+  <div className="mt-16">
+  <h2 className="text-3xl text-center font-mono font-bold text-foreground mb-10">
+    What Our Community Says
+  </h2>
+  <TestimonialsGrid />
+  </div>  
+  <div className="mt-10">
+    <CustomerStoryCTA />
+  </div>
 </div>
