@@ -110,7 +110,7 @@ export const Frame = ({
       frame.removeEventListener('click', handleImageClick);
       window.removeEventListener('resize', updateImageCursors);
     };
-  }, [children]);
+  }, []);
 
   return (
     <>
