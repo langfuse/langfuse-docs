@@ -14,6 +14,10 @@ export default {
     type: "separator",
     title: <MenuSubSeparator>Advanced</MenuSubSeparator>,
   },
+  "evaluate-prompts": {
+    title: "Evaluate Prompts ↗",
+    href: "/docs/evaluation/dataset-runs/run-via-ui",
+  },
   "a-b-testing": {},
   "*": {
     layout: "default",

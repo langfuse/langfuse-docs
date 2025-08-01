@@ -124,15 +124,15 @@ Example of user feedback captured in ChatGPT:
 **Implicit User Feedback (Human-in-the-Loop):**  
  Instead of waiting for explicit ratings, you can infer quality from user behavior: Did they ask the same question again? Did they click on recommended links? Though it’s usually easier to gather, the signal can be noisy and needs careful interpretation.
 
-**Manual Annotation:**  
- Having experts (or crowdworkers) label or grade outputs can provide deep insights, especially for complex tasks. The downside is cost and time: manual annotation doesn’t scale easily.
+**Human Annotation:**  
+ Having experts (or crowdworkers) label or grade outputs can provide deep insights, especially for complex tasks. The downside is cost and time: human annotation doesn’t scale easily.
 
-Example of a manual annotation workflow in Langfuse:
+Example of a human annotation workflow in Langfuse:
 
 {" "}
 
 <Frame className="my-10" fullWidth>
-  ![Example of a manual annotation workflow in
+  ![Example of a human annotation workflow in
   Langfuse](/images/blog/2025-03-04-llm-evaluation/human-annotation-example.png)
 </Frame>
 
@@ -154,7 +154,7 @@ Traces are the underlying thread across all these methods—by systematically lo
 graph TD
   A["Tracing (production and development)"] --> B["User Feedback"]
   A --> C["Implicit user feedback"]
-  A --> D["Manual Annotation"]
+  A --> D["Human Annotation"]
   A --> E["Automated Evaluation"]
 
   B --> F["Identify & monitor issues"]
@@ -214,7 +214,7 @@ Use traces or structured logs from real interactions or test runs. This is your 
 
 ### Experiment with Different Methods
 
-Don’t rely on just one technique. Try manual annotation, automated metrics, user feedback—even pairwise comparisons if that fits your use case.
+Don’t rely on just one technique. Try human annotation, automated metrics, user feedback—even pairwise comparisons if that fits your use case.
 
 ### Set Baselines
 

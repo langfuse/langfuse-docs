@@ -1,0 +1,303 @@
+---
+title: "Vercel AI Gateway Integration"
+sidebarTitle: Vercel AI Gateway
+logo: /images/integrations/vercel_ai_gateway_icon.svg
+description: "Learn how to integrate Langfuse with the Vercel AI Gateway using the OpenAI SDK."
+---
+
+# Vercel AI Gateway Integration
+
+In this guide, we'll show you how to integrate [Langfuse](/) with the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
+
+The [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) is a proxy service from Vercel that routes model requests to various AI providers. It offers a unified API to multiple providers and gives you the ability to set budgets, monitor usage, load-balance requests, and manage fallbacks.
+
+Since the Vercel AI Gateway uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
+
+## Get started
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tab>
+
+```bash
+pip install langfuse openai
+```
+
+```python
+import os
+
+# Set your Langfuse API keys
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+# 🇪🇺 EU region
+LANGFUSE_HOST="https://cloud.langfuse.com"
+# 🇺🇸 US region
+# LANGFUSE_HOST="https://us.cloud.langfuse.com"
+
+# Set your Vercel AI Gateway API key or OIDC token (Vercel AI Gateway uses the 'AI_GATEWAY_API_KEY' and 'VERCEL_OIDC_TOKEN' environment variables)
+os.environ["OPENAI_API_KEY"] = "<YOUR_VERCEL_AI_GATEWAY_API_KEY_OR_OIDC_TOKEN>"
+```
+
+</Tab>
+
+<Tab>
+
+```bash
+npm install langfuse openai
+```
+
+```typescript
+// Set your Langfuse API keys
+process.env.LANGFUSE_SECRET_KEY = "sk-lf-...";
+process.env.LANGFUSE_PUBLIC_KEY = "pk-lf-...";
+// 🇪🇺 EU region
+process.env.LANGFUSE_HOST = "https://cloud.langfuse.com";
+// 🇺🇸 US region
+// process.env.LANGFUSE_HOST = "https://us.cloud.langfuse.com";
+
+// Set your Vercel AI Gateway API key or OIDC token (Vercel AI Gateway uses the 'AI_GATEWAY_API_KEY' and 'VERCEL_OIDC_TOKEN' environment variables)
+process.env.OPENAI_API_KEY = "<YOUR_VERCEL_AI_GATEWAY_API_KEY_OR_OIDC_TOKEN>";
+```
+
+</Tab>
+
+</Tabs>
+
+## Example 1: Simple LLM Call
+
+Since the Vercel AI Gateway provides an OpenAI-compatible API, we can use the Langfuse OpenAI SDK wrapper to automatically log Vercel AI Gateway calls as generations in Langfuse.
+
+- The `base_url` is set to the Vercel AI Gateway API endpoint.
+- You can replace `"anthropic/claude-4-sonnet"` with any model available on the Vercel AI Gateway.
+- The `default_headers` can include optional headers as per the Vercel AI Gateway documentation.
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tab>
+
+```python
+# Import the Langfuse OpenAI SDK wrapper
+from langfuse.openai import openai
+
+# Create an OpenAI client with the Vercel AI Gateway base URL
+client = openai.OpenAI(
+    base_url="https://ai-gateway.vercel.sh/v1",
+    default_headers={
+        "http-referer": "<YOUR_SITE_URL>",  # Optional: Your site URL
+        "x-title": "<YOUR_SITE_NAME>",      # Optional: Your site name
+    }
+)
+
+# Make a chat completion request
+response = client.chat.completions.create(
+    model="anthropic/claude-4-sonnet",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a fun fact about space."}
+    ],
+    name="fun-fact-request"  # Optional: Name of the generation in Langfuse
+)
+
+# Print the assistant's reply
+print(response.choices[0].message.content)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+// Create an OpenAI client with the Vercel AI Gateway base URL
+const openaiClient = new OpenAI({
+    baseURL: "https://ai-gateway.vercel.sh/v1",
+    defaultHeaders: {
+        "http-referer": "<YOUR_SITE_URL>",  // Optional: Your site URL
+        "x-title": "<YOUR_SITE_NAME>",      // Optional: Your site name
+    }
+});
+
+// Create an observed client with Langfuse options
+const client = observeOpenAI(openaiClient, {
+    generationName: "fun-fact-request"  // Optional: Name of the generation in Langfuse
+});
+
+// Make a chat completion request
+const response = await client.chat.completions.create({
+    model: "anthropic/claude-4-sonnet",
+    messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: "Tell me a fun fact about space." }
+    ]
+});
+
+// Print the assistant's reply
+console.log(response.choices[0].message.content);
+```
+
+</Tab>
+
+</Tabs>
+
+## Example 2: Nested LLM Calls
+
+We can capture execution details of nested LLM calls, inputs, outputs, and execution times. This provides in-depth observability with minimal code changes.
+
+- Nested functions create a hierarchy of traces.
+- Each LLM call within the functions is logged, providing a detailed trace of the execution flow.
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tab>
+
+By using the `@observe()` decorator, we can capture execution details of any Python function.
+
+- The `@observe()` decorator captures inputs, outputs, and execution details of the functions.
+
+```python
+from langfuse import observe
+from langfuse.openai import openai
+
+# Create an OpenAI client with the Vercel AI Gateway base URL
+client = openai.OpenAI(
+    base_url="https://ai-gateway.vercel.sh/v1",
+)
+
+@observe()  # This decorator enables tracing of the function
+def analyze_text(text: str):
+    # First LLM call: Summarize the text
+    summary_response = summarize_text(text)
+    summary = summary_response.choices[0].message.content
+
+    # Second LLM call: Analyze the sentiment of the summary
+    sentiment_response = analyze_sentiment(summary)
+    sentiment = sentiment_response.choices[0].message.content
+
+    return {
+        "summary": summary,
+        "sentiment": sentiment
+    }
+
+@observe()  # Nested function to be traced
+def summarize_text(text: str):
+    return client.chat.completions.create(
+        model="openai/gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You summarize texts in a concise manner."},
+            {"role": "user", "content": f"Summarize the following text:\n{text}"}
+        ],
+        name="summarize-text"
+    )
+
+@observe()  # Nested function to be traced
+def analyze_sentiment(summary: str):
+    return client.chat.completions.create(
+        model="openai/gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You analyze the sentiment of texts."},
+            {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}
+        ],
+        name="analyze-sentiment"
+    )
+
+# Example usage
+text_to_analyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation."
+analyze_text(text_to_analyze)
+```
+
+</Tab>
+
+<Tab>
+
+By using the Langfuse SDK, we can manually create traces and generations to capture nested LLM calls.
+
+```typescript
+import { Langfuse } from "langfuse";
+import { observeOpenAI } from "langfuse";
+import OpenAI from "openai";
+
+// Initialize Langfuse
+const langfuse = new Langfuse();
+
+// Create an OpenAI client with the Vercel AI Gateway base URL
+const openaiClient = new OpenAI({
+    baseURL: "https://ai-gateway.vercel.sh/v1",
+});
+
+async function analyzeText(text: string) {
+    // Create a trace for the entire analysis
+    const trace = langfuse.trace({
+        name: "analyze-text",
+        input: { text }
+    });
+
+    try {
+        // First LLM call: Summarize the text
+        const summaryResponse = await summarizeText(text, trace);
+        const summary = summaryResponse.choices[0].message.content;
+
+        // Second LLM call: Analyze the sentiment of the summary
+        const sentimentResponse = await analyzeSentiment(summary!, trace);
+        const sentiment = sentimentResponse.choices[0].message.content;
+
+        const result = {
+            summary,
+            sentiment
+        };
+
+        // Update trace with output
+        trace.update({ output: result });
+        
+        return result;
+    } catch (error) {
+        trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
+        throw error;
+    }
+}
+
+async function summarizeText(text: string, trace: any) {
+    const client = observeOpenAI(openaiClient, {
+        generationName: "summarize-text",
+        parent: trace
+    });
+    
+    return await client.chat.completions.create({
+        model: "openai/gpt-3.5-turbo",
+        messages: [
+            { role: "system", content: "You summarize texts in a concise manner." },
+            { role: "user", content: `Summarize the following text:\n${text}` }
+        ]
+    });
+}
+
+async function analyzeSentiment(summary: string, trace: any) {
+    const client = observeOpenAI(openaiClient, {
+        generationName: "analyze-sentiment",
+        parent: trace
+    });
+    
+    return await client.chat.completions.create({
+        model: "openai/gpt-3.5-turbo",
+        messages: [
+            { role: "system", content: "You analyze the sentiment of texts." },
+            { role: "user", content: `Analyze the sentiment of the following summary:\n${summary}` }
+        ]
+    });
+}
+
+// Example usage
+const textToAnalyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation.";
+analyzeText(textToAnalyze);
+```
+
+</Tab>
+
+</Tabs>
+
+## Learn More
+
+- **Vercel AI Gateway Docs**: [https://vercel.com/docs/ai-gateway](https://vercel.com/docs/ai-gateway)
+- **Langfuse OpenAI Integration**: [https://langfuse.com/integrations/model-providers/openai-py](/integrations/model-providers/openai-py)
+- **Langfuse `@observe()` Decorator**: [https://langfuse.com/docs/sdk/python/decorators](/docs/sdk/python/decorators)
