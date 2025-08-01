@@ -1,0 +1,83 @@
+---
+title: "Langfuse July Update"
+description: "Langfuse July Update: Playground Side-by-Side Comparison, real-time alerts (Webhooks & Slack) for prompt changes, usage alerts on Langfuse Cloud, and one-click remote experiments for non-technical teammates."
+ogImage: /images/blog/2025-07-31-langfuse-july-update/july-update.png
+tag: update
+date: 2025/07/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse July Update"
+  description="Langfuse July Update: Playground Side-by-Side Comparison, real-time alerts (Webhooks & Slack) for prompt changes, usage alerts on Langfuse Cloud, and one-click remote experiments for non-technical teammates."
+  authors={["marcklingen"]}
+  image="/images/blog/2025-07-31-langfuse-july-update/july-update.png"
+  date="July 31, 2025"
+/>
+
+With Q3 in full swing, we’ve shipped product updates to speed up your development: Side‑by‑side Playground testing, real‑time alerts (Webhooks & Slack) for prompt changes, usage alerts on Langfuse Cloud, and one‑click remote experiments for non‑technical teammates.
+
+## Q3 Roadmap Highlights & Townhall
+
+Earlier this month, we held our Q3 planning and a community Townhall. Here are some of the highlights we will be working on in Q3:
+
+-   Agent observability: unified agent graphs, richer tracing (tool‑call span types), built‑in agent evaluations across conversation/response/turn/trajectory.
+-   Evaluation: rule‑based evaluators; LLM‑as‑judge at multiple levels with debugging & cost tracking; comparison dashboards (correlation, confusion matrix, overlap); SDK abstraction for dataset runs.
+-   Data, prompts & platform: multimodal support for Datasets & Playground; I/O schema validation; tool/function support in Prompt Experiments; platform webhooks; in‑app routing.
+
+→ [View the public roadmap](/docs/roadmap)
+→ [Watch the Town Hall](https://www.youtube.com/watch?v=cz8HqPhDLHE) Recording
+
+## Playground Side-by-Side Comparison
+
+<Frame>
+![Playground Side-by-Side Comparison](/images/blog/2025-07-31-langfuse-july-update/multi-playgroundcl.png)
+</Frame>
+
+Open multiple chat windows in parallel to compare prompts, models, variable inputs, or tools, and restore the test state.
+
+This enables faster A/B testing, fewer open tabs, and shorter feedback cycles.
+
+→ [Learn More](/changelog/2025-07-28-playground-side-by-side)
+
+## Slack & Webhooks for Prompt Changes
+
+<Frame>
+![Slack & Webhooks for Prompt Changes](/images/blog/2025-07-31-langfuse-july-update/slack-integrationcl.png)
+</Frame>
+
+We added Webhooks and a Slack integration to get real-time notifications for new prompt versions, changes to deployment labels or tags, and other edits.
+
+We’re expanding webhook triggers to cover more Langfuse events soon.
+
+→ [Learn More](/changelog/2025-07-30-slack-prompt-notifications)
+
+## Trigger Remote Custom Experiments
+
+<Frame>
+![Trigger Remote Custom Experiments](/images/blog/2025-07-31-langfuse-july-update/remote-experimentscl.png)
+</Frame>
+
+You can now trigger external Dataset Runs directly from the Langfuse UI. This feature enables non-technical users to run tests on Datasets without requiring code changes or manual setup.
+
+→ [Trigger a remote Dataset Run](/changelog/2025-07-24-remote-experiment-triggers)
+
+## New docs and integration pages
+
+<Frame fullWidth>
+![New docs and integration pages](/images/blog/2025-07-31-langfuse-july-update/new-docs-and-integration-pagescl.png)
+</Frame>
+
+We reorganized our docs and integration guides to make discovery easier across observability, prompts, and evals.
+
+→ Explore our new [documentation](/docs) and [integration](/integrations) pages
+
+## More July Releases
+
+-   [Usage Alerts (Cloud):](/changelog/2025-07-30-usage-alerts)  Set a threshold for monthly events; we’ll notify you once per billing cycle when you cross it.
+-   [Sessions in the Annotation Queue](/changelog/2025-07-28-sessions-in-annotation-queues): Integrate Sessions into your human annotation workflow.
+-   [n8n Node: Fetch Prompts from Langfuse Prompt Management](/changelog/2025-07-06-n8n-node-for-langfuse-prompts) into your n8n workflow.
+-   Prompt [Full-Text Search](/changelog/2025-07-22-full-text-search-for-prompts): Search through all your prompts to help find and organize large prompt collections.
+-   [LiveKit Integration](/changelog/2025-07-25-livekit-integration):  Trace your LiveKit agents to see latencies, costs and use it together with other Langfuse features.
