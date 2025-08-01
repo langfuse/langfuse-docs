@@ -29,46 +29,38 @@ function additionalLinksFromMeta(metaConfig: Record<string, any>) {
 const categoryConfig = {
   native: {
     title: "Native",
-    icon: <Code />,
     description: "Native integrations with Langfuse",
     additionalLinks: additionalLinksFromMeta(nativeIntegrationsMeta),
   },
   frameworks: {
     title: "Frameworks",
-    icon: <Puzzle />,
     description: "Integrate with popular AI frameworks",
   },
   "model-providers": {
     title: "Model Providers",
-    icon: <Server />,
     description: "Direct integrations with AI model providers",
   },
   gateways: {
     title: "Gateways",
-    icon: <Globe />,
     description: "Connect through API gateways and proxies",
   },
   "no-code": {
     title: "No-Code",
-    icon: <Wrench />,
     description: "No-code agent builders and tools",
   },
   analytics: {
     title: "Analytics",
-    icon: <ChartBar />,
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
   },
   data: {
     title: "Data Platform",
-    icon: <Database />,
     description:
       "Use Langfuse data and metrics in your own application and data platform",
     additionalLinks: additionalLinksFromMeta(dataPlatformIntegrationsMeta),
   },
   other: {
     title: "Other",
-    icon: <RectangleEllipsis />,
     description: "Other integrations",
   },
 };
