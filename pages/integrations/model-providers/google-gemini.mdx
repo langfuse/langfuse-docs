@@ -1,0 +1,111 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Google Gemini Models with Langfuse Integration
+sidebarTitle: Google Gemini
+logo: /images/integrations/google_gemini_icon.svg
+description: Learn how to integrate Langfuse with the Google GenAI SDK for comprehensive tracing and debugging of your AI conversations.
+category: Integrations
+---
+
+# Trace Google Gemini Models in Langfuse
+
+This notebook shows how to trace and observe Google Gemini models with Langfuse and the Google GenAI SDK. 
+
+> **What is Google Gemini?** [Google Gemini](https://ai.google.dev/gemini-api/docs/libraries) is Google’s family of multimodal generative models (text, images, audio, video, code) available through the Gemini API and Vertex AI, with tiers like Flash and Pro for different speed/quality needs.
+
+> **What is the Google GenAI SDK?** The [Google GenAI SDK](https://cloud.google.com/vertex-ai/generative-ai/docs/sdks/overview) is a unified client library (Python/JavaScript) that simplifies calling Gemini—handling auth (API key or ADC), streaming, tool/function calling, and safety—so you can integrate models in a few lines.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+
+
+<Steps>
+## Step 1: Install Dependencies
+
+Before you begin, install the necessary packages in your Python environment:
+
+
+
+```python
+%pip install google-genai openai langfuse openinference-instrumentation-google-genai
+```
+
+## Step 2: Configure Langfuse SDK
+
+Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
+
+Also set your Google Vertex API credentials which uses Application Default Credentials (ADC) from a service account key file.
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your Google Gemini API key
+os.environ["GOOGLE_API_KEY"] = "***"  
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+
+# Initialise Langfuse client and verify connectivity
+langfuse = get_client()
+assert langfuse.auth_check(), "Langfuse auth failed - check your keys ✋"
+```
+
+## Step 3: OpenTelemetry Instrumentation
+
+Use the [`GoogleGenAIInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-google-genai) library to wrap [Google GenAI SDK](https://ai.google.dev/gemini-api/docs/libraries) calls and send OpenTelemetry spans to Langfuse.
+
+
+```python
+from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
+
+GoogleGenAIInstrumentor().instrument()
+```
+
+## Step 4: Run an Example
+
+
+```python
+from google import genai
+
+client = genai.Client()
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="What is Langfuse?",
+)
+print(response.text)
+```
+
+
+```python
+# Streaming Example
+for chunk in client.models.generate_content_stream(
+    model="gemini-2.5-flash",
+    contents="What is Langfuse?",
+):
+    print(chunk.text, end="", flush=True)
+print()  # newline after streaming
+```
+
+### View Traces in Langfuse
+
+After executing the application, navigate to your Langfuse Trace Table. You will find detailed traces of the application's execution, providing insights into the agent conversations, LLM calls, inputs, outputs, and performance metrics. 
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/integration_gemini/gemini-trace.png)
+
+[View trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/9f2f0fe0228fd81a9fe75882934b384a?timestamp=2025-08-01T13%3A22%3A00.147Z&display=details&observation=b7a63ca7e1d083bc)
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
