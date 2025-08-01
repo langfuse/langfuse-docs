@@ -77,7 +77,7 @@ export const CustomerQuote = ({
         </span>
         
         {/* Visible streaming text positioned absolutely */}
-        <span className="absolute inset-0 text-gray-600 dark:text-gray-400">
+        <span className="absolute inset-0 text-gray-800 dark:text-gray-200">
           <span className={`${openingQuoteStyle} mr-1`}>"</span>
           <span className="text-2xl">{hasAnimated ? displayedText : quote}</span>
           {hasAnimated && !isAnimating && (
