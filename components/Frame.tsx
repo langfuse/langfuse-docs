@@ -118,13 +118,13 @@ export const Frame = ({
         className={cn(
           "my-4",
           border &&
-            "p-3 pb-1 bg-gradient-to-tr from-blue-300/50 via-green-200/50 to-yellow-300/50 inline-block rounded",
+            "p-1 md:p-2 bg-gradient-to-tr from-blue-300/50 via-green-200/50 to-yellow-300/50 inline-block rounded",
           className
         )}
       >
         <div
           className={cn(
-            "inline-block rounded overflow-hidden bg-primary/5 max-w-2xl [&>*]:mt-0",
+            "inline rounded overflow-hidden bg-primary/5 max-w-2xl [&>*]:mt-0 [&>*]:mb-0 [&>img]:block [&>img]:w-full [&>img]:h-auto [&>img]:leading-none [&>img]:align-top",
             fullWidth && "max-w-full",
             transparent && "bg-transparent",
             border
