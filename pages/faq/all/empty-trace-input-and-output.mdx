@@ -1,0 +1,50 @@
+---
+title: Why are the input and output of a trace empty?
+description: This article explains why the input and output of a trace might be empty and how to fix it.
+tags: [observability]
+---
+
+# Why are the input and output of a trace empty?
+
+By default, the input and output of a trace are set from the root observation (the first span or generation in your trace). If these fields are empty, it might be because the root observation did not have its input/output set, or they were not explicitly set at the trace level. You can explicitly set trace input/output using the update_trace method:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
+    # Root span has its own input/output
+    root_span.update(input="Step 1 data", output="Step 1 result")
+
+    # But trace should have different input/output
+    root_span.update_trace(
+        input={"original_query": "User's actual question"},
+        output={"final_answer": "Complete response", "confidence": 0.95}
+    )
+```
+[(1)](https://langfuse.com/docs/observability/sdk/python/sdk-v3)
+
+If you want to set trace input/output for evaluation features, you can also use:
+
+```python
+from langfuse import observe, get_client
+
+langfuse = get_client()
+
+@observe()
+def process_user_query(user_question: str):
+    # LLM processing...
+    answer = call_llm(user_question)
+
+    # Explicitly set trace input/output
+    langfuse.update_current_trace(
+        input={"question": user_question},
+        output={"answer": answer}
+    )
+
+    return answer
+```
+[(1)](https://langfuse.com/docs/observability/sdk/python/sdk-v3)
+
+If you use the decorator-based integration, input/output are captured automatically, but you can override or disable this behavior using parameters like capture_input, capture_output, or by calling update_current_trace as shown above[(2)](https://langfuse.com/guides/cookbook/python_decorators#customize-inputoutput)[(1)](https://langfuse.com/docs/observability/sdk/python/sdk-v3).

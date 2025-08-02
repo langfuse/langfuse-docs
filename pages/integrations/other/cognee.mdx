@@ -1,0 +1,101 @@
+---
+title: "Langfuse Integration with Cognee"
+sidebarTitle: Cognee
+logo: /images/integrations/cognee_icon.png
+description: "Monitor Cognee pipelines and AI memory with Langfuse for comprehensive observability in your AI agents."
+category: Integrations
+---
+
+# Cognee Integration with Langfuse
+
+> **What is Cognee?** [Cognee](https://www.cognee.ai/) is an open-source AI memory that turns your data into a searchable, reasoning-ready knowledge graph. By pairing Cognee with Langfuse you gain production-grade tracing, evaluation, and analytics for every pipeline step, and search query. Check out the [GitHub repo](https://github.com/topoteretes/cognee) or the [docs](https://docs.cognee.ai) for details.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is the open-source LLM engineering platform. It helps teams trace applications, debug issues, evaluate quality, and monitor costs in production.
+
+## Quick Start Guide
+
+<Steps>
+
+### Step&nbsp;1: Install Cognee (includes Langfuse)
+
+```bash
+pip install cognee  # langfuse is declared as a dependency and will be installed automatically
+```
+
+### Step&nbsp;2: Create a Langfuse Project
+
+1. Sign up at [Langfuse Cloud](https://cloud.langfuse.com).
+2. Create a new project and copy your **public** and **secret** API keys.
+
+### Step&nbsp;3: Configure Environment Variables
+
+Create a `.env` file or export the variables directly in your shell:
+
+```env
+LANGFUSE_PUBLIC_KEY=<your public key>
+LANGFUSE_SECRET_KEY=<your secret key>
+LANGFUSE_HOST=https://cloud.langfuse.com   # 🇪🇺 EU region
+# LANGFUSE_HOST=https://us.cloud.langfuse.com   # 🇺🇸 US region
+```
+
+### Step&nbsp;4: Trace Cognee Functions
+
+`cognee` ships with a tiny wrapper around Langfuse. Import `get_observe()` and decorate any function you want to monitor.
+
+```python
+from cognee.modules.observability.get_observe import get_observe
+
+observe = get_observe()
+
+@observe(as_type="generation")  # optional label
+async def acreate_structured_output(...):
+    ...  # your business logic
+```
+
+Every time the function runs, the decorator automatically opens a **span** in Langfuse and streams metrics such as duration, token usage, and custom metadata.
+
+### Step&nbsp;5: Start Cognifying & Watch Traces
+
+Run your regular Cognee workflows:
+
+```python
+import cognee
+import asyncio
+from cognee.modules.observability.get_observe import get_observe
+
+observe = get_observe()
+
+@observe(name="simple_example_run", as_type="example")
+async def main():
+    await cognee.add("Natural language processing (NLP) is ...")
+    await cognee.cognify()
+    results = await cognee.search("Tell me about NLP")
+    for r in results:
+        print(r)
+
+asyncio.run(main())
+```
+
+Open the Langfuse UI – traces for any `@observe`-decorated helper functions will appear.
+
+</Steps>
+
+## Adding Your Own Spans
+
+You can instrument **any** function in your codebase – not just cognee internals:
+
+```python
+from cognee.modules.observability.get_observe import get_observe
+
+observe = get_observe()
+
+@observe(as_type="my_tool", metadata={"foo": "bar"})
+def my_helper(arg1, arg2):
+    ...
+```
+
+## Resources
+
+- [Cognee homepage](https://www.cognee.ai/)
+- [Cognee GitHub repository](https://github.com/topoteretes/cognee)
+- [Cognee docs](https://docs.cognee.ai/how-to-guides/cognee-sdk/integrations/langfuse-integration) for this integration

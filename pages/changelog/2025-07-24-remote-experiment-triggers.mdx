@@ -1,0 +1,29 @@
+---
+date: 2025-07-24
+title: Trigger Remote Custom Experiments from UI  
+description: Enable non-technical users to trigger external experiment pipelines directly from the Langfuse UI on datasets.
+author: Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now trigger external experiment pipelines directly from the Langfuse UI. This feature enables non-technical users to run experiments on [Datasets](/docs/datasets) without requiring code changes or manual setup.
+
+Configure a remote experiment URL at the dataset level, and team members can trigger experiments with a single click. Langfuse will send the dataset name, ID, and any custom payload to your experiment service, then wait up to 10 seconds for a response.
+
+## Features
+
+- **Dataset-level configuration**: Set up experiment URLs and custom payloads per dataset
+- **Simple triggering**: One-click experiment execution from the UI
+- **Custom payloads**: Send additional context or parameters to your experiment service
+- **Response handling**: 10-second timeout with status feedback
+
+## Get started
+
+import { Book } from "lucide-react";
+
+<Cards num={1}>
+  <Card title="Remote Custom Experiments Documentation" href="https://langfuse.com/docs/evaluation/dataset-runs/remote-run#run-via-ui" icon={<Book />} />
+</Cards>

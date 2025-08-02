@@ -47,6 +47,7 @@ OR
 |-------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------|
 | `REDIS_HOST`            | Required           | Redis host name.                                                                                                        |
 | `REDIS_PORT`            | `6379`             | Port of the Redis instance.                                                                                             |
+| `REDIS_USERNAME`        |                    | Username for Redis authentication.                                                                                      |
 | `REDIS_AUTH`            |                    | Authentication string for the Redis instance.                                                                           |
 | `REDIS_TLS_ENABLED`     | `false`            | Enable TLS for the Redis connection. Alternatively, enable tls via `rediss://` connection string.                       |
 | `REDIS_TLS_CA_PATH`     |                    | Path to the CA certificate for the Redis connection.                                                                    |
@@ -182,6 +183,7 @@ When using Redis cluster mode:
 - Use the same authentication credentials across all cluster nodes
 - Monitor cluster health and handle node failures appropriately
 - Set `maxmemory-policy=noeviction` on all cluster nodes to prevent queue job eviction
+- Set `LANGFUSE_INGESTION_QUEUE_SHARD_COUNT` to a positive integer to enable sharding of the ingestion queue across cluster nodes. We recommend 2-3x of your Redis shard.
 
 </Callout>
 

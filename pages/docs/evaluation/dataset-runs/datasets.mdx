@@ -1,0 +1,171 @@
+---
+title: Datasets
+description: Use Langfuse Datasets to create structured experiments to test and benchmark LLM applications.
+sidebarTitle: Datasets
+---
+
+# Datasets
+
+A dataset is a collection of inputs and expected outputs and is used to test your application. Before executing your first dataset run, you need to create a dataset. 
+
+<Frame border fullWidth>
+![Datasets](/images/docs/datasets-overview.png)
+</Frame>
+
+
+
+## Why use datasets?
+
+- **Datasets prerequisite for Dataset Runs**, they serve as the data input of Dataset Runs
+- Create test cases for your application with real production traces
+- Collaboratively create and collect dataset items with your team
+- Have a single source of truth for your test data
+
+## Get Started
+
+<Steps>
+
+### Creating a dataset
+
+Datasets have a name which is unique within a project.
+
+import CreateDataset from "@/components-mdx/datasets-create-dataset.mdx";
+
+<CreateDataset />
+
+### Create new dataset items
+
+Dataset items can be added to a dataset by providing the input and optionally the expected output.
+
+import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx";
+
+<CreateDatasetItem />
+</Steps>
+
+
+## Create synthetic datasets
+
+Frequently, you want to create synthetic examples to test your application to bootstrap your dataset. LLMs are great at generating these by prompting for common questions/tasks.
+
+To get started have a look at this cookbook for examples on how to generate synthetic datasets:
+
+import { FileCode } from "lucide-react";
+
+<Cards num={1}>
+  <Card
+    title="Notebook: Synthetic Datasets"
+    href="/docs/evaluation/features/synthetic-datasets"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## Create items from production data
+
+A common workflow is to select production traces where the application did not perform as expected. Then you let an expert add the expected output to test new versions of your application on the same data.
+
+<Tabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<Tab>
+
+```python
+langfuse.create_dataset_item(
+    dataset_name="<dataset_name>",
+    input={ "text": "hello world" },
+    expected_output={ "text": "hello world" },
+    # link to a trace
+    source_trace_id="<trace_id>",
+    # optional: link to a specific span, event, or generation
+    source_observation_id="<observation_id>"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+langfuse.createDatasetItem({
+  datasetName: "<dataset_name>",
+  input: { text: "hello world" },
+  expectedOutput: { text: "hello world" },
+  // link to a trace
+  sourceTraceId: "<trace_id>",
+  // optional: link to a specific span, event, or generation
+  sourceObservationId: "<observation_id>",
+});
+```
+
+</Tab>
+<Tab>
+In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
+
+<CloudflareVideo
+  videoId="51ba46cebd0431f9e5483082a8470206"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+</Tabs>
+
+## Edit/archive dataset items
+
+You can edit or archive dataset items. Archiving items will remove them from future experiment runs.
+
+<Tabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```python
+langfuse.create_dataset_item(
+    id="<item_id>",
+    # example: update status to "ARCHIVED"
+    status="ARCHIVED"
+)
+```
+
+</Tab>
+<Tab>
+
+You can upsert items by providing the `id` of the item you want to update.
+
+```ts
+langfuse.createDatasetItem({
+  id: "<item_id>",
+  // example: update status to "ARCHIVED"
+  status: "ARCHIVED",
+});
+```
+
+</Tab>
+<Tab>
+In the UI, you can edit the item by clicking on the item id. To archive or delete the item, click on the dots next to the item and select `Archive` or `Delete`.
+
+<Frame fullWidth>
+![Delete items](/images/docs/dataset-delete-items.png)
+</Frame>
+
+</Tab>
+</Tabs>
+
+## Dataset runs
+
+Once you created a dataset, you can test and evaluate your application based on it.
+
+import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
+
+<Cards num={1}>
+
+  <Card
+    icon={<WandSparkles size="24" />}
+    title="Native Dataset Runs"
+    href="/docs/evaluation/dataset-runs/native-run"
+    arrow
+  />
+  <Card
+    icon={<CodeXml size="24" />}
+    title="Remote Dataset Runs"
+    href="/docs/evaluation/dataset-runs/remote-run"
+    arrow
+  />
+</Cards>

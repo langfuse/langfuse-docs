@@ -2,24 +2,55 @@
 description: FAQ and deployment options for Langfuse in an enterprise environment.
 ---
 
-# Langfuse in the Enterprise
+# Langfuse for Enterprise
 
 Langfuse addresses key challenges when deploying LLM-based applications within an enterprise. As an [open source](/open-source) project, Langfuse is the ideal platform **to address data security and privacy concerns by self-hosting.** This document outlines common queries related to using Langfuse in an enterprise setting.
 
-Langfuse is licensed as an open-core project. It's core product (tracing, observability, evals, prompt management and API/SDK endpoints) is MIT-licensed and freely available (also without limitation for commercial use). Some Langfuse features on the periphery of the core product are not available in the open-source version and cannot be used out of the box. As of today, these are security & compliance features (e.g. SSO enforcement, data retention)
+Langfuse is licensed as an open-core project. It's core product (tracing, observability, evals, prompt management and API/SDK endpoints) is MIT-licensed and freely available (also without limitation for commercial use). 
 
-Please refer to our [feature overview](/pricing-self-host) and the Enterprise Edition FAQ [here](/open-source#enterprise-edition-ee-faq). Please reach out to enterprise@langfuse.com to discuss an enterprise license (self-hosted or cloud) for your team.
+---
 
-**Select Resources**
+## Your platform for enterprise-ready LLM applications
+
+Upgrade to Langfuse Enterprise Edition to address high security requirements and needs of platform teams to support billions of traces per month. With an Enterprise Agreement, you get access to additional support, features to address your specific needs and compliance requirements. 
+
+Please refer to our [feature overview](/pricing-self-host) and the Enterprise Edition FAQ [here](/open-source#enterprise-edition-ee-faq). 
+
+Langfuse is trusted by the best teams building LLM applications and AI agents and supported by the largest open source community:
+
+import { EnterpriseLogos } from "../components/EnterpriseLogos";
+import { Button } from "../components/ui/button";
+import Link from "next/link";
+
+<EnterpriseLogos />
+
+---
+
+
+
+## Select Resources
 
 - [Why Langfuse?](/why)
 - [Langfuse has twice been included in the Thoughtworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse)
-- [Enterprise Edition (EE) FAQ](/open-source#enterprise-edition-ee-faq)
-- Langfuse can be procured through the [AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=seller-nmyz7ju7oafxu).
+- [Feature Comparison](/pricing-self-host) - Open Source and Enterprise Edition (Self-hosted)
+- [Security and Compliance](/security) - includes information on GDPR, HIPAA, SOC2 and ISO27001 compliance
+- [Enterprise Security FAQ](/security/security-faq)
+- Langfuse can be procured through the [AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=seller-nmyz7ju7oafxu) or per invoice.
+---
 
 ## Talk to us
 
-Reach out via email ([enterprise@langfuse.com](mailto:enterprise@langfuse.com)) or [talk to us](/talk-to-us) to discuss your specific needs and requirements.
+Ready to get started with Langfuse Enterprise? We're here to help you find the right solution for your team.
+
+<div className="flex flex-col sm:flex-row gap-4 mt-6">
+  <Button size="lg" variant="outline" asChild>
+    <Link href="/talk-to-us">Talk to Enterprise team</Link>
+  </Button>
+  <Button size="lg" variant="secondary" asChild>
+    <Link href="mailto:enterprise@langfuse.com">Email us</Link>
+  </Button>
+</div>
+---
 
 ## Introduction to Langfuse
 
@@ -36,24 +67,8 @@ _10 minute demo of all Langfuse features_
   allowFullScreen
 ></iframe>
 
-_Langfuse features along the development lifecycle_
 
-<Frame
-  transparent
-  fullWidth
-  className="mt-5 rounded-lg ring-primary/20 ring-1 dark:hidden"
->
-  ![Langfuse Features along the development
-  lifecycle](/images/docs/features-light.png)
-</Frame>
-<Frame
-  transparent
-  fullWidth
-  className="mt-10 rounded-lg ring-primary/20 ring-1 hidden dark:block"
->
-  ![Langfuse Features along the development
-  lifecycle](/images/docs/features-dark.png)
-</Frame>
+---
 
 ## Resources
 
@@ -73,8 +88,10 @@ _Langfuse features along the development lifecycle_
 - Self-hosting
   - [Deployment Guide](/self-hosting)
   - Open Source [Licensing](/open-source)
-  - [Comparison](/pricing-self-host) of Open Source, Pro, and Enterprise version
+  - [Comparison](/pricing-self-host) of Open Source and Enterprise version
   - Langfuse Self-Hosting: EE [Terms and Conditions](/terms)
+
+---
 
 ## Resellers and managed Langfuse deployments
 
@@ -84,25 +101,51 @@ In Japan & APAC, [GAO](https://www.gao-ai.com/) is a partner company based in To
 
 We are happy to introduce prospects to our contact at Shakudo and GAO for more information on self-hosted / managed self-hosting.
 
+
+---
+
+## Any questions?
+
+We're here to help you find the right solution for your use case. 
+
+<div className="flex flex-col sm:flex-row gap-4 mt-6">
+  <Button size="lg" variant="outline" asChild>
+    <Link href="/talk-to-us">Talk to Enterprise Team</Link>
+  </Button>
+  <Button size="lg" variant="secondary" asChild>
+    <Link href="mailto:enterprise@langfuse.com">Email us</Link>
+  </Button>
+</div>
+
+
+---
+
 ## FAQ
 
-<Callout type="info" emoji="✨">
+<Callout type="info" emoji="">
   We collect the most common questions and answers here. If you have questions
   that are not answered, please reach out to us: enterprise@langfuse.com
 </Callout>
 
-### What deployment options are available for Langfuse?
+<details>
+<summary>What deployment options are available for Langfuse?</summary>
 
 1. Managed Cloud (cloud.langfuse.com), see [Pricing](/pricing) and [Security](/security) page for details.
 2. [Self-hosted](/self-hosting) on your own infrastructure. Contact us if you are interested in additional support.
 
-### What is the difference between Langfuse Cloud and the open-source version?
+</details>
+
+<details>
+<summary>What is the difference between Langfuse Cloud and the open-source version?</summary>
 
 The Langfuse team provides Langfuse Cloud as a managed solution to simplify the initial setup of Langfuse and to minimize the operational overhead of maintaining high availability in production. You can chose to self-host Langfuse on your own infrastructure.
 
 Some features are not available in the open-source version. Please refer to the overview [here](/pricing-self-host).
 
-### How does Authentication and RBAC work in Langfuse?
+</details>
+
+<details>
+<summary>How does Authentication and RBAC work in Langfuse?</summary>
 
 Langfuse offers a list of prebuilt roles which apply on an organizational and project level to restrict access ([RBAC documentation](/docs/rbac)).
 
@@ -110,7 +153,10 @@ If needed, environments (production, staging, development) can be separated into
 
 SSO with Langfuse is simple. Currently Google, GitHub, Azure AD, Okta, Auth0, and AWS Cognito are supported. We can easily add additional providers based on your requirements. As an enterprise customer, you can also enforce SSO for your organization.
 
-### What is the easiest way to try Langfuse?
+</details>
+
+<details>
+<summary>What is the easiest way to try Langfuse?</summary>
 
 The Hobby Plan on [Langfuse Cloud](https://cloud.langfuse.com) includes enough resources to try Langfuse for free while in a non-production environment, no credit card required.
 
@@ -118,7 +164,10 @@ Alternatively, you can quickly spin up Langfuse on your own machine using `docke
 
 If you require security and compliance features to run a POC, please reach out to us at enterprise@langfuse.com.
 
-### Common Enterprise LLM Platform Architecture [#common-architecture]
+</details>
+
+<details>
+<summary>Common Enterprise LLM Platform Architecture</summary>
 
 Langfuse aims to address the challenges of debugging, monitoring, and continuously improving LLM-based applications. It focuses on observability, evaluation, and prompt management.
 
@@ -138,6 +187,5 @@ graph LR
   Gateway -->|"optional: forward llm calls"| LF
 ```
 
-## Talk to us [#demo]
+</details>
 
-Reach out via email ([enterprise@langfuse.com](mailto:enterprise@langfuse.com)) or [talk to us](/talk-to-us) to discuss your specific needs and requirements.

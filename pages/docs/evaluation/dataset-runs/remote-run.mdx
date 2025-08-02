@@ -1,0 +1,532 @@
+---
+title: Remote Dataset Runs via the SDK
+description: Start remote dataset runs via the Langfuse SDK to programmatically test prompt versions and models.
+---
+
+# Remote Dataset Runs
+
+Once you [created a dataset](/docs/evaluation/dataset-runs/datasets), you can use the dataset to test how your application performs on different inputs.
+Remote Dataset Runs are used to programmatically loop your applications or prompts through a dataset and optionally apply Evaluation Methods to the results.
+
+They are called "Remote Dataset Runs" because they can make use of "remote" or external logic and code. 
+
+## Why use Remote Dataset Runs?
+
+- Full flexibility to use your own application logic
+- Use custom scoring functions to evaluate the outputs
+- Run multiple experiments on the same dataset in parallel
+- Easy to integrate with your existing evaluation infrastructure
+
+## Setup & Run via SDK
+
+<Steps>
+
+### Load the dataset
+
+Use the Python or JS/TS SDK to load the dataset.
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+from langfuse import get_client
+
+dataset = get_client().get_dataset("<dataset_name>")
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+const dataset = await langfuse.getDataset("<dataset_name>");
+```
+
+</Tab>
+</Tabs>
+
+### Instrument your application
+
+First we create our application runner helper function. This function will be called for every dataset item in the next step. 
+
+<Callout type="info" emoji="ℹ️">
+For a dataset run, it is important that your application creates Langfuse traces for each execution so they can be linked to the dataset item. Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+</Callout>
+
+<Tabs items={["Python SDK v3", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
+<Tab>
+{/* PYTHON SDK v3 */}
+
+Assume you already have a Langfuse-instrumented LLM-app:
+
+```python filename="app.py"
+from langfuse import get_client, observe
+from langfuse.openai import OpenAI
+
+@observe
+def my_llm_function(question: str):
+    response = OpenAI().chat.completions.create(
+        model="gpt-4o", messages=[{"role": "user", "content": question}]
+    )
+    output = response.choices[0].message.content
+
+    # Update trace input / output
+    get_client().update_current_trace(input=question, output=output)
+
+    return output
+```
+
+_See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for more details._
+
+</Tab>
+
+
+<Tab>
+{/* JS/TS SDK */}
+
+
+```ts filename="app.ts"
+const trace = langfuse.trace({
+  name: "my-AI-application-endpoint",
+});
+ 
+// Example generation creation
+const generation = trace.generation({
+  name: "chat-completion",
+  model: "gpt-4o",
+  input: messages,
+});
+ 
+// Application code
+const chatCompletion = await llm.respond(prompt);
+ 
+// End generation - sets endTime
+generation.end({
+  output: chatCompletion,
+});
+```
+
+</Tab>
+<Tab>
+{/* LANGCHAIN (PYTHON) */}
+
+```python filename="app.py" /config={"callbacks": [langfuse_handler]}/
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+ 
+def my_llm_function(question):
+  llm = ChatOpenAI(model_name="gpt-4o")
+  prompt = ChatPromptTemplate.from_template("Answer the question: {question}")
+  chain = prompt | llm
+
+  response = chain.invoke(
+      {"question": question}, 
+      config={"callbacks": [langfuse_handler]})
+  
+  return response
+```
+
+</Tab>
+
+<Tab>
+{/* LANGCHAIN (JS/TS) */}
+
+```typescript filename="app.ts" /callbacks: [langfuseHandler]/
+import { CallbackHandler } from "langfuse-langchain";
+// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
+ 
+const langfuseHandler = new CallbackHandler();
+ 
+// Your Langchain code
+ 
+// Add Langfuse handler as callback to `run` or `invoke`
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+<Tab>
+{/* Vercel AI SDK */}
+
+Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs for details on how to use the Vercel AI SDK with Langfuse.
+
+```ts filename="app.ts" 
+const runMyLLMApplication = async (input: string, traceId: string) => {
+  const output = await generateText({
+    model: openai("gpt-4o"),
+    maxTokens: 50,
+    prompt: input,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: "vercel-ai-sdk-example-trace",
+      metadata: {
+        langfuseTraceId: traceId,
+        langfuseUpdateParent: true, // Update the parent trace with execution results as the trace was created manually to enable linking
+      },
+    },
+  });
+  return output;
+};
+
+```
+
+
+</Tab>
+
+
+<Tab>
+{/* OTHER FRAMEWORKS */}
+
+Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+
+<Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/vercel_ai_sdk_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Vercel AI SDK"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/llamaindex_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Llamaindex"
+    href="/integrations/frameworks/llamaindex"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/crewai_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="CrewAI"
+    href="/integrations/frameworks/crewai"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/ollama_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Ollama"
+    href="/integrations/model-providers/ollama"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/litellm_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="LiteLLM"
+    href="/integrations/gateways/litellm"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/autogen_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="AutoGen"
+    href="/integrations/frameworks/autogen"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/google_adk_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Google ADK"
+    href="/integrations/frameworks/google-adk"
+    arrow
+  />
+  <Card title="All integrations" href="/integrations" arrow />
+</Cards>
+
+</Tab>
+
+</Tabs>
+
+
+### Loop over dataset items
+
+When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
+
+<Tabs items={["Python SDK v3",  "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<Tab>
+
+You may then execute that LLM-app for each dataset item to create a dataset run:
+
+```python filename="execute_dataset.py" /for item in dataset.items:/
+from langfuse import get_client
+from .app import my_llm_application
+
+for item in dataset.items:
+    # Use the item.run() context manager for automatic trace linking
+    with item.run(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as root_span:
+        # Execute your LLM-app against the dataset item input
+        output = my_llm_application.run(item.input)
+
+        # Optionally: Add scores
+        root_span.score_trace(
+            name="<example_eval>",
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+get_client().flush()
+```
+
+_See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTelemetry-based SDK._
+
+</Tab>
+
+<Tab>
+
+```ts /for (const item of dataset.items)/
+for (const item of dataset.items) {
+  // execute application function and get langfuseObject (trace/span/generation/event)
+  // output also returned as it is used to evaluate the run
+  // you can also link using ids, see sdk reference for details
+  const [langfuseObject, output] = await myLlmApplication.run(item.input);
+
+  // link the execution trace to the dataset item and give it a run_name
+  await item.link(langfuseObject, "<run_name>", {
+    description: "My first run", // optional run description
+    metadata: { model: "llama3" }, // optional run metadata
+  });
+
+  // Optionally: Add scores
+  langfuseObject.score({
+    name: "<score_name>",
+    value: myEvalFunction(item.input, output, item.expectedOutput),
+    comment: "This is a comment", // optional, useful to add reasoning
+  });
+}
+
+// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+await langfuse.flushAsync();
+```
+
+</Tab>
+<Tab>
+
+```python /for item in dataset.items:/
+for item in dataset.items:
+    # Langchain callback handler that automatically links the execution trace to the dataset item
+    handler = item.get_langchain_handler(run_name="<run_name>")
+
+    # Execute application and pass custom handler
+    my_langchain_chain.run(item.input, callbacks=[handler])
+
+    # Optionally: Add scores
+    langfuse.score(trace_id=handler.get_trace_id(), name="my_score", value=1)
+
+# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+langfuse.flush()
+```
+
+</Tab>
+
+<Tab>
+
+```typescript /createDatasetItemHandler/ /for (const item of dataset.items)/
+import { Langfuse } from "langfuse";
+import { createDatasetItemHandler } from "langfuse-langchain";
+...
+
+const langfuse = new Langfuse()
+const runName = "my-dataset-run";
+
+for (const item of dataset.items) {
+  // Create langchain handler that automatically links the execution trace to the dataset item run
+  const { handler, trace } = await createDatasetItemHandler({ item, runName, langfuseClient: langfuse });
+
+  // Pass the callback handler when invoking the chain
+  await chain.invoke({ country: item.input }, { callbacks: [handler] });
+
+  // Optionally: Add scores
+  trace.score({
+    name: "test-score",
+    value: 0.5,
+  });
+}
+
+await langfuse.flushAsync();
+```
+
+</Tab>
+<Tab>
+
+```typescript /for (const item of dataset.items)/
+// iterate over the dataset items
+for (const item of dataset.items) {
+  // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
+  const trace = langfuse.trace({ name: "new experiment trace" });
+
+  // run application on the dataset item input
+  const output = await runMyLLMApplication(item.input, trace.id);
+
+  // link the execution trace to the dataset item and give it a run_name
+  await item.link(trace, "<run_name>", {
+    description: "My first run", // optional run description
+    metadata: { model: "gpt-4o" }, // optional run metadata
+  });
+
+  // Optionally: Add scores
+  trace.score({
+    name: "<score_name>",
+    value: myEvalFunction(item.input, output, item.expectedOutput),
+    comment: "This is a comment", // optional, useful to add reasoning
+  });
+}
+
+// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
+await langfuse.flushAsync();
+```
+
+</Tab>
+</Tabs>
+
+### Optionally: Add scores
+
+Optionally, the output of the application can be evaluated to compare different runs more easily. More details on scores/evals [here](/docs/scores/overview). Options:
+
+<Tabs items={["In your code", "In Langfuse"]}>
+<Tab>
+
+Use any evaluation function and directly add a score while looping over the dataset items. See [above](#loop-over-dataset-items) for implementation details.
+
+import {SquarePercent} from "lucide-react";
+
+<Cards num={1}>
+
+  <Card
+    icon={<SquarePercent size="24" />}
+    title="Add custom scores"
+    href="/docs/evaluation/evaluation-methods/custom-scores"
+    arrow
+  />
+</Cards>
+
+</Tab>
+
+<Tab>
+
+Set up [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) within Langfuse to automatically evaluate the outputs of these runs. This greatly simplifies the process of adding evaluations to your experiments. We have recorded a [10 min walkthrough](/guides/videos/llm-as-a-judge-eval-on-dataset-experiments) on how this works end-to-end.
+
+import {Lightbulb} from "lucide-react";
+
+<Cards num={1}>
+
+  <Card
+    icon={<Lightbulb size="24" />}
+    title="Set up LLM-as-a-judge"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    arrow
+  />
+</Cards>
+
+
+</Tab>
+</Tabs>
+
+### Compare dataset runs
+
+After each experiment run on a dataset, you can check the aggregated score in the dataset runs table and compare results side-by-side.
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+</Steps>
+
+## Run via UI
+
+<Callout type="info">
+You will need to first set up Remote Dataset Runs via the SDK or your own external code before setting up this option in the UI. 
+</Callout>
+
+<Steps>
+
+### Navigate to the dataset
+
+- **Navigate to** `Your Project` > `Datasets`
+- **Click on** the dataset you want to set up a remote experiment trigger for
+
+<Frame border fullWidth>
+![New Experiment Button](/images/docs/navigate-to-dataset.png)
+</Frame>
+
+### Open the setup page
+
+**Click on** `Start Experiment` to open the setup page
+
+<Frame border fullWidth>
+![New Experiment Button](/images/docs/trigger-process.png)
+</Frame>
+
+**Click on** `⚡` below `Custom Experiment`
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-remote-experiment-1.png)
+</Frame>
+
+### Configure the webhook
+
+**Enter** the URL of your external evaluation service that will receive the webhook when experiments are triggered.
+**Specify** a default config that will be sent to your webhook. Users can modify this when triggering experiments.
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-remote-experiment-2.png)
+</Frame>
+
+### Trigger experiments
+
+Once configured, team members can trigger remote experiments via the `Run` button under the **Custom Experiment** option. Langfuse will send the dataset metadata (ID and name) along with any custom configuration to your webhook.
+
+<Frame border>
+![New Experiment Button](/images/docs/trigger-remote-experiment-3.png)
+</Frame>
+
+</Steps>
+
+**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Dataset Run.
