@@ -109,7 +109,7 @@ import os
 # Initialize OpenAI client with TrueFoundry Gateway
 client = OpenAI(
     api_key=os.environ["TRUEFOUNDRY_API_KEY"],
-    base_url=os.environ["TRUEFOUNDRY_BASE_URL"]  # Base URL from unified code snippet
+    base_url=os.environ["TRUEFOUNDRY_GATEWAY_BASE_URL"]  # Base URL from unified code snippet
 )
 ```
 
@@ -198,15 +198,6 @@ def analyze_customer_query(query, customer_id):
 
 # Usage
 result = analyze_customer_query("How do I reset my password?", "customer_123")
-```
-
-### Debug Mode
-
-Enable debug logging for troubleshooting:
-
-```python
-import logging
-logging.basicConfig(level=logging.DEBUG)
 ```
 
 > **Note**: All other features of Langfuse will work as expected, including prompt management, evaluations, custom dashboards, and advanced observability features. The TrueFoundry integration seamlessly supports the full Langfuse feature set.
