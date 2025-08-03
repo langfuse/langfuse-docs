@@ -28,7 +28,7 @@ const ImageZoomModal = ({ src, alt, onClose }: { src: string; alt: string; onClo
         <img
           src={src}
           alt={alt}
-          className="max-h-full max-w-full object-contain rounded-lg"
+          className="max-h-[90vh] max-w-[90vw] w-auto h-auto object-contain rounded-lg"
           onClick={(e) => e.stopPropagation()}
         />
         <button
