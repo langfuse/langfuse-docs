@@ -15,6 +15,8 @@ import sumupLight from "../home/img/sumup_light.svg";
 import sumupDark from "../home/img/sumup_dark.svg";
 import telusLight from "../home/img/telus_light.png";
 import telusDark from "../home/img/telus_dark.png";
+import magicPatternsLight from "../home/img/magicpatterns_light.png";
+import magicPatternsDark from "../home/img/magicpatterns_dark.png";
 
 type User = {
   name: string;
@@ -52,16 +54,17 @@ const users: User[] = [
     customerStoryPath: "/customers/khan-academy",
   },
   {
-    name: "Pigment",
-    lightImage: pigmentLight,
-    darkImage: pigmentDark,
-    href: "https://pigment.com",
-  },
-  {
     name: "Springer Nature",
     lightImage: springernatureLight,
     darkImage: springernatureDark,
     href: "https://www.springernature.com",
+  },
+  {
+    name: "Magic Patterns",
+    lightImage: magicPatternsLight,
+    darkImage: magicPatternsDark,
+    href: "https://magicpatterns.com",
+    customerStoryPath: "/customers/magic-patterns-ai-design-tools",
   },
   {
     name: "Telus",
@@ -75,6 +78,7 @@ const users: User[] = [
     darkImage: circlebackDark,
     href: "https://circleback.ai",
   },
+
 ];
 
 interface EnterpriseLogoGridProps {
@@ -85,39 +89,55 @@ export const EnterpriseLogoGrid = ({
   className = "" 
 }: EnterpriseLogoGridProps) => {
   return (
-    <div className={`grid grid-cols-4 auto-rows-fr ${className}`}>
+    <div className={`grid grid-cols-2 md:grid-cols-4 auto-rows-fr ${className}`}>
       {users.map((user) => (
-        <div key={user.name} className="relative overflow-hidden h-32 hover:opacity-80 transition py-8 px-12 border border-gray-200 dark:border-gray-800 dark:bg-gray-900/50 -mr-px -mb-px flex items-center justify-center">
-          <a
-            href={user.href}
-            className="block"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src={user.lightImage}
-              alt={user.name}
-              className="object-contain max-h-12 max-w-full hidden dark:block"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-            />
-            <Image
-              src={user.darkImage}
-              alt={user.name}
-              className="object-contain max-h-12 max-w-full dark:hidden"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-            />
-          </a>
+        <div key={user.name} className={`relative overflow-hidden h-16 md:h-14 transition py-4 px-4 md:py-8 md:px-14 border border-gray-200 dark:border-gray-800 bg-card -mr-px -mb-px flex items-center justify-center ${user.customerStoryPath ? 'group hover:opacity-80' : ''}`}>
+          {user.customerStoryPath ? (
+            <a
+              href={user.customerStoryPath}
+              className="block"
+            >
+              <Image
+                src={user.lightImage}
+                alt={user.name}
+                className="object-contain max-h-8 max-w-full hidden dark:block"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              />
+              <Image
+                src={user.darkImage}
+                alt={user.name}
+                className="object-contain max-h-8 max-w-full dark:hidden"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              />
+            </a>
+          ) : (
+            <div className="block">
+              <Image
+                src={user.lightImage}
+                alt={user.name}
+                className="object-contain max-h-7 max-w-full hidden dark:block"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              />
+              <Image
+                src={user.darkImage}
+                alt={user.name}
+                className="object-contain max-h-7 max-w-full dark:hidden"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              />
+            </div>
+          )}
           
           {/* Customer Story Badge */}
           {user.customerStoryPath && (
-            <div className="absolute top-2 right-2 group z-50">
+            <div className="absolute top-0 right-0 md:top-2 md:right-2 z-50">
               <a
                 href={user.customerStoryPath}
-                className="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white text-xs w-6 h-6 rounded-full transition-all duration-200 group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 "
+                className="inline-flex items-center justify-center text-blue-500 md:bg-blue-500 md:text-white text-xs rounded-full md:w-6 md:h-6 group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 md:px-0 md:py-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="hidden group-hover:inline whitespace-nowrap">Read Customer Story</span>
-                <span className="group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
+                <span className="md:hidden whitespace-nowrap">Read Story</span>
+                <span className="hidden md:group-hover:inline">Read Customer Story</span>
+                <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
               </a>
             </div>
           )}

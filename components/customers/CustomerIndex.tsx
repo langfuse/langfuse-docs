@@ -10,6 +10,7 @@ interface CustomerStory {
     title: string;
     description: string;
     customerLogo?: string;
+    customerLogoDark?: string;
     customerQuote?: string;
     quoteAuthor?: string;
     quoteRole?: string;
@@ -48,16 +49,41 @@ export const CustomerIndex = ({
           {/* Customer Logo */}
           {story.frontMatter.customerLogo && (
             <div className="flex items-center mb-8">
-              <Image
-                src={story.frontMatter.customerLogo}
-                alt={`${story.frontMatter.title} logo`}
-                width={250}
-                height={80}
-                className="h-8 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
-                quality={100}
-                priority={false}
-                unoptimized={false}
-              />
+              {story.frontMatter.customerLogoDark ? (
+                <>
+                  <Image
+                    src={story.frontMatter.customerLogo}
+                    alt={`${story.frontMatter.title} logo`}
+                    width={250}
+                    height={80}
+                    className="h-8 w-auto object-contain dark:hidden"
+                    quality={100}
+                    priority={false}
+                    unoptimized={false}
+                  />
+                  <Image
+                    src={story.frontMatter.customerLogoDark}
+                    alt={`${story.frontMatter.title} logo`}
+                    width={250}
+                    height={80}
+                    className="h-8 w-auto object-contain hidden dark:block"
+                    quality={100}
+                    priority={false}
+                    unoptimized={false}
+                  />
+                </>
+              ) : (
+                <Image
+                  src={story.frontMatter.customerLogo}
+                  alt={`${story.frontMatter.title} logo`}
+                  width={250}
+                  height={80}
+                  className="h-8 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
+                  quality={100}
+                  priority={false}
+                  unoptimized={false}
+                />
+              )}
             </div>
           )}
 
@@ -91,7 +117,7 @@ export const CustomerIndex = ({
                   </div>
                 )}
               </div>
-                          <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
+                          <div className="w-6 h-6 min-w-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
               <svg 
                 className="w-3 h-3 text-gray-600 dark:text-gray-400" 
                 fill="none" 
