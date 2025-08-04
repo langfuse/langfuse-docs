@@ -1,0 +1,495 @@
+---
+title: OTEL-based TypeScript SDK (v4)
+description: Improved OTEL-based Python SDK (v4) with better developer experience and third-party integrations.
+category: SDKs
+---
+
+# TypeScript SDK (v4-beta)
+
+<Callout type="info">
+If you are self-hosting Langfuse, the TypeScript SDK v4 requires **Langfuse platform version \>= 3.63.0** for all features to work correctly.
+</Callout>
+
+This SDK is built on top of [OpenTelemetry](https://opentelemetry.io/), the industry standard for observability. This allows for a better developer experience, more robust context management, and seamless integration with a wide range of third-party libraries.
+
+## Setup
+
+### Installation
+
+The SDK is modular. You can install only the packages you need.
+
+#### Full Tracing SDK (recommended)
+
+For tracing LLM applications in a **Node.js environment**, you need the core tracing functions, the OpenTelemetry processor, and the client for additional features like scoring.
+
+```bash
+npm install @langfuse/tracing @langfuse/otel
+```
+
+#### Client-only
+
+If you only need to interact with the Langfuse API for features like **prompt management** or fetching data without application tracing, you can install just the client. This setup is compatible with any JavaScript runtime (Node.js, browsers, edge functions).
+
+```bash
+npm install @langfuse/client
+```
+
+### OTEL Setup (Tracing only)
+
+To capture traces, you need to set up the OpenTelemetry SDK and register the `LangfuseSpanProcessor`. This processor receives all created spans and sends them to Langfuse.
+
+Here is a minimal setup for a **Node.js** application. You should import this code at the entry point of your application, before any other modules are imported.
+
+```typescript file="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  // Configure the Langfuse Span Processor
+  spanProcessor: new LangfuseSpanProcessor(),
+  // Add any OpenTelemetry instrumentations
+  instrumentations: [],
+});
+
+sdk.start();
+```
+
+At the entry point of your application, import the setup file:
+
+```typescript file="index.ts"
+import "./instrumentation"; // Import first to initialize tracing
+
+// Your application code here...
+```
+
+The `LangfuseSpanProcessor` is configured via environment variables:
+
+  - `LANGFUSE_PUBLIC_KEY`: Your Langfuse public key
+  - `LANGFUSE_SECRET_KEY`: Your Langfuse secret key
+  - `LANGFUSE_BASE_URL`: The URL of your Langfuse instance (e.g., `https://cloud.langfuse.com`)
+
+You may also use the corresponding constructor arguments to the `LangfuseSpanProcessor`.
+
+For instrumenting applications in other environments like **AWS Lambda, Cloudflare Workers, or Vercel Functions**, please refer to the official [OpenTelemetry documentation for JavaScript](https://opentelemetry.io/docs/languages/js/serverless/) for environment-specific setup instructions. The key is to register the `LangfuseSpanProcessor` with the appropriate OTEL SDK for your runtime.
+
+## Basic Tracing
+
+Langfuse represents each step in your application as an "observation." There are three types of observations:
+
+  * **Spans**: Any arbitrary operation, like a tool call, a data processing step, or an API call.
+  * **Generations**: LLM calls. These have special fields for model parameters, usage, and cost.
+  * **Events**: A single point in time, like a user clicking a button or a specific event occurring.
+
+### Manual Observations
+
+The core tracing functions (`startSpan`, `startGeneration`, `createEvent`) give you full control over creating observations.
+
+When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the *original* parent, not the one you just created.
+
+To create nested observations manually, use the methods on the returned object (e.g., `parentSpan.startSpan(...)`).
+
+```typescript
+import { startSpan } from "@langfuse/tracing";
+
+// Start a root span for a user request
+const span = startSpan("user-request", {
+  input: { query: "What is the capital of France?" }
+});
+
+// Create a nested span for a tool call
+const toolCall = span.startSpan("fetch-weather", {
+  input: { city: "Paris" },
+});
+
+// Simulate work and end the tool call span
+await new Promise(resolve => setTimeout(resolve, 100));
+toolCall.end({ output: { temperature: "15°C" } });
+
+// Create a nested generation for the LLM call
+const generation = span.startGeneration("llm-call", {
+  model: "gpt-4",
+  input: [{ role: "user", content: "What is the capital of France?" }],
+});
+generation.end({
+  output: { content: "The capital of France is Paris." },
+  usageDetails: { input: 10, output: 5 },
+});
+
+// End the root span
+span.end({ output: "Successfully answered user request." });
+```
+
+<Callout type="warning" title="Manual Ending Required">
+  If you use `startSpan()` or `startGeneration()`, you are
+  responsible for calling `.end()` on the returned observation object. Failure
+  to do so will result in incomplete or missing observations in Langfuse.
+</Callout>
+
+### Callbacks for Active Spans
+
+To simplify nesting and context management, you can use `startActiveSpan` and `startActiveGeneration`. These functions take a callback and automatically manage the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation. The observation will be automatically ended after the callback execution.
+
+This is the recommended approach for most use cases.
+
+```typescript
+import { startActiveSpan, startGeneration } from "@langfuse/tracing";
+
+await startActiveSpan("user-request", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" }
+  });
+
+  // This generation will automatically be a child of "user-request"
+  const generation = startGeneration("llm-call", {
+    model: "gpt-4",
+    input: [{ role: "user", content: "What is the capital of France?" }],
+  });
+
+  // ... LLM call logic ...
+
+  generation.end({
+    output: { content: "The capital of France is Paris." },
+    usageDetails: { input: 10, output: 5 },
+  });
+
+  span.update({ output: "Successfully answered." });
+});
+```
+
+### `observe` Wrapper
+
+The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call.
+
+```typescript
+import { observe } from "@langfuse/tracing";
+
+// An existing function
+async function fetchData(source: string) {
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData);
+
+// Now, every time you call tracedFetchData, a span will be created with its input and outputs pre-populated
+// with the function args and its return value
+const result = await tracedFetchData("API");
+```
+
+You can configure the `observe` wrapper by passing a options object as the second argument with several options:
+
+| Option          | Description                                                                                                    | Default                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `name`          | The name of the observation.                                                                                   | The original function's name.          |
+| `asType`        | The type of observation to create (`span` or `generation`).                                                    | `"span"`                               |
+| `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                                 | `true`                                 |
+| `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation.             | `true`                                 |
+
+### Flushing
+
+In short-lived environments like serverless functions (e.g., Vercel Functions, AWS Lambda), you must explicitly flush the traces before the process exits. The `LangfuseSpanProcessor` buffers events and sends them in batches, so a final flush ensures no data is lost.
+
+You can get the processor from your OTEL SDK setup.
+
+```typescript file="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessor: langfuseSpanProcessor,
+});
+
+sdk.start();
+```
+
+```typescript file="handler.ts"
+import { langfuseSpanProcessor } from "./tracing";
+
+export async function handler(event, context) {
+  // ... your application logic ...
+
+  // Flush before exiting
+  await langfuseSpanProcessor.forceFlush();
+}
+```
+
+### Integrations
+
+#### OpenAI
+
+The `@langfuse/openai` package provides a wrapper to automatically trace calls to the OpenAI SDK.
+
+**Installation:**
+
+```bash
+npm install @langfuse/openai
+```
+
+**Usage:**
+
+The `observeOpenAI` function wraps your OpenAI client instance. All subsequent API calls made with the wrapped client will be traced as generations.
+
+```typescript
+import { OpenAI } from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+
+// Instantiate the OpenAI client as usual
+const openai = new OpenAI();
+
+// Wrap it with Langfuse
+const tracedOpenAI = observeOpenAI(openai, {
+  // Pass trace-level attributes that will be applied to all calls
+  traceName: "my-openai-trace",
+  sessionId: "user-session-123",
+  userId: "user-abc",
+  tags: ["openai-integration"],
+});
+
+// Use the wrapped client just like the original
+const completion = await tracedOpenAI.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "What is OpenTelemetry?" }],
+});
+```
+
+#### LangChain
+
+The `@langfuse/langchain` package offers a `CallbackHandler` to integrate Langfuse tracing into your LangChain applications.
+
+**Installation:**
+
+```bash
+npm install @langfuse/langchain
+```
+
+**Usage:**
+
+Instantiate the `CallbackHandler` and pass it to your chain's `.invoke()` or `.stream()` method in the `callbacks` array. The `runName` you provide will become the name of the trace if you have no other OTEL-span already in context.
+
+```typescript
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { CallbackHandler } from "@langfuse/langchain";
+
+// 1. Initialize the Langfuse callback handler
+const langfuseHandler = new CallbackHandler({
+  sessionId: "user-session-123",
+  userId: "user-abc",
+  tags: ["langchain-test"],
+});
+
+// 2. Define your chain
+const model = new ChatOpenAI({ model: "gpt-4o" });
+const prompt = ChatPromptTemplate.fromTemplate("Tell me a joke about {topic}.");
+const chain = prompt.pipe(model);
+
+// 3. Add the handler to the callbacks array
+const result = await chain.invoke(
+  { topic: "developers" },
+  {
+    callbacks: [langfuseHandler],
+    runName: "joke-generator", // This becomes the trace name if no active OTEL-span in context
+  }
+);
+
+console.log(result.content);
+```
+
+#### Vercel AI SDK
+
+The Vercel AI SDK is natively instrumented with OpenTelemetry. If you have already configured your OTEL Setup with the `LangfuseSpanProcessor`, traces from the Vercel AI SDK will be captured automatically without any additional code.
+
+Please refer to the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry) for instructions on how to enable it.
+
+#### Other Third-Party Integrations
+
+Many LLM and data libraries are built with OpenTelemetry support. If a library you use supports OTEL, you just need to ensure the `LangfuseSpanProcessor` is registered in your OTEL setup. All traces generated by that library will automatically be sent to Langfuse.
+
+# Scoring Traces and Observations
+
+You can score traces and observations via the `langfuse.score` methods on the Langfuse client. This is useful for automated evaluations or for capturing user feedback.
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+import { startSpan } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+// First, create a trace and an observation
+const rootSpan = startSpan("my-trace");
+const generation = rootSpan.startGeneration("my-generation");
+generation.end();
+rootSpan.end();
+
+// Score the specific generation (an observation)
+langfuse.score.observation(generation, {
+  name: "accuracy",
+  value: 1,
+  comment: "The answer was factually correct.",
+});
+
+// Score the entire trace
+langfuse.score.trace(trace, {
+  name: "user-satisfaction",
+  value: 0.9,
+  comment: "User was happy with the overall result.",
+});
+
+// You can also score the currently active observation or trace
+import { startActiveSpan } from "@langfuse/tracing";
+
+startActiveSpan("another-trace", (span) => {
+  langfuse.score.activeObservation({
+    name: "latency-score",
+    value: 0.95,
+  });
+  langfuse.score.activeTrace({
+    name: "quality-score",
+    value: 0.88,
+  });
+});
+
+
+// Finally, ensure scores are sent to the server
+await langfuse.flush();
+```
+
+## Datasets
+
+You can run your models or chains on a Langfuse dataset to evaluate their performance. The SDK provides a way to link each execution to a specific dataset item, creating a **Dataset Run** in Langfuse.
+
+The workflow is as follows:
+
+1.  Fetch the dataset using `langfuse.dataset.get()`.
+2.  Iterate through the `dataset.items`.
+3.  For each item, execute your model/chain logic, creating a trace.
+4.  Link the trace to the dataset item using the `item.link()` method.
+
+```typescript
+import { LangfuseClient } from "langfuse";
+import { startSpan } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+// 1. Fetch the dataset
+const dataset = await langfuse.dataset.get("my-evaluation-dataset");
+
+const runName = "my-test-run-v1";
+
+// 2. Iterate and process each item
+for (const item of dataset.items) {
+  // 3. Start a rootSpan and link the trace to the dataset item for this run
+  const rootSpan = startSpan("my-chain", { input: item.input });
+  await item.link(trace, runName);
+
+  // 4. Execute your logic and create a trace
+  // ... your model/chain execution
+
+  rootSpan.end({ output: "model-output" });
+
+}
+
+// Flush all traces and links
+await langfuse.flush();
+```
+
+## REST API Wrapper
+
+The SDK client provides a fully-typed wrapper around the Langfuse Public API, available under the `langfuse.api` namespace. This allows you to programmatically fetch traces, sessions, scores, and more.
+
+```typescript
+import { LangfuseClient } from "langfuse";
+
+const langfuse = new LangfuseClient();
+
+// Example: Fetch the 10 most recent traces for a specific user
+const traces = await langfuse.api.trace.list({
+  userId: "user-123",
+  limit: 10,
+});
+
+console.log(traces.data);
+```
+
+## Advanced Configuration
+
+### Logging
+
+You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
+
+**In code:**
+
+```typescript
+import { configureGlobalLogger, LogLevel } from "langfuse";
+
+// Set the log level to DEBUG to see all log messages
+configureGlobalLogger({ level: LogLevel.DEBUG });
+```
+
+Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
+
+**Via environment variable:**
+
+You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variable.
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
+
+### Masking
+
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
+
+The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
+
+```typescript file="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    // A simple regex to mask credit card numbers
+    const maskedData = data.replace(
+      /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
+      "***MASKED_CREDIT_CARD***"
+    );
+    return maskedData;
+  },
+});
+
+const sdk = new NodeSDK({
+  spanProcessor,
+});
+
+sdk.start();
+```
+
+### Sampling
+
+Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
+
+Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
+
+```typescript file="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  // Sample 20% of all traces
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessor: new LangfuseSpanProcessor(),
+});
+
+sdk.start();
+```
+
+For more advanced sampling strategies, refer to the [OpenTelemetry JS Sampling Documentation](https://opentelemetry.io/docs/languages/js/sampling/).
+
+
+### Filtering by instrumentation scope
+
+### Multi-project setup (experimental)
