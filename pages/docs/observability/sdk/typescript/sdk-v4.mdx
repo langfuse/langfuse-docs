@@ -158,13 +158,15 @@ await startActiveSpan("user-request", async (span) => {
 
 ### `observe` Wrapper
 
-The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call.
+The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the `updateActiveSpan` and `updateActiveGeneration` functions to add attributes to the resulting observation inside the wrapped function.
 
 ```typescript
-import { observe } from "@langfuse/tracing";
+import { observe, updateActiveSpan } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
+  updateActiveSpan({ metadata: { source: "API" } })
+
   // ... logic to fetch data
   return { data: `some data from ${source}` };
 }
@@ -185,6 +187,67 @@ You can configure the `observe` wrapper by passing a options object as the secon
 | `asType`        | The type of observation to create (`span` or `generation`).                                                    | `"span"`                               |
 | `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                                 | `true`                                 |
 | `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation.             | `true`                                 |
+
+### Updating Traces
+
+In many cases, you might not have all the information about a trace (like a `userId` or `sessionId`) when you start it. The SDK provides flexible ways to add or update trace-level attributes at any point during its execution.
+
+#### `.updateTrace()` on an observation
+
+When you create an observation manually using `startSpan` or `startGeneration`, you get back an object. This object has an `.updateTrace()` method that you can call at any time before the trace is ended. This method will apply the attributes to the entire trace.
+
+```typescript
+import { startSpan } from "@langfuse/tracing";
+
+// Start a trace without knowing the user yet
+const rootSpan = startSpan("data-processing");
+
+// ... some initial steps ...
+
+// Later, once the user is authenticated, update the trace
+const userId = "user-123";
+const sessionId = "session-abc";
+rootSpan.updateTrace({
+  userId: userId,
+  sessionId: sessionId,
+  tags: ["authenticated-user"],
+  metadata: { plan: "premium" },
+});
+
+// ... continue with the rest of the trace ...
+const generation = trace.startGeneration("llm-call");
+generation.end();
+
+rootSpan.end();
+```
+
+#### `updateActiveTrace()`
+
+When you are operating within a callback from `startActiveSpan`, `startActiveGeneration`, or inside a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, you can use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
+
+```typescript
+import { startActiveSpan, updateActiveTrace } from "@langfuse/tracing";
+
+await startActiveSpan("user-request", async (span) => {
+  // Initial part of the request
+  span.update({ input: { path: "/api/process" } });
+
+  // Simulate fetching user data
+  await new Promise(resolve => setTimeout(resolve, 50));
+  const user = { id: "user-5678", name: "Jane Doe" };
+
+  // Update the active trace with the user's information
+  updateActiveTrace({
+    userId: user.id,
+    metadata: { userName: user.name },
+  });
+
+  // ... continue logic ...
+  span.end({ output: { status: "success" } });
+});
+```
+
+Any attributes you add will be associated with be visible in the Langfuse UI as trace-level properties.
 
 ### Flushing
 
