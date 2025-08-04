@@ -396,6 +396,69 @@ for (const item of dataset.items) {
 await langfuse.flush();
 ```
 
+# Prompt Management
+
+You can manage prompts in the Langfuse UI and fetch them in your application code. This allows you to version, test, and deploy prompts without changing your application code.
+
+<Callout type="info">
+**Use `langfuse.prompt.get()` for caching and resilience**
+
+It is highly recommended to use `langfuse.prompt.get()` to fetch prompts. This method includes built-in caching to reduce latency and a fallback mechanism for resilience. The direct API wrapper, `langfuse.api.prompts.get()`, does not offer these features.
+</Callout>
+
+The `langfuse.prompt.get()` method fetches a prompt and returns a prompt client with a `.compile()` method to inject variables.
+
+```typescript
+import { OpenAI } from "openai";
+
+import { LangfuseClient } from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+
+const langfuse = new LangfuseClient();
+const openai = observeOpenAI(new OpenAI());
+
+// 1. Fetch the production version of the "joke-prompt"
+const jokePrompt = await langfuse.prompt.get("joke-prompt");
+
+// 2. Compile the prompt with variables
+const compiledPrompt = jokePrompt.compile({ topic: "developers" });
+
+// 3. Use the compiled prompt in your LLM call
+const response = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: compiledPrompt }],
+  langfusePrompt: jokePrompt // link the resulting generation with the prompt
+});
+```
+
+### Configuration
+
+You can configure fetching behavior with the second argument of `langfuse.prompt.get()`:
+
+| Option            | Description                                                                                             | Default        |
+| ----------------- | ------------------------------------------------------------------------------------------------------- | -------------- |
+| `version`         | Fetch a specific version of the prompt.                                                                 | `undefined`    |
+| `label`           | Fetch the prompt with a specific label.                                                                 | `"production"` |
+| `cacheTtlSeconds` | Duration to cache the prompt in-memory. Set to `0` to disable.                                          | `60`          |
+| `fallback`        | A default prompt (string or object) to use if the API is unreachable or the prompt is not found.        | `undefined`    |
+
+### Fallback Example
+
+To make your application more resilient on the first prompt fetch where no cache is available, provide a fallback prompt.
+
+```typescript
+const prompt = await langfuse.prompt.get("non-existent-prompt", {
+  fallback: {
+    prompt: "This is a fallback for {{topic}}.",
+    config: { model: "gpt-3.5-turbo", temperature: 0.8 },
+  },
+});
+
+// The application can proceed even if the prompt couldn't be fetched
+const compiled = prompt.compile({ topic: "resilience" });
+// "This is a fallback for resilience."
+```
+
 ## REST API Wrapper
 
 The SDK client provides a fully-typed wrapper around the Langfuse Public API, available under the `langfuse.api` namespace. This allows you to programmatically fetch traces, sessions, scores, and more.
