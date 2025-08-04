@@ -20,10 +20,10 @@ The SDK is modular. You can install only the packages you need.
 
 #### Full Tracing SDK (recommended)
 
-For tracing LLM applications in a **Node.js environment**, you need the core tracing functions, the OpenTelemetry processor, and the client for additional features like scoring.
+For tracing LLM applications in a **Node.js environment**, you need the core tracing functions, the OpenTelemetry span processor, and the client for additional features like scoring.
 
 ```bash
-npm install @langfuse/tracing @langfuse/otel
+npm install @langfuse/client @langfuse/tracing @langfuse/otel
 ```
 
 #### Client-only
@@ -34,7 +34,7 @@ If you only need to interact with the Langfuse API for features like **prompt ma
 npm install @langfuse/client
 ```
 
-### OTEL Setup (Tracing only)
+### OTEL tracing setup
 
 To capture traces, you need to set up the OpenTelemetry SDK and register the `LangfuseSpanProcessor`. This processor receives all created spans and sends them to Langfuse.
 
