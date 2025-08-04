@@ -24,7 +24,7 @@ const menuItems: {
         href: "/docs/scores/overview",
       },
       {
-        name: "Manual Annotation",
+        name: "Human Annotation",
         href: "/docs/scores/annotation",
       },
       {
