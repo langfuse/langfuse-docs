@@ -18,7 +18,7 @@ export const Usage = () => {
       </h2>
       <div className="flex flex-col gap-8">
         <div className="relative">
-          <EnterpriseLogoGrid includeCircleback={false} />
+          <EnterpriseLogoGrid />
         </div>
         <div className="flex flex-row justify-around sm:justify-center sm:gap-10">
           {stats.map((item) => (
