@@ -215,7 +215,7 @@ rootSpan.updateTrace({
 });
 
 // ... continue with the rest of the trace ...
-const generation = trace.startGeneration("llm-call");
+const generation = rootSpan.startGeneration("llm-call");
 generation.end();
 
 rootSpan.end();
