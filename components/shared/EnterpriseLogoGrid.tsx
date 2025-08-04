@@ -115,13 +115,13 @@ export const EnterpriseLogoGrid = ({
               <Image
                 src={user.lightImage}
                 alt={user.name}
-                className="object-contain max-h-7 max-w-full hidden dark:block"
+                className="object-contain max-h-8 max-w-full hidden dark:block"
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
               />
               <Image
                 src={user.darkImage}
                 alt={user.name}
-                className="object-contain max-h-7 max-w-full dark:hidden"
+                className="object-contain max-h-8 max-w-full dark:hidden"
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
               />
             </div>
