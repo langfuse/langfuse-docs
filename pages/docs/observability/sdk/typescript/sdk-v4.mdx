@@ -40,7 +40,7 @@ To capture traces, you need to set up the OpenTelemetry SDK and register the `La
 
 Here is a minimal setup for a **Node.js** application. You should import this code at the entry point of your application, before any other modules are imported.
 
-```typescript file="instrumentation.ts"
+```typescript filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -56,7 +56,7 @@ sdk.start();
 
 At the entry point of your application, import the setup file:
 
-```typescript file="index.ts"
+```typescript filename="index.ts"
 import "./instrumentation"; // Import first to initialize tracing
 
 // Your application code here...
@@ -255,7 +255,7 @@ In short-lived environments like serverless functions (e.g., Vercel Functions, A
 
 You can get the processor from your OTEL SDK setup.
 
-```typescript file="instrumentation.ts"
+```typescript filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -268,7 +268,7 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-```typescript file="handler.ts"
+```typescript filename="handler.ts"
 import { langfuseSpanProcessor } from "./tracing";
 
 export async function handler(event, context) {
@@ -571,7 +571,7 @@ To prevent sensitive data from being sent to Langfuse, you can provide a `mask` 
 
 The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
 
-```typescript file="instrumentation.ts"
+```typescript filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -599,7 +599,7 @@ Langfuse respects OpenTelemetry's sampling decisions. You can configure a sample
 
 Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
 
-```typescript file="instrumentation.ts"
+```typescript filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
