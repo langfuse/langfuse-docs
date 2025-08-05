@@ -1245,28 +1245,44 @@ For all integrations in multi-project setups, you must specify the `public_key` 
 
 **Observe Decorator:**
 
-Pass `langfuse_public_key` as a keyword argument to the observed function (not the decorator):
+Pass `langfuse_public_key` as a keyword argument to the *top-most* observed function (not the decorator). From Python SDK >= 3.2.2, nested decorated functions will automatically pick up the public key from the execution context they are currently into. Also, calls to `get_client` will be also aware of the current `langfuse_public_key` in the decorated function execution context, so passing the `langfuse_public_key` here again is not necessary.
 
 ```python
 from langfuse import observe
 
-@observe()
+@observe
+def nested():
+    # get_client call is context aware
+    # if it runs inside another decorated function that has
+    # langfuse_public_key passed, it does not need passing here again
+    get_client().update_current_trace(user_id='myuser')
+
+
+@observe
 def process_data_for_project_a(data):
-    # Processing logic
+    # passing `langfuse_public_key` here again is not necessarily
+    # as it is stored in execution context
+    nested()
+
     return {"processed": data}
 
-@observe()
+@observe
 def process_data_for_project_b(data):
-    # Processing logic
+    # passing `langfuse_public_key` here again is not necessarily
+    # as it is stored in execution context
+    nested()
+
     return {"enhanced": data}
 
 # Route to Project A
+# Top-most decorated function needs `langfuse_public_key` kwarg
 result_a = process_data_for_project_a(
     data="input data",
     langfuse_public_key="pk-lf-project-a-..."
 )
 
 # Route to Project B
+# Top-most decorated function needs `langfuse_public_key` kwarg
 result_b = process_data_for_project_b(
     data="input data",
     langfuse_public_key="pk-lf-project-b-..."
