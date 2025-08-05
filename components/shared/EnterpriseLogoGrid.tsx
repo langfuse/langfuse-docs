@@ -54,17 +54,17 @@ const users: User[] = [
     customerStoryPath: "/customers/khan-academy",
   },
   {
-    name: "Springer Nature",
-    lightImage: springernatureLight,
-    darkImage: springernatureDark,
-    href: "https://www.springernature.com",
-  },
-  {
     name: "Magic Patterns",
     lightImage: magicPatternsLight,
     darkImage: magicPatternsDark,
     href: "https://magicpatterns.com",
     customerStoryPath: "/customers/magic-patterns-ai-design-tools",
+  },
+  {
+    name: "Springer Nature",
+    lightImage: springernatureLight,
+    darkImage: springernatureDark,
+    href: "https://www.springernature.com",
   },
   {
     name: "Telus",
