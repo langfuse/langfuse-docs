@@ -19,6 +19,65 @@ Optionally, you can also trigger Remote Dataset Runs via the Langfuse UI which w
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
 
+## How does it work?
+
+```mermaid
+sequenceDiagram
+    actor Person as User
+    participant User as Experiment Runner
+    participant App as LLM Application
+    participant LF as Langfuse Server
+
+    Note over Person, LF: Setup & Execute Remote Dataset Run
+
+    %% Trigger experiment
+    Person->>User: Trigger experiment run
+
+    %% Load Dataset
+    User->>LF: get_dataset("dataset_name")
+    LF-->>User: Return dataset with items
+
+    %% Loop through dataset items
+    loop For each dataset item
+        Note over User, LF: Process dataset item
+
+        %% Start dataset run context
+        User->>LF: item.run(run_name, description, metadata)
+        LF-->>User: Return run context (root_span)
+
+        %% Execute LLM application
+        User->>App: Execute LLM app with item.input
+        Note over App: Create Langfuse trace<br/>for execution
+        App->>LF: App is instrumented with Langfuse and reports traces
+        App-->>User: Return application output
+
+        %% Optional: Add evaluation scores from experiment runner
+        opt Add Custom Scores
+            Note over User: Run evaluation function locally
+            User->>LF: root_span.score_trace(name, value, comment)
+        end
+
+        %% Link execution to dataset item
+        Note over User, LF: Trace automatically linked<br/>to dataset run
+    end
+
+    %% Flush data to server
+    User->>LF: flush() - Send all pending data
+    LF-->>User: Confirm data received
+    User-->>Person: Experiment complete
+
+    %% Optional: Langfuse server-side evaluations
+    opt Server-side Evaluations
+        Note over LF: Run configured evaluations<br/>(e.g., LLM-as-a-judge)
+        LF->>LF: Add evaluation scores to dataset run
+    end
+
+    %% View results in UI
+    Note over Person, LF: Analyze experiment results
+    Person->>LF: Access dataset runs UI
+    LF-->>Person: Display aggregated scores and comparisons
+```
+
 ## Setup & Run via SDK
 
 <Steps>
