@@ -616,7 +616,36 @@ sdk.start();
 For more advanced sampling strategies, refer to the [OpenTelemetry JS Sampling Documentation](https://opentelemetry.io/docs/languages/js/sampling/).
 
 
-### Filtering by instrumentation scope
+### Filtering spans
+
+You can configure a predicate function `shouldExportSpan` and pass it to the `LangfuseSpanProcessor` to decide based on an ended OTEL span whether it should be exported to Langfuse or not.
+
+<Callout type="warning">
+**Filtering spans may break tracing trees**
+
+When filtering spans, be aware this may break trace tree relationships if spans from filtered and non-filtered scopes are nested together.
+
+For example, if you filter out parent spans but keep child spans, you may see "orphaned" LLM spans whose parent spans were filtered out. This can make traces harder to interpret.
+
+Consider the impact on trace structure when configuring `shouldExportSpan`.
+
+</Callout>
+
+```typescript filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+// Filter out all Express spans
+const shouldExportSpan = ({ otelSpan }) =>
+  otelSpan.instrumentationScope.name !== "express";
+
+const sdk = new NodeSDK({
+  spanProcessor: new LangfuseSpanProcessor({ shouldExportSpan }),
+});
+
+sdk.start();
+```
 
 ### Multi-project setup (experimental)
 
