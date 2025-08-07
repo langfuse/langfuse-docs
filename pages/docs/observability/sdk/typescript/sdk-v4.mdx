@@ -648,7 +648,14 @@ sdk.start();
 
 ## Multi-project setup (experimental)
 
+
 You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments.
+
+<Callout type="warning">
+**Multi-project setup is experimental**
+
+The multi-project setup is experimental and may change in the future. Please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) if you have any feedback or suggestions.
+</Callout>
 
 ```typescript filename="instrumentation.ts" /new LangfuseSpanProcessor({ projectId: "my-project-id" })/
 import { NodeSDK } from "@opentelemetry/sdk-node";
