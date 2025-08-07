@@ -120,6 +120,80 @@ const mcpHandler = createMcpHandler(
       }
     );
 
+    // Define the getLangfuseDocsPage tool
+    server.tool(
+      "getLangfuseDocsPage",
+      "Fetch the Markdown for a single Langfuse docs page. Accepts either a path (e.g. /docs/observability/overview) or a full URL (https://langfuse.com/docs/observability/overview).",
+      {
+        pathOrUrl: z
+          .string()
+          .describe(
+            "Docs path starting with / or full URL starting with https://langfuse.com"
+          ),
+      },
+      async ({ pathOrUrl }) => {
+        const normalizePath = (input: string): string => {
+          try {
+            if (/^https?:\/\//i.test(input)) {
+              const u = new URL(input);
+              return u.pathname || "/";
+            }
+          } catch {}
+          // Ensure leading slash
+          return input.startsWith("/") ? input : `/${input}`;
+        };
+
+        try {
+          const pathname = normalizePath(pathOrUrl.trim());
+          // If already ends with .md, use as-is; else append .md
+          const mdPath = pathname.endsWith(".md") ? pathname : `${pathname}.md`;
+          // Always fetch from production domain (mirrors static build output)
+          const base = "https://langfuse.com";
+          const mdUrl = `${base}${mdPath}`;
+
+          const res = await fetch(mdUrl, {
+            headers: { Accept: "text/markdown" },
+          });
+          if (!res.ok) {
+            throw new Error(`Failed to fetch ${mdUrl}: ${res.status}`);
+          }
+          const markdown = await res.text();
+
+          trackMcpToolUsage("getLangfuseDocsPage", "success", {
+            path: pathname,
+            length: markdown.length,
+          });
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: markdown,
+              },
+            ],
+            _meta: { url: mdUrl },
+          };
+        } catch (error) {
+          trackMcpToolUsage("getLangfuseDocsPage", "error", {
+            input: pathOrUrl,
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
+          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error fetching docs page markdown: ${
+                  error instanceof Error ? error.message : "Unknown error"
+                }`,
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+    );
+
     // Define the getLangfuseOverview tool
     server.tool(
       "getLangfuseOverview",
