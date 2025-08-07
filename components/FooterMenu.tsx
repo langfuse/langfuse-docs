@@ -162,6 +162,10 @@ const menuItems: {
         name: "About us",
         href: "/about",
       },
+      {
+        name: "Customers",
+        href: "/customers",
+      },
       { name: "Support", href: "/support" },
       {
         name: "Talk to us",

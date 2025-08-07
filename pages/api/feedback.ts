@@ -14,32 +14,26 @@ export default async function handler(req: NextRequest) {
           statusText: "Bad Request - Only POST requests are allowed",
         }
       );
-    if (!process.env.SLACK_WEBHOOK_FEEDBACK_URL)
-      throw new Error("SLACK_WEBHOOK_FEEDBACK_URL is not set");
+    if (!process.env.WEBSITE_FEEDBACK_WEBHOOK)
+      throw new Error("WEBSITE_FEEDBACK_WEBHOOK is not set");
 
     const body = await req.json();
 
-    const slackResponse = await fetch(process.env.SLACK_WEBHOOK_FEEDBACK_URL, {
+    const webhookResponse = await fetch(process.env.WEBSITE_FEEDBACK_WEBHOOK, {
       method: "POST",
       body: JSON.stringify({
-        rawBody: JSON.stringify(
-          {
-            type: "docs-feedback",
-            ...body,
-          },
-          null,
-          2
-        ),
+        type: "docs-feedback",
+        ...body,
       }),
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    if (slackResponse.status === 200) {
+    if (webhookResponse.status === 200) {
       return NextResponse.json({ status: "OK" });
     } else {
-      console.error(slackResponse);
+      console.error(webhookResponse);
       return NextResponse.json(
         {},
         {
