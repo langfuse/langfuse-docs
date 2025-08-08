@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ai-sdk/openai':
+        specifier: ^2.0.7
+        version: 2.0.7(zod@4.0.15)
       '@ai-sdk/react':
         specifier: ^2.0.8
         version: 2.0.8(react@18.3.1)(zod@4.0.15)
@@ -26,6 +29,9 @@ importers:
       '@inkeep/cxkit-react':
         specifier: ^0.5.47
         version: 0.5.47(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod@4.0.15)
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.13.2
+        version: 1.13.2
       '@radix-ui/react-accordion':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -227,6 +233,12 @@ packages:
 
   '@ai-sdk/gateway@1.0.4':
     resolution: {integrity: sha512-1roLdgMbFU3Nr4MC97/te7w6OqxsWBkDUkpbCcvxF3jz/ku91WVaJldn/PKU8feMKNyI5W9wnqhbjb1BqbExOQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
+  '@ai-sdk/openai@2.0.7':
+    resolution: {integrity: sha512-gIomHziQDBx1hs4VzDSDEFlfojf4/YQWY9F+r8ZiviGNUs5JKNbgHh1JoEHuC2XmMQ0x9LSyavLcqRn6aDxcyg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -5095,6 +5107,12 @@ packages:
 snapshots:
 
   '@ai-sdk/gateway@1.0.4(zod@4.0.15)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.15)
+      zod: 4.0.15
+
+  '@ai-sdk/openai@2.0.7(zod@4.0.15)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.1(zod@4.0.15)
