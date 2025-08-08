@@ -261,9 +261,18 @@ await startActiveSpan("user-request", async (span) => {
 });
 ```
 
-### Linking with External Systems
+### Trace and Observation IDs
 
-Langfuse trace IDs must be 32 lowercase hexchars. You can create deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
+In Langfuse, every trace and observation has a unique identifier. Understanding their format and how to set them is useful for integrating with other systems.
+
+  - **Trace IDs** are 32-character lowercase hexadecimal strings, representing 16 bytes of data
+  - **Observation IDs** (also known as Span IDs in OpenTelemetry) are 16-character lowercase hexadecimal strings, representing 8 bytes
+
+While the SDK handles ID generation automatically, you may manually set them to align with external systems or create specific trace structures. This is done using the `parentSpanContext` option in tracing methods.
+
+When starting a new trace by setting a `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist but is only used for trace ID inheritance of the created observation.
+
+You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
 
 ```typescript
 import { createTraceId, startSpan } from "@langfuse/tracing";
@@ -277,8 +286,8 @@ const langfuseTraceId = await createTraceId(externalId);
 const rootSpan = startSpan("process-ticket", {}, {
   parentSpanContext: {
     traceId: langfuseTraceId,
-    spanId: "0123456789abcdef", // A new, random spanId
-    traceFlags: 1
+    spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+    traceFlags: 1 // mark trace as sampled
   }
 });
 
@@ -708,14 +717,86 @@ sdk.start();
 
 This configuration will send every trace to both projects. You can also configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
 
+## Reference
+
+You can find the [full SDK reference here](https://langfuse-js-git-main-langfuse.vercel.app/).
+
 ## Upgrade from v3
 
-The v4 SDK is a major rewrite based on OpenTelemetry and introduces several breaking changes.
+### Tracing
 
-**Key Changes:**
+The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces several breaking changes.
 
 1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the `LangfuseSpanProcessor` with an OpenTelemetry `NodeSDK`.
 2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by `startSpan`, `startGeneration`, `startActiveSpan`, etc., from the `@langfuse/tracing` package.
 3.  **Separation of Concerns**:
       * The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
       * The **`@langfuse/client`** package and the `LangfuseClient` class are now only for non-tracing features like scoring, prompt management, and datasets.
+
+See the docs above for details on each.
+
+### Prompt Management
+
+- **Import**: The import of the Langfuse client is now:
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+```
+
+- **Usage**: The usage of the Langfuse client is now:
+
+```typescript
+const langfuse = new LangfuseClient();
+
+const prompt = await langfuse.prompt.get("my-prompt");
+
+const compiledPrompt = prompt.compile({ topic: "developers" });
+
+const response = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: compiledPrompt }],
+});
+```
+
+- `version` is now an optional property of the second argument of `langfuse.prompt.get()`.
+
+```typescript
+const prompt = await langfuse.prompt.get("my-prompt", { version: "1.0" });
+```
+
+
+### OpenAI integration
+
+- **Import**: The import of the OpenAI integration is now:
+
+```typescript
+import { observeOpenAI } from "@langfuse/openai";
+```
+
+- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+
+
+### Langchain integration
+
+- **Import**: The import of the Langchain integration is now:
+
+```typescript
+import { CallbackHandler } from "@langfuse/langchain";
+```
+
+- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+
+### `langfuseClient.getTraceUrl`
+- method is now asynchronous and returns a promise
+
+```typescript
+const traceUrl = await langfuseClient.getTraceUrl(traceId);
+```
+
+### Scoring
+
+See [scoring section above](#scoring) for new scoring methods.
+
+### Datasets
+
+See [datasets section above](#datasets) for new dataset methods.
