@@ -12,7 +12,7 @@ import {
   Copy as CopyIcon,
   RefreshCcw as RefreshCcwIcon,
 } from "lucide-react";
-import { ButtonScrollToBottom } from "@/components/qaChatbot/ui/ButtonScrollToBottom";
+// Removed dependency on legacy ButtonScrollToBottom
 
 export default function AIDemoChat({ className }: { className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -51,7 +51,7 @@ export default function AIDemoChat({ className }: { className?: string }) {
       </div>
 
       <form onSubmit={onSubmit} className="relative flex gap-2 mt-3">
-        <ButtonScrollToBottom outerDivRef={ref} />
+
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
