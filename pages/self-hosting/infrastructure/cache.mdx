@@ -183,7 +183,8 @@ When using Redis cluster mode:
 - Use the same authentication credentials across all cluster nodes
 - Monitor cluster health and handle node failures appropriately
 - Set `maxmemory-policy=noeviction` on all cluster nodes to prevent queue job eviction
-- Set `LANGFUSE_INGESTION_QUEUE_SHARD_COUNT` to a positive integer to enable sharding of the ingestion queue across cluster nodes. We recommend 2-3x of your Redis shard.
+- Set `LANGFUSE_INGESTION_QUEUE_SHARD_COUNT` to a positive integer to enable sharding of the ingestion queue across cluster nodes. We recommend 2-3x of your Redis shards.
+- Set `LANGFUSE_TRACE_UPSERT_QUEUE_SHARD_COUNT` to a positive integer to enable sharding of the trace upsert queue across cluster nodes. We recommend 2-3x of your Redis shards.
 
 </Callout>
 
