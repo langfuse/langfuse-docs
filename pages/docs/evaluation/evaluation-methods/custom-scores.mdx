@@ -49,6 +49,7 @@ langfuse.create_score(
     value=0.9,
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     data_type="NUMERIC", # optional, inferred if not provided
     comment="Factually correct", # optional
 )
@@ -349,6 +350,7 @@ langfuse = get_client()
 langfuse.create_score(
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     name="accuracy",
     value=0.9,
     comment="Factually correct", # optional
