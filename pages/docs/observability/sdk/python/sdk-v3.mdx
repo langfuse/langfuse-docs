@@ -937,6 +937,7 @@ langfuse.flush()
         value=0.95, # Can be float for NUMERIC/BOOLEAN, string for CATEGORICAL
         trace_id="abcdef1234567890abcdef1234567890",
         observation_id="1234567890abcdef", # Optional: if scoring a specific observation
+        session_id="session_123", # Optional: if scoring a specific session
         data_type="NUMERIC", # "NUMERIC", "BOOLEAN", "CATEGORICAL"
         comment="Source verified for 95% of claims."
     )
@@ -954,6 +955,7 @@ langfuse.flush()
 | `value`          | `Union[float, str]`       | Score value. Float for `NUMERIC`/`BOOLEAN`, string for `CATEGORICAL`. **Required.**                                    |
 | `trace_id`       | `str`                     | ID of the trace to associate with (for `create_score`). **Required.**                                                  |
 | `observation_id` | `Optional[str]`           | ID of the specific observation to score (for `create_score`).                                                          |
+| `session_id`     | `Optional[str]`           | ID of the specific session to score (for `create_score`).                                                              |
 | `score_id`       | `Optional[str]`           | Custom ID for the score (auto-generated if None).                                                                      |
 | `data_type`      | `Optional[ScoreDataType]` | `"NUMERIC"`, `"BOOLEAN"`, or `"CATEGORICAL"`. Inferred if not provided based on value type and score config on server. |
 | `comment`        | `Optional[str]`           | Optional comment or explanation for the score.                                                                         |
