@@ -1,0 +1,120 @@
+---
+title: "AI-Powered first level support for 4 million merchants"
+date: August 11, 2025
+description: How Global Payments Company SumUp rolled out AI-Powered Support for 4 million merchants across 35+ markets building on Langfuse
+ogImage: 
+tag: customer-story
+author: Felix
+customerLogo: "/images/customers/sumup/Sumup-Light.png"
+customerLogoDark: "/images/customers/sumup/Sumup-Dark.png"
+customerQuote: "Building on Langfuse we saved 30% of external BPO cost by deflecting 50% of support conversations to AI."
+quoteAuthor: "Ana Casado"
+quoteRole: "Head of Operations Data and AI"
+quoteCompany: "SumUp"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+
+<BlogHeader
+  title="AI-Powered first level support for 4 million merchants"
+  description="How Global Payments Company SumUp rolled out AI-Powered Support for 4 million merchants across 35+ markets building on Langfuse"
+  customerLogo="/images/customers/sumup/Sumup-Light.png"
+  authors={["felixkrauth"]}
+/>
+
+## About SumUp
+[SumUp](https://www.sumup.com/en-gb/) is a leading global fintech company trusted by over 4 million merchants in more than 35+ markets worldwide. It stands out by making card payments easy and accessible for small businesses, offering simple, reliable hardware and software solutions within a comprehensive multipillar ecosystem of financial solutions.
+
+## The Challenge
+The mission was simple: empower SumUp's merchant support teams with an AI assistant as the first entry point for all customer support requests. 
+
+The challenge was far from trivial. Multi-market complexity and scale: SumUp's merchant support serves over 4 million merchants across 35+ markets with market-specific differences in requirements. Security & Privacy: SumUp operates in Financial Services, data privacy and security are of paramount importance and had to be maintained throughout the project. Systems Integration: Conversations within SumUp's customers are complex and require follow-ups and clarifications, as well as querying a variety of systems. The implementation had to model highly complex LLM interactions and tool uses.
+
+## Solution: multiple layers of AI empowerment
+<Frame fullWidth>
+  ![Screenshot of SumUp Merchant Support on Mobile](/images/customers/sumup/sumup_support_screens.png)
+</Frame>
+
+**Merchant facing with hybrid support model:** AI assistant that answers first line of questions & routes the conversation to humans if necessary.
+
+**Internal:** Self-built AI Translation tools allow support agents to help merchants in languages other than their own & AI Agent Copilot that helps agents find most relevant resources, drafting answers and reducing handling time. 
+
+## Rollout
+
+SumUp handled their market rollout strategically and incrementally. Here is how SumUp rolled out AI-Powered Support to 35+ markets within 18 months successfully.
+
+**Expansion Strategy**
+* Begin with English-speaking markets (Ireland and UK)  
+* Focus on smaller volume merchants first  
+* Slowly increase volume while monitoring reliability metrics  
+* Expanded based on improved performance versus previous solution.  
+* Extend to markets with no previous existing Bot support
+
+## How SumUp is using Langfuse
+
+In early PoC stages of the project, SumUp got started quickly with using Langfuse [Self-Hosting](/self-hosting) – no tedious vendor onboarding & evaluation before having a better understanding of project requirements and needs. Once the system got closer to production and full rollout, the team happily switched over to let Langfuse Cloud do the grunt work of making the systems run reliably.
+
+Tracing was the clear starting point of implementation. Yet, during the project the team has set up elaborate multi-team workflows powered by Langfuse to enable continuous development & monitoring of 25 users across Engineering, Support Operations, Content, Q\&A and other stakeholders.
+
+<CustomerQuote
+  quote="Projects like ours often start from an Engineering perspective. Langfuse gave us full observability and asynchronous debugging powers out of the box. If anyone builds an LLM application they should start with that."
+  name="Luis Dreisbach"
+  role="Senior Machine Learning Engineer"
+  company="SumUp"
+  image="/images/customers/sumup/luis-dreisbach.jpg"
+/>
+
+**Tracing: Deep Visibility Across Teams:** 
+
+Langfuse [Observability & Tracing](/docs/observability/overview) gives SumUp a unified view on all LLM inputs, tool uses and outputs across functions. Engineers can run very detailed asynchronous debugging. Content owners understand shortcomings of LLM inputs & context documents. Q&A has full visibility in output quality.
+
+<Frame fullWidth>
+  ![Screenshot of SumUp Merchant Support on Mobile](/images/customers/sumup/sumup_tracing_view.png)
+</Frame>
+
+**Prompt Management & Playground: Fast Iteration & Empowering Non-Technical Staff**
+
+[Prompt management](/docs/prompt-management/overview) lets business teams and engineers alike iterate and test prompt changes in production really fast. The system is integrated with a self-built set of evaluators to test new iterations automatically. [The Playground](/docs/prompt-management/playground) lets SumUp reproduce exact production configs, variables and tool integrations from production traces into a simple UI to quickly iterate on prompt improvements before implementing them. Reproducing the exact production environment was very time consuming for engineers and impossible for non-technical staff before using Langfuse.
+
+## Business Impact
+
+<CustomerQuote
+  quote="Building on Langfuse we have achieved a 50% deflection rate of conversations that don't go to humans. That is 300,000 monthly merchant requests that no longer require human support – that’s 10,000 per day! Even though merchant numbers grow fast; we can focus our resources on more valuable challenges."
+  name="Ana Casado"
+  role="Head of Operations Data and AI"
+  company="SumUp"
+  image="/images/customers/sumup/ana-casado.jpg"
+/>
+
+<ImpactChart
+  items={[
+    {
+      area: "PoC to 35+ markets success",
+      impact: "What started with one market and low volume merchants was successfully rolled out over 18 months to 35+ markets supporting over 4 million merchants.",
+    },
+    {
+      area: "Scalability, Quality & Speed",
+      impact: "Scaling AI-powered first level merchant support from 1,000 to 600,000 monthly conversations leading not to worse but to actually better merchant experiences through much faster responses. It translates direct value for the merchants and stronger loyalty towards SumUp.",
+    },
+    {
+      area: "Operational Excellence & Cost Reduction",
+      impact:
+        "The implementation has achieved a deflection rate of almost 50% which directly translates into a 30% cost reduction of external BPO (Business Process Outsourcing) cost. ",
+    },
+    {
+      area: "Multi-Team Collaboration",
+      impact:
+        "Langfuse enables 25 users across engineering, content teams and Q&A to implement robust workflows for continuous process improvements on Langfuse. Especially empowering non-technical users to contribute to robust workflows really made the difference here.",
+    },
+  ]}
+/>
+
+
+
+
+
+
+
