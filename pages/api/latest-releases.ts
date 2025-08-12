@@ -9,8 +9,6 @@ const REPOS = [
 const GITHUB_REPO_API_URL_RELEASE = (repo: string) =>
   `https://api.github.com/repos/${repo}/releases`;
 
-const CACHE_MAX_AGE = 15 * 60 * 1000; // 15 minutes
-
 type ApiResponse = {
   repo: string;
   latestRelease?: string;
@@ -18,23 +16,7 @@ type ApiResponse = {
   url?: string;
 };
 
-const cache: {
-  date: Date | null;
-  data: ApiResponse[] | null;
-} = {
-  date: null,
-  data: null,
-};
-
 const getLatestReleases = async (): Promise<ApiResponse[]> => {
-  if (
-    cache.date &&
-    cache.data &&
-    Date.now() - cache.date.getTime() < CACHE_MAX_AGE
-  ) {
-    return cache.data;
-  }
-
   const headers = {
     Accept: "application/vnd.github.v3+json",
   };
@@ -64,9 +46,6 @@ const getLatestReleases = async (): Promise<ApiResponse[]> => {
     })
   );
 
-  cache.date = new Date();
-  cache.data = langfuseReleases;
-
   return langfuseReleases;
 };
 
@@ -82,10 +61,14 @@ export default async function handler(
 
     const langfuseReleases = await getLatestReleases();
 
-    return res
-      .status(200)
-      .setHeader("Content-Type", "application/json")
-      .json(langfuseReleases);
+    return (
+      res
+        .status(200)
+        .setHeader("Content-Type", "application/json")
+        // cache for 5 minutes in the CDN
+        .setHeader("Cache-Control", "public, s-maxage=300, max-age=0")
+        .json(langfuseReleases)
+    );
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
