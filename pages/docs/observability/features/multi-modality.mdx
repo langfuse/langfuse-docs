@@ -128,7 +128,7 @@ pdf_media = LangfuseMedia(content_bytes=pdf_bytes, content_type="application/pdf
 
 @observe()
 def process_document():
-langfuse = get_client()
+    langfuse = get_client()
 
     # Update the current trace with the media file
     langfuse.update_current_trace(
@@ -145,10 +145,10 @@ langfuse = get_client()
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="analyze-document") as span: # Include media in the span input, output, or metadata
-span.update(
-input={"document": pdf_media},
-metadata={"file_size": len(pdf_bytes)}
-)
+    span.update(
+        input={"document": pdf_media},
+        metadata={"file_size": len(pdf_bytes)}
+    )
 
     # Process document...
 
