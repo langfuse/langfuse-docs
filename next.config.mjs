@@ -95,6 +95,14 @@ const nextraConfig = withNextra({
           },
         ],
       },
+      // Mark markdown endpoints as noindex and ensure correct content type
+      {
+        source: "/:path*.md",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Content-Type", value: "text/markdown; charset=utf-8" },
+        ],
+      },
     ];
 
     // Do not index Vercel preview deployments
@@ -123,7 +131,17 @@ const nextraConfig = withNextra({
       destination,
       permanent: false,
     })),
-  ]
+  ],
+  async rewrites() {
+    // Serve any ".md" path by mapping to the static copy in public/md-src
+    // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
+    return [
+      {
+        source: "/:path*.md",
+        destination: "/md-src/:path*.md",
+      },
+    ];
+  },
 });
 
 const nonPermanentRedirects = [
