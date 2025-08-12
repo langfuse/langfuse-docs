@@ -72,7 +72,11 @@ export default async function handler(
         .status(200)
         .setHeader("Content-Type", "application/json")
         // cache for 5 minutes in the CDN
-        .setHeader("Cache-Control", "public, s-maxage=300, max-age=0")
+        // cache for 1 day if there is an error with the API response
+        .setHeader(
+          "Cache-Control",
+          "public, s-maxage=300, max-age=0, stale-if-error=86400"
+        )
         .json(langfuseReleases)
     );
   } catch (error) {
