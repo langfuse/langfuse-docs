@@ -36,7 +36,13 @@ const getLatestReleases = async (): Promise<ApiResponse[]> => {
   const langfuseReleases = await Promise.all(
     responses.map(async (response, index) => {
       const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error(`No releases found for ${REPOS[index]}`);
+      }
       const latestRelease = data.find((release) => !release.prerelease);
+      if (!latestRelease) {
+        throw new Error(`No latest release found for ${REPOS[index]}`);
+      }
       return {
         repo: REPOS[index],
         latestRelease: latestRelease ? latestRelease.tag_name : undefined,
