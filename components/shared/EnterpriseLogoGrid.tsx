@@ -45,6 +45,7 @@ const users: User[] = [
     lightImage: sumupLight,
     darkImage: sumupDark,
     href: "https://sumup.com",
+    customerStoryPath: "/customers/sumup",
   },
   {
     name: "Khan Academy",

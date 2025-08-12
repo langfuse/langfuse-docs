@@ -39,12 +39,12 @@ export const CustomerIndex = ({
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {customerStories.map((story) => (
         <Link 
           key={story.route} 
           href={story.route} 
-          className="group block bg-card border rounded-lg p-8 break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
+          className="group block bg-card border rounded-lg p-8 break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer flex flex-col h-full"
         >
           {/* Customer Logo */}
           {story.frontMatter.customerLogo && (
@@ -93,6 +93,9 @@ export const CustomerIndex = ({
               "{story.frontMatter.customerQuote}"
             </blockquote>
           )}
+
+          {/* Spacing div to push author info to bottom */}
+          <div className="flex-1" />
 
           {/* Author Information */}
           {(story.frontMatter.quoteAuthor || story.frontMatter.quoteRole || story.frontMatter.quoteCompany) && (
