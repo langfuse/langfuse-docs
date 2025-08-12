@@ -19,7 +19,10 @@ Optionally, you can also trigger Remote Dataset Runs via the Langfuse UI which w
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
 
-## How does it work?
+## Setup & Run via SDK
+
+<details>
+<summary>Sequence Diagram</summary>
 
 ```mermaid
 sequenceDiagram
@@ -30,8 +33,8 @@ sequenceDiagram
 
     Note over Person, LF: Setup & Execute Remote Dataset Run
 
-    %% Trigger experiment
-    Person->>User: Trigger experiment run
+    %% Trigger dataset run
+    Person->>User: Trigger dataset run
 
     %% Load Dataset
     User->>LF: get_dataset("dataset_name")
@@ -64,7 +67,7 @@ sequenceDiagram
     %% Flush data to server
     User->>LF: flush() - Send all pending data
     LF-->>User: Confirm data received
-    User-->>Person: Experiment complete
+    User-->>Person: Dataset run complete
 
     %% Optional: Langfuse server-side evaluations
     opt Server-side Evaluations
@@ -73,12 +76,12 @@ sequenceDiagram
     end
 
     %% View results in UI
-    Note over Person, LF: Analyze experiment results
+    Note over Person, LF: Analyze dataset run results
     Person->>LF: Access dataset runs UI
     LF-->>Person: Display aggregated scores and comparisons
 ```
 
-## Setup & Run via SDK
+</details>
 
 <Steps>
 
