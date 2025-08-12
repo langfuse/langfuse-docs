@@ -1241,6 +1241,16 @@ main()
 get_client().flush()
 ```
 
+### Distributed tracing
+
+To maintain the trace context across service / process boundaries, please rely on the OpenTelemetry native context propagation across service / process boundaries as much as possible.
+
+Using the `trace_context` argument to 'force' the parent child relationship may lead to unexpected trace updates as the resulting span will be treated as a root span server side.
+
+- If you are using multiprocessing, [see here for details on how to propagate the OpenTelemetry context](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076).
+- If you are using Pydantic Logfire, please set `distributed_tracing` to `True`.
+
+
 ### Multi-Project Setup (Experimental)
 
 <Callout type="warning">
