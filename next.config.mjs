@@ -502,6 +502,7 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/features/evaluation-methods/user-feedback", "/faq/all/user-feedback"],
   ["/docs/evaluation/features/security-and-guardrails", "/docs/security-and-guardrails"],
   ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
+  ["/faq/all/llm-connection", "/docs/administration/llm-connection"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
 
   // Redirect old webhooks path to new webhooks/slack integrations path
