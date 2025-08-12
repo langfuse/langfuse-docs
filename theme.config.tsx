@@ -1,6 +1,6 @@
 import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
-import { Cards, Steps, Tabs, Callout } from "nextra/components";
+import { Cards, Steps, Tabs as OriginalTabs, Callout } from "nextra/components";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import { MainContentWrapper } from "./components/MainContentWrapper";
@@ -18,6 +18,7 @@ import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import Image from "next/image";
 import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
+import { SyncedTabs } from "./components/SyncedTabs";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -182,16 +183,16 @@ const config: DocsThemeConfig = {
   },
   components: {
     Frame,
-    Tabs,
+    Tabs: SyncedTabs,
     Tab: ({
       children,
       ...props
     }: { children: React.ReactNode } & React.ComponentProps<
-      typeof Tabs.Tab
+      typeof OriginalTabs.Tab
     >) => (
-      <Tabs.Tab {...props} style={{ marginTop: "1rem" }}>
+      <OriginalTabs.Tab {...props} style={{ marginTop: "1rem" }}>
         <div className="border rounded bg-background p-4">{children}</div>
-      </Tabs.Tab>
+      </OriginalTabs.Tab>
     ),
     Steps,
     Card: Cards.Card,

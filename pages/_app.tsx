@@ -10,7 +10,6 @@ import { PlainChat } from "@/components/supportChat";
 import { Hubspot, hsPageView } from "@/components/analytics/hubspot";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { LangTabsProvider } from "@/components/LangTabs";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -40,10 +39,8 @@ export default function App({ Component, pageProps }) {
   return (
     <div className={`${GeistSans.variable} font-sans ${GeistMono.variable}`}>
       <PostHogProvider client={posthog}>
-        <LangTabsProvider>
-          <Component {...pageProps} />
-          <PlainChat />
-        </LangTabsProvider>
+        <Component {...pageProps} />
+        <PlainChat />
       </PostHogProvider>
       <Hubspot />
       <Script
