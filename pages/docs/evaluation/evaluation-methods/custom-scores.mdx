@@ -49,6 +49,7 @@ langfuse.create_score(
     value=0.9,
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     data_type="NUMERIC", # optional, inferred if not provided
     comment="Factually correct", # optional
 )
@@ -349,6 +350,7 @@ langfuse = get_client()
 langfuse.create_score(
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     name="accuracy",
     value=0.9,
     comment="Factually correct", # optional
@@ -610,4 +612,4 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 
 When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
 
-If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter when initially creating the score.
+If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.

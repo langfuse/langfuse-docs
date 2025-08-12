@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
-import config from "../theme.config";
 import { Button } from "./ui/button";
 import {
   Copy as CopyIcon,
@@ -38,7 +37,6 @@ const isCustomerStory = (pathname: string) =>
 
 const CopyMarkdownButton = () => {
   const router = useRouter();
-  const { docsRepositoryBase } = config;
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
   >("idle");
@@ -64,45 +62,31 @@ const CopyMarkdownButton = () => {
     setCopyState("loading");
     setErrorMessage("");
 
-    if (!docsRepositoryBase) {
-      console.error("docsRepositoryBase is not defined in theme config.");
-      setErrorMessage("Config Error");
-      setCopyState("error");
-      timeoutIdRef.current = setTimeout(() => {
-        setCopyState("idle");
-        timeoutIdRef.current = null;
-      }, 3000);
-      return;
-    }
-
     let basePath = router.pathname;
     if (basePath.startsWith("/")) basePath = basePath.substring(1);
     if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
     if (!basePath) basePath = "index"; // Handle root index page
 
-    const potentialPaths = [
-      `pages/${basePath}.mdx`,
-      `pages/${basePath}.md`,
-      `pages/${basePath}/index.mdx`,
-      `pages/${basePath}/index.md`,
-    ];
-
-    const fetchPromises = potentialPaths.map(async (filePath) => {
-      const rawUrl = `${docsRepositoryBase
-        ?.replace("https://github.com/", "https://raw.githubusercontent.com/")
-        .replace("/tree/", "/")}/${filePath}`;
-      const response = await fetch(rawUrl);
-      if (!response.ok) {
-        throw new Error(
-          `Fetch failed for ${filePath}: ${response.status} ${response.statusText}`
-        );
-      }
-      return response.text(); // Return the markdown text on success
-    });
+    const mdUrl = `/${basePath}.md`;
 
     try {
-      // Use Promise.any to get the first successful fetch
-      const markdown = await Promise.any(fetchPromises);
+      const response = await fetch(mdUrl, {
+        headers: { Accept: "text/markdown" },
+      });
+      if (!response.ok) {
+        if (response.status === 404) {
+          setErrorMessage("Source Files Not Found");
+        } else {
+          setErrorMessage("Fetch Error");
+        }
+        setCopyState("error");
+        timeoutIdRef.current = setTimeout(() => {
+          setCopyState("idle");
+          timeoutIdRef.current = null;
+        }, 3000);
+        return;
+      }
+      const markdown = await response.text();
 
       await navigator.clipboard.writeText(markdown);
       setCopyState("copied");
@@ -111,39 +95,15 @@ const CopyMarkdownButton = () => {
         timeoutIdRef.current = null;
       }, 2000);
     } catch (error: any) {
-      // Check if it's an AggregateError from Promise.any (all fetches failed)
-      let all404 = false;
-      if (error instanceof AggregateError) {
-        // Check if *all* failures were 404s
-        all404 = error.errors.every((e) => e.message?.includes("404"));
-        if (!all404) {
-          // Log only if there was a non-404 error
-          console.error(
-            "Failed to copy markdown due to unexpected fetch error:",
-            error
-          );
-          setErrorMessage("Fetch Error");
-        } else {
-          // All were 404s, this is expected
-          console.log(
-            "Source markdown file not found at any potential path for:",
-            router.pathname
-          );
-          setErrorMessage("Source Files Not Found");
-        }
+      console.error("Failed to copy markdown:", error);
+      if (
+        error?.name === "NotAllowedError" ||
+        error?.name === "SecurityError"
+      ) {
+        setErrorMessage("Clipboard Permission Denied");
       } else {
-        // Log other types of errors (clipboard, generic, etc.)
-        console.error("Failed to copy markdown:", error);
-        if (
-          error.name === "NotAllowedError" ||
-          error.name === "SecurityError"
-        ) {
-          setErrorMessage("Clipboard Permission Denied");
-        } else {
-          setErrorMessage("Copy Error"); // Generic error for other issues
-        }
+        setErrorMessage("Copy Error");
       }
-
       setCopyState("error");
       timeoutIdRef.current = setTimeout(() => {
         setCopyState("idle");

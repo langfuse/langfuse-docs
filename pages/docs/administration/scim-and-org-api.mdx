@@ -86,12 +86,6 @@ This guide will cover how to setup Okta authentication and user provisioning for
 Authentication and provisioning are two separate steps in Okta.
 Follow the one that is applicable to your use case.
 
-<CloudflareVideo
-  videoId="3912534274101b16d15fd02dd251c2c0"
-  aspectRatio={16 / 9}
-  gifStyle
-/>
-
 ### Authentication
 
 For authentication, Langfuse supports the [OpenID Connect (OIDC)](https://openid.net/connect/) protocol.
@@ -120,25 +114,33 @@ To set up Okta authentication, follow these steps:
 
 ### User Provisioning
 
+<CloudflareVideo
+  videoId="4c202878b7444ab7a2620526d88d86e6"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
 For user provisioning, Langfuse supports the SCIM 2.0 protocol.
 To setup user provisioning in Okta, follow these steps:
 
 1. **Create a SAML/SCIM Application**:
    - Log in to your Okta admin console.
-   - Navigate to **Applications** > **Browser App Catalog**.
-   - Search for **SCIM** and select **SCIM 2.0 Test App (Basic Auth)**.
-   - Click **Add integration**.
-   - Fill in the application settings:
-     - **Application label**: `Langfuse SCIM`
-   - Click **Next** and then **Done**. There is no need to configure the Sign-On Options.
+   - Navigate to **Applications** > **Create App Integration**.
+   - Choose **SAML 2.0** as the sign-in method and click **Next**.
+   - Fill in the application settings. Use your self-hosted domain or one of the Langfuse Cloud domains.
+     - **App name**: `Langfuse SCIM`
+     - **Single sign-on URL**: `https://your-langfuse-domain.com/api/auth/callback/okta`
+     - **Audience URI**: `langfuse`
+   - Click **Next** and then **Finish**.
 2. **Configure SCIM Settings**:
-   - In the **Provisioning** tab, click **Configure API Integration**.
-   - Enable the **Enable API Integration** checkbox.
+   - In the **General** tab, set `Provisioning` to SCIM.
+   - In the **Provisioning** tab, edit your **SCIM Connection**.
    - Enter your credentials:
-     - **SCIM 2.0 Base Url**: `https://your-langfuse-domain.com/api/public/scim`
-     - **Username**: Use a public key from your Organization settings.
-     - **Password**: Use a private key from your Organization settings.
-   - Turn off **Import Groups**.
+     - **SCIM connector base URL**: `https://your-langfuse-domain.com/api/public/scim`
+     - **Unique identifier field for users**: `userName`
+     - **Supported provisioning actions**: `Import new Users and Profile Updates`, `Push New Users`, `Push Profile Updates`
+     - **Basic Auth - Username**: Use a public key from your Organization settings.
+     - **Basic Auth - Password**: Use a private key from your Organization settings.
    - Test the API credentials and press **Save**.
 3. **Configure Provisioning**:
    - In the **Provisioning** tab, enable the following options:
@@ -147,6 +149,14 @@ To setup user provisioning in Okta, follow these steps:
      - **Deactivate Users**
    - Click **Save**.
 4. **Add Default User Permissions** (Optional):
+   - In the **Provisioning** tab, go to the Profile Editor and add a new `roles` attribute:
+     - **Data type**: `string array`
+     - **Display Name**: Langfuse Roles
+     - **Variable Name**: `roles`
+     - **External Name**: `roles`
+     - **External Namespace**: `urn:ietf:params:scim:schemas:core:2.0:User`
+     - **Attribute members**: `NONE`, `VIEWER`, `MEMBER`, `ADMIN`
+     - **Attribute type**: `Personal`
    - In the **Provisioning** tab, modify the `roles` attribute to set default permissions for new users.
    - You can set it for all users of the application to provide a default. Set it to "NONE", "VIEWER", "MEMBER", or "ADMIN".
 5. **Assign Users**:
