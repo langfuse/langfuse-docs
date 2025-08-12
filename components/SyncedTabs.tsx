@@ -42,6 +42,16 @@ const globalStore: TabsLabelStore = (globalThis as any).__LANGFUSE_TABS_LABEL_ST
 // cache on globalThis to keep a single store across HMR in dev
 ;(globalThis as any).__LANGFUSE_TABS_LABEL_STORE__ = globalStore;
 
+// Initialize from localStorage once on module load (client-only)
+if (typeof window !== "undefined") {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw && globalStore.getSnapshot() == null) {
+      globalStore.setLabel(raw);
+    }
+  } catch {}
+}
+
 export type SyncedTabsProps = React.ComponentProps<typeof OriginalTabs>;
 
 export function SyncedTabs(props: SyncedTabsProps): JSX.Element {
@@ -51,29 +61,6 @@ export function SyncedTabs(props: SyncedTabsProps): JSX.Element {
 
   const normalizedItems = useMemo(() => items.map(normalize), [items]);
   const currentLabel = useSyncExternalStore(globalStore.subscribe, globalStore.getSnapshot, globalStore.getSnapshot);
-
-  // Initialize from localStorage on first mount if no shared label yet
-  useEffect(() => {
-    if (currentLabel == null && typeof window !== "undefined") {
-      try {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
-        if (raw && raw.length > 0) {
-          globalStore.setLabel(raw);
-        }
-      } catch {}
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Fallback: if still no label after attempting to restore, set from this Tabs default
-  useEffect(() => {
-    if (currentLabel == null && items.length > 0) {
-      const defaultIndex = (props as any).selectedIndex ?? 0;
-      const initial = items[Math.min(Math.max(defaultIndex, 0), items.length - 1)];
-      globalStore.setLabel(initial);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
 
   // Live-sync across browser tabs/windows
   useEffect(() => {
