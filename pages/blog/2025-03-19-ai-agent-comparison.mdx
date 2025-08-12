@@ -187,10 +187,12 @@ flowchart TD
     D -->|"RAG-based retrieval (doc search)"| L["LlamaIndex\n(Retrieving data)"]
     D -->|"Code-gen agent (lightweight)"| M["SmolAgents\n(Small code approach)"]
     D -->|"Generic OpenAI approach"| N["OpenAI Agents SDK"]
+    D -->|"Provider-flexible agent SDK"| Y["Strands Agents\n(Model-agnostic)"]
 
     %% MULTI-AGENT BRANCH
     F -->|Graph-based & fine-grained control| G["LangGraph\n(DAG of nodes)"]
     F -->|Role-based, collaborative crew| H["CrewAI\n(Multi-role synergy)"]
+    F -->|Provider-flexible with OTEL| Y["Strands Agents\n(Model-agnostic)"]
 
     C -->|"Conversation-based (chat & tool calls)"| E["AutoGen (Microsoft)"]
     C -->|"Planner-based (multi-step task)"| X["Semantic Kernel (Microsoft)"]
