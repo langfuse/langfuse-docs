@@ -1,13 +1,15 @@
 ---
-title: Dataset Runs via the UI
+title: Native Dataset Runs (Prompt Experiments)
 description: Experiment with different prompt versions and models on a dataset and compare the results side-by-side.
 ---
 
-# Dataset Runs via the UI
+# Native Dataset Runs (Prompt Experiments)
 
-You can execute Dataset Runs (also called Prompt Experiments) in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
+You can execute Native Dataset Runs **(also called Prompt Experiments)** in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
 
 Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) to automatically score the responses based on the expected outputs to further analyze the results on an aggregate level.
+
+They are called "Native Dataset Runs" because they rely on Datasets, Prompts and optionally LLM-as-a-Judge Evaluators all being managed **natively** in Langfuse.
 
 <CloudflareVideo
   videoId="0e2811d0dbcd59000837773aef814963"
@@ -15,13 +17,14 @@ Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-
   title="Introduction to Dataset Runs"
 />
 
-## Why run Dataset Runs via the UI?
+## Why use Native Dataset Runs (Prompt Experiments)?
 
 - Quickly test different prompt versions or models
 - Structure your prompt testing by using a dataset to test different prompt versions and models
 - Quickly iterate on prompts through Dataset Runs
 - Optionally use LLM-as-a-Judge Evaluators to score the responses based on the expected outputs from the dataset
 - Prevent regressions by running tests when making prompt changes
+
 
 ## Prerequisites
 <Steps>
@@ -144,7 +147,7 @@ In this example:
 
 ### Configure LLM connection
 
-As your prompt will be executed for each dataset item, you need to configure an LLM connection in the project settings. [How to configure an LLM connection?](/faq/all/llm-connection)
+As your prompt will be executed for each dataset item, you need to configure an LLM connection in the project settings. [How to configure an LLM connection?](/docs/administration/llm-connection)
 
 ### Optional: Set up LLM-as-a-judge
 
@@ -152,7 +155,7 @@ You can set up an LLM-as-a-judge evaluator to score the responses based on the e
 </Steps>
 
 
-## Trigger a Dataset Run via UI
+## Trigger a Native Dataset Run (Prompt Experiment)
 
 <Steps>
 ### Navigate to the dataset

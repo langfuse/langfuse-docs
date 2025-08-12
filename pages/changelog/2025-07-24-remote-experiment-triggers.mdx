@@ -1,6 +1,6 @@
 ---
 date: 2025-07-24
-title: Trigger Remote Custom Experiments from UI  
+title: Trigger Remote Custom Evaluations from the LangfuseUI  
 description: Enable non-technical users to trigger external experiment pipelines directly from the Langfuse UI on datasets.
 author: Marlies
 ---
@@ -9,9 +9,9 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-You can now trigger external experiment pipelines directly from the Langfuse UI. This feature enables non-technical users to run experiments on [Datasets](/docs/datasets) without requiring code changes or manual setup.
+You can now trigger external evaluation pipelines directly from the Langfuse UI. This feature enables non-technical users to execute [Dataset](/docs/datasets) Runs without requiring code changes or manual setup.
 
-Configure a remote experiment URL at the dataset level, and team members can trigger experiments with a single click. Langfuse will send the dataset name, ID, and any custom payload to your experiment service, then wait up to 10 seconds for a response.
+Configure a remote experiment URL at the dataset level, and team members can trigger evaluations with a single click. Langfuse will send the dataset name, ID, and any custom payload to your evaluation service, then wait up to 10 seconds for a response.
 
 ## Features
 
@@ -20,27 +20,10 @@ Configure a remote experiment URL at the dataset level, and team members can tri
 - **Custom payloads**: Send additional context or parameters to your experiment service
 - **Response handling**: 10-second timeout with status feedback
 
-## Setup
+## Get started
 
-1. Navigate to your **Dataset** in Langfuse. In the top right corner of your **Dataset Runs** page, click **New Experiment**
-2. Configure the **Remote Experiment URL** where your experiment service is hosted
-3. Add any **Custom Payload** (JSON format) needed by your experiment runner
+import { Book } from "lucide-react";
 
-## Triggering an experiment
-
-1. Click **New Experiment** in the top right corner of the dataset runs page. Click the **Run** button
-2. Confirm your payload, and click **Run** again to send dataset details to your service
-
-## Integration
-
-Your remote experiment service will receive:
-- Dataset name and ID
-- Custom payload (if configured)
-
-Ideally, your experiment runner uses [Langfuse SDKs/API](/docs/evaluation/get-started/offline) to push the dataset run and evaluation results back to Langfuse for complete experiment tracking.
-
-## Questions or Feedback?
-
-Share your remote experiment workflows and use cases in our [GitHub Discussions](https://github.com/orgs/langfuse/discussions).
-
-Please open a [GitHub issue](/issues) if you encounter any problems or have suggestions for improvements.
+<Cards num={1}>
+  <Card title="Remote Custom Evaluations Documentation" href="https://langfuse.com/docs/evaluation/dataset-runs/remote-run#run-via-ui" icon={<Book />} />
+</Cards>

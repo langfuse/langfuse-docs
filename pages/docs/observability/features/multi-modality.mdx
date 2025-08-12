@@ -128,7 +128,7 @@ pdf_media = LangfuseMedia(content_bytes=pdf_bytes, content_type="application/pdf
 
 @observe()
 def process_document():
-langfuse = get_client()
+    langfuse = get_client()
 
     # Update the current trace with the media file
     langfuse.update_current_trace(
@@ -145,10 +145,10 @@ langfuse = get_client()
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="analyze-document") as span: # Include media in the span input, output, or metadata
-span.update(
-input={"document": pdf_media},
-metadata={"file_size": len(pdf_bytes)}
-)
+    span.update(
+        input={"document": pdf_media},
+        metadata={"file_size": len(pdf_bytes)}
+    )
 
     # Process document...
 
@@ -232,7 +232,7 @@ If you use the API directly to log traces to Langfuse, you need to follow these 
 ### Upload media to Langfuse
 
 1. If you use base64 encoded media: you need to extract it from the trace payloads similar to how the Langfuse SDKs do it.
-2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#post-/api/public/media).
+2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#tag/media/post/api/public/media).
 3. Upload media file: `PUT [presignedURL]`.
 
 See this [end-to-end example](/guides/cookbook/example_multi_modal_traces#custom-via-api) (Python) on how to use the API directly to upload media files.

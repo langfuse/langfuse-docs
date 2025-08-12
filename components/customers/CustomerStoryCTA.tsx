@@ -11,8 +11,7 @@ export const CustomerStoryCTA = () => {
         </h3>
         <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
           Join thousands of teams building better LLM applications with Langfuse's 
-          open-source observability platform. Start monitoring, debugging, and improving 
-          your AI applications today.
+          open-source observability platform.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button size="lg" variant="cta" asChild>

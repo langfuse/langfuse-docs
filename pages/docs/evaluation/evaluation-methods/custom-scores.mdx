@@ -3,9 +3,9 @@ description: Ingest custom scores via the Langfuse SDKs or API.
 sidebarTitle: Custom Scores (API/SDK)
 ---
 
-# Custom Scores via API/SDKs
+# Custom Scores
 
-Custom Scores are the most flexible way to implement evaluation workflows using Langfuse. As any other evaluation method the purpose of custom scores is to assign evaluations metrics to `Traces`, `Observations` or `Sessions`or `DatasetRuns` via the `Score` object (see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model)).
+Custom Scores are the most flexible way to implement evaluation workflows using Langfuse. As any other evaluation method the purpose of custom scores is to assign evaluations metrics to `Traces`, `Observations`, `Sessions`, or `DatasetRuns` via the `Score` object (see [Scores Data Model](/docs/evaluation/evaluation-methods/data-model)).
 
 This is achieved by ingesting scores via the Langfuse SDKs or API. 
 
@@ -24,9 +24,11 @@ This is achieved by ingesting scores via the Langfuse SDKs or API.
 - **Custom internal workflow tooling**: build custom internal tooling that helps you manage human-in-the-loop workflows. Ingest scores back into Langfuse, optionally following your custom schema by referencing a config.
 - **Custom run-time evaluations**: e.g. track whether the generated SQL code actually worked, or if the structured output was valid JSON.
 
-## Ingesting Scores
+## Ingesting Scores via API/SDKs
 
 You can add scores via the Langfuse SDKs or API. Scores can take one of three data types: **Numeric**, **Categorical** or **Boolean**.
+
+*[Image placeholder: Score ingestion flow diagram showing SDK/API to Langfuse]*
 
 Here are examples by `Score` data types
 
@@ -47,6 +49,7 @@ langfuse.create_score(
     value=0.9,
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     data_type="NUMERIC", # optional, inferred if not provided
     comment="Factually correct", # optional
 )
@@ -205,7 +208,7 @@ Numeric score values must be provided as float.
 
 ```python
 langfuse.score(
-    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
     name="correctness",
@@ -237,7 +240,7 @@ Boolean scores must be provided as a float. The value's string equivalent will b
 
 ```python
 langfuse.score(
-    id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     trace_id=message.trace_id,
     observation_id=message.generation_id, # optional
     name="helpfulness",
@@ -260,7 +263,7 @@ Numeric score values must be provided as float.
 
 ```ts
 await langfuse.score({
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "correctness",
@@ -276,7 +279,7 @@ Categorical score values must be provided as strings.
 
 ```ts
 await langfuse.score({
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "accuracy",
@@ -292,7 +295,7 @@ Boolean scores must be provided as a float. The value's string equivalent will b
 
 ```ts
 await langfuse.score({
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "helpfulness",
@@ -318,6 +321,8 @@ In some cases, you want to prevent this behavior or update an existing score. Th
 
 ### Enforcing a Score Config
 Score configs are helpful when you want to standardize your scores for future analysis.
+
+*[Image placeholder: Score config creation in Langfuse UI]*
 
 To enforce a score config, you can provide a `configId` when creating a score to reference a `ScoreConfig` that was previously created. `Score Configs` can be defined in the Langfuse UI or via our API. [See our guide on how to create and manage score configs](/faq/all/manage-score-configs).
 
@@ -345,10 +350,11 @@ langfuse = get_client()
 langfuse.create_score(
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     name="accuracy",
     value=0.9,
     comment="Factually correct", # optional
-    score_id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     config_id="78545-6565-3453654-43543", # optional, to ensure that the score follows a specific min/max value range
     data_type="NUMERIC" # optional, possibly inferred
 )
@@ -379,7 +385,7 @@ langfuse.create_score(
     name="correctness",
     value="correct",
     comment="Factually correct", # optional
-    score_id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     config_id="12345-6565-3453654-43543", # optional, to ensure that the score maps to a specific category defined in a score config
     data_type="CATEGORICAL" # optional, possibly inferred
 )
@@ -410,7 +416,7 @@ langfuse.create_score(
     name="helpfulness",
     value=1,
     comment="Factually correct", # optional
-    score_id="unique_id", # optional, can be used as an indempotency key to update the score subsequently
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
     config_id="93547-6565-3453654-43543", # optional, can be used to infer the score data type and validate the score value
     data_type="BOOLEAN" # optional, possibly inferred
 )
@@ -502,7 +508,7 @@ await langfuse.score({
   name: "accuracy",
   value: 0.9,
   comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific min/max value range
   dataType: "NUMERIC", // optional, possibly inferred
 });
@@ -519,7 +525,7 @@ await langfuse.score({
   name: "correctness",
   value: "correct",
   comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   configId: "12345-6565-3453654-43543", // optional, to ensure that a score maps to a specific category defined in a score config
   dataType: "CATEGORICAL", // optional, possibly inferred
 });
@@ -536,7 +542,7 @@ await langfuse.score({
   name: "helpfulness",
   value: 1,
   comment: "Factually correct", // optional
-  id: "unique_id", // optional, can be used as an indempotency key to update the score subsequently
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   configId: "93547-6565-3453654-43543", // optional, can be used to infer the score data type and validate the score value
   dataType: "BOOLEAN", // optional, possibly inferred
 });
@@ -602,8 +608,8 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 </Tab>
 </Tabs>
 
-## Update Existing Scores
+## Update Existing Scores via API/SDKs
 
 When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
 
-If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter when initially creating the score.
+If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.

@@ -24,7 +24,7 @@ const menuItems: {
         href: "/docs/scores/overview",
       },
       {
-        name: "Manual Annotation",
+        name: "Human Annotation",
         href: "/docs/scores/annotation",
       },
       {
@@ -161,6 +161,10 @@ const menuItems: {
       {
         name: "About us",
         href: "/about",
+      },
+      {
+        name: "Customers",
+        href: "/customers",
       },
       { name: "Support", href: "/support" },
       {

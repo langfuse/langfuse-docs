@@ -95,6 +95,14 @@ const nextraConfig = withNextra({
           },
         ],
       },
+      // Mark markdown endpoints as noindex and ensure correct content type
+      {
+        source: "/:path*.md",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Content-Type", value: "text/markdown; charset=utf-8" },
+        ],
+      },
     ];
 
     // Do not index Vercel preview deployments
@@ -123,7 +131,17 @@ const nextraConfig = withNextra({
       destination,
       permanent: false,
     })),
-  ]
+  ],
+  async rewrites() {
+    // Serve any ".md" path by mapping to the static copy in public/md-src
+    // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
+    return [
+      {
+        source: "/:path*.md",
+        destination: "/md-src/:path*.md",
+      },
+    ];
+  },
 });
 
 const nonPermanentRedirects = [
@@ -141,6 +159,7 @@ const nonPermanentRedirects = [
   ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
   ["/sticker", "/stickers"],
   ["/ask-ai", "/docs/ask-ai"],
+  ["/docs/sso", "/self-hosting/authentication-and-sso"],
 
   // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
@@ -346,6 +365,8 @@ const nonPermanentRedirects = [
   ["/docs/integrations/litellm/tracing", "/integrations/gateways/litellm"],
   ["/docs/integrations/portkey", "/integrations/gateways/portkey"],
   ["/docs/integrations/other/openrouter", "/integrations/gateways/openrouter"],
+  ["/docs/integrations/other/truefoundry", "/integrations/gateways/truefoundry"],
+  ["/docs/integrations/other/vercel-ai-gateway", "/integrations/gateways/vercel-ai-gateway"],
 
   // No-code integrations - redirect to integration pages where they exist
   ["/docs/integrations/dify", "/integrations/no-code/dify"],
@@ -400,8 +421,8 @@ const nonPermanentRedirects = [
   ["/docs/datasets/example-synthetic-datasets", "/guides/cookbook/example_synthetic_datasets"],
   ["/docs/datasets/get-started", "/docs/evaluation/dataset-runs/datasets"],
   ["/docs/datasets/overview", "/docs/evaluation/dataset-runs/datasets"],
-  ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/run-via-ui"],
-  ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/run-via-sdk"],
+  ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
+  ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/remote-run"],
   ["/docs/fine-tuning", "/docs/api-and-data-platform/features/fine-tuning"],
   ["/docs/get-started", "/docs"],
   ["/docs/model-usage-and-cost", "/docs/observability/features/token-and-cost-tracking"],
@@ -472,7 +493,7 @@ const nonPermanentRedirects = [
   ["/docs/datasets/dataset-runs/data-model", "/docs/evaluation/dataset-runs/data-model"],
   ["/guides/cookbook/user-feedback", "/faq/all/user-feedback"],
   ["/guides/cookbook/security-and-guardrails", "/docs/security-and-guardrails"],
-  ["/docs/evaluation/features/prompt-experiments", "/docs/evaluation/dataset-runs/run-via-ui"],
+  ["/docs/evaluation/features/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/evaluation/data-model", "/docs/evaluation/dataset-runs/data-model"],
   ["/guides/cookbook/integration_mirascope", "/integrations/frameworks/mirascope"],
   ["/guides/cookbook/integration_mistral_sdk", "/integrations/model-providers/mistral-sdk"],
@@ -481,7 +502,15 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/features/evaluation-methods/user-feedback", "/faq/all/user-feedback"],
   ["/docs/evaluation/features/security-and-guardrails", "/docs/security-and-guardrails"],
   ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
+  ["/faq/all/llm-connection", "/docs/administration/llm-connection"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
+
+  // Redirect old webhooks path to new webhooks/slack integrations path
+  ["/docs/prompt-management/features/webhooks", "/docs/prompt-management/features/webhooks-slack-integrations"],
+
+  // Redirect renamed dataset run pages
+  ["/docs/evaluation/dataset-runs/run-via-ui", "/docs/evaluation/dataset-runs/native-run"],
+  ["/docs/evaluation/dataset-runs/run-via-sdk", "/docs/evaluation/dataset-runs/remote-run"],
 
 ];
 
