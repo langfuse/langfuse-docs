@@ -1,0 +1,41 @@
+---
+title: Can I query the metrics API using the Langfuse Python SDK?
+description: This FAQ post details how to query the Langfuse metrics API using Python SDK.
+tags: [api, integration]
+---
+
+# Can I query the metrics API using the Langfuse Python SDK?
+
+Yes, you can query the metrics API using the Langfuse Python SDK. Here's how:
+
+1. **Set Up Your Query**: Define the metrics you wish to retrieve. Below is an example JSON query:
+   
+   ```json
+   {
+     "view": "traces",
+     "metrics": [{"measure": "count", "aggregation": "count"}],
+     "dimensions": [{"field": "name"}],
+     "filters": [],
+     "fromTimestamp": "2025-05-01T00:00:00Z",
+     "toTimestamp": "2025-05-13T00:00:00Z"
+   }
+   ```
+
+2. **Use the Langfuse Python SDK**: Invoke the `metrics` method of the `langfuse.api` module with your query.
+
+   ```python
+   query = """
+   {
+     "view": "traces",
+     "metrics": [{"measure": "count", "aggregation": "count"}],
+     "dimensions": [{"field": "name"}],
+     "filters": [],
+     "fromTimestamp": "2025-05-01T00:00:00Z",
+     "toTimestamp": "2025-05-13T00:00:00Z"
+   }
+   """
+
+   langfuse.api.metrics.metrics(query=query)
+   ```
+
+Follow these steps to successfully query the metrics API from your Python application.
