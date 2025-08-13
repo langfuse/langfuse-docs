@@ -99,7 +99,10 @@ Supported granularities include: `hour`, `day`, `week`, `month`, and `auto`.
 
 Here's an example of querying the number of traces grouped by name:
 
-```bash
+<Tabs items={["API", "Python SDK"]}>
+  <Tab label="API">
+
+  ```bash
 curl \
   -H "Authorization: Basic <BASIC AUTH HEADER>" \
   -G \
@@ -113,6 +116,26 @@ curl \
   }' \
   https://cloud.langfuse.com/api/public/metrics
 ```
+    
+  </Tab>
+  <Tab label="Python SDK">
+
+  ```python
+  query = """
+  {
+    "view": "traces",
+    "metrics": [{"measure": "count", "aggregation": "count"}],
+    "dimensions": [{"field": "name"}],
+    "filters": [],
+    "fromTimestamp": "2025-05-01T00:00:00Z",
+    "toTimestamp": "2025-05-13T00:00:00Z"
+  }
+  """
+
+langfuse.api.metrics.metrics(query = query)
+  ```  
+  </Tab>
+</Tabs>
 
 Response:
 
