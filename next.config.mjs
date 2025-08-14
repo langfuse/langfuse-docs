@@ -145,7 +145,7 @@ const nextraConfig = withNextra({
 });
 
 const nonPermanentRedirects = [
-  ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
+  // short links
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/watch-demo"],
@@ -160,10 +160,7 @@ const nonPermanentRedirects = [
   ["/sticker", "/stickers"],
   ["/ask-ai", "/docs/ask-ai"],
   ["/docs/sso", "/self-hosting/authentication-and-sso"],
-
-  // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
-
   ["/docs/data-security-privacy", "/security"],
   ["/baa", "/security/hipaa"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
@@ -175,10 +172,9 @@ const nonPermanentRedirects = [
   ["/docs/analytics", "/docs/analytics/overview"],
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
   ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
-
+  ["/events", "https://lu.ma/langfuse"],
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
-
   ["/launch", "/blog/2025-05-19-launch-week-3"],
 
   // Redirect to overview pages
