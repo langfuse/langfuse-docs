@@ -1,72 +1,75 @@
 ---
-source: ⚠️ Jupyter Notebook
-title: Monitor Truefoundry with Langfuse
-sidebarTitle: Truefoundry
+title: "TrueFoundry Integration"
+sidebarTitle: TrueFoundry
 logo: /images/integrations/truefoundry-logo.png
-description: Learn how to integrate Truefoundry with Langfuse using the OpenAI drop-in replacement.
-category: Integrations
+description: "Learn how to integrate Langfuse with TrueFoundry."
 ---
 
-# Monitor Truefoundry Models with Langfuse
+## What is TrueFoundry AI Gateway?
 
-> **What is Truefoundry?** [TrueFoundry](https://www.truefoundry.com/ai-gateway) is an enterprise-grade AI Gateway and control plane that lets you deploy, govern, and monitor any LLM or Gen-AI workload behind a single OpenAI-compatible API—bringing rate-limiting, cost controls, observability, and on-prem support to production AI applications.
+[TrueFoundry AI Gateway](https://www.truefoundry.com/ai-gateway) is a unified interface that provides access to multiple AI models with advanced features for control, visibility, security, and cost optimization in your Generative AI applications. It offers seamless integration with popular observability tools like Langfuse.
 
-## How Truefoundry Integrates with Langfuse
+#### How TrueFoundry Integrates with Langfuse
 
-Truefoundry’s AI Gateway and Langfuse combine to give you enterprise-grade observability, governance, and cost control over every LLM request—set up in minutes.
+TrueFoundry integrates with Langfuse with the help of Langfuse SDK's OpenAI class. Requests are routed via TrueFoundry AI Gateway and the traces are pushed to Langfuse with the help of their SDK. Some features of TrueFoundry:
 
 <details>
 <summary><strong>Unified OpenAI-Compatible Endpoint</strong></summary>
 
-Point the Langfuse OpenAI client at Truefoundry’s gateway URL. Truefoundry routes to any supported model (OpenAI, Anthropic, self-hosted, etc.), while Langfuse transparently captures each call—no code changes required.
+Simply point the Langfuse OpenAI client at TrueFoundry's gateway URL. TrueFoundry routes requests to any supported model (OpenAI, Anthropic, Azure OpenAI, self-hosted models, etc.), while Langfuse transparently captures every call with full context—no application code changes required.
 </details>
 
 <details>
-<summary><strong>End-to-End Tracing & Metrics</strong></summary>
+<summary><strong>Comprehensive Tracing & Analytics</strong></summary>
 
-Langfuse delivers:
-- **Full request/response logs** (including system messages)  
-- **Token usage** (prompt, completion, total)  
-- **Latency breakdowns** per call  
-- **Cost analytics** by model and environment  
-Drill into any trace in seconds to optimize performance or debug regressions.
+Langfuse automatically captures:
+- **Complete request/response logs** (including system messages and metadata)
+- **Detailed token usage** (prompt tokens, completion tokens, total consumption)
+- **Performance metrics** (latency breakdowns, response times)
+- **Cost analytics** by model, environment, and user
+- **Error tracking** and debugging information
+
+Drill into any trace instantly to optimize performance or debug issues.
 </details>
 
 <details>
-<summary><strong>Production-Ready Controls</strong></summary>
+<summary><strong>Enterprise-Grade Controls</strong></summary>
 
-Truefoundry augments your LLM stack with:
-- **Rate limiting & quotas** per team or user  
-- **Budget alerts & spend caps** to prevent overruns  
-- **Scoped API keys** with RBAC for dev, staging, prod  
-- **On-prem/VPC deployment** for full data sovereignty  
+TrueFoundry adds production-ready governance to your LLM stack:
+- **Rate limiting & quotas** with granular controls per team or user
+- **Budget alerts & spend caps** to prevent cost overruns
+- **Role-based access control** with scoped API keys for dev, staging, and production
+- **On-premises/VPC deployment** for complete data sovereignty and compliance
+- **Model fallbacks** and load balancing for high availability
 </details>
 
 ## Prerequisites
 
 Before integrating Langfuse with TrueFoundry, ensure you have:
-1. TrueFoundry Account: Create a [Truefoundry account](https://www.truefoundry.com/register) with atleast one model provider and generate a Personal Access Token by following the instructions in [quick start](https://docs.truefoundry.com/gateway/quick-start) and [generating tokens](https://docs.truefoundry.com/gateway/authentication)
-2. Langfuse Account: Sign up for a free [Langfuse Cloud account](https://cloud.langfuse.com/) or self-host Langfuse
 
-<Steps>
-## Step 1: Install Dependencies
+1. **TrueFoundry Account**: Create a [TrueFoundry account](https://docs.truefoundry.com/gateway/quick-start) with atleast one model provider and generate a Personal Access Token by following the instructions in [Generating Tokens](https://docs.truefoundry.com/gateway/authentication)
+2. **Langfuse Account**: Sign up for a free [Langfuse Cloud account](https://cloud.langfuse.com) or self-host Langfuse
 
+## Integration Guide
 
-```python
-%pip install openai langfuse
+### Step 1: Install Dependencies
+
+Install the required packages for TrueFoundry and Langfuse integration:
+
+```bash
+pip install openai langfuse
 ```
 
-## Step 2: Set Up Environment Variables
+### Step 2: Set Up Environment Variables
 
-Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://cloud.langfuse.com/) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). These environment variables are essential for the Langfuse client to authenticate and send data to your Langfuse project.
-
+Configure your Langfuse API keys. Get these keys from your [Langfuse project settings](https://cloud.langfuse.com):
 
 ```python
 import os
 
 # Langfuse Configuration
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com"  # 🇺🇸 US region
 
@@ -75,6 +78,7 @@ os.environ["TRUEFOUNDRY_API_KEY"] = "your-truefoundry-token"
 os.environ["TRUEFOUNDRY_BASE_URL"] = "https://your-control-plane.truefoundry.cloud/api/llm"
 ```
 
+Verify your Langfuse connection:
 
 ```python
 from langfuse import get_client
@@ -83,17 +87,20 @@ from langfuse import get_client
 get_client().auth_check()
 ```
 
+### Step 3: Configure Langfuse OpenAI Drop-in Replacement
 
+First, get the base URL and model name from your TrueFoundry AI Gateway:
 
+1. **Navigate to AI Gateway Playground**: Go to your TrueFoundry AI Gateway playground
+2. **Access Unified Code Snippet**: Use the Langchain library code snippet
+3. **Copy Base URL**: You will get the base path from the unified code snippet
+4. **Copy model name**: You will get the model name from the same code snippet (ensure you use the same model name as written)
 
-    True
+<Frame caption="Get Base URL from Unified Code Snippet">
+  <img src="/images/unified-code-tfy.png" />
+</Frame>
 
-
-
-## Step 3: Use Langfuse OpenAI Drop-in Replacement
-
-Use Langfuse's OpenAI-compatible client to capture and trace every request routed through the TrueFoundry AI Gateway. Detailed steps for configuring the gateway and generating virtual LLM keys are available in the [TrueFoundry documentation](https://docs.truefoundry.com/gateway/langfuse).
-
+Use Langfuse's OpenAI-compatible client to automatically trace all requests sent through TrueFoundry's AI Gateway:
 
 ```python
 from langfuse.openai import OpenAI
@@ -102,12 +109,13 @@ import os
 # Initialize OpenAI client with TrueFoundry Gateway
 client = OpenAI(
     api_key=os.environ["TRUEFOUNDRY_API_KEY"],
-    base_url=os.environ["TRUEFOUNDRY_BASE_URL"]  # Base URL from unified code snippet
+    base_url=os.environ["TRUEFOUNDRY_GATEWAY_BASE_URL"]  # Base URL from unified code snippet
 )
 ```
 
-## Step 4: Run an Example
+### Step 4: Run an Example
 
+Execute a sample request to test the integration:
 
 ```python
 # Make a request through TrueFoundry Gateway with Langfuse tracing
@@ -128,19 +136,22 @@ langfuse = get_client()
 langfuse.flush()
 ```
 
-## Step 5: See Traces in Langfuse
+### Step 5: View Traces in Langfuse
 
-After running the example, log in to Langfuse to view the detailed traces, including:
+After running your code, log in to your Langfuse dashboard to view detailed traces including:
 
-- Request parameters
-- Response content
-- Token usage and latency metrics
-- LLM model information through Truefoundry gateway
+- **Request Parameters**: Model, temperature, max tokens, and other configuration
+- **Response Content**: Full response text and metadata  
+- **Performance Metrics**: Token usage, latency, and cost information
+- **Gateway Information**: TrueFoundry-specific routing and processing details
 
-![Langfuse Trace Example](https://langfuse.com/images/cookbook/integration_troufoundry/truefoundry-trace.png)
 
-> **Note**: All other features of Langfuse will work as expected, including prompt management, evaluations, custom dashboards, and advanced observability features. The TrueFoundry integration seamlessly supports the full Langfuse feature set.
-</Steps>
+<Frame caption="Langfuse Trace Dashboard">
+  <img src="/images/langfuse-trace-tfy.png" />
+</Frame>
+
+Your TrueFoundry AI Gateway is now fully integrated with Langfuse for comprehensive LLM observability and optimization.
+
 
 ## Advanced Integration with Langfuse Python SDK
 
@@ -149,7 +160,6 @@ Enhance your observability by combining the automatic tracing with additional La
 ### Using the @observe Decorator
 
 The `@observe()` decorator automatically wraps your functions and adds custom attributes to traces:
-
 
 ```python
 from langfuse import observe, get_client
@@ -192,24 +202,12 @@ def analyze_customer_query(query, customer_id):
 result = analyze_customer_query("How do I reset my password?", "customer_123")
 ```
 
-### Debug Mode
-
-Enable debug logging for troubleshooting:
-
-```python
-import logging
-logging.basicConfig(level=logging.DEBUG)
-```
-
 > **Note**: All other features of Langfuse will work as expected, including prompt management, evaluations, custom dashboards, and advanced observability features. The TrueFoundry integration seamlessly supports the full Langfuse feature set.
 
 ## Learn More
 
 - **TrueFoundry AI Gateway Introduction**: [https://docs.truefoundry.com/gateway/intro-to-llm-gateway](https://docs.truefoundry.com/gateway/intro-to-llm-gateway)
 - **TrueFoundry Authentication Guide**: [https://docs.truefoundry.com/gateway/authentication](https://docs.truefoundry.com/gateway/authentication)
-
-
-
-import LearnMore from "@/components-mdx/integration-learn-more.mdx";
-
-<LearnMore />
+- **Langfuse OpenAI Integration**: [https://langfuse.com/docs/integrations/openai](https://langfuse.com/docs/integrations/openai)
+- **Langfuse @observe() Decorator**: [https://langfuse.com/docs/sdk/python/decorators](https://langfuse.com/docs/sdk/python/decorators)
+- **Langfuse Python SDK Guide**: [https://langfuse.com/docs/sdk/python](https://langfuse.com/docs/sdk/python) 
