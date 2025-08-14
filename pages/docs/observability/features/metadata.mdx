@@ -5,7 +5,11 @@ sidebarTitle: Metadata
 
 # Metadata
 
-Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments. Metadata can be added to traces in the form of arbitrary JSON.
+Traces and observations (see [Langfuse Data Model](/docs/tracing-data-model)) can be enriched with metadata to better understand your users, application, and experiments.
+Metadata can be added to traces in the form of arbitrary JSON.
+
+Metadata updates are merged based on the top-level key.
+We strongly encourage not to write the same key multiple times within your instrumentation.
 
 <Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
@@ -61,17 +65,18 @@ with langfuse.start_as_current_span(
         gen.update(metadata={"completion_type": "creative"})
 ```
 
-You can update metadata multiple times - new values are merged with existing ones up until the first level of the dictionary:
+You can add new keys to the metadata object by continuously updating the entity.
+We strongly discourage writing the same top-level key multiple times as this will produce an undefined behaviour.
 
 ```python
 with langfuse.start_as_current_span(name="operation") as span:
-    # First update
-    span.update(metadata={"step": 1, "status": "started"})
+    # First write
+    span.update(metadata={"status": "started"})
 
-    # Later update - will be merged with previous metadata
-    span.update(metadata={"step": 2, "error": None})
+    # Additional key - will be merged with previous metadata
+    span.update(metadata={"error": "Failed to process"})
 
-    # Final metadata will be {"step": 2, "status": "started", "error": null}
+    # Final metadata will be {"status": "started", "error": "Failed to process"}
 ```
 
 </Tab>
@@ -186,13 +191,13 @@ Option 1: Via metadata fields in chain invocation (simplest approach):
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
- 
+
 langfuse_handler = CallbackHandler()
- 
+
 llm = ChatOpenAI(model_name="gpt-4o")
 prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
- 
+
 # Set trace attributes dynamically via metadata
 response = chain.invoke(
     {"topic": "cats"},
@@ -213,14 +218,14 @@ from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
- 
+
 langfuse = get_client()
 langfuse_handler = CallbackHandler()
- 
+
 llm = ChatOpenAI(model_name="gpt-4o")
 prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
- 
+
 # Set trace attributes dynamically via enclosing span
 with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
     span.update_trace(
@@ -228,7 +233,7 @@ with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
     )
 
     response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
- 
+
     span.update_trace(output={"response": response.content})
 ```
 
