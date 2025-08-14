@@ -421,7 +421,7 @@ const nonPermanentRedirects = [
   ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/remote-run"],
   ["/docs/fine-tuning", "/docs/api-and-data-platform/features/fine-tuning"],
-  ["/docs/get-started", "/docs"],
+  ["/docs/get-started", "/docs/observability/get-started"],
   ["/docs/model-usage-and-cost", "/docs/observability/features/token-and-cost-tracking"],
   ["/docs/opentelemetry/example-arize", "/guides/cookbook/otel_integration_arize"],
   ["/docs/opentelemetry/example-mlflow", "/guides/cookbook/otel_integration_mlflow"],
