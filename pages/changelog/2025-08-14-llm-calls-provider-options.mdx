@@ -1,0 +1,19 @@
+---
+date: 2025-08-14
+title: Additional provider options in LLM calls in playground and evals
+description: Set additional provider options in your LLM calls in playground and in evals
+author: Hassieb
+ogImage: /images/docs/llm-connection-provider-options.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Until now, LLM invocations for the Playground and evaluations were limited to a specific set of parameters, such as temperature, top_p, and max_tokens. However, many LLM providers allow for additional parameters, including reasoning effort, service tier, and others. These parameters often differ between providers.
+
+We now support setting these additional configurations as a JSON object for all LLM invocations. In the model parameters settings, you will find a "provider options" field at the bottom. This field allows you to enter specific key-value pairs accepted by your LLM provider's API endpoint.
+
+This feature is currently available for the adapters for Anthropic, OpenAI, and AWS (Amazon Bedrock).
+
+Learn more in the [LLM connection documentation](/docs/administration/llm-connection).

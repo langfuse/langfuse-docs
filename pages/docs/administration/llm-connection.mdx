@@ -8,7 +8,7 @@ sidebarTitle: LLM Connections
 
 LLM connections are used to call models in the Langfuse Playground or for LLM-as-a-Judge evaluations.
 
-## How to set up an LLM connection?
+## Setup
 
 Navigate to your Project Settings -> LLM Connections and click on "Add new LLM API key".
 
@@ -18,7 +18,17 @@ Navigate to your Project Settings -> LLM Connections and click on "Add new LLM A
 
 Enter the name of the LLM connection and the API key for the model you want to use.
 
-## Which models are supported?
+## Supported providers
+
+The Langfuse platform is currently supporting the following LLM providers:
+
+- OpenAI
+- Azure OpenAI
+- Anthropic
+- Google AI Studio
+- Google Vertex AI
+- Amazon Bedrock
+
 
 import {
   Accordion,
@@ -139,13 +149,41 @@ export function ModelList() {
 </AccordionItem>
 </Accordion>
 
-## How to use an LLM proxy? [#LLM-as-a-Judge]
+You may connect to third party LLM providers if their API schema implements the schema of one of our supported provider adapters. For example, you may connect to Mistral by using the OpenAI adapter in Langfuse to connect to Mistral's OpenAI compliant API.
+
+## Advanced configurations
+
+### Additional provider options
+
+LLM calls from a created LLM connection can be configured with a specific set of parameters, such as temperature, top_p, and max_tokens. However, many LLM providers allow for additional parameters, including reasoning effort, service tier, and others when invoking a model. These parameters often differ between providers.
+
+You can provide additional configurations as a JSON object for all LLM invocations. In the model parameters settings, you will find a "provider options" field at the bottom. This field allows you to enter specific key-value pairs accepted by your LLM provider's API endpoint.
+
+Please see your providers API reference for what additional fields are supported (e.g. [OpenAI Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create), [Anthropic Messages API Reference](https://docs.anthropic.com/en/api/messages))
+
+This feature is currently available for the adapters for Anthropic, OpenAI, and AWS (Amazon Bedrock).
+
+Example for forcing reasoning effort `minimal` on a OpenAI gpt-5 invocation:
+
+import { Frame } from "@/components/Frame";
+import Image from "next/image";
+
+<Frame border>
+  <Image
+    alt="Trace Detail"
+    src="/images/docs/llm-connection-provider-options.png"
+    width="480"
+    height="480"
+  />
+</Frame>
+
+### Connecting via proxies
 
 You can use an LLM proxy to power LLM-as-a-judge or the Playground in Langfuse. Please create an LLM API Key in the project settings and set the base URL to resolve to your proxy's host. The proxy must accept the API format of one of our adapters and support tool calling.
 
 For OpenAI compatible proxies, here is an example tool calling request that must be handled by the proxy in OpenAI format to support LLM-as-a-judge in Langfuse:
 
-```bash
+```bash /<host set in project settings>/ /<api key entered in project settings>/ /<custom header set in project settings>/ /<model set in project settings>/
 curl -X POST 'https://<host set in project settings>/chat/completions' \
 -H 'accept: application/json' \
 -H 'content-type: application/json' \
@@ -200,6 +238,4 @@ curl -X POST 'https://<host set in project settings>/chat/completions' \
   ]
 }'
 ```
-
-
 
