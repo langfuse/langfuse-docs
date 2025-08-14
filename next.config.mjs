@@ -360,6 +360,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/other/novitaai", "/integrations/model-providers/novitaai"],
   ["/docs/integrations/other/togetherai", "/integrations/model-providers/togetherai"],
   ["/docs/integrations/other/xai", "/integrations/model-providers/xai-grok"],
+  ["/guides/cookbook/integration_google_vertex_and_gemini", "/integrations/model-providers/google-vertex-ai"],
 
   // Gateway integrations - redirect to integration pages where they exist
   ["/docs/integrations/litellm/tracing", "/integrations/gateways/litellm"],
