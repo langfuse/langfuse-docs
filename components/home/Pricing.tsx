@@ -238,7 +238,7 @@ const PricingCalculatorModal = ({
             <Label htmlFor="events" className="flex items-center gap-1">
               Monthly Units
               <Link
-                href="/docs/tracing-data-model#billable-units"
+                href="/docs/observability/data-model#billable-units"
                 target="_blank"
               >
                 <InfoIcon className="size-3" />
@@ -577,11 +577,11 @@ type Section = {
 const sections: Section[] = [
   {
     name: "LLM Application & Agent Tracing",
-    href: "/docs/tracing",
+    href: "/docs/observability/overview",
     features: [
       {
         name: "Traces and Graphs (Agents)",
-        href: "/docs/tracing",
+        href: "/docs/observability/overview",
         tiers: {
           cloud: {
             Hobby: true,
@@ -597,7 +597,7 @@ const sections: Section[] = [
       },
       {
         name: "Session Tracking (Chats/Threads)",
-        href: "/docs/tracing-features/sessions",
+        href: "/docs/observability/features/sessions",
         tiers: {
           cloud: {
             Hobby: true,
@@ -613,7 +613,7 @@ const sections: Section[] = [
       },
       {
         name: "User Tracking",
-        href: "/docs/tracing-features/users",
+        href: "/docs/observability/features/users",
         tiers: {
           cloud: {
             Hobby: true,
@@ -629,7 +629,7 @@ const sections: Section[] = [
       },
       {
         name: "Token and Cost Tracking",
-        href: "/docs/model-usage-and-cost",
+        href: "/docs/observability/features/token-and-cost-tracking",
         tiers: {
           cloud: {
             Hobby: true,
@@ -655,7 +655,7 @@ const sections: Section[] = [
       },
       {
         name: "SDKs (Python, JavaScript)",
-        href: "/docs/sdk/overview",
+        href: "/docs/observability/sdk/overview",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -665,7 +665,7 @@ const sections: Section[] = [
         name: "OpenTelemetry (Java, Go, custom)",
         description:
           "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
-        href: "/docs/opentelemetry/get-started",
+        href: "/integrations/native/opentelemetry",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -681,7 +681,7 @@ const sections: Section[] = [
       },
       {
         name: "Custom via API",
-        href: "/docs/api",
+        href: "/docs/api-and-data-platform/features/public-api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -691,7 +691,7 @@ const sections: Section[] = [
         name: "Included usage",
         description:
           "Billable units are the collection of created traces, observations, and scores in Langfuse.",
-        href: "/docs/tracing-data-model",
+        href: "/docs/observability/data-model",
         tiers: {
           cloud: {
             Hobby: "50k units",
@@ -709,7 +709,7 @@ const sections: Section[] = [
         name: "Additional usage",
         description:
           "Billable units are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
-        href: "/docs/tracing-data-model",
+        href: "/docs/observability/data-model",
         tiers: {
           cloud: {
             Hobby: false,
@@ -721,7 +721,7 @@ const sections: Section[] = [
       },
       {
         name: "Multi-modal",
-        href: "/docs/tracing-features/multi-modality",
+        href: "/docs/observability/features/multi-modality",
         tiers: {
           cloud: {
             Hobby: "Free while in beta",
@@ -762,12 +762,12 @@ const sections: Section[] = [
   },
   {
     name: "Prompt Management",
-    href: "/docs/prompts",
+    href: "/docs/prompt-management/overview",
     features: [
       {
         name: "Prompt Versioning",
         description: "Manage prompts via UI, API, SDKs",
-        href: "/docs/prompts",
+        href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -791,7 +791,7 @@ const sections: Section[] = [
       {
         name: "Prompt Release Management",
         description: "Deploy and rollback prompts to different environments",
-        href: "/docs/prompts",
+        href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -801,7 +801,7 @@ const sections: Section[] = [
         name: "Prompt Composability",
         description:
           "Create shared snippets that can be reused in different prompts",
-        href: "/docs/prompts/get-started#composability",
+        href: "/docs/prompt-management/features/composability",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -810,7 +810,7 @@ const sections: Section[] = [
       {
         name: "Prompt Caching (server and client)",
         description: "Use prompts with 0 latency and uptime impact",
-        href: "/docs/prompts/get-started#caching-in-client-sdks",
+        href: "/docs/prompt-management/features/caching",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -819,7 +819,7 @@ const sections: Section[] = [
       {
         name: "Playground",
         description: "Test prompts in a sandbox environment",
-        href: "/docs/playground",
+        href: "/docs/prompt-management/features/playground",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -828,7 +828,7 @@ const sections: Section[] = [
       {
         name: "Prompt Experiments",
         description: "Run structured experiments on new prompt versions",
-        href: "/docs/datasets/prompt-experiments",
+        href: "/docs/evaluation/dataset-runs/native-run",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
@@ -841,7 +841,7 @@ const sections: Section[] = [
         name: "Protected Deployment Labels",
         description:
           "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
-        href: "/docs/prompts/get-started#protected-prompt-labels",
+        href: "/docs/prompt-management/features/prompt-version-control#protected-prompt-labels",
         tiers: {
           cloud: {
             Hobby: false,
@@ -864,7 +864,7 @@ const sections: Section[] = [
         name: "Datasets",
         description:
           "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
-        href: "/docs/datasets",
+        href: "/docs/evaluation/dataset-runs/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -874,7 +874,7 @@ const sections: Section[] = [
         name: "Custom Experiments (via SDK)",
         description:
           "Run custom experiments on your Langfuse datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
-        href: "/docs/datasets",
+        href: "/docs/evaluation/dataset-runs/remote-run",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -882,7 +882,7 @@ const sections: Section[] = [
       },
       {
         name: "Evaluation Scores (custom)",
-        href: "/docs/scores",
+        href: "/docs/evaluation/evaluation-methods/custom-scores",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -890,7 +890,7 @@ const sections: Section[] = [
       },
       {
         name: "User Feedback Tracking",
-        href: "/docs/scores/user-feedback",
+        href: "/faq/all/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -899,7 +899,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
-        href: "/docs/scores/annotation",
+        href: "/docs/evaluation/evaluation-methods/annotation",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -908,7 +908,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation Queues",
         description: "Managed human annotation workflows with queues",
-        href: "/docs/scores/annotation#annotation-queues",
+        href: "/docs/evaluation/evaluation-methods/annotation#annotation-queues",
         tiers: {
           cloud: {
             Hobby: "1 queue",
@@ -924,7 +924,7 @@ const sections: Section[] = [
       },
       {
         name: "External Evaluation Pipelines",
-        href: "/docs/scores/external-evaluation-pipelines",
+        href: "/guides/cookbook/example_external_evaluation_pipelines",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -934,7 +934,7 @@ const sections: Section[] = [
         name: "LLM-as-judge evaluators",
         description:
           "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
-        href: "/docs/scores/model-based-evals",
+        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
         tiers: {
           cloud: {
             Hobby: "1 evaluator",
@@ -987,11 +987,11 @@ const sections: Section[] = [
   },
   {
     name: "API",
-    href: "/docs/api",
+    href: "/docs/api-and-data-platform/features/public-api",
     features: [
       {
         name: "Extensive Public API",
-        href: "/docs/api",
+        href: "/docs/api-and-data-platform/features/public-api",
         tiers: {
           cloud: {
             Hobby: true,
@@ -1059,7 +1059,7 @@ const sections: Section[] = [
     features: [
       {
         name: "Batch Export via UI",
-        href: "/docs/query-traces#ui",
+        href: "/docs/api-and-data-platform/features/export-from-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -1067,7 +1067,7 @@ const sections: Section[] = [
       },
       {
         name: "PostHog Integration",
-        href: "/docs/analytics/integrations/posthog",
+        href: "/integrations/analytics/posthog",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -1075,7 +1075,7 @@ const sections: Section[] = [
       },
       {
         name: "Scheduled Batch Export to Blob Storage",
-        href: "/docs/query-traces#blob-storage",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1175,7 +1175,7 @@ const sections: Section[] = [
   },
   {
     name: "Security",
-    href: "/docs/security",
+    href: "/docs/security-and-guardrails",
     features: [
       {
         name: "Data region",
@@ -1190,7 +1190,7 @@ const sections: Section[] = [
       },
       {
         name: "Data masking",
-        href: "/docs/tracing-features/masking",
+        href: "/docs/observability/features/masking",
         tiers: {
           cloud: {
             Hobby: true,
@@ -1221,7 +1221,7 @@ const sections: Section[] = [
       },
       {
         name: "Organization-level RBAC",
-        href: "/docs/rbac",
+        href: "/docs/administration/rbac",
         tiers: {
           cloud: {
             Hobby: true,
@@ -1261,7 +1261,7 @@ const sections: Section[] = [
       },
       {
         name: "Project-level RBAC",
-        href: "/docs/rbac#project-level-roles",
+        href: "/docs/administration/rbac#project-level-roles",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1274,7 +1274,7 @@ const sections: Section[] = [
       },
       {
         name: "Data retention management",
-        href: "/docs/data-retention",
+        href: "/docs/administration/data-retention",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1304,7 +1304,7 @@ const sections: Section[] = [
       },
       {
         name: "Audit Logs",
-        href: "/docs/audit-logs",
+        href: "/docs/administration/audit-logs",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1317,7 +1317,7 @@ const sections: Section[] = [
       },
       {
         name: "Admin API (project management, SCIM)",
-        href: "/docs/api#org-scoped-routes",
+        href: "/docs/administration/scim-and-org-api",
         tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -2113,7 +2113,7 @@ const faqs = [
   {
     question: "What is a billable unit?",
     answer:
-      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
+      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/observability/data-model'>Langfuse Data Model docs</a>.",
   },
   {
     question: "How can I reduce my Langfuse Cloud bill?",
