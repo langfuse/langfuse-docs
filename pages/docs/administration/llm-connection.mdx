@@ -10,7 +10,7 @@ LLM connections are used to call models in the Langfuse Playground or for LLM-as
 
 ## Setup
 
-Navigate to your Project Settings -> LLM Connections and click on "Add new LLM API key".
+Navigate to your `Project Settings` > `LLM Connections` and **click on** `Add new LLM API key`.
 
 <Frame border fullWidth>
 ![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
@@ -30,17 +30,8 @@ The Langfuse platform is currently supporting the following LLM providers:
 - Amazon Bedrock
 
 
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
-
-<Accordion type="single" collapsible>
-<AccordionItem value="supported-models">
-<AccordionTrigger>Supported models</AccordionTrigger>
-<AccordionContent>
+<details>
+<summary>Supported models</summary>
 
 Currently the playground supports the following models by default. You may configure additional custom model names when adding your LLM API Key in the Langfuse project settings, e.g. when using a custom model or proxy.
 
@@ -145,9 +136,7 @@ export function ModelList() {
 }
 
 <ModelList />
-</AccordionContent>
-</AccordionItem>
-</Accordion>
+</details>
 
 You may connect to third party LLM providers if their API schema implements the schema of one of our supported provider adapters. For example, you may connect to Mistral by using the OpenAI adapter in Langfuse to connect to Mistral's OpenAI compliant API.
 
@@ -155,13 +144,24 @@ You may connect to third party LLM providers if their API schema implements the 
 
 ### Additional provider options
 
-LLM calls from a created LLM connection can be configured with a specific set of parameters, such as temperature, top_p, and max_tokens. However, many LLM providers allow for additional parameters, including reasoning effort, service tier, and others when invoking a model. These parameters often differ between providers.
+<Callout type="info">
+  Provider options are **not set up in the Project Settings > LLM Connections** page but either when selecting a LLM Connection on the [Playground](/docs/promptmanagement/features/playground) or during [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) Evaluator setup.
+</Callout>
+
+LLM calls from a created LLM connection can be configured with a specific set of parameters, such as `temperature`, `top_p`, and `max_tokens`. 
+
+However, many LLM providers allow for additional parameters, including `reasoning_effort`, `service_tier`, and others when invoking a model. These parameters often differ between providers.
 
 You can provide additional configurations as a JSON object for all LLM invocations. In the model parameters settings, you will find a "provider options" field at the bottom. This field allows you to enter specific key-value pairs accepted by your LLM provider's API endpoint.
 
-Please see your providers API reference for what additional fields are supported (e.g. [OpenAI Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create), [Anthropic Messages API Reference](https://docs.anthropic.com/en/api/messages))
+Please see your providers API reference for what additional fields are supported: 
+- [Anthropic Messages API Reference](https://docs.anthropic.com/en/api/messages)
+- [OpenAI Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create)
 
-This feature is currently available for the adapters for Anthropic, OpenAI, and AWS (Amazon Bedrock).
+This feature is currently available for the adapters for:
+- Anthropic
+- OpenAI
+- AWS (Amazon Bedrock)
 
 Example for forcing reasoning effort `minimal` on a OpenAI gpt-5 invocation:
 
