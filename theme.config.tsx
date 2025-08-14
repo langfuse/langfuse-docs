@@ -1,6 +1,6 @@
 import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
-import { Cards, Steps, Tabs, Callout } from "nextra/components";
+import { Cards, Steps, Tabs as NextraTabs, Callout } from "nextra/components";
 import { Logo } from "@/components/logo";
 import { useRouter } from "next/router";
 import { MainContentWrapper } from "./components/MainContentWrapper";
@@ -18,6 +18,68 @@ import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import Image from "next/image";
 import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
+
+// Infer a storageKey for common tab groups so selections persist across pages
+function normalizeLabel(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/[`()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getLabelsFromItems(items: unknown[]): string[] {
+  return items.map((item) => {
+    if (typeof item === "string") return item;
+    if (item && typeof item === "object") {
+      return String((item as any).label ?? (item as any).text ?? "");
+    }
+    return "";
+  });
+}
+
+function inferStorageKey(items: unknown[] | undefined): string | undefined {
+  if (!Array.isArray(items)) return undefined;
+  const labels = getLabelsFromItems(items).map(normalizeLabel);
+
+  // Language group: ["Python", "JS/TS"|"JS"|"TypeScript"|"JavaScript"]
+  const isTwoItems = labels.length === 2;
+  const hasPython = labels.some((l) => /\bpython\b/.test(l));
+  const hasJsTs = labels.some((l) => /(js\/ts|javascript|typescript|\bjs\b|\bts\b)/.test(l));
+  if (isTwoItems && hasPython && hasJsTs) return "langfuse:tabs:language";
+
+  // Python SDK version group: ["Python SDK v3", "Python SDK v2"]
+  const hasPythonSdk = labels.every((l) => l.includes("python") && l.includes("sdk"));
+  const hasV3 = labels.some((l) => /(v\s*3|\bv3\b)/.test(l));
+  const hasV2 = labels.some((l) => /(v\s*2|\bv2\b)/.test(l));
+  if (isTwoItems && hasPythonSdk && hasV3 && hasV2) return "langfuse:tabs:python-sdk-version";
+
+  // Deployment group: ["Langfuse Cloud"|"Cloud", "Local or self-hosted"|"Self-hosted"]
+  const hasCloud = labels.some((l) => /langfuse\s*cloud|^cloud$/.test(l));
+  const hasSelfHosted = labels.some((l) => /(self\s*-?hosted|local)/.test(l));
+  if (isTwoItems && hasCloud && hasSelfHosted) return "langfuse:tabs:deployment";
+
+  // Config method group: ["Environment Variables", "Constructor"]
+  const hasEnv = labels.some((l) => /environment\s*variables?|env\s*variables?/.test(l));
+  const hasCtor = labels.some((l) => /constructor/.test(l));
+  if (isTwoItems && hasEnv && hasCtor) return "langfuse:tabs:config";
+
+  return undefined;
+}
+
+const Tabs: React.FC<React.ComponentProps<typeof NextraTabs>> = (props) => {
+  const inferred = inferStorageKey((props as any).items);
+  return <NextraTabs {...props} storageKey={props.storageKey ?? inferred} />;
+};
+
+const Tab: React.FC<React.ComponentProps<typeof NextraTabs.Tab>> = ({ children, ...props }) => (
+  <NextraTabs.Tab {...props} style={{ marginTop: "1rem" }}>
+    <div className="border rounded bg-background p-4">{children}</div>
+  </NextraTabs.Tab>
+);
+
+// Ensure <Tabs.Tab> works in MDX by attaching the styled Tab component
+(Tabs as any).Tab = Tab;
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -174,8 +236,8 @@ const config: DocsThemeConfig = {
           href={isDev ? "/favicon-16x16-dev.png" : "/favicon-16x16.png"}
         />
 
-        {canonical && <link rel="canonical" href={canonical} />}
-        {noindex && <meta name="robots" content="noindex" />}
+        {canonical && <link rel="canonical" href={canonical} />} 
+        {noindex && <meta name="robots" content="noindex" />} 
         <title>{titleTemplate.replace("%s", title)}</title>
       </>
     );
@@ -183,16 +245,7 @@ const config: DocsThemeConfig = {
   components: {
     Frame,
     Tabs,
-    Tab: ({
-      children,
-      ...props
-    }: { children: React.ReactNode } & React.ComponentProps<
-      typeof Tabs.Tab
-    >) => (
-      <Tabs.Tab {...props} style={{ marginTop: "1rem" }}>
-        <div className="border rounded bg-background p-4">{children}</div>
-      </Tabs.Tab>
-    ),
+    Tab,
     Steps,
     Card: Cards.Card,
     Cards,
