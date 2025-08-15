@@ -1,0 +1,70 @@
+---
+title: TypeScript SDK - Setup
+description: Tracing setup for the TypeScript SDK.
+---
+
+# TypeScript SDK - Setup
+
+## Installation
+
+The Langfuse TypeScript SDK is modular, so you can install only the packages you need.
+
+
+### Full Tracing install
+
+Install the relevant packages for a full tracing setup:
+
+```bash
+npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+```
+
+- **`@langfuse/tracing`**: Core tracing functions (`startSpan`, `startGeneration`, `startActiveSpan`, etc.)
+- **`@langfuse/otel`**: The `LangfuseSpanProcessor` to export traces to Langfuse.
+- **`@opentelemetry/sdk-node`**: The OpenTelemetry SDK for Node.js.
+
+Learn more about the packages [here](/docs/observability/sdk/typescript/overview#packages).
+
+
+### Client-only  install
+
+If you do not use Langfuse tracing in your application and rely on features such as prompt management, you only need the `@langfuse/client` package.
+
+```bash
+npm install @langfuse/client
+```
+
+## Register your credentials
+
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+
+<EnvJS />
+
+## Initialize OpenTelemetry
+
+The Langfuse TypeScript SDK's tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The `LangfuseSpanProcessor` is the key component that sends traces to Langfuse.
+
+```typescript filename="instrumentation.ts" /LangfuseSpanProcessor/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+The `LangfuseSpanProcessor` is the key component that sends traces to Langfuse.
+
+For advanced configuration of the LangfuseSpanProcessor for masking, filtering, and more, see [Advanced Configuration](/docs/observability/sdk/typescript/advanced-configuration).
+
+You can learn more about setting up OpenTelemetry in your JS environment [here](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/).
+
+<Callout type="info">
+**Next.js users:**
+
+If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` described above rather than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
+</Callout>
+

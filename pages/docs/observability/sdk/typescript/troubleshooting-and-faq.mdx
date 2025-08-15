@@ -1,0 +1,17 @@
+---
+title: TypeScript SDK - Troubleshooting and FAQ
+description: Troubleshooting and FAQ for the TypeScript SDK.
+---
+
+# TypeScript SDK - Troubleshooting and FAQ
+
+If your issue is not covered here, please see our [support page](/support).
+
+
+## Missing traces in serverless environments
+
+Please see the documentation on [force-flushing](/docs/observability/sdk/typescript/advanced-configuration#force-flushing-events)
+
+## Missing traces with `@vercel/otel`
+
+If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` described above rather than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.

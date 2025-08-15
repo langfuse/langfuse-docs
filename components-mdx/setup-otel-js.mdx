@@ -1,0 +1,17 @@
+Create a `instrumentation.ts` file that initializes the OpenTelemetry `NodeSDK` and registers the `LangfuseSpanProcessor`.
+
+```typescript filename="instrumentation.ts" /LangfuseSpanProcessor/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+Import the `instrumentation.ts` file at the top of your application.
+
+```typescript filename="index.ts"
+import "./instrumentation"; // Must be the first import
+```
