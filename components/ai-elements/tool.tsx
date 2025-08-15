@@ -50,7 +50,7 @@ const getStatusBadge = (status: ToolUIPart["state"]) => {
   } as const;
 
   return (
-    <Badge className="rounded-full text-xs" variant="secondary">
+    <Badge className="rounded-full text-xs gap-2" variant="secondary">
       {icons[status]}
       {labels[status]}
     </Badge>
@@ -64,10 +64,7 @@ export const ToolHeader = ({
   ...props
 }: ToolHeaderProps) => (
   <CollapsibleTrigger
-    className={cn(
-      "flex w-full items-center justify-between gap-4 p-3",
-      className
-    )}
+    className={cn("flex w-full items-center justify-between gap-4", className)}
     {...props}
   >
     <div className="flex items-center gap-2">
