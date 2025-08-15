@@ -115,7 +115,7 @@ If you're solving data-heavy tasks—like question answering on private document
 
 ## Strands Agents
 
-[Strands Agents SDK](https://strandsagents.com) is AWS's toolkit for building AI agents that can tap into **Amazon Bedrock** and other AWS services. It puts a strong focus on production readiness by shipping first-class OpenTelemetry tracing and native integrations with Bedrock models. That means you get end-to-end observability out of the box while still enjoying a clean, declarative API for defining agent behavior.
+[Strands Agents SDK](https://strandsagents.com) is a model-agnostic agent framework that runs anywhere and supports multiple model providers with reasoning and tool use, including **Amazon Bedrock**, Anthropic, OpenAI, Ollama, and others via LiteLLM. It emphasizes production readiness with first-class OpenTelemetry tracing and optional deep AWS integrations. This gives you end-to-end observability with a clean, declarative API for defining agent behavior. For a deeper technical overview of its agent architectures and observability, see AWS’s [technical deep dive](https://aws.amazon.com/blogs/machine-learning/amazon-strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/).
 
 <Frame fullWidth>
   ![Strands Agents trace visualization in
@@ -126,7 +126,7 @@ _[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz0
 
 [How to trace Strands Agents with Langfuse →](/integrations/frameworks/strands-agents)
 
-If you are already running on AWS or want tight coupling with Bedrock's model catalog, Strands Agents gives you a production-grade starting point that pairs nicely with Langfuse's observability pipeline.
+Strands Agents runs anywhere (AWS, other clouds, or on-prem). If you’re on AWS, you can opt into deep Bedrock integrations; otherwise, use any provider (Anthropic, OpenAI, Ollama, etc.) via LiteLLM—while still pairing nicely with Langfuse’s observability pipeline.
 
 ## 🐍 Pydantic AI Agents
 
@@ -154,10 +154,10 @@ If you're a Python developer who values explicit type contracts, tests, and quic
 | **[AutoGen](https://microsoft.github.io/autogen/stable/)**                         | Asynchronous multi-agent chat        | Live conversations, event-driven             | Scenarios needing real-time concurrency, multiple LLM "voices" interacting             |
 | **[Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/)** | Skill-based, enterprise integrations | Multi-language, enterprise compliance        | Enterprise settings, .NET ecosystems, or large orgs needing robust skill orchestration |
 | **[LlamaIndex Agents](https://www.llamaindex.ai/)**                                | RAG with integrated indexing         | Retrieval + agent synergy                    | Use-cases that revolve around extensive data lookup, retrieval, and knowledge fusion   |
-| **[Strands Agents](https://strandsagents.com)**                                  | AWS-centric agent toolkit            | Native Bedrock & AWS integrations           | AWS-hosted or serverless agent applications needing deep Bedrock support              |
+| **[Strands Agents](https://strandsagents.com)**                                  | Model-agnostic agent toolkit         | Runs anywhere; multi-model via LiteLLM; strong OTEL observability | Teams needing provider-flexible agents (Bedrock, Anthropic, OpenAI, Ollama) with production tracing |
 | **[Pydantic AI](https://pydantic-ai.readthedocs.io/en/latest/)**                 | Type-safe Python agent framework     | Strong type safety & FastAPI-style DX       | Python developers wanting structured, validated agent logic                          |
 
-As you can see there are very different approaches to these agent frameworks. Graph-based solutions like LangGraph give you precise control, while conversation-based solutions like AutoGen give you natural, flexible dialogues. Role-based orchestration from CrewAI can tackle complex tasks through a "cast" of specialized agents, whereas Smolagents is ideal for minimal code-driven patterns. Semantic Kernel is positioned in the enterprise space, and LlamaIndex Agents shine for retrieval-centric applications. The OpenAI Agents SDK appeals to users already confident in the OpenAI stack. Strands Agents and Pydantic AI are tailored for AWS and Python environments.
+As you can see there are very different approaches to these agent frameworks. Graph-based solutions like LangGraph give you precise control, while conversation-based solutions like AutoGen give you natural, flexible dialogues. Role-based orchestration from CrewAI can tackle complex tasks through a "cast" of specialized agents, whereas Smolagents is ideal for minimal code-driven patterns. Semantic Kernel is positioned in the enterprise space, and LlamaIndex Agents shine for retrieval-centric applications. The OpenAI Agents SDK appeals to users already confident in the OpenAI stack. Strands Agents is model-agnostic with optional deep AWS integrations, and Pydantic AI is tailored for Python environments.
 
 ## When to Use Each Framework
 
@@ -187,10 +187,12 @@ flowchart TD
     D -->|"RAG-based retrieval (doc search)"| L["LlamaIndex\n(Retrieving data)"]
     D -->|"Code-gen agent (lightweight)"| M["SmolAgents\n(Small code approach)"]
     D -->|"Generic OpenAI approach"| N["OpenAI Agents SDK"]
+    D -->|"Provider-flexible agent SDK"| Y["Strands Agents\n(Model-agnostic)"]
 
     %% MULTI-AGENT BRANCH
     F -->|Graph-based & fine-grained control| G["LangGraph\n(DAG of nodes)"]
     F -->|Role-based, collaborative crew| H["CrewAI\n(Multi-role synergy)"]
+    F -->|Provider-flexible with OTEL| Y["Strands Agents\n(Model-agnostic)"]
 
     C -->|"Conversation-based (chat & tool calls)"| E["AutoGen (Microsoft)"]
     C -->|"Planner-based (multi-step task)"| X["Semantic Kernel (Microsoft)"]

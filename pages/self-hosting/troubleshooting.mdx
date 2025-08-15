@@ -160,11 +160,11 @@ To check the current status and job counts across all queues, make a GET request
 
 ```bash
 curl -X GET "https://your-langfuse-instance.com/api/admin/bullmq" \
-  -H "Authorization: Bearer YOUR_ADMIN_API_KEY"
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
   -H 'Content-Type: application/json' \
   --data '{
     "action": "retry",
-    "queueNames": [ ]
+    "queueNames": [ "ingestion-queue" ]
 }'
 ```
 

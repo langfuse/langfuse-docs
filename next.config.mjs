@@ -145,7 +145,7 @@ const nextraConfig = withNextra({
 });
 
 const nonPermanentRedirects = [
-  ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
+  // short links
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/watch-demo"],
@@ -160,10 +160,7 @@ const nonPermanentRedirects = [
   ["/sticker", "/stickers"],
   ["/ask-ai", "/docs/ask-ai"],
   ["/docs/sso", "/self-hosting/authentication-and-sso"],
-
-  // stripe
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
-
   ["/docs/data-security-privacy", "/security"],
   ["/baa", "/security/hipaa"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
@@ -175,10 +172,9 @@ const nonPermanentRedirects = [
   ["/docs/analytics", "/docs/analytics/overview"],
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
   ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
-
+  ["/events", "https://lu.ma/langfuse"],
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
-
   ["/launch", "/blog/2025-05-19-launch-week-3"],
 
   // Redirect to overview pages
@@ -360,6 +356,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/other/novitaai", "/integrations/model-providers/novitaai"],
   ["/docs/integrations/other/togetherai", "/integrations/model-providers/togetherai"],
   ["/docs/integrations/other/xai", "/integrations/model-providers/xai-grok"],
+  ["/guides/cookbook/integration_google_vertex_and_gemini", "/integrations/model-providers/google-vertex-ai"],
 
   // Gateway integrations - redirect to integration pages where they exist
   ["/docs/integrations/litellm/tracing", "/integrations/gateways/litellm"],
@@ -424,7 +421,7 @@ const nonPermanentRedirects = [
   ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/remote-run"],
   ["/docs/fine-tuning", "/docs/api-and-data-platform/features/fine-tuning"],
-  ["/docs/get-started", "/docs"],
+  ["/docs/get-started", "/docs/observability/get-started"],
   ["/docs/model-usage-and-cost", "/docs/observability/features/token-and-cost-tracking"],
   ["/docs/opentelemetry/example-arize", "/guides/cookbook/otel_integration_arize"],
   ["/docs/opentelemetry/example-mlflow", "/guides/cookbook/otel_integration_mlflow"],
@@ -502,6 +499,7 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/features/evaluation-methods/user-feedback", "/faq/all/user-feedback"],
   ["/docs/evaluation/features/security-and-guardrails", "/docs/security-and-guardrails"],
   ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
+  ["/faq/all/llm-connection", "/docs/administration/llm-connection"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
 
   // Redirect old webhooks path to new webhooks/slack integrations path
