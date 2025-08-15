@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     onFinish: async () => {
       await mcpClient.close();
     },
+    experimental_telemetry: { isEnabled: true },
   });
 
   return result.toUIMessageStreamResponse({
@@ -46,3 +47,5 @@ export async function POST(req: Request) {
     sendReasoning: true,
   });
 }
+
+export const maxDuration = 30;
