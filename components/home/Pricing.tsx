@@ -1221,7 +1221,7 @@ const sections: Section[] = [
       },
       {
         name: "Organization-level RBAC",
-        href: "/docs/rbac",
+        href: "/docs/administration/rbac",
         tiers: {
           cloud: {
             Hobby: true,
@@ -1261,7 +1261,7 @@ const sections: Section[] = [
       },
       {
         name: "Project-level RBAC",
-        href: "/docs/rbac#project-level-roles",
+        href: "/docs/administration/rbac#project-level-roles",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1274,7 +1274,7 @@ const sections: Section[] = [
       },
       {
         name: "Data retention management",
-        href: "/docs/data-retention",
+        href: "/docs/administration/data-retention",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1304,7 +1304,7 @@ const sections: Section[] = [
       },
       {
         name: "Audit Logs",
-        href: "/docs/audit-logs",
+        href: "/docs/administration/audit-logs",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1317,7 +1317,7 @@ const sections: Section[] = [
       },
       {
         name: "Admin API (project management, SCIM)",
-        href: "/docs/api#org-scoped-routes",
+        href: "/docs/administration/scim-and-org-api",
         tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
         },
