@@ -855,6 +855,15 @@ const sections: Section[] = [
           },
         },
       },
+      {
+        name: "Webhooks & Slack",
+        description: "Trigger webhooks for prompt changes and integrate with Slack",
+        href: "/docs/prompt-management/features/webhooks-slack-integrations",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
     ],
   },
   {
@@ -871,10 +880,20 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Custom Experiments (via SDK)",
+        name: "Remote Dataset Runs (via SDK)",
         description:
-          "Run custom experiments on your Langfuse datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
+          "Experiment on your Datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
         href: "/docs/evaluation/dataset-runs/remote-run",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Native Dataset Runs (via UI)",
+        description:
+          "Test different versions of your prompts or models in the UI using Datasets you manage in Langfuse.",
+        href: "/docs/evaluation/dataset-runs/native-run",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -2113,7 +2132,7 @@ const faqs = [
   {
     question: "What is a billable unit?",
     answer:
-      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/tracing-data-model'>Langfuse Data Model docs</a>.",
+      "A billable unit in Langfuse is any tracing data point you send to our platform - this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our <a class='underline' href='/docs/observability/data-model'>Langfuse Data Model docs</a>.",
   },
   {
     question: "How can I reduce my Langfuse Cloud bill?",
