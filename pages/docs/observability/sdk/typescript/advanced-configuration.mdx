@@ -1,0 +1,201 @@
+---
+title: TypeScript SDK - Advanced Configuration
+description: Advanced configuration options for the TypeScript SDK.
+---
+
+# TypeScript SDK - Advanced Configuration
+
+## Masking
+
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
+
+The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
+
+```typescript filename="instrumentation.ts" /mask:/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    // A simple regex to mask credit card numbers
+    const maskedData = data.replace(
+      /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
+      "***MASKED_CREDIT_CARD***"
+    );
+    return maskedData;
+  },
+});
+
+const sdk = new NodeSDK({
+  spanProcessors: [spanProcessor],
+});
+
+sdk.start();
+```
+
+
+## Filtering Spans
+
+You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
+
+<Callout type="warning" title="Filtering Spans May Break Trace Trees">
+Filtering spans may break the parent-child relationships in your traces. For example, if you filter out a parent span but keep its children, you may see "orphaned" observations in the Langfuse UI. Consider the impact on trace structure when configuring `shouldExportSpan`.
+</Callout>
+
+```typescript filename="instrumentation.ts" /shouldExportSpan/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+
+// Example: Filter out all spans from the 'express' instrumentation
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  otelSpan.instrumentationScope.name !== "express";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
+});
+
+sdk.start();
+```
+
+## Sampling
+
+Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
+
+Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
+
+```typescript filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  // Sample 20% of all traces
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+For more advanced sampling strategies, refer to the [OpenTelemetry JS Sampling Documentation](https://opentelemetry.io/docs/languages/js/sampling/).
+
+## Managing trace and observation IDs
+
+In Langfuse, every trace and observation has a unique identifier. Understanding their format and how to set them is useful for integrating with other systems.
+
+  - **Trace IDs** are 32-character lowercase hexadecimal strings, representing 16 bytes of data
+  - **Observation IDs** (also known as Span IDs in OpenTelemetry) are 16-character lowercase hexadecimal strings, representing 8 bytes
+
+While the SDK handles ID generation automatically, you may manually set them to align with external systems or create specific trace structures. This is done using the `parentSpanContext` option in tracing methods.
+
+When starting a new trace by setting a `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist but is only used for trace ID inheritance of the created observation.
+
+You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
+
+```typescript
+import { createTraceId, startSpan } from "@langfuse/tracing";
+
+const externalId = "support-ticket-54321";
+
+// Generate a valid, deterministic traceId from the external ID
+const langfuseTraceId = await createTraceId(externalId);
+
+// You can now start a new trace with this ID
+const rootSpan = startSpan("process-ticket", {}, {
+  parentSpanContext: {
+    traceId: langfuseTraceId,
+    spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+    traceFlags: 1 // mark trace as sampled
+  }
+});
+
+// Later, you can regenerate the same traceId to score or retrieve the trace
+const scoringTraceId = await createTraceId(externalId);
+// scoringTraceId will be the same as langfuseTraceId
+```
+
+## Logging
+
+You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
+
+**In code:**
+
+```typescript /configureGlobalLogger/
+import { configureGlobalLogger, LogLevel } from "@langfuse/core";
+
+// Set the log level to DEBUG to see all log messages
+configureGlobalLogger({ level: LogLevel.DEBUG });
+```
+
+Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
+
+**Via environment variable:**
+
+You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variable.
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
+
+## Force-flushing events
+
+In short-lived environments like serverless functions (e.g., Vercel Functions, AWS Lambda), you should explicitly flush the traces before the process exits or the runtime environment is frozen. The `LangfuseSpanProcessor` buffers events and sends them in batches, so a final flush ensures no data is lost.
+
+You can export the processor from your OTEL SDK setup file.
+
+```typescript filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor to be able to flush it
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+```
+
+Then, in your serverless function handler, call `forceFlush()` before the function exits.
+
+```typescript filename="handler.ts"
+import { langfuseSpanProcessor } from "./instrumentation";
+
+export async function handler(event, context) {
+  // ... your application logic ...
+
+  // Flush before exiting
+  await langfuseSpanProcessor.forceFlush();
+}
+```
+## Multi-project Setup (Experimental)
+
+You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
+
+<Callout type="warning" title="Multi-project setup is experimental">
+The multi-project setup is experimental and may change in the future. Please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) if you have any feedback.
+</Callout>
+
+```typescript filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      publicKey: "pk-lf-public-key-project-1",
+      secretKey: "sk-lf-secret-key-project-1",
+    }),
+    new LangfuseSpanProcessor({
+      publicKey: "pk-lf-public-key-project-2",
+      secretKey: "sk-lf-secret-key-project-2",
+    }),
+  ],
+});
+
+sdk.start();
+```
+
+This configuration will send every trace to both projects. You can also configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
+

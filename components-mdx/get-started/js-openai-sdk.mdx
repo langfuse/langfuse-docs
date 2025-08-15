@@ -1,18 +1,27 @@
+**Install package**
 ```sh
-npm install langfuse openai
+npm install @langfuse/openai
 ```
+
+**Add credentials**
 
 Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
 
 import EnvJS from "@/components-mdx/env-js.mdx";
+import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
 <EnvJS />
 
-With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
+**Initialize OpenTelemetry**
 
+<SetupOtelJS />
+
+With your environment configured and OpenTelemetry initialized, call OpenAI SDK methods as usual from the wrapped client.
+
+**Wrap OpenAI client**
 ```ts
 import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
