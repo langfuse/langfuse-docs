@@ -3,7 +3,12 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
 
 export function register() {
   const traceProvider = new NodeTracerProvider({
-    spanProcessors: [new LangfuseSpanProcessor()],
+    spanProcessors: [
+      new LangfuseSpanProcessor({
+        shouldExportSpan: (span) =>
+          span.otelSpan.instrumentationScope.name !== "next.js",
+      }),
+    ],
   });
 
   traceProvider.register();

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { FormEvent, HTMLAttributes } from "react";
 import { useChat } from "@ai-sdk/react";
+import { getPersistedNanoId } from "./utils/persistedNanoId";
 
 import {
   Conversation,
@@ -39,11 +40,33 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
+import { LangfuseWeb } from "langfuse";
+import { FeedbackDialog } from "./FeedbackPopover";
+
+const langfuseWebClient = new LangfuseWeb({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+});
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
+  // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
+  const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
+    new Map()
+  );
+
+  // Generate a unique chat ID that persists for this chat session
+  const chatId = useMemo(() => `chat_${crypto.randomUUID()}`, []);
+
+  // Generate a persistent user ID for this user (client-side only)
+  const userId = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return getPersistedNanoId({
+      key: "qa-chatbot-user-id",
+      prefix: "u-",
+    });
+  }, []);
 
   const { messages, sendMessage, status, regenerate } = useChat({
     messages: [
@@ -60,14 +83,33 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     ],
     transport: new DefaultChatTransport({
       api: "/api/qa-chatbot",
+      body: { chatId, userId },
     }),
   });
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !userId) return; // Don't send if userId is not ready
     sendMessage({ text: input });
     setInput("");
+  };
+
+  const handleFeedback = (
+    messageId: string,
+    value: number,
+    comment?: string
+  ) => {
+    // Update the local state
+    setUserFeedback((prev) => new Map(prev.set(messageId, value)));
+
+    // Send feedback to Langfuse
+    langfuseWebClient.score({
+      traceId: messageId,
+      id: `user-feedback-${messageId}`,
+      name: "user-feedback",
+      value: value,
+      comment: comment,
+    });
   };
 
   return (
@@ -110,29 +152,48 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                       if (part.type === "text") {
                         const isLastMessage =
                           messageIndex === messages.length - 1;
+                        const isNotFirstMessage = messageIndex > 0;
                         return (
                           <div key={`${message.id}-${i}`}>
                             <Response>{part.text}</Response>
-                            {message.role === "assistant" && isLastMessage && (
-                              <Actions className="mt-2 opacity-0 transition-opacity group-hover:opacity-100">
-                                <Action
-                                  onClick={() => regenerate()}
-                                  label="Retry"
-                                  tooltip="Retry"
-                                >
-                                  <RefreshCcwIcon className="size-3" />
-                                </Action>
-                                <Action
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(part.text)
-                                  }
-                                  label="Copy"
-                                  tooltip="Copy"
-                                >
-                                  <CopyIcon className="size-3" />
-                                </Action>
-                              </Actions>
-                            )}
+                            {message.role === "assistant" &&
+                              isLastMessage &&
+                              isNotFirstMessage && (
+                                <Actions className="mt-2">
+                                  <Action
+                                    onClick={() => regenerate()}
+                                    label="Retry"
+                                    tooltip="Retry"
+                                  >
+                                    <RefreshCcwIcon className="size-3" />
+                                  </Action>
+                                  <Action
+                                    onClick={() =>
+                                      navigator.clipboard.writeText(part.text)
+                                    }
+                                    label="Copy"
+                                    tooltip="Copy"
+                                  >
+                                    <CopyIcon className="size-3" />
+                                  </Action>
+                                  <FeedbackDialog
+                                    messageId={message.id}
+                                    feedbackType="positive"
+                                    currentFeedback={
+                                      userFeedback.get(message.id) ?? null
+                                    }
+                                    onFeedback={handleFeedback}
+                                  />
+                                  <FeedbackDialog
+                                    messageId={message.id}
+                                    feedbackType="negative"
+                                    currentFeedback={
+                                      userFeedback.get(message.id) ?? null
+                                    }
+                                    onFeedback={handleFeedback}
+                                  />
+                                </Actions>
+                              )}
                           </div>
                         );
                       }
@@ -183,7 +244,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
             value={input}
           />
           <PromptInputToolbar>
-            <PromptInputSubmit disabled={!input} status={status} />
+            <PromptInputSubmit disabled={!input || !userId} status={status} />
           </PromptInputToolbar>
         </PromptInput>
       </div>
