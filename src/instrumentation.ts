@@ -1,8 +1,10 @@
-import { NodeSDK } from "@opentelemetry/sdk-node";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
-const sdk = new NodeSDK({
-  serviceName: "langfuse-docs",
-  spanProcessors: [new LangfuseSpanProcessor()],
-});
-sdk.start();
+export function register() {
+  const traceProvider = new NodeTracerProvider({
+    spanProcessors: [new LangfuseSpanProcessor()],
+  });
+
+  traceProvider.register();
+}
