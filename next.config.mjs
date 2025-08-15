@@ -1,6 +1,6 @@
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
-import NextBundleAnalyzer from '@next/bundle-analyzer'
+import NextBundleAnalyzer from '@next/bundle-analyzer';
 
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -47,6 +47,7 @@ const nextraConfig = withNextra({
     'react-syntax-highlighter',
     'geist'
   ],
+
   images: {
     remotePatterns: [
       {
