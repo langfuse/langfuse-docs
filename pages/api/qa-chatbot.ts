@@ -1,5 +1,4 @@
 import { POST } from "../../components/qaChatbot/apiHandler";
-export { maxDuration } from "../../components/qaChatbot/apiHandler";
 
 export const config = { runtime: "edge" };
 

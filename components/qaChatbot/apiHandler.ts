@@ -6,7 +6,6 @@ import {
   experimental_createMCPClient as createMCPClient,
   MCPTransport,
   stepCountIs,
-  smoothStream,
 } from "ai";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 
@@ -37,10 +36,6 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(10),
-    // experimental_transform: smoothStream({
-    //   delayInMs: 20, // optional: defaults to 10ms
-    //   chunking: "line", // optional: defaults to 'word'
-    // }),
     onFinish: async () => {
       await mcpClient.close();
     },
@@ -51,6 +46,3 @@ export async function POST(req: Request) {
     sendReasoning: true,
   });
 }
-
-// Export a maxDuration for the Edge function using this handler
-export const maxDuration = 60;
