@@ -96,7 +96,9 @@ First we create our application runner helper function. This function will be ca
   how to instrument the framework you are using.
 </Callout>
 
-<Tabs items={["Python SDK v3", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
+import { LangTab } from '@/components/LangTab'
+
+<LangTab items={["Python SDK v3", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
 <Tab>
 {/* PYTHON SDK v3 */}
 
@@ -314,13 +316,13 @@ Please refer to the [integrations](/docs/integrations/overview) page for details
 
 </Tab>
 
-</Tabs>
+ </LangTab>
 
 ### Run experiment on dataset
 
 When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
 
-<Tabs items={["Python SDK v3",  "JS/TS", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK"]}>
+<LangTab items={["Python SDK v3", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
 <Tab>
 
 You may then execute that LLM-app for each dataset item to create a dataset run:
@@ -488,7 +490,13 @@ await langfuse.flushAsync();
 ```
 
 </Tab>
-</Tabs>
+<Tab>
+{/* OTHER FRAMEWORKS */}
+
+Please refer to the [integrations](/docs/integrations/overview) page for details on how to instrument the framework you are using.
+
+</Tab>
+</LangTab>
 
 If you want to learn more about how adding evaluation scores from the code works, please refer to the docs:
 
