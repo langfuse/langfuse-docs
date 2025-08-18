@@ -3,7 +3,7 @@ export default {
   setup: "Setup",
   instrumentation: "Instrumentation",
   evaluation: "Evaluation",
-  "advanced-configuration": "Advanced Configuration",
+  "advanced-usage": "Advanced usage",
   "upgrade-path": "Upgrade Path",
   "troubleshooting-and-faq": "Troubleshooting & FAQ",
   reference: {
