@@ -56,7 +56,11 @@ langfuse.update_prompt(
 Use the JS/TS SDK to assign labels to a prompt when creating a new prompt version.
 
 ```ts {5}
-await langfuse.createPrompt({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.prompt.create({
   name: "movie-critic",
   type: "text",
   prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
@@ -67,8 +71,7 @@ await langfuse.createPrompt({
 Alternatively, you can also update the labels of an existing prompt version using the JS/TS SDK:
 
 ```ts {5}
-langfuse = Langfuse();
-await langfuse.updatePrompt({
+await langfuse.prompt.update({
   name: "movie-critic",
   version: 1,
   newLabels: ["john", "doe"],
@@ -114,21 +117,22 @@ prompt = langfuse.get_prompt("movie-critic", label="latest")
 <Tab>
 
 ```ts
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client"
 
-// Initialize the Langfuse client
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient()
 
 // Get specific version of a prompt (here version 1)
-const prompt = await langfuse.getPrompt("movie-critic", 1);
+const prompt = await langfuse.prompt.get("movie-critic", {
+  version: 1
+});
 
 // Get specific label
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   label: "staging",
 });
 
 // Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   label: "latest",
 });
 ```

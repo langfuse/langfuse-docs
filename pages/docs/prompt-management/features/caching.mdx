@@ -159,8 +159,12 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=300)
 <Tab>
 
 ```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
 // Get current `production` version and cache prompt for 5 minutes
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   cacheTtlSeconds: 300,
 });
 ```
@@ -188,12 +192,12 @@ prompt = langfuse.get_prompt("movie-critic", cache_ttl_seconds=0, label="latest"
 <Tab>
 
 ```ts
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   cacheTtlSeconds: 0,
 });
 
 // Common in non-production environments, no cache + latest version
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   cacheTtlSeconds: 0,
   label: "latest",
 });

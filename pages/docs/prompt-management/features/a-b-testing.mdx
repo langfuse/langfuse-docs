@@ -62,20 +62,22 @@ result_text = response.choices[0].message.content
 <Tab>
 
 ```js
-import { Langfuse, observeOpenAI } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+
 import OpenAI from "openai";
 
 // Requires environment variables for initialization
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 // Create and wrap OpenAI client
 const openai = observeOpenAI(new OpenAI());
 
 // Fetch prompt versions
-const promptA = await langfuse.getPrompt("my-prompt-name", undefined, {
+const promptA = await langfuse.prompt.get("my-prompt-name", {
   label: "prod-a",
 });
-const promptB = await langfuse.getPrompt("my-prompt-name", undefined, {
+const promptB = await langfuse.prompt.get("my-prompt-name", {
   label: "prod-b",
 });
 
