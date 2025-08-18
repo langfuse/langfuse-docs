@@ -57,6 +57,10 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+<Callout type="info">
+If you would like to exclude Langfuse spans from being sent to third-party observability backends configured in your OpenTelemetry setup, see [the documentation on isolating the Langfuse tracer provider](#isolated-tracer-provider).
+</Callout>
+
 ## Sampling
 
 Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
@@ -114,6 +118,17 @@ const scoringTraceId = await createTraceId(externalId);
 // scoringTraceId will be the same as langfuseTraceId
 ```
 
+You may also access the current active trace ID via the `getActiveTraceId` function:
+
+```
+import { startSpan, getActiveTraceId } from "@langfuse/tracing";
+
+await startSpan('run', async (span) => {
+    const traceId = getActiveTraceId();
+    console.log(`Current trace ID: ${traceId}`);
+});
+```
+
 ## Logging
 
 You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
@@ -169,6 +184,35 @@ export async function handler(event, context) {
   await langfuseSpanProcessor.forceFlush();
 }
 ```
+
+## Isolated tracer provider
+
+The Langfuse JS SDK uses the global OpenTelemetry TracerProvider to attach its span processor and create tracers that emit spans. This means that if you have an existing OpenTelemetry setup with another destination configured for your spans (e.g., Datadog), you will see Langfuse spans in those third-party observability backends as well.
+
+If you'd like to avoid sending Langfuse spans to third-party observability backends in your existing OpenTelemetry setup, you will need to use an isolated OpenTelemetry TracerProvider that is separate from the global one.
+
+<Callout type="info">
+If you would like to simply limit the spans that are sent to Langfuse and you have no third-party observability backend where you'd like to exclude Langfuse spans from, [see filtering spans instead](#filtering-spans).
+</Callout>
+
+<Callout type="warning" title="Isolated TracerProvider may break trace trees">
+Using an isolated TracerProvider may break the parent-child relationships in your traces, as all TracerProviders still share the same active span context. For example, if you have an active parent span from the global TracerProvider but children from an isolated TracerProvider, you may see "orphaned" observations in the Langfuse UI. Consider the impact on trace structure when configuring an isolated tracer provider.
+</Callout>
+
+```typescript /setLangfuseTracerProvider/ /LangfuseSpanProcessor/ /langfuseTracerProvider/
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
+
+// Create a new TracerProvider and register the LangfuseSpanProcessor
+// do not set this TracerProvider as the global TracerProvider
+const langfuseTracerProvider = new NodeTracerProvider(
+  spanProcessors: [new LangfuseSpanProcessor()],
+)
+
+// Register the isolated TracerProvider
+setLangfuseTracerProvider(langfuseTracerProvider)
+```
+
 ## Multi-project Setup (Experimental)
 
 You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
