@@ -11,7 +11,7 @@ To prevent sensitive data from being sent to Langfuse, you can provide a `mask` 
 
 The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
 
-```typescript filename="instrumentation.ts" /mask:/
+```ts filename="instrumentation.ts" /mask:/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -42,7 +42,7 @@ You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProc
 Filtering spans may break the parent-child relationships in your traces. For example, if you filter out a parent span but keep its children, you may see "orphaned" observations in the Langfuse UI. Consider the impact on trace structure when configuring `shouldExportSpan`.
 </Callout>
 
-```typescript filename="instrumentation.ts" /shouldExportSpan/
+```ts filename="instrumentation.ts" /shouldExportSpan/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
 
@@ -67,7 +67,7 @@ Langfuse respects OpenTelemetry's sampling decisions. You can configure a sample
 
 Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
 
-```typescript filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
+```ts filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
@@ -158,7 +158,7 @@ In short-lived environments like serverless functions (e.g., Vercel Functions, A
 
 You can export the processor from your OTEL SDK setup file.
 
-```typescript filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -174,7 +174,7 @@ sdk.start();
 
 Then, in your serverless function handler, call `forceFlush()` before the function exits.
 
-```typescript filename="handler.ts"
+```ts filename="handler.ts"
 import { langfuseSpanProcessor } from "./instrumentation";
 
 export async function handler(event, context) {
@@ -221,7 +221,7 @@ You can configure the SDK to send traces to multiple Langfuse projects. This is 
 The multi-project setup is experimental and may change in the future. Please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) if you have any feedback.
 </Callout>
 
-```typescript filename="instrumentation.ts"
+```ts filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 

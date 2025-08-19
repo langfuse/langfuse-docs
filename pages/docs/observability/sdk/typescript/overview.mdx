@@ -42,7 +42,7 @@ Add your Langfuse credentials to your environment variables. Make sure that you 
 
 Create a file named `instrumentation.ts` to initialize the OpenTelemetry SDK. The **`LangfuseSpanProcessor`** is the key component that sends traces to Langfuse.
 
-```typescript filename="instrumentation.ts" /LangfuseSpanProcessor/
+```ts filename="instrumentation.ts" /LangfuseSpanProcessor/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -55,7 +55,7 @@ sdk.start();
 
 Import the `instrumentation.ts` file at the very top of your application's entry point (e.g., `index.ts`).
 
-```typescript filename="index.ts"
+```ts filename="index.ts"
 import "./instrumentation"; // Must be the first import
 ```
 
@@ -65,7 +65,7 @@ Learn more about setting up OpenTelemetry [here](/docs/observability/sdk/typescr
 
 Use the `startActiveSpan` function to start a trace. This function takes a callback and automatically manages the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
 
-```typescript filename="index.ts" /startActiveSpan/
+```ts filename="index.ts" /startActiveSpan/
 import "./instrumentation";
 import { startActiveSpan } from "@langfuse/tracing";
 
