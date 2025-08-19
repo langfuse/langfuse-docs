@@ -18,6 +18,7 @@ import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import Image from "next/image";
 import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
+import { LangTabs } from "./components/LangTabs";
 
 const config: DocsThemeConfig = {
   logo: <Logo />,
@@ -183,6 +184,7 @@ const config: DocsThemeConfig = {
   components: {
     Frame,
     Tabs,
+    LangTabs, // with state management
     Tab: ({
       children,
       ...props
