@@ -492,6 +492,9 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/dataset-runs/run-via-ui", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/evaluation/dataset-runs/run-via-sdk", "/docs/evaluation/dataset-runs/remote-run"],
 
+  // Redirect preview URL of JS SDK v4 - no longer necessary once merged to main
+  ["/docs/observability/sdk/typescript/sdk-v4", "/docs/observability/sdk/typescript/overview"],
+
 ];
 
 const permanentRedirects = []

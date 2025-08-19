@@ -21,7 +21,11 @@ _See [Python SDK](/docs/sdk/python/sdk-v3) docs for details on how to initialize
 <Tab>
 
 ```ts
-langfuse.createDataset({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.api.datasets.create({
   name: "<dataset_name>",
   // optional description
   description: "My first dataset",

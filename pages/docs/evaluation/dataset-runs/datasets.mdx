@@ -82,7 +82,11 @@ langfuse.create_dataset_item(
 <Tab>
 
 ```ts
-langfuse.createDatasetItem({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.api.datasetItems.create({
   datasetName: "<dataset_name>",
   input: { text: "hello world" },
   expectedOutput: { text: "hello world" },
@@ -130,7 +134,11 @@ langfuse.create_dataset_item(
 You can upsert items by providing the `id` of the item you want to update.
 
 ```ts
-langfuse.createDatasetItem({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.api.datasetItems.create({
   id: "<item_id>",
   // example: update status to "ARCHIVED"
   status: "ARCHIVED",
