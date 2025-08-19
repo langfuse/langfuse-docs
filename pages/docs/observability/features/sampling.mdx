@@ -11,8 +11,8 @@ You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environm
 
 The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
-<Tab>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
+<Tab title="Python SDK (v3)">
 With Python SDK v3, you can configure sampling when initializing the client:
 
 ```python
@@ -46,7 +46,7 @@ def process_data():
 If a trace is not sampled, none of its observations (spans or generations) or associated scores will be sent to Langfuse, which can significantly reduce data volume for high-traffic applications.
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -77,20 +77,30 @@ trace = langfuse.trace(
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
 
-```ts
-import { Langfuse } from "langfuse";
+Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
 
-const langfuse = new Langfuse({
-  sampleRate: 0.5,
+Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
+
+```ts filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  // Sample 20% of all traces
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessors: [new LangfuseSpanProcessor()],
 });
+
+sdk.start();
 ```
 
-See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
+For more advanced sampling strategies, refer to the [OpenTelemetry JS Sampling Documentation](https://opentelemetry.io/docs/languages/js/sampling/).
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (Python v2)">
 
 <Callout type="info">
 
@@ -119,7 +129,7 @@ completion = openai.chat.completions.create(
 ```
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (JS/TS)">
 
 ```ts
 import OpenAI from "openai";
@@ -136,7 +146,7 @@ See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for mo
 
 </Tab>
 
-<Tab>
+<Tab title="Langchain (Python v2)">
 
 <Callout type="info">
 
@@ -160,7 +170,7 @@ handler = CallbackHandler(
 
 </Tab>
 
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 ```ts
 import { CallbackHandler } from "langfuse-langchain";
@@ -174,7 +184,7 @@ See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more
 
 </Tab>
 
-<Tab>
+<Tab title="Vercel AI SDK (JS/TS)">
 
 When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sdk)
 

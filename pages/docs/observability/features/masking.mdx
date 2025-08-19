@@ -21,8 +21,8 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
-<Tab>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tab title="Python SDK (v3)">
 
 Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
 
@@ -91,7 +91,7 @@ with langfuse.start_as_current_span(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 Define a masking function:
 
@@ -136,34 +136,38 @@ langfuse.flush()
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
 
-```typescript
-import { Langfuse } from "langfuse";
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
 
-function maskingFunction(params: { data: any }) {
-  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
-    return "REDACTED";
-  }
+The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
 
-  return params.data;
-}
+```ts filename="instrumentation.ts" /mask:/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 
-const langfuse = new Langfuse({ mask: maskingFunction });
-
-const trace = langfuse.trace({
-  output: "SECRET_DATA",
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    // A simple regex to mask credit card numbers
+    const maskedData = data.replace(
+      /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
+      "***MASKED_CREDIT_CARD***"
+    );
+    return maskedData;
+  },
 });
 
-await langfuse.flushAsync();
+const sdk = new NodeSDK({
+  spanProcessors: [spanProcessor],
+});
 
-// The trace output in Langfuse will have the output masked as "REDACTED".
+sdk.start();
 ```
 
-See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+See [JS/TS SDK docs](/docs/observability/sdk/typescript/advanced-usage#masking) for more details.
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (Python v2)">
 
 <Callout type="info">
 
@@ -227,7 +231,7 @@ fn()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (Python v2)">
 <Callout type="info">
 
 When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
@@ -276,7 +280,7 @@ fn()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
 

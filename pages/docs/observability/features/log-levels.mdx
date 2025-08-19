@@ -13,8 +13,8 @@ In addition to the level, you can also include a `statusMessage` to provide addi
   ![Trace log level and statusMessage](/images/docs/trace-log-level.png)
 </Frame>
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI SDK", "Langchain"]}>
-<Tab>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "OpenAI SDK", "Langchain"]}>
+<Tab title="Python SDK (v3)">
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
@@ -84,7 +84,7 @@ with langfuse.start_as_current_generation(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -122,30 +122,77 @@ trace.span(
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import { startActiveSpan, startGeneration, updateActiveSpan } from "@langfuse/tracing";
+ 
+await startActiveSpan("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" }
+  });
 
-const trace = langfuse.trace();
+  updateActiveSpan({
+    level: "WARNING",
+    statusMessage: "This is a warning"
+  });
 
-// Add an observation (span) with a level and status message
-trace.span({
-  level: "WARNING",
-  statusMessage: "This is a warning",
 });
+```
+
+When using the `observe` wrapper:
+
+```ts
+import { observe, updateActiveSpan } from "@langfuse/tracing";
+ 
+// An existing function
+async function fetchData(source: string) {
+
+  updateActiveSpan({
+    level: "WARNING",
+    statusMessage: "This is a warning"
+  });
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+ 
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper"
+});
+ 
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startSpan } from "@langfuse/tracing";
+
+const span = startSpan('manual-observation', {
+  input: { query: 'What is the capital of France?' },
+});
+
+span.update({
+  level: "WARNING",
+  statusMessage: "This is a warning"
+});
+
+span.end({ output: 'Paris'});
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
-<Tab>
+<Tab title="OpenAI SDK">
 
 When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), `level` and `statusMessage` are automatically set based on the OpenAI API response. See [example](/integrations/model-providers/openai-py).
 
 </Tab>
-<Tab>
+<Tab title="Langchain">
 
 When using the [LangChain Integration](/integrations/frameworks/langchain), `level` and `statusMessage` are automatically set for each step in the LangChain pipeline.
 

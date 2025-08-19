@@ -49,8 +49,8 @@ If available in the LLM response, ingesting usage and/or cost is the most accura
 
 Many of the Langfuse integrations automatically capture usage details and cost details data from the LLM response. If this does not work as expected, please create an [issue](/issue) on GitHub.
 
-<Tabs items={["Python SDK v3 (Decorator)", "Python SDK v3 (Manual)", "Python SDK v2 (Decorator)", "Python SDK v2 (low-level)", "JS"]}>
-<Tab>
+<Tabs items={["Python SDK v3 (Decorator)", "Python SDK v3 (Manual)", "Python SDK v2 (Decorator)", "Python SDK v2 (low-level)", "JS/TS SDK"]}>
+<Tab title="Python SDK v3 (Decorator)">
 
 ```python
 from langfuse import observe, get_client
@@ -107,7 +107,7 @@ main()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK v3 (Manual)">
 
 ```python
 from langfuse import get_client
@@ -147,7 +147,7 @@ with langfuse.start_as_current_generation(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK v2 (Decorator)">
 
 ```python
 @observe(as_type="generation")
@@ -198,7 +198,7 @@ main()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK v2 (low-level)">
 
 ```python
 generation = langfuse.generation(
@@ -224,30 +224,121 @@ generation = langfuse.generation(
 You can also update the usage and cost via `generation.update()` and `generation.end()`.
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
 
-```ts
-const generation = langfuse.generation({
-  // ...
-  usageDetails: {
-    // usage
-    input: int,
-    output: int,
-    cache_read_input_tokens: int,
-    total: int, // optional, it is derived from input + cache_read_input_tokens + output
-  },
-  costDetails: {
-    // usd cost
-    input: float,
-    cache_read_input_tokens: float,
-    output: float,
-    total: float, // optional, it is derived from input + cache_read_input_tokens + output
-  },
-  // ...
+When using the context manager:
+
+```ts /usageDetails/, /costDetails/
+import { startActiveSpan, startGeneration, updateActiveTrace, updateActiveSpan } from "@langfuse/tracing";
+ 
+await startActiveSpan("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" }
+  });
+ 
+  // This generation will automatically be a child of "user-request"
+  const generation = startGeneration("llm-call", {
+    model: "gpt-4",
+    input: [{ role: "user", content: "What is the capital of France?" }],
+  });
+ 
+  // ... LLM call logic ...
+ 
+  generation.end({
+    output: { content: "The capital of France is Paris." },
+    usageDetails: {
+      input: 10,
+      output: 5,
+      cache_read_input_tokens: 2,
+      some_other_token_count: 10,
+      total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+    },
+    costDetails: {
+      // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
+      input: 1,
+      output: 1,
+      cache_read_input_tokens: 0.5,
+      some_other_token_count: 1,
+      total: 3.5,
+  }
+  });
 });
 ```
 
-You can also update the usage and cost via `generation.update()` and `generation.end()`.
+When using the `observe` wrapper:
+
+```ts /usageDetails/, /costDetails/
+import { observe, updateActiveGeneration } from "@langfuse/tracing";
+ 
+// An existing function
+async function fetchData(source: string) {
+  updateActiveGeneration({ 
+    usageDetails: {
+      input: 10,
+      output: 5,
+      cache_read_input_tokens: 2,
+      some_other_token_count: 10,
+      total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+    },
+    costDetails: {
+      // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
+      input: 1,
+      output: 1,
+      cache_read_input_tokens: 0.5,
+      some_other_token_count: 1,
+      total: 3.5,
+    } 
+})
+  
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+ 
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper",
+  asType: "generation",
+});
+
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts /usageDetails/, /costDetails/
+const span = startSpan('manual-observation', {
+  input: { query: 'What is the capital of France?' },
+});
+
+const generation = span.startGeneration('llm-call', {
+  model: 'gpt-4',
+  input: [{ role: 'user', content: 'What is the capital of France?' }],
+  output: { content: 'The capital of France is Paris.' },
+});
+
+generation.end({
+  output: { content: 'The capital of France is Paris.' },
+  usageDetails: {
+    input: 10,
+    output: 5,
+    cache_read_input_tokens: 2,
+    some_other_token_count: 10,
+    total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+  },
+  costDetails: {
+    // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
+    input: 1,
+    output: 1,
+    cache_read_input_tokens: 0.5,
+    some_other_token_count: 1,
+    total: 3.5,
+  }
+});
+
+span.end({ output: 'Successfully answered user request.', sessionId: '123' });
+```
+
+You can also update the usage and cost via `generation.update()`.
 
 </Tab>
 </Tabs>

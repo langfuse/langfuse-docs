@@ -12,8 +12,8 @@ Each trace has a unique URL that you can use to share it with others or to acces
 
 Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
-<Tab>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tab title="Python SDK (v3)">
 When using the `@observe()` decorator:
 
 ```python
@@ -50,7 +50,7 @@ with langfuse.start_as_current_span(name="process-request") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -72,14 +72,22 @@ trace.get_trace_url()
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
 ```ts
-const trace = langfuse.trace(...)
-trace.getTraceUrl()
+import { LangfuseClient } from "@langfuse/client";
+import { startSpan } from "@langfuse/tracing";
+ 
+const langfuse = new LangfuseClient();
+ 
+const rootSpan = startSpan("my-trace");
+const traceUrl = await langfuse.getTraceUrl(rootSpan.traceId)
+
+console.log("Trace URL: ", traceUrl);
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (Python v2)">
 
 <Callout type="info">
 
@@ -115,7 +123,7 @@ handler.get_trace_url()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/integrations/frameworks/langchain#interoperability)).
 
@@ -151,8 +159,8 @@ You can make a trace `public` to share it via a public link. This allows others 
 
 _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99_
 
-<Tabs items={["Langfuse UI", "Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
-<Tab>
+<Tabs items={["Langfuse UI", "Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK"]}>
+<Tab title="Langfuse UI">
 
 <CloudflareVideo
   videoId="756231d6f8b10b5656ca5ad35c6bd7b1"
@@ -161,7 +169,7 @@ _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d
 />
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v3)">
 
 When using the `@observe()` decorator:
 
@@ -194,7 +202,7 @@ with langfuse.start_as_current_span(name="process-request") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 When using the `@observe()` decorator:
 
@@ -222,13 +230,18 @@ trace = langfuse.trace(
 
 </Tab>
 
-<Tab>
-```diff
-const trace = langfuse.trace({
-    ...
-+   public: true,
-    ...
+<Tab title="JS/TS SDK">
+
+```ts /public: true/
+import { startSpan, updateTrace } from "@langfuse/tracing";
+
+const rootSpan = startSpan("my-trace");
+
+rootSpan.updateTrace({
+  public: true,
 });
+
+rootSpan.end();
 ```
 
 </Tab>

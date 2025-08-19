@@ -39,8 +39,8 @@ Trace IDs in Langfuse:
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
-<Tab>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
+<Tab title="Python SDK (v3)">
 The Python SDK v3 uses W3C Trace Context IDs by default, which are:
 
 - 32-character lowercase hexadecimal string for trace IDs
@@ -129,7 +129,7 @@ with langfuse.start_as_current_span(name="outer-operation") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -168,38 +168,49 @@ trace = langfuse.trace(
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When starting a new trace by setting a `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist but is only used for trace ID inheritance of the created observation.
+
+You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
+
+```typescript
+import { createTraceId, startSpan } from "@langfuse/tracing";
+
+const externalId = "support-ticket-54321";
+
+// Generate a valid, deterministic traceId from the external ID
+const langfuseTraceId = await createTraceId(externalId);
+
+// You can now start a new trace with this ID
+const rootSpan = startSpan("process-ticket", {}, {
+  parentSpanContext: {
+    traceId: langfuseTraceId,
+    spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+    traceFlags: 1 // mark trace as sampled
+  }
+});
+
+// Later, you can regenerate the same traceId to score or retrieve the trace
+const scoringTraceId = await createTraceId(externalId);
+// scoringTraceId will be the same as langfuseTraceId
+```
+
+You may also access the current active trace ID via the `getActiveTraceId` function:
 
 ```ts
-import { Langfuse } from "langfuse";
-import { v4 as uuidv4 } from "uuid";
+import { startSpan, getActiveTraceId } from "@langfuse/tracing";
 
-const langfuse = new Langfuse();
-
-// Create trace with custom ID
-const traceId = uuidv4();
-const trace = langfuse.trace({
-  id: traceId,
-  name: "chat-app-session",
-  userId: "user_123456789",
-  metadata: { user: "user@langfuse.com" },
-  tags: ["production"],
-});
-
-// Create observations with custom IDs
-const span = trace.span({
-  id: "custom-span-id",
-  name: "chat-interaction",
-});
-
-const generation = trace.generation({
-  id: "custom-generation-id",
-  name: "chat-completion",
+await startSpan('run', async (span) => {
+    const traceId = getActiveTraceId();
+    console.log(`Current trace ID: ${traceId}`);
 });
 ```
 
+Learn more in the [JS/TS SDK](/docs/observability/sdk/typescript/advanced-usage#managing-trace-and-observation-ids) docs.
+
 </Tab>
-<Tab>
+<Tab title="OpenTelemetry">
 
 When using [OpenTelemetry](/docs/opentelemetry/get-started), trace IDs are handled automatically by the OpenTelemetry SDK. You can access and set trace IDs using the OpenTelemetry context:
 
@@ -218,7 +229,7 @@ with tracer.start_as_current_span("my-operation") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (Python v2)">
 
 When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), you have two options for working with trace IDs:
 
@@ -273,7 +284,7 @@ The decorator approach is recommended when you want to:
 - Track the entire function execution, not just the OpenAI call
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (JS/TS)">
 
 ```ts
 import OpenAI from "openai";
@@ -296,7 +307,7 @@ const completion = await openai.chat.completions.create({
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (Python)">
 
 **Python SDK v3:**
 
@@ -400,7 +411,7 @@ The decorator approach is recommended when you want to:
 - Track the entire function execution, not just the Langchain operations
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 ```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
@@ -422,7 +433,7 @@ const chain = new LLMChain({
 ```
 
 </Tab>
-<Tab>
+<Tab title="LiteLLM">
 
 When using [LiteLLM](/integrations/frameworks/litellm-sdk):
 
