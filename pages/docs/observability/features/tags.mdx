@@ -7,8 +7,8 @@ sidebarTitle: Tags
 
 Tags allow you to categorize and filter traces. You can tag traces (1) when they are created using the Langfuse SDKs and integrations or (2) from the Langfuse UI. To tag a trace, add a list of tags to the tags field of the trace object. Tags are strings and a trace may have multiple tags.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)"]}>
-<Tab>
+<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)"]}>
+<Tab title="Python SDK (v3)">
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
 ```python
@@ -51,7 +51,7 @@ with langfuse.start_as_current_span(name="another-operation"):
 ```
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v2)">
 
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -79,21 +79,69 @@ trace = langfuse.trace(
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import { startActiveSpan, startGeneration, updateActiveTrace } from "@langfuse/tracing";
+ 
+await startActiveSpan("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" }
+  });
 
-const trace = langfuse.trace({
-  tags: ["tag-1", "tag-2"],
+  updateActiveTrace({
+    tags: ["tag-1", "tag-2"]
+  });
+
 });
+```
+
+When using the `observe` wrapper:
+
+```ts
+import { observe, updateActiveSpan } from "@langfuse/tracing";
+ 
+// An existing function
+async function fetchData(source: string) {
+
+  updateActiveTrace({
+    tags: ["tag-1", "tag-2"]
+  });
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+ 
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper"
+});
+ 
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startSpan } from "@langfuse/tracing";
+
+const span = startSpan('manual-observation', {
+  input: { query: 'What is the capital of France?' },
+});
+
+span.updateTrace({
+  tags: ['tag-1', 'tag-2']
+});
+
+span.end({ output: 'Paris'});
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (Python)">
 
 **Python SDK v3 - use metadata:**
 
@@ -154,7 +202,7 @@ fn()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (Python)">
 
 **Python SDK v3 - use metadata in chain invocation:**
 
@@ -219,7 +267,7 @@ fn()
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `tags` to the constructor:
 
