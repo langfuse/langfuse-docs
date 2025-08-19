@@ -265,7 +265,7 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient()
 
-await langfuse.score.create({
+langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
@@ -274,6 +274,9 @@ await langfuse.score.create({
   dataType: "NUMERIC", // optional, inferred if not provided
   comment: "Factually correct", // optional
 });
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>
@@ -285,7 +288,7 @@ import { LangfuseClient } from "@langfuse/client"
 
 const langfuse = new LangfuseClient()
 
-await langfuse.score.create({
+langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
@@ -294,6 +297,9 @@ await langfuse.score.create({
   dataType: "CATEGORICAL", // optional, inferred if not provided
   comment: "Factually correct", // optional
 });
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>
@@ -305,7 +311,7 @@ import { LangfuseClient } from "@langfuse/client"
 
 const langfuse = new LangfuseClient()
 
-await langfuse.score.create({
+langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
@@ -314,6 +320,9 @@ await langfuse.score.create({
   dataType: "BOOLEAN", // required, numeric values without data type would be inferred as NUMERIC
   comment: "Incorrect answer", // optional
 });
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>
@@ -516,7 +525,7 @@ import { LangfuseClient } from "@langfuse/client"
 
 const langfuse = new LangfuseClient()
 
-await langfuse.score.create({
+langfuse.score.create({
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "accuracy",
@@ -526,6 +535,9 @@ await langfuse.score.create({
   configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific min/max value range
   dataType: "NUMERIC", // optional, possibly inferred
 });
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>
@@ -537,7 +549,7 @@ import { LangfuseClient } from "@langfuse/client"
 
 const langfuse = new LangfuseClient()
 
-await langfuse.score.create({
+langfuse.score.create({
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "correctness",
@@ -547,6 +559,9 @@ await langfuse.score.create({
   configId: "12345-6565-3453654-43543", // optional, to ensure that a score maps to a specific category defined in a score config
   dataType: "CATEGORICAL", // optional, possibly inferred
 });
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>
@@ -558,7 +573,7 @@ import { LangfuseClient } from "@langfuse/client"
 
 const langfuse = new LangfuseClient()
 
-await langfuse.score.create({
+langfuse.score.create({
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "helpfulness",
@@ -568,6 +583,9 @@ await langfuse.score.create({
   configId: "93547-6565-3453654-43543", // optional, can be used to infer the score data type and validate the score value
   dataType: "BOOLEAN", // optional, possibly inferred
 });
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>

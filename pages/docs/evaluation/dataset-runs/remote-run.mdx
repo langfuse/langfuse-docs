@@ -40,7 +40,11 @@ dataset = get_client().get_dataset("<dataset_name>")
 {/* JS/TS SDK */}
 
 ```ts
-const dataset = await langfuse.getDataset("<dataset_name>");
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+const dataset = await langfuse.dataset.get("<dataset_name>");
 ```
 
 </Tab>
@@ -85,26 +89,27 @@ _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for more details._
 <Tab>
 {/* JS/TS SDK */}
 
+Please make sure you have [OpenTelemetry](/docs/observability/sdk/typescript/setup) set up for tracing the dataset runs.
 
-```ts filename="app.ts"
-const trace = langfuse.trace({
-  name: "my-AI-application-endpoint",
-});
- 
-// Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-4o",
-  input: messages,
-});
- 
-// Application code
-const chatCompletion = await llm.respond(prompt);
- 
-// End generation - sets endTime
-generation.end({
-  output: chatCompletion,
-});
+```typescript filename="app.ts"
+import { OpenAI } from "openai"
+
+import { LangfuseClient } from "@langfuse/client";
+import { startSpan } from "@langfuse/tracing";
+import { observeOpenAI } from "@langfuse/openai";
+
+const myLLMApplication = async (input: string) => {
+  return startActiveSpan("my-llm-application", async (span) => {
+    const output = await observeOpenAI(new OpenAI()).chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: input }],
+    });
+
+    span.update({ input, output: output.choices[0].message.content });
+
+    return [span, output] as const;
+  }
+};
 ```
 
 </Tab>
@@ -133,15 +138,19 @@ def my_llm_function(question):
 {/* LANGCHAIN (JS/TS) */}
 
 ```typescript filename="app.ts" /callbacks: [langfuseHandler]/
-import { CallbackHandler } from "langfuse-langchain";
-// Deno: import CallbackHandler from "https://esm.sh/langfuse-langchain";
+import { CallbackHandler } from "@langfuse/langchain";
  
-const langfuseHandler = new CallbackHandler();
- 
-// Your Langchain code
- 
-// Add Langfuse handler as callback to `run` or `invoke`
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+const myLLMApplication = async (input: string) => {
+  return startActiveSpan('my_llm_application', async (span) => {
+    // ... your Langchain code ...
+    const langfuseHandler = new CallbackHandler();
+    const output = await chain.invoke({ input }, { callbacks: [langfuseHandler] });
+
+    span.update({ input, output });
+
+    return [span, output] as const;
+  }
+}
 ```
 
 </Tab>
@@ -153,22 +162,22 @@ Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs
 
 ```ts filename="app.ts" 
 const runMyLLMApplication = async (input: string, traceId: string) => {
-  const output = await generateText({
-    model: openai("gpt-4o"),
-    maxTokens: 50,
-    prompt: input,
-    experimental_telemetry: {
-      isEnabled: true,
-      functionId: "vercel-ai-sdk-example-trace",
-      metadata: {
-        langfuseTraceId: traceId,
-        langfuseUpdateParent: true, // Update the parent trace with execution results as the trace was created manually to enable linking
+  return startActiveSpan("my_llm_application", async (span) => {
+    const output = await generateText({
+      model: openai("gpt-4o"),
+      maxTokens: 50,
+      prompt: input,
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: "vercel-ai-sdk-example-trace",
       },
-    },
-  });
-  return output;
-};
+    });
 
+    span.update({ input, output: output.text });
+
+    return [span, output] as const;
+  }
+};
 ```
 
 
@@ -321,28 +330,32 @@ _See [Python SDK v3](/docs/sdk/python/sdk-v3) docs for details on the new OpenTe
 <Tab>
 
 ```ts /for (const item of dataset.items)/
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
 for (const item of dataset.items) {
   // execute application function and get langfuseObject (trace/span/generation/event)
   // output also returned as it is used to evaluate the run
   // you can also link using ids, see sdk reference for details
-  const [langfuseObject, output] = await myLlmApplication.run(item.input);
+  const [span, output] = await myLlmApplication.run(item.input);
 
   // link the execution trace to the dataset item and give it a run_name
-  await item.link(langfuseObject, "<run_name>", {
+  await item.link(span, "<run_name>", {
     description: "My first run", // optional run description
     metadata: { model: "llama3" }, // optional run metadata
   });
 
   // Optionally: Add scores
-  langfuseObject.score({
+  langfuse.score.trace(span, {
     name: "<score_name>",
     value: myEvalFunction(item.input, output, item.expectedOutput),
     comment: "This is a comment", // optional, useful to add reasoning
   });
 }
 
-// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-await langfuse.flushAsync();
+// Flush the langfuse client to ensure all score data is sent to the server at the end of the experiment run
+await langfuse.flush();
 ```
 
 </Tab>
@@ -367,59 +380,66 @@ langfuse.flush()
 
 <Tab>
 
-```typescript /createDatasetItemHandler/ /for (const item of dataset.items)/
-import { Langfuse } from "langfuse";
-import { createDatasetItemHandler } from "langfuse-langchain";
+```typescript /item.link/ /langfuseHandler/ /for (const item of dataset.items)/
+import { LangfuseClient } from "@langfuse/client";
+import { CallbackHandler } from "@langfuse/langchain";
 ...
 
-const langfuse = new Langfuse()
+const langfuse = new LangfuseClient()
 const runName = "my-dataset-run";
 
 for (const item of dataset.items) {
-  // Create langchain handler that automatically links the execution trace to the dataset item run
-  const { handler, trace } = await createDatasetItemHandler({ item, runName, langfuseClient: langfuse });
+  const [span, output] = await startActiveSpan('my_llm_application', async (span) => {
+    // ... your Langchain code ...
+    const langfuseHandler = new CallbackHandler();
+    const output = await chain.invoke({ input: item.input }, { callbacks: [langfuseHandler] });
 
-  // Pass the callback handler when invoking the chain
-  await chain.invoke({ country: item.input }, { callbacks: [handler] });
+    span.update({ input: item.input, output });
+
+    return [span, output] as const;
+  });
+
+  await item.link(span, runName)
 
   // Optionally: Add scores
-  trace.score({
+  langfuse.score.trace(span, {
     name: "test-score",
     value: 0.5,
   });
 }
 
-await langfuse.flushAsync();
+await langfuse.flush();
 ```
 
 </Tab>
 <Tab>
 
 ```typescript /for (const item of dataset.items)/
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
 // iterate over the dataset items
 for (const item of dataset.items) {
-  // create a trace manually in order to pass id to vercel ai sdk for later linking to the dataset run
-  const trace = langfuse.trace({ name: "new experiment trace" });
-
   // run application on the dataset item input
-  const output = await runMyLLMApplication(item.input, trace.id);
+  const [span, output] = await runMyLLMApplication(item.input, trace.id);
 
   // link the execution trace to the dataset item and give it a run_name
-  await item.link(trace, "<run_name>", {
+  await item.link(span, "<run_name>", {
     description: "My first run", // optional run description
     metadata: { model: "gpt-4o" }, // optional run metadata
   });
 
   // Optionally: Add scores
-  trace.score({
+  langfuse.score.trace(span, {
     name: "<score_name>",
     value: myEvalFunction(item.input, output, item.expectedOutput),
     comment: "This is a comment", // optional, useful to add reasoning
   });
 }
 
-// Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-await langfuse.flushAsync();
+// Flush the langfuse client to ensure all score data is sent to the server at the end of the experiment run
+await langfuse.flush();
 ```
 
 </Tab>
