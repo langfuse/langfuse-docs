@@ -16,8 +16,6 @@ import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
 import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
-import Image from "next/image";
-import ProductHuntWhiteImage from "./public/images/producthunt-white.png";
 import { LangTabs } from "./components/LangTabs";
 
 const config: DocsThemeConfig = {
