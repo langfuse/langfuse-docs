@@ -429,7 +429,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "50k units / month included",
         "30 days data access",
         "2 users",
-        "Community support (Discord & GitHub)",
+        "Community support via GitHub",
       ],
       cta: "Sign up",
     },
@@ -454,7 +454,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
-        "Support via Email/Chat",
+        "Support via Chat",
       ],
       cta: "Sign up",
     },
@@ -476,7 +476,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited annotation queues",
         "High rate limits",
         "SOC2 & ISO27001 reports, BAA available (HIPAA)",
-        "Support via Slack",
+        "Support via Slack, Chat",
       ],
       addOn: {
         name: "Teams",
@@ -857,7 +857,8 @@ const sections: Section[] = [
       },
       {
         name: "Webhooks & Slack",
-        description: "Trigger webhooks for prompt changes and integrate with Slack",
+        description:
+          "Trigger webhooks for prompt changes and integrate with Slack",
         href: "/docs/prompt-management/features/webhooks-slack-integrations",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -1120,21 +1121,28 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Community (GitHub, Discord)",
+        name: "Community (GitHub)",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
-        name: "Chat & Email",
+        name: "Chat",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
-        name: "Private Slack/Discord channel",
+        name: "Email",
+        tiers: {
+          cloud: { Hobby: false, Core: false, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Private Slack channel",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1158,6 +1166,19 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Response time SLO",
+        description:
+          "Target response time for support requests via supported channels",
+        tiers: {
+          cloud: {
+            Hobby: "n/a",
+            Core: "48h",
+            Pro: "48h (24h with Teams add-on)",
+            Enterprise: "Custom",
+          },
         },
       },
       {
@@ -1826,15 +1847,15 @@ export default function Pricing({
                 {/* Special offers callout */}
                 <div className="mt-4 mb-4 text-center">
                   <div className="inline-flex items-center gap-6 px-4 py-2 bg-muted/30 rounded-full text-sm text-muted-foreground">
-                    <Link 
-                      href="/startups" 
+                    <Link
+                      href="/startups"
                       className="hover:text-primary transition-colors underline"
                     >
                       Startup discounts available
                     </Link>
                     <span className="text-muted-foreground/50">|</span>
-                    <Link 
-                      href="/research" 
+                    <Link
+                      href="/research"
                       className="hover:text-primary transition-colors underline"
                     >
                       Academic & research benefits
