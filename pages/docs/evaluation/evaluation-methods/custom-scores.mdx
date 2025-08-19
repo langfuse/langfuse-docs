@@ -261,7 +261,11 @@ langfuse.score(
 Numeric score values must be provided as float.
 
 ```ts
-await langfuse.score({
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient()
+
+await langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
@@ -277,7 +281,11 @@ await langfuse.score({
 Categorical score values must be provided as strings.
 
 ```ts
-await langfuse.score({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
@@ -293,7 +301,11 @@ await langfuse.score({
 Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```ts
-await langfuse.score({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.score.create({
   id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
   traceId: message.traceId,
   observationId: message.generationId, // optional
@@ -500,7 +512,11 @@ langfuse.score(
 When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
 
 ```ts
-await langfuse.score({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.score.create({
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "accuracy",
@@ -517,7 +533,11 @@ await langfuse.score({
 Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
 
 ```ts
-await langfuse.score({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.score.create({
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "correctness",
@@ -534,7 +554,11 @@ await langfuse.score({
 When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
 
 ```ts
-await langfuse.score({
+import { LangfuseClient } from "@langfuse/client"
+
+const langfuse = new LangfuseClient()
+
+await langfuse.score.create({
   traceId: message.traceId,
   observationId: message.generationId, // optional
   name: "helpfulness",

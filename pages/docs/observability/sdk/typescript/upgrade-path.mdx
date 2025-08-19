@@ -77,7 +77,25 @@ const traceUrl = await langfuseClient.getTraceUrl(traceId);
 
 ## Scoring
 
-See [scoring section above](#scoring) for new scoring methods.
+- **Import**: The import of the Langfuse client is now:
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+```
+
+- **Usage**: The usage of the Langfuse client is now:
+
+```typescript
+const langfuse = new LangfuseClient();
+
+await langfuse.score.create({
+  traceId: "trace_id_here",
+  name: "accuracy",
+  value: 0.9,
+});
+```
+
+See [custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for new scoring methods.
 
 ## Datasets
 
