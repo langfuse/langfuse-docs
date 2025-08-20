@@ -13,7 +13,9 @@ import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
 import { trace } from "@opentelemetry/api";
 
-const langfuseClient = new LangfuseClient();
+const langfuseClient = new LangfuseClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+});
 const tracedGetPrompt = observe(
   langfuseClient.prompt.get.bind(langfuseClient.prompt),
   {
@@ -71,7 +73,7 @@ const handler = async (req: Request) => {
     stopWhen: stepCountIs(10),
     onFinish: async (result) => {
       updateActiveTrace({
-        output: result,
+        output: result.content,
       });
       trace.getActiveSpan().end();
 
