@@ -1,5 +1,11 @@
 export default {
-  "sdk-v3": "OTEL-based SDK (v3)",
+  overview: "Overview",
+  setup: "Setup",
+  instrumentation: "Instrumentation",
+  evaluation: "Evaluation",
+  "advanced-usage": "Advanced usage",
+  "upgrade-path": "Upgrade Path",
+  "troubleshooting-and-faq": "Troubleshooting & FAQ",
   reference: {
     title: "Reference ↗",
     href: "https://python.reference.langfuse.com",

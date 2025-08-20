@@ -1,0 +1,112 @@
+---
+title: Setup of the Langfuse Python SDK
+description: Setup the Langfuse Python SDK for tracing your application and ingesting data into Langfuse.
+category: SDKs
+---
+
+## Setup
+
+### Installation
+
+To install the v3 SDK, run:
+
+```bash
+pip install langfuse
+```
+
+### Initialize Client
+
+Begin by initializing the `Langfuse` client. You must provide your Langfuse public and secret keys. These can be passed as constructor arguments or set as environment variables (recommended).
+
+If you are self-hosting Langfuse or using a data region other than the default (EU, `https://cloud.langfuse.com`), ensure you configure the `host` argument or the `LANGFUSE_HOST` environment variable (recommended).
+
+<Tabs items={["via Environment Variables (recommended)", "via Constructor Arguments"]}>
+<Tab>
+```bash filename=".env"
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_HOST="https://cloud.langfuse.com" # US region: https://us.cloud.langfuse.com
+```
+
+</Tab>
+
+<Tab>
+
+```python filename="Initialize client"
+from langfuse import Langfuse
+
+# Initialize with constructor arguments
+
+langfuse = Langfuse(
+    public_key="YOUR_PUBLIC_KEY",
+    secret_key="YOUR_SECRET_KEY",
+    host="https://cloud.langfuse.com" # US region: https://us.cloud.langfuse.com
+)
+```
+
+<Callout type="info">
+
+If you are reinstantiating Langfuse client with different constructor arguments but the same `public_key`, the client will reuse the same instance and ignore the new arguments.
+
+</Callout>
+
+</Tab>
+
+</Tabs>
+
+<details>
+<summary>
+Verify connection with `langfuse.auth_check()`
+</summary>
+
+You can also verify your connection to the Langfuse server using `langfuse.auth_check()`. We do not recommend using this in production as this adds latency to your application.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Verify connection, do not use in production as this is a synchronous call
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+</details>
+
+Key configuration options:
+
+| Constructor Argument        | Environment Variable                 | Description                                                                                                                           | Default value                  |
+| --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `public_key`                | `LANGFUSE_PUBLIC_KEY`                | Your Langfuse project's public API key. **Required.**                                                                                 |                                |
+| `secret_key`                | `LANGFUSE_SECRET_KEY`                | Your Langfuse project's secret API key. **Required.**                                                                                 |                                |
+| `host`                      | `LANGFUSE_HOST`                      | The API host for your Langfuse instance.                                                                                              | `"https://cloud.langfuse.com"` |
+| `timeout`                   | `LANGFUSE_TIMEOUT`                   | Timeout in seconds for API requests.                                                                                                  | `5`                           |
+| `httpx_client`              | -                                    | Custom `httpx.Client` for making non-tracing HTTP requests.                                                                           |                                |
+| `debug`                     | `LANGFUSE_DEBUG`                     | Enables debug mode for more verbose logging. Set to `True` or `"True"`.                                                               | `False`                        |
+| `tracing_enabled`           | `LANGFUSE_TRACING_ENABLED`           | Enables or disables the Langfuse client. If `False`, all observability calls become no-ops.                                           | `True`                         |
+| `flush_at`                  | `LANGFUSE_FLUSH_AT`                  | Number of spans to batch before sending to the API.                                                                                   | `512`                          |
+| `flush_interval`            | `LANGFUSE_FLUSH_INTERVAL`            | Time in seconds between batch flushes.                                                                                                | `5`                            |
+| `environment`               | `LANGFUSE_TRACING_ENVIRONMENT`       | Environment name for tracing (e.g., "development", "staging", "production"). Must be lowercase alphanumeric with hyphens/underscores. | `"default"`                    |
+| `release`                   | `LANGFUSE_RELEASE`                   | [Release](/docs/tracing-features/releases-and-versioning) version/hash of your application. Used for grouping analytics.              |                                |
+| `media_upload_thread_count` | `LANGFUSE_MEDIA_UPLOAD_THREAD_COUNT` | Number of background threads for handling media uploads.                                                                              | `1`                            |
+| `sample_rate`               | `LANGFUSE_SAMPLE_RATE`               | [Sampling](/docs/tracing-features/sampling) rate for traces (float between 0.0 and 1.0). `1.0` means 100% of traces are sampled.      | `1.0`                          |
+| `mask`                      | -                                    | A function `(data: Any) -> Any` to [mask](/docs/tracing-features/masking) sensitive data in traces before sending to the API.         |                                |
+|       | `LANGFUSE_MEDIA_UPLOAD_ENABLED`      | Whether to upload media files to Langfuse S3. In self-hosted environments this might be useful to disable.                                                                               | `True`                         |
+
+### Accessing the Client Globally
+
+The Langfuse client is a singleton. It can be accessed anywhere in your application using the `get_client` function.
+
+Optionally, you can initialize the client via `Langfuse()` to pass in configuration options (see above). Otherwise, it is created automatically when you call `get_client()` based on environment variables.
+
+```python
+from langfuse import get_client
+
+# Optionally, initialize the client with configuration options
+# langfuse = Langfuse(public_key="pk-lf-...", secret_key="sk-lf-...")
+
+# Get the default client
+client = get_client()
+```
