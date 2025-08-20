@@ -13,7 +13,7 @@ Langfuse allows you to bring your own trace IDs (e.g., messageId, traceId, corre
 
 <Callout>
 
-By default, Langfuse assigns random IDs (uuid, cuid) to all logged events. For the new OTEL-based SDKs (Python v3), Langfuse assigns random 32 hexchar trace IDs and 16 hexchar observation IDs.
+By default, Langfuse assigns random IDs (uuid, cuid) to all logged events. For the OTEL-based SDKs, Langfuse assigns random 32 hexchar trace IDs and 16 hexchar observation IDs.
 
 </Callout>
 
@@ -35,13 +35,13 @@ Trace IDs in Langfuse:
 - Are used to identify and group related observations
 - Can be used for distributed tracing across services
 - Support upsert operations (creating or updating based on ID)
-- For the new OTEL-based SDKs (Python v3), trace IDs are 32 hexchar lowercase strings and observation IDs are 16 hexchar lowercase strings
+- For the OTEL-based SDKs, trace IDs are 32 hexchar lowercase strings and observation IDs are 16 hexchar lowercase strings
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
+<Tabs items={["Python SDK", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
 <Tab>
-The Python SDK v3 uses W3C Trace Context IDs by default, which are:
+The Python SDK uses W3C Trace Context IDs by default, which are:
 
 - 32-character lowercase hexadecimal string for trace IDs
 - 16-character lowercase hexadecimal string for observation (span) IDs
@@ -131,45 +131,6 @@ with langfuse.start_as_current_span(name="outer-operation") as span:
 </Tab>
 <Tab>
 
-When using the [`@observe()` decorator](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context, observe
-import uuid
-
-@observe()
-def process_user_request(user_id, request_data, **kwargs):
-    # Function logic here
-    pass
-
-def main():
-    # Custom trace ID
-    custom_trace_id = "custom-" + str(uuid.uuid4())
-
-    # Pass id as kwarg
-    # Can be passed to multiple functions
-    process_user_request(
-        user_id=user_id,
-        request_data=request_data,
-        langfuse_parent_trace_id=custom_trace_id,
-    )
-```
-
-When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```python
-from langfuse import Langfuse
-
-# Set custom trace ID during creation
-trace = langfuse.trace(
-    id="my-custom-trace-id",
-    name="Rap Battle",
-)
-```
-
-</Tab>
-<Tab>
-
 ```ts
 import { Langfuse } from "langfuse";
 import { v4 as uuidv4 } from "uuid";
@@ -230,7 +191,7 @@ from langfuse.openai import openai
 # Set trace_id directly in the completion call
 completion = openai.chat.completions.create(
     name="test-chat",
-    model="gpt-3.5-turbo",
+    model="gpt-4o",
     messages=[
         {"role": "system", "content": "You are a calculator."},
         {"role": "user", "content": "1 + 1 = "}
@@ -242,28 +203,34 @@ completion = openai.chat.completions.create(
 2. Use the [`@observe()` decorator](/docs/sdk/python/decorators) for automatic trace management:
 
 ```python
-from langfuse.decorators import langfuse_context, observe
+from langfuse import observe, get_client
 from langfuse.openai import openai
-
+import uuid
+ 
 @observe()
-def calculate_sum(a: int, b: int, **kwargs):
-    # Get the current trace ID if needed
-    trace_id = langfuse_context.get_current_trace_id()
-
+def process_user_request(user_id, request_data):
     completion = openai.chat.completions.create(
         name="calculator",
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a calculator. Only output the numeric result."},
             {"role": "user", "content": f"{a} + {b} = "}
         ]
     )
-
-    # The completion will automatically be added to the current trace
-    return completion.choices[0].message.content, trace_id
-
-# Use with custom trace ID
-result, trace_id = calculate_sum(5, 3, langfuse_observation_id="my-custom-trace-id")
+    return completion.choices[0].message.content
+ 
+# Use custom trace ID by passing it as special keyword argument
+external_trace_id = "custom-" + str(uuid.uuid4())
+ 
+# Get a consistent trace ID for the same user
+langfuse = get_client()
+trace_id = langfuse.create_trace_id(seed=external_trace_id) # 32 hexchar lowercase string, deterministic with seed
+ 
+process_user_request(
+    user_id="user_123",
+    request_data={"query": "hello"},
+    langfuse_trace_id=trace_id
+)
 ```
 
 The decorator approach is recommended when you want to:
@@ -297,8 +264,6 @@ const completion = await openai.chat.completions.create({
 
 </Tab>
 <Tab>
-
-**Python SDK v3:**
 
 To pass a custom trace ID to a Langchain execution, you can wrap the execution in a span that sets a predefined trace ID. You can also retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
 
@@ -335,69 +300,6 @@ with langfuse.start_as_current_span(
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
 ```
-
-**Python SDK v2:**
-
-Option 1: Using the [CallbackHandler](/integrations/frameworks/langchain) and langchain run config:
-
-```python
-from langfuse.callback import CallbackHandler
-import uuid
-
-predefined_run_id = str(uuid.uuid4())
-
-langfuse_handler = CallbackHandler()
-
-# Pass run_id to the chain invocation
-chain.invoke(
-    {"input": "test"},
-    config={
-        "callbacks": [langfuse_handler],
-        "run_id": predefined_run_id,  # This becomes the trace ID
-    },
-)
-```
-
-Option 2: Using the [`@observe()` decorator](/docs/sdk/python/decorators) for automatic trace management:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-chain = prompt | model | StrOutputParser()
-
-@observe()
-def get_person_city(person: str, **kwargs):
-    # Get the Langchain handler from the current context
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-
-    # The handler is automatically scoped to the current trace
-    response = chain.invoke(
-        {"person": person},
-        config={"callbacks": [langfuse_handler]}
-    )
-
-    # Get trace ID if needed
-    trace_id = langfuse_context.get_current_trace_id()
-    return response, trace_id
-
-# Use with custom trace ID
-result, trace_id = get_person_city(
-    "Einstein",
-    langfuse_observation_id="my-custom-trace-id"
-)
-```
-
-The decorator approach is recommended when you want to:
-
-- Group multiple Langchain operations into a single trace
-- Combine Langchain with other integrations (OpenAI, LlamaIndex, etc.)
-- Add additional context or metadata to the trace
-- Track the entire function execution, not just the Langchain operations
 
 </Tab>
 <Tab>

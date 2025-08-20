@@ -195,7 +195,7 @@ const nonPermanentRedirects = [
   ["/docs/reference", "https://api.reference.langfuse.com/"],
   ["/docs/integrations/api", "/docs/api"],
   ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
-  ["/docs/integrations/sdk/python", "/docs/sdk/python"],
+  ["/docs/integrations/sdk/python", "/docs/observability/sdk/python/overview"],
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/typescript", "/docs/integrations/langchain/tracing"],
@@ -230,7 +230,7 @@ const nonPermanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
   ["/docs/sdk", "/docs/sdk/overview"],
-  ["/docs/sdk/python", "/docs/sdk/python/decorators"],
+  ["/docs/sdk/python", "/docs/observability/sdk/python/overview"],
   ["/cookbook", "/guides"],
   ["/cookbook/:path*", "/guides/cookbook/:path*"],
   ["/docs/sdk/typescript", "/docs/sdk/typescript/guide"],
@@ -272,7 +272,7 @@ const nonPermanentRedirects = [
   ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/daily-metrics-api", "/docs/analytics/metrics-api#daily-metrics"],
   ["/docs/opentelemetry/example-opentelemetry-collector", "/docs/opentelemetry/get-started#export-from-opentelemetry-collector"],
-  ["/docs/sdk/python/decorators", "https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator"],
+  ["/docs/sdk/python/decorators", "/docs/observability/sdk/python/instrumentation#custom-instrumentation"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
@@ -453,9 +453,9 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/features/evaluation-methods/custom", "/docs/evaluation/evaluation-methods/custom-scores"],
   ["/docs/evaluation/features/experiment-comparison", "/docs/evaluation/dataset-runs/datasets"],
   ["/docs/sdk/overview", "/docs/observability/sdk/overview"],
-  ["/docs/sdk/python/example", "/docs/observability/sdk/python/example"],
-  ["/docs/sdk/python/low-level-sdk", "/docs/observability/sdk/python/low-level-sdk"],
-  ["/docs/sdk/python/sdk-v3", "/docs/observability/sdk/python/sdk-v3"],
+  ["/docs/sdk/python/example", "/docs/observability/sdk/python/overview"],
+  ["/docs/sdk/python/low-level-sdk", "/docs/observability/sdk/python/overview"],
+  ["/docs/sdk/python/sdk-v3", "/docs/observability/sdk/python/overview"],
   ["/docs/sdk/typescript/example-notebook", "/docs/observability/sdk/typescript/example-notebook"],
   ["/docs/sdk/typescript/guide", "/docs/observability/sdk/typescript/guide"],
   ["/docs/sdk/typescript/guide-web", "/docs/observability/sdk/typescript/guide-web"],
@@ -508,6 +508,14 @@ const nonPermanentRedirects = [
   // Redirect renamed dataset run pages
   ["/docs/evaluation/dataset-runs/run-via-ui", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/evaluation/dataset-runs/run-via-sdk", "/docs/evaluation/dataset-runs/remote-run"],
+
+  // Redirect removing Python SDK v2 docs and splitting up Python SDK v3 docs
+  ["/docs/observability/sdk/python/sdk-v3", "/docs/observability/sdk/python/overview"],
+  ["/docs/observability/sdk/python/decorators", "/docs/observability/sdk/python/overview"],
+  ["/docs/observability/sdk/python/example", "/docs/observability/sdk/python/overview"],
+  ["/docs/observability/sdk/python/low-level-sdk", "/docs/observability/sdk/python/overview"],
+  ["/guides/cookbook/python_decorators#interoperability-with-other-integrations", "/docs/observability/sdk/python/instrumentation#native-instrumentations"],
+  ["/guides/cookbook/python_decorators#customize-inputoutput", "/docs/observability/sdk/python/instrumentation#trace-inputoutput-behavior"],
 
 ];
 
