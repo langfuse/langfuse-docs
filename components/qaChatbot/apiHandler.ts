@@ -97,7 +97,12 @@ export const POST = async (req: Request) => {
         experimental_telemetry: { isEnabled: true },
       });
 
-      after(tracerProvider.forceFlush());
+      after(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1_000);
+        });
+        await tracerProvider.forceFlush();
+      });
 
       return result.toUIMessageStreamResponse({
         generateMessageId: () => getActiveTraceId(),
