@@ -4,17 +4,20 @@ description: Setup the Langfuse Python SDK for tracing your application and inge
 category: SDKs
 ---
 
-## Setup
+# Setup
 
-### Installation
+To get started with the Langfuse Python SDK, you need to install the SDK and initialize the client.
 
-To install the v3 SDK, run:
+<Steps>
+## Installation
+
+To install the Langfuse Python SDK v3, run:
 
 ```bash
 pip install langfuse
 ```
 
-### Initialize Client
+## Initialize Client
 
 Begin by initializing the `Langfuse` client. You must provide your Langfuse public and secret keys. These can be passed as constructor arguments or set as environment variables (recommended).
 
@@ -95,7 +98,9 @@ Key configuration options:
 | `mask`                      | -                                    | A function `(data: Any) -> Any` to [mask](/docs/tracing-features/masking) sensitive data in traces before sending to the API.         |                                |
 |       | `LANGFUSE_MEDIA_UPLOAD_ENABLED`      | Whether to upload media files to Langfuse S3. In self-hosted environments this might be useful to disable.                                                                               | `True`                         |
 
-### Accessing the Client Globally
+</Steps>
+
+## Accessing the Client Globally
 
 The Langfuse client is a singleton. It can be accessed anywhere in your application using the `get_client` function.
 

@@ -4,9 +4,9 @@ description: Advanced usage of the Langfuse Python SDK for data masking, logging
 category: SDKs
 ---
 
-## Advanced Configuration
+# Advanced Usage
 
-### Masking Sensitive Data
+## Masking Sensitive Data
 
 If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a `mask` function during client initialization. This function will be applied to all relevant data before it's sent to Langfuse.
 
@@ -34,7 +34,7 @@ with langfuse.start_as_current_span(name="user-query", input={"email": "test@exa
     pass
 ```
 
-### Logging
+## Logging
 
 The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`.
 To enable detailed debug logging, you can either:
@@ -52,7 +52,7 @@ langfuse_logger.setLevel(logging.DEBUG)
 
 The default log level for the `langfuse` logger is `logging.WARNING`.
 
-### Sampling
+## Sampling
 
 You can configure the SDK to sample traces by setting the `sample_rate` parameter during client initialization (or via the `LANGFUSE_SAMPLE_RATE` environment variable). This value should be a float between `0.0` (sample 0% of traces) and `1.0` (sample 100% of traces).
 
@@ -65,7 +65,7 @@ from langfuse import Langfuse
 langfuse_sampled = Langfuse(sample_rate=0.2)
 ```
 
-### Filtering by Instrumentation Scope
+## Filtering by Instrumentation Scope
 
 You can configure the SDK to filter out spans from specific instrumentation libraries by using the `blocked_instrumentation_scopes` parameter. This is useful when you want to exclude infrastructure spans while keeping your LLM and application spans.
 
@@ -94,7 +94,7 @@ For example, if you block parent spans but keep child spans from a separate libr
 Consider the impact on trace structure when choosing which scopes to filter.
 </Callout>
 
-### Isolated TracerProvider
+## Isolated TracerProvider
 
 You can configure a separate OpenTelemetry TracerProvider for use with Langfuse. This creates isolation between Langfuse tracing and your other observability systems.
 
@@ -124,7 +124,7 @@ langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
 langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
 ```
 
-### Using ThreadPoolExecutors or ProcessPoolExecutors
+## Using ThreadPoolExecutors or ProcessPoolExecutors
 
 The observe decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors _and_ when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
 
@@ -132,7 +132,7 @@ The recommended workaround is to pass the parent observation id  and the trace I
 
 ```python /langfuse_parent_trace_id=trace_id/ /langfuse_parent_observation_id=observation_id/
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from langfuseimport get_client, observe
+from langfuse import get_client, observe
 
 @observe
 def execute_task(*args):
@@ -170,7 +170,7 @@ main()
 get_client().flush()
 ```
 
-### Distributed tracing
+## Distributed tracing
 
 To maintain the trace context across service / process boundaries, please rely on the OpenTelemetry native context propagation across service / process boundaries as much as possible.
 
@@ -180,7 +180,7 @@ Using the `trace_context` argument to 'force' the parent child relationship may 
 - If you are using Pydantic Logfire, please set `distributed_tracing` to `True`.
 
 
-### Multi-Project Setup (Experimental)
+## Multi-Project Setup (Experimental)
 
 <Callout type="warning">
 Multi-project setups are **experimental** and have important limitations regarding third-party OpenTelemetry integrations.
@@ -205,7 +205,7 @@ Third-party libraries that emit OpenTelemetry spans automatically (e.g., HTTP cl
 **Why is this experimental?**
 This approach requires that the `public_key` parameter be passed to all Langfuse SDK executions across all integrations to ensure proper routing, and third-party spans will appear in all projects.
 
-#### Initialization
+### Initialization
 
 To set up multiple projects, initialize separate Langfuse clients for each project:
 
@@ -226,7 +226,7 @@ project_b_client = Langfuse(
 )
 ```
 
-#### Integration Usage
+### Integration Usage
 
 For all integrations in multi-project setups, you must specify the `public_key` parameter to ensure traces are routed to the correct project.
 
@@ -336,7 +336,7 @@ response_b = chain.invoke(
 - Missing public key parameters may result in traces being routed to the default project or lost
 - Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
 
-### Self-signed SSL certificates (self-hosted Langfuse)
+## Self-signed SSL certificates (self-hosted Langfuse)
 
 
 If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:

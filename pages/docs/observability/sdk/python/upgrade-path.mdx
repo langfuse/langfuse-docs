@@ -4,7 +4,7 @@ description: Upgrade path from v2 to v3 of the Langfuse Python SDK.
 category: SDKs
 ---
 
-## Upgrade from v2
+# Upgrade from the Python SDK v2
 
 The v3 SDK introduces significant improvements and changes compared to v2. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
 
@@ -15,9 +15,9 @@ The v3 SDK introduces significant improvements and changes compared to v2. It is
 - **Trace Attributes** (`user_id`, `session_id`, etc.) Can be set via enclosing spans OR directly on integrations using metadata fields (OpenAI call, Langchain invocation)
 - **Context Management**: Automatic OTEL context propagation
 
-### Migration Path by Integration Type
+## Migration Path by Integration Type
 
-#### `@observe` Decorator Users
+### `@observe` Decorator Users
 
 **v2 Pattern:**
 
@@ -46,7 +46,7 @@ def my_function():
     return "result"
 ```
 
-#### OpenAI Integration
+### OpenAI Integration
 
 **v2 Pattern:**
 
@@ -115,7 +115,7 @@ with langfuse.start_as_current_span(name="chat-request") as span:
     span.update_trace(output={"response": response.choices[0].message.content})
 ```
 
-#### LangChain Integration
+### LangChain Integration
 
 **v2 Pattern:**
 
@@ -178,7 +178,7 @@ with langfuse.start_as_current_span(name="langchain-request") as span:
     span.update_trace(output={"response": response})
 ```
 
-#### LlamaIndex Integration Users
+### LlamaIndex Integration Users
 
 **v2 Pattern:**
 
@@ -213,7 +213,7 @@ with langfuse.start_as_current_span(name="llamaindex-query") as span:
     span.update_trace(output={"response": str(response)})
 ```
 
-#### Low-Level SDK Users
+### Low-Level SDK Users
 
 **v2 Pattern:**
 
@@ -265,7 +265,7 @@ with langfuse.start_as_current_span(
     root_span.update_trace(output={"response": "Response"})
 ```
 
-### Key Migration Checklist
+## Key Migration Checklist
 
 1. **Update Imports**:
 
@@ -318,7 +318,7 @@ with langfuse.start_as_current_span(
      - `enabled` → `tracing_enabled`
      - `threads` → `media_upload_thread_count`
 
-### Detailed Change Summary
+## Detailed Change Summary
 
 1.  **Core Change: OpenTelemetry Foundation**
 
@@ -351,7 +351,7 @@ with langfuse.start_as_current_span(
     - **v2**: Events were limited to 1MB in size
     - **v3**: No size limits enforced on the SDK-side for events
 
-### Future support for v2
+## Future support for v2
 
 We will continue to support the v2 SDK for the foreseeable future with critical bug fixes and security patches. We will not be adding any new features to the v2 SDK.
 

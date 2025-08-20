@@ -4,10 +4,17 @@ description: Instrument your application with the Langfuse Python SDK to trace y
 category: SDKs
 ---
 
-## Basic Tracing
+# Instrumentation
 
 Langfuse provides flexible ways to create and manage traces and their constituent observations (spans and generations).
 
+## Create traces with the SDK
+
+There are three main ways to create traces with the Langfuse Python SDK. All of them are fully interoperable with each other.
+
+<Tabs items={["Observe Decorator", "Context Managers", "Manual"]}>
+
+<Tab>
 ### `@observe` Decorator
 
 The `@observe()` decorator provides a convenient way to automatically trace function executions, including capturing their inputs, outputs, execution time, and any errors. It supports both synchronous and asynchronous functions.
@@ -58,6 +65,10 @@ The observe decorator is capturing the args, kwargs and return value of decorate
 
 </Callout>
 
+</Tab>
+
+<Tab>
+
 ### Context Managers
 
 You can create spans or generations anywhere in your application. If you need more control than the `@observe` decorator, the primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
@@ -103,6 +114,10 @@ with langfuse.start_as_current_span(
     root_span.update(output={"final_joke": joke_response})
     # Root span ends automatically here
 ```
+
+</Tab>
+
+<Tab>
 
 ### Manual Observations
 
@@ -186,6 +201,10 @@ with langfuse.start_as_current_span(name="main-operation") as main_operation_spa
 #   |- core-step-within-main
 #     (Note: 'core-step-within-main' is a sibling to 'manual-side-task', both children of 'main-operation')
 ```
+
+</Tab>
+
+</Tabs>
 
 ### Nesting Observations
 
@@ -486,9 +505,9 @@ with langfuse.start_as_current_span(
     pass
 ```
 
-## Client Management
+### Client Management
 
-### `flush()`
+#### `flush()`
 
 Manually triggers the sending of all buffered observations (spans, generations, scores, media metadata) to the Langfuse API. This is useful in short-lived scripts or before exiting an application to ensure all data is persisted.
 
@@ -502,7 +521,7 @@ langfuse.flush() # Ensures all pending data is sent
 
 The `flush()` method blocks until the queued data is processed by the respective background threads.
 
-### `shutdown()`
+#### `shutdown()`
 
 Gracefully shuts down the Langfuse client. This includes:
 
@@ -526,7 +545,9 @@ langfuse.shutdown()
 
 
 
-## Integrations
+## Native integrations
+
+The Langfuse Python SDK has native integrations for the OpenAI and LangChain SDK. You can also use any other OTel-based instrumentation library to automatically trace your calls in Langfuse.
 
 ### OpenAI Integration
 

@@ -1,28 +1,30 @@
 ---
 title: Overview of the Python SDK
-description: OTEL-based Python SDK (v3) with better developer experience and third-party integrations.
+description: OTel-based Python SDK (v3) with better developer experience and third-party integrations.
 category: SDKs
 ---
 
-# Python SDK
+# Overview of the Python SDK
 
 <Callout type="info">
 
 If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platform version >= 3.63.0**](https://github.com/langfuse/langfuse/releases/tag/v3.63.0) for traces to be correctly processed.
 
+Documentation for the deprecated Python SDK v2 can be found [here](/docs/observability/sdk/python/v2).
+
 </Callout>
 
-Our [OpenTelemetry-based](https://opentelemetry.io/) Python SDK (v3) is the latest generation of the SDK designed for a improved developer experience and enhanced ease of use. Built on the robust OpenTelemetry Python SDK, it offers a more intuitive API for comprehensive tracing of your LLM application.
+Our [OpenTelemetry-based](https://opentelemetry.io/) Python SDK (v3) is the latest generation of the SDK designed for a improved developer experience and enhanced ease of use. Built on the OpenTelemetry Python SDK, it offers a more intuitive API for comprehensive tracing of your LLM application.
 
-The v3 SDK introduces several key benefits:
+**Key benefits:**
 
 - **Improved Developer Experience**: A more intuitive API means less code to write for tracing your application, simplifying the integration process.
 - **Unified Context Sharing**: Seamlessly hook into the tracing context of the current span to update it or create child spans. This is particularly beneficial for integrating with other instrumented libraries.
 - **Broad Third-Party Integrations**: Any library instrumented with OpenTelemetry will work out-of-the-box with the Langfuse SDK. Spans from these libraries are automatically captured and correctly nested within your Langfuse traces.
 
-There are three main ways of instrumenting your application with the new Langfuse SDK. All of them are fully interoperable with each other.
+## Quickstart
 
-## Get started
+There are three main ways of instrumenting your application with the new Langfuse SDK. All of them are fully interoperable with each other.
 
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 
@@ -72,17 +74,17 @@ import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react
     />
 </Cards>
 
-## OTEL and Langfuse
+## OTel and Langfuse
 
-The Langfuse v3 SDK is built upon [OpenTelemetry (OTEL)](https://opentelemetry.io/), a standard for observability. Understanding the relation between OTEL and Langfuse is not required to use the SDK, but it is helpful to have a basic understanding of the concepts. OTEL related concepts are abstracted away and you can use the SDK without being deeply familiar with them.
+The Langfuse v3 SDK is built upon [OpenTelemetry (OTel)](https://opentelemetry.io/), a standard for observability. Understanding the relation between OTel and Langfuse is not required to use the SDK, but it is helpful to have a basic understanding of the concepts. OTel related concepts are abstracted away and you can use the SDK without being deeply familiar with them.
 
 ```mermaid
 graph TD
     subgraph OTEL_Core_Concepts ["OpenTelemetry"]
         direction LR
-        OTEL_Trace["OTEL Trace"]
-        Root_OTEL_Span["Root OTEL Span"]
-        Child_OTEL_Span["Child OTEL Span"]
+        OTEL_Trace["OTel Trace"]
+        Root_OTEL_Span["Root OTel Span"]
+        Child_OTEL_Span["Child OTel Span"]
 
         OTEL_Trace -- is defined by --> Root_OTEL_Span
         Root_OTEL_Span -- Hierarchy via <br/> Context Propagation --> Child_OTEL_Span
@@ -111,14 +113,14 @@ graph TD
     class LF_Trace,LF_Observation langfuse;
 ```
 
-- **OTEL Trace**: An OTEL-trace represents the entire lifecycle of a request or transaction as it moves through your application and its services. A trace is typically a sequence of operations, like an LLM generating a response followed by a parsing step. The root (first) span created in a sequence defines the OTEL-trace. OTEL-traces do not have a start and end time, they are defined by the root span.
-- **OTEL Span**: A span represents a single unit of work or operation within a trace. Spans have a start and end time, a name, and can have attributes (key-value pairs of metadata). Spans can be nested to create a hierarchy, showing parent-child relationships between operations.
-- **Langfuse Trace**: A Langfuse trace collects observations and holds trace attributes such as `session_id`, `user_id` as well as overall input and outputs. It shares the same ID as the OTEL trace and its attributes are set via specific OTEL span attributes that are automatically propagated to the Langfuse trace.
-- **Langfuse Observation**: In Langfuse terminology, an "observation" is a Langfuse-specific representation of an OTEL span. It can be a generic span (Langfuse-span) or a specialized "generation" (Langfuse-generation) or a point in time event (Langfuse-event)
-  - **Langfuse Span**: A Langfuse-span is a generic OTEL-span in Langfuse, designed for non-LLM operations.
-  - **Langfuse Generation**: A Langfuse-generation is a specialized type of OTEL-span in Langfuse, designed specifically for Large Language Model (LLM) calls. It includes additional fields like `model`, `model_parameters`, `usage_details` (tokens), and `cost_details`.
+- **OTel Trace**: An OTel-trace represents the entire lifecycle of a request or transaction as it moves through your application and its services. A trace is typically a sequence of operations, like an LLM generating a response followed by a parsing step. The root (first) span created in a sequence defines the OTel trace. OTel traces do not have a start and end time, they are defined by the root span.
+- **OTel Span**: A span represents a single unit of work or operation within a trace. Spans have a start and end time, a name, and can have attributes (key-value pairs of metadata). Spans can be nested to create a hierarchy, showing parent-child relationships between operations.
+- **Langfuse Trace**: A Langfuse trace collects observations and holds trace attributes such as `session_id`, `user_id` as well as overall input and outputs. It shares the same ID as the OTel trace and its attributes are set via specific OTel span attributes that are automatically propagated to the Langfuse trace.
+- **Langfuse Observation**: In Langfuse terminology, an "observation" is a Langfuse-specific representation of an OTel span. It can be a generic span (Langfuse-span) or a specialized "generation" (Langfuse-generation) or a point in time event (Langfuse-event).
+  - **Langfuse Span**: A Langfuse-span is a generic OTel span in Langfuse, designed for non-LLM operations.
+  - **Langfuse Generation**: A Langfuse-generation is a specialized type of OTel span in Langfuse, designed specifically for Large Language Model (LLM) calls. It includes additional fields like `model`, `model_parameters`, `usage_details` (tokens), and `cost_details`.
   - **Langfuse Event**: A Langfuse-event tracks a point in time action.
-- **Context Propagation**: OpenTelemetry automatically handles the propagation of the current trace and span context. This means when you call another function (whether it's also traced by Langfuse, an OTEL-instrumented library, or a manually created span), the new span will automatically become a child of the currently active span, forming a correct trace hierarchy.
+- **Context Propagation**: OpenTelemetry automatically handles the propagation of the current trace and span context. This means when you call another function (whether it's also traced by Langfuse, an OTel-instrumented library, or a manually created span), the new span will automatically become a child of the currently active span, forming a correct trace hierarchy.
 
-The Langfuse SDK provides wrappers around OTEL spans (`LangfuseSpan`, `LangfuseGeneration`) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTEL spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes.
+The Langfuse SDK provides wrappers around OTel spans (`LangfuseSpan`, `LangfuseGeneration`) that offer convenient methods for interacting with Langfuse-specific features like scoring and media handling, while still being native OTel spans under the hood. You can also use these wrapper objects to add Langfuse trace attributes.
 
