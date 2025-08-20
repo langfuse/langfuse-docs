@@ -33,11 +33,11 @@ The SDKs look for a `release` in the following order:
 2. Environment variable
 3. Automatically on popular platforms
 
-#### SDK initialization
+### Initialization
 
-<Tabs items={["Python SDK", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK", "JS/TS", "Langchain (JS/TS)", "Environment variable"]}>
 
-<Tab>
+<Tab title="Python SDK">
 
 The Python SDK v3 allows you to set the release when initializing the client:
 
@@ -106,9 +106,7 @@ const handler = new CallbackHandler({
 
 </Tab>
 
-</Tabs>
-
-#### Via environment variable
+<Tab title="Environment variable">
 
 The SDKs will look for a `LANGFUSE_RELEASE` environment variable. Use it to configure the release e.g. in your CI/CD pipeline.
 
@@ -116,7 +114,12 @@ The SDKs will look for a `LANGFUSE_RELEASE` environment variable. Use it to conf
 LANGFUSE_RELEASE = "<release_tag>" # <- github sha or other identifier
 ```
 
-#### Automatically on popular platforms
+
+</Tab>
+
+</Tabs>
+
+**Automatically on popular platforms**
 
 If no other `release` is set, the Langfuse SDKs default to a set of known release environment variables.
 
@@ -136,7 +139,7 @@ flowchart LR
 
 The `version` parameter can be added to `traces` and all observation types (`span`, `generation`, `event`). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
+<Tabs items={["Python SDK", "JS/TS", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -181,40 +184,7 @@ with langfuse.start_as_current_span(
 The version parameter can be included in both spans and generations, and can be set either during creation or updated later.
 
 </Tab>
-
 <Tab>
-
-Decorators
-
-```python /version="1.0"/
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    # trace level
-    langfuse_context.update_current_trace(
-        version="1.0",
-    )
-
-    # observation level
-    langfuse_context.update_current_observation(
-        version="1.0",
-    )
-fn()
-```
-
-Low-level SDK
-
-```python /version="1.0"/
-langfuse.generation(
-  name="guess-countries",
-  version="1.0",
-)
-```
-
-`langfuse.trace()`, `langfuse.span()` and `langfuse.event()` also take an optional `version` parameter.
-
-</Tab><Tab>
 
 ```ts /version: "1.0"/
 langfuse.generation({
@@ -225,7 +195,8 @@ langfuse.generation({
 
 `langfuse.trace()`, `langfuse.span()` and `langfuse.event()` also take an optional `version` parameter.
 
-</Tab><Tab>
+</Tab>
+<Tab>
 
 ```python /version="1.0"/
 from langfuse.callback import CallbackHandler
@@ -233,7 +204,8 @@ from langfuse.callback import CallbackHandler
 handler = CallbackHandler(version="1.0")
 ```
 
-</Tab><Tab>
+</Tab>
+<Tab>
 
 ```ts /version: "1.0"/
 import { CallbackHandler } from "langfuse-langchain";
