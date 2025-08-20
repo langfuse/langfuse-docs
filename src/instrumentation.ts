@@ -32,6 +32,10 @@ export function register() {
   const traceProvider = new BasicTracerProvider({ spanProcessors });
 
   trace.setGlobalTracerProvider(traceProvider);
-  context.setGlobalContextManager(new AsyncLocalStorageContextManager());
+
+  const contextManager = new AsyncLocalStorageContextManager();
+  contextManager.enable();
+  context.setGlobalContextManager(contextManager);
+
   propagation.setGlobalPropagator(new W3CTraceContextPropagator());
 }
