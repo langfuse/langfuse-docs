@@ -27,7 +27,7 @@ You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
 
-<Tabs items={["Python SDK","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
+<Tabs items={["Python SDK","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)"]}>
 
 <Tab>
 {/* Python SDK v3 */}
@@ -92,7 +92,6 @@ export async function POST(req, res) {
 </Tab>
 <Tab>
 {/* OpenAI SDK (Python) */}
-For Python SDK v3
 
 ```python
 from langfuse import get_client
@@ -104,17 +103,9 @@ langfuse = get_client()
 langfuse.flush()
 ```
 
-For Python SDK v2
-
-```python
-from langfuse.openai import openai
-openai.flush_langfuse()
-```
-
 </Tab>
 <Tab>
 {/* Langchain (Python) */}
-For Python SDK v3
 
 ```python
 from langfuse import get_client
@@ -126,12 +117,6 @@ langfuse.flush()
 # access the client directly
 langfuse_handler.client.flush()
 
-```
-
-For Python SDK v2
-
-```python
-langfuse_handler.flush()
 ```
 
 </Tab>
@@ -146,15 +131,6 @@ If you exit the application, use `shutdownAsync` method to make sure all request
 
 ```javascript
 await langfuseHandler.shutdownAsync();
-```
-
-</Tab>
-<Tab>
-{/* LlamaIndex */}
-
-```python
-# For Python SDK v2
-langfuse_handler.flush()
 ```
 
 </Tab>

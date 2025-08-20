@@ -193,16 +193,6 @@ with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
     span.update_trace(output={"response": response.content})
 ```
 
-**Python SDK v2:**
-
-Pass `metadata` as a keyword argument:
-
-```python
-handler = CallbackHandler(
-  metadata={"key":"value"}
-)
-```
-
 </Tab>
 <Tab>
 

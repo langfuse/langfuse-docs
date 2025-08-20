@@ -180,7 +180,7 @@ You can also update the usage and cost via `generation.update()` and `generation
 
 For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
 
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS"]}>
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -210,29 +210,6 @@ with langfuse.start_as_current_generation(
             },
         }
     )
-```
-
-</Tab>
-<Tab>
-
-```python
-generation = langfuse.generation(
-  # ...
-  usage={
-    # usage
-    "prompt_tokens": int,
-    "completion_tokens": int,
-    "total_tokens": int,
-    "prompt_tokens_details": {
-      "cached_tokens": int,
-      "audio_tokens": int,
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": int,
-    },
-  },
-  # ...
-)
 ```
 
 </Tab>

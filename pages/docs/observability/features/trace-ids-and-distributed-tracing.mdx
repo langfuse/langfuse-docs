@@ -13,7 +13,7 @@ Langfuse allows you to bring your own trace IDs (e.g., messageId, traceId, corre
 
 <Callout>
 
-By default, Langfuse assigns random IDs (uuid, cuid) to all logged events. For the new OTEL-based SDKs (Python v3), Langfuse assigns random 32 hexchar trace IDs and 16 hexchar observation IDs.
+By default, Langfuse assigns random IDs (uuid, cuid) to all logged events. For the OTEL-based SDKs, Langfuse assigns random 32 hexchar trace IDs and 16 hexchar observation IDs.
 
 </Callout>
 
@@ -35,7 +35,7 @@ Trace IDs in Langfuse:
 - Are used to identify and group related observations
 - Can be used for distributed tracing across services
 - Support upsert operations (creating or updating based on ID)
-- For the new OTEL-based SDKs (Python v3), trace IDs are 32 hexchar lowercase strings and observation IDs are 16 hexchar lowercase strings
+- For the OTEL-based SDKs, trace IDs are 32 hexchar lowercase strings and observation IDs are 16 hexchar lowercase strings
 
 ## Usage
 
@@ -302,69 +302,6 @@ with langfuse.start_as_current_span(
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
 ```
-
-**Python SDK v2:**
-
-Option 1: Using the [CallbackHandler](/integrations/frameworks/langchain) and langchain run config:
-
-```python
-from langfuse.callback import CallbackHandler
-import uuid
-
-predefined_run_id = str(uuid.uuid4())
-
-langfuse_handler = CallbackHandler()
-
-# Pass run_id to the chain invocation
-chain.invoke(
-    {"input": "test"},
-    config={
-        "callbacks": [langfuse_handler],
-        "run_id": predefined_run_id,  # This becomes the trace ID
-    },
-)
-```
-
-Option 2: Using the [`@observe()` decorator](/docs/sdk/python/decorators) for automatic trace management:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-
-prompt = ChatPromptTemplate.from_template("what is the city {person} is from?")
-model = ChatOpenAI()
-chain = prompt | model | StrOutputParser()
-
-@observe()
-def get_person_city(person: str, **kwargs):
-    # Get the Langchain handler from the current context
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-
-    # The handler is automatically scoped to the current trace
-    response = chain.invoke(
-        {"person": person},
-        config={"callbacks": [langfuse_handler]}
-    )
-
-    # Get trace ID if needed
-    trace_id = langfuse_context.get_current_trace_id()
-    return response, trace_id
-
-# Use with custom trace ID
-result, trace_id = get_person_city(
-    "Einstein",
-    langfuse_observation_id="my-custom-trace-id"
-)
-```
-
-The decorator approach is recommended when you want to:
-
-- Group multiple Langchain operations into a single trace
-- Combine Langchain with other integrations (OpenAI, LlamaIndex, etc.)
-- Add additional context or metadata to the trace
-- Track the entire function execution, not just the Langchain operations
 
 </Tab>
 <Tab>
