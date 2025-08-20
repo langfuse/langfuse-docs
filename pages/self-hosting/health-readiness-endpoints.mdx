@@ -1,0 +1,36 @@
+---
+title: Health and Readiness Check Endpoint
+---
+
+# Health and Readiness Check Endpoint
+
+Langfuse web container includes a health check endpoint at `/api/public/health` and a readiness check endpoint at `/api/public/ready` and the
+Langfuse worker container a health check endpoint at `/api/health`.
+The health check endpoint indicates if the application is alive and the readiness check endpoint indicates if the application is ready to serve traffic.
+
+Access the health and readiness check endpoints:
+
+```bash
+# langfuse-web
+curl http://localhost:3000/api/public/health
+curl http://localhost:3000/api/public/ready
+
+# langfuse-worker
+curl http://localhost:3030/api/health
+```
+
+The potential responses from the health check endpoint are:
+
+- `200 OK`: Both the API is functioning normally and a successful connection to the database was made.
+- `503 Service Unavailable`: Either the API is not functioning or it couldn't establish a connection to the database.
+
+The potential responses from the readiness check endpoint are:
+
+- `200 OK`: The application is ready to serve traffic.
+- `500 Internal Server Error`: The application received a SIGTERM or SIGINT and should not receive traffic.
+
+Applications and monitoring services can call this endpoint periodically for health updates.
+
+Per default, the Langfuse web healthcheck endpoint does not validate if the database is reachable, as there are cases where the
+database is unavailable, but the application still serves traffic.
+If you want to run database healthchecks, you can add `?failIfDatabaseUnavailable=true` to the healthcheck endpoint.
