@@ -514,6 +514,8 @@ const nonPermanentRedirects = [
   ["/docs/observability/sdk/python/decorators", "/docs/observability/sdk/python/overview"],
   ["/docs/observability/sdk/python/example", "/docs/observability/sdk/python/overview"],
   ["/docs/observability/sdk/python/low-level-sdk", "/docs/observability/sdk/python/overview"],
+  ["/guides/cookbook/python_decorators#interoperability-with-other-integrations", "/docs/observability/sdk/python/instrumentation#native-instrumentations"],
+  ["/guides/cookbook/python_decorators#customize-inputoutput", "/docs/observability/sdk/python/instrumentation#trace-inputoutput-behavior"],
 
 ];
 
