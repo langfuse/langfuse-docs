@@ -5,7 +5,7 @@ export default {
   evaluation: "Evaluation",
   "advanced-usage": "Advanced usage",
   "upgrade-path": "Upgrade Path",
-  "troubleshooting-and-faq": "Troubleshooting & FAQ",
+  "troubleshooting-and-faq": "Troubleshooting",
   reference: {
     title: "Reference ↗",
     href: "https://python.reference.langfuse.com",
