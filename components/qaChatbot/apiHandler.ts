@@ -84,7 +84,17 @@ const handler = async (req: Request) => {
     experimental_telemetry: { isEnabled: true },
   });
 
-  waitUntil(tracerProvider.forceFlush());
+  waitUntil(
+    (async () => {
+      console.log("Waiting before flushing...");
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+      console.log("Flushing...");
+      await tracerProvider.forceFlush();
+      console.log("Force flushed tracerProvider");
+    })(),
+  );
 
   return result.toUIMessageStreamResponse({
     generateMessageId: () => getActiveTraceId(),
