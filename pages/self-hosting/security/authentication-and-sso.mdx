@@ -1,0 +1,233 @@
+---
+title: Authentication and SSO (self-hosted)
+description: Langfuse supports both email/password and SSO authentication. Follow this guide to configure authentication for your self-hosted Langfuse deployment.
+label: "Version: v3"
+sidebarTitle: "Authentication and SSO"
+---
+
+# Authentication and SSO (self-hosted)
+
+<Callout>
+  Make sure that `NEXTAUTH_URL` environment variable is [configured
+  correctly](/self-hosting/configuration) if you want to use any authentication
+  method other than email/password.
+</Callout>
+
+Langfuse supports both email/password and SSO authentication.
+
+If you use Langfuse Cloud, please refer to the [Cloud Authentication and SSO](/security/auth) documentation.
+
+## Email/Password [#auth-email-password]
+
+Email/password authentication is enabled by default. Users can sign up and log in using their email and password.
+
+### Password Reset
+
+**If [transactional emails](/self-hosting/transactional-emails) are configured** on your instance, users can reset their password by using the "Forgot password" link on the login page.
+
+**If transactional emails are not set up**, passwords can be reset by following these steps:
+
+    1.  Update the email associated with your user account in database, such as by adding a prefix.
+    2.  You can then sign up again with a new password.
+    3.  Reassign any organizations you were associated with via the `organization_memberships` table in database.
+    4.  Finally, remove the old user account from the `users` table in database.
+
+### Disable email/password authentication to use SSO
+
+To disable email/password authentication, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. In this case, you need to set up [SSO](#sso) instead.
+
+If you decide to switch from email/password to SSO on a running instance, you can enable `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` on the SSO provider. This will automatically merge accounts with the same email address.
+
+### Creation of default user
+
+If you want to programmatically create a default user, check out the [Headless Initialization](/self-hosting/headless-initialization) documentation. This is useful if you want to initialize the instance without using the UI, e.g. when running Langfuse in a CI/CD pipeline or programmatically deploying Langfuse into many environments.
+
+## SSO
+
+To enable OAuth/SSO provider sign-in for Langfuse, configure the required environment variables for the provider.
+
+Use `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified.
+
+Need another provider? Langfuse uses Auth.js, which integrates with [many providers](https://next-auth.js.org/providers/). Add a [feature request on GitHub](/ideas) if you want us to add support for a specific provider.
+
+### Auth0
+
+[NextAuth Auth0 Provider Docs](https://next-auth.js.org/providers/auth0)
+
+| Configuration      | Value                                                                         |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AUTH0_CLIENT_ID`<br/>`AUTH_AUTH0_CLIENT_SECRET`<br/>`AUTH_AUTH0_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.      |
+| OAuth Redirect URL | `/api/auth/callback/auth0`                                                    |
+
+Provider: `AUTH0`
+
+### AWS Cognito
+
+[NextAuth Cognito Provider Docs](https://next-auth.js.org/providers/cognito)
+
+| Configuration      | Value                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_COGNITO_CLIENT_ID`<br/>`AUTH_COGNITO_CLIENT_SECRET`<br/>`AUTH_COGNITO_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.            |
+| OAuth Redirect URL | `/api/auth/callback/cognito`                                                        |
+
+Provider: `COGNITO`
+
+### Azure AD/Entra ID
+
+[NextAuth Azure AD Provider Docs](https://next-auth.js.org/providers/azure-ad)
+
+| Configuration      | Value                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_AZURE_AD_CLIENT_ID`<br/>`AUTH_AZURE_AD_CLIENT_SECRET`<br/>`AUTH_AZURE_AD_TENANT_ID` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.                  |
+| OAuth Redirect URL | `/api/auth/callback/azure-ad`                                                             |
+
+Provider: `AZURE_AD`
+
+Notes:
+
+- [#4764](https://github.com/orgs/langfuse/discussions/4764): Langfuse uses email to identify users. Thus, you need to add the `email` claim in the token configuration and all users must have an `Email` in their user profile.
+
+### GitHub
+
+[NextAuth GitHub Provider Docs](https://next-auth.js.org/providers/github)
+
+| Configuration      | Value                                                                    |
+| ------------------ | ------------------------------------------------------------------------ |
+| Required Variables | `AUTH_GITHUB_CLIENT_ID`<br/>`AUTH_GITHUB_CLIENT_SECRET`                  |
+| Optional Variables | See [additional configuration](#additional-configuration) section below. |
+| OAuth Redirect URL | `/api/auth/callback/github`                                              |
+
+Provider: `GITHUB`
+
+### GitHub Enterprise
+
+| Configuration      | Value                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_GITHUB_ENTERPRISE_CLIENT_ID`<br/>`AUTH_GITHUB_ENTERPRISE_CLIENT_SECRET`<br/>`AUTH_GITHUB_ENTERPRISE_BASE_URL` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.                                            |
+| OAuth Redirect URL | `/api/auth/callback/github-enterprise`                                                                              |
+
+Provider: `GITHUB_ENTERPRISE`
+
+Thanks to [@jay0129](https://github.com/jay0129) for the initial contribution of GitHub Enterprise support!
+
+### GitLab
+
+[NextAuth GitLab Provider Docs](https://next-auth.js.org/providers/gitlab)
+
+| Configuration      | Value                                                                                                                                                                                                 |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_GITLAB_CLIENT_ID`<br/>`AUTH_GITLAB_CLIENT_SECRET`                                                                                                                                               |
+| Optional Variables | `AUTH_GITLAB_ISSUER`<br/>`AUTH_GITLAB_URL` (For custom GitLab instances different from gitlab.com)<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
+| OAuth Redirect URL | `/api/auth/callback/gitlab`                                                                                                                                                                           |
+
+Provider: `GITLAB`
+
+### Google
+
+[NextAuth Google Provider Docs](https://next-auth.js.org/providers/google)
+
+| Configuration      | Value                                                                                                                                                                                                                                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_GOOGLE_CLIENT_ID`<br/>`AUTH_GOOGLE_CLIENT_SECRET`                                                                                                                                                                                                                                                   |
+| Optional Variables | `AUTH_GOOGLE_ALLOWED_DOMAINS=langfuse.com,google.com` (list of allowed domains based on [`hd` OAuth claim](https://developers.google.com/identity/openid-connect/openid-connect#an-id-tokens-payload))<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
+| OAuth Redirect URL | `/api/auth/callback/google`                                                                                                                                                                                                                                                                               |
+
+Provider: `GOOGLE`
+
+### Keycloak
+
+[NextAuth Keycloak Provider Docs](https://next-auth.js.org/providers/keycloak)
+
+| Configuration      | Value                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_KEYCLOAK_CLIENT_ID`<br/>`AUTH_KEYCLOAK_CLIENT_SECRET`<br/>`AUTH_KEYCLOAK_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.               |
+| OAuth Redirect URL | `/api/auth/callback/keycloak`                                                          |
+
+Provider: `KEYCLOAK`
+
+Thanks to [@RTae](https://github.com/RTae) for the initial contribution of Keycloak support!
+
+### Okta
+
+[NextAuth Okta Provider Docs](https://next-auth.js.org/providers/okta)
+
+| Configuration      | Value                                                                      |
+| ------------------ | -------------------------------------------------------------------------- |
+| Required Variables | `AUTH_OKTA_CLIENT_ID`<br/>`AUTH_OKTA_CLIENT_SECRET`<br/>`AUTH_OKTA_ISSUER` |
+| Optional Variables | See [additional configuration](#additional-configuration) section below.   |
+| OAuth Redirect URL | `/api/auth/callback/okta`                                                  |
+
+Provider: `OKTA`
+
+Please find a video guide on setting up Okta authentication and user provisioning with Langfuse [here](/docs/administration/scim-and-org-api#okta-setup-guide).
+
+Notes:
+
+- You might need to add `AUTH_OKTA_CHECKS=pkce,state` depending on your Okta setup. See [additional configuration](#additional-configuration) section below.
+
+### WorkOS
+
+[NextAuth WorkOS Provider Docs](https://next-auth.js.org/providers/workos)
+
+| Configuration      | Value                                                        |
+| ------------------ | ------------------------------------------------------------ |
+| Required Variables | `AUTH_WORKOS_CLIENT_ID`<br/>`AUTH_WORKOS_CLIENT_SECRET`      |
+| Optional Variables | `AUTH_WORKOS_ORGANIZATION_ID` or `AUTH_WORKOS_CONNECTION_ID` |
+| OAuth Redirect URL | `/api/auth/callback/workos`                                  |
+
+Provider: `WORKOS`
+
+Notes:
+
+- Without specifying `AUTH_WORKOS_ORGANIZATION_ID` or `AUTH_WORKOS_CONNECTION_ID`, users will see two login options and must provide their organization or connection ID.
+- If you specify either variable, only one login button appears with that default setting. You cannot specify both variables simultaneously.
+
+### Custom OAuth Provider
+
+[NextAuth Custom OAuth Provider Docs](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([source](https://github.com/langfuse/langfuse/blob/main/web/src/server/auth.ts))
+
+| Configuration      | Value                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Required Variables | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI)                                                                                                                                                                                                                           |
+| Optional Variables | `AUTH_CUSTOM_SCOPE` (defaults to `"openid email profile"`)<br/>`AUTH_CUSTOM_ID_TOKEN` (Defaults to `true`, set to `false` if you want to make a request to the `userinfo` endpoint instead of extracting user information from the `id_token` claims)<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
+| OAuth Redirect URL | `/api/auth/callback/custom`                                                                                                                                                                                                                                                                                                                              |
+
+Provider: `CUSTOM`
+
+## HTTP Proxy for SSO
+
+Langfuse supports HTTP proxy settings for SSO providers.
+Configure `AUTH_HTTPS_PROXY` or `AUTH_HTTP_PROXY` to use a proxy for SSO provider requests.
+
+## Additional configuration
+
+These are additional configuration variables. Replace `<PROVIDER>` with the provider name (e.g., `GOOGLE`, `GITHUB`, `AZURE_AD`, etc., see other variables of provider above).
+
+| Variable                                | Description                                                                                                                                                                                                                                                                                   |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT`     | Comma-separated list of domains that are only allowed to sign in using SSO. Email/password sign in is disabled for these domains. E.g. `domain1.com,domain2.com`                                                                                                                              |
+| `AUTH_DISABLE_SIGNUP`                   | Set to `true` to disable sign up for new users. Only existing users can sign in. This affects all new users that try to sign up, also those who received an invite to a project and have no account yet.                                                                                      |
+| `AUTH_SESSION_MAX_AGE`                  | Set the maximum age of the session (JWT) in minutes. The default is 30 days (`43200`). The value must be greater than 5 minutes, as the front-end application refreshes its session every 5 minutes.                                                                                          |
+| `AUTH_IGNORE_ACCOUNT_FIELDS`            | Comma-separated list of fields to ignore from the SSO IDP account when creating an account. Use this to correct errors with custom IDP providers.                                                                                                                                             |
+| `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING` | Set to `true` to allow merging accounts with the same email address. This is useful when users sign in with different providers or email/password but have the same email address. You need to be careful with this setting as it can lead to security issues if the emails are not verified. |
+| `AUTH_<PROVIDER>_CLIENT_AUTH_METHOD`    | Configure the token endpoint authentication method. Supported values: `client_secret_basic` (default), `client_secret_post`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `self_signed_tls_client_auth`, `none`. Use `none` for PKCE flow.                                      |
+| `AUTH_<PROVIDER>_CHECKS`                | Configure the authentication checks. Supported values: `nonce`, `none`, `pkce`, `state`. Multiple values can be provided as comma-separated list.                                                                                                                                             |
+
+## Troubleshooting
+
+- Make sure that `NEXTAUTH_URL` environment variable is [configured correctly](/self-hosting/configuration) if you want to use any authentication method other than email/password.
+- Error: _"Please sign in with the same provider that you used to create this account"._ This error occurs when you try to sign in with a different provider than the one you used to create your account. To fix this, you need to sign in with the same provider that you used to create your account or allow for account linking/takeover by setting `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` (env depends on the provider, see above).
+- For password reset, see the [Password Reset](#password-reset) section.
+- Langfuse authentication relies on email addresses. When using SSO, ensure that the user's email address is included in their IDP profile.
+- If authentication with your provider fails, please try different applicable combinations of the `CLIENT_AUTH_METHOD` and `CHECKS` as outlined above.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-auth"]} />
