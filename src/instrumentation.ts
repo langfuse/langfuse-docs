@@ -25,8 +25,6 @@ export const spanProcessors: SpanProcessor[] = [
   usSpanProcessor,
 ];
 
-export function register() {
-  const traceProvider = new NodeTracerProvider({ spanProcessors });
+const traceProvider = new NodeTracerProvider({ spanProcessors });
 
-  traceProvider.register();
-}
+traceProvider.register();
