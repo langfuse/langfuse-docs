@@ -13,7 +13,7 @@ import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
 import { trace } from "@opentelemetry/api";
 import { waitUntil } from "@vercel/functions";
-import { spanProcessors } from "@/src/instrumentation";
+import { tracerProvider } from "@/src/instrumentation";
 
 const langfuseClient = new LangfuseClient({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
@@ -84,7 +84,7 @@ const handler = async (req: Request) => {
     experimental_telemetry: { isEnabled: true },
   });
 
-  waitUntil(Promise.all(spanProcessors.map((p) => p.forceFlush())));
+  waitUntil(tracerProvider.forceFlush());
 
   return result.toUIMessageStreamResponse({
     generateMessageId: () => getActiveTraceId(),

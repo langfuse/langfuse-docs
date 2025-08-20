@@ -1,11 +1,9 @@
 import { trace, context, propagation } from "@opentelemetry/api";
 import {
-  BasicTracerProvider,
+  NodeTracerProvider,
   SpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
+} from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
-import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
-import { W3CTraceContextPropagator } from "@opentelemetry/core";
 
 const shouldExportSpan: ShouldExportSpan = (span) => {
   return span.otelSpan.instrumentationScope.name !== "next.js";
@@ -23,19 +21,7 @@ const usSpanProcessor = new LangfuseSpanProcessor({
   shouldExportSpan,
 });
 
-export const spanProcessors: SpanProcessor[] = [
-  euSpanProcessor,
-  usSpanProcessor,
-];
+const spanProcessors: SpanProcessor[] = [euSpanProcessor, usSpanProcessor];
 
-export function register() {
-  const traceProvider = new BasicTracerProvider({ spanProcessors });
-
-  trace.setGlobalTracerProvider(traceProvider);
-
-  const contextManager = new AsyncLocalStorageContextManager();
-  contextManager.enable();
-  context.setGlobalContextManager(contextManager);
-
-  propagation.setGlobalPropagator(new W3CTraceContextPropagator());
-}
+export const tracerProvider = new NodeTracerProvider({ spanProcessors });
+tracerProvider.register();
