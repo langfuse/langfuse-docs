@@ -15,6 +15,7 @@ category: SDKs
   - Ensure `langfuse.shutdown()` is called or the program exits cleanly to allow `atexit` hooks to flush data. Manually call `langfuse.flush()` to force data sending.
   - Enable debug logging (`debug=True` or `LANGFUSE_DEBUG="True"`) to see SDK activity and potential errors during exporting.
 - **Incorrect Nesting or Missing Spans**:
+  - If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platform version >= 3.63.0**](https://github.com/langfuse/langfuse/releases/tag/v3.63.0) for traces to be correctly processed.
   - Ensure you are using context managers (`with langfuse.start_as_current_span(...)`) for proper context propagation.
   - If manually creating spans (`langfuse.start_span()`), ensure they are correctly ended with `.end()`.
   - In async code, ensure context is not lost across `await` boundaries if not using Langfuse's async-compatible methods.
