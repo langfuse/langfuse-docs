@@ -122,7 +122,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   return (
     <div className={className} {...props}>
       <div className="flex flex-col h-[62vh] border-2 rounded-xl p-2">
-        <Conversation className="h-full">
+        <Conversation className="flex-1 overflow-y-hidden">
           <ConversationContent>
             {messages.map((message, messageIndex) => (
               <div key={message.id}>
