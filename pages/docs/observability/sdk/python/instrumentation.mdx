@@ -6,16 +6,15 @@ category: SDKs
 
 # Instrumentation
 
-Langfuse provides flexible ways to create and manage traces and their constituent observations (spans and generations).
+To instrument your application to send traces to Langfuse, you can use either native library instrumentations that work out of the box, or use custom instrumentation methods for fine-grained control.
 
-## Create traces with the SDK
+## Custom Instrumentation
 
-There are three main ways to create traces with the Langfuse Python SDK. All of them are fully interoperable with each other.
+There are three main ways to create spans with the Langfuse Python SDK. All of them are fully interoperable with each other.
 
 <Tabs items={["Observe Decorator", "Context Managers", "Manual"]}>
 
-<Tab>
-### `@observe` Decorator
+<Tab title="Observe Decorator">
 
 The `@observe()` decorator provides a convenient way to automatically trace function executions, including capturing their inputs, outputs, execution time, and any errors. It supports both synchronous and asynchronous functions.
 
@@ -66,14 +65,11 @@ The observe decorator is capturing the args, kwargs and return value of decorate
 </Callout>
 
 </Tab>
-
-<Tab>
-
-### Context Managers
+<Tab title="Context Managers">
 
 You can create spans or generations anywhere in your application. If you need more control than the `@observe` decorator, the primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
 
-- `langfuse.start_as_current_span()`: Creates a new span and sets it as the currently active observation in the OTEL context for its duration. Any new observations created within this block will be its children.
+- `langfuse.start_as_current_span()`: Creates a new span and sets it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children.
 - `langfuse.start_as_current_generation()`: Similar to the above, but creates a specialized "generation" observation for LLM calls.
 
 ```python
@@ -116,10 +112,7 @@ with langfuse.start_as_current_span(
 ```
 
 </Tab>
-
-<Tab>
-
-### Manual Observations
+<Tab title="Manual">
 
 For scenarios where you need to create an observation (a span or generation) without altering the currently active OpenTelemetry context, you can use `langfuse.start_span()` or `langfuse.start_generation()`.
 
@@ -203,13 +196,13 @@ with langfuse.start_as_current_span(name="main-operation") as main_operation_spa
 ```
 
 </Tab>
-
 </Tabs>
 
 ### Nesting Observations
 
 <Tabs items={["Observe Decorator", "Context Managers", "Manual"]}>
-<Tab>
+<Tab title="Observe Decorator">
+
 The function call hierarchy is automatically captured by the `@observe` decorator reflected in the trace.
 
 ```python
@@ -227,8 +220,8 @@ def main_function(data, parameter):
 ```
 
 </Tab>
-
 <Tab title="Context Managers">
+
 Nesting is handled automatically by OpenTelemetry's context propagation. When you create a new observation (span or generation) using `start_as_current_span` or `start_as_current_generation`, it becomes a child of the observation that was active in the context when it was created.
 
 ```python
@@ -257,8 +250,8 @@ with langfuse.start_as_current_span(name="outer-process") as outer_span:
 ```
 
 </Tab>
+<Tab title="Manual">
 
-<Tab>
 If you are creating observations manually (not `_as_current_`), you can use the methods on the parent `LangfuseSpan` or `LangfuseGeneration` object to create children. These children will _not_ become the current context unless their `_as_current_` variants are used.
 
 ```python
@@ -280,7 +273,6 @@ parent.end()
 ```
 
 </Tab>
-
 </Tabs>
 
 ### Updating Observations
@@ -543,9 +535,7 @@ langfuse = get_client()
 langfuse.shutdown()
 ```
 
-
-
-## Native integrations
+## Native Instrumentations
 
 The Langfuse Python SDK has native integrations for the OpenAI and LangChain SDK. You can also use any other OTel-based instrumentation library to automatically trace your calls in Langfuse.
 
@@ -625,6 +615,8 @@ The special metadata fields are:
 - `langfuse_tags`: Sets tags for the trace (should be a list of strings)
 
 Supported Langfuse arguments: `name`, `metadata`, `langfuse_prompt`
+
+Learn more in the [OpenAI integration](/integrations/model-providers/openai-py) documentation.
 
 ### Langchain Integration
 
@@ -708,11 +700,109 @@ The callback handler maps various Langchain events to Langfuse observations:
 
 Langfuse attempts to parse model names, usage, and other relevant details from the information provided by Langchain. The `metadata` argument in Langchain calls can be used to pass additional information to Langfuse, including `langfuse_prompt` to link with managed prompts.
 
+Learn more in the [Langchain integration](/integrations/frameworks/langchain) documentation.
+
 ### Third-party integrations
 
 The Langfuse SDK seamlessly integrates with any third-party library that uses OpenTelemetry instrumentation. When these libraries emit spans, they are automatically captured and properly nested within your trace hierarchy. This enables unified tracing across your entire application stack without requiring any additional configuration.
 
+<Cards num={2}>
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/vercel_ai_sdk_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Vercel AI SDK"
+    href="/integrations/frameworks/vercel-ai-sdk"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/llamaindex_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Llamaindex"
+    href="/integrations/frameworks/llamaindex"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/crewai_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="CrewAI"
+    href="/integrations/frameworks/crewai"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/ollama_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Ollama"
+    href="/integrations/model-providers/ollama"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/litellm_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="LiteLLM"
+    href="/integrations/gateways/litellm"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/autogen_icon.svg"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="AutoGen"
+    href="/integrations/frameworks/autogen"
+    arrow
+  />
+  <Card
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
+        <img
+          src="/images/integrations/google_adk_icon.png"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    title="Google ADK"
+    href="/integrations/frameworks/google-adk"
+    arrow
+  />
+  <Card title="All integrations" href="/integrations" arrow />
+</Cards>
+
 For example, if you're using OpenTelemetry-instrumented databases, HTTP clients, or other services alongside your LLM operations, all these spans will be correctly organized within your traces in Langfuse.
+
 
 <Tabs items={["Example Anthropic", "Example LlamaIndex"]}>
 
@@ -747,6 +837,8 @@ with langfuse.start_as_current_span(name="myspan"):
 langfuse.flush()
 ```
 
+Learn more in the [Anthropic integration](/integrations/model-providers/anthropic) documentation.
+
 </Tab>
 
 <Tab>
@@ -771,6 +863,8 @@ with langfuse.start_as_current_span(name="myspan"):
 
 langfuse.flush()
 ```
+
+Learn more in the [Llamaindex integration](/integrations/frameworks/llamaindex) documentation.
 
 </Tab>
 

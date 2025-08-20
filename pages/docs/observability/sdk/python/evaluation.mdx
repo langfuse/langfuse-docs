@@ -4,9 +4,17 @@ description: Evaluate your application with the Langfuse Python SDK.
 category: SDKs
 ---
 
-# Evaluations with the Langfuse Python SDK
+# Evaluations
 
-## Scoring traces and observations
+The Python SDK provides ways to evaluate your application. You can add custom scores to your traces and observations, or use the SDK to execute Dataset Runs.
+
+<Callout type="info">
+
+This page shows the evaluation methods that are supported by the Python SDK. Please refer to the [Evaluation documentation](/docs/evaluation/overview) for more information on how to evaluate your application in Langfuse.
+
+</Callout>
+
+## Create Scores
 
 <Tabs items={["LangfuseSpan / LangfuseGeneration object methods", "Context-aware methods", "Low-level method"]}>
 
@@ -89,14 +97,14 @@ category: SDKs
 
 See [Scoring](/docs/scores/overview) for more details.
 
-## Datasets
+## Dataset Runs
 
 [Langfuse Datasets](/docs/datasets/overview) are essential for evaluating and testing your LLM applications by allowing you to manage collections of inputs and their expected outputs.
 
-### Interacting with Datasets
+### Create a Dataset
 
-- **Fetching**: Retrieve a dataset and its items using `langfuse.get_dataset(name: str)`. This returns a `DatasetClient` instance, which contains a list of `DatasetItemClient` objects (accessible via `dataset.items`). Each `DatasetItemClient` holds the `input`, `expected_output`, and `metadata` for an individual data point.
 - **Creating**: You can programmatically create new datasets with `langfuse.create_dataset(...)` and add items to them using `langfuse.create_dataset_item(...)`.
+- **Fetching**: Retrieve a dataset and its items using `langfuse.get_dataset(name: str)`. This returns a `DatasetClient` instance, which contains a list of `DatasetItemClient` objects (accessible via `dataset.items`). Each `DatasetItemClient` holds the `input`, `expected_output`, and `metadata` for an individual data point.
 
 ```python
 from langfuse import get_client
@@ -117,9 +125,11 @@ langfuse.create_dataset_item(
 )
 ```
 
-### Linking Traces to Dataset Items for Runs
+### Execute a Dataset Run
 
-The most powerful way to use datasets is by linking your application's executions (traces) to specific dataset items when performing an evaluation run. See our [datasets documentation](/docs/datasets) for more details. The `DatasetItemClient.run()` method provides a context manager to streamline this process.
+After fetching your dataset, you can execute a run against it. This will create a new trace for each item in the dataset. Please refer to the [Remote Dataset Run documentation](/docs/evaluation/dataset-runs/remote-run) for more details.
+
+The most powerful way to use datasets is by linking your application's executions (traces) to specific dataset items when performing an evaluation run. The `DatasetItemClient.run()` method provides a context manager to streamline this process.
 
 **How `item.run()` works:**
 

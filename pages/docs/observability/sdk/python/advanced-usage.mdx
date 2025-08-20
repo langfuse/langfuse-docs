@@ -6,6 +6,8 @@ category: SDKs
 
 # Advanced Usage
 
+The Python SDK provides advanced usage options for your application. This includes data masking, logging, sampling, filtering, and more.
+
 ## Masking Sensitive Data
 
 If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a `mask` function during client initialization. This function will be applied to all relevant data before it's sent to Langfuse.
@@ -124,7 +126,7 @@ langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
 langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
 ```
 
-## Using ThreadPoolExecutors or ProcessPoolExecutors
+## Using `ThreadPoolExecutors` or `ProcessPoolExecutors`
 
 The observe decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors _and_ when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
 
