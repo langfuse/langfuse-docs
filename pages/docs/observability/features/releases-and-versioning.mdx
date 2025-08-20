@@ -35,7 +35,7 @@ The SDKs look for a `release` in the following order:
 
 #### SDK initialization
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK", "JS/TS", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
 
 <Tab>
 
@@ -68,34 +68,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 ```
 
 </Tab>
-
 <Tab>
-
-Decorators
-
-```python /release="<release_tag>"/
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    langfuse_context.update_current_trace(
-        release="<release_tag>"
-    )
-
-fn()
-```
-
-Low-level SDK
-
-```python /release="<release_tag>"/
-from langfuse import Langfuse
-
-langfuse = Langfuse(
-  release="<release_tag>"
-)
-```
-
-</Tab><Tab>
 
 ```ts /release: "<release_tag>"/
 import { Langfuse } from "langfuse";

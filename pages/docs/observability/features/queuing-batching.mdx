@@ -27,7 +27,7 @@ You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
 
-<Tabs items={["Python SDK (v3)","Python SDK (v2)","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
+<Tabs items={["Python SDK","JS/TS","OpenAI SDK (Python)","Langchain","Langchain (JS)","LlamaIndex"]}>
 
 <Tab>
 {/* Python SDK v3 */}
@@ -52,26 +52,6 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-langfuse.shutdown()
-```
-
-</Tab>
-
-<Tab>
-{/* Python SDK v2 */}
-
-```python
-# Decorator
-from langfuse.decorators import langfuse_context
-langfuse_context.flush()
-
-# low-level SDK
-langfuse.flush()
-```
-
-If you exit the application, use `shutdown` method to make sure all requests are flushed and pending requests are awaited before the process exits. On success of this function, no more events will be sent to Langfuse API.
-
-```python
 langfuse.shutdown()
 ```
 

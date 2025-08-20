@@ -11,7 +11,7 @@ You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environm
 
 The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "OpenAI (JS/TS)", "Langchain (Python v2)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
+<Tabs items={["Python SDK", "JS/TS", "OpenAI (JS/TS)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
 <Tab>
 With Python SDK v3, you can configure sampling when initializing the client:
 
@@ -48,37 +48,6 @@ If a trace is not sampled, none of its observations (spans or generations) or as
 </Tab>
 <Tab>
 
-When using the [`@observe()` decorator](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
-
-@observe()
-def fn():
-    pass
-
-fn()
-```
-
-When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```python
-from langfuse import Langfuse
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
-langfuse = Langfuse(sample_rate=0.5)
-
-trace = langfuse.trace(
-  name="Rap Battle",
-)
-```
-
-</Tab>
-<Tab>
-
 ```ts
 import { Langfuse } from "langfuse";
 
@@ -88,35 +57,6 @@ const langfuse = new Langfuse({
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
-
-</Tab>
-<Tab>
-
-<Callout type="info">
-
-When using the **Python SDK v3**, the sample rate provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
-
-See the Python SDK v3 tab for more details.
-
-</Callout>
-
-When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py) with Python SDK v2:
-
-```python
-# Either set the environment variable or configure the openai import. The latter takes precedence.
-os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
-
-from langfuse.openai import openai
-openai.langfuse_sample_rate = 0.5
-
-completion = openai.chat.completions.create(
-  name="test-chat",
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a calculator."},
-    {"role": "user", "content": "1 + 1 = "}],
-)
-```
 
 </Tab>
 <Tab>
@@ -135,31 +75,6 @@ const openai = observeOpenAI(new OpenAI(), {
 See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
 
 </Tab>
-
-<Tab>
-
-<Callout type="info">
-
-When using the **Python SDK v3**, the sample rate provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
-
-See the Python SDK v3 tab for more details.
-
-</Callout>
-
-When using the [CallbackHandler](/integrations/frameworks/langchain) with Python SDK v2:
-
-```python
-from langfuse.callback import CallbackHandler
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_SAMPLE_RATE"] = '0.5'
-handler = CallbackHandler(
-  sample_rate=0.5
-)
-```
-
-</Tab>
-
 <Tab>
 
 ```ts

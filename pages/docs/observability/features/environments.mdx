@@ -35,8 +35,8 @@ This means:
 
 ## Usage
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
-<Tab>
+<Tabs items={["Python SDK", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
+<Tab title="Python SDK">
 
 ```python
 from langfuse import get_client, observe
@@ -59,44 +59,6 @@ def main():
     return "Hello"
 
 main()
-```
-
-</Tab>
-<Tab>
-
-When using the [`@observe()` decorator](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-# Either set the environment variable or configure the decorator. The latter takes precedence.
-# Alternatively, set via .env file and load via dotenv
-os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
-
-# Configure the decorator
-langfuse_context.configure(environment="production")
-
-@observe()
-def fn():
-    pass
-
-fn()
-```
-
-When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```python
-from langfuse import Langfuse
-
-# Either set the environment variable or the constructor parameter. The latter takes precedence.
-os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
-
-# Configure the client
-langfuse = Langfuse(environment="production")
-
-trace = langfuse.trace(
-  name="Rap Battle",
-)
 ```
 
 </Tab>
