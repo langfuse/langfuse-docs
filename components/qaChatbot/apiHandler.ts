@@ -11,10 +11,6 @@ import { observe, startActiveSpan, updateActiveTrace } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
-import { trace } from "@opentelemetry/api";
-import { waitUntil } from "@vercel/functions";
-import { tracerProvider } from "@/src/instrumentation";
-import { after } from "next/server";
 
 const langfuseClient = new LangfuseClient({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
@@ -96,15 +92,6 @@ export const POST = async (req: Request) => {
         },
         experimental_telemetry: { isEnabled: true },
       });
-
-      after(
-        (async () => {
-          await new Promise((resolve) => {
-            setTimeout(resolve, 1_000);
-          });
-          await tracerProvider.forceFlush();
-        })(),
-      );
 
       return result.toUIMessageStreamResponse({
         generateMessageId: () => getActiveTraceId(),
