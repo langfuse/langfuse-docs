@@ -53,7 +53,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
   const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
-    new Map()
+    new Map(),
   );
 
   // Generate a unique chat ID that persists for this chat session
@@ -97,7 +97,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleFeedback = (
     messageId: string,
     value: number,
-    comment?: string
+    comment?: string,
   ) => {
     // Update the local state
     setUserFeedback((prev) => new Map(prev.set(messageId, value)));
@@ -114,7 +114,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   return (
     <div className={className} {...props}>
-      <div className="flex flex-col h-full border-2 rounded-xl p-2">
+      <div className="flex flex-col h-[62vh] border-2 rounded-xl p-2">
         <Conversation className="h-full">
           <ConversationContent>
             {messages.map((message, messageIndex) => (
@@ -129,7 +129,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               <SourcesTrigger
                                 count={
                                   message.parts.filter(
-                                    (part) => part.type === "source-url"
+                                    (part) => part.type === "source-url",
                                   ).length
                                 }
                               />

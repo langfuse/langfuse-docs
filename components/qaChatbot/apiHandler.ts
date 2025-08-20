@@ -10,14 +10,15 @@ import {
 import { observe, startActiveSpan, updateActiveTrace } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { LangfuseClient } from "@langfuse/client";
-import { getActiveTraceId } from "./utils/activeTraceId";
+import { getActiveTraceId } from "@langfuse/tracing";
+import { trace } from "@opentelemetry/api";
 
 const langfuseClient = new LangfuseClient();
 const tracedGetPrompt = observe(
-  (name: string) => langfuseClient.prompt.get(name),
+  langfuseClient.prompt.get.bind(langfuseClient.prompt),
   {
     name: "get-prompt",
-  }
+  },
 );
 
 const handler = async (req: Request) => {
@@ -30,21 +31,21 @@ const handler = async (req: Request) => {
 
   // Set session id and user id on active trace
   updateActiveTrace({
+    name: "handle-chatbot-message",
     sessionId: chatId,
     userId,
     input: messages[messages.length - 1].parts.find(
-      (part) => part.type === "text"
+      (part) => part.type === "text",
     )?.text,
   });
 
   // Get prompt from Langfuse
-  const prompt = (
-    await tracedGetPrompt("langfuse-docs-assistant-text")
-  ).compile();
+  const prompt = await tracedGetPrompt("langfuse-docs-assistant-text");
 
   // Initialize MCP client using Streamable HTTP transport (works with our MCP server)
   const mcpClient = await startActiveSpan("create-mcp-client", async () => {
     const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
+
     return createMCPClient({
       transport: new StreamableHTTPClientTransport(mcpUrl, {
         sessionId: `qa-chatbot-${crypto.randomUUID()}`,
@@ -64,15 +65,17 @@ const handler = async (req: Request) => {
         reasoningEffort: "low",
       } satisfies OpenAIResponsesProviderOptions,
     },
-    system: prompt,
+    system: prompt.prompt,
     messages: convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(10),
     onFinish: async (result) => {
-      await mcpClient.close();
       updateActiveTrace({
         output: result,
       });
+      trace.getActiveSpan().end();
+
+      await mcpClient.close();
     },
     experimental_telemetry: { isEnabled: true },
   });
@@ -85,6 +88,7 @@ const handler = async (req: Request) => {
 };
 
 // Instrument handler with Langfuse tracing
-export const POST = observe(handler);
+// use endOnExit=false to end _after_ response has been fully streamed
+export const POST = observe(handler, { endOnExit: false });
 
 export const maxDuration = 30;
