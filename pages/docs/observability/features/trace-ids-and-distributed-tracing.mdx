@@ -41,7 +41,7 @@ Trace IDs in Langfuse:
 
 <Tabs items={["Python SDK", "JS/TS", "OpenTelemetry", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "LiteLLM"]}>
 <Tab>
-The Python SDK v3 uses W3C Trace Context IDs by default, which are:
+The Python SDK uses W3C Trace Context IDs by default, which are:
 
 - 32-character lowercase hexadecimal string for trace IDs
 - 16-character lowercase hexadecimal string for observation (span) IDs
@@ -264,8 +264,6 @@ const completion = await openai.chat.completions.create({
 
 </Tab>
 <Tab>
-
-**Python SDK v3:**
 
 To pass a custom trace ID to a Langchain execution, you can wrap the execution in a span that sets a predefined trace ID. You can also retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
 
