@@ -21,7 +21,7 @@ Learn more about Langfuse's data security and privacy measures concerning the st
 
 This approach ensures that you have complete control over the event input and output data traced by your application.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS", "OpenAI (Python v2)", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
+<Tabs items={["Python SDK", "JS/TS", "Langchain (JS/TS)"]}>
 <Tab>
 
 Define a masking function. The masking function will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
@@ -93,51 +93,6 @@ with langfuse.start_as_current_span(
 </Tab>
 <Tab>
 
-Define a masking function:
-
-```python
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-```
-
-Use with the [`@observe()` decorator](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-langfuse_context.configure(mask=masking_function)
-
-@observe()
-def fn():
-    return "SECRET_DATA"
-
-fn()
-
-langfuse_context.flush()
-
-# The trace output in Langfuse will have the output masked as "REDACTED".
-```
-
-Use with the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```python
-from langfuse import Langfuse
-
-langfuse = Langfuse(mask=masking_function)
-
-trace = langfuse.trace(output="SECRET_DATA")
-
-langfuse.flush()
-
-# The trace output in Langfuse will have the output masked as "REDACTED".
-```
-
-</Tab>
-<Tab>
-
 ```typescript
 import { Langfuse } from "langfuse";
 
@@ -161,119 +116,6 @@ await langfuse.flushAsync();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
-
-</Tab>
-<Tab>
-
-<Callout type="info">
-
-When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
-
-See the Python SDK v3 tab for more details.
-
-</Callout>
-
-When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py) with the Python SDK v2, set `openai.langfuse_mask` to the masking function:
-
-```python
-from langfuse.openai import openai
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-openai.langfuse_mask = masking_function
-
-completion = openai.chat.completions.create(
-  name="test-chat",
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a bot."},
-    {"role": "user", "content": "1 + 1 = "}],
-  temperature=0,
-)
-
-openai.flush_langfuse()
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set masking function via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langfuse.openai import openai
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-langfuse_context.configure(mask=masking_function)
-
-@observe()
-def fn():
-    completion = openai.chat.completions.create(
-      name="test-chat",
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": "You are a calculator."},
-        {"role": "user", "content": "1 + 1 = "}],
-      temperature=0,
-    )
-
-fn()
-```
-
-</Tab>
-<Tab>
-<Callout type="info">
-
-When using the **Python SDK v3**, the masking function provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
-
-See the Python SDK v3 tab for more details.
-
-</Callout>
-
-Pass `mask` as a keyword argument:
-
-```python
-from langfuse.callback import CallbackHandler
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-handler = CallbackHandler(
-  mask=masking_function
-)
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set `mask` via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-def masking_function(data):
-  if isinstance(data, str) and data.startswith("SECRET_"):
-    return "REDACTED"
-
-  return data
-
-langfuse_context.configure(mask=masking_function)
-
-@observe()
-def fn():
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-
-    # Pass handler to invoke of your langchain chain/agent
-    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
-
-fn()
-```
 
 </Tab>
 <Tab>
