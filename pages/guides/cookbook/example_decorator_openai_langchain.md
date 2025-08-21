@@ -5,8 +5,6 @@ category: Integrations
 
 # Example: Langfuse Decorator + OpenAI Integration + Langchain Integration
 
-**Note:** This notebook utilizes the [Langfuse OTel Python SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3). For users of [Python SDK v2](https://langfuse.com/docs/sdk/python/decorators), please refer to [our legacy notebook](https://github.com/langfuse/langfuse-docs/blob/366ec9395851da998d390eac4ab8c4dd2e985054/cookbook/example_decorator_openai_langchain.ipynb).
-
 
 ```python
 %pip install langfuse openai langchain_openai langchain --upgrade

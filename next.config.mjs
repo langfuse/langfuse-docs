@@ -95,6 +95,14 @@ const nextraConfig = withNextra({
           },
         ],
       },
+      // Mark markdown endpoints as noindex and ensure correct content type
+      {
+        source: "/:path*.md",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Content-Type", value: "text/markdown; charset=utf-8" },
+        ],
+      },
     ];
 
     // Do not index Vercel preview deployments
@@ -123,11 +131,21 @@ const nextraConfig = withNextra({
       destination,
       permanent: false,
     })),
-  ]
+  ],
+  async rewrites() {
+    // Serve any ".md" path by mapping to the static copy in public/md-src
+    // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
+    return [
+      {
+        source: "/:path*.md",
+        destination: "/md-src/:path*.md",
+      },
+    ];
+  },
 });
 
 const nonPermanentRedirects = [
-  ["/analytics", "https://docs.google.com/document/d/1PEFSqn-VWjNXOZZ1U7FC0oH-spDdkKJxLwgp15iK7zY"],
+  // short links
   ["/discord", "https://discord.gg/7NXusRtqYU"],
   ["/demo", "/docs/demo"],
   ["/video", "/watch-demo"],
@@ -141,10 +159,8 @@ const nonPermanentRedirects = [
   ["/stickers", "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1"],
   ["/sticker", "/stickers"],
   ["/ask-ai", "/docs/ask-ai"],
-
-  // stripe
+  ["/docs/sso", "/self-hosting/authentication-and-sso"],
   ["/billing-portal", "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE"],
-
   ["/docs/data-security-privacy", "/security"],
   ["/baa", "/security/hipaa"],
   ["/idea", "https://github.com/orgs/langfuse/discussions/new?category=ideas"],
@@ -156,10 +172,9 @@ const nonPermanentRedirects = [
   ["/docs/analytics", "/docs/analytics/overview"],
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
   ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
-
+  ["/events", "https://lu.ma/langfuse"],
   ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
   ["/join-us", "/careers"],
-
   ["/launch", "/blog/2025-05-19-launch-week-3"],
 
   // Redirect to overview pages
@@ -180,7 +195,7 @@ const nonPermanentRedirects = [
   ["/docs/reference", "https://api.reference.langfuse.com/"],
   ["/docs/integrations/api", "/docs/api"],
   ["/docs/integrations/sdk/typescript", "/docs/sdk/typescript"],
-  ["/docs/integrations/sdk/python", "/docs/sdk/python"],
+  ["/docs/integrations/sdk/python", "/docs/observability/sdk/python/overview"],
   ["/docs/langchain", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/python", "/docs/integrations/langchain/tracing"],
   ["/docs/langchain/typescript", "/docs/integrations/langchain/tracing"],
@@ -215,7 +230,7 @@ const nonPermanentRedirects = [
   ["/docs/cloud", "/docs/deployment/cloud"],
   ["/docs/guides/sdk-integration", "/docs/sdk/overview"],
   ["/docs/sdk", "/docs/sdk/overview"],
-  ["/docs/sdk/python", "/docs/sdk/python/decorators"],
+  ["/docs/sdk/python", "/docs/observability/sdk/python/overview"],
   ["/cookbook", "/guides"],
   ["/cookbook/:path*", "/guides/cookbook/:path*"],
   ["/docs/sdk/typescript", "/docs/sdk/typescript/guide"],
@@ -257,7 +272,7 @@ const nonPermanentRedirects = [
   ["/docs/analytics/integrations", "/docs/analytics/integrations/posthog"],
   ["/docs/analytics/daily-metrics-api", "/docs/analytics/metrics-api#daily-metrics"],
   ["/docs/opentelemetry/example-opentelemetry-collector", "/docs/opentelemetry/get-started#export-from-opentelemetry-collector"],
-  ["/docs/sdk/python/decorators", "https://langfuse.com/docs/sdk/python/sdk-v3#observe-decorator"],
+  ["/docs/sdk/python/decorators", "/docs/observability/sdk/python/instrumentation#custom-instrumentation"],
 
   // new self-hosting section
   ["/docs/self-hosting", "/self-hosting"],
@@ -341,6 +356,7 @@ const nonPermanentRedirects = [
   ["/docs/integrations/other/novitaai", "/integrations/model-providers/novitaai"],
   ["/docs/integrations/other/togetherai", "/integrations/model-providers/togetherai"],
   ["/docs/integrations/other/xai", "/integrations/model-providers/xai-grok"],
+  ["/guides/cookbook/integration_google_vertex_and_gemini", "/integrations/model-providers/google-vertex-ai"],
 
   // Gateway integrations - redirect to integration pages where they exist
   ["/docs/integrations/litellm/tracing", "/integrations/gateways/litellm"],
@@ -405,7 +421,7 @@ const nonPermanentRedirects = [
   ["/docs/datasets/prompt-experiments", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/datasets/python-cookbook", "/docs/evaluation/dataset-runs/remote-run"],
   ["/docs/fine-tuning", "/docs/api-and-data-platform/features/fine-tuning"],
-  ["/docs/get-started", "/docs"],
+  ["/docs/get-started", "/docs/observability/get-started"],
   ["/docs/model-usage-and-cost", "/docs/observability/features/token-and-cost-tracking"],
   ["/docs/opentelemetry/example-arize", "/guides/cookbook/otel_integration_arize"],
   ["/docs/opentelemetry/example-mlflow", "/guides/cookbook/otel_integration_mlflow"],
@@ -437,9 +453,9 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/features/evaluation-methods/custom", "/docs/evaluation/evaluation-methods/custom-scores"],
   ["/docs/evaluation/features/experiment-comparison", "/docs/evaluation/dataset-runs/datasets"],
   ["/docs/sdk/overview", "/docs/observability/sdk/overview"],
-  ["/docs/sdk/python/example", "/docs/observability/sdk/python/example"],
-  ["/docs/sdk/python/low-level-sdk", "/docs/observability/sdk/python/low-level-sdk"],
-  ["/docs/sdk/python/sdk-v3", "/docs/observability/sdk/python/sdk-v3"],
+  ["/docs/sdk/python/example", "/docs/observability/sdk/python/overview"],
+  ["/docs/sdk/python/low-level-sdk", "/docs/observability/sdk/python/overview"],
+  ["/docs/sdk/python/sdk-v3", "/docs/observability/sdk/python/overview"],
   ["/docs/sdk/typescript/example-notebook", "/docs/observability/sdk/typescript/example-notebook"],
   ["/docs/sdk/typescript/guide", "/docs/observability/sdk/typescript/guide"],
   ["/docs/sdk/typescript/guide-web", "/docs/observability/sdk/typescript/guide-web"],
@@ -483,6 +499,7 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/features/evaluation-methods/user-feedback", "/faq/all/user-feedback"],
   ["/docs/evaluation/features/security-and-guardrails", "/docs/security-and-guardrails"],
   ["/docs/evaluation/get-started/online", "/docs/observability/overview"],
+  ["/faq/all/llm-connection", "/docs/administration/llm-connection"],
   // END OF MOVED MAIN DOCS INTO SUBMODULES
 
   // Redirect old webhooks path to new webhooks/slack integrations path
@@ -495,6 +512,49 @@ const nonPermanentRedirects = [
   // Redirect preview URL of JS SDK v4 - no longer necessary once merged to main
   ["/docs/observability/sdk/typescript/sdk-v4", "/docs/observability/sdk/typescript/overview"],
 
+  // Redirect removing Python SDK v2 docs and splitting up Python SDK v3 docs
+  ["/docs/observability/sdk/python/sdk-v3", "/docs/observability/sdk/python/overview"],
+  ["/docs/observability/sdk/python/decorators", "/docs/observability/sdk/python/overview"],
+  ["/docs/observability/sdk/python/example", "/docs/observability/sdk/python/overview"],
+  ["/docs/observability/sdk/python/low-level-sdk", "/docs/observability/sdk/python/overview"],
+  ["/guides/cookbook/python_decorators#interoperability-with-other-integrations", "/docs/observability/sdk/python/instrumentation#native-instrumentations"],
+  ["/guides/cookbook/python_decorators#customize-inputoutput", "/docs/observability/sdk/python/instrumentation#trace-inputoutput-behavior"],
+
+
+  // Adding folders to self-host docs
+  ["/self-hosting/automated-access-provisioning", "/self-hosting/administration/automated-access-provisioning"],
+  ["/self-hosting/headless-initialization", "/self-hosting/administration/headless-initialization"],
+  ["/self-hosting/organization-creators", "/self-hosting/administration/organization-creators"],
+  ["/self-hosting/organization-management-api", "/self-hosting/administration/organization-management-api"],
+  ["/self-hosting/ui-customization", "/self-hosting/administration/ui-customization"],
+  ["/self-hosting/backups", "/self-hosting/configuration/backups"],
+  ["/self-hosting/caching-features", "/self-hosting/configuration/caching"],
+  ["/self-hosting/custom-base-path", "/self-hosting/configuration/custom-base-path"],
+  ["/self-hosting/encryption", "/self-hosting/configuration/encryption"],
+  ["/self-hosting/health-readiness-endpoints", "/self-hosting/configuration/health-readiness-endpoints"],
+  ["/self-hosting/observability", "/self-hosting/configuration/observability"],
+  ["/self-hosting/scaling", "/self-hosting/configuration/scaling"],
+  ["/self-hosting/transactional-emails", "/self-hosting/configuration/transactional-emails"],
+  ["/self-hosting/aws", "/self-hosting/deployment/aws"],
+  ["/self-hosting/azure", "/self-hosting/deployment/azure"],
+  ["/self-hosting/docker-compose", "/self-hosting/deployment/docker-compose"],
+  ["/self-hosting/gcp", "/self-hosting/deployment/gcp"],
+  ["/self-hosting/infrastructure/blobstorage", "/self-hosting/deployment/infrastructure/blobstorage"],
+  ["/self-hosting/infrastructure/cache", "/self-hosting/deployment/infrastructure/cache"],
+  ["/self-hosting/infrastructure/clickhouse", "/self-hosting/deployment/infrastructure/clickhouse"],
+  ["/self-hosting/infrastructure/containers", "/self-hosting/deployment/infrastructure/containers"],
+  ["/self-hosting/infrastructure/llm-api", "/self-hosting/deployment/infrastructure/llm-api"],
+  ["/self-hosting/infrastructure/postgres", "/self-hosting/deployment/infrastructure/postgres"],
+  ["/self-hosting/kubernetes-helm", "/self-hosting/deployment/kubernetes-helm"],
+  ["/self-hosting/railway", "/self-hosting/deployment/railway"],
+  ["/self-hosting/authentication-and-sso", "/self-hosting/security/authentication-and-sso"],
+  ["/self-hosting/deployment-strategies", "/self-hosting/security/deployment-strategies"],
+  ["/self-hosting/networking", "/self-hosting/security/networking"],
+  ["/self-hosting/troubleshooting", "/self-hosting/troubleshooting-and-faq"],
+  ["/self-hosting/background-migrations", "/self-hosting/upgrade/background-migrations"],
+  ["/self-hosting/upgrade-guides/upgrade-v1-to-v2", "/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2"],
+  ["/self-hosting/upgrade-guides/upgrade-v2-to-v3", "/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3"],
+  ["/self-hosting/versioning", "/self-hosting/upgrade/versioning"],
 ];
 
 const permanentRedirects = []

@@ -15,7 +15,7 @@ graph LR
 
 Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<Tabs items={["Python SDK", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 
 <Tab title="Python SDK (v3)">
 When using the `@observe()` decorator:
@@ -64,34 +64,6 @@ You can also update the session_id of the current trace without a direct referen
 with langfuse.start_as_current_span(name="another-operation"):
     # Add to the current trace
     langfuse.update_current_trace(session_id="your-session-id")
-```
-
-</Tab>
-<Tab title="Python SDK (v2)">
-
-When using the [`@observe()` decorator](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    langfuse_context.update_current_trace(
-        session_id="your-session-id"
-    )
-
-fn()
-```
-
-When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```python
-from langfuse import Langfuse
-langfuse = Langfuse()
-
-trace = langfuse.trace(
-    session_id="your-session-id"
-)
 ```
 
 </Tab>
@@ -157,9 +129,7 @@ span.end({ output: 'Paris'});
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
-<Tab title="OpenAI (Python)">
-
-**Python SDK v3 - use metadata:**
+<Tab>
 
 ```python
 from langfuse.openai import openai
@@ -175,52 +145,8 @@ completion = openai.chat.completions.create(
 )
 ```
 
-**Python SDK v2 - pass as additional argument:**
-
-```python
-from langfuse.openai import openai
-
-completion = openai.chat.completions.create(
-  name="test-chat",
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a calculator."},
-    {"role": "user", "content": "1 + 1 = "}],
-  temperature=0,
-
-  # add session_id as additional argument
-  session_id="your-session-id"
-)
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/integrations/model-providers/openai-py#use-traces)), set the session_id via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-from langfuse.openai import openai
-
-@observe()
-def fn():
-    langfuse_context.update_current_trace(
-        session_id="your-session-id"
-    )
-
-    completion = openai.chat.completions.create(
-      name="test-chat",
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": "You are a calculator."},
-        {"role": "user", "content": "1 + 1 = "}],
-      temperature=0,
-    )
-
-fn()
-```
-
 </Tab>
-<Tab title="Langchain (Python)">
-
-**Python SDK v3 - use metadata in chain invocation:**
+<Tab>
 
 ```python
 from langfuse.langchain import CallbackHandler
@@ -237,54 +163,6 @@ chain.invoke(
         },
     },
 )
-```
-
-**Python SDK v2 - pass as constructor argument:**
-
-```python
-from langfuse.callback import CallbackHandler
-
-handler = CallbackHandler(
-  session_id="your-session-id"
-)
-```
-
-You can also set the `session_id` dynamically via the runnable configuration in the chain invocation:
-
-```python
-from langfuse.callback import CallbackHandler
-
-handler = CallbackHandler()
-
-# Pass langfuse_session_id as metadata to the chain invocation to be parsed as the Langfuse session_id
-chain.invoke(
-    {"animal": "dog"},
-    config={
-        "callbacks": [handler],
-        "metadata": {
-            "langfuse_session_id": "your-session-id",
-        },
-    },
-)
-```
-
-When using the integration with the `@observe()` decorator (see [interop docs](/integrations/frameworks/langchain#interoperability)), set the session_id via the `langfuse_context`:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    langfuse_context.update_current_trace(
-        session_id="your-session-id"
-    )
-
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-
-    # Pass handler to invoke of your langchain chain/agent
-    chain.invoke({"person": person}, config={"callbacks":[langfuse_handler]})
-
-fn()
 ```
 
 </Tab>

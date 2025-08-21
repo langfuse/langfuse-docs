@@ -109,8 +109,8 @@ Supported formats:
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
-<Tab>
+<Tabs items={["Python SDK", "JS/TS"]}>
+<Tab title="Python SDK">
 ```python
 from langfuse import get_client, observe
 from langfuse.media import LangfuseMedia
@@ -128,7 +128,7 @@ pdf_media = LangfuseMedia(content_bytes=pdf_bytes, content_type="application/pdf
 
 @observe()
 def process_document():
-langfuse = get_client()
+    langfuse = get_client()
 
     # Update the current trace with the media file
     langfuse.update_current_trace(
@@ -145,10 +145,10 @@ langfuse = get_client()
 langfuse = get_client()
 
 with langfuse.start_as_current_span(name="analyze-document") as span: # Include media in the span input, output, or metadata
-span.update(
-input={"document": pdf_media},
-metadata={"file_size": len(pdf_bytes)}
-)
+    span.update(
+        input={"document": pdf_media},
+        metadata={"file_size": len(pdf_bytes)}
+    )
 
     # Process document...
 
@@ -158,38 +158,6 @@ metadata={"file_size": len(pdf_bytes)}
         "original": pdf_media
     })
 
-````
-
-</Tab>
-<Tab>
-
-```python
-from langfuse.decorators import observe, langfuse_context
-from langfuse.media import LangfuseMedia
-
-with open("static/bitcoin.pdf", "rb") as pdf_file:
-        pdf_bytes = pdf_file.read()
-
-# Wrap media in LangfuseMedia class
-wrapped_obj = LangfuseMedia(
-    obj=pdf_bytes, content_bytes=pdf_bytes, content_type="application/pdf"
-)
-
-# Optionally, access media via wrapped_obj.obj
-wrapped_obj.obj
-
-@observe()
-def main():
-    langfuse_context.update_current_trace(
-      input=wrapped_obj,
-      metadata={
-          "context": wrapped_obj
-      },
-    )
-
-    return # Limitation: LangfuseMedia object does not work in decorated function IO, needs to be set via update_current_trace or update_current_observation
-
-main()
 ````
 
 </Tab>
@@ -232,7 +200,7 @@ If you use the API directly to log traces to Langfuse, you need to follow these 
 ### Upload media to Langfuse
 
 1. If you use base64 encoded media: you need to extract it from the trace payloads similar to how the Langfuse SDKs do it.
-2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#post-/api/public/media).
+2. Initialize the upload and get a `mediaId` and `presignedURL`: [`POST /api/public/media`](https://api.reference.langfuse.com/#tag/media/post/api/public/media).
 3. Upload media file: `PUT [presignedURL]`.
 
 See this [end-to-end example](/guides/cookbook/example_multi_modal_traces#custom-via-api) (Python) on how to use the API directly to upload media files.

@@ -28,11 +28,11 @@ This is achieved by ingesting scores via the Langfuse SDKs or API.
 
 You can add scores via the Langfuse SDKs or API. Scores can take one of three data types: **Numeric**, **Categorical** or **Boolean**.
 
-*[Image placeholder: Score ingestion flow diagram showing SDK/API to Langfuse]*
+If a score is ingested manually using a `trace_id` to link the score to a trace, it is not necessary to wait until the trace has been created. The score will show up in the scores table and will be linked to the trace once the trace with the same `trace_id` is created.
 
 Here are examples by `Score` data types
 
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 <Tabs items={["Numeric", "Categorical", "Boolean"]}>
@@ -49,6 +49,7 @@ langfuse.create_score(
     value=0.9,
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     data_type="NUMERIC", # optional, inferred if not provided
     comment="Factually correct", # optional
 )
@@ -198,62 +199,6 @@ with langfuse.start_as_current_span(name="my-operation"):
 </Tabs>
 
 </Tab>
-
-<Tab>
-
-<Tabs items={["Numeric", "Categorical", "Boolean"]}>
-<Tab>
-Numeric score values must be provided as float.
-
-```python
-langfuse.score(
-    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="correctness",
-    value=0.9,
-    data_type="NUMERIC", # optional, inferred if not provided
-    comment="Factually correct", # optional
-)
-```
-
-</Tab>
-<Tab>
-Categorical score values must be provided as strings.
-
-```python
-langfuse.score(
-    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="accuracy",
-    value="partially correct",
-    data_type="CATEGORICAL", # optional, inferred if not provided
-    comment="Factually correct", # optional
-)
-```
-
-</Tab>
-<Tab>
-Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
-
-```python
-langfuse.score(
-    id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="helpfulness",
-    value=0, # 0 or 1
-    data_type="BOOLEAN", # required, numeric values without data type would be inferred as NUMERIC
-    comment="Incorrect answer", # optional
-)
-```
-
-</Tab>
-</Tabs>
-
-</Tab>
-
 <Tab>
 
 <Tabs items={["Numeric", "Categorical", "Boolean"]}>
@@ -331,7 +276,7 @@ await langfuse.flush();
 </Tab>
 </Tabs>
 
-→ More details in [Python SDK docs](/docs/observability/sdk/python/sdk-v3#scoring-traces-and-observations) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+→ More details in [Python SDK docs](/docs/observability/sdk/python/evaluation#create-scores) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 ### Preventing Duplicate Scores
 
@@ -354,7 +299,7 @@ Whenever you provide a `ScoreConfig`, the score data will be validated against t
 - **Score Value when Type is categorical**: Value must map to one of the categories defined in the config
 - **Score Value when Type is boolean**: Value must equal `0` or `1`
 
-<Tabs items={["Python SDK v3", "Python SDK v2", "JS/TS SDK"]}>
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
 
 <Tab>
 
@@ -370,6 +315,7 @@ langfuse = get_client()
 langfuse.create_score(
     trace_id="trace_id_here",
     observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, Id of the session the score relates to
     name="accuracy",
     value=0.9,
     comment="Factually correct", # optional
@@ -455,65 +401,6 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 </Tabs>
 
 </Tab>
-
-<Tab>
-
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
-<Tab>
-When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
-
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="accuracy",
-    value=0.9,
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="78545-6565-3453654-43543" # optional, to ensure that the score follows a specific min/max value range
-    data_type="NUMERIC" # optional, possibly inferred
-)
-```
-
-</Tab>
-<Tab>
-Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
-
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="correctness",
-    value="correct",
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="12345-6565-3453654-43543" # optional, to ensure that the score maps to a specific category defined in a score config
-    data_type="CATEGORICAL" # optional, possibly inferred
-)
-```
-
-</Tab>
-<Tab>
-When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
-
-```python
-langfuse.score(
-    trace_id=message.trace_id,
-    observation_id=message.generation_id, # optional
-    name="helpfulness",
-    value=1,
-    comment="Factually correct", # optional
-    id="unique_id" # optional, can be used as an indempotency key to update the score subsequently
-    config_id="93547-6565-3453654-43543" # optional, can be used to infer the score data type and validate the score value
-    data_type="BOOLEAN" # optional, possibly inferred
-)
-```
-
-</Tab>
-</Tabs>
-
-</Tab>
-
 <Tab>
 
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
@@ -593,7 +480,7 @@ await langfuse.flush();
 
 </Tab>
 
-→ More details in [Python SDK docs](/docs/observability/sdk/python/sdk-v3#scoring-traces-and-observations) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+→ More details in [Python SDK docs](/docs/observability/sdk/python/evaluation#create-scores) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
 </Tabs>
 
@@ -652,4 +539,4 @@ For example, let's assume you'd like to ingest a boolean score to measure **help
 
 When creating a score, you can provide an optional `id` parameter. This will update the score if it already exists within your project.
 
-If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter when initially creating the score.
+If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.

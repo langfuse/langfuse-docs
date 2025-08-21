@@ -1,0 +1,363 @@
+---
+title: Upgrade path from v2 to v3 of the Langfuse Python SDK
+description: Upgrade path from v2 to v3 of the Langfuse Python SDK.
+category: SDKs
+---
+
+# Upgrade from the Python SDK v2
+
+The Python SDK v3 introduces significant improvements and changes compared to the legacy v2 SDK. It is **not fully backward compatible**. This comprehensive guide will help you migrate based on your current integration.
+
+<Callout type="info">
+  You can find a snapshot of the v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
+</Callout>
+
+**Core Changes to SDK v2:**
+
+- **OpenTelemetry Foundation**: v3 is built on OpenTelemetry standards
+- **Trace Input/Output**: Now derived from root observation by default
+- **Trace Attributes** (`user_id`, `session_id`, etc.) Can be set via enclosing spans OR directly on integrations using metadata fields (OpenAI call, Langchain invocation)
+- **Context Management**: Automatic OTEL context propagation
+
+## Migration Path by Integration Type
+
+### `@observe` Decorator Users
+
+**v2 Pattern:**
+
+```python
+from langfuse.decorators import langfuse_context, observe
+
+@observe()
+def my_function():
+    # This was the trace
+    langfuse_context.update_current_trace(user_id="user_123")
+    return "result"
+```
+
+**v3 Migration:**
+
+```python
+from langfuse import observe, get_client # new import
+
+@observe()
+def my_function():
+    # This is now the root span, not the trace
+    langfuse = get_client()
+
+    # Update trace explicitly
+    langfuse.update_current_trace(user_id="user_123")
+    return "result"
+```
+
+### OpenAI Integration
+
+**v2 Pattern:**
+
+```python
+from langfuse.openai import openai
+
+response = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    # Trace attributes directly on the call
+    user_id="user_123",
+    session_id="session_456",
+    tags=["chat"],
+    metadata={"source": "app"}
+)
+```
+
+**v3 Migration:**
+
+If you do not set additional trace attributes, no changes are needed.
+
+If you set additional trace attributes, you have two options:
+
+**Option 1: Use metadata fields (simplest migration):**
+
+```python
+from langfuse.openai import openai
+
+response = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    metadata={
+        "langfuse_user_id": "user_123",
+        "langfuse_session_id": "session_456",
+        "langfuse_tags": ["chat"],
+        "source": "app"  # Regular metadata still works
+    }
+)
+```
+
+**Option 2: Use enclosing span (for more control):**
+
+```python
+from langfuse import get_client
+from langfuse.openai import openai
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="chat-request") as span:
+    # Set trace attributes on the enclosing span
+    span.update_trace(
+        user_id="user_123",
+        session_id="session_456",
+        tags=["chat"],
+        # Explicit trace input/output for LLM-as-a-judge features
+        input={"query": "Hello"},
+    )
+
+    response = openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "Hello"}],
+        metadata={"source": "app"}
+    )
+
+    # Set trace output explicitly
+    span.update_trace(output={"response": response.choices[0].message.content})
+```
+
+### LangChain Integration
+
+**v2 Pattern:**
+
+```python
+from langfuse.callback import CallbackHandler
+
+handler = CallbackHandler(
+    user_id="user_123",
+    session_id="session_456",
+    tags=["langchain"]
+)
+
+response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
+```
+
+**v3 Migration:**
+
+You have two options for setting trace attributes:
+
+**Option 1: Use metadata fields in chain invocation (simplest migration):**
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+response = chain.invoke(
+    {"input": "Hello"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_user_id": "user_123",
+            "langfuse_session_id": "session_456",
+            "langfuse_tags": ["langchain"]
+        }
+    }
+)
+```
+
+**Option 2: Use enclosing span (for more control):**
+
+```python
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="langchain-request") as span:
+    span.update_trace(
+        user_id="user_123",
+        session_id="session_456",
+        tags=["langchain"],
+        input={"query": "Hello"}  # Explicit trace input
+    )
+
+    handler = CallbackHandler()
+    response = chain.invoke({"input": "Hello"}, config={"callbacks": [handler]})
+
+    # Set trace output explicitly
+    span.update_trace(output={"response": response})
+```
+
+### LlamaIndex Integration Users
+
+**v2 Pattern:**
+
+```python
+from langfuse.llama_index import LlamaIndexCallbackHandler
+
+handler = LlamaIndexCallbackHandler()
+Settings.callback_manager = CallbackManager([handler])
+
+response = index.as_query_engine().query("Hello")
+```
+
+**v3 Migration:**
+
+```python
+from langfuse import get_client
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+
+# Use third-party OTEL instrumentation
+LlamaIndexInstrumentor().instrument()
+
+langfuse = get_client()
+
+with langfuse.start_as_current_span(name="llamaindex-query") as span:
+    span.update_trace(
+        user_id="user_123",
+        input={"query": "Hello"}
+    )
+
+    response = index.as_query_engine().query("Hello")
+
+    span.update_trace(output={"response": str(response)})
+```
+
+### Low-Level SDK Users
+
+**v2 Pattern:**
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+trace = langfuse.trace(
+    name="my-trace",
+    user_id="user_123",
+    input={"query": "Hello"}
+)
+
+generation = trace.generation(
+    name="llm-call",
+    model="gpt-4o"
+)
+generation.end(output="Response")
+```
+
+**v3 Migration:**
+
+<Callout type="info">
+  In v3, all spans / generations must be ended by calling `.end()` on the
+  returned object.
+</Callout>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Use context managers instead of manual objects
+with langfuse.start_as_current_span(
+    name="my-trace",
+    input={"query": "Hello"}  # Becomes trace input automatically
+) as root_span:
+    # Set trace attributes
+    root_span.update_trace(user_id="user_123")
+
+    with langfuse.start_as_current_generation(
+        name="llm-call",
+        model="gpt-4o"
+    ) as generation:
+        generation.update(output="Response")
+
+    # If needed, override trace output
+    root_span.update_trace(output={"response": "Response"})
+```
+
+## Key Migration Checklist
+
+1. **Update Imports**:
+
+   - Use `from langfuse import get_client` to access global client instance configured via environment variables
+   - Use `from langfuse import Langfuse` to create a new client instance configured via constructor parameters
+   - Use `from langfuse import observe` to import the observe decorator
+   - Update integration imports: `from langfuse.langchain import CallbackHandler`
+
+2. **Trace Attributes Pattern**:
+
+   - **Option 1**: Use metadata fields (`langfuse_user_id`, `langfuse_session_id`, `langfuse_tags`) directly in integration calls
+   - **Option 2**: Move `user_id`, `session_id`, `tags` to enclosing spans and use `span.update_trace()` or `langfuse.update_current_trace()`
+
+3. **Trace Input/Output**:
+
+   - **Critical for LLM-as-a-judge**: Explicitly set trace input/output
+   - Don't rely on automatic derivation from root observation if you need specific values
+
+4. **Context Managers**:
+
+   - Replace manual `langfuse.trace()`, `trace.span()` with context managers if you want to use them
+   - Use `with langfuse.start_as_current_span()` instead
+
+5. **LlamaIndex Migration**:
+
+   - Replace Langfuse callback with third-party OTEL instrumentation
+   - Install: `pip install openinference-instrumentation-llama-index`
+
+6. **ID Management**:
+
+   - **No Custom Observation IDs**: v3 uses W3C Trace Context standard - you cannot set custom observation IDs
+   - **Trace ID Format**: Must be 32-character lowercase hexadecimal (16 bytes)
+   - **External ID Correlation**: Use `Langfuse.create_trace_id(seed=external_id)` to generate deterministic trace IDs from external systems
+
+   ```python
+   from langfuse import Langfuse, observe
+
+   # v3: Generate deterministic trace ID from external system
+   external_request_id = "req_12345"
+   trace_id = Langfuse.create_trace_id(seed=external_request_id)
+
+   @observe(langfuse_trace_id=trace_id)
+   def my_function():
+       # This trace will have the deterministic ID
+       pass
+   ```
+
+7. **Initialization**:
+   - Replace constructor parameters:
+     - `enabled` → `tracing_enabled`
+     - `threads` → `media_upload_thread_count`
+
+## Detailed Change Summary
+
+1.  **Core Change: OpenTelemetry Foundation**
+
+    - Built on OpenTelemetry standards for better ecosystem compatibility
+
+2.  **Trace Input/Output Behavior**
+
+    - **v2**: Integrations could set trace input/output directly
+    - **v3**: Trace input/output derived from root observation by default
+    - **Migration**: Explicitly set via `span.update_trace(input=..., output=...)`
+
+3.  **Trace Attributes Location**
+
+    - **v2**: Could be set directly on integration calls
+    - **v3**: Must be set on enclosing spans
+    - **Migration**: Wrap integration calls with `langfuse.start_as_current_span()`
+
+4.  **Creating Observations**:
+
+    - **v2**: `langfuse.trace()`, `langfuse.span()`, `langfuse.generation()`
+    - **v3**: `langfuse.start_as_current_span()`, `langfuse.start_as_current_generation()`
+    - **Migration**: Use context managers, ensure `.end()` is called or use `with` statements
+
+5.  **IDs and Context**:
+
+    - **v3**: W3C Trace Context format, automatic context propagation
+    - **Migration**: Use `langfuse.get_current_trace_id()` instead of `get_trace_id()`
+
+6.  **Event Size Limitations**:
+    - **v2**: Events were limited to 1MB in size
+    - **v3**: No size limits enforced on the SDK-side for events
+
+## Future support for v2
+
+We will continue to support the v2 SDK for the foreseeable future with critical bug fixes and security patches. We will not be adding any new features to the v2 SDK. You can find a snapshot of the v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
+
+
+

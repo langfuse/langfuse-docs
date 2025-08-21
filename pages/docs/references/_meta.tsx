@@ -5,13 +5,8 @@ export default {
     newWindow: true,
   },
   "python-ref": {
-    title: "Python SDK (v3) ↗",
+    title: "Python SDK ↗",
     href: "https://python.reference.langfuse.com",
-    newWindow: true,
-  },
-  "python-v2-ref": {
-    title: "Python SDK (v2) ↗",
-    href: "https://v2-stable.langfuse-python.pages.dev/langfuse",
     newWindow: true,
   },
   "js-ref": {

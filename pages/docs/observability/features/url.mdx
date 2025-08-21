@@ -12,8 +12,8 @@ Each trace has a unique URL that you can use to share it with others or to acces
 
 Sometimes, it is useful to get the trace URL directly in the SDK. E.g. to add it to your logs or interactively look at it when running experiments in notebooks.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK", "Langchain (Python v2)", "Langchain (JS/TS)"]}>
-<Tab title="Python SDK (v3)">
+<Tabs items={["Python SDK", "JS/TS", "Langchain (JS/TS)"]}>
+<Tab>
 When using the `@observe()` decorator:
 
 ```python
@@ -50,28 +50,6 @@ with langfuse.start_as_current_span(name="process-request") as span:
 ```
 
 </Tab>
-<Tab title="Python SDK (v2)">
-
-When using the [`@observe()` decorator](/docs/sdk/python/decorators):
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    langfuse_context.get_current_trace_url()
-
-fn()
-```
-
-When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```python
-trace = langfuse.trace(...)
-trace.get_trace_url()
-```
-
-</Tab>
 <Tab title="JS/TS SDK">
 
 ```ts
@@ -84,42 +62,6 @@ const rootSpan = startSpan("my-trace");
 const traceUrl = await langfuse.getTraceUrl(rootSpan.traceId)
 
 console.log("Trace URL: ", traceUrl);
-```
-
-</Tab>
-<Tab title="Langchain (Python v2)">
-
-<Callout type="info">
-
-When using the **Python SDK v3**, the trace URL is available via the `langfuse.get_trace_url()`.
-
-See the Python SDK v3 tab for more details.
-
-</Callout>
-
-Use the interoperability of the Langfuse Python `@observe()` Decorator with the Langchain integration to get the URL of a trace ([interop docs](/integrations/frameworks/langchain#interoperability)).
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    langfuse_handler = langfuse_context.get_current_langchain_handler()
-
-    # Your Langchain code
-
-    # Add Langfuse handler as callback (classic and LCEL)
-    chain.invoke({"input": "<user_input>"}, config={"callbacks": [langfuse_handler]})
-
-    langfuse_context.get_current_trace_url()
-
-fn()
-```
-
-**Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.
-
-```
-handler.get_trace_url()
 ```
 
 </Tab>
@@ -159,8 +101,8 @@ You can make a trace `public` to share it via a public link. This allows others 
 
 _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99_
 
-<Tabs items={["Langfuse UI", "Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK"]}>
-<Tab title="Langfuse UI">
+<Tabs items={["Langfuse UI", "Python SDK", "JS/TS"]}>
+<Tab>
 
 <CloudflareVideo
   videoId="756231d6f8b10b5656ca5ad35c6bd7b1"
@@ -202,36 +144,7 @@ with langfuse.start_as_current_span(name="process-request") as span:
 ```
 
 </Tab>
-<Tab title="Python SDK (v2)">
-
-When using the `@observe()` decorator:
-
-```python
-from langfuse.decorators import langfuse_context, observe
-
-@observe()
-def fn():
-    langfuse_context.update_current_trace(
-        public=True
-    )
-
-fn()
-```
-
-When using the [low-level SDK](/docs/sdk/python/low-level-sdk):
-
-```diff
-trace = langfuse.trace(
-    ...
-+   public=True
-    ...
-)
-```
-
-</Tab>
-
-<Tab title="JS/TS SDK">
-
+<Tab>
 ```ts /public: true/
 import { startSpan, updateTrace } from "@langfuse/tracing";
 

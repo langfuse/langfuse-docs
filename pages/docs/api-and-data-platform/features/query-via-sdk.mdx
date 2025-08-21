@@ -26,8 +26,8 @@ New data is typically available for querying within 15-30 seconds of ingestion, 
 
 Via the [SDKs](/docs/sdk/overview) for Python and JS/TS you can easily query the API without having to write the HTTP requests yourself.
 
-<Tabs items={["Python SDK  v3", "Python SDK v2", "JS/TS SDK"]}>
-<Tab>
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
 
 ```bash
 pip install langfuse
@@ -35,86 +35,85 @@ pip install langfuse
 
 ```python
 from langfuse import get_client
-langfuse = get_client() # uses environment variables to authenticate
-
-# Fetch list of traces, supports filters and pagination
-traces = langfuse.api.trace.list()
-
-# Fetch a single trace by ID
-trace = langfuse.api.trace.get("traceId")
-
-# Fetch list of observations, supports filters and pagination
-observations = langfuse.api.observations.get_many()
-
-# Fetch a single observation by ID
-observation = langfuse.api.observations.get("observationId")
-
-# Fetch list of sessions
-sessions = langfuse.api.sessions.list()
-
-# Explore more entities via Intellisense
-langfuse.api.*
+langfuse = get_client()  # uses environment variables to authenticate
 ```
 
-</Tab>
-<Tab>
+The `api` namespace is auto-generated from the Public API (OpenAPI). Method names mirror REST resources and support filters and pagination.
 
-<Callout type="info">
-
-The dedicated `fetch*` methods for core entities are covered by tests and semantic versioning. The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities.
-
-</Callout>
-```bash
-pip install langfuse
-```
+### Traces
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse(
-  secret_key="sk-lf-...",
-  public_key="pk-lf-...",
-  host="https://cloud.langfuse.com"  # 🇪🇺 EU region
-  # host="https://us.cloud.langfuse.com" # 🇺🇸 US region
-)
-
-### Dedicated fetch_* methods for core entities
-
-# Fetch list of traces, supports filters and pagination
-traces = langfuse.fetch_traces()
-
-# Fetch a single trace by ID
-trace = langfuse.fetch_trace("traceId")
-
-# Fetch list of observations, supports filters and pagination
-observations = langfuse.fetch_observations()
-
-# Fetch a single observation by ID
-observation = langfuse.fetch_observation("observationId")
-
-# Fetch list of sessions
-sessions = langfuse.fetch_sessions()
-
-### Methods on langfuse.api namespace for other entities (generated from the API reference)
-
-# Fetch a single score by ID
-langfuse.api.score.get("scoreId")
-
-# Explore more entities via Intellisense
-langfuse.api.*
+traces = langfuse.api.trace.list(limit=100, user_id="user_123", tags=["production"])  # pagination via cursor
+trace = langfuse.api.trace.get("traceId")
 ```
 
-Python SDK reference including all available filters:
+### Observations
 
-- [`fetch_traces()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_traces)
-- [`fetch_trace()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_trace)
-- [`fetch_observations()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_observations)
-- [`fetch_observation()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_observation)
-- [`fetch_sessions()`](https://python.reference.langfuse.com/langfuse/client#Langfuse.fetch_sessions)
+```python
+observations = langfuse.api.observations.get_many(trace_id="abcdef1234", type="GENERATION", limit=100)
+observation = langfuse.api.observations.get("observationId")
+```
 
-[This notebook](/guides/cookbook/example_query_data_via_sdk) includes a number of examples of how to use the Langfuse SDK to query data.
+### Sessions
+
+```python
+sessions = langfuse.api.sessions.list(limit=50)
+```
+
+### Scores
+
+```python
+langfuse.api.score_v_2.get(score_ids = "ScoreId")
+```
+
+### Prompts
+
+Please refer to the [prompt management documentation](/docs/prompt-management/get-started) on fetching prompts.
+
+### Datasets
+
+```python
+# Namespaces:
+# - langfuse.api.datasets.*
+# - langfuse.api.dataset_items.*
+# - langfuse.api.dataset_run_items.*
+```
+
+### Metrics
+
+```python
+query = """
+{
+  "view": "traces",
+  "metrics": [{"measure": "count", "aggregation": "count"}],
+  "dimensions": [{"field": "name"}],
+  "filters": [],
+  "fromTimestamp": "2025-05-01T00:00:00Z",
+  "toTimestamp": "2025-05-13T00:00:00Z"
+}
+"""
+ 
+langfuse.api.metrics.metrics(query = query)
+```
+
+#### Async equivalents
+
+```python
+# All endpoints are also available as async under `async_api`:
+trace = await langfuse.async_api.trace.get("traceId")
+traces = await langfuse.async_api.trace.list(limit=100)
+```
+
+#### Common filtering & pagination
+
+- limit, cursor (pagination)
+- time range filters (e.g., start_time, end_time)
+- entity filters: user_id, session_id, trace_id, type, name, tags, level, etc.
+
+See the Public API for the exact parameters per resource.
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
 
 <Callout type="info">
 
@@ -179,25 +178,3 @@ JS/TS SDK reference including all available filters:
 </Tab>
 </Tabs>
 
-## API [#api]
-
-All data in Langfuse is available via the API. Refer to the [API reference](https://api.reference.langfuse.com/) for more information.
-
-Example routes:
-
-```bash
-GET /api/public/traces
-GET /api/public/traces/:traceId
-
-GET /api/public/observations
-GET /api/public/observations/:observationId
-
-GET /api/public/sessions
-
-GET /api/public/scores
-GET /api/public/scores/:scoreId
-```
-
-## Export Data
-
-For comprehensive export capabilities including UI exports, scheduled blob storage exports, and programmatic access via SDKs and APIs, see the [overview page](/docs/api-and-data-platform/overview).
