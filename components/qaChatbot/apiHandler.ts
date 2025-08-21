@@ -18,7 +18,7 @@ import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
-import { getActiveSpan } from "@opentelemetry/api/build/src/trace/context-utils";
+import { trace } from "@opentelemetry/api";
 
 const langfuseClient = new LangfuseClient({
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
@@ -94,7 +94,7 @@ export const handler = async (req: Request) => {
       updateActiveTrace({
         output: result.content,
       });
-      getActiveSpan().end();
+      trace.getActiveSpan().end();
     },
   });
 
