@@ -12,7 +12,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
-import { spanProcessors } from "@/src/instrumentation";
+import { spanProcessors } from "@/src/instrumentation.ts";
 
 const langfuseClient = new LangfuseClient({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
@@ -97,7 +97,6 @@ export const POST = async (req: Request) => {
             .end();
 
           await mcpClient.close();
-          await flush();
         },
         experimental_telemetry: { isEnabled: true },
       });
