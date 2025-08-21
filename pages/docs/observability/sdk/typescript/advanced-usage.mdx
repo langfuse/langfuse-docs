@@ -152,13 +152,51 @@ You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variab
 export LANGFUSE_LOG_LEVEL="DEBUG"
 ```
 
-## Force-flushing events
+## Serverless environments
 
-In short-lived environments like serverless functions (e.g., Vercel Functions, AWS Lambda), you should explicitly flush the traces before the process exits or the runtime environment is frozen. The `LangfuseSpanProcessor` buffers events and sends them in batches, so a final flush ensures no data is lost.
+In short-lived environments such as serverless functions (e.g., Vercel Functions, AWS Lambda), you must explicitly flush the traces before the process exits or the runtime environment is frozen.
 
-You can export the processor from your OTEL SDK setup file.
 
-```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/
+
+<Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
+<Tab>
+{/* Generic serverless */}
+Export the processor from your OTEL SDK setup file in order to flush it later.
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor to be able to flush it
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+
+```
+In your serverless function handler, call `forceFlush()` on the span processor before the function exits.
+
+```ts filename="handler.ts" /forceFlush/
+import { langfuseSpanProcessor } from "./instrumentation";
+
+export async function handler(event, context) {
+  // ... your application logic ...
+
+  // Flush before exiting
+  await langfuseSpanProcessor.forceFlush();
+}
+```
+</Tab>
+
+<Tab>
+{/* Vercel Cloud Functions */}
+
+Export the processor from your `instrumentation.ts` file in order to flush it later.
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -172,18 +210,27 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-Then, in your serverless function handler, call `forceFlush()` before the function exits.
+In Vercel Cloud Functions, please use the `after` utility to schedule a flush after the request has completed.
 
-```ts filename="handler.ts"
-import { langfuseSpanProcessor } from "./instrumentation";
+```ts filename="route.ts" /after/ /forceFlush/
+import { after } from "next/server";
 
-export async function handler(event, context) {
-  // ... your application logic ...
+import { langfuseSpanProcessor } from "./instrumentation.ts"
 
-  // Flush before exiting
-  await langfuseSpanProcessor.forceFlush();
+export async function POST() {
+  // ... existing request logic ...
+
+  // Schedule flush after request has completed
+  after(async () => {
+    await langfuseSpanProcessor.forceFlush();
+  })
+
+  // ... send response ...
 }
 ```
+</Tab>
+</Tabs>
+
 
 ## Isolated tracer provider
 
