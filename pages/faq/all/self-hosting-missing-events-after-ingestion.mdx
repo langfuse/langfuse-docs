@@ -1,0 +1,22 @@
+---
+title: Missing events after POST /api/public/ingestion in self-hosted Langfuse
+tags: [self-hosting]
+---
+
+# Missing events after POST /api/public/ingestion in self-hosted Langfuse
+
+If you are not seeing events within minutes of posting them to `/api/public/ingestion`, it is likely that the events are not being ingested correctly.
+Events do not appear immediately in the UI, as they are being processed asynchronously.
+If your events are not shown after a few minutes, you can check the following:
+
+- **Check the Langfuse Web logs**: Look for any errors in the Langfuse Web container around the time that you ingested the events.
+  Any errors you observe indicate that the event is malformatted or that either [Redis](/self-hosting/infrastructure/cache) or [S3](/self-hosting/infrastructure/blobstorage) are not available.
+  In this case, you should also see non-207 status codes within your application.
+- **Check the S3/Blob Storage bucket**: Validate that the event was uploaded correctly into your blob storage.
+  It should be available in a path like `/<projectId>/<type>/<eventId>/<randomId>.json`.
+  If the event was accepted in the Langfuse Web container, but is not available in S3, it indicates an issue with your S3 configuration.
+- **Check the Langfuse Worker logs**: Look for any errors in the Langfuse Worker container about within 0-60 seconds of ingesting your event.
+  If no events at all are being processed, it usually indicates a configuration issue around Redis or S3.
+- **Check ClickHouse tables**: If the previous processing looks correct, validate whether you can find the event in ClickHouse in the `traces`, `observations`, or `scores` table.
+  Search for the respective `projectId` and `eventId`.
+  If you cannot find the event in ClickHouse, but the worker indicates it was processed or if you can find it in ClickHouse and it is not returned via the API, please [open an issue](https://github.com/langfuse/langfuse/issues).
