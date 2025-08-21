@@ -7,7 +7,7 @@ import {
   MCPTransport,
   stepCountIs,
 } from "ai";
-import { observe, startActiveSpan, updateActiveTrace } from "@langfuse/tracing";
+import { observe, startActiveSpan } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId } from "@langfuse/tracing";
@@ -67,12 +67,6 @@ export const POST = async (req: Request) => {
       // Discover all tools exposed by the MCP server
       const tools = await mcpClient.tools();
 
-      const flush = async () => {
-        console.log("🚨 Flushing...");
-        await Promise.all(spanProcessors.map((p) => p.forceFlush()));
-        console.log("🚨 Flushed.");
-      };
-
       const result = streamText({
         model: openai("gpt-5-nano"),
         providerOptions: {
@@ -101,7 +95,7 @@ export const POST = async (req: Request) => {
         experimental_telemetry: { isEnabled: true },
       });
 
-      after(flush());
+      after(Promise.all(spanProcessors.map((p) => p.forceFlush())));
 
       return result.toUIMessageStreamResponse({
         generateMessageId: () => getActiveTraceId(),
