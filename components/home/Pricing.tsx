@@ -428,7 +428,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All platform features (with limits)",
         "50k units / month included",
         "30 days data access",
-        "2 users",
+        "3 users",
         "Community support via GitHub",
       ],
       cta: "Sign up",
@@ -992,7 +992,7 @@ const sections: Section[] = [
         name: "Users",
         tiers: {
           cloud: {
-            Hobby: "2",
+            Hobby: "3",
             Core: "Unlimited",
             Pro: "Unlimited",
             Enterprise: "Unlimited",
