@@ -1,6 +1,6 @@
 // pages/api/mcp.ts
 import { createMcpHandler } from "@vercel/mcp-adapter";
-import { z } from "zod";
+import { z } from "zod/v3";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
