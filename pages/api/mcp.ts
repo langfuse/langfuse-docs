@@ -1,16 +1,18 @@
 // pages/api/mcp.ts
 import { createMcpHandler } from "@vercel/mcp-adapter";
-import { z } from "zod/v3";
+import * as z from "zod/v3";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 
 // Initialize PostHog client for server-side tracking
-const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
-  host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
-  flushAt: 1,
-  flushInterval: 0,
-});
+const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+      flushAt: 1,
+      flushInterval: 0,
+    })
+  : undefined;
 
 // Helper function for PostHog tracking
 const trackMcpToolUsage = async (
@@ -21,7 +23,7 @@ const trackMcpToolUsage = async (
   return waitUntil(
     (async () => {
       try {
-        posthog.capture({
+        posthog?.capture({
           distinctId: "docs-mcp-server",
           event: "docs_mcp:execute_tool",
           properties: {
@@ -33,7 +35,7 @@ const trackMcpToolUsage = async (
         });
 
         // Ensure events are flushed before function shutdown
-        await posthog.flush();
+        await posthog?.flush();
       } catch (error) {
         console.error("Error tracking PostHog event:", error);
       }
