@@ -44,7 +44,8 @@ import { LangfuseWeb } from "langfuse";
 import { FeedbackDialog } from "./FeedbackPopover";
 
 const eulangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
+  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
 });
 
 const usLangfuseWebClient = new LangfuseWeb({
@@ -58,7 +59,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
   const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
-    new Map()
+    new Map(),
   );
 
   // Generate a unique chat ID that persists for this chat session
@@ -102,7 +103,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleFeedback = (
     messageId: string,
     value: number,
-    comment?: string
+    comment?: string,
   ) => {
     // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
@@ -136,7 +137,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               <SourcesTrigger
                                 count={
                                   message.parts.filter(
-                                    (part) => part.type === "source-url"
+                                    (part) => part.type === "source-url",
                                   ).length
                                 }
                               />
