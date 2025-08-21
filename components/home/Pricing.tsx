@@ -1330,14 +1330,14 @@ const sections: Section[] = [
       },
       {
         name: "Organization Creators",
-        href: "/self-hosting/organization-creators",
+        href: "/self-hosting/administration/organization-creators",
         tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
         name: "UI Customization",
-        href: "/self-hosting/ui-customization",
+        href: "/self-hosting/administration/ui-customization",
         tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1364,7 +1364,7 @@ const sections: Section[] = [
       },
       {
         name: "Organization Management API",
-        href: "/self-hosting/organization-management-api",
+        href: "/self-hosting/administration/organization-management-api",
         tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -2168,7 +2168,7 @@ const faqs = [
   {
     question: "Can I self-host Langfuse?",
     answer:
-      "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/local'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",
+      "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/deployment/docker-compose'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",
   },
   {
     question: "Where is the data stored?",

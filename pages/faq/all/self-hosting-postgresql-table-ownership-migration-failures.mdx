@@ -1,0 +1,38 @@
+---
+title: PostgreSQL table ownership and migration failures in self-hosted Langfuse
+tags: [self-hosting]
+---
+
+# PostgreSQL table ownership and migration failures in self-hosted Langfuse
+
+If you encounter permission errors during PostgreSQL migrations like the following, it typically occurs when the database user running migrations has changed,
+as new users won't own existing tables and therefore cannot modify them.
+
+```
+DbError { severity: "ERROR", code: SqlState(E42501), message: "permission denied for table projects" }
+```
+
+You can verify mixed ownership by checking table owners:
+
+```sql
+\dt public.*
+```
+
+## Solutions
+
+**Option 1: Transfer table ownership**
+
+```sql
+-- Replace 'new_user' with your current migration user
+ALTER TABLE table_name OWNER TO new_user;
+```
+
+**Option 2: Use dedicated migration user**
+
+Set the `DIRECT_URL` environment variable to use a superuser or table owner specifically for migrations:
+
+```bash
+DIRECT_URL=postgresql://migration_user:password@host:port/database
+```
+
+This allows Prisma to use different credentials for migrations while keeping your regular `DATABASE_URL` for application operations.
