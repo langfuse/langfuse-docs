@@ -1,6 +1,5 @@
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
-import { NodeSDK } from "@opentelemetry/sdk-node";
 
 const shouldExportSpan: ShouldExportSpan = (span) => {
   return span.otelSpan.instrumentationScope.name !== "next.js";
@@ -20,13 +19,10 @@ const usSpanProcessor = new LangfuseSpanProcessor({
   exportMode: "immediate",
 });
 
-const spanProcessors = [euSpanProcessor, usSpanProcessor];
+export const spanProcessors = [euSpanProcessor, usSpanProcessor];
 
-// const tracerProvider = new NodeTracerProvider({
-//   spanProcessors,
-// });
-//
-// tracerProvider.register();
-const sdk = new NodeSDK({ spanProcessors });
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors,
+});
 
-sdk.start();
+tracerProvider.register();
