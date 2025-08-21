@@ -44,9 +44,9 @@ const trackMcpToolUsage = async (
 };
 
 // Create the MCP handler using Vercel's adapter
+// @ts-ignore
 const mcpHandler = createMcpHandler(
   (server) => {
-    // Define the searchDocs tool
     server.tool(
       "searchLangfuseDocs",
       "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool to get relevant documentation chunks.",
@@ -313,8 +313,3 @@ export default async function handler(
     res.end();
   }
 }
-
-/* TypeScript checks:
-   tsc --noEmit                     (Next.js already runs this)
-   All exports are default for Next.js API Routes.                  :contentReference[oaicite:4]{index=4}
-*/
