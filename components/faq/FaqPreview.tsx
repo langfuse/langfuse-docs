@@ -19,11 +19,9 @@ export const getFilteredFaqPages = (
       const faqTags = page.frontMatter?.tags || [];
       return faqTags.some((tag) => tags.includes(tag));
     })
-    .sort((a, b) => {
-      const aTitle = a.frontMatter?.title;
-      const bTitle = b.frontMatter?.title;
-      return aTitle.localeCompare(bTitle);
-    })
+    .sort((a, b) =>
+      (a.frontMatter?.title || "").localeCompare(b.frontMatter?.title || "")
+    )
     .slice(0, limit);
 };
 
