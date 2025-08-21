@@ -13,13 +13,18 @@ export const getFilteredFaqPages = (
   tags: string[],
   limit: number | undefined = undefined
 ) => {
-  const pages = faqPages
+  return faqPages
     .filter((page) => page.route !== "/faq/all")
     .filter((page) => {
       const faqTags = page.frontMatter?.tags || [];
       return faqTags.some((tag) => tags.includes(tag));
-    });
-  return limit === undefined ? pages : pages.slice(0, limit);
+    })
+    .sort((a, b) => {
+      const aTitle = a.frontMatter?.title;
+      const bTitle = b.frontMatter?.title;
+      return aTitle.localeCompare(bTitle);
+    })
+    .slice(0, limit);
 };
 
 export const FaqPreview = ({
@@ -30,7 +35,7 @@ export const FaqPreview = ({
   renderAsCards?: boolean;
 }) => {
   const faqPages = getFaqPages();
-  const filteredFaqPages = getFilteredFaqPages(faqPages, tags, 10);
+  const filteredFaqPages = getFilteredFaqPages(faqPages, tags);
 
   return <FaqList pages={filteredFaqPages} renderAsCards={renderAsCards} />;
 };
