@@ -44,9 +44,9 @@ const trackMcpToolUsage = async (
 };
 
 // Create the MCP handler using Vercel's adapter
-// @ts-ignore
 const mcpHandler = createMcpHandler(
   (server) => {
+    // @ts-ignore
     server.tool(
       "searchLangfuseDocs",
       "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool to get relevant documentation chunks.",
@@ -123,6 +123,7 @@ const mcpHandler = createMcpHandler(
     );
 
     // Define the getLangfuseDocsPage tool
+    // @ts-ignore
     server.tool(
       "getLangfuseDocsPage",
       "Fetch the Markdown for a single Langfuse docs page. Accepts either a path (e.g. /docs/observability/overview) or a full URL (https://langfuse.com/docs/observability/overview).",
@@ -197,6 +198,7 @@ const mcpHandler = createMcpHandler(
     );
 
     // Define the getLangfuseOverview tool
+    // @ts-ignore
     server.tool(
       "getLangfuseOverview",
       "Get an initial overview of Langfuse documentation and features by fetching the llms.txt file from langfuse.com",
