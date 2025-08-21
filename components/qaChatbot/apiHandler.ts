@@ -67,6 +67,9 @@ export const POST = async (req: Request) => {
       // Discover all tools exposed by the MCP server
       const tools = await mcpClient.tools();
 
+      const flush = async () =>
+        Promise.all(spanProcessors.map((p) => p.forceFlush()));
+
       const result = streamText({
         model: openai("gpt-5-nano"),
         providerOptions: {
@@ -91,11 +94,12 @@ export const POST = async (req: Request) => {
             .end();
 
           await mcpClient.close();
+          await flush();
         },
         experimental_telemetry: { isEnabled: true },
       });
 
-      after(Promise.all(spanProcessors.map((p) => p.forceFlush())));
+      after(flush());
 
       return result.toUIMessageStreamResponse({
         generateMessageId: () => getActiveTraceId(),
