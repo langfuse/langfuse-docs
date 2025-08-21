@@ -13,9 +13,5 @@ export default {
   security: "Security",
   administration: "Administration",
   upgrade: "Upgrade",
-  "-- Former Versions": {
-    type: "separator",
-    title: "Former Versions",
-  },
-  v2: "v2",
+  v2: "Legacy Docs (v2)",
 };
