@@ -84,7 +84,10 @@ export const handler = async (req: Request) => {
     messages: convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(10),
-    experimental_telemetry: { isEnabled: true },
+    experimental_telemetry: {
+      isEnabled: true,
+      metadata: { langfusePrompt: prompt.toJSON() },
+    },
     onFinish: async (result) => {
       await mcpClient.close();
 
@@ -99,7 +102,7 @@ export const handler = async (req: Request) => {
   });
 
   // Schedule flush after request is finished
-  after(() => flush());
+  after(async () => await flush());
 
   return result.toUIMessageStreamResponse({
     generateMessageId: () => getActiveTraceId(),
