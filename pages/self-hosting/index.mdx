@@ -27,18 +27,18 @@ When self-hosting Langfuse, you run the same infrastructure that powers Langfuse
 
 ### Low-scale deployments
 
-You can [run Langfuse on a VM or locally using Docker Compose](/self-hosting/docker-compose).
+You can [run Langfuse on a VM or locally using Docker Compose](/self-hosting/deployment/docker-compose).
 This is recommended for testing and low-scale deployments and lacks high-availability, scaling capabilities, and backup functionality.
 
 ### Production-scale deployments
 
 For production and high-availability deployments, we recommend one of the following options:
 
-- [Kubernetes (Helm)](/self-hosting/kubernetes-helm)
-- [AWS (Terraform)](/self-hosting/aws)
-- [Azure (Terraform)](/self-hosting/azure)
-- [GCP (Terraform)](/self-hosting/gcp)
-- [Railway](/self-hosting/railway)
+- [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm)
+- [AWS (Terraform)](/self-hosting/deployment/aws)
+- [Azure (Terraform)](/self-hosting/deployment/azure)
+- [GCP (Terraform)](/self-hosting/deployment/gcp)
+- [Railway](/self-hosting/deployment/railway)
 
 ## Architecture
 
@@ -64,7 +64,7 @@ Some of the optimizations include:
 - **OLAP database**: All read-heavy analytical operations are offloaded to an OLAP database (Clickhouse) for fast query performance.
 - **Multi-modal traces in S3**: Multi-modal traces can include large videos or arbitrary files. To enable support for these, they are directly uploaded to S3/Blob Storage from the client SDKs. Learn more [here](/docs/tracing-features/multi-modality).
 - **Recoverability of events**: All incoming tracing and evaluation events are persisted in S3/Blob Storage first. Only after successful processing, the events are written to the database. This ensures that even if the database is temporarily unavailable, the events are not lost and can be processed later.
-- **Background migrations**: Long-running migrations that are required by an upgrade but not blocking for regular operations are offloaded to a background job. This massively reduces the downtime during an upgrade. Learn more [here](/self-hosting/background-migrations).
+- **Background migrations**: Long-running migrations that are required by an upgrade but not blocking for regular operations are offloaded to a background job. This massively reduces the downtime during an upgrade. Learn more [here](/self-hosting/upgrade/background-migrations).
 
 If you have any feedback or questions regarding the architecture, please reach out to us.
 
@@ -81,7 +81,7 @@ import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
 
 import { ProductUpdateSignup } from "@/components/productUpdateSignup";
 
-Release notes are published on [GitHub](https://github.com/langfuse/langfuse/releases). Langfuse uses tagged semver releases ([versioning policy](/self-hosting/versioning)).
+Release notes are published on [GitHub](https://github.com/langfuse/langfuse/releases). Langfuse uses tagged semver releases ([versioning policy](/self-hosting/upgrade/versioning)).
 
 You can subscribe to our mailing list to get notified about new releases and new major versions.
 

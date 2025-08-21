@@ -12,8 +12,20 @@ LLM connections are used to call models in the Langfuse Playground or for LLM-as
 
 Navigate to your `Project Settings` > `LLM Connections` and **click on** `Add new LLM API key`.
 
+<details>
+<summary>Alternatively, you can use the API</summary>
+
+You can use the [API](/docs/api-and-data-platform/features/public-api) to manage LLM connections:
+
+```bash
+GET /api/public/llm-connections
+PUT /api/public/llm-connections
+```
+
+</details>
+
 <Frame border fullWidth>
-![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
+  ![New LLM connection](/images/docs/prompt-experiments-new-llm-connection.png)
 </Frame>
 
 Enter the name of the LLM connection and the API key for the model you want to use.
@@ -28,7 +40,6 @@ The Langfuse platform is currently supporting the following LLM providers:
 - Google AI Studio
 - Google Vertex AI
 - Amazon Bedrock
-
 
 <details>
 <summary>Supported models</summary>
@@ -106,10 +117,10 @@ export function ModelList() {
         <li>
           <strong>Any model that supports the OpenAI API schema:</strong> The
           Playground and LLM-as-a-Judge evaluations can be used by any framework
-          that supports the OpenAI API schema such as Groq, OpenRouter, Vercel AI Gateway, LiteLLM,
-          Hugging Face, and more. Just replace the API Base URL with the
-          appropriate endpoint for the model you want to use and add the
-          providers API keys for authentication.
+          that supports the OpenAI API schema such as Groq, OpenRouter, Vercel
+          AI Gateway, LiteLLM, Hugging Face, and more. Just replace the API Base
+          URL with the appropriate endpoint for the model you want to use and
+          add the providers API keys for authentication.
         </li>
         <li>
           <strong>OpenAI / Azure OpenAI:</strong> {openAIModels.join(", ")}
@@ -145,20 +156,26 @@ You may connect to third party LLM providers if their API schema implements the 
 ### Additional provider options
 
 <Callout type="info">
-  Provider options are **not set up in the Project Settings > LLM Connections** page but either when selecting a LLM Connection on the [Playground](/docs/promptmanagement/features/playground) or during [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) Evaluator setup.
+  Provider options are **not set up in the Project Settings > LLM Connections**
+  page but either when selecting a LLM Connection on the
+  [Playground](/docs/promptmanagement/features/playground) or during
+  [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) Evaluator
+  setup.
 </Callout>
 
-LLM calls from a created LLM connection can be configured with a specific set of parameters, such as `temperature`, `top_p`, and `max_tokens`. 
+LLM calls from a created LLM connection can be configured with a specific set of parameters, such as `temperature`, `top_p`, and `max_tokens`.
 
 However, many LLM providers allow for additional parameters, including `reasoning_effort`, `service_tier`, and others when invoking a model. These parameters often differ between providers.
 
 You can provide additional configurations as a JSON object for all LLM invocations. In the model parameters settings, you will find a "provider options" field at the bottom. This field allows you to enter specific key-value pairs accepted by your LLM provider's API endpoint.
 
-Please see your providers API reference for what additional fields are supported: 
+Please see your providers API reference for what additional fields are supported:
+
 - [Anthropic Messages API Reference](https://docs.anthropic.com/en/api/messages)
 - [OpenAI Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create)
 
 This feature is currently available for the adapters for:
+
 - Anthropic
 - OpenAI
 - AWS (Amazon Bedrock)
@@ -238,4 +255,3 @@ curl -X POST 'https://<host set in project settings>/chat/completions' \
   ]
 }'
 ```
-

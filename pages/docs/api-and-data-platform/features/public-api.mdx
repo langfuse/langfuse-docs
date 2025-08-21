@@ -46,6 +46,16 @@ References:
 - OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
 - Postman collection: https://cloud.langfuse.com/generated/postman/collection.json
 
+<Callout type="info">
+
+There are 3 different groups of APIs:
+
+- This page -> Project-level APIs: CRUD traces/evals/prompts/configuration within a project
+- [Organization-level APIs](/docs/administration/scim-and-org-api): provision projects, users (SCIM), and permissions
+- [Management API](/self-hosting/administration/organization-management-api): administer organizations on self-hosted installations
+
+</Callout>
+
 ## Authentication
 
 Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
@@ -75,7 +85,7 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 <Tabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
-When using the [Python SDK v3](/docs/sdk/python/sdk-v3):
+When using the [Python SDK](/docs/sdk/python/sdk-v3):
 
 ```python
 from langfuse import get_client
