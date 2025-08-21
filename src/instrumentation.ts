@@ -19,7 +19,10 @@ const usSpanProcessor = new LangfuseSpanProcessor({
   exportMode: "immediate",
 });
 
-export const spanProcessors = [euSpanProcessor, usSpanProcessor];
+const spanProcessors = [euSpanProcessor, usSpanProcessor];
+
+export const flush = async () =>
+  Promise.all(spanProcessors.map((p) => p.forceFlush()));
 
 const tracerProvider = new NodeTracerProvider({
   spanProcessors,
