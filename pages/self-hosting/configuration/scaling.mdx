@@ -11,14 +11,14 @@ This guide covers how you can operate your Langfuse deployment at scale and incl
 
 ## Minimum Infrastructure Requirements
 
-| Service                                                              | Minimum Requirements                                         |
-| -------------------------------------------------------------------- | ------------------------------------------------------------ |
-| [Langfuse Web Container](/self-hosting/infrastructure/containers)    | 2 CPU, 4 GiB Memory                                          |
-| [Langfuse Worker Container](/self-hosting/infrastructure/containers) | 2 CPU, 4 GiB Memory                                          |
-| [PostgreSQL Database](/self-hosting/infrastructure/postgres)         | 2 CPU, 4 GiB Memory                                          |
-| [Redis/Valkey Instance](/self-hosting/infrastructure/cache)          | 1 CPU, 1.5 GiB Memory                                        |
-| [ClickHouse](/self-hosting/infrastructure/clickhouse)                | 2 CPU, 8 GiB Memory                                          |
-| [Blob Storage](/self-hosting/infrastructure/blobstorage)             | Serverless (S3 or compatible) or MinIO (2 CPU, 4 GiB Memory) |
+| Service                                                                         | Minimum Requirements                                         |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [Langfuse Web Container](/self-hosting/deployment/infrastructure/containers)    | 2 CPU, 4 GiB Memory                                          |
+| [Langfuse Worker Container](/self-hosting/deployment/infrastructure/containers) | 2 CPU, 4 GiB Memory                                          |
+| [PostgreSQL Database](/self-hosting/deployment/infrastructure/postgres)         | 2 CPU, 4 GiB Memory                                          |
+| [Redis/Valkey Instance](/self-hosting/deployment/infrastructure/cache)          | 1 CPU, 1.5 GiB Memory                                        |
+| [ClickHouse](/self-hosting/deployment/infrastructure/clickhouse)                | 2 CPU, 8 GiB Memory                                          |
+| [Blob Storage](/self-hosting/deployment/infrastructure/blobstorage)             | Serverless (S3 or compatible) or MinIO (2 CPU, 4 GiB Memory) |
 
 ## Ingestion Throughput
 
@@ -123,7 +123,7 @@ SELECT table, formatReadableSize(size) as size, rows FROM (
 If you observe high Redis Engine CPU utilization (above 90%), we recommend to check the following:
 
 - Use an instance with at least 4 CPUs. This will allow Redis to schedule networking and background tasks on separate CPUs.
-- Ensure that you have [Redis Cluster mode](/self-hosting/infrastructure/cache#redis-cluster-mode) enabled.
+- Ensure that you have [Redis Cluster mode](/self-hosting/deployment/infrastructure/cache#redis-cluster-mode) enabled.
 
 If the high CPU utilization persists, it is possible to shard the queues that Langfuse uses across multiple nodes.
 Set `LANGFUSE_INGESTION_QUEUE_SHARD_COUNT` and `LANGFUSE_TRACE_UPSERT_QUEUE_SHARD_COUNT` to a value greater than 1 to enable sharding.

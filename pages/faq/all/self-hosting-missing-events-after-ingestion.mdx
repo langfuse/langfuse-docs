@@ -10,7 +10,7 @@ Events do not appear immediately in the UI, as they are being processed asynchro
 If your events are not shown after a few minutes, you can check the following:
 
 - **Check the Langfuse Web logs**: Look for any errors in the Langfuse Web container around the time that you ingested the events.
-  Any errors you observe indicate that the event is malformatted or that either [Redis](/self-hosting/infrastructure/cache) or [S3](/self-hosting/infrastructure/blobstorage) are not available.
+  Any errors you observe indicate that the event is malformatted or that either [Redis](/self-hosting/deployment/infrastructure/cache) or [S3](/self-hosting/deployment/infrastructure/blobstorage) are not available.
   In this case, you should also see non-207 status codes within your application.
 - **Check the S3/Blob Storage bucket**: Validate that the event was uploaded correctly into your blob storage.
   It should be available in a path like `/<projectId>/<type>/<eventId>/<randomId>.json`.

@@ -152,7 +152,7 @@ Deleting projects within Langfuse was a synchronous operation and projects got r
 Projects will be marked as deleted within Langfuse v3 and will not be accessible using the standard UI navigation options.
 We immediately revoke access keys for projects, but all remaining data will be removed in the background.
 
-Information will not be deleted from the [S3/Blob Store](/self-hosting/infrastructure/blobstorage).
+Information will not be deleted from the [S3/Blob Store](/self-hosting/deployment/infrastructure/blobstorage).
 This action needs to be performed manually by an administrator.
 This process will be automated in a future release.
 
@@ -209,7 +209,7 @@ Therefore, we recommend to use v3.29.0 for parallel operations and upgrade to th
 
 #### 1. Provision new infrastructure
 
-Ensure that you deploy all required storage components ([Clickhouse](/self-hosting/infrastructure/clickhouse), [Redis](/self-hosting/infrastructure/cache), [S3/Blob Store](/self-hosting/infrastructure/blobstorage)) and have the connection information handy.
+Ensure that you deploy all required storage components ([Clickhouse](/self-hosting/deployment/infrastructure/clickhouse), [Redis](/self-hosting/deployment/infrastructure/cache), [S3/Blob Store](/self-hosting/deployment/infrastructure/blobstorage)) and have the connection information handy.
 You can reuse your existing Postgres instance for the new deployment.
 Ensure that you also have your Postgres connection details ready.
 
@@ -239,7 +239,7 @@ All new events will be stored in Clickhouse and should appear within the UI with
 
 #### 4. Wait for historic data migration to complete
 
-We have introduced [background migrations](/self-hosting/background-migrations) as part of the migration to v3.
+We have introduced [background migrations](/self-hosting/upgrade/background-migrations) as part of the migration to v3.
 Those allow Langfuse to schedule longer-running migrations without impacting the availability of the service.
 As part of the v3 release, we have introduced four migrations that will run once you deploy the new stack.
 
@@ -251,7 +251,7 @@ As part of the v3 release, we have introduced four migrations that will run once
 Each migration has to finish, before the next one starts.
 Depending on the size of your event tables, this process may take multiple hours.
 
-In case of any issues, please review the troubleshooting section in the [background migrations guide](/self-hosting/background-migrations#troubleshooting).
+In case of any issues, please review the troubleshooting section in the [background migrations guide](/self-hosting/upgrade/background-migrations#troubleshooting).
 
 #### 5. Stop the old Langfuse containers
 

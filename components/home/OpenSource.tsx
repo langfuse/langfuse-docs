@@ -14,7 +14,10 @@ export default function OpenSource() {
         description={
           <span>
             Langfuse is committed to open source. You can also run it{" "}
-            <Link href="/self-hosting/local" className="underline">
+            <Link
+              href="/self-hosting/deployment/docker-compose"
+              className="underline"
+            >
               locally
             </Link>{" "}
             or{" "}

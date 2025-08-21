@@ -27,7 +27,7 @@ Langfuse accepts the following environment variables to fine-tune your Redis usa
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
 | Variable                  | Required / Default | Description                                                                                        |
-|---------------------------|--------------------|----------------------------------------------------------------------------------------------------|
+| ------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
 | `REDIS_CONNECTION_STRING` | Required           | Redis connection string with format `redis[s]://[[username][:password]@][host][:port][/db-number]` |
 
 ### Cache Configuration Options
@@ -35,7 +35,7 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 Langfuse supports caching for API keys and prompts to improve performance. The following environment variables control caching behavior:
 
 | Variable                             | Required / Default | Description                                                                                                                                                 |
-|--------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_CACHE_API_KEY_ENABLED`     | `true`             | Enable or disable API key caching. Set to `false` to disable caching of API keys. Plain-text keys are never stored in Redis, only hashed or encrypted keys. |
 | `LANGFUSE_CACHE_API_KEY_TTL_SECONDS` | `300`              | Time-to-live (TTL) in seconds for cached API keys. Determines how long API keys remain in the cache before being refreshed.                                 |
 | `LANGFUSE_CACHE_PROMPT_ENABLED`      | `true`             | Enable or disable prompt caching. Set to `false` to disable caching of prompts.                                                                             |
@@ -44,7 +44,7 @@ Langfuse supports caching for API keys and prompts to improve performance. The f
 OR
 
 | Variable                | Required / Default | Description                                                                                                             |
-|-------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------|
+| ----------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | `REDIS_HOST`            | Required           | Redis host name.                                                                                                        |
 | `REDIS_PORT`            | `6379`             | Port of the Redis instance.                                                                                             |
 | `REDIS_USERNAME`        |                    | Username for Redis authentication.                                                                                      |
@@ -67,11 +67,13 @@ This section covers different deployment options and provides example environmen
 Langfuse handles failovers between read-replicas and supports Redis cluster mode for horizontal scaling.
 
 For **standalone Redis instances**, use the standard configuration:
+
 ```bash
 REDIS_CONNECTION_STRING=redis://username:password@your-redis-endpoint:6379
 ```
 
 For **Redis cluster mode**, enable cluster support:
+
 ```bash
 REDIS_CLUSTER_ENABLED=true
 REDIS_CLUSTER_NODES=your-cluster-endpoint:6379
@@ -90,7 +92,7 @@ You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the
 
 Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
 We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
-See [Langfuse on Kubernetes (Helm)](/self-hosting/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
 #### Example Configuration
 
@@ -179,6 +181,7 @@ REDIS_AUTH=your-cluster-password
 <Callout type="warning">
 
 When using Redis cluster mode:
+
 - Ensure all cluster nodes are accessible from your Langfuse containers
 - Use the same authentication credentials across all cluster nodes
 - Monitor cluster health and handle node failures appropriately

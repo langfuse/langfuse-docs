@@ -29,15 +29,15 @@ Langfuse needs an S3 bucket to upload raw event information.
 The following environment variables are mandatory for every deployment.
 They need to be provided for the Langfuse Web and Langfuse Worker containers.
 
-| Variable                                             | Required / Default | Description                                                                                                           |
-|------------------------------------------------------|--------------------|-----------------------------------------------------------------------------------------------------------------------|
-| `LANGFUSE_S3_EVENT_UPLOAD_BUCKET`                    | Required           | Name of the bucket in which event information should be uploaded.                                                     |
-| `LANGFUSE_S3_EVENT_UPLOAD_PREFIX`                    | `""`               | Prefix to store events within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
-| `LANGFUSE_S3_EVENT_UPLOAD_REGION`                    |                    | Region in which the bucket resides.                                                                                   |
-| `LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`                  |                    | Endpoint to use to upload events.                                                                                     |
-| `LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`             |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                  |
-| `LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY`         |                    | Secret access key for the bucket.                                                                                     |
-| `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE`          |                    | Whether to force path style on requests. Required for MinIO.                                                          |
+| Variable                                     | Required / Default | Description                                                                                                           |
+| -------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_S3_EVENT_UPLOAD_BUCKET`            | Required           | Name of the bucket in which event information should be uploaded.                                                     |
+| `LANGFUSE_S3_EVENT_UPLOAD_PREFIX`            | `""`               | Prefix to store events within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
+| `LANGFUSE_S3_EVENT_UPLOAD_REGION`            |                    | Region in which the bucket resides.                                                                                   |
+| `LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`          |                    | Endpoint to use to upload events.                                                                                     |
+| `LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                  |
+| `LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket.                                                                                     |
+| `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO.                                                          |
 
 ### Optional Configuration
 
@@ -49,7 +49,7 @@ Langfuse uses the credentials to generate short-lived, pre-signed URLs that allo
 #### Multi-Modal Tracing
 
 | Variable                                        | Required / Default | Description                                                                                                          |
-|-------------------------------------------------|--------------------|----------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`               | Required           | Name of the bucket in which media files should be uploaded.                                                          |
 | `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`               | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
 | `LANGFUSE_S3_MEDIA_UPLOAD_REGION`               |                    | Region in which the bucket resides.                                                                                  |
@@ -67,7 +67,7 @@ We upload intermediate results to S3 and provide a presigned URL for users to do
 To configure batch exports in your environment, configure the following environment variables:
 
 | Variable                                     | Required / Default | Description                                                                                                                                                                        |
-|----------------------------------------------|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_S3_BATCH_EXPORT_ENABLED`           | `false`            | Whether to enable Langfuse S3 batch exports. This must be set to `true` to enable batch exports.                                                                                   |
 | `LANGFUSE_S3_BATCH_EXPORT_BUCKET`            | Required           | Name of the bucket in which batch exports should be uploaded.                                                                                                                      |
 | `LANGFUSE_S3_BATCH_EXPORT_PREFIX`            | `""`               | Prefix to store batch exports within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`.                                                       |
@@ -113,9 +113,9 @@ Ensure that both entities have the necessary permissions to access the bucket:
 
 <Callout type="info">
 
-  To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.
-  Note that Langfuse only issues delete statements on the API.
-  If you use versioned buckets, delete markers and non-current versions need to be removed manually or with a lifecycle rule.
+To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.
+Note that Langfuse only issues delete statements on the API.
+If you use versioned buckets, delete markers and non-current versions need to be removed manually or with a lifecycle rule.
 
 </Callout>
 
@@ -125,7 +125,7 @@ Amazon S3 provides server-side encryption (SSE) options to encrypt your data at 
 Langfuse supports AWS KMS encryption for all S3 interactions through the following environment variables:
 
 | Variable                                  | Required / Default | Description                                                                                                         |
-|-------------------------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_S3_EVENT_UPLOAD_SSE`            |                    | Server-side encryption algorithm to use. Set to `aws:kms` to use AWS KMS or `AES256` to use server-side encryption. |
 | `LANGFUSE_S3_EVENT_UPLOAD_SSE_KMS_KEY_ID` |                    | ID of the KMS key to use for encryption. Required when `LANGFUSE_S3_EVENT_UPLOAD_SSE` is set to `aws:kms`.          |
 | `LANGFUSE_S3_MEDIA_UPLOAD_SSE`            |                    | Server-side encryption algorithm to use. Set to `aws:kms` to use AWS KMS or `AES256` to use server-side encryption. |
@@ -170,7 +170,7 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLE
 
 [MinIO](https://min.io/) is an open-source object storage server that is compatible with the S3 API.
 It is a popular choice for on-premise deployments and local development.
-Langfuse uses it for local development and as a default in our [Docker Compose](/self-hosting/docker-compose) and [Kubernetes (Helm)](/self-hosting/kubernetes-helm) deployment options.
+Langfuse uses it for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
 
 #### Example Configuration
 
@@ -278,9 +278,9 @@ Ensure that the HMAC key has the necessary permissions to access the bucket.
 
 <Callout type="warning">
 
-  Please note that GCS does not implement all functions of the S3 API.
-  We are aware of issues around DeleteObject requests that may cause errors in your application.
-  This will have no effect on most operations within Langfuse, but may limit your ability to delete data.
+Please note that GCS does not implement all functions of the S3 API.
+We are aware of issues around DeleteObject requests that may cause errors in your application.
+This will have no effect on most operations within Langfuse, but may limit your ability to delete data.
 
 </Callout>
 
