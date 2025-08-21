@@ -21,10 +21,8 @@ const usSpanProcessor = new LangfuseSpanProcessor({
 
 const spanProcessors = [euSpanProcessor, usSpanProcessor];
 
-export function register() {
-  const tracerProvider = new NodeTracerProvider({
-    spanProcessors,
-  });
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors,
+});
 
-  tracerProvider.register();
-}
+tracerProvider.register();
