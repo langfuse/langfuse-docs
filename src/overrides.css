@@ -141,3 +141,10 @@ li:has(> .subseparator) {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* Prevent iOS Safari auto-zoom on focus by enforcing >=16px */
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
