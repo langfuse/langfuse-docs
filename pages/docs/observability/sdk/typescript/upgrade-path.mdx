@@ -57,6 +57,16 @@ import { observeOpenAI } from "@langfuse/openai";
 
 - You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
 
+## Vercel AI SDK
+
+Please the v4 `LangfuseSpanProcessor` in your OpenTelemetry setup instead of the v3 `LangfuseExporter`.
+
+If you are using Next.js, please use a manual OpenTelemetry setup via the `NodeTracerProvider` than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
+
+If you are still missing traces, please see the documentation on [serverless environments](/docs/observability/sdk/typescript/advanced-usage#serverless-environments)
+
+If you would like to filter out the Next JS level spans from being exported to Langfuse, [see here](/docs/observability/typescript/advanced-usage#filtering-spans).
+
 
 ## Langchain integration
 
