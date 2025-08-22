@@ -39,6 +39,13 @@ const withNextra = nextra({
 
 // next config
 const nextraConfig = withNextra({
+  // Enable static export when STATIC_EXPORT env var is set
+  ...(process.env.STATIC_EXPORT === 'true' && {
+    output: 'export',
+    trailingSlash: true,
+    // Disable server-side features for static export
+    distDir: 'out',
+  }),
   experimental: {
     scrollRestoration: true,
   },
@@ -48,6 +55,8 @@ const nextraConfig = withNextra({
     'geist'
   ],
   images: {
+    // Disable image optimization for static export
+    ...(process.env.STATIC_EXPORT === 'true' && { unoptimized: true }),
     remotePatterns: [
       {
         protocol: 'https',
