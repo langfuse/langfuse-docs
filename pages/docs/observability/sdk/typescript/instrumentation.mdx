@@ -54,11 +54,108 @@ const completion = await tracedOpenAI.chat.completions.create({
 
 ### Vercel AI SDK
 
-The Vercel AI SDK is natively instrumented with OpenTelemetry. If you have configured your OTEL Setup with the `LangfuseSpanProcessor`, traces from the Vercel AI SDK will be captured automatically without any additional code.
+The Vercel AI SDK offers native instrumentation with OpenTelemetry.
 
-Please refer to the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry) for instructions on how to enable it.
+Here is a full example on how to set up tracing with the
 
-If you would like to filter out the Next JS level spans from being exported to Langfuse, [see here](/docs/observability/typescript/advanced-usage#filtering-spans).
+- AI SDK v5
+- Next JS deployed
+- deployed on Vercel
+
+```ts filename="instrumentation.ts"
+import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+
+// Optional: filter our NextJS infra spans
+const shouldExportSpan: ShouldExportSpan = (span) => {
+  return span.otelSpan.instrumentationScope.name !== "next.js";
+};
+
+const langfuseSpanProcessor = new LangfuseSpanProcessor({
+  shouldExportSpan,
+});
+
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+tracerProvider.register();
+```
+
+<Callout>
+If you are using Next.js, please use a manual OpenTelemetry setup via the `NodeTracerProvider` than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
+</Callout>
+
+
+```ts filename="route.ts"
+import { streamText } from "ai";
+import { after } from "next/server";
+
+import { openai } from "@ai-sdk/openai";
+import {
+  observe,
+  updateActiveSpan,
+  updateActiveTrace,
+} from "@langfuse/tracing";
+import { trace } from "@opentelemetry/api";
+
+import { langfuseSpanProcessor } from "@/src/instrumentation";
+
+const handler = async (req: Request) => {
+  const {
+    messages,
+    chatId,
+    userId,
+  }: { messages: UIMessage[]; chatId: string; userId: string } =
+    await req.json();
+
+  // Set session id and user id on active trace
+  const inputText = messages[messages.length - 1].parts.find(
+    (part) => part.type === "text",
+  )?.text;
+
+  updateActiveSpan({
+    input: inputText,
+  });
+
+  updateActiveTrace({
+    name: "my-ai-sdk-trace",
+    sessionId: chatId,
+    userId,
+    input: inputText,
+  });
+
+  const result = streamText({
+    // ... other streamText options ...
+    experimental_telemetry: {
+      isEnabled: true
+    },
+    onFinish: async (result) => {
+      updateActiveSpan({
+        output: result.content,
+      });
+      updateActiveTrace({
+        output: result.content,
+      });
+
+      // End span manually after stream has finished
+      trace.getActiveSpan().end();
+    },
+  });
+
+  // Important in serverless environments: schedule flush after request is finished
+  after(async () => await langfuseSpanProcessor.forceFlush());
+
+  return result.toUIMessageStreamResponse();
+};
+
+export const POST = observe(handler, {
+  name: "handle-chat-message",
+  endOnExit: false, // end observation _after_ stream has finished
+});
+```
+
+Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry).
 
 ### Langchain
 
