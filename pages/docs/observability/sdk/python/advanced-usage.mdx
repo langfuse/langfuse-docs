@@ -132,7 +132,7 @@ The observe decorator uses Python's `contextvars` to store the current trace con
 
 The recommended workaround is to pass the parent observation id  and the trace ID as a keyword argument to each multithreaded execution, thus re-establishing the link to the parent span or trace:
 
-```python /langfuse_parent_trace_id=trace_id/ /langfuse_parent_observation_id=observation_id/
+```python /langfuse_trace_id=trace_id/ /langfuse_parent_observation_id=observation_id/
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from langfuse import get_client, observe
 
@@ -150,7 +150,7 @@ def execute_groups(task_args):
             executor.submit(
                 execute_task,
                 *task_arg,
-                langfuse_parent_trace_id=trace_id,
+                langfuse_trace_id=trace_id,
                 langfuse_parent_observation_id=observation_id,
             )
             for task_arg in task_args

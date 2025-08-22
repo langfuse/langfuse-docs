@@ -19,6 +19,9 @@ const GITHUB_CONFIG = {
     batchDelay: 100
 };
 
+// Contributors to exclude from the widget
+const EXCLUDED_CONTRIBUTORS = ['cursoragent'];
+
 // Single cache for all GitHub API responses
 const cache = new Map();
 // Cache for email to GitHub username mapping
@@ -186,7 +189,7 @@ async function analyzeContributors() {
 
         const contributor = await resolveContributor(commit.email, commit.hash);
 
-        if (contributor) {
+        if (contributor && !EXCLUDED_CONTRIBUTORS.includes(contributor)) {
             if (!fileContributors[urlPath]) fileContributors[urlPath] = {};
 
             // Keep most recent contribution date

@@ -1,16 +1,18 @@
 // pages/api/mcp.ts
 import { createMcpHandler } from "@vercel/mcp-adapter";
-import { z } from "zod";
+import * as z from "zod/v3";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 
 // Initialize PostHog client for server-side tracking
-const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY || "", {
-  host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
-  flushAt: 1,
-  flushInterval: 0,
-});
+const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
+  ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+      flushAt: 1,
+      flushInterval: 0,
+    })
+  : undefined;
 
 // Helper function for PostHog tracking
 const trackMcpToolUsage = async (
@@ -21,7 +23,7 @@ const trackMcpToolUsage = async (
   return waitUntil(
     (async () => {
       try {
-        posthog.capture({
+        posthog?.capture({
           distinctId: "docs-mcp-server",
           event: "docs_mcp:execute_tool",
           properties: {
@@ -33,7 +35,7 @@ const trackMcpToolUsage = async (
         });
 
         // Ensure events are flushed before function shutdown
-        await posthog.flush();
+        await posthog?.flush();
       } catch (error) {
         console.error("Error tracking PostHog event:", error);
       }
@@ -44,7 +46,7 @@ const trackMcpToolUsage = async (
 // Create the MCP handler using Vercel's adapter
 const mcpHandler = createMcpHandler(
   (server) => {
-    // Define the searchDocs tool
+    // @ts-ignore
     server.tool(
       "searchLangfuseDocs",
       "Search Langfuse documentation for relevant information. Whenever there are questions about Langfuse, use this tool to get relevant documentation chunks.",
@@ -121,6 +123,7 @@ const mcpHandler = createMcpHandler(
     );
 
     // Define the getLangfuseDocsPage tool
+    // @ts-ignore
     server.tool(
       "getLangfuseDocsPage",
       "Fetch the Markdown for a single Langfuse docs page. Accepts either a path (e.g. /docs/observability/overview) or a full URL (https://langfuse.com/docs/observability/overview).",
@@ -195,6 +198,7 @@ const mcpHandler = createMcpHandler(
     );
 
     // Define the getLangfuseOverview tool
+    // @ts-ignore
     server.tool(
       "getLangfuseOverview",
       "Get an initial overview of Langfuse documentation and features by fetching the llms.txt file from langfuse.com",
@@ -311,8 +315,3 @@ export default async function handler(
     res.end();
   }
 }
-
-/* TypeScript checks:
-   tsc --noEmit                     (Next.js already runs this)
-   All exports are default for Next.js API Routes.                  :contentReference[oaicite:4]{index=4}
-*/
