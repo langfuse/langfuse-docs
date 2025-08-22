@@ -2,9 +2,7 @@ const cookbookRoutes = require("./cookbook/_routes.json");
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-    siteUrl: process.env.STATIC_EXPORT === 'true' ?
-        (process.env.STATIC_SITE_URL || 'https://langfuse.com') :
-        'https://langfuse.com',
+    siteUrl: process.env.CF_PAGES_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ?? 'https://langfuse.com',
     generateRobotsTxt: true,
     changefreq: 'daily',
     additionalPaths: async (config) => [{
