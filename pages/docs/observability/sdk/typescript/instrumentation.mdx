@@ -229,11 +229,14 @@ await startActiveSpan("user-request", async (span) => {
     input: [{ role: "user", content: "What is the capital of France?" }],
   });
 
-  // ... LLM call logic ...
+ // ... LLM call logic ...
+
+  generation.update({
+    usageDetails: { input: 10, output: 5 },
+  });
 
   generation.end({
     output: { content: "The capital of France is Paris." },
-    usageDetails: { input: 10, output: 5 },
   });
 
   span.update({ output: "Successfully answered." });
@@ -302,9 +305,13 @@ const generation = span.startGeneration("llm-call", {
   model: "gpt-4",
   input: [{ role: "user", content: "What is the capital of France?" }],
 });
+
+generation.update({
+  usageDetails: { input: 10, output: 5 },
+});
+
 generation.end({
   output: { content: "The capital of France is Paris." },
-  usageDetails: { input: 10, output: 5 },
 });
 
 // End the root span

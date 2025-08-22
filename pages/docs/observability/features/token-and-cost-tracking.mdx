@@ -167,9 +167,8 @@ await startActiveSpan("context-manager", async (span) => {
   });
  
   // ... LLM call logic ...
- 
-  generation.end({
-    output: { content: "The capital of France is Paris." },
+
+  generation.update({
     usageDetails: {
       input: 10,
       output: 5,
@@ -184,7 +183,11 @@ await startActiveSpan("context-manager", async (span) => {
       cache_read_input_tokens: 0.5,
       some_other_token_count: 1,
       total: 3.5,
-  }
+    }
+  });
+ 
+  generation.end({
+    output: { content: "The capital of France is Paris." },
   });
 });
 ```
@@ -240,8 +243,7 @@ const generation = span.startGeneration('llm-call', {
   output: { content: 'The capital of France is Paris.' },
 });
 
-generation.end({
-  output: { content: 'The capital of France is Paris.' },
+generation.update({
   usageDetails: {
     input: 10,
     output: 5,
@@ -257,6 +259,10 @@ generation.end({
     some_other_token_count: 1,
     total: 3.5,
   }
+});
+
+generation.end({
+  output: { content: 'The capital of France is Paris.' },
 });
 
 span.end({ output: 'Successfully answered user request.', sessionId: '123' });
