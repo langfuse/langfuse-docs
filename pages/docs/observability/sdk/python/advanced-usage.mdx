@@ -367,3 +367,87 @@ httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFI
 langfuse = Langfuse(httpx_client=httpx_client)
 ```
 
+## Observation Types
+
+Langfuse supports multiple observation types to provide context for different components of LLM applications.
+The full list of the observation types is document here: [Observation types](/docs/observability/features/observation-types).
+
+### Setting observation types with the `@observe` decorator
+
+The `@observe` decorator is the recommended approach for setting observation types. It automatically handles context propagation and span management:
+
+```python
+from langfuse import observe
+
+# Agent workflow with reasoning and tool usage
+@observe(as_type="agent")
+def run_customer_support_agent(query):
+    context = retrieve_context(query)
+    response = generate_response(query, context)
+    return {"response": response, "context": context}
+
+# Tool calls to external services
+@observe(as_type="tool")
+def retrieve_context(query):
+    results = vector_store.similarity_search(query, k=5)
+    return results
+
+# Guardrail for content safety
+@observe(as_type="guardrail")
+def content_safety_check(text):
+    # Safety assessment
+    if contains_harmful_content(text):
+        return {"safe": False, "reason": "Contains harmful content"}
+    return {"safe": True}
+```
+
+### Setting observation types with client methods and context manager
+
+With the langfuse client, you can directly create an observation with a set type:
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+def process_with_manual_tracing():
+    trace = langfuse.trace(name="document-processing")
+
+    # Create different observation types
+    embedding_obs = trace.start_observation(
+        as_type="embedding",
+        name="document-embedding",
+        input={"document": "text content"}
+    )
+
+    embeddings = generate_embeddings("text content")
+    embedding_obs.update(output={"embeddings": embeddings})
+    embedding_obs.end()
+```
+
+The context manager approach provides automatic resource cleanup:
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+def process_with_context_managers():
+    with langfuse.start_as_current_observation(
+        as_type="chain",
+        name="retrieval-pipeline",
+    ) as chain:
+
+        # Retrieval step
+        with langfuse.start_as_current_observation(
+            as_type="retriever",
+            name="vector-search",
+        ) as retriever:
+            search_results = perform_vector_search("user question")
+            retriever.update(output={"results": search_results})
+
+        # Generation step
+        with langfuse.start_as_current_observation(
+            name="answer-generation",
+            as_type="generation",
+        ) as generation:
+            answer = generate_answer("user question", search_results)
+            generation.update(output={"answer": answer})

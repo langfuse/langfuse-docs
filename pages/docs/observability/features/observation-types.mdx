@@ -1,0 +1,76 @@
+---
+title: Observation Types
+description: Structured tracing with observation types in Langfuse
+---
+
+# Observation Types
+
+Langfuse supports different observation types to provide more context to your spans and allow efficient filtering.
+
+import { CircleDot, MoveHorizontal, Fan, Bot, Wrench, Link, Search, WandSparkles, Layers3, ShieldCheck } from "lucide-react";
+
+## Available Types
+
+- <CircleDot size={16} className="text-muted-green inline mr-1" /> **Events** - Discrete moments without duration
+- <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> **Spans** - General operations with start/end time. Often used for nesting.
+- <Fan size={16} className="text-muted-magenta inline mr-1" /> **Generations** - LLM completions with [cost and token tracking](/docs/observability/features/token-and-cost-tracking)
+- <Bot size={16} className="text-purple-600 inline mr-1" /> **Agents** - Multi-step reasoning workflows
+- <Wrench size={16} className="text-orange-600 inline mr-1" /> **Tools** - External API calls and functions
+- <Link size={16} className="text-indigo-600 inline mr-1" /> **Chains** - Sequential operation orchestration
+- <Search size={16} className="text-teal-600 inline mr-1" /> **Retrievers** - Data lookup and search operations
+- <WandSparkles size={16} className="text-pink-600 inline mr-1" /> **Evaluators** - Quality assessment functions
+- <Layers3 size={16} className="text-amber-600 inline mr-1" /> **Embeddings** - Text vectorization with [token tracking](/docs/observability/features/token-and-cost-tracking)
+- <ShieldCheck size={16} className="text-red-600 inline mr-1" /> **Guardrails** - Safety and content filtering
+
+## Usage with Python SDK
+
+<Callout type="info">
+Observation types require Python SDK `version>=3.4` or JS/TS SDK `version>=4.0`.
+</Callout>
+
+For langgraph/langchain and OpenAI, the SDK should automatically detect the correct observation type and set it.
+When directly using the Python SDK, there are multiple ways of setting an observation type.
+
+Using `@observe` decorator:
+
+```python
+from langfuse import observe
+
+# Agent workflow
+@observe(as_type="agent")
+def run_agent_workflow(query):
+    # Agent reasoning and tool orchestration
+    return process_with_tools(query)
+
+# Tool calls
+@observe(as_type="tool")
+def call_weather_api(location):
+    # External API call
+    return weather_service.get_weather(location)
+```
+
+Calling the `start_as_current_observation` or `start_observation` method:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Start observation with specific type
+with langfuse.start_as_current_observation(
+    as_type="embedding",
+    name="embedding-generation"
+) as obs:
+    embeddings = model.encode(["text to embed"])
+    obs.update(output=embeddings)
+
+# Start observation with specific type
+with langfuse.start_observation(
+    as_type="chain",
+    name="transform-text"
+) as obs:
+    transformed_text = model.transform_text(["text to transform"])
+    obs.update(output=transformed_text)
+```
+
+For detailed Python implementation examples, see the [Python SDK Advanced Usage](/docs/observability/sdk/python/advanced-usage#observation-types).
