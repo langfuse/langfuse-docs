@@ -26,7 +26,9 @@ import { CircleDot, MoveHorizontal, Fan, Bot, Wrench, Link, Search, WandSparkles
 
 You can directly set the adequate observation types for your application within the SDK by setting the `as_type` parameter available when creating an observation.
 
-`as_type` is available in the `@observe` decorator, `start_as_current_observation` context manager and `start_observation` method:
+`as_type` is available in the `@observe` decorator, `start_as_current_observation` context manager and `start_observation` method.
+
+For SDKs with auto instrumentation such as langchain/langgraph or OpenAI, we automatically set the natively integrated observation types. For example, a method marked with `@tool` in langchain will automatically set the observation type to `tool`.
 
 <Tabs items={["Python SDK", "JS/TS"]}>
 <Tab>
@@ -69,15 +71,13 @@ with langfuse.start_as_current_observation(
     obs.update(output=embeddings)
 
 # Start observation with specific type
-with langfuse.start_observation(
+transform_span = langfuse.start_observation(
     as_type="chain",
     name="transform-text"
-) as obs:
-    transformed_text = model.transform_text(["text to transform"])
-    obs.update(output=transformed_text)
+):
+transformed_text = transform_text(["text to transform"])
+transform_span.update(output=transformed_text)
 ```
-
-For detailed Python implementation examples, see the [Python SDK Advanced Usage](/docs/observability/sdk/python/advanced-usage#observation-types).
 
 </Tab>
 <Tab>
