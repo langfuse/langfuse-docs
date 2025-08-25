@@ -555,6 +555,11 @@ const nonPermanentRedirects = [
   ["/self-hosting/upgrade-guides/upgrade-v1-to-v2", "/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2"],
   ["/self-hosting/upgrade-guides/upgrade-v2-to-v3", "/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3"],
   ["/self-hosting/versioning", "/self-hosting/upgrade/versioning"],
+
+  // Redirect TypeScript SDK v3 docs to new docs
+  ["/docs/observability/sdk/typescript/guide", "/docs/observability/sdk/typescript/overview"],
+  ["/docs/observability/sdk/typescript/guide-web", "/docs/observability/sdk/typescript/overview"],
+  ["/docs/observability/sdk/typescript/example-notebook", "/docs/observability/sdk/typescript/overview"],
 ];
 
 const permanentRedirects = []
