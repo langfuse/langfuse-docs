@@ -55,15 +55,63 @@ with langfuse.start_as_current_span(name="another-operation"):
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import { startActiveSpan, startGeneration, updateActiveTrace } from "@langfuse/tracing";
+ 
+await startActiveSpan("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" }
+  });
 
-const trace = langfuse.trace({
-  tags: ["tag-1", "tag-2"],
+  updateActiveTrace({
+    tags: ["tag-1", "tag-2"]
+  });
+
 });
+```
+
+When using the `observe` wrapper:
+
+```ts
+import { observe, updateActiveTrace } from "@langfuse/tracing";
+ 
+// An existing function
+async function fetchData(source: string) {
+
+  updateActiveTrace({
+    tags: ["tag-1", "tag-2"]
+  });
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+ 
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper"
+});
+ 
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startSpan } from "@langfuse/tracing";
+
+const span = startSpan('manual-observation', {
+  input: { query: 'What is the capital of France?' },
+});
+
+span.updateTrace({
+  tags: ['tag-1', 'tag-2']
+});
+
+span.end({ output: 'Paris'});
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -86,7 +134,7 @@ completion = openai.chat.completions.create(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (Python)">
 
 Use metadata in chain invocation:
 
@@ -105,7 +153,7 @@ chain.invoke(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `tags` to the constructor:
 

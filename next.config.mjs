@@ -519,6 +519,9 @@ const nonPermanentRedirects = [
   ["/docs/evaluation/dataset-runs/run-via-ui", "/docs/evaluation/dataset-runs/native-run"],
   ["/docs/evaluation/dataset-runs/run-via-sdk", "/docs/evaluation/dataset-runs/remote-run"],
 
+  // Redirect preview URL of JS SDK v4 - no longer necessary once merged to main
+  ["/docs/observability/sdk/typescript/sdk-v4", "/docs/observability/sdk/typescript/overview"],
+
   // Redirect removing Python SDK v2 docs and splitting up Python SDK v3 docs
   ["/docs/observability/sdk/python/sdk-v3", "/docs/observability/sdk/python/overview"],
   ["/docs/observability/sdk/python/decorators", "/docs/observability/sdk/python/overview"],
@@ -562,6 +565,11 @@ const nonPermanentRedirects = [
   ["/self-hosting/upgrade-guides/upgrade-v1-to-v2", "/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2"],
   ["/self-hosting/upgrade-guides/upgrade-v2-to-v3", "/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3"],
   ["/self-hosting/versioning", "/self-hosting/upgrade/versioning"],
+
+  // Redirect TypeScript SDK v3 docs to new docs
+  ["/docs/observability/sdk/typescript/guide", "/docs/observability/sdk/typescript/overview"],
+  ["/docs/observability/sdk/typescript/guide-web", "/docs/observability/sdk/typescript/overview"],
+  ["/docs/observability/sdk/typescript/example-notebook", "/docs/observability/sdk/typescript/overview"],
 ];
 
 const permanentRedirects = []

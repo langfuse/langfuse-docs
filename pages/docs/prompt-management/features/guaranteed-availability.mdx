@@ -65,16 +65,16 @@ if __name__ == '__main__':
 
 ```ts
 import express from "express";
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
 // Initialize the Express app and Langfuse client
 const app = express();
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 async function fetchPromptsOnStartup() {
   try {
     // Fetch and cache the production version of the prompt
-    await langfuse.getPrompt("movie-critic");
+    await langfuse.prompt.get("movie-critic");
   } catch (error) {
     console.error("Failed to fetch prompt on startup:", error);
     process.exit(1); // Exit the application if the prompt is not available
@@ -86,7 +86,7 @@ fetchPromptsOnStartup();
 
 app.get("/get-movie-prompt/:movie", async (req, res) => {
   const movie = req.params.movie;
-  const prompt = await langfuse.getPrompt("movie-critic");
+  const prompt = await langfuse.prompt.get("movie-critic");
   const compiledPrompt = prompt.compile({ criticlevel: "expert", movie });
   res.json({ prompt: compiledPrompt });
 });
@@ -131,16 +131,17 @@ prompt.is_fallback
 <Tab>
 
 ```ts /fallback: "Do you like {{movie}}?"/ /fallback: [{ role: "system", content: "You are an expert on {{movie}}" }]/
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
 
 // Get `text` prompt with fallback
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   fallback: "Do you like {{movie}}?",
 });
 
 // Get `chat` prompt with fallback
-const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+const chatPrompt = await langfuse.prompt.get("movie-critic-chat", {
   type: "chat",
   fallback: [{ role: "system", content: "You are an expert on {{movie}}" }],
 });

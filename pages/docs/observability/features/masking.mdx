@@ -91,34 +91,38 @@ with langfuse.start_as_current_span(
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
 
-```typescript
-import { Langfuse } from "langfuse";
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
 
-function maskingFunction(params: { data: any }) {
-  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
-    return "REDACTED";
-  }
+The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
 
-  return params.data;
-}
+```ts filename="instrumentation.ts" /mask:/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 
-const langfuse = new Langfuse({ mask: maskingFunction });
-
-const trace = langfuse.trace({
-  output: "SECRET_DATA",
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    // A simple regex to mask credit card numbers
+    const maskedData = data.replace(
+      /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
+      "***MASKED_CREDIT_CARD***"
+    );
+    return maskedData;
+  },
 });
 
-await langfuse.flushAsync();
+const sdk = new NodeSDK({
+  spanProcessors: [spanProcessor],
+});
 
-// The trace output in Langfuse will have the output masked as "REDACTED".
+sdk.start();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
 

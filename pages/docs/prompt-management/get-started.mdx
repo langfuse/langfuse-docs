@@ -85,17 +85,17 @@ prompt.config
 <Tab>
 
 ```ts
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
 // Iniitialize the Langfuse client
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 ```
 
 **Text prompt**
 
 ```ts
 // Get current `production` version
-const prompt = await langfuse.getPrompt("movie-critic");
+const prompt = await langfuse.prompt.get("movie-critic");
 
 // Insert variables into prompt template
 const compiledPrompt = prompt.compile({
@@ -109,7 +109,7 @@ const compiledPrompt = prompt.compile({
 
 ```ts
 // Get current `production` version of a chat prompt
-const chatPrompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+const chatPrompt = await langfuse.prompt.get("movie-critic-chat", {
   type: "chat",
 }); // type option infers the prompt type (default is 'text')
 
@@ -125,15 +125,17 @@ const compiledChatPrompt = chatPrompt.compile({
 
 ```ts
 // Get specific version of a prompt (here version 1)
-const prompt = await langfuse.getPrompt("movie-critic", 1);
+const prompt = await langfuse.prompt.get("movie-critic", {
+  version: 1
+});
 
 // Get specific label
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   label: "staging",
 });
 
 // Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   label: "latest",
 });
 ```
@@ -215,17 +217,17 @@ prompt.config
 As Langfuse and Langchain process input variables of prompt templates differently (`{}` instead of `{{}}`), we provide the `prompt.getLangchainPrompt()` method to transform the Langfuse prompt into a string that can be used with Langchain's PromptTemplate.
 
 ```ts
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 ```
 
 **Text prompt**
 
 ```ts
 // Get current `production` version
-const langfusePrompt = await langfuse.getPrompt("movie-critic");
+const langfusePrompt = await langfuse.prompt.get("movie-critic");
 
 // Example using ChatPromptTemplate
 const promptTemplate = PromptTemplate.fromTemplate(
@@ -237,9 +239,8 @@ const promptTemplate = PromptTemplate.fromTemplate(
 
 ```ts
 // Get current `production` version of a chat prompt
-const langfusePrompt = await langfuse.getPrompt(
+const langfusePrompt = await langfuse.prompt.get(
   "movie-critic-chat",
-  undefined,
   { type: "chat" }
 );
 
@@ -253,15 +254,17 @@ const promptTemplate = ChatPromptTemplate.fromMessages(
 
 ```ts
 // Get specific version of a prompt (here version 1)
-const prompt = await langfuse.getPrompt("movie-critic", 1);
+const prompt = await langfuse.prompt.get("movie-critic", {
+  version: 1
+});
 
 // Get specific label
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   label: "staging",
 });
 
 // Get latest prompt version. The 'latest' label is automatically maintained by Langfuse.
-const prompt = await langfuse.getPrompt("movie-critic", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic", {
   label: "latest",
 });
 ```

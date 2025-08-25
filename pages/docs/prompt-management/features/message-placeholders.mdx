@@ -6,7 +6,7 @@ description: Use message placeholders in chat prompts to insert a list of chat m
 
 # Message Placeholders in Chat Prompts
 
-Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt. 
+Message Placeholders allow you to insert a list of chat messages (`[{role: "...", content: "..."}]`) at specific positions within a chat prompt.
 
 You can define multiple placeholders in a prompt and resolve them with different values at runtime.
 Message Placeholders are also supported in the [Playground](/docs/playground) and [Prompt Experiments](/docs/datasets/prompt-experiments).
@@ -54,11 +54,11 @@ langfuse.create_prompt(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic-chat",
   type: "chat",
   prompt: [
@@ -108,11 +108,11 @@ compiled_prompt = prompt.compile(criticlevel="expert", chat_history=[
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
-const prompt = await langfuse.getPrompt("movie-critic-chat", undefined, {
+const prompt = await langfuse.prompt.get("movie-critic-chat", {
   type: "chat",
 });
 
@@ -167,15 +167,14 @@ langchain_prompt = ChatPromptTemplate.from_template(langfuse_prompt.get_langchai
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 // Get current `production` version
-const langfusePrompt = await langfuse.getPrompt(
+const langfusePrompt = await langfuse.prompt.get(
   "movie-critic-chat",
-  undefined,
   {
     type: "chat",
   }

@@ -21,8 +21,7 @@ You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=
 ### Manual flushing
 
 <Callout type="info">
-  This is especially relevant for short-lived applications like serverless
-  functions. If you do not flush the client, you may lose events.
+  In short-lived environments like serverless functions (e.g., Vercel Functions, AWS Lambda), you should explicitly flush the traces before the process exits or the runtime environment is frozen. If you do not flush the client, you may lose events.
 </Callout>
 
 If you want to send a batch immediately, you can call the `flush` method on the client. In case of network issues, flush will log an error and retry the batch, it will never throw an exception.
@@ -59,33 +58,34 @@ langfuse.shutdown()
 <Tab>
 {/* JS/TS */}
 
-```javascript
-await langfuse.flushAsync();
+The `LangfuseSpanProcessor` buffers events and sends them in batches, so a final flush ensures no data is lost.
+
+You can export the processor from your OTEL SDK setup file.
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor to be able to flush it
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
 ```
 
-If you exit the application, use `shutdownAsync` method to make sure all requests are flushed and pending requests are awaited before the process exits.
+Then, in your serverless function handler, call `forceFlush()` before the function exits.
 
-```javascript
-await langfuse.shutdownAsync();
-```
+```ts filename="handler.ts"
+import { langfuseSpanProcessor } from "./instrumentation";
 
-**If you run on Vercel**, the [`waitUntil()`](https://vercel.com/docs/functions/functions-api-reference#waituntil) method enqueues an asynchronous task to be performed during the lifecycle of the request. It doesn't block the response, but should complete before shutting down the function. Thereby, it ensures that all events are flushed before the function exits without delaying the response.
+export async function handler(event, context) {
+  // ... your application logic ...
 
-```sh
-npm i @vercel/functions
-```
-
-```javascript
-import { waitUntil } from "@vercel/functions";
-
-export async function POST(req, res) {
-  // your code involving langfuse
-
-  // Flush events to Langfuse without blocking the response
-  waitUntil(langfuse.flushAsync());
-
-  // Send response to client
-  return res.status(200).send("OK");
+  // Flush before exiting
+  await langfuseSpanProcessor.forceFlush();
 }
 ```
 

@@ -35,7 +35,7 @@ The SDKs look for a `release` in the following order:
 
 ### Initialization
 
-<Tabs items={["Python SDK", "JS/TS", "Langchain (JS/TS)", "Environment variable"]}>
+<Tabs items={["Python SDK", "JS/TS", "Environment variable"]}>
 
 <Tab title="Python SDK">
 
@@ -70,42 +70,13 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 </Tab>
 <Tab>
 
-```ts /release: "<release_tag>"/
-import { Langfuse } from "langfuse";
+The JS/TS SDK will look for a `LANGFUSE_RELEASE` environment variable. Use it to configure the release e.g. in your CI/CD pipeline.
 
-langfuse = new Langfuse({
-  release: "<release_tag>",
-});
+```bash
+LANGFUSE_RELEASE = "<release_tag>" # <- github sha or other identifier
 ```
 
-</Tab><Tab>
-
-<Callout type="info">
-
-When using the **Python SDK**, the release provided on client initialization will apply to all event inputs and outputs regardless of the Langfuse-maintained integration you are using.
-
-See the Python SDK tab for more details.
-
-</Callout>
-```python /release="<release_tag>"/
-from langfuse.callback import CallbackHandler
-
-handler = CallbackHandler(release="<release_tag>")
-
-````
-
-</Tab><Tab>
-
-```ts /release: "<release_tag>"/
-import { CallbackHandler } from "langfuse-langchain";
-
-const handler = new CallbackHandler({
-  release: "<release_tag>",
-});
-````
-
 </Tab>
-
 <Tab title="Environment variable">
 
 The SDKs will look for a `LANGFUSE_RELEASE` environment variable. Use it to configure the release e.g. in your CI/CD pipeline.

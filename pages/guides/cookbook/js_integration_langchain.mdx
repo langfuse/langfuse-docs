@@ -1,0 +1,137 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Cookbook - Langchain Integration (JS/TS)
+sidebarTitle: Langchain Integration (JS/TS)
+description: Cookbook with examples of the Langfuse Integration for Langchain (JS/TS).
+category: Examples
+---
+
+# Cookbook: Langchain Integration (JS/TS)
+
+This is a cookbook with examples of the Langfuse integration for Langchain (JS/TS).
+
+Follow the [integration guide](https://langfuse.com/integrations/frameworks/langchain) to add this integration to your Langchain project.
+
+<Steps>
+## Set Up Environment
+
+Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com/) or [self-hosting Langfuse](https://langfuse.com/self-hosting). You’ll also need your OpenAI API key.
+
+> **Note**: This cookbook uses **Deno.js** for execution, which requires different syntax for importing packages and setting environment variables. For Node.js applications, the setup process is similar but uses standard `npm` packages and `process.env`.
+
+
+```typescript
+// Langfuse authentication keys
+Deno.env.set("LANGFUSE_PUBLIC_KEY", "pk-lf-***");
+Deno.env.set("LANGFUSE_SECRET_KEY", "sk-lf-***");
+
+// Langfuse host configuration
+// For US data region, set this to "https://us.cloud.langfuse.com"
+Deno.env.set("LANGFUSE_HOST", "https://cloud.langfuse.com")
+
+// Set environment variables using Deno-specific syntax
+Deno.env.set("OPENAI_API_KEY", "sk-proj-***");
+```
+
+With the environment variables set, we can now initialize the `langfuseSpanProcessor` which is passed to the main OpenTelemetry SDK that orchestrates tracing.
+
+
+```typescript
+// Import required dependencies
+import 'npm:dotenv/config';
+import { NodeSDK } from "npm:@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "npm:@langfuse/otel@^4.0.0-alpha";
+ 
+// Export the processor to be able to flush it later
+// This is important for ensuring all spans are sent to Langfuse
+export const langfuseSpanProcessor = new LangfuseSpanProcessor({
+    publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+    secretKey: process.env.LANGFUSE_SECRET_KEY!,
+    baseUrl: process.env.LANGFUSE_HOST ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
+    environment: process.env.NODE_ENV ?? 'development', // Default to development if not specified
+  });
+ 
+// Initialize the OpenTelemetry SDK with our Langfuse processor
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+ 
+// Start the SDK to begin collecting telemetry
+// The warning about crypto module is expected in Deno and doesn't affect basic tracing functionality. Media upload features will be disabled, but all core tracing works normally
+sdk.start();
+```
+
+## Step 2: Instantiate the CallbackHandler
+
+Instantiate the CallbackHandler and pass it to your chain’s `.invoke()` or `.stream()` method in the callbacks array. All operations within the chain will be traced as nested observations.
+
+
+```typescript
+import { CallbackHandler } from "npm:@langfuse/langchain";
+ 
+// 1. Initialize the Langfuse callback handler
+const langfuseHandler = new CallbackHandler({
+  sessionId: "user-session-123",
+  userId: "user-abc",
+  tags: ["langchain-test"],
+});
+```
+
+## Step 3: Langchain interfaces
+
+Langfuse supports the following Langchain JS interfaces
+
+- invoke
+- stream
+
+For this section we will use a very simple example prompt (from Langchain JS [docs](https://js.langchain.com/docs/expression_language/interface)) and ChatOpenAI. Langfuse works with any model.
+
+
+```typescript
+import { ChatOpenAI } from "npm:@langchain/openai"
+import { PromptTemplate } from "npm:@langchain/core/prompts"
+
+const model = new ChatOpenAI({});
+const promptTemplate = PromptTemplate.fromTemplate(
+  "Tell me a joke about {topic}"
+);
+```
+
+### using `invoke`
+
+
+```typescript
+import { RunnableSequence } from "npm:@langchain/core/runnables";
+
+const chain = RunnableSequence.from([promptTemplate, model]);
+
+const res = await chain.invoke(
+    { topic: "bears" },
+    { callbacks: [langfuseHandler] }
+);
+
+console.log(res.content)
+```
+
+### using `stream`
+
+
+```typescript
+const chain = promptTemplate.pipe(model);
+const stream = await chain.stream(
+    { topic: "bears" },
+    { callbacks: [langfuseHandler] }
+);
+for await (const chunk of stream) {
+  console.log(chunk?.content);
+}
+```
+
+## Step 4: Explore the trace in Langfuse
+
+In the Langfuse interface, you can see a detailed trace of all steps in the Langchain application.
+
+![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_langchain_trace.png)
+
+[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8633501eb9ad671eb65c7b131c52c427?display=details%3Ftimestamp%3D2025-08-25T13%3A26%3A28.319Z&observation=6a6e9b25ddfe845f)
+</Steps>
