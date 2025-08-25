@@ -54,7 +54,9 @@ const completion = await tracedOpenAI.chat.completions.create({
 
 ### Vercel AI SDK
 
-The Vercel AI SDK offers native instrumentation with OpenTelemetry.
+The Vercel AI SDK offers native instrumentation with OpenTelemetry. You can enable the Vercel AI SDK telemetry by passing `{ experimental_telemetry: { isEnabled: true }}` to your AI SDK function calls.
+
+The LangfuseSpanProcessor is automatically detecting multimodal data in your traces and is handling it automatically.
 
 Here is a full example on how to set up tracing with the
 
