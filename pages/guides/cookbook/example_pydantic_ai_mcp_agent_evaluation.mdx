@@ -1,0 +1,373 @@
+---
+source: Jupyter Notebook
+title: Example - Pydantic AI MCP Agent Evaluation
+description: This guide shows how to evaluate Pydantic AI MCP Agents with Langfuse using online and offline evaluation methods.
+category: Evaluation
+---
+
+# Langfuse × Pydantic AI – Agent Evals
+
+## 1. Setup – install packages & add credentials
+
+
+```python
+# If you are running this on colab/@home comment‑out what you already have
+%pip install -q --upgrade "pydantic-ai[mcp]" langfuse openai nest_asyncio aiohttp
+```
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = ""
+os.environ["LANGFUSE_SECRET_KEY"] = ""
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = ""
+```
+
+## 2. Enable Langfuse Tracing
+
+All integrations: https://langfuse.com/integrations
+
+
+```python
+from langfuse import get_client
+from pydantic_ai.agent import Agent
+
+# Initialise Langfuse client and verify connectivity
+langfuse = get_client()
+assert langfuse.auth_check(), "Langfuse auth failed - check your keys ✋"
+
+# Turn on OpenTelemetry instrumentation for *all* future Agent instances
+Agent.instrument_all()
+print("✅ Pydantic AI instrumentation enabled - traces will stream to Langfuse")
+```
+
+## 3. Create an agent that can search the Langfuse docs
+
+We use the Lagfuse Docs MCP Server to provide tools to the agent: https://langfuse.com/docs/docs-mcp
+
+
+```python
+from pydantic_ai import Agent, RunContext
+from pydantic_ai.mcp import MCPServerStreamableHTTP, CallToolFunc, ToolResult
+from langfuse import observe
+from typing import Any
+
+# Public MCP server that exposes Langfuse docs tools
+LANGFUSE_MCP_URL = "https://langfuse.com/api/mcp"
+
+@observe
+async def run_agent(question: str, system_prompt: str, model="openai:o3-mini"):
+    langfuse.update_current_trace(input=question)
+
+    tool_call_history = []
+
+    # Log all tool calls for trajectory analysis
+    async def process_tool_call(
+        ctx: RunContext[int],
+        call_tool: CallToolFunc,
+        tool_name: str,
+        args: dict[str, Any],
+    ) -> ToolResult:
+        """A tool call processor that passes along the deps."""
+        print(f"MCP Tool call: {tool_name} with args: {args}")
+        tool_call_history.append({
+            "tool_name": tool_name,
+            "args": args
+        })
+        return await call_tool(tool_name, args)
+    
+    langfuse_docs_server = MCPServerStreamableHTTP(
+        LANGFUSE_MCP_URL,
+        process_tool_call=process_tool_call
+    )
+
+    agent = Agent(
+        model=model,
+        mcp_servers=[langfuse_docs_server],
+        system_prompt=system_prompt
+    )
+
+    async with agent.run_mcp_servers():
+        print("\n---")
+        print("Q:", question)
+        result = await agent.run(question)
+        print("A:", result.output)
+
+        langfuse.update_current_trace(
+            output=result.output,
+            metadata={"tool_call_history": tool_call_history
+        })
+
+        return result.output, tool_call_history
+```
+
+
+```python
+await run_agent(
+    question="What is Langfuse and how does it help monitor LLM applications?",
+    system_prompt="You are an expert on Langfuse. Answer user questions accurately and concisely using the available MCP tools. Cite sources when appropriate. Please make sure to use the tools in the best way possible to answer.",
+    model="openai:gpt-4.1-nano"
+);
+```
+
+## Evaluation
+
+1. Create Test Cases
+    - input
+    - reference for reference-based evaluations
+2. Set up evaluators
+3. Run experiments
+
+
+```python
+tests_cases = [
+    {
+        "input": {"question": "What is Langfuse?"},
+        "expected_output": {
+            "response_facts": [
+                "Open Source LLM Engineering Platform",
+                "Product modules: Tracing, Evaluation and Prompt Management"
+            ],
+            "trajectory": [
+                "getLangfuseOverview"
+            ],
+        }
+    },
+    {
+        "input": {
+            "question": "How to trace a python application with Langfuse?"
+        },
+        "expected_output": {
+            "response_facts": [
+                "Python SDK, you can use the observe() decorator",
+                "Lots of integrations, LangChain, LlamaIndex, Pydantic AI, and many more."
+            ],
+            "trajectory": [
+                "getLangfuseOverview",
+                "searchLangfuseDocs"
+            ],
+            "search_term": "Python Tracing"
+        }
+    },
+    {
+        "input": {"question": "How to connect to the Langfuse Docs MCP server?"},
+        "expected_output": {
+            "response_facts": [
+                "Connect via the MCP server endpoint: https://langfuse.com/api/mcp",
+                "Transport protocol: `streamableHttp`"
+            ],
+            "trajectory": ["getLangfuseOverview"]
+        }
+    },
+    {
+        "input": {
+            "question": "How long are traces retained in langfuse?",
+        },
+        "expected_output": {
+            "response_facts": [
+                "By default, traces are retained indefinetly",
+                "You can set custom data retention policy in the project settings"
+            ],
+            "trajectory": ["getLangfuseOverview", "searchLangfuseDocs"],
+            "search_term": "Data retention"
+        }
+    }
+]
+```
+
+Upload to Langfuse datasets
+
+
+```python
+DATSET_NAME = "pydantic-ai-mcp-agent-evaluation"
+```
+
+
+```python
+dataset = langfuse.create_dataset(
+    name=DATSET_NAME
+)
+for case in tests_cases:
+    langfuse.create_dataset_item(
+        dataset_name=DATSET_NAME,
+        input=case["input"],
+        expected_output=case["expected_output"]
+    )
+```
+
+### Set up Evaluations in Langfuse
+
+#### Final response evaluation
+
+```md
+You are a teacher grading a student based on the factual correctness of his statements. In the following please find some example gradings that you did in the past.
+
+### Examples
+
+#### **Example 1:**
+- **Response:** "The sun is shining brightly."
+- **Facts to verify:** ["The sun is up.", "It is a beautiful day."]
+
+Grading
+- Reasoning: The response accurately includes both facts and aligns with the context of a beautiful day.
+- Score: 1
+
+#### **Example 2:**
+- **Response:** "When I was in the kitchen, the dog was there"
+- **Facts to verify:** ["The cat is on the table.", "The dog is in the kitchen."]
+
+Grading
+- Reasoning: The response includes that the dog is in the kitchen but does not mention that the cat is on the table.
+- Score: 0
+
+### New Student Response
+
+- **Response**: {{response}}
+- **Facts to verify:** {{facts_to_verify}}
+```
+
+#### Trajectory
+
+```md
+You are comparing two lists of strings. Please check whether the lists contain exactly the same items. The order does not matter.
+
+## Examples
+
+Input
+Expected: ["searchWeb", "visitWebsite"]
+Output: ["searchWeb"]
+
+Grading
+Reasoning: ["searchWeb", "visitWebsite"] are expected. In the output, "visitWebsite" is missing. Thus the two arrays are not the same.
+Score: 0
+
+Input
+Expected: ["drawImage", "visitWebsite", "speak"]
+Output: ["visitWebsite", "speak", "drawImage"]
+
+Grading
+Reasoning: The output matches the items from the expected output.
+Score: 1
+
+Input
+Expected: ["getNews"]
+Output: ["getNews", "watchTv"]
+
+Grading
+Reasoning: The output contains "watchTv" which was not expected.
+Score: 0
+
+## This excercise
+
+Expected: {{expected}}
+Output: {{output}}
+```
+
+#### Search quality
+
+```md
+You are a teacher grading a student based on whether he has looked for the right information in order to answe a question. In the following please find some example gradings that you did in the past.
+
+The search by the student does not need to exactly match the response you expected; searches are often brief. The search term should correspond vaguely with the expected search term.
+
+### Examples
+#### **Example 1:**
+- **Response:** How can I contact support?
+- **Expected search topics**: Support
+
+Grading
+- Reasoning: The response accurately searches for support.
+- Score: 1
+
+#### **Example 2:**
+- **Response:** Deployment
+- **Expected search topics:** Tracing
+
+Grading
+- Reasoning: The response does not match the expected search topic of Tracing. Deployment questions are unrelated.
+- Score: 0
+
+#### **Example 3:**
+- **Response:**
+- **Expected search topics:**
+
+Grading
+- Reasoning: No search was done and no search term was expected.
+- Score: 1
+
+#### **Example 4:**
+- **Response:** How to view sessions?
+- **Expected search topics:**
+
+Grading
+- Reasoning: No search was expected, but search was used. This is not a problem.
+- Score: 1
+
+#### **Example 5:**
+- **Response:**
+- **Expected search topics:** How to run Langfuse locally?
+
+Grading
+- Reasoning: Even though we expected a search regarding running Langfuse locally, no search was made.
+- Score: 0
+
+### New Student Response
+
+- **Response:** {{search}}
+- **Expected search topics:** {{expected_search_topic}}
+```
+
+### Run Experiments
+
+
+```python
+system_prompts = {
+    "simple": (
+        "You are an expert on Langfuse. "
+        "Answer user questions accurately and concisely using the available MCP tools. "
+        "Cite sources when appropriate."
+    ),
+    "nudge_search_and_sources": (
+        "You are an expert on Langfuse. "
+        "Answer user questions accurately and concisely using the available MCP tools. "
+        "Always cite sources when appropriate."
+        "When you are unsure, always use getLangfuseOverview tool to do some research and then search the docs for more information. You can if needed use these tools multiple times."
+    )
+}
+
+models = [
+    "openai:gpt-4.1-nano",
+    "openai:o4-mini"
+]
+```
+
+
+```python
+from datetime import datetime
+
+d = langfuse.get_dataset(DATSET_NAME)
+
+for prompt_name, prompt_content in list(system_prompts.items()):
+    for test_model in models:
+        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        
+        for item in d.items:
+            with item.run(
+                run_name=f"{test_model}-{prompt_name}-{now}",
+                run_metadata={"model": test_model, "prompt": prompt_content},
+            ) as root_span:
+                
+                await run_agent(
+                    item.input["question"],
+                    prompt_content,
+                    test_model
+                )
+
+```
