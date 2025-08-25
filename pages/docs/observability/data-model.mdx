@@ -20,21 +20,18 @@ Each trace can contain multiple `observations` to log the individual steps of th
 
 #### Types
 
-- <CircleDot size={16} className="text-muted-green inline mr-1" /> `Events` are the
-  basic building blocks. They are used to track discrete events in a trace.
-- <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `Spans` represent
+- <CircleDot size={16} className="text-muted-green inline mr-1" /> `event` is the
+  basic building block. An event is used to track discrete events in a trace.
+- <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `span` represents
   durations of units of work in a trace.
-- <Fan size={16} className="text-muted-magenta inline mr-1" /> `Generations` are
-  spans used to log generations of AI models incl. prompts, [token usage and costs](/docs/observability/features/token-and-cost-tracking).
-- <Bot size={16} className="text-purple-600 inline mr-1" /> `Agents` decide on the flow of your application and can use tools using the guidance of an LLM.
-- <Wrench size={16} className="text-orange-600 inline mr-1" /> `Tools` represent a tool call, e.g. to a weather API.
-- <Link size={16} className="text-indigo-600 inline mr-1" /> `Chains` are links between different LLM application steps, e.g. glue that passes context from a retriever to an LLM call.
-- <Search size={16} className="text-teal-600 inline mr-1" /> `Retrievers` represent data retrieval steps, e.g. a call to a vector store or a database.
-- <WandSparkles size={16} className="text-primary-accent inline mr-1" /> `Evaluators` represent functions that assess relevance/correctness/helpfulness of a LLM's outputs.
-- <Layers3 size={16} className="text-amber-600 inline mr-1" /> `Embeddings` are calls to a LLM to embed data and can [include token usage and costs](/docs/observability/features/token-and-cost-tracking)
-- <ShieldCheck size={16} className="text-red-600 inline mr-1" /> `Guardrails` are components that protect against malicious content or jailbreaks.
-
-**Note**: the actual values of the observation type in Langfuse arein singular form, `generation` not `generations`.
+- <Fan size={16} className="text-muted-magenta inline mr-1" /> `generation` is a span used to log generations of AI models incl. prompts, [token usage and costs](/docs/observability/features/token-and-cost-tracking).
+- <Bot size={16} className="text-purple-600 inline mr-1" /> `agent` decides on the flow of your application and can e.g. use tools using the guidance of an LLM.
+- <Wrench size={16} className="text-orange-600 inline mr-1" /> `tool` represents a tool call, for example to a weather API.
+- <Link size={16} className="text-indigo-600 inline mr-1" /> `chain` is a link between different LLM application steps, for example passing context from a retriever to an LLM call.
+- <Search size={16} className="text-teal-600 inline mr-1" /> `retriever` represents data retrieval steps, such as a call to a vector store or a database.
+- <WandSparkles size={16} className="text-primary-accent inline mr-1" /> `evaluator` represents functions that assess relevance/correctness/helpfulness of a LLM's outputs.
+- <Layers3 size={16} className="text-amber-600 inline mr-1" /> `embedding` is a call to a LLM to embed data and can model, [include token usage and costs](/docs/observability/features/token-and-cost-tracking)
+- <ShieldCheck size={16} className="text-red-600 inline mr-1" /> `guardrail` is a component that protects against malicious content or jailbreaks.
 
 
 #### Nesting
