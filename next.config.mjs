@@ -183,7 +183,7 @@ const nonPermanentRedirects = [
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
   ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
   ["/events", "https://lu.ma/langfuse"],
-  ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
+  ["/public-metrics-dashboard", "/why#public-metrics"],
   ["/join-us", "/careers"],
   ["/launch", "/blog/2025-05-19-launch-week-3"],
 
