@@ -7,20 +7,11 @@ description: Structured tracing with observation types in Langfuse
 
 Langfuse supports different observation types to provide more context to your spans and allow efficient filtering.
 
-import { CircleDot, MoveHorizontal, Fan, Bot, Wrench, Link, Search, WandSparkles, Layers3, ShieldCheck } from "lucide-react";
+import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 ## Available Types
 
-- <CircleDot size={16} className="text-muted-green inline mr-1" /> `event` - Discrete moments without duration
-- <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `span` - General operations with start/end time. Often used for nesting.
-- <Fan size={16} className="text-muted-magenta inline mr-1" /> `generation` - LLM completions with [cost and token tracking](/docs/observability/features/token-and-cost-tracking)
-- <Bot size={16} className="text-purple-600 inline mr-1" /> `agent` - Multi-step reasoning workflows
-- <Wrench size={16} className="text-orange-600 inline mr-1" /> `tool` - External API calls and functions
-- <Link size={16} className="text-indigo-600 inline mr-1" /> `chain` - Sequential operation orchestration
-- <Search size={16} className="text-teal-600 inline mr-1" /> `retrievers` - Data lookup and search operations
-- <WandSparkles size={16} className="text-pink-600 inline mr-1" /> `evaluator` - Quality assessment functions
-- <Layers3 size={16} className="text-amber-600 inline mr-1" /> `embedding` - Text vectorization with [token tracking](/docs/observability/features/token-and-cost-tracking)
-- <ShieldCheck size={16} className="text-red-600 inline mr-1" /> `guardrail` - Safety and content filtering
+<ObservationTypesList />
 
 ## How to Use Observation Types
 
