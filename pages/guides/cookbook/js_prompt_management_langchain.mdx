@@ -40,7 +40,7 @@ With the environment variables set, we can now initialize the `langfuseSpanProce
 import 'npm:dotenv/config';
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "npm:@langfuse/otel@^4.0.0-alpha";
- 
+
 // Export the processor to be able to flush it later
 // This is important for ensuring all spans are sent to Langfuse
 export const langfuseSpanProcessor = new LangfuseSpanProcessor({
@@ -49,12 +49,12 @@ export const langfuseSpanProcessor = new LangfuseSpanProcessor({
     baseUrl: process.env.LANGFUSE_HOST ?? 'https://cloud.langfuse.com', // Default to cloud if not specified
     environment: process.env.NODE_ENV ?? 'development', // Default to development if not specified
   });
- 
+
 // Initialize the OpenTelemetry SDK with our Langfuse processor
 const sdk = new NodeSDK({
   spanProcessors: [langfuseSpanProcessor],
 });
- 
+
 // Start the SDK to begin collecting telemetry
 // The warning about crypto module is expected in Deno and doesn't affect basic tracing functionality. Media upload features will be disabled, but all core tracing works normally
 sdk.start();
@@ -65,7 +65,7 @@ The **LangfuseClient** provides additional functionality beyond OpenTelemetry tr
 
 ```typescript
 import { LangfuseClient } from "npm:@langfuse/client";
- 
+
 const langfuse = new LangfuseClient();
 ```
 
@@ -122,7 +122,9 @@ prompt.prompt
 
 
 
-    [32m"Tell me a joke about {{topic}}"[39m
+```
+"Tell me a joke about {{topic}}"
+```
 
 
 
@@ -136,11 +138,13 @@ prompt.config
 
 
 
+```
     {
-      model: [32m"gpt-4o"[39m,
-      temperature: [33m0.7[39m,
-      supported_languages: [ [32m"en"[39m, [32m"fr"[39m ]
+      model: "gpt-4o",
+      temperature: 0.7,
+      supported_languages: [ "en", "fr" ]
     }
+```
 
 
 
@@ -157,7 +161,7 @@ Also, pass the Langfuse prompt as metadata to the PromptTemplate to automaticall
 import { PromptTemplate } from "npm:@langchain/core/prompts"
 
 const langfuseTextPrompt = await langfuse.prompt.get("jokes"); // Fetch a previously created text prompt
- 
+
 // Pass the langfuseTextPrompt to the PromptTemplate as metadata to link it to generations that use it
 const langchainTextPrompt = PromptTemplate.fromTemplate(
   langfuseTextPrompt.getLangchainPrompt()
@@ -173,7 +177,7 @@ We'll use the native [Langfuse Tracing for Langchain JS](https://langfuse.com/in
 
 ```typescript
 import { CallbackHandler } from "npm:@langfuse/langchain";
- 
+
 // 1. Initialize the Langfuse callback handler
 const langfuseHandler = new CallbackHandler({
   sessionId: "user-session-123",
@@ -285,7 +289,7 @@ import { JsonOutputFunctionsParser } from "npm:langchain/output_parsers";
 const parser = new JsonOutputFunctionsParser();
 
 // Instantiate the ChatOpenAI class
-const model = new ChatOpenAI({ 
+const model = new ChatOpenAI({
     modelName: extractorPrompt.config.modelName,
     temperature: extractorPrompt.config.temperature
 });
