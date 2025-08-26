@@ -5,12 +5,14 @@ description: Tracing setup for the TypeScript SDK.
 
 # TypeScript SDK - Setup
 
+<Steps>
 ## Installation
 
 The Langfuse TypeScript SDK is modular, so you can install only the packages you need.
 
+<Tabs items={["Full Tracing install", "Client-only install"]}>
 
-### Full Tracing install
+<Tab>
 
 Install the relevant packages for a full tracing setup:
 
@@ -24,14 +26,17 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 
 Learn more about the packages [here](/docs/observability/sdk/typescript/overview#packages).
 
-
-### Client-only  install
+</Tab>
+<Tab>
 
 If you do not use Langfuse tracing in your application and rely on features such as prompt management, you only need the `@langfuse/client` package.
 
 ```bash
 npm install @langfuse/client
 ```
+
+</Tab>
+</Tabs>
 
 ## Register your credentials
 
@@ -68,3 +73,23 @@ You can learn more about setting up OpenTelemetry in your JS environment [here](
 If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` described above rather than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
 </Callout>
 
+</Steps>
+
+## Learn more
+
+import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
+
+<Cards num={2}>
+    <Card
+        icon={<Rocket size="24" />}
+        title="Cookbook: Instrumentation"
+        href="/guides/cookbook/js_langfuse_sdk"
+        arrow
+    />
+    <Card
+        icon={<Settings size="24" />}
+        title="Advanced Usage"
+        href="/docs/observability/sdk/typescript/advanced-usage"
+        arrow
+    />
+</Cards>

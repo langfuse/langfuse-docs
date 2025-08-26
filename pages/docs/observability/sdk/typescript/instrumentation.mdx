@@ -13,11 +13,30 @@ import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 To instrument your application to send traces to Langfuse, you can use either native library instrumentations that work out of the box, or use custom instrumentation methods for fine-grained control.
 
+import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
+
+<Cards num={2}>
+    <Card
+        icon={<Rocket size="24" />}
+        title="Cookbook: Instrumentation"
+        href="/guides/cookbook/js_langfuse_sdk"
+        arrow
+    />
+    <Card
+        icon={<Plug size="24" />}
+        title="All Langfuse Integrations"
+        href="/integrations"
+        arrow
+    />
+</Cards>
+
 ## Native instrumentations
 
 ### OpenAI
 
 The `@langfuse/openai` package provides a wrapper to automatically trace calls to the OpenAI SDK.
+
+For an end-to-end example, see the [Langfuse + OpenAI JS/TS Cookbook](https://langfuse.com/guides/cookbook/js_integration_openai).
 
 **Installation:**
 
@@ -162,6 +181,8 @@ Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Tel
 ### Langchain
 
 The `@langfuse/langchain` package offers a `CallbackHandler` to integrate Langfuse tracing into your LangChain applications.
+
+For an end-to-end example, see the [Langfuse + LangChain JS/TS Cookbook](https://langfuse.com/guides/cookbook/js_integration_langchain).
 
 **Installation:**
 
