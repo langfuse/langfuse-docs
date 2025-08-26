@@ -19,20 +19,29 @@ import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 **Instrument application**
 
 ```ts filename="server.ts"
-import { startActiveSpan, startActiveGeneration } from "@langfuse/tracing"
-
-const completion = await starActiveSpan('my-AI-application-endpoint', async (span) => {
-  await startActiveGeneration(async(generation) => {
-    const chatCompletion = await llm.respond(prompt);
-
-    generation.update({
-      name: "chat-completion",
-      model: "gpt-4o",
-      input: messages,
-      output: chatCompletion,
-    })
-
-    return chatCompletion
-  })
-})
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
+ 
+await startActiveObservation("user-request", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
+ 
+  // This generation will automatically be a child of "user-request"
+  const generation = startObservation(
+    "llm-call",
+    {
+      model: "gpt-4",
+      input: [{ role: "user", content: "What is the capital of France?" }],
+    },
+    { asType: "generation" },
+  );
+ 
+  // ... LLM call logic ...
+ 
+  generation.end({
+    output: { content: "The capital of France is Paris." },
+  });
+ 
+  span.update({ output: "Successfully answered." });
+});
 ```

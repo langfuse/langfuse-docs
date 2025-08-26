@@ -161,11 +161,11 @@ Please make sure you have [OpenTelemetry](/docs/observability/sdk/typescript/set
 import { OpenAI } from "openai"
 
 import { LangfuseClient } from "@langfuse/client";
-import { startActiveSpan } from "@langfuse/tracing";
+import { startActiveObservation } from "@langfuse/tracing";
 import { observeOpenAI } from "@langfuse/openai";
 
 const myLLMApplication = async (input: string) => {
-  return startActiveSpan("my-llm-application", async (span) => {
+  return startActiveObservation("my-llm-application", async (span) => {
     const output = await observeOpenAI(new OpenAI()).chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: input }],
@@ -207,7 +207,7 @@ def my_llm_function(question):
 import { CallbackHandler } from "@langfuse/langchain";
  
 const myLLMApplication = async (input: string) => {
-  return startActiveSpan('my_llm_application', async (span) => {
+  return startActiveObservation('my_llm_application', async (span) => {
     // ... your Langchain code ...
     const langfuseHandler = new CallbackHandler();
     const output = await chain.invoke({ input }, { callbacks: [langfuseHandler] });
@@ -228,7 +228,7 @@ Please refer to the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) docs
 
 ```ts filename="app.ts"
 const runMyLLMApplication = async (input: string, traceId: string) => {
-  return startActiveSpan("my_llm_application", async (span) => {
+  return startActiveObservation("my_llm_application", async (span) => {
     const output = await generateText({
       model: openai("gpt-4o"),
       maxTokens: 50,
@@ -461,7 +461,7 @@ import { CallbackHandler } from "@langfuse/langchain";
 const langfuse = new LangfuseClient()
 const runName = "my-dataset-run";
 for (const item of dataset.items) {
-  const [span, output] = await startActiveSpan('my_llm_application', async (span) => {
+  const [span, output] = await startActiveObservation('my_llm_application', async (span) => {
     // ... your Langchain code ...
     const langfuseHandler = new CallbackHandler();
     const output = await chain.invoke({ input: item.input }, { callbacks: [langfuseHandler] });

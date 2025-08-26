@@ -60,9 +60,9 @@ with langfuse.start_as_current_span(name="another-operation"):
 When using the context manager:
 
 ```ts
-import { startActiveSpan, startGeneration, updateActiveTrace } from "@langfuse/tracing";
+import { startActiveObservation, startObservation, updateActiveTrace } from "@langfuse/tracing";
  
-await startActiveSpan("context-manager", async (span) => {
+await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" }
   });
@@ -101,9 +101,9 @@ const result = await tracedFetchData("API");
 When creating spans manually:
 
 ```ts
-import { startSpan } from "@langfuse/tracing";
+import { startObservation } from "@langfuse/tracing";
 
-const span = startSpan('manual-observation', {
+const span = startObservation('manual-observation', {
   input: { query: 'What is the capital of France?' },
 });
 

@@ -89,17 +89,20 @@ with langfuse.start_as_current_generation(
 When using the context manager:
 
 ```ts
-import { startActiveSpan, startGeneration, updateActiveSpan } from "@langfuse/tracing";
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
  
-await startActiveSpan("context-manager", async (span) => {
+await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" }
   });
 
-  updateActiveSpan({
-    level: "WARNING",
-    statusMessage: "This is a warning"
-  });
+  updateActiveObservation(
+    "span",
+    {
+      level: "WARNING",
+      statusMessage: "This is a warning",
+    },
+  );
 
 });
 ```
@@ -107,15 +110,18 @@ await startActiveSpan("context-manager", async (span) => {
 When using the `observe` wrapper:
 
 ```ts
-import { observe, updateActiveSpan } from "@langfuse/tracing";
+import { observe, updateActiveObservation } from "@langfuse/tracing";
  
 // An existing function
 async function fetchData(source: string) {
 
-  updateActiveSpan({
-    level: "WARNING",
-    statusMessage: "This is a warning"
-  });
+  updateActiveObservation(
+    "span",
+    {
+      level: "WARNING",
+      statusMessage: "This is a warning",
+    },
+  );
 
   // ... logic to fetch data
   return { data: `some data from ${source}` };
@@ -132,9 +138,9 @@ const result = await tracedFetchData("API");
 When creating spans manually:
 
 ```ts
-import { startSpan } from "@langfuse/tracing";
+import { startObservation } from "@langfuse/tracing";
 
-const span = startSpan('manual-observation', {
+const span = startObservation('manual-observation', {
   input: { query: 'What is the capital of France?' },
 });
 

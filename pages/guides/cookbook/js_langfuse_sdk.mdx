@@ -85,7 +85,7 @@ In the following, we will demonstrate how to log LLM calls using the SDK, LangCh
 
 ### Option 1:  Context Manager
 
-To simplify nesting and context management, you can use startActiveSpan and startActiveGeneration. These functions take a callback and automatically manage the observation’s lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+To simplify nesting and context management, you can use startActiveObservation. These functions take a callback and automatically manage the observation’s lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
 
 This is the recommended approach for most use cases as it prevents context leakage and ensures observations are properly ended.
 
@@ -157,7 +157,7 @@ await langfuseSpanProcessor.forceFlush();
 
 ### Option 2: `observe` Decorator
 
-The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the `updateActiveSpan` and `updateActiveGeneration` functions to add attributes to the observation from within the wrapped function.
+The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a span or generation around the function call. You can use the `updateActiveObservation` function to add attributes to the observation from within the wrapped function.
 
 
 ```typescript
@@ -206,7 +206,7 @@ Teams typically wrap their LLM SDK calls in a helper function that manages traci
 
 
 ```typescript
-// Import the startSpan function for manual span creation
+// Import the startObservation function for manual span creation
 import { startObservation } from 'npm:@langfuse/tracing@^4.0.0-beta.8';
 
 // Create the root span for this operation

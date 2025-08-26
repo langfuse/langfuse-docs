@@ -209,11 +209,11 @@ Many LLM and data libraries are built with OpenTelemetry support. If a library y
 
 ## Custom instrumentation
 
-You can add custom instrumentations to your application via the `observe` wrapper, `startActiveSpan` and `startActiveGeneration` context managers, or by manually managing the observation lifecycle and its nesting with the `startSpan` and `startGeneration` functions.
+You can add custom instrumentations to your application via the `observe` wrapper, `startActiveObservation` context managers, or by manually managing the observation lifecycle and its nesting with the `startObservation` function.
 
 ### Context management with callbacks
 
-To simplify nesting and context management, you can use `startActiveSpan` and `startActiveGeneration`. These functions take a callback and automatically manage the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+To simplify nesting and context management, you can use `startActiveObservation`. These functions take a callback and automatically manage the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
 
 This is the recommended approach for most use cases as it prevents context leakage and ensures observations are properly ended.
 
@@ -287,7 +287,7 @@ The core tracing function (`startObservation`) give you full control over creati
 
 When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the *original* parent, not the one you just created.
 
-To create nested observations manually, use the methods on the returned object (e.g., `parentSpan.startSpan(...)`).
+To create nested observations manually, use the methods on the returned object (e.g., `parentSpan.startObservation(...)`).
 
 ```typescript /startObservation/ /end/ /asType/
 import { startObservation } from "@langfuse/tracing";
@@ -333,7 +333,7 @@ span.end({ output: "Successfully answered user request." });
 ```
 
 <Callout type="warning" title="Manual Ending Required">
-If you use `startSpan()` or `startGeneration()`, you are responsible for calling `.end()` on the returned observation object. Failure to do so will result in incomplete or missing observations in Langfuse.
+If you use `startObservation()`, you are responsible for calling `.end()` on the returned observation object. Failure to do so will result in incomplete or missing observations in Langfuse.
 </Callout>
 
 ### Updating Traces

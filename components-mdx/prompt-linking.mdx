@@ -46,11 +46,15 @@ with langfuse.start_as_current_generation(
 <Tab>
 
 ```diff
-startGeneration("llm", {
+startObservation(
+  "llm", 
+  {
     ...
-+   prompt: prompt
++ prompt: prompt
     ...
-})
+  },
+  { asType: "generation" },
+)
 ```
 
 </Tab>

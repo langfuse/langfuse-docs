@@ -153,18 +153,22 @@ with langfuse.start_as_current_generation(
 When using the context manager:
 
 ```ts /usageDetails/, /costDetails/
-import { startActiveSpan, startGeneration, updateActiveTrace, updateActiveSpan } from "@langfuse/tracing";
+import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "@langfuse/tracing";
  
-await startActiveSpan("context-manager", async (span) => {
+await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" }
   });
  
   // This generation will automatically be a child of "user-request"
-  const generation = startGeneration("llm-call", {
-    model: "gpt-4",
-    input: [{ role: "user", content: "What is the capital of France?" }],
-  });
+  const generation = startObservation(
+    "llm-call",
+    {
+      model: "gpt-4",
+      input: [{ role: "user", content: "What is the capital of France?" }],
+    },
+    { asType: "generation" },
+  );
  
   // ... LLM call logic ...
 
@@ -233,15 +237,19 @@ const result = await tracedFetchData("API");
 When creating spans manually:
 
 ```ts /usageDetails/, /costDetails/
-const span = startSpan('manual-observation', {
+const span = startObservation('manual-observation', {
   input: { query: 'What is the capital of France?' },
 });
 
-const generation = span.startGeneration('llm-call', {
-  model: 'gpt-4',
-  input: [{ role: 'user', content: 'What is the capital of France?' }],
-  output: { content: 'The capital of France is Paris.' },
-});
+const generation = span.startObservation(
+  'llm-call', 
+  {
+    model: 'gpt-4',
+    input: [{ role: 'user', content: 'What is the capital of France?' }],
+    output: { content: 'The capital of France is Paris.' },
+  },
+  { asType: "generation" },
+);
 
 generation.update({
   usageDetails: {
@@ -265,7 +273,7 @@ generation.end({
   output: { content: 'The capital of France is Paris.' },
 });
 
-span.end({ output: 'Successfully answered user request.', sessionId: '123' });
+span.end({ output: 'Successfully answered user request.'});
 ```
 
 You can also update the usage and cost via `generation.update()`.
