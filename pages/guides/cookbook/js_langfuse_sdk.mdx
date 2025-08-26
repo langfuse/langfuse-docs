@@ -92,20 +92,24 @@ This is the recommended approach for most use cases as it prevents context leaka
 
 ```typescript
 // Import necessary functions from the tracing package
-import { startActiveSpan, startGeneration, updateActiveTrace, updateActiveSpan } from "npm:@langfuse/tracing";
+import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "npm:@langfuse/tracing@^4.0.0-beta.8";
  
 // Start a new span with automatic context management
-await startActiveSpan("context-manager", async (span) => {
+await startActiveObservation("context-manager", async (span) => {
   // Log the initial user query
   span.update({
     input: { query: "What is the capital of France?" }
   });
  
   // Create a new generation span that will automatically be a child of "context-manager"
-  const generation = startGeneration("llm-call", {
+  const generation = startObservation(
+    "llm-call", 
+    {
     model: "gpt-4",
     input: [{ role: "user", content: "What is the capital of France?" }],
-  });
+    },
+    { asType: "generation" },
+  );
  
   // ... LLM call logic would go here ...
 
@@ -128,11 +132,11 @@ await startActiveSpan("context-manager", async (span) => {
   // Example user information
   const user = { id: "user-5678", name: "Jane Doe", sessionId: "123" };
 
-  // Add a warning to the active span
-  updateActiveSpan({
-    level: "WARNING",
-    statusMessage: "This is a warning",
-  });
+  // Add an optional log level of type warning to the active span
+  updateActiveObservation(
+    "span",
+    { level: "WARNING", statusMessage: "This is a warning" },
+  );
  
   // Update the trace with user context
   updateActiveTrace({
@@ -157,11 +161,11 @@ The `observe` wrapper is a powerful tool for tracing existing functions without 
 
 
 ```typescript
-import { observe, updateActiveGeneration } from "npm:@langfuse/tracing";
+import { observe, updateActiveObservation } from "npm:@langfuse/tracing@^4.0.0-beta.8";
  
 // An existing function
 async function fetchData(source: string) {
-  updateActiveGeneration({ usageDetails: {
+  updateActiveObservation("span", { usageDetails: {
     // usage
     input: 10,
     output: 5,
@@ -203,26 +207,35 @@ Teams typically wrap their LLM SDK calls in a helper function that manages traci
 
 ```typescript
 // Import the startSpan function for manual span creation
-import { startSpan } from 'npm:@langfuse/tracing';
+import { startObservation } from 'npm:@langfuse/tracing@^4.0.0-beta.8';
 
 // Create the root span for this operation
-const span = startSpan('manual-observation', {
+const span = startObservation('manual-observation', {
     input: { query: 'What is the capital of France?' },
   });
   
 // Create a child span for a tool call (e.g., weather API)
-const toolCall = span.startSpan('fetch-weather', { input: { city: 'Paris' } });
+const toolCall = span.startObservation(
+  'fetch-weather',
+  { input: { city: 'Paris' } },
+  { asType: "tool" },
+);
 // Simulate API call with timeout
+
 await new Promise((r) => setTimeout(r, 100));
 // End the tool call with its output
 toolCall.end({ output: { temperature: '15°C' } });
 
 // Create a generation span for the LLM call
-const generation = span.startGeneration('llm-call', {
+const generation = span.startObservation(
+  'llm-call', 
+  {
   model: 'gpt-4',
   input: [{ role: 'user', content: 'What is the capital of France?' }],
   output: { content: 'The capital of France is Paris.' },
-});
+  },
+  { asType: "generation" },
+);
 
 // Update the generation with token usage details
 generation.update({
@@ -250,7 +263,7 @@ span.end({
 await langfuseSpanProcessor.forceFlush();
 ```
 
-[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/27a5d45afd2eeda4a00828f5761b9256?timestamp=2025-08-25T12%3A49%3A39.750Z&display=details&observation=4687cb0a13949d75)
+[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/21027580c794c3ce820926c90101fa89?timestamp=2025-08-26T15:31:45.972Z&display=details)
 
 ## Native integrations
 

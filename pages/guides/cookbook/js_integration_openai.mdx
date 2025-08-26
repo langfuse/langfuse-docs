@@ -39,7 +39,7 @@ With the environment variables set, we can now initialize the `langfuseSpanProce
 // Import required dependencies
 import 'npm:dotenv/config';
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "npm:@langfuse/otel@^4.0.0-alpha";
+import { LangfuseSpanProcessor } from "npm:@langfuse/otel@^4.0.0-beta.8";
  
 // Export the processor to be able to flush it later
 // This is important for ensuring all spans are sent to Langfuse
@@ -65,7 +65,7 @@ sdk.start();
 
 ```typescript
 import OpenAI from "npm:openai@^4.0.0";
-import { observeOpenAI } from "npm:@langfuse/openai";
+import { observeOpenAI } from "npm:@langfuse/openai@^4.0.0-beta.8";
 ```
 
 
@@ -224,13 +224,13 @@ Use the context manager of the Langfuse TypeScript SDK to group two OpenAI gener
 
 
 ```typescript
-import { startActiveSpan, startGeneration } from "npm:@langfuse/tracing";
+import { startObservation, startActiveObservation } from "npm:@langfuse/tracing@^4.0.0-beta.8";
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
 const country = "Germany";
  
-await startActiveSpan("user-request", async (span) => {
+await startActiveObservation("user-request", async (span) => {
  
   const capital = (
     await observeOpenAI(new OpenAI(), {

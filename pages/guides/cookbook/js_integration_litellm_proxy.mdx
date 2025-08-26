@@ -114,14 +114,14 @@ Use the context manager of the Langfuse TypeScript SDK to group multiple LiteLLM
 
 
 ```typescript
-import { startActiveSpan, startGeneration } from "npm:@langfuse/tracing";
+import { startActiveObservation, startObservation } from "npm:@langfuse/tracing";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
 const client = observeOpenAI(new OpenAI({baseURL: PROXY_URL}));
 
 const systemPrompt = "You are a very accurate calculator. You output only the result of the calculation.";
  
-await startActiveSpan("user-request", async (span) => {
+await startActiveObservation("user-request", async (span) => {
 
   await client.chat.completions.create({
     model: "ollama/llama3",
