@@ -6,7 +6,13 @@ import { CTACard } from "@/components/CTACard";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { ImpactChart } from "@/components/customers/ImpactChart";
-import { Carousel } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 <div className="md:container">
   <div className="flex flex-col items-center content-center text-center my-10 mb-20">
@@ -49,16 +55,35 @@ If complex technical problems & great developer experiences excite you, we'd lov
 
 ## Team
 
-<div className="mt-2">
-  <Carousel className="w-full" showDots={false} showArrows={true}>
-    <Frame fullWidth>![Langfuse Team](/images/people/team.jpg)</Frame>
-    <Frame fullWidth>![Langfuse Office](/images/careers/office3.jpg)</Frame>
-    <Frame fullWidth>![Langfuse Team](/images/careers/team3.jpg)</Frame>
-    <Frame fullWidth>![Langfuse Team](/images/careers/team4.jpg)</Frame>
-    <Frame fullWidth>![Langfuse Team](/images/careers/team5.jpg)</Frame>
-    <Frame fullWidth>![Langfuse Team](/images/careers/team6.jpg)</Frame>
-  </Carousel>
-</div>
+<Carousel
+  className="w-full"
+  opts={{
+    loop: true,
+  }}
+>
+  <CarouselContent>
+    <CarouselItem>
+      <Frame fullWidth>![Langfuse Team](/images/people/team.jpg)</Frame>
+    </CarouselItem>
+    <CarouselItem>
+      <Frame fullWidth>![Langfuse Office](/images/careers/office3.jpg)</Frame>
+    </CarouselItem>
+    <CarouselItem>
+      <Frame fullWidth>![Langfuse Team](/images/careers/team3.jpg)</Frame>
+    </CarouselItem>
+    <CarouselItem>
+      <Frame fullWidth>![Langfuse Team](/images/careers/team4.jpg)</Frame>
+    </CarouselItem>
+    <CarouselItem>
+      <Frame fullWidth>![Langfuse Team](/images/careers/team5.jpg)</Frame>
+    </CarouselItem>
+    <CarouselItem>
+      <Frame fullWidth>![Langfuse Team](/images/careers/team6.jpg)</Frame>
+    </CarouselItem>
+  </CarouselContent>
+  <CarouselPrevious />
+  <CarouselNext />
+</Carousel>
 
 - Clemens Rawert, [@rawert](https://x.com/rawert), [Linkedin](https://www.linkedin.com/in/rawert/)
 - Marc Klingen, [@marcklingen](https://x.com/marcklingen), [GitHub](https://github.com/marcklingen), [Linkedin](https://www.linkedin.com/in/marcklingen/)
@@ -165,9 +190,9 @@ If complex technical problems & great developer experiences excite you, we'd lov
 
 ## Public Metrics
 
-import PublicMetrics from "@/components-mdx/public-metrics.mdx";
+import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
 
-<PublicMetrics />
+<PublicMetricsDashboard />
 
 ## Work with us
 

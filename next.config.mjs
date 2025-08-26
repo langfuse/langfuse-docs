@@ -1,6 +1,6 @@
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
-import NextBundleAnalyzer from '@next/bundle-analyzer'
+import NextBundleAnalyzer from '@next/bundle-analyzer';
 
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -39,6 +39,13 @@ const withNextra = nextra({
 
 // next config
 const nextraConfig = withNextra({
+  // Enable static export when STATIC_EXPORT env var is set
+  ...(process.env.STATIC_EXPORT === 'true' && {
+    output: 'export',
+    trailingSlash: true,
+    // Disable server-side features for static export
+    distDir: 'out',
+  }),
   experimental: {
     scrollRestoration: true,
   },
@@ -47,7 +54,10 @@ const nextraConfig = withNextra({
     'react-syntax-highlighter',
     'geist'
   ],
+
   images: {
+    // Disable image optimization for static export
+    ...(process.env.STATIC_EXPORT === 'true' && { unoptimized: true }),
     remotePatterns: [
       {
         protocol: 'https',
@@ -173,7 +183,7 @@ const nonPermanentRedirects = [
   ["/request-trial", "https://forms.gle/cXZuQZLmzJp8yd9k7"],
   ["/request-security-docs", "https://forms.gle/o5JE7vWtX7Qk2syc8"],
   ["/events", "https://lu.ma/langfuse"],
-  ["/public-metrics-dashboard", "https://lookerstudio.google.com/reporting/5198bcda-7d3d-447d-b596-ebe778c5fe99"],
+  ["/public-metrics-dashboard", "/why#public-metrics"],
   ["/join-us", "/careers"],
   ["/launch", "/blog/2025-05-19-launch-week-3"],
 
