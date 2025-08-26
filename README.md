@@ -10,7 +10,7 @@ You can easily contribute to the docs using GitHub Codespaces. Just click on the
 
 ## Local Development
 
-Pre-requisites: Node.js 20+, pnpm v9.5.0
+Pre-requisites: Node.js 22, pnpm v9.5.0
 
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `pnpm i` to install the dependencies.
