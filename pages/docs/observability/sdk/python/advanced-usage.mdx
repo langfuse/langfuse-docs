@@ -374,40 +374,25 @@ The full list of the observation types is document here: [Observation types](/do
 
 ### Setting observation types with the `@observe` decorator
 
-The `@observe` decorator is the recommended approach for setting observation types. It automatically handles context propagation and span management:
+By setting the `as_type` parameter in the `@observe` decorator, you can specify the observation type for a method:
 
-```python
+```python /as_type="tool"/
 from langfuse import observe
-
-# Agent workflow with reasoning and tool usage
-@observe(as_type="agent")
-def run_customer_support_agent(query):
-    context = retrieve_context(query)
-    response = generate_response(query, context)
-    return {"response": response, "context": context}
 
 # Tool calls to external services
 @observe(as_type="tool")
 def retrieve_context(query):
-    results = vector_store.similarity_search(query, k=5)
+    results = vector_store.get(query)
     return results
-
-# Guardrail for content safety
-@observe(as_type="guardrail")
-def content_safety_check(text):
-    # Safety assessment
-    if contains_harmful_content(text):
-        return {"safe": False, "reason": "Contains harmful content"}
-    return {"safe": True}
 ```
 
 ### Setting observation types with client methods and context manager
 
-With the langfuse client, you can directly create an observation with a set type:
+With the Langfuse client, you can directly create an observation with a defined type:
 
-```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+```python /as_type="embedding"/
+from langfuse import get_client()
+langfuse = get_client()
 
 def process_with_manual_tracing():
     trace = langfuse.trace(name="document-processing")
@@ -426,9 +411,9 @@ def process_with_manual_tracing():
 
 The context manager approach provides automatic resource cleanup:
 
-```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+```python /as_type="chain"/
+from langfuse import get_client
+langfuse = get_client()
 
 def process_with_context_managers():
     with langfuse.start_as_current_observation(
@@ -443,11 +428,4 @@ def process_with_context_managers():
         ) as retriever:
             search_results = perform_vector_search("user question")
             retriever.update(output={"results": search_results})
-
-        # Generation step
-        with langfuse.start_as_current_observation(
-            name="answer-generation",
-            as_type="generation",
-        ) as generation:
-            answer = generate_answer("user question", search_results)
-            generation.update(output={"answer": answer})
+```
