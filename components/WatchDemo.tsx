@@ -56,7 +56,7 @@ const DEMO_TABS = [
         href: "/integrations",
       },
       {
-        title: "Observabililty data model",
+        title: "Observability data model",
         href: "/docs/observability/data-model",
       },
     ],
