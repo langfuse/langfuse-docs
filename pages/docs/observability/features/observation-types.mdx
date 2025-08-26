@@ -24,22 +24,20 @@ import { CircleDot, MoveHorizontal, Fan, Bot, Wrench, Link, Search, WandSparkles
 
 ## How to Use Observation Types
 
-You can directly set the adequate observation types for your application within the SDK by setting the `as_type` parameter available when creating an observation.
+For [integrations with agent frameworks](/docs/integrations) as langchain/langgraph or OpenAI, we automatically set the natively integrated observation types. For example, marking a method with `@tool` in langchain will automatically set the Langfuse observation type to `tool`.
 
-`as_type` is available in the `@observe` decorator, `start_as_current_observation` context manager and `start_observation` method.
-
-For SDKs with auto instrumentation such as langchain/langgraph or OpenAI, we automatically set the natively integrated observation types. For example, a method marked with `@tool` in langchain will automatically set the observation type to `tool`.
+You can also manually set the adequate observation types for your application within the Langfuse SDK. Set the `as_type` parameter to the desired observation type when creating an observation.
 
 <Tabs items={["Python SDK", "JS/TS"]}>
 <Tab>
 
 <Callout type="info">
-Observation types require Python SDK `version>=3.4`.
+Observation types require Python SDK `version>=3.3.1`.
 </Callout>
 
 Using `@observe` decorator:
 
-```python
+```python /as_type="agent"/ /as_type="tool"/
 from langfuse import observe
 
 # Agent workflow
@@ -57,7 +55,7 @@ def call_weather_api(location):
 
 Calling the `start_as_current_observation` or `start_observation` method:
 
-```python
+```python /as_type="embedding"/ /as_type="chain"/
 from langfuse import get_client
 
 langfuse = get_client()
@@ -82,7 +80,7 @@ transform_span.update(output=transformed_text)
 </Tab>
 <Tab>
 
-Coming soon, starting with version 4.0.
+Coming soon in version 4.0, see the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/8403) for more context.
 
 </Tab>
 </Tabs>
