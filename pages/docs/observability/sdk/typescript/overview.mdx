@@ -63,14 +63,14 @@ Learn more about setting up OpenTelemetry [here](/docs/observability/sdk/typescr
 
 ### Instrument your application
 
-Use the `startActiveSpan` function to start a trace. This function takes a callback and automatically manages the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+Use the `startActiveObservation` function to start a trace. This function takes a callback and automatically manages the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
 
-```ts filename="index.ts" /startActiveSpan/
+```ts filename="index.ts" /startActiveObservation/
 import "./instrumentation";
-import { startActiveSpan } from "@langfuse/tracing";
+import { startActiveObservation } from "@langfuse/tracing";
 
 async function main() {
-  await startActiveSpan("my-first-trace", async (span) => {
+  await startActiveObservation("my-first-trace", async (span) => {
     span.update({
       input:  "Hello, Langfuse!",
       output: "This is my first trace!",

@@ -7,9 +7,9 @@ description: Instrumentation methods for the TypeScript SDK.
 
 Langfuse represents each step in your application as an **observation**. There are three types of observations:
 
-  - **Spans**: Any arbitrary operation, like a tool call, a data processing step, or an API call.
-  - **Generations**: LLM calls. These have special fields for model parameters, usage, and cost.
-  - **Events**: A single point in time, like a user clicking a button or a specific event occurring.
+import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
+
+<ObservationTypesList />
 
 To instrument your application to send traces to Langfuse, you can use either native library instrumentations that work out of the box, or use custom instrumentation methods for fine-grained control.
 
@@ -96,7 +96,7 @@ import { after } from "next/server";
 import { openai } from "@ai-sdk/openai";
 import {
   observe,
-  updateActiveSpan,
+  updateActiveObservation,
   updateActiveTrace,
 } from "@langfuse/tracing";
 import { trace } from "@opentelemetry/api";
@@ -116,7 +116,7 @@ const handler = async (req: Request) => {
     (part) => part.type === "text",
   )?.text;
 
-  updateActiveSpan({
+  updateActiveObservation({
     input: inputText,
   });
 
@@ -133,7 +133,7 @@ const handler = async (req: Request) => {
       isEnabled: true
     },
     onFinish: async (result) => {
-      updateActiveSpan({
+      updateActiveObservation({
         output: result.content,
       });
       updateActiveTrace({
@@ -141,7 +141,7 @@ const handler = async (req: Request) => {
       });
 
       // End span manually after stream has finished
-      trace.getActiveSpan().end();
+      trace.getActiveObservation("span").end();
     },
   });
 
@@ -217,21 +217,25 @@ To simplify nesting and context management, you can use `startActiveSpan` and `s
 
 This is the recommended approach for most use cases as it prevents context leakage and ensures observations are properly ended.
 
-```typescript /startActiveSpan/ /startGeneration/ /end/
-import { startActiveSpan, startGeneration } from "@langfuse/tracing";
+```typescript /startActiveObservation/ /startObservation/ /end/
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
-await startActiveSpan("user-request", async (span) => {
+await startActiveObservation("user-request", async (span) => {
   span.update({
-    input: { query: "What is the capital of France?" }
+    input: { query: "What is the capital of France?" },
   });
 
   // This generation will automatically be a child of "user-request"
-  const generation = startGeneration("llm-call", {
-    model: "gpt-4",
-    input: [{ role: "user", content: "What is the capital of France?" }],
-  });
+  const generation = startObservation(
+    "llm-call",
+    {
+      model: "gpt-4",
+      input: [{ role: "user", content: "What is the capital of France?" }],
+    },
+    { asType: "generation" },
+  );
 
- // ... LLM call logic ...
+  // ... LLM call logic ...
 
   generation.update({
     usageDetails: { input: 10, output: 5 },
@@ -247,14 +251,14 @@ await startActiveSpan("user-request", async (span) => {
 
 ### `observe` wrapper
 
-The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a **span** or **generation** around the function call. You can use the `updateActiveSpan` and `updateActiveGeneration` functions to add attributes to the observation from within the wrapped function.
+The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a **span** or **generation** around the function call. You can use the `updateActiveObservation` function to add attributes to the observation from within the wrapped function.
 
-```typescript /observe/ /updateActiveSpan/
-import { observe, updateActiveSpan } from "@langfuse/tracing";
+```typescript /observe/ /updateActiveObservation/
+import { observe, updateActiveObservation } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-  updateActiveSpan({ metadata: { source: "API" } })
+  updateActiveObservation({ metadata: { source: "API" } }, "span");
   // ... logic to fetch data
   return { data: `some data from ${source}` };
 }
@@ -279,34 +283,42 @@ You can configure the `observe` wrapper by passing an options object as the seco
 
 ### Manual observations
 
-The core tracing functions (`startSpan`, `startGeneration`, `createEvent`) give you full control over creating observations.
+The core tracing function (`startObservation`) give you full control over creating observations. You can pass the `asType` option to specify the type of observation to create.
 
 When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the *original* parent, not the one you just created.
 
 To create nested observations manually, use the methods on the returned object (e.g., `parentSpan.startSpan(...)`).
 
-```typescript /startSpan/ /startGeneration/ /end/
-import { startSpan } from "@langfuse/tracing";
+```typescript /startObservation/ /end/ /asType/
+import { startObservation } from "@langfuse/tracing";
 
 // Start a root span for a user request
-const span = startSpan("user-request", {
-  input: { query: "What is the capital of France?" }
+const span = startObservation("user-request", {
+  input: { query: "What is the capital of France?" },
 });
 
 // Create a nested span for a tool call
-const toolCall = span.startSpan("fetch-weather", {
-  input: { city: "Paris" },
-});
+const toolCall = span.startObservation(
+  "fetch-weather",
+  {
+    input: { city: "Paris" },
+  },
+  { asType: "tool" },
+);
 
 // Simulate work and end the tool call span
-await new Promise(resolve => setTimeout(resolve, 100));
+await new Promise((resolve) => setTimeout(resolve, 100));
 toolCall.end({ output: { temperature: "15°C" } });
 
 // Create a nested generation for the LLM call
-const generation = span.startGeneration("llm-call", {
-  model: "gpt-4",
-  input: [{ role: "user", content: "What is the capital of France?" }],
-});
+const generation = span.startObservation(
+  "llm-call",
+  {
+    model: "gpt-4",
+    input: [{ role: "user", content: "What is the capital of France?" }],
+  },
+  { asType: "generation" },
+);
 
 generation.update({
   usageDetails: { input: 10, output: 5 },
@@ -330,13 +342,13 @@ Often, you might not have all the information about a trace (like a `userId` or 
 
 #### `.updateTrace()` on an observation
 
-When you create an observation manually with `startSpan` or `startGeneration`, the returned object has an `.updateTrace()` method. You can call this at any time before the root span ends to apply attributes to the entire trace.
+When you create an observation manually with `startObservation`, the returned object has an `.updateTrace()` method. You can call this at any time before the root span ends to apply attributes to the entire trace.
 
 ```typescript /updateTrace/
-import { startSpan } from "@langfuse/tracing";
+import { startObservation } from "@langfuse/tracing";
 
 // Start a trace without knowing the user yet
-const rootSpan = startSpan("data-processing");
+const rootSpan = startObservation("data-processing");
 
 // ... some initial steps ...
 
@@ -351,7 +363,12 @@ rootSpan.updateTrace({
 });
 
 // ... continue with the rest of the trace ...
-const generation = rootSpan.startGeneration("llm-call");
+const generation = rootSpan.startObservation(
+  "llm-call",
+  {},
+  { asType: "generation" },
+);
+
 generation.end();
 
 rootSpan.end();
@@ -359,12 +376,12 @@ rootSpan.end();
 
 #### `updateActiveTrace()`
 
-When you're inside a callback from `startActiveSpan`, `startActiveGeneration`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
+When you're inside a callback from `startActiveObservation`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
 
 ```typescript /updateActiveTrace/
-import { startActiveSpan, updateActiveTrace } from "@langfuse/tracing";
+import { startActiveObservation, updateActiveTrace } from "@langfuse/tracing";
 
-await startActiveSpan("user-request", async (span) => {
+await startActiveObservation("user-request", async (span) => {
   // Initial part of the request
   span.update({ input: { path: "/api/process" } });
 

@@ -10,7 +10,7 @@ description: Upgrade path from v3 to v4 for the TypeScript SDK.
 The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces several breaking changes.
 
 1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the `LangfuseSpanProcessor` with an OpenTelemetry `NodeSDK`.
-2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by `startSpan`, `startGeneration`, `startActiveSpan`, etc., from the `@langfuse/tracing` package.
+2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by `startObservation`, `startActiveObservation`, etc., from the `@langfuse/tracing` package.
 3.  **Separation of Concerns**:
       * The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
       * The **`@langfuse/client`** package and the `LangfuseClient` class are now only for non-tracing features like scoring, prompt management, and datasets.

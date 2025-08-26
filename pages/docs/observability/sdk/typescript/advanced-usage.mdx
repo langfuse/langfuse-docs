@@ -97,7 +97,7 @@ When starting a new trace by setting a `traceId`, you must also provide an arbit
 You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
 
 ```typescript
-import { createTraceId, startSpan } from "@langfuse/tracing";
+import { createTraceId, startObservation } from "@langfuse/tracing";
 
 const externalId = "support-ticket-54321";
 
@@ -105,7 +105,7 @@ const externalId = "support-ticket-54321";
 const langfuseTraceId = await createTraceId(externalId);
 
 // You can now start a new trace with this ID
-const rootSpan = startSpan("process-ticket", {}, {
+const rootSpan = startObservation("process-ticket", {}, {
   parentSpanContext: {
     traceId: langfuseTraceId,
     spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
@@ -120,10 +120,10 @@ const scoringTraceId = await createTraceId(externalId);
 
 You may also access the current active trace ID via the `getActiveTraceId` function:
 
-```
-import { startSpan, getActiveTraceId } from "@langfuse/tracing";
+```typescript
+import { startObservation, getActiveTraceId } from "@langfuse/tracing";
 
-await startSpan('run', async (span) => {
+await startObservation('run', async (span) => {
     const traceId = getActiveTraceId();
     console.log(`Current trace ID: ${traceId}`);
 });

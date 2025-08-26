@@ -11,13 +11,17 @@ You can score traces and observations via the `langfuse.score` methods on the La
 
 ```typescript /langfuse.score.observation/ /langfuse.score.trace/ /langfuse.score.activeObservation/ /langfuse.score.activeTrace/
 import { LangfuseClient } from "@langfuse/client";
-import { startSpan, startActiveSpan } from "@langfuse/tracing";
+import { startObservation, startActiveObservation } from "@langfuse/tracing";
 
 const langfuse = new LangfuseClient();
 
 // First, create a trace and an observation
-const rootSpan = startSpan("my-trace");
-const generation = rootSpan.startGeneration("my-generation");
+const rootSpan = startObservation("my-trace");
+const generation = rootSpan.startObservation(
+  "my-generation",
+  {},
+  { asType: "generation" },
+);
 generation.end();
 rootSpan.end();
 
@@ -36,7 +40,7 @@ langfuse.score.trace(rootSpan, {
 });
 
 // You can also score the currently active observation or trace
-startActiveSpan("another-trace", (span) => {
+startActiveObservation("another-trace", (span) => {
   langfuse.score.activeObservation({
     name: "latency-score",
     value: 0.95,
@@ -46,7 +50,6 @@ startActiveSpan("another-trace", (span) => {
     value: 0.88,
   });
 });
-
 
 // Finally, ensure scores are sent to the server
 await langfuse.flush();
