@@ -4,8 +4,10 @@ import { BarChart3, CheckCircle2, FileText, PlayCircle } from "lucide-react";
 import { Quote } from "@/components/Quote";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Cards as NextraCards } from "nextra/components";
+import { HomeSection } from "./home/components/HomeSection";
 
-const TABS = [
+const DEMO_TABS = [
   {
     id: "intro",
     label: "Introduction",
@@ -54,14 +56,14 @@ const TABS = [
         href: "/integrations",
       },
       {
-        title: "Observability data model",
+        title: "Observabililty data model",
         href: "/docs/observability/data-model",
       },
     ],
   },
   {
     id: "prompt",
-    label: "Prompt Engineering",
+    label: "Prompts",
     title: "Prompt Management & Engineering",
     description:
       "Discover how to manage, version, and optimize your prompts with collaborative editing, A/B testing, and seamless integration with your applications.",
@@ -101,13 +103,13 @@ const TABS = [
 ];
 
 export function WatchDemoPage() {
-  const [activeTab, setActiveTab] = useState(TABS[0].id);
+  const [activeTab, setActiveTab] = useState(DEMO_TABS[0].id);
 
   // Read hash from URL on mount and hash changes
   useEffect(() => {
     const updateTabFromHash = () => {
       const hash = window.location.hash.replace("#", "");
-      if (hash && TABS.some((t) => t.id === hash)) {
+      if (hash && DEMO_TABS.some((t) => t.id === hash)) {
         setActiveTab(hash);
       }
     };
@@ -130,7 +132,7 @@ export function WatchDemoPage() {
   };
 
   return (
-    <div>
+    <HomeSection className="px-0">
       <Header
         title="Langfuse Demo"
         description="End-to-end demo of all Langfuse platform features"
@@ -142,12 +144,12 @@ export function WatchDemoPage() {
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <TabsList className="h-auto p-2 gap-2 md:gap-4 flex-wrap justify-center mx-auto">
-            {TABS.map((tab) => (
+          <TabsList className="h-auto p-2 gap-2 md:gap-4 flex-wrap justify-center mx-auto flex-col sm:flex-row">
+            {DEMO_TABS.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="flex-none h-auto flex-row items-center justify-center gap-2 px-4 py-3 text-center whitespace-nowrap"
+                className="flex-none h-auto items-center justify-center md:gap-2 md:px-4 md:py-3 text-center whitespace-nowrap flex-row"
               >
                 <tab.icon className="size-5" />
                 <span>{tab.label}</span>
@@ -155,7 +157,7 @@ export function WatchDemoPage() {
             ))}
           </TabsList>
 
-          {TABS.map((tab) => (
+          {DEMO_TABS.map((tab) => (
             <TabsContent
               key={tab.id}
               value={tab.id}
@@ -201,6 +203,19 @@ export function WatchDemoPage() {
           ))}
         </Tabs>
       </div>
-    </div>
+    </HomeSection>
   );
 }
+
+export const WatchDemoCards = () => (
+  <NextraCards num={2}>
+    {DEMO_TABS.map((tab) => (
+      <NextraCards.Card
+        key={tab.id}
+        title={tab.title}
+        href={`/watch-demo#${tab.id}`}
+        icon={<tab.icon />}
+      />
+    ))}
+  </NextraCards>
+);
