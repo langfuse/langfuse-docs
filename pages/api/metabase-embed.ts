@@ -11,13 +11,12 @@ export default async function handler(
       return res.status(405).json({ message: "Method Not Allowed" });
     }
 
-    // Check if required environment variables are set
     const METABASE_SITE_URL = "https://langfuse.metabaseapp.com";
     const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
 
-    if (!METABASE_SITE_URL || !METABASE_SECRET_KEY) {
+    if (!METABASE_SECRET_KEY) {
       console.error(
-        "Missing required environment variables: METABASE_SITE_URL or METABASE_SECRET_KEY"
+        "Missing required environment variables: METABASE_SECRET_KEY"
       );
       return res.status(500).json({ message: "Server configuration error" });
     }
