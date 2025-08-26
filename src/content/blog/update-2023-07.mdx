@@ -1,0 +1,171 @@
+---
+title: Langfuse Update — July 2023
+date: 2023/08/02
+description: Async SDKs, automated token counts, new Trace UI, Langchain integration, public GET API, new reports, ...
+tag: update
+ogImage: /images/blog/update-july-2023/og-july-2023.jpg
+author: Marc
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
+
+<BlogHeader
+  title="Langfuse Update — July 2023"
+  description="Building out the core platform and preparing infrastructure for advanced analytics: Async SDKs, automated token counts, nested Trace UI, langchain integration, public GET API"
+  date="Aug 2, 2023"
+  authors={["marcklingen"]}
+/>
+
+Hi all, a lot has happened since our launch two weeks ago and I'm excited to share our July update:
+
+- **Faster integration**
+  - [Langchain integration](#langchain): Integrate with Langfuse in minutes when using Langchain
+  - [SDKs for Python and JS/TS](#sdks): Now fully async, typed, and with improved DX for nested traces
+- **New nested [Trace UI](#nested-trace-ui)**
+- **More metrics**
+  - [Automated token counts](#token-counts) for OpenAI and Anthropic models
+  - [Human-in-the-loop evaluation](#human-in-the-loop-evaluation) as an additional source of scores
+- **Analytics**
+  - [User reporting](#user-reporting) on token usage, traces and feedback
+  - [Analytics](#analytics) (alpha) continuously rolling out to more users
+- **Other**
+  - [Public GET API](#get-api) for custom integrations
+  - [Improved docs](#docs) with new content and Q&A chatbot
+
+---
+
+The details 👇
+
+## 🦜🔗 Langchain Integration [#Langchain]
+
+For teams building their LLM app with Langchain, adopting Langfuse just got that much easier. We added a `CallbackHandler` to the Langfuse Python SDK that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
+
+<Tabs
+  items={[
+    "Python (constructor args)",
+    "Python (env)",
+    "JS (constructor args)",
+    "JS (env)",
+  ]}
+>
+  <Tab>
+    <GetStartedLangchainPythonArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsEnv />
+  </Tab>
+</Tabs>
+
+→ [Integration docs](/integrations/frameworks/langchain)
+
+## ⚡️ Improved SDKs for Python and JS/TS [#SDKs]
+
+Most Langfuse users integrate using our Python or JS/TS SDKs. We made improvements to both DX and performance:
+
+1. Fully async, avoid adding latency or blocking your app
+2. Typed (Pydantic/Typescript)
+3. Improved DX for nesting traces; no need to manually manage IDs
+4. Support for more runtimes: JS/TS SDKs work in Node.js, Edge (Deno, Vercel, Cloudflare) or in the browser to directly report scores (e.g. user feedback) to Langfuse
+
+→ [SDK docs](/docs/sdk)
+
+## ⛓️ New Trace UI [#nested-trace-ui]
+
+Most users of Langfuse run complex LLM-based applications. To help monitor and debug these applications and understand how the different steps lead to the final output, we added a new nested trace UI.
+
+_Examples from our Langchain integration:_
+
+<Frame>
+  ![Debug view in Langfuse](/images/blog/langchain/langfuse-debug-ui.gif)
+</Frame>
+
+## 🧮 Automated Token Counts [#token-counts]
+
+Usage/cost reporting is a key use case of Langfuse.
+
+Until now, token counts needed to be ingested when logging new LLM calls. For OpenAI and Anthropic models, Langfuse now automatically calculates token counts based on the ingested prompts and completions. This is helpful as some APIs do not provide token counts in their responses. It also reduces integration effort.
+
+| Model     | Tokenizer     | Used package                                                                       |
+| --------- | ------------- | ---------------------------------------------------------------------------------- |
+| `gpt*`    | `cl100k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |
+| `claude*` | `claude`      | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) |
+
+→ [Learn more](/docs/model-usage-and-cost)
+
+## 🌟 Human-in-the-loop Evaluation [#human-in-the-loop-evaluation]
+
+Scores in Langfuse are essential to monitor the quality of your LLM app. Until now, scores were created via the Web SDK based on user feedback (e.g. thumbs up/down, implicit user feedback) or via the API (e.g. when running model-based evals).
+
+Many of you wanted to annotate generations in the UI as you or your team browse production logs. We've added this to the Langfuse UI:
+
+<Frame>![Annotate via the langfuse UI](/images/docs/score-manual.gif)</Frame>
+
+→ [Learn more](/docs/scores)
+
+## 👥 User Reporting [#user-reporting]
+
+Add a `userId` when ingesting data into Langfuse and use it to get usage/cost broken down by user. Explore what individual users are doing in your LLM app.
+
+More user-based analytics and features are coming soon, e.g. APIs to use this data in your own dashboards and usage-based billing.
+
+<Frame>![User reporting](/images/blog/update-july-2023/users.gif)</Frame>
+
+→ [Learn more](/docs/tracing-features/users)
+
+## 📈 Analytics (alpha) [#analytics]
+
+Currently we are working with a small group of alpha users to test our analytics features. We've focused a lot on getting this right and are excited to share more soon. Reach out if you want to share your needs or want to be part of the alpha. We are onboarding new users every week.
+
+→ [More details](/docs/analytics/overview)
+
+## 👩‍💻 Public GET API [#get-api]
+
+We added a public GET API to Langfuse to support users consuming Langfuse data in their own applications. Check out the API reference for more details on the available endpoints. Need other endpoints? Shoot me a message: marc@langfuse.com
+
+Example use cases:
+
+- Integrate user feedback (by use case) into your own dashboards
+- Fine-tune on low-quality generations
+
+```sh
+GET /traces
+GET /traces/:traceId
+GET /scores
+GET /observations/:observationId
+```
+
+→ [API reference](/docs/api)
+
+## 📚 Improved Docs [#docs]
+
+We've shipped a lot over the last month and the docs were lagging behind. We've now updated the docs to reflect the latest changes and added a bunch of new content. This should make it way easier to get started with Langfuse and incrementally adopt more advanced features. We'd love to get your feedback on the docs, use the new widget on the bottom to 👍/👎, thank you 🙏
+
+We also added a [Q&A chatbot](/blog/qa-chatbot-for-langfuse-docs) as one user was surprised that we don't have one yet. It's still a bit rough around the edges but we'll improve it over time. Give feedback when using it and you can be sure that it is all tracked and analyzed in Langfuse.
+
+<Frame>![New docs](/images/blog/update-july-2023/docs-banner.jpg)</Frame>
+
+## 🚢 What's Next?
+
+There is more coming in August. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd like to see? Join us on [Discord](/discord) and share your thoughts.
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Subscribe to get monthly updates via email:
+
+<ProductUpdateSignup source="Product update [July 2023]" className="mt-3" />
+
+Follow along on Twitter ([@Langfuse](https://twitter.com/langfuse), [@marcklingen](https://twitter.com/marcklingen))
+
+import { Tweet } from "@/components/Tweet";
+
+<Tweet id="1687153163332173838" />

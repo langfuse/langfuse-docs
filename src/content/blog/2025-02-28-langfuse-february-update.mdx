@@ -1,0 +1,81 @@
+---
+title: "Langfuse February Update"
+description: "We've had a busy February at Langfuse, filled with new integrations, features, and announcements."
+ogImage: /images/blog/2025-02-28-langfuse-february-update/langfuse-february-update.png
+tag: update
+date: 2025/02/28
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse February Update"
+  description="We've had a busy February at Langfuse, filled with new integrations, features, and announcements."
+  authors={["marcklingen"]}
+  image="/images/blog/2025-02-28-langfuse-february-update/langfuse-february-update.png"
+/>
+
+We’ve had a busy February at Langfuse, filled with new integrations, features, and announcements. Here’s a quick rundown:
+
+## 🔭 OpenTelemetry Support
+
+<Frame className="my-10" fullWidth>
+  ![New
+  integrations](/images/blog/2025-02-28-langfuse-february-update/otel-integrations.png)
+</Frame>
+
+Langfuse now includes an OpenTelemetry backend to receive OTel traces at: `/api/public/otel`
+
+> **What is OpenTelemetry?**  
+> [OpenTelemetry](https://opentelemetry.io/) is an open-source observability framework for collecting and processing telemetry data. It includes Semantic Conventions, which standardize the naming and structuring of trace data.
+
+We’re thrilled about this update because it enables integrations with a wide range of frameworks and languages that use the OpenTelemetry standard. This includes:
+
+- [CrewAI](/integrations/frameworks/crewai)
+- [AutoGen](/integrations/frameworks/autogen)
+- [Semantic Kernel](/integrations/frameworks/semantic-kernel)
+- [Pydantic AI](/integrations/frameworks/pydantic-ai)
+- [Spring AI](/integrations/frameworks/spring-ai)
+- [Smolagents](/integrations/frameworks/smolagents)
+- Other languages such as Java, Go, .NET
+
+→ Learn more in our [documentation](/docs/opentelemetry/get-started)
+
+## ⚡ Open Source LLMOps Stack
+
+<Frame className="my-10" fullWidth>
+  ![Open Source LLMOps
+  Stack](/images/blog/2025-02-28-langfuse-february-update/llmops-stack.png)
+</Frame>
+We've partnered with [LiteLLM](https://www.litellm.ai/) to introduce the Open Source
+LLMOps Stack.
+
+Selecting the right tooling stack is essential—avoiding vendor lock-in and high switching costs means you can continue to develop in rapid cycles.
+
+Popular among Langfuse and LiteLLM users (especially in enterprise and regulated settings), this stack enables efficient observability without extensive instrumentation. LiteLLM further enhances the experience with virtual LLM keys, budgeting, failovers, and compatibility with over 100 LLMs through the OpenAI API schema.
+
+→ **Learn more**: [oss-llmops-stack.com](https://oss-llmops-stack.com/)
+
+## 🎁 New Features
+
+<Frame className="my-10" fullWidth>
+  ![New
+  features](/images/blog/2025-02-28-langfuse-february-update/feature-overview.png)
+</Frame>
+
+We’ve shipped a host of new features to simplify development workflows and help new users get started quickly:
+
+- **Dataset CSV Upload**: Quickly create Dataset Items from CSV files.
+- **Model Context Protocol (MCP) Prompt Server**: Easily integrate Langfuse prompts with LLM Agents, Claude Desktop, Cursor, and other MCP clients.
+- **Graph View for LangGraph Traces**: Visually follow agent executions in an intuitive graph. (Generalized version coming soon!)
+- **Typed Public API Client in SDKs**: Simplified access to Langfuse's API with fully-typed clients.
+- **Improved In-Product Onboarding**: Interactive screens highlight unused features to help you maximize Langfuse.
+
+→ **View the full** [Changelog](/changelog)
+
+## 👨‍💻 We're Hiring in Berlin
+
+Langfuse is growing fast! We're seeking talented individuals to join our Berlin-based team. Looking for a change? Email us or forward this opportunity—there's a USD 5K referral bonus!
+
+→ [Learn more and apply](/careers)

@@ -1,0 +1,96 @@
+---
+description: Sneak peak into upcoming new features and changes in Langfuse. This page is updated regularly.
+---
+
+# Langfuse Roadmap
+
+Langfuse is [open source](/open-source) and we want to be fully transparent what we're working on and what's next. This roadmap is a living document and we'll update it as we make progress.
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  **Your feedback is highly appreciated**. Feel like something is missing? Add
+  new [ideas on GitHub](/ideas) or vote on existing ones. Both are a great way
+  to contribute to Langfuse and help us understand what is important to you.
+</Callout>
+
+## 🚀 Released
+
+// TODO(nextra v4): Port changelog listing to use nextra/page-map
+// Temporary placeholder during v3→v4 migration
+export const ChangelogList = () => null;
+
+10 most recent [changelog](/changelog) items:
+
+<Callout type="warning">
+  Changelog list temporarily disabled during Nextra v4 migration. See Backlog.md.
+</Callout>
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+<Callout type="info">
+
+Subscribe to our mailing list to get occasional email updates about new features.
+
+<ProductUpdateSignup source="self-host guide" className="my-3 max-w-sm" />
+
+</Callout>
+
+## 🚧 In progress
+
+- Tracing
+  - Unified agent graphs
+  - New JS SDK based on OpenTelemetry ([#1291](https://github.com/orgs/langfuse/discussions/1291))
+- Evaluation
+  - Improvements to core eval views (e.g. compare run view)
+  - Annotate dataset experiments
+
+## 🔮 Planned
+
+- Agent Observability
+  - Unified agent graphs ([#2669](https://github.com/orgs/langfuse/discussions/2669)) (beta for LangGraph ([docs](/docs/tracing-features/agent-graphs)))
+  - New span types for tool calls ([#2624](https://github.com/orgs/langfuse/discussions/2624))
+  - Agent evaluations: conversation, response, turn, and trajectory levels
+- Evaluation
+  - Rule‑based evaluators (regex, structural checks) ([#4671](https://github.com/orgs/langfuse/discussions/4671), [#4484](https://github.com/orgs/langfuse/discussions/4484))
+  - Trace LLM‑as‑judge evaluations for debugging & cost tracking
+  - Evaluation comparison dashboard: correlation, confusion matrix, overlap histogram
+  - SDK abstraction for easy experiment setup and UI‑triggered external runners
+  - Sessions & observations support for annotation queues ([#7551](https://github.com/orgs/langfuse/discussions/7551))
+  - Session-level and observation-level llm-as-a-judge
+- Datasets
+  - Multi‑modal dataset support ([#6883](https://github.com/orgs/langfuse/discussions/6883))
+  - Run comparison view: filterable, sortable dataset runs with annotation support
+  - Bulk add traces to datasets ([#7691](https://github.com/orgs/langfuse/discussions/7691))
+  - Dataset folders ([#3935](https://github.com/orgs/langfuse/discussions/3935))
+  - Input/output schema validation
+- Playground
+  - Multi‑modal message support ([#6017](https://github.com/orgs/langfuse/discussions/6017))
+  - Dataset experiments in playground
+- Prompt Management
+  - Track prompt variables in production tracing ([#5242](https://github.com/orgs/langfuse/discussions/5242))
+  - Prompt experiments with structured outputs and tool/function support ([#5958](https://github.com/orgs/langfuse/discussions/5958))
+  - Exports & imports for prompts ([#1696](https://github.com/orgs/langfuse/discussions/1696))
+- Data Platform
+  - Webhooks for tracing, dataset, and admin events ([#1033](https://github.com/orgs/langfuse/discussions/1033)) in addition to the existing prompt webhooks
+  - In-app routing (e.g. add to annotation queue, trigger evals)
+  - Metric‑threshold alerts ([#3997](https://github.com/orgs/langfuse/discussions/3997))
+  - Langfuse Cloud usage-based billing alerts
+
+## 🙏 Feature requests and bug reports
+
+The best way to support Langfuse is to share your feedback, report bugs, and upvote on ideas suggested by others.
+
+### Feature requests
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview filterCategory="Ideas" itemsPerPage={10} />
+
+### Bug reports
+
+import { Bug } from "lucide-react";
+
+<Cards num={2}>
+  <Card href="/issues" title="Bugs (GitHub Issues)" arrow icon={<Bug />} />
+</Cards>

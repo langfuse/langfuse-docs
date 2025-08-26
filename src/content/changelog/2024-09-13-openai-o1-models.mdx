@@ -1,0 +1,33 @@
+---
+date: 2024-09-13
+title: Token/cost tracking for OpenAI's o1 models
+description: Day 1 support for OpenAI's o1 models including tracking token counts and USD spend.
+showOgInHeader: false
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+
+
+<ChangelogHeader />
+
+OpenAI has released new powerful models. The o1 series of large language models are trained with reinforcement learning to perform complex reasoning. o1 models think before they answer, producing a long internal chain of thought before responding to the user, opening up new use-cases for LLMs and improved performance for some existing LLM workloads. Langfuse now supports cost tracking for generations OpenAI's o1 models including tracking token counts and USD spend without changes necessary on your end.
+
+
+<Callout type="info">
+  Note: Providing token counts is essential for accurate cost tracking
+</Callout>
+
+
+Tracking cost by infering token usage from the input and output strings is not supported for OpenAI o1 model family at this time. That is, if no token counts are ingested, Langfuse can not infer cost for o1 models.
+
+Reasoning models such as o1 take multiple steps to arrive to a response. The result from each step generates reasoning tokens that are billed as output tokens. So the cost-effective output token count is the sum of all reasoning tokens and the token count for the final completion. Since Langfuse does not have visibility into the reasoning tokens, it cannot infer the correct cost for generations that have no token usage provided.
+
+To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations via the low-level SDKs. When utilizing the [Langfuse OpenAI wrapper](/integrations/model-providers/openai-py) or integrations such as for [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex) or [LiteLLM](/integrations/gateways/litellm), token usage is collected and provided automatically for you.
+
+##### Learn more
+
+- [Cost tracking in Langfuse](/docs/model-usage-and-cost).
+- [OpenAI release note](https://openai.com/o1/)
+- [OpenAI guide](https://platform.openai.com/docs/guides/reasoning) on how reasoning models work.

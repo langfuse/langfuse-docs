@@ -1,0 +1,61 @@
+---
+date: 2024-02-05
+title: SDK-level prompt caching
+description: The latest release of the Python and JS/TS Langfuse SDK includes a new prompt caching feature that improves the reliability and performance of your applications.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+After launching the highly anticipated [prompt management](/docs/prompts) feature in Langfuse, we've enhanced its performance and reliability in the Python and JS/TS SDKs through prompt caching. This feature stores prompts in the client SDKs' memory, cutting down on server requests and boosting your applications' reliability and speed. With a default TTL of 60 seconds, caching settings can be adjusted for individual prompts within the SDK. Should a refetch of a prompt fail, the SDK will automatically revert to the cached version, ensuring your application's availability is not compromised.
+
+### How it works
+
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+# Get current production prompt version and cache for 5 minutes
+prompt = langfuse.get_prompt("prompt name", cache_ttl_seconds=300)
+
+# Get a specific prompt version and cache for 5 minutes
+prompt = langfuse.get_prompt("prompt name", version=3, cache_ttl_seconds=300)
+
+# Disable caching for a prompt
+prompt = langfuse.get_prompt("prompt name", cache_ttl_seconds=0)
+```
+
+</Tab>
+
+<Tab>
+
+```ts
+// Get current production version and cache prompt for 5 minutes
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 300,
+});
+
+// Get prompt version 3 and cache for 5 minutes
+const prompt = await langfuse.getPrompt("prompt name", 3, {
+  cacheTtlSeconds: 300,
+});
+
+// Disable caching for a prompt
+const prompt = await langfuse.getPrompt("prompt name", undefined, {
+  cacheTtlSeconds: 0,
+});
+```
+
+</Tab>
+
+</Tabs>
+
+### Upgrade path
+
+To benefit from prompt caching, upgrade to the latest version of the Python and JS/TS SDKs. The caching feature is enabled with a 60 seconds TTL default, so you don't need to make any changes to your code to start using it.
+
+### More details
+
+Check out the full [documentation](/docs/prompts#caching-in-client-sdks) for more details on how to use this feature.

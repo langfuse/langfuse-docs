@@ -1,8 +1,4 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
-import { MessageCircleQuestion } from "lucide-react";
-import Link from "next/link";
+import { Callout } from "nextra/components";
 
 const PREVIEW_PAGES_PER_TAG = 5;
 
@@ -20,58 +16,8 @@ export const formatTag = (tag: string) =>
     .map((word) => wordCasing[word.toLowerCase()] || word)
     .join(" ");
 
-export const FaqIndex = () => {
-  const pages = getPagesUnderRoute("/faq/all") as Array<
-    Page & { frontMatter: any }
-  >;
-  const categorizedPages = pages
-    .filter((page) => page.route !== "/faq/all")
-    .reduce((acc, page) => {
-      const tags = page.frontMatter?.tags || ["Other"];
-      tags.forEach((tag: string) => {
-        if (!acc[tag]) acc[tag] = [];
-        acc[tag].push(page);
-      });
-      return acc;
-    }, {} as Record<string, Array<Page & { frontMatter: any }>>);
-
-  return (
-    <>
-      {Object.entries(categorizedPages)
-        .sort(([tagA], [tagB]) => {
-          if (tagA === "Other") return 1;
-          if (tagB === "Other") return -1;
-          return tagA.localeCompare(tagB);
-        })
-        .map(([tag, pages]) => (
-          <div key={tag} className="my-10">
-            <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-2xl">
-              {formatTag(tag)}
-            </h3>
-            <Cards num={1}>
-              {pages.slice(0, PREVIEW_PAGES_PER_TAG).map((page) => (
-                <Cards.Card
-                  href={page.route}
-                  key={page.route}
-                  title={
-                    page.meta?.title || page.frontMatter?.title || page.name
-                  }
-                  icon={<MessageCircleQuestion />}
-                  arrow
-                >
-                  {""}
-                </Cards.Card>
-              ))}
-            </Cards>
-            <p className="mt-4">
-              <Link href={`/faq/tag/${encodeURIComponent(tag)}`}>
-                {pages.length > PREVIEW_PAGES_PER_TAG
-                  ? `View all (${pages.length - PREVIEW_PAGES_PER_TAG} more) ->`
-                  : `View all ->`}
-              </Link>
-            </p>
-          </div>
-        ))}
-    </>
-  );
-};
+export const FaqIndex = () => (
+  <Callout type="warning">
+    FAQ index temporarily disabled during Nextra v4 migration. See Backlog.md.
+  </Callout>
+);

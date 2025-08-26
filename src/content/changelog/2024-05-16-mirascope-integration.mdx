@@ -1,0 +1,64 @@
+---
+date: 2024-05-16
+title: Mirascope integration
+description: Mirascope is a Python toolkit for building LLM applications and it natively integrates with Langfuse.
+author: Marc
+ogImage: /images/changelog/2024-05-16-mirascope-integration.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Mirascope automatically passes the Langfuse [`observe()` decorator](/docs/sdk/python/decorators) to all relevant functions within Mirascope via its `with_langfuse` decorator.
+
+```python /@with_langfuse/ /from mirascope.langfuse import with_langfuse/
+import os
+from mirascope.langfuse import with_langfuse
+from mirascope.anthropic import AnthropicCall
+
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+
+
+@with_langfuse
+class BookRecommender(AnthropicCall):
+    prompt_template = "Please recommend some {genre} books"
+
+    genre: str
+
+
+recommender = BookRecommender(genre="fantasy")
+response = recommender.call()  # this will automatically get logged with langfuse
+print(response.content)
+#> Here are some recommendations for great fantasy book series: ...
+```
+
+This will give you:
+
+- A trace around the AnthropicCall.call() that captures items like the prompt template, and input/output attributes and more.
+- Human-readable display of the conversation with the agent
+- Details of the response, including the number of tokens used
+
+<Frame border fullWidth>
+  ![Mirascope Trace call](/images/docs/miracope-trace-call.png)
+</Frame>
+
+## Learn more
+
+import { BookOpen, FileCode } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Integration docs"
+    href="/integrations/frameworks/mirascope"
+    icon={<BookOpen />}
+  />
+  <Card
+    title="Notebook with examples"
+    href="/guides/cookbook/integration_mirascope"
+    icon={<FileCode />}
+  />
+</Cards>

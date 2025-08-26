@@ -1,0 +1,142 @@
+---
+title: "Langfuse adds >20 evals with UpTrain.ai integration"
+date: 2024/03/05
+description: Run UpTrain's >20 pre-configured evaluations on your Langfuse prod/dev data in Langfuse.
+ogImage: /images/blog/uptrain/uptrain-ai.png
+tag: integration
+author: Clemens
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse adds >20 evals with UpTrain.ai integration"
+  description="Langfuse significatly expands its range of open source evaluators through an integration with open source project and fellow YC startup UpTrain.ai"
+  date="March 5, 2024"
+  authors={["clemensrawert"]}
+/>
+
+<Frame fullWidth className="mb-12">
+  ![Langfuse](/images/blog/uptrain/uptrain-ai.png)
+</Frame>
+
+Langfuse adds >20 open source evaluations to its roster through an integration with open source project and fellow Y Combinator startup [UpTrain](https://uptrain.ai) – we share an office building with UpTrain in SF, so this one came about over a cup of coffee. If you want to dive straight in, [head over to the cookbook](/guides/cookbook/evaluation_with_uptrain).
+
+**UpTrain** ([GitHub](https://github.com/uptrain-ai/uptrain))
+
+> Open-source project to evaluate and improve Generative AI applications. It provides grades for 20+ preconfigured checks (covering language, code, embedding use cases), performs root cause analyses on instances of failure cases and provides guidance on how to resolve them.
+
+## Evaluations in Langfuse
+
+**Langfuse** allows users to [score](/docs/scores) the quality of their application. This can be done through human input via user feedback in the front-end or manual scoring in the Langfuse UI.
+
+To scale evaluation to a large number of traces, Langfuse supports [model-based evaluations](/docs/scores/model-based-evals). This allows users to integrate e.g. through UpTrain, Ragas or LangChain Evals and use their pre-configured evals to score their completions. Users can also use custom scoring and ingest these via the Langfuse SDKs.
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  **Sneak peak**: We are currently working on an evaluation service to
+  automatically score all incoming observations by running custom evaluation
+  templates. Ping us if you want to be among the first to try it:
+  early-access@langfuse.com
+</Callout>
+
+## How to Trace with Langfuse and Evaluate with UpTrain
+
+You can easily evaluate existing traces in Langfuse by loading them into a notebook, running UpTrain evaluators on them and writing the scores back to your data in Langfuse:
+
+<Steps>
+
+### Log your query-response pairs with Langfuse
+
+Use one of our many integrations (Python, JS, Langchain, LlamaIndex, LiteLLM, …) to trace your LLM app. Here is a full list of [integrations](/integrations) and how to get started in the [quickstart](/docs/get-started).
+
+### Retrieve sub-set of traces to evaluate
+
+```python
+# paginated response
+traces=langfuse.client.trace.list(
+    name="qa-traces" # select the traces you want to evaluate
+)
+
+evaluation_batch = {
+    "question": [],
+    "context": [],
+    "response": [],
+    "trace_id": [],
+}
+
+for t in traces:
+    # get the observations for the trace
+    observations = [langfuse.client.observations.get(o) for o in t.observations]
+
+    # extract data deeply nested in the Langfuse trace
+    for o in observations:
+        if o.name == 'retrieval':
+            question = o.input['question']
+            context = o.output['context']
+        if o.name=='generation':
+            answer = o.output['response']
+
+    evaluation_batch['question'].append(question)
+    evaluation_batch['context'].append(context)
+    evaluation_batch['response'].append(response)
+    evaluation_batch['trace_id'].append(t.id)
+
+# transform for UpTrain
+data = [dict(zip(evaluation_batch,t)) for t in zip(*evaluation_batch.values())]
+```
+
+### Run UpTrain evals
+
+```python
+res = eval_llm.evaluate(
+   data = data,
+   checks = [Evals.CONTEXT_RELEVANCE, Evals.FACTUAL_ACCURACY, Evals.RESPONSE_COMPLETENESS]
+)
+```
+
+### Log the scores back to Langfuse
+
+```python
+for _, row in df.iterrows():
+    for metric_name in ["context_relevance", "factual_accuracy","response_completeness"]:
+        langfuse.score(
+            name=metric_name,
+            value=row["score_"+metric_name],
+            trace_id=row["trace_id"]
+        )
+```
+
+And you're done! In just a few lines of code, you have added powerful eval capabilities that you can apply to all of your data stored in Langfuse.
+
+</Steps>
+
+## 20+ pre-configured evaluations available
+
+UpTrain provides 20+ pre-configured OSS evals ([list](https://github.com/uptrain-ai/uptrain?tab=readme-ov-file#pre-built-evaluations-we-offer-)). Common use cases include:
+
+- Accessing scores for Response Completeness, Relevance & Validity, etc.,
+- Computing the quality of retrieval and degree of context utilization,
+- Checking if the response can be verified from the context or not,
+- Detecting and preventing prompt injection and jailbreak attempts
+- Examining if the user is frustrated while interacting with a chatbot
+
+## Get Started
+
+Run the end-to-end cookbook on your Langfuse traces or learn more about model-based evals in Langfuse.
+
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Cookbook: Uptrain + Langfuse"
+    href="/guides/cookbook/evaluation_with_uptrain"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Docs: Model-based evals"
+    href="/docs/scores/model-based-evals"
+    icon={<BookOpen />}
+  />
+</Cards>

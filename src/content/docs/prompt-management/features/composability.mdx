@@ -1,0 +1,56 @@
+---
+title: Prompt Composability
+sidebarTitle: Composability
+description: Reference other prompts in your prompts using a simple tag format.
+---
+
+# Prompt Composability
+
+As you create more prompts, you will often find yourself using the same snippets of text or instructions in multiple prompts. To avoid duplication, you can compose prompts by referencing other prompts.
+
+<Video
+  src="/images/docs/prompt-composition.mp4"
+  aspectRatio={1030 / 712}
+  gifStyle
+  className="rounded-lg max-w-lg"
+  title="Prompt Composability"
+/>
+
+## Why Use Composed Prompts?
+
+- Create modular **prompt components** that can be reused across multiple prompts
+- **Maintain** common instructions, examples, or context in a single place
+- **Update dependent prompts** automatically when base prompts change
+
+## Get started
+
+<Tabs items={["Langfuse UI", "SDKs/API"]}>
+
+<Tab>
+When creating the prompt via the Langfuse UI, you can use the `Add prompt reference` button to insert a prompt reference into your prompt.
+
+<CloudflareVideo
+  videoId="442e83cda5a94c08faf20b8365f73726"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Tab>
+
+<Tab>
+
+You can reference other **text** prompts in your prompts the following format:
+
+```bash
+@@@langfusePrompt:name=PromptName|version=1@@@
+```
+
+You can also use a label instead of a specific version for dynamic resolution:
+
+```bash
+@@@langfusePrompt:name=PromptName|label=production@@@
+```
+
+</Tab>
+
+</Tabs>

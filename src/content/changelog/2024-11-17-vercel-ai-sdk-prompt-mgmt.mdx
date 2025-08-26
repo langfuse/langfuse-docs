@@ -1,0 +1,76 @@
+---
+date: 2024-11-17
+title: Prompt Management for Vercel AI SDK
+badge: Launch Week 2 🚀
+description: Langfuse Prompt Management now integrates natively with the Vercel AI SDK. Version and release prompts in Langfuse, use them via Vercel AI SDK, monitor metrics in Langfuse.
+ogImage: /images/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt/og.png
+showOgInHeader: false
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Kicking off [Launch Week 2](/blog/2024-11-17-launch-week-2) one day early with the first of 6 announcements.
+
+## Introduction
+
+**What is the Vercel AI SDK?** The [Vercel AI SDK](https://sdk.vercel.ai/getting-started) is a production-ready framework for building AI applications in JavaScript/TypeScript. It features type-safe outputs, React state management hooks, and streaming support while remaining model-agnostic.
+
+**Langfuse Tracing for Vercel AI SDK**. Langfuse Tracing [integrates](/integrations/frameworks/vercel-ai-sdk) with your Vercel AI SDK application via OpenTelemetry to monitor LLM requests. Track key metrics like quality, cost, and latency through detailed application traces.
+
+## What's new?
+
+[Langfuse Prompt Management](/docs/prompts/get-started) now enables seamless prompt deployment and optimization. Key features include client-side caching with async refreshing and flexible management through UI, SDK, or API interfaces.
+
+By linking Vercel AI SDK traces with Langfuse prompt versions, you can now:
+
+- Track which prompt version was used in any trace
+- Debug prompt-related issues
+- Monitor performance metrics per prompt version
+- Track prompt version usage
+
+## How to link a trace with a prompt version?
+
+Prerequisites:
+
+- Vercel AI SDK installed in your application ([guide](https://sdk.vercel.ai/getting-started)).
+- Langfuse Tracing enabled for Vercel AI SDK ([guide](/integrations/frameworks/vercel-ai-sdk)).
+- Create a prompt in Langfuse ([guide](/docs/prompts/get-started)).
+
+Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePrompt` property in the `metadata` field:
+
+```typescript {11,13,15}
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// fetch prompt from Langfuse Prompt Management
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt, // use prompt
+  experimental_telemetry: {
+    isEnabled: true, // enable tracing
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(), // link trace to prompt version
+    },
+  },
+});
+```
+
+## Example
+
+The resulting generation will have the prompt linked to the trace in Langfuse.
+
+<Frame fullWidth border>
+  ![Langfuse Vercel AI SDK trace linked to a prompt
+  version](/images/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt/trace.png)
+</Frame>
+
+## Try it out
+
+See the [prompt management](/docs/prompts/get-started) docs for more details.

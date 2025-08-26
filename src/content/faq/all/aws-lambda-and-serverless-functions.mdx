@@ -1,0 +1,26 @@
+---
+title: How to use Langfuse Tracing in Serverless Functions (AWS Lambda, Vercel, Cloudflare Workers, etc.)
+tags: [observability]
+---
+
+# How to use Langfuse Tracing in Serverless Functions (AWS Lambda, Vercel, Cloudflare Workers, etc.)
+
+Langfuse Tracing is optimized to run in the background in order to avoid adding latency to an application. This can cause some difficulties when tracing in serverless environments like AWS Lambda, Vercel Functions, Google Cloud Functions, etc.
+
+The behavior of the Langfuse clients is outlined [here](/docs/tracing).
+
+## What is the root cause of this issue?
+
+The root cause of this issue is that serverless functions are typically short-lived and terminate after execution. This means that the Langfuse agent, which runs in the background, may not have enough time to complete its work before the function exits. Thereby, events might not be sent to Langfuse.
+
+## Use `flush` to ensure events are sent before the function exits
+
+To solve this issue, you can manually flush the events before the function exits. This can be done by calling the `flush` method of the Langfuse client. The flush method is supported across all Langfuse SDKs and integrations.
+
+## Alternative: waitUntil
+
+Vercel and Cloudflare Workers support the [`waitUntil`](https://developer.mozilla.org/en-US/docs/Web/API/ExtendableEvent/waitUntil) method, which allows you to wait for a promise (`flush`) to resolve before the function exits. Thereby you can return a value from your function and still ensure that events are sent to Langfuse.
+
+## Alternative: flushAt
+
+Alternatively, you can configure Langfuse to flush events individually. This can be done by setting the `flushAt` option to a specific number of events.

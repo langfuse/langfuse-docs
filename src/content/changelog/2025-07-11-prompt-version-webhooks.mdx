@@ -1,0 +1,40 @@
+---
+date: 2025-07-11
+title: Webhooks for Prompt Changes
+description: Get real-time notifications for new prompt versions, changes to deployment labels or tags, and other edits.
+author: Max
+ogImage: /images/changelog/2025-07-11-webhook-changelog.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+When using Langfuse [Prompt Management](/docs/prompts/get-started), you can now receive real-time notifications when prompts are changed:
+
+- **Created** - A new prompt version is added
+- **Updated** - Labels or tags on an existing prompt version are modified
+- **Deleted** - A prompt version is removed
+
+Common use cases:
+
+- Trigger CI/CD pipelines when production prompts are updated
+- Sync prompt changes with external systems or persist them in your repo via a GitHub Action
+- Notify team members about prompt modifications
+
+## Features
+
+- **Filtering**: Configure webhooks for specific prompt actions with custom filters
+- **Security**: HMAC SHA‑256 signature verification via `x-langfuse-signature` header
+- **Reliability**: High availability with error handling and retry mechanisms
+
+## Get started
+
+import { Book, FileJson } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Prompt Webhooks Documentation" href="/docs/prompt-management/features/webhooks-slack-integrations" icon={<Book />} />
+  <Card title="Prompt Management Overview" href="/docs/prompts/get-started" icon={<FileJson />} />
+</Cards>
+
+

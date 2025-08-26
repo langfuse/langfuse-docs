@@ -1,0 +1,95 @@
+---
+date: 2024-11-19
+title: LLM-as-a-judge Evaluators for Dataset Experiments
+badge: Launch Week 2 🚀
+description: Introducing support for managed LLM-as-a-judge evaluators for dataset experiments.
+ogImage: /images/changelog/2024-11-19-dataset-evaluators.png
+showOgInHeader: false
+author: Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded mt-10 w-full"
+  src="https://www.youtube-nocookie.com/embed/JOGMn5nqCSM?si=9-Et0tKtOYffyvru"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## Introduction
+
+Building reliable AI applications is challenging because it's hard to understand how changes impact performance. Without proper evaluation, teams end up playing whack-a-mole with bugs and regressions. [Datasets and experiments](/docs/datasets/overview) in Langfuse help transform this uncertainty into a structured engineering process.
+
+<details>
+<summary>Benefits of investing into datasets and development evaluations</summary>
+
+- Measure the impact of changes before deployment
+- Identify regressions early
+- Compare specific dataset items across different runs using reliable scores
+- Build stronger conviction in your test datasets by identifying gaps between test and production evaluations
+- Create reliable feedback loops for development
+
+</details>
+
+Until now, datasets and experiments depended on custom evaluations that were added to the run via the SDKs/API. This is great if you need full flexibility or want to use your preferred evaluation library or scoring logic. There were LLM-as-a-judge evaluators, but they were _limited to production runs_ and _could not access the ground truth of your dataset_ (`expected_output`) which is necessary for a reliable offline evaluation.
+
+## What's new?
+
+**Day 2 of [Launch Week 2](/blog/2024-11-17-launch-week-2) brings managed LLM-as-a-judge evaluators to dataset experiments.** Assign evaluators to your datasets and they will automatically run on new experiment runs, scoring your outputs based on your evaluation criteria.
+
+You can run any LLM-as-a-judge prompt, Langfuse comes with templates for the following evaluation criteria: Hallucination, Helpfulness, Relevance, Toxicity, Correctness, Contextrelevance, Contextcorrectness, Conciseness
+
+Langfuse LLM-as-a-judge _works with any LLM that supports tool/function calling_ that is accessible via the following APIs: OpenAI, Azure OpenAI, Anthropic, AWS Bedrock. Via LLM gateways such as LiteLLM, virtually any popular LLM can be used via the OpenAI connector.
+
+## How it works
+
+<Steps>
+
+### Set up your LLM-as-a-judge evaluator
+
+Evaluators in Langfuse consist of:
+
+- **Dataset**: Select which test examples (production cases, synthetic data, or manual tests) your evaluator should run on
+- **Prompt**: The prompt you want to use for evaluation including mapping variables from your dataset items to prompt variables
+- **Scoring**: A custom score name and comment format you'd like the LLM evaluator to produce
+- **Metadata**: Sampling rates to control costs, and delay to steer delay after running your experiment
+
+Learn more about LLM-as-a-judge evaluators in our [evaluation documentation](/docs/scores/model-based-evals).
+
+### Run experiments
+
+Iterate on your application (prompts, model configuration, retrieval/application logic, etc.) and run an experiment via the Langfuse SDKs.
+
+Learn more in our [datasets & experiments docs](/docs/datasets/overview) or run this [end-to-end example (Python Notebook)](/docs/datasets/python-cookbook).
+
+### Analyze results
+
+After successfully running your experiments, analyze results and scores produced by your evaluator in the Langfuse UI, using the [dataset experiment run comparison view](/changelog/2024-11-18-dataset-runs-comparison-view). Use the Langfuse UI to:
+
+1. Compare metrics across experiment runs
+2. Drill down into specific examples
+3. Identify patterns in successes/failures
+4. Track performance over time
+5. Identify when to add more test cases to your dataset, as evaluation on test dataset is strong but production evaluation is weak
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+</Steps>
+
+## Learn more
+
+Check out our documentation for detailed guides on:
+
+- [LLM-as-a-judge evaluators](/docs/scores/model-based-evals): How to set up your evaluator for production or test with the right dataset, prompt, scoring, and metadata
+- [Datasets & Experiments](/docs/datasets/overview): How to create and manage your development datasets, run experiments, and analyze results

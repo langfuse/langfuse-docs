@@ -1,0 +1,28 @@
+---
+date: 2024-11-17
+title: llms.txt
+badge: Launch Week 2 🚀
+description: Easily use the Langfuse documentation in Cursor and other LLM editors via the new llms.txt file.
+ogImage: /images/changelog/2024-11-17-llms-txt.png
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Next to the major [Launch Week 2](/blog/2024-11-17-launch-week-2) announcements, we've added a new `llms.txt` file to the Langfuse docs. This file allows you to easily use Langfuse docs in Cursor and other LLM editors.
+
+[`https://langfuse.com/llms.txt`](https://langfuse.com/llms.txt)
+
+## About `llms.txt`
+
+The `llms.txt` file format was proposed by [llmstxt.org](https://llmstxt.org/) as a standard way to provide information to help LLMs use a website at inference time.
+
+> We propose that those interested in providing LLM-friendly content add a /llms.txt file to their site. This is a markdown file that provides brief background information and guidance, along with links to markdown files (which can also link to external sites) providing more detailed information.
+
+## How did we implement this?
+
+The `llms.txt` file is generated using the [generate_llms_txt.js](https://github.com/langfuse/langfuse-docs/blob/main/scripts/generate_llms_txt.js) script. This script parses the sitemap, extracts the relevant pages, auto-generates titles, and outputs the `llms.txt` file. The script is automatically run when the docs are built ([package.json](https://github.com/langfuse/langfuse-docs/blob/main/package.json)).
+
+See [PR #984](https://github.com/langfuse/langfuse-docs/pull/984) for more details.

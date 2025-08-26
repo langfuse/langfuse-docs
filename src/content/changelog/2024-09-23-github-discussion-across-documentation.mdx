@@ -1,0 +1,35 @@
+---
+date: 2024-09-23
+title: Documentation now integrates with GitHub Discussions (Support and Feature Requests)
+description: See previews of all commonly asked questions and feature requests for each page across the Langfuse documentation.
+author: Marc
+ogImage: /images/changelog/2024-09-23-github-discussion-across-documentation.jpg
+showOgInHeader: false
+---
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+_Preview of widget that's included at the bottom of many documentation pages_
+
+<div className="p-2 rounded mt-2 mb-12 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <GhDiscussionsPreview className="mt-0 w-full bg-background p-4 rounded" />
+</div>
+
+[GitHub Discussions](https://github.com/orgs/langfuse/discussions) has long been the best place to ask questions and provide feedback about Langfuse. It has helped scale support and foster collaboration on new features. However, finding relevant discussions has been challenging, especially for those interested in specific topics or features.
+
+We have now added a preview of all relevant GitHub discussion posts to many pages[1] in the Langfuse Documentation, this is based on the labels that are set on the discussion posts. We will continue to roll this out to more pages over the next few weeks.
+
+We were inspired by the PostHog documentation, which features a similar widget for discovering answers to common questions and voting on roadmap items. Instead of creating our own discussion forum though, we chose to just index GitHub Discussions, as it is already well established in the Langfuse community.
+
+Let us know what you think!
+
+<div className="text-xs pt-4 mt-8 border-t">
+  [1] Examples: [Roadmap](/docs/roadmap), [LLM Playground](/docs/playground),
+  [Prompt Management](/docs/prompts), [Decorator-based integration for
+  Python](/docs/sdk/python/decorators), [Langchain
+  Integration](/integrations/frameworks/langchain), [Integration
+  Overview](/integrations)
+</div>

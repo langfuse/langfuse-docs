@@ -1,0 +1,15 @@
+---
+title: I cannot connect to my docker deployment, what should I do?
+tags: [self-hosting]
+---
+
+# I cannot connect to my self-hosted Langfuse instance, what should I do?
+
+If you encounter issues while [self-hosting](/self-hosting) Langfuse, ensure the following:
+
+- `NEXTAUTH_URL` exactly matches the URL you're accessing Langfuse with. Pay attention to the protocol (http vs https) and the port (e.g., 3000 if you do not expose Langfuse on port 80).
+- Set `HOSTNAME` to `0.0.0.0` if you cannot access Langfuse.
+- SSO: Ensure that the OAuth provider is configured correctly. The return path needs to match the `NEXTAUTH_URL`, and the OAuth client needs to be configured with the correct callback URL.
+- Encode special characters in `DATABASE_URL`, see this StackOverflow [answer](https://stackoverflow.com/a/68213745) for details.
+- If you use the SDKs to connect with Langfuse, use `auth_check()` to verify that the connection works.
+- Make sure you are at least on Postgres 12.

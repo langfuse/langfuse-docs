@@ -1,0 +1,81 @@
+---
+title: LiteLLM Proxy Integration
+seoTitle: Open Source Observability for LiteLLM Proxy
+sidebarTitle: LiteLLM Proxy
+logo: /images/integrations/litellm_icon.png
+---
+
+# Integration: 🚅 LiteLLM Proxy
+
+**LiteLLM** ([GitHub](https://github.com/BerriAI/litellm)): Use any LLM as a drop in replacement for GPT. Use Azure, OpenAI, Cohere, Anthropic, Ollama, VLLM, Sagemaker, HuggingFace, Replicate (100+ LLMs).
+
+<Callout type="info">
+  This integration is for the LiteLLM Proxy. If you are looking for the LiteLLM
+  SDK integration, see the [LiteLLM SDK
+  Integration](/integrations/frameworks/litellm-sdk) page.
+</Callout>
+
+There are two ways to integrate LiteLLM with Langfuse:
+
+1. LiteLLM Proxy with OpenAI SDK Wrapper, the proxy standardizes 100+ models on the OpenAI API schema and the Langfuse OpenAI SDK wrapper instruments the LLM calls.
+2. LiteLLM Proxy which can send logs to Langfuse if enabled in the UI.
+
+---
+
+## 1. LiteLLM Proxy + Langfuse OpenAI SDK Wrapper
+
+<Callout type="info">
+  This is the preferred way to integrate LiteLLM with Langfuse. The Langfuse
+  OpenAI SDK wrapper automatically captures token counts, latencies, streaming
+  response times (time to first token), API errors, and more.
+</Callout>
+
+How this works:
+
+1. The [LiteLLM Proxy](https://docs.litellm.ai/docs/simple_proxy) standardizes 100+ models on the OpenAI API schema
+2. and the Langfuse OpenAI SDK wrapper ([Python](/integrations/model-providers/openai-py), [JS/TS](/integrations/model-providers/openai-js)) instruments the LLM calls.
+
+To see a full end-to-end example, check out the LiteLLM cookbook.
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Python Cookbook"
+    href="/guides/cookbook/integration_litellm_proxy"
+    icon={<FileCode />}
+  />
+  <Card
+    title="JS/TS Cookbook"
+    href="/guides/cookbook/js_integration_litellm_proxy"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## 2. Send Logs from LiteLLM Proxy to Langfuse
+
+By setting the callback to Langfuse in the LiteLLM UI you can instantly log your responses across all providers. For more information on how to setup the Proxy UI, see the [LiteLLM docs](https://docs.litellm.ai/docs/proxy/ui).
+
+<Callout type="info">
+
+You can add additional Langfuse attributes to the requests in order to group requests into traces, add userIds, tags, sessionIds, and more. These attributes are shared across LiteLLM Proxy and SDK, please refer to both documentation pages to learn about all potential options:
+
+- [LiteLLM Proxy docs](https://docs.litellm.ai/docs/proxy/logging#langfuse)
+- [LiteLLM Python SDK docs](https://litellm.vercel.app/docs/observability/langfuse_integration#advanced)
+
+</Callout>
+
+<Frame border>
+  ![Set Langfuse as callback in Proxy
+  UI](https://langfuse.com/images/docs/litellm-ui.png)
+</Frame>
+
+import LitellmAbout from "@/components-mdx/litellm-about.mdx";
+
+<LitellmAbout />
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["integration-litellm"]} />

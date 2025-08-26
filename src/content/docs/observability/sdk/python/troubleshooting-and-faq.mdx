@@ -1,0 +1,37 @@
+---
+title: Troubleshooting and FAQ of the Langfuse Python SDK
+description: Troubleshooting and FAQ of the Langfuse Python SDK to resolve common issues.
+category: SDKs
+---
+
+# Troubleshooting and FAQ
+
+This page addresses frequently asked questions and common troubleshooting topics for the Langfuse Python SDK.
+
+If you don't find a solution to your issue here, try using [Ask AI](/docs/ask-ai) for instant answers. For bug reports, please open a ticket on [GitHub Issues](/issues). For general questions or support, visit our [support page](/support).
+
+- **Authentication Issues**:
+  - Ensure `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_HOST` (if not using default cloud) are correctly set either as environment variables or in the `Langfuse()` constructor.
+  - Use `langfuse.auth_check()` after initialization to verify credentials. Do not use this in production as this method waits for a response from the server.
+- **No Traces Appearing**:
+  - Check if `tracing_enabled` is `True` (default).
+  - Verify `sample_rate` is not `0.0`.
+  - Ensure `langfuse.shutdown()` is called or the program exits cleanly to allow `atexit` hooks to flush data. Manually call `langfuse.flush()` to force data sending.
+  - Enable debug logging (`debug=True` or `LANGFUSE_DEBUG="True"`) to see SDK activity and potential errors during exporting.
+- **Incorrect Nesting or Missing Spans**:
+  - If you are self-hosting Langfuse, the Python SDK v3 requires [**Langfuse platform version >= 3.63.0**](https://github.com/langfuse/langfuse/releases/tag/v3.63.0) for traces to be correctly processed. You can find a snapshot of the legacy v2 SDK documentation [here](https://python-sdk-v2.docs-snapshot.langfuse.com/docs/observability/sdk/python/decorators).
+  - Ensure you are using context managers (`with langfuse.start_as_current_span(...)`) for proper context propagation.
+  - If manually creating spans (`langfuse.start_span()`), ensure they are correctly ended with `.end()`.
+  - In async code, ensure context is not lost across `await` boundaries if not using Langfuse's async-compatible methods.
+- **Langchain/OpenAI Integration Not Working**:
+  - Confirm the respective integration (e.g., `from langfuse.openai import openai` or `LangfuseCallbackHandler`) is correctly set up _before_ the calls to the LLM libraries are made.
+  - Check for version compatibility issues between Langfuse, Langchain, and OpenAI SDKs.
+- **Media Not Appearing**:
+  - Ensure `LangfuseMedia` objects are correctly initialized and passed in `input`, `output`, or `metadata`.
+  - Check debug logs for any media upload errors. Media uploads happen in background threads.
+
+If you encounter persistent issues, please:
+
+1.  Enable debug logging to gather more information.
+2.  Check the Langfuse status page (if applicable for cloud users).
+3.  Raise an issue on our [GitHub repository](/issues) with details about your setup, SDK version, code snippets, and debug logs.

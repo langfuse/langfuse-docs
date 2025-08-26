@@ -1,0 +1,148 @@
+---
+title: "OpenTelemetry (OTel) for LLM Observability"
+date: 2024/10/14
+description: Explore the challenges of LLM observability and the current state of using OpenTelemetry (OTel) for standardized instrumentation.
+ogImage: /images/blog/2024-10-opentelemetry-for-llms/opentelemetry-for-llms.png
+tag: guide, architecture, integration
+author: Marc
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="OpenTelemetry (OTel) for LLM Observability"
+  description="Explore the challenges of LLM observability and the current state of using OpenTelemetry (OTel) for standardized instrumentation."
+  date="October 14, 2024"
+  authors={["marcklingen"]}
+/>
+
+import Image from "next/image";
+
+<Callout type="info">
+
+**Update**: We have released the [Langfuse OTel Endpoint](/docs/opentelemetry/get-started) to increase compatibility with emerging OTel-based instrumentation libraries.
+
+</Callout>
+
+## Introduction to <Image src="/images/blog/2024-10-opentelemetry-for-llms/opentelemetry-logo.svg" alt="OpenTelemetry Logo" width={140} height={30} className="inline-block" />
+
+[OpenTelemetry](https://opentelemetry.io/) is an open-source observability framework designed to handle the instrumentation of applications for collecting traces, metrics, and logs. It helps developers monitor and troubleshoot complex systems by providing standardized tools and practices for data collection and analysis.
+
+OpenTelemetry supports various exporters and backends, making it flexible and adaptable to different environments. By using OpenTelemetry, applications can achieve better visibility into their operations, aiding in root cause analysis and performance optimization.
+
+## Goal of this post
+
+This post is a high-level overview of the challenges of LLM observability and the current state of using OpenTelemetry (OTel) for LLMOps.
+
+OTel is geared towards general observability, and **traces are a great standardized way to capture LLM application data** – we have recorded a [webinar](/guides/videos/webinar-observability-llm-systems) on this. While we are excited about OTel and the roadmap towards it across LLMOps tools, non-OTel LLMOps tools are preferred by many teams. This post explores why this is the case and how OTel can address these challenges in the future.
+
+_Example trace of our [public demo](/docs/demo)_
+
+<CloudflareVideo
+  videoId="be2a8276c589a0de39ab846d505cf731"
+  aspectRatio={1.516}
+  gifStyle
+  className="block dark:hidden"
+/>
+<CloudflareVideo
+  videoId="835959b1fbe097cd396e7b20cd5cf91e"
+  aspectRatio={1.516}
+  gifStyle
+  className="hidden dark:block"
+/>
+
+## Outline
+
+1. Overview of LLM Application Observability
+   - Unique Challenges
+   - Comparison with Traditional Observability
+   - Experimentation vs. Production Monitoring
+2. OpenTelemetry (OTel) for LLM Observability
+   - Current State
+   - My Personal View
+
+## 1. Overview of LLM Application Observability
+
+[LLM Application Observability](/faq/all/llm-observability) refers to the ability to monitor and understand how Large Language Model applications function, especially focusing on aspects like performance, reliability, and user interactions. This involves collecting and analyzing data such as traces, metrics, and logs to troubleshoot issues and [optimize the application](/faq/all/llm-analytics-101).
+
+### Unique Challenges
+
+LLM applications present distinct challenges compared to traditional software systems. Evaluating the quality of LLM outputs is inherently complex due to their non-deterministic nature. Metrics like [cost](/docs/model-usage-and-cost), [latency](/docs/analytics/overview), and [quality](/docs/scores/overview) must be balanced and cannot be purely derived from traces as they are in traditional applications.
+
+Additionally, the interactive and context-sensitive nature of LLM tasks often requires real-time monitoring and rapid adaptation. Addressing these challenges demands robust tools and frameworks that can handle the dynamic and evolving nature of LLM applications.
+
+### Comparison with Traditional Observability
+
+Traditional observability focuses on identifying exceptions and compliance with expected behaviors. LLM observability, however, requires monitoring dynamic and stochastic outputs, making it harder to standardize and interpret.
+
+|                                                  | Observability                                      | LLM Observability                                                                                      |
+| ------------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Async instrumentation** (not in critical path) | ✅                                                 | ✅                                                                                                     |
+| **Spans / traces** (as core abstractions)        | ✅                                                 | ✅                                                                                                     |
+| **Metrics**                                      | ✅                                                 | ✅                                                                                                     |
+| **Exceptions**                                   | At runtime                                         | Ex-post (evaluations, annotations, user feedback, …)                                                   |
+| **Main use cases**                               | Alerts, metrics, aggregated performance breakdowns | Debug single traces, build datasets for application benchmarking/testing, monitor hallucinations/evals |
+| **Users**                                        | Ops                                                | MLE, SWE, data scientists, non-technical                                                               |
+| **Focus**                                        | Holistic system                                    | Focus on what's critical for LLM application                                                           |
+
+### Experimentation vs. Production Monitoring
+
+In development, experimentation with various models and configurations is crucial. Developers iterate on different approaches to fine-tune model behavior, optimize performance metrics, and explore new functionalities.
+
+Production monitoring, however, shifts the focus to real-time performance tracking. It involves constant vigilance to ensure the application runs smoothly, identifying any latency issues, [tracking costs](/docs/model-usage-and-cost), and integrating [user interactions and feedback](/docs/scores/user-feedback) to continuously improve the application. Both phases are essential, but they have distinct objectives and methodologies geared towards pushing the boundaries of what the LLM can achieve and ensuring it operates reliably in real-world scenarios.
+
+| Development                                          | Production                                                                                  |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Debug step-by-step, especially when using frameworks | Monitor: cost / latency / quality                                                           |
+| Run experiments on datasets and evaluations          | Debug issues identified in prod based on user feedback, evaluations, and human annotations |
+| Document and share experiments                       | Cluster user intents                                                                        |
+
+## 2. OpenTelemetry (OTel) for LLM Observability
+
+### Current State
+
+The OpenTelemetry Special Interest Group (SIG) focused on "Generative AI Observability" pushes for standardized semantic conventions for LLM/GenAI Applications and instrumentation libraries for the most popular model vendors and frameworks. Learn more about the SIG in its [project doc](https://github.com/open-telemetry/community/blob/main/projects/gen-ai.md) and [meeting notes](https://docs.google.com/document/d/1EKIeDgBGXQPGehUigIRLwAUpRGa7-1kXB736EaYuJ2M/edit?tab=t.0#heading=h.ylazl6464n0c).
+
+Deliverables of the working group (as of Oct 14, 2024) include:
+
+> Immediate term:
+>
+> - Ship OTel instrumentation libraries for OpenAI (or any other GenAI client) in Python and JS following existing conventions
+>
+> Middle term:
+>
+> - Ship OpenTelemetry (or native) instrumentations for popular GenAI client libraries in Python and JS covering chat calls
+> - Evolve GenAI semantic conventions to cover other popular GenAI operations such as embeddings, image or audio generation
+>
+> As a result, we should have feature parity with the instrumentations of existing GenAI Observability vendors for a set of client instrumentation libraries that all vendors can depend upon.
+>
+> Long term:
+>
+> - Implement instrumentations for GenAI orchestrators and GenAI frameworks for popular libraries in different languages
+> - Evolve GenAI and other relevant conventions (DB) to cover complex multi-step scenarios such as RAG
+> - Propose mature instrumentations to upstream libraries/frameworks
+
+Currently, there's a mix of progress and ongoing challenges. Significant issues include dealing with large traces, diverse LLM schema implementations (often biased towards OpenAI), and capturing evaluations and annotations. Many OTel-based LLM instrumentation libraries don't strictly adhere to evolving conventions, resulting in vendor-specific solutions.
+
+### My Personal View
+
+Despite the challenges, I'm excited about OTel instrumentation in the mid-term. The real value lies in its standardized data model, enabling seamless workflow integration across various frameworks and platforms. This standardization leads to increased interoperability across vendors, which is the main reason why OTel is interesting. Currently, we maintain [countless integrations](/integrations) with popular models/frameworks/languages but can't support the long tail due to capacity constraints. Standardizing on OTel will allow the ecosystem to crowdsource instrumentation efforts, benefiting everyone and enabling LLMOps vendors to focus more on core features rather than maintaining numerous integrations. These developments are essential for achieving consistent and reliable observability across diverse LLM frameworks and platforms.
+
+We are committed to OTel and are happy to contribute to the SIG. We will continue to maintain our integrations and SDKs and are currently exploring adding an OTel collector to allow for integrations with OTel-based instrumentation libraries.
+
+<Callout>
+  If you are interested in contributing to our OTel efforts, join the [GitHub
+  Discussion thread](https://github.com/orgs/langfuse/discussions/2509).
+</Callout>
+
+<Callout type="info">
+
+**Update**: We have released a [Langfuse OTel Collector](/docs/opentelemetry/get-started) to increase compatibility with emerging OTel-based instrumentation libraries.
+
+</Callout>
+
+## Get Started
+
+If you want to get started with tracing your AI applications with Langfuse today, check out our [quickstart guide](/docs/get-started) on how to use Langfuse with multiple LLM building frameworks like [Langchain](/integrations/frameworks/langchain) or [LlamaIndex](/integrations/frameworks/llamaindex).
+
+If you are curious about why Traces are a good fit for LLM observability, check out our [webinar](/guides/videos/webinar-observability-llm-systems) on the topic.

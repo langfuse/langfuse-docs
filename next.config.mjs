@@ -27,10 +27,13 @@ const cspHeader = process.env.NODE_ENV === 'production' ? `
   block-all-mixed-content;
 `: "";
 
-// nextra config
+// nextra v4 config (App Router)
 const withNextra = nextra({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
+  // Mount content at root (we'll serve from app/[[...mdxPath]] and src/content)
+  // Optionally customize search or latex support if needed
+  search: {
+    codeblocks: false,
+  },
   mdxOptions: {
     remarkPlugins: [remarkGfm],
   },

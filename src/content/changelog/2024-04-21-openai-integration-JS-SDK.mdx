@@ -1,0 +1,60 @@
+---
+date: 2024-04-21
+badge: Launch Week 1 🚀
+title: OpenAI SDK integration for JS/TS SDK
+description: Langfuse now provides a simple to adopt wrapper for the OpenAI JS/TS SDK for you to seemlessly trace your OpenAI calls.
+author: Hassieb
+ogImage: /images/changelog/2024-04-21-openai-integration-JS-SDK.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We are excited to kick off [**Langfuse Launch Week 1**](/blog/launch-week-1) a bit early on Day 0 with a new integration for the OpenAI JS SDK. The [Python version](/integrations/model-providers/openai-py) has been extremely popular with the community, and we are thrilled to bring the same level of observability to the JS/TS SDK.
+
+Langfuse now provides a wrapper for the OpenAI JS SDK that allows you to trace your OpenAI calls with only minor code changes. Simply import the `observeOpenAI` function from `langfuse` and pass your OpenAI SDK instance to it. The wrapper will automatically track all your OpenAI calls and provide you with insights into your model usage, cost, and performance in the Langfuse UI.
+
+We recently soft-launched this integration to gather feedback and improve the DX. We are now excited to make it available to everyone.
+
+Thanks to [@noble-varghese](https://github.com/noble-varghese) and [@RichardKruemmel](https://github.com/RichardKruemmel) for your contribution on this!
+
+### Quickstart
+
+```ts /import { observeOpenAI } from "langfuse"/ /observeOpenAI/
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+// wrap the OpenAI SDK
+const openai = observeOpenAI(new OpenAI());
+
+// use the OpenAI SDK as you normally would
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story." }],
+});
+```
+
+Langfuse will automatically capture the following information for you:
+
+- All prompts/completions with support for streaming and function calling
+- Total latencies and time-to-first-token
+- OpenAI API Errors
+- Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
+
+### Learn more
+
+import { FileCode } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Docs"
+    href="/integrations/model-providers/openai-js"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example Notebook"
+    href="/guides/cookbook/js_integration_openai"
+    icon={<FileCode />}
+  />
+</Cards>

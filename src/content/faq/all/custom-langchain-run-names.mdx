@@ -1,0 +1,57 @@
+---
+title: How to customize the names of observations within a Langchain trace?
+tags: [integration, integration-langchain]
+---
+
+# How to customize the names of a Langchain class within a trace?
+
+You can update the name of a run within Langchain. Langfuse will pick up the name and display it in the UI.
+
+## Custom `run_name` via `with_config` (Python)
+
+To customize the names of Langchain traces, you can use the `run_name` parameter within the `config` of a run.
+
+Examples (from [Langchain docs](https://python.langchain.com/docs/concepts/runnables/#setting-custom-run-name-tags-and-metadata))
+
+```python
+from langchain import chat_models, prompts, callbacks, schema
+
+chain = (
+    prompts.ChatPromptTemplate.from_template("Reverse the following string: {text}")
+    | chat_models.ChatOpenAI()
+).with_config({"run_name": "StringReverse"})
+```
+
+```python
+from langchain.schema import runnable
+
+configured_lambda_chain = (
+    chain
+    | StrOutputParser()
+    | runnable.RunnableLambda(reverse_and_concat).with_config(
+        {"run_name": "LambdaReverse"}
+    )
+)
+```
+
+```python
+from langchain import agents, tools
+
+
+agent_executor = agents.initialize_agent(
+    llm=chat_models.ChatOpenAI(),
+    tools=[tools.ReadFileTool(), tools.WriteFileTool(), tools.ListDirectoryTool()],
+    agent=agents.AgentType.OPENAI_FUNCTIONS,
+)
+result = agent_executor.with_config({"run_name": "File Agent"}).invoke(
+    "What files are in the current directory?"
+)
+```
+
+## Custom name argument on Langchain classes
+
+You can also pass a custom `name` argument to Langchain classes. This will override the default name of the class when shown in a Langfuse trace.
+
+```python
+model = ChatOpenAI(name="generate-rating")
+```

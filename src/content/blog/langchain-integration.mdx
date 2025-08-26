@@ -1,0 +1,89 @@
+---
+title: 🦜🔗 Langchain Integration
+date: 2023/07/27
+description: Integrate with Langfuse in seconds using the new Langchain Integration.
+tag: integration
+ogImage: /images/blog/langchain/langchain_integration_og.jpg
+author: Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import GetStartedLangchainPythonArgs from "@/components-mdx/get-started-langchain-python-constructor-args.mdx";
+import GetStartedLangchainPythonEnv from "@/components-mdx/get-started-langchain-python-env.mdx";
+import GetStartedLangchainJsArgs from "@/components-mdx/get-started-langchain-js-constructor-args.mdx";
+import GetStartedLangchainJsEnv from "@/components-mdx/get-started-langchain-js-env.mdx";
+
+<BlogHeader
+  title="Langchain Integration"
+  description="Integrate with Langfuse in seconds using the new Langchain Integration"
+  date="Jul 27, 2023"
+  authors={["maxdeichmann", "marcklingen"]}
+/>
+
+For teams building their LLM app with Langchain, adopting Langfuse just got easier. We added a `CallbackHandler` to the Langfuse Python SDK that natively integrates with [Langchain Callbacks](https://python.langchain.com/docs/how_to/#callbacks).
+
+## 🪢 + 🦜🔗 → 🤌
+
+<Tabs
+  items={[
+    "Python (constructor args)",
+    "Python (env)",
+    "JS (constructor args)",
+    "JS (env)",
+  ]}
+>
+  <Tab>
+    <GetStartedLangchainPythonArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainPythonEnv />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsArgs />
+  </Tab>
+  <Tab>
+    <GetStartedLangchainJsEnv />
+  </Tab>
+</Tabs>
+
+_From the [Langchain integration docs](/integrations/frameworks/langchain)_
+
+## Which actions are tracked?
+
+The Langfuse `CallbackHandler` tracks the following actions when using Langchain:
+
+- Chains: `on_chain_start`, `on_chain_end`. `on_chain_error`
+- Agents: `on_agent_start`, `on_agent_action`, `on_agent_finish`, `on_agent_end`
+- Tools: `on_tool_start`, `on_tool_end`, `on_tool_error`
+- Retriever: `on_retriever_start`, `on_retriever_end`
+- ChatModel: `on_chat_model_start`,
+- LLM: `on_llm_start`, `on_llm_end`, `on_llm_error`
+
+All actions are automatically nested based on the call tree and include inputs, outputs, model configurations, token counts, latencies and errors.
+
+## How does it look like in Langfuse?
+
+Demo of the debug view in Langfuse:
+
+<Frame>
+  ![Debug view in Langfuse](/images/blog/langchain/langfuse-debug-ui.gif)
+</Frame>
+
+_You can find the code of these examples in the [Python Cookbook](/guides/cookbook/integration_langchain)_
+
+## About Langfuse
+
+Langfuse is an open source product analytics platform for LLM applications. It is used by teams to track and analyze their LLM app in production with regards to quality, cost and latency across product releases and use cases. In addition, the Langfuse Debug UI helps to visualize the control flow of LLM apps in production. Read our [launch post](/blog/product-analytics-for-LLM-apps) if you want to learn more.
+
+## Next steps
+
+- Read the [Langchain integration](/integrations/frameworks/langchain) docs for more details and examples to get started.
+- **Not (exclusively) using Langchain in production?** Follow the [quickstart](/docs/get-started) to get started with the Typescript and Python SDKs that allow you to integrate with your custom LLM app.
+
+## Questions / Feedback?
+
+We are happy to hear from you! If you have questions or feature requests, open an issue on [GitHub](/issue), join the Langfuse [Discord](/discord), or contact us via Twitter or email: hi@langfuse.com
+
+import { Tweet } from "@/components/Tweet";
+
+<Tweet id="1684350596533346304" />

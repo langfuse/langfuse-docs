@@ -1,0 +1,248 @@
+---
+title: Langfuse Update — August 2023
+date: 2023/09/06
+description: "Improved data ingestion, integrations and UI."
+tag: update
+ogImage: /images/blog/update-august-2023/og-aug-2023.jpg
+author: Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import releaseImg from "@/public/images/blog/update-august-2023/release.jpg";
+import versionImg from "@/public/images/blog/update-august-2023/version.jpg";
+import Image from "next/image";
+
+<BlogHeader
+  title="Langfuse Update — August 2023"
+  description="Improved data ingestion, integrations and UI"
+  date="Sept 6, 2023"
+  authors={["maxdeichmann"]}
+/>
+
+Hi everyone 👋, over the last 4 weeks we doubled down on integrations, and pushing more trace context to Langfuse.
+
+- **Improved ingestion of traces**
+
+  - [Langchain integration](#langchain) for JS/TS users
+  - Execute Langchain in the [context of a Trace](#langchain-trace)
+  - Track [releases and versions](#releases-and-versions) in Python and JS/TS
+  - Improved filtering on [Traces table](#traces-table)
+
+- **Improved Analytics**
+
+  - [USD cost calculation](#cost) for tokens
+  - [Token usage chart](#token-chart)
+
+- **Other**
+  - [GET API](#get-api): usage by user, model and date; access to raw traces
+  - [Simplified self-hosting](#self-hosting) via Docker
+
+... and many small improvements and bug fixes.
+
+---
+
+The details 👇
+
+## 🦜🔗 JS/TS Langchain integration [#langchain]
+
+Last month we released the Python Integration for Langchain and now shipped the same for teams building with JS/TS. We released a new package [langfuse-langchain](https://www.npmjs.com/package/langfuse-langchain) which exposes a `CallbackHandler` that automatically traces your complex Langchain chains and agents. Simply pass it as a callback.
+
+```ts /{ callbacks: [handler] }/
+// Initialize Langfuse handler
+import CallbackHandler from "langfuse-langchain";
+
+const handler = new CallbackHandler({
+  secretKey: process.env.LANGFUSE_SECRET_KEY, // sk-lf-...
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY, // pk-lf-...
+  // options
+});
+
+// Setup Langchain
+import { OpenAI } from "langchain/llms/openai";
+
+const llm = new OpenAI();
+
+// Add Langfuse handler as callback
+const res = await llm.call("<user-input>", { callbacks: [handler] });
+```
+
+→ [Integration docs](/integrations/frameworks/langchain)
+
+## ⛓️ Langchain integrations with Trace context [#langchain-trace]
+
+When using the Langchain Python integration, you can now add more context to the traces you create. Thereby you can add userIds, metadata or modify the id to be able to attach scores to the trace.
+
+```python
+import uuid
+
+from langfuse.client import Langfuse
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+# initialise langfuse client
+langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST)
+
+# create trace_id for future reference
+trace_id = str(uuid.uuid4())
+# create the Trace
+trace = langfuse.trace(id=trace_id)
+# get a handler bound to the Trace
+handler = trace.getNewHandler()
+
+# setup Langchain
+llm = OpenAI()
+chain = LLMChain(llm=llm, prompt=PromptTemplate(...))
+
+chain.run("<your-input>", callbacks=[handler])
+```
+
+→ [Docs](/integrations/frameworks/langchain)
+
+## 📦 Trace context: Releases and versions [#releases-and-versions]
+
+When iterating quickly on an LLM app, understanding which change or release led to a certain behavior is crucial. Therefore we added the ability to add information on the releases and versions to traces and observations. This is helpful to understand which version of your app (e.g. git sha) or LLM feature (e.g. prompt version) was used in a given trace.
+
+### Releases
+
+Releases are available for all SDKs. They can be added in three ways (in order of precedence):
+
+1. SDK initialization
+
+   ```python
+   # Python
+   langfuse = Langfuse(ENV_PUBLIC_KEY, ENV_SECRET_KEY, ENV_HOST, release='ba7816b')
+   ```
+
+   ```ts
+   // TypeScript
+   langfuse = new Langfuse({
+     publicKey: ENV_PUBLIC_KEY,
+     secretKey: ENV_SECRET_KEY,
+     host: ENV_HOST,
+     release: "ba7816b",
+   });
+   ```
+
+2. Via environment variable
+
+   ```bash
+   LANGFUSE_RELEASE = "ba7816b..." # <- github sha or other identifier
+   ```
+
+3. Automatically from a list of known release environment variables, e.g. Vercel, Heroku, Netlify. See the full list of support environment variables for [JS/TS](https://github.com/langfuse/langfuse-js/blob/v3-stable/langfuse-core/src/release-env.ts) and [Python](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py).
+
+<Frame border>
+  ![Picture release in traces
+  table](/images/blog/update-august-2023/release.jpg)
+</Frame>
+
+Learn more → [Python](/docs/sdk/python#releases-and-versions), [JS/TS](/docs/sdk/typescript/guide#releases-and-versions)
+
+### Versions
+
+When making changes to prompts and chains, you can add `version` parameter to `span`, `generation` or `event`. The version can then be used to understand the effect of changes using [Langfuse analytics](/docs/analytics).
+
+<Frame border>
+  ![Version on single generation](/images/blog/update-august-2023/version.jpg)
+</Frame>
+
+## 🔎 Improved traces table [#traces-table]
+
+Our users spend a lot of time on the Traces table to find the Traces they want to take a close look at. We added filtering options on `metadata` and `userId` to make navigating easier.
+
+<Frame border>
+  ![User reporting](/images/blog/update-august-2023/traces-table.gif)
+</Frame>
+
+## 📈 USD Cost Calculation [#cost]
+
+We've added USD cost calculation for tokens. This is helpful to understand the cost of your LLM app per execution broken down by different LLM calls in the app. We calculate the cost based on the model and the number of tokens used.
+
+<Frame border>
+  ![User reporting](/images/blog/update-august-2023/costs.gif)
+</Frame>
+
+~~ Here is a list of all the models we support so far. If you are missing a model, please let us know on [Discord](/discord). ~~
+Update February 2024: Please refer to [Model Usage and Cost](https://langfuse.com/docs/model-usage-and-cost) for the latest info on how to calculate accurate costs.
+
+## Token usage chart [#token-chart]
+
+We improved our analytics by creating a chart to the dashboard to visualize the token usage by model over time.
+
+<Frame border>
+  ![User reporting](/images/blog/update-august-2023/token-chart.gif)
+</Frame>
+
+## 📊 GET API [#get-api]
+
+Build on top of the data in Langfuse using the new GET API
+
+### Usage by user, model and date
+
+Use cases
+
+- Display usage in product
+- Integrate with billing system to charge users based on consumed tokens
+- Integrate with internal analytics system
+
+```
+GET api/public/metrics/usage
+```
+
+```JSON
+{
+   id: userId,
+   usage: [
+     {day: <2023-08-01>
+     model: claude-...,
+     promptTokens: 6783,
+     completionTokens: 5627,
+     totalTokens: 91738},]
+}
+```
+
+Other usage APIs
+
+```
+GET /api/public/users
+GET /api/public/metrics/usage
+GET /api/public/metrics/usage?group_by=trace_name
+```
+
+## Raw traces
+
+Use cases
+
+- Fine tuning
+- Metadata ingestion into data warehouse
+
+```
+GET /api/public/traces
+GET /api/public/traces/:traceId
+GET /api/public/observations/:observationId
+```
+
+→ [API reference](/docs/api)
+
+## 🐳 Simplified self-hosting via Docker [#self-hosting]
+
+To reduce the friction of self-hosting, we now publish Docker images for the Langfuse server. You can pull the latest image from GitHub Container Registry.
+
+```
+docker pull ghcr.io/langfuse/langfuse
+```
+
+For detailed instructions, see [self-hosting](/self-hosting) and [local setup](/self-hosting/deployment/docker-compose) documentation.
+
+## 🚢 What's Next?
+
+There is more coming in September. Stay tuned! We'll focus on shipping analytics to all users and further improvements to the UI/DX of the core platform. Anything you'd like to see? Join us on [Discord](/discord) and share your thoughts.
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Subscribe to get monthly updates via email:
+
+<ProductUpdateSignup source="Product update [July 2023]" className="mt-3" />
+
+Follow along on Twitter ([@Langfuse](https://twitter.com/langfuse), [@marcklingen](https://twitter.com/marcklingen))

@@ -1,0 +1,19 @@
+---
+date: 2024-09-13
+title: Custom Base Path for Self-Hosted Deployments
+description: Deploy Langfuse behind a custom base path for more flexible self-hosting configurations.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now deploy Langfuse behind a custom base path (e.g. `https://yourdomain.com/langfuse`) by setting the `NEXT_PUBLIC_BASE_PATH` environment variable. This allows for more flexible self-hosting configurations, especially when integrating Langfuse into existing infrastructure.
+
+To use a custom base path:
+
+1. Set the `NEXT_PUBLIC_BASE_PATH` environment variable at build time.
+2. Build the Docker image. As this base path is inlined in static assets, you cannot use the prebuilt docker images.
+
+See the [self-hosting documentation](/self-hosting/configuration/custom-base-path) for more details. Thanks to everyone who contributed to the [discussion](https://github.com/orgs/langfuse/discussions/2400) on this!

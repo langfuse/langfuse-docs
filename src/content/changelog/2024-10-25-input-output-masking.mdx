@@ -1,0 +1,28 @@
+---
+date: 2024-10-25
+title: Event input and output masking
+description: Configure SDK-side masking to redact sensitive information from inputs and outputs sent to the Langfuse server.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+SDK-side masking enables you to:
+
+1. Redact sensitive information from trace or observation inputs and outputs.
+2. Customize the content of events before transmission.
+3. Implement fine-grained data filtering based on your specific requirements.
+
+The process works as follows:
+
+1. You define a custom masking function and pass it to the Langfuse client constructor.
+2. All event inputs and outputs are processed through this function.
+3. The masked eventdata is then sent to the Langfuse server.
+
+This approach ensures that you have complete control over the event input and output data traced by your application.
+
+**Learn more**
+
+- [Input and Output Masking](/docs/tracing-features/masking)

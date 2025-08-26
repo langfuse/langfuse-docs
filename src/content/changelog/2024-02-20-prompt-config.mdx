@@ -1,0 +1,43 @@
+---
+date: 2024-02-20
+title: Store additional structured data in Langfuse Prompt Management
+description: Version control model names, model parameters, and additional json data in Langfuse Prompt Management.
+author: Richard
+ogImage: /images/changelog/2024-02-20-prompt-config.jpg
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Previously, prompts in Langfuse only consisted of strings with `{{variables}}`. However, when using LLMs in an application/chain, there are many other parameters and data that are associated with the prompt that would benefit from being managed in [Langfuse Prompt Management](/docs/prompts).
+
+We added the `config` attribute to prompts to store all of this extra structured data associated with the prompt. It is versioned together with the prompt and can be set/updated in the same way as the prompt string.
+
+Examples of use cases:
+
+- Model name
+- Model parameters, such as `temperature`, `top_p`, `max_tokens`, etc.
+- Function/tool parameters
+- JSON schemas
+
+See [prompt management docs](/docs/prompts/get-started) for more details.
+
+## Cookbooks
+
+We've added two example cookbooks that demonstrate how to use the `config` attribute:
+
+import { Terminal, FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Example OpenAI Functions"
+    href="/guides/cookbook/prompt_management_openai_functions"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Example Langchain (Python)"
+    href="/guides/cookbook/prompt_management_langchain"
+    icon={<FileCode />}
+  />
+</Cards>

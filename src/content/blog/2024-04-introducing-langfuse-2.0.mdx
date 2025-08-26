@@ -1,0 +1,49 @@
+---
+title: "Introducing Langfuse 2.0: the LLM Engineering Platform"
+date: 2024/04/26
+description: Extending Langfuse’s core tracing with evaluations, prompt management, LLM playground and datasets.
+ogImage: /images/blog/2024-04-introducing-langfuse-2.0/og.png
+tag: announcement
+author: Clemens
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Introducing Langfuse 2.0: The LLM Engineering Platform"
+  description="Extending Langfuse’s core tracing with evaluations, prompt management, LLM playground and datasets."
+  date="April 24, 2024"
+  authors={["clemensrawert", "marcklingen", "maxdeichmann"]}
+/>
+
+We publicly launched Langfuse in late August of last year. Back then, the product was focused on production traces of LLM applications – because that was our main pain point when originally tinkering on code-generation and scraping agents.
+
+Our ambition was always to build open source tooling to help developers iterate on complex LLM workflows in production. In the meantime, we’ve grown Langfuse from our first core users within YC to thousands of teams relying on Langfuse in startups and enterprises. Our feature scope now far exceeds observability – so it’s time to launch **Langfuse 2.0 – the LLM Engineering Platform**.
+
+Langfuse’s core is [**tracing**](/docs/tracing). We provide an open source way to instrument, display and export complex traces of complex LLM applications, such as RAG or agent systems. We have invested heavily into the **scalability and breadth of our [integrations](/integrations)**. We develop our own Python and Typescript SDKs and support integrations with Llama Index, Langchain, OpenAI, LiteLLM and others on top of this. Today you can use Langfuse with any popular model or framework via our SDKs and we’ll continue to improve these as all of you add feature requests and report bugs.
+
+<Frame className="my-10" fullWidth>
+  ![Platform
+  Overview](/images/blog/2024-04-introducing-langfuse-2.0/platform-overview.png)
+</Frame>
+
+**Evaluations** are our largest feature addition. Today, we are releasing our **eval service** in public beta. It allows Langfuse users to run [model-based evaluations](/docs/scores/model-based-evals) on their traces. It’s a shortcut to generating massive labeled datasets with little manual effort. You can of course still run custom evaluations or collect feedback from users and report these to Langfuse via our SDKs or API. We expect that the best teams will continue to experiment heavily with different evals, correlate with ground truths or manually labeled datasets to figure out how to reliably evaluate their application. We want to help with this.
+
+What are LLMs without Prompts? We have doubled down on helping developers manage their prompt workflows. You can now [**version prompts**](/docs/prompts) from within Langfuse’s SDKs and UI. This is a huge unlock especially for teams with many domain experts or non-technical team members who rather manage and deploy prompts from Langfuse than in git. Prompt management hooks into Langfuse tracing to monitor how the versions of each prompt are used in production and you can easily roll back a change if you notice degraded performance.
+
+And since this week, you can also directly iterate on prompts within the new [**LLM playground**](/docs/playground). It is a neat and easy way to continue tinkering with the data you observe in Langfuse while not leaving the interface.
+
+<CloudflareVideo
+  videoId="fc956675646a9f989193bfd8755d3aec"
+  aspectRatio={16 / 9}
+  title="Introducing Langfuse 2.0"
+  posterStartTime={71}
+/>
+
+Our most sophisticated users **experiment and iterate on their entire LLM pipelines**. This might start with a playground for some workflows, but our newly revamped [**Datasets**](/docs/datasets) feature helps do this on an ongoing basis with a structured evaluation process. Datasets are reference sets of inputs and expected outputs. You can upload your own datasets via the API and SDKs or continuously add to the datasets when recognizing new edge cases in production traces. You can then run experiments on these datasets and attach scores and evaluations to them.
+
+Crucially, as all features in Langfuse, this feature can be used via our **powerful and open GET and POST APIs**. We have seen users build some truly impressive workflows on top of this abstraction while being able to pick which pieces of Langfuse they want to use and where they built something specific for the unique workflow of their team. It’s part of our commitment to building the most dev-friendly platform out there.
+
+We can’t wait to see what you build!
+
+Please get in touch if you have feedback or questions, [**GitHub Discussions**](/ideas) is the best channel to contribute your ideas to the project.

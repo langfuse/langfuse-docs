@@ -1,0 +1,92 @@
+---
+title: "Launch YC"
+date: 2023/07/19
+description: Cross-post of our Launch YC (W23) post which explains why we're building Langfuse.
+tag: announcement
+ogImage: /images/blog/product-analytics-for-llm-apps/yc-team.jpeg
+author: Clemens
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse — Open source product analytics for LLM applications"
+  description="This is a cross-post of our Launch YC (W23) which explains why we're building Langfuse."
+  date="Jul 19, 2023"
+  authors={["clemensrawert", "marcklingen", "maxdeichmann"]}
+/>
+
+_**TLDR:** Langfuse is building open source product analytics (think 'Mixpanel') for LLM apps. We help companies to track and analyze quality, cost and latency across product releases and use cases._
+
+<Frame fullWidth className="mt-10 mb-5">
+  ![Langfuse](/images/blog/product-analytics-for-llm-apps/yc-team.jpeg)
+</Frame>
+
+Hi everyone,
+
+we're Max, Marc and Clemens. We were part of the Winter 23 batch and work on Langfuse, where we help teams make sense of how their LLM applications perform.
+
+## 🤯 Problem
+
+LLMs represent a new paradigm in software. Single LLM calls are probabilistic and add substantial latency and cost. Applications use LLMs in new ways via advanced prompting, embedding-based retrieval, chains, and agents with tools. Teams building production-grade LLM applications have new **product analytics** and **monitoring** needs:
+
+- **Quality of outputs** is difficult to measure. Outputs can e.g. be inaccurate, unhelpful, poorly formatted, hallucinated or error.
+- **Cost of compute** is a priority again given high inference costs.
+- **Latency of responses** matters for synchronous use cases.
+- **Debugging is challenging** due to increasingly complex LLM applications (chains, agents, tool usage).
+- **Understanding user behavior** is difficult given open-ended user prompts and conversational interactions.
+
+## 🧠 Solution
+
+<Frame>
+  ![Metrics](/images/blog/product-analytics-for-llm-apps/metrics.png)
+</Frame>
+
+Langfuse derives actionable insights from production data. Our customers use Langfuse to answer questions such as: _"How helpful are my LLM app's outputs? What is my LLM API spend by customer? What do latencies look like across geographies and steps of LLM chains? Did the quality of the application improve in newer versions? What was the impact of switching from zero-shotting GPT4 to using few-shotted Llama calls?"_
+
+#### Metrics
+
+- **Quality** is measured through user feedback, model-based scoring and human-in-the-loop scored samples. Quality is assessed over time as well as across prompt versions, LLMs and users.
+- **Cost and Latency** are accurately measured and broken down by user, session, geography, feature, model and prompt version.
+
+#### Insights
+
+- Monitor quality/cost/latency **tradeoffs** by release to facilitate product and engineering decisions.
+- **Cluster use cases** by employing a classifier to understand what users are doing.
+- Break down **LLM usage by customer** for usage-based billing and profitability analysis.
+
+#### Integrations
+
+- [Python](/docs/sdk/python) and [Typescript](/docs/sdk/typescript/guide) SDKs to easily monitor complex LLM apps
+- [Frontend SDK](/docs/sdk/typescript/guide) to directly capture feedback from users as a quality signal
+
+_Langfuse can be self-hosted or used with a generous free tier in our managed cloud version._
+
+## 🚧 Debugging UI
+
+<Frame>
+  ![Debugging UI](/images/blog/product-analytics-for-llm-apps/debugging-ui.png)
+</Frame>
+
+Based on the ingested data, Langfuse helps developers debug complex LLM apps in production:
+
+- Inspect LLM app executions in a nested UI for chains, agents and tool usage.
+- Segment by user feedback to find the root cause of quality problems.
+
+## 🙏 Asks
+
+1. Star us on [GitHub](https://github.com/langfuse/langfuse) + follow along on [Twitter](https://twitter.com/langfuse) & [LinkedIn](https://www.linkedin.com/company/langfuse).
+2. If you run an LLM app, go ahead and reach out to us, we'd love to see how we can be helpful.
+3. Please forward Langfuse to teams building commercial LLM applications.
+
+---
+
+## References
+
+1. [Launch YC](https://www.ycombinator.com/launches/J2s-langfuse-open-source-product-analytics-for-llm-apps)
+2. [LinkedIn post](https://www.linkedin.com/feed/update/urn:li:activity:7087446200353783808/)
+3. [Twitter thread](https://twitter.com/MarcKlingen/status/1681687868534652928)
+
+import { Tweet } from "@/components/Tweet";
+
+<Tweet id="1681687868534652928" />

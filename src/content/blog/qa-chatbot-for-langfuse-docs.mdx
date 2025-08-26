@@ -1,0 +1,142 @@
+---
+title: 🤖 Q&A Chatbot for Langfuse Docs
+date: 2023/07/31
+description: Summary of how we've built a Q&A chatbot for the Langfuse docs and how Langfuse helps us to improve it.
+tag: example
+ogImage: /images/blog/docs-qa-chatbot/og_docs-qa-chatbot.jpg
+author: Marc
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Chat } from "@/components/qaChatbot";
+import { Callout } from "nextra/components";
+
+<BlogHeader
+  title="Q&A Chatbot for the Langfuse Docs"
+  description="Summary of how we've built a Q&A chatbot for the Langfuse docs and how Langfuse helps us to improve it"
+  date="Jul 31, 2023"
+  authors={["marcklingen"]}
+/>
+
+We've built a new Q&A chatbot to help users find the right information in the Langfuse docs. In this post, I'll briefly summarize how we've built it and how we use Langfuse to monitor and improve it.
+
+**Update:** All Langfuse Cloud users now have view-only access to this project. [View live demo](/docs/demo) to explore it yourself.
+
+<div className="p-3 rounded mt-2 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <Chat className="h-96 my-0 bg-background/90" />
+</div>
+
+## Implementation
+
+### Technologies used
+
+- Embeddings of docs (.mdx files)
+  - Model: OpenAI `text-embedding-ada-002`
+  - GitHub Action workflow to update embeddings on cron schedule: [supabase/embeddings-generator](https://github.com/supabase/embeddings-generator)
+  - Storage
+    - Postgres with pgvector: [Supabase](https://supabase.com)
+    - Schema: [supabase/headless-vector-search](https://github.com/supabase/headless-vector-search)
+- Streaming responses
+  - Model: OpenAI GPT-3.5-turbo
+  - Retrieval (embedding similarity search functions): [supabase/headless-vector-search](https://github.com/supabase/headless-vector-search)
+  - Next.js edge function using [Vercel AI SDK](https://github.com/vercel-labs/ai)
+- UI components with streaming and markdown support: [ai-chatbot](https://github.com/vercel-labs/ai-chatbot)
+- Observability, analytics and feedback collection: [Langfuse](https://langfuse.com), integrated via Typescript SDK (edge & web)
+
+### Code
+
+All of the code is open source and available on GitHub in the [langfuse-docs](https://github.com/langfuse/langfuse-docs) repo. Relevant files:
+
+import { FileTree } from "nextra/components";
+
+<FileTree>
+  <FileTree.Folder name="langfuse-docs" defaultOpen>
+    <FileTree.Folder name=".github" defaultOpen>
+      <FileTree.Folder name="workflows" defaultOpen>
+        <FileTree.File name="generate_embeddings.yml" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+    <FileTree.Folder name="components" defaultOpen>
+      <FileTree.Folder name="qaChatbot" defaultOpen>
+        <FileTree.Folder name="hooks" defaultOpen />
+        <FileTree.Folder name="supabase" defaultOpen />
+        <FileTree.Folder name="ui" defaultOpen />
+        <FileTree.File name="index.tsx" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+    <FileTree.Folder name="pages" defaultOpen>
+      <FileTree.Folder name="api" defaultOpen>
+        <FileTree.File name="qa-chatbot.ts" />
+      </FileTree.Folder>
+      <FileTree.Folder name="docs" defaultOpen>
+        <FileTree.File name="qa-chatbot.mdx" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+## Langfuse
+
+<Callout type="info">
+  Want to explore the project in Langfuse yourself? [Create
+  account](https://cloud.langfuse.com/auth/sign-up) to get view-only access to
+  this project in Langfuse.
+</Callout>
+
+### Usage reporting
+
+The reporting helps us to:
+
+- Monitor usage (cost control)
+- Understand what new users of Langfuse want to know which helps us to improve the docs
+- Track latency, quality (based on user feedback) and OpenAI errors
+
+<Frame>
+  ![Usage reporting in Langfuse](/images/blog/docs-qa-chatbot/usage.gif)
+</Frame>
+
+### Tracing
+
+Each response is based on the following steps which can go wrong, be slow or expensive:
+
+1. Embedding of user request
+2. Embedding similarity search in Postgres
+3. Summary of docs as markdown
+4. Generation of response based on retrieved context and chat history
+
+This is how a single trace looks like in Langfuse:
+
+<Frame>![Trace in Langfuse](/images/blog/docs-qa-chatbot/trace.gif)</Frame>
+
+### User feedback collection
+
+In this example, we can see how we do:
+
+1. Collection of feedback using the Langfuse Web SDK
+   > _Negative, Langchain not included in response_
+2. Browsing of feedback
+3. Identification of the root cause of the low-quality response
+   > Docs on Langchain integration are not included in embedding similarity search
+
+<Frame>
+  ![User feedback collection in
+  Langfuse](/images/blog/docs-qa-chatbot/feedback.gif)
+</Frame>
+
+## Why build this?
+
+A user was surprised when I (a human) answered his/her question. It's 2023, a bot was expected. As we added a lot to the docs over the last days, building a retrieval-based chatbot finally made sense to help users explore the project. Also, I love to have an additional production app to dogfood new Langfuse features and demonstrate how Langfuse can be used.
+
+<Frame>
+  ![User requesting chatbot](/images/blog/docs-qa-chatbot/user_message.jpg)
+</Frame>
+
+## Get in touch
+
+We're super excited to offer users of the Langfuse docs a faster way to find the right information and dogfood Langfuse to monitor it. Check out the [repo](https://github.com/langfuse/langfuse-docs) for all backend and frontend code including the integration with Langfuse.
+
+If you have any questions, join the [Discord](/discord) or reach out to me on [Twitter](https://twitter.com/marcklingen).
+
+import { Tweet } from "@/components/Tweet";
+
+<Tweet id="1686121673353797632" />

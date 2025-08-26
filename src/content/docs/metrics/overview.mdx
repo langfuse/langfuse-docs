@@ -1,0 +1,50 @@
+---
+title: Open Source LLM Metrics
+description: Improve your LLM application with open source metrics tracking latency, cost, and quality across various dimensions.
+---
+
+# Metrics
+
+Langfuse metrics derive actionable insights from [observability](/docs/observability) and [evaluation](/docs/evaluation) traces.
+
+Metrics can be sliced and diced via the [customizable dashboards](/docs/metrics/features/custom-dashboards) and the [metrics API](/docs/metrics/features/metrics-api).
+
+<Frame border fullWidth>
+  <img src="/images/docs/llm-analytics.png" alt="LLM Analytics" />
+</Frame>
+
+## Features
+
+import { LayoutDashboard, Activity } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Custom Dashboards"
+    href="/docs/metrics/features/custom-dashboards"
+    icon={<LayoutDashboard />}
+    arrow
+  />
+  <Card
+    title="Metrics API"
+    href="/docs/metrics/features/metrics-api"
+    icon={<Activity />}
+    arrow
+  />
+</Cards>
+
+## Metrics & Dimensions
+
+Metrics:
+
+- **Quality** is measured through user feedback, model-based scoring, human-in-the-loop scored samples or custom scores via SDKs/API (see [scores](/docs/scores/overview)). Quality is assessed over time as well as across prompt versions, LLMs and users.
+- **Cost and Latency** are accurately measured and broken down by user, session, geography, feature, model and prompt version.
+- **Volume** based on the ingested traces and tokens used.
+
+Dimensions:
+
+- Trace name: differentiate between different use cases, features, etc. by adding a `name` field to your traces.
+- User: track usage and cost by user. Just add a `userId` to your traces ([docs](/docs/tracing-features/users)).
+- Tags: filter different use cases, features, etc. by adding [tags](/docs/tracing-features/tags) to your traces.
+- Release and version numbers: track how changes to the LLM application affected your metrics.
+
+For an exact definition, please refer to the [metrics API docs](/docs/metrics/features/metrics-api).

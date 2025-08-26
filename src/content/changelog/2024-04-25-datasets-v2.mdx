@@ -1,0 +1,126 @@
+---
+date: 2024-04-25
+badge: Launch Week 1 🚀
+title: Datasets v2
+description: New editor, metadata on all objects, tables that render i/o, dataset runs on traces, push traces to datasets, and more.
+ogVideo: /images/changelog/2024-04-25-datasets-v2.mp4
+showOgInHeader: false
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+On Day 4 of [Launch Week 1](/blog/launch-week-1), we're happy to share [Datasets](/docs/datasets) v2 as we have made significant improvements to the dataset experience in Langfuse. Improvements include a new editor powered by Codemirror, metadata support on all objects, tables that render inputs/outputs side-by-side, the ability to link dataset runs to traces, and the option to create dataset items directly from traces. We've also extended the public API with new endpoints for programmatic management of datasets.
+
+<CloudflareVideo
+  videoId="bb521aa5ad9160ce723a6a77376f5651"
+  aspectRatio={16 / 9.5}
+  title="Datasets v2"
+  className="mt-10"
+/>
+
+## Recap
+
+- [Datasets](/docs/datasets) are a way to organize fine-tuning, testing, and golden datasets in Langfuse.
+- Items of datasets are `input` and `expectedOutput` pairs
+- Items can be added: via API, via SDKs, manually in the UI (create/edit), directly from traces ("add to dataset")
+- Dataset runs are executions of your application/function on the dataset. In the UI you can see how the runs performed based on evals, and compare outputs to expected outputs manually.
+
+## What's new
+
+### New tables
+
+<CloudflareVideo
+  videoId="ce33a18301b89d368d581ecaf9be33ea"
+  aspectRatio={16 / 10.24}
+  gifStyle
+  className="max-w-2xl"
+/>
+
+Tables are core the Langfuse UI and we have shipped many improvements especially for datasets:
+
+- Button to jump from dataset runs and items to the related traces
+- View inputs/outputs of runs directly next to the expected outputs of the dataset items
+- Adjustable row heights
+
+### Extended public API
+
+New endpoints to manage and use datasets programmatically ([api](/docs/api)):
+
+- `GET /datasets`
+- `POST /datasets`
+- `GET /datasets/{datasetName}`
+- `GET /datasets/{datasetName}/runs/{runName}`
+- `POST /dataset-run-items`
+- `GET /dataset-items/{id}`
+- `POST /dataset-items`
+
+The public API is essential as Langfuse is the Open LLM Engineering Platform. It should be easy to use only the parts you need, and the API is the way to do that. Some teams have built their own UIs and CI workflows based on the limited API we had before, and we're excited to see what you can do with the new endpoints.
+
+### New editor
+
+<CloudflareVideo
+  videoId="b6fdfef9be905f2da2568af4e31a15e6"
+  aspectRatio={16 / 6.93}
+  title="JSON editor"
+  gifStyle
+  className="max-w-2xl"
+/>
+
+Introducing a new editor for dataset items powered by [Codemirror](https://github.com/uiwjs/react-codemirror).
+
+- Syntax highlighting
+- Automated indentation
+- Keyboard shortcuts
+- Multiple cursors
+- Bracket/quote matching
+- ... (we love it, it's a really awesome editor)
+
+Previously this was a plain TextArea which checked if the JSON was valid. Now the editing experience is much better!
+
+PS: This editor is also used across all JSON inputs in Langfuse, e.g. prompt `config`, and model tokenizer `config`.
+
+### Metadata on all objects, descriptions on datasets
+
+<Frame className="max-w-2xl">
+  ![Metadata across dataset
+  objects](/images/changelog/2024-04-25-datasets-v2-metadata.png)
+</Frame>
+
+As the number of custom workflows built on top of Langfuse grows, the `metadata` field becomes an important part of the objects in Langfuse as it can store arbitrary JSON to keep state or configure your workflows. We have added metadata to datasets, dataset items, and dataset runs.
+
+Also, there is a new description field on datasets. This is a free text field where you can describe the dataset, e.g. what it is used for, how it was created, or what the expected outputs are.
+
+### Link dataset runs to `traces`
+
+You can now `link()` traces to dataset runs, not only observations (spans, generations, ...). You can either pass the `trace`, `span` or `generation` object directly to the `link()` method, or the `traceId` and `spanId` of the trace you want to link.
+
+Previously, runs were only linked to observations as traces had no inputs/outputs. This changed and that's why it is now possible to link runs to traces.
+
+### Create dataset items from traces
+
+<CloudflareVideo
+  videoId="07c554ea667ecafec4d726da6c43bb40"
+  aspectRatio={16 / 10.35}
+  title="JSON editor"
+  gifStyle
+  className="max-w-2xl"
+/>
+
+In the UI, you can now create dataset items directly from traces. This is a great way to quickly add items to your datasets based on edge cases that you identify in [Langfuse Tracing](/docs/tracing). Just click on the observation in the trace and use the `+ Add to dataset` button.
+
+## Learn more
+
+import { Book, FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Datasets docs" href="/docs/datasets" icon={<Book />} />
+  <Card
+    title="API reference"
+    href="https://api.reference.langfuse.com"
+    icon={<Book />}
+  />
+</Cards>
+import {CloudflareVideo} from "@/components/Video"

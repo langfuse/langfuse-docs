@@ -1,0 +1,81 @@
+---
+description: Fully typed and async SDKs to integrate with Langfuse for Python and Typescript.
+---
+
+# Langfuse SDKs
+
+The Langfuse SDKs are the recommended way to integrate with Langfuse.
+
+Properties:
+
+- Fully async requests, using Langfuse adds almost no latency
+- Accurate latency tracking using synchronous timestamps
+- IDs available for downstream use
+- Great DX when nesting observations
+- Cannot break your application, all errors are caught and logged
+- Interoperable with Langfuse [integrations](/integrations)
+
+## JS/TS
+
+<div className="flex flex-row flex-wrap gap-2 mt-2">
+  <a href="https://github.com/langfuse/langfuse-js">
+    <img
+      alt="GitHub repository langfuse/langfuse-js"
+      src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub"
+    />
+  </a>
+  <a href="https://www.npmjs.com/package/langfuse">
+    <img
+      src="https://img.shields.io/npm/v/langfuse?style=flat-square&label=npm+langfuse"
+      alt="npm langfuse"
+    />
+  </a>
+  <a href="https://www.npmjs.com/package/langfuse-node">
+    <img
+      src="https://img.shields.io/npm/v/langfuse-node?style=flat-square&label=npm+langfuse-node"
+      alt="npm langfuse-node"
+    />
+  </a>
+</div>
+
+```sh npm2yarn
+npm install langfuse
+
+# Node.js < 18
+npm install langfuse-node
+```
+
+- Fully typed
+- Edge-ready, e.g., Vercel, Cloudflare, Deno
+- Works client-side to report user feedback (with only the public_key)
+- Interfaces
+  - [Server-side](/docs/sdk/typescript/guide)
+  - [Client-side](/docs/sdk/typescript/guide-web), meant to be used in the browser to report [scores](/docs/scores)
+
+## Python
+
+<div className="flex flex-row flex-wrap gap-2 mt-2">
+  <a href="https://github.com/langfuse/langfuse-python">
+    <img
+      alt="GitHub repository langfuse/langfuse-python"
+      src="https://img.shields.io/badge/repo-langfuse--python-blue?style=flat-square&logo=GitHub"
+    />
+  </a>
+  <a href="https://pypi.org/project/langfuse/">
+    <img
+      src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi+langfuse"
+      alt="PyPi langfuse"
+    />
+  </a>
+</div>
+
+```sh
+pip install langfuse
+```
+
+- Based on OpenTelemetry, so you can use any OTEL-based instrumentation library for your LLM. See our [docs](/docs/sdk/python/sdk-v3#third-party-integrations) for more details.
+- Uses Pydantic for typing and validation
+- Interfaces
+  - [`@observe()` decorator](/docs/sdk/python/sdk-v3#observe-decorator)
+  - [Context Managers](/docs/sdk/python/sdk-v3#context-managers)
+  - [Manual instrumentation](/docs/sdk/python/sdk-v3#manual-observations)

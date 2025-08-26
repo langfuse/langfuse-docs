@@ -1,0 +1,235 @@
+---
+title: "Langfuse Launch Week #2"
+date: 2024/11/17
+description: "A new feature launch every day. Dedicated to unlocking model capabilities and integrating Langfuse tightly in your development loop."
+tag: launchweek
+ogImage: /images/blog/2024-11-17-launch-week-2/launch-week-2-blog-header.png
+author: Clemens, Marc, Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import Link from "next/link";
+
+<BlogHeader
+  title="Langfuse Launch Week #2"
+  description="A week dedicated to unlocking model capabilities and integrating Langfuse into your development loop"
+  authors={[
+    "clemensrawert",
+    "marcklingen",
+    "maxdeichmann",
+    "marliesmayerhofer",
+    "hassiebpakzad",
+    "jannikmaierhoefer",
+    "steffenschmitz",
+  ]}
+/>
+
+We are excited to announce **Langfuse Launch Week #2**!
+
+Starting on **Monday, November 18th, 2024**, we'll unveil a major upgrade to the Langfuse platform **every day until Friday**. We're topping it off with a [Product Hunt launch](/ph) on Friday and a [Virtual Town Hall](https://lu.ma/c7zsbc3b) on Wednesday.
+
+[Star us](https://github.com/langfuse/langfuse/) on GitHub and follow us on [Twitter](https://x.com/langfuse) for daily updates.
+
+_Want to see what we have launched in LW1 back in April to get a taste of what's coming? [Check out the blog post](/blog/launch-week-1)._
+
+## Launch Week Focus
+
+<Frame fullWidth className="mb-6 hidden dark:block">
+  ![Langfuse Launch Week #2 Theme - Supporting the next generation of models and
+  Langfuse in the development
+  loop](/images/blog/2024-11-17-launch-week-2/launch-week-2-theme.png)
+</Frame>
+
+<Frame fullWidth className="mb-6 block dark:hidden">
+  ![Langfuse Launch Week #2 Theme - Supporting the next generation of models and
+  Langfuse in the development
+  loop](/images/blog/2024-11-17-launch-week-2/launch-week-2-theme-light.png)
+</Frame>
+
+This week, we're focusing on **supporting the next generation of models**. As AI models evolve Langfuse is evolving too. We're integrating Langfuse deeply into your development loop with **end-to-end prompt engineering workflow tooling** tailored for product development teams. Stay tuned for the exciting updates ahead!
+
+## 🚀&nbsp;&nbsp;&nbsp;Day 0: Prompt Management for Vercel AI SDK
+
+```typescript {11,13,15}
+import { generateText } from "ai";
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+// fetch prompt from Langfuse Prompt Management
+const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+
+const result = await generateText({
+  model: openai("gpt-4o"),
+  prompt: fetchedPrompt.prompt, // use prompt
+  experimental_telemetry: {
+    isEnabled: true, // enable tracing
+    metadata: {
+      langfusePrompt: fetchedPrompt.toJSON(), // link trace to prompt version
+    },
+  },
+});
+```
+
+Langfuse Prompt Management now integrates natively with the Vercel AI SDK. Version and release prompts in Langfuse, use them via Vercel AI SDK, monitor metrics in Langfuse.
+
+This helps you answer questions like:
+
+- _Which prompt version caused a particular bug?_
+- _What is the average latency and cost impact of a prompt version?_
+- _Which prompt version is the most used?_
+
+See the [changelog](/changelog/2024-11-17-vercel-ai-sdk-prompt-mgmt) for more details.
+
+## 🆚&nbsp;&nbsp;&nbsp;Day 1: Dataset Experiment Run Comparison View
+
+<CloudflareVideo
+  videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
+  aspectRatio={16 / 9}
+  gifStyle
+  className="mt-6"
+/>
+
+Langfuse Datasets now features a powerful comparison view for dataset experiment runs. This new interface allows both technical and non-technical users to analyze multiple experiment runs side by side. Compare your application's performance across different test dataset experiment runs, examine metrics like latency and cost, and dive deep into individual dataset items. Use it to accelerate your testing of different prompts, models, or application configurations.
+
+See the [changelog](/changelog/2024-11-18-dataset-runs-comparison-view) for more details.
+
+## ⚖️&nbsp;&nbsp;&nbsp;Day 2: LLM-as-a-judge for Dataset Experiments
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/JOGMn5nqCSM?si=9-Et0tKtOYffyvru"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+Langfuse now brings managed LLM-as-a-judge evaluators to dataset experiments. Assign evaluators to your datasets and they will automatically run on new experiment runs, scoring your outputs based on your evaluation criteria. You can use any LLM that supports tool/function calling (OpenAI, Azure OpenAI, Anthropic, AWS Bedrock) and choose from built-in templates for criteria like hallucination, helpfulness, relevance, toxicity, and more. Unlike previous evaluators that were limited to production runs, these new evaluators can access your dataset's ground truth (`expected_output`) for reliable offline evaluation - helping teams catch issues before they reach production.
+
+See the [changelog](/changelog/2024-11-19-llm-as-a-judge-for-datasets) for more details or watch the video above for a walkthrough.
+
+## 🎨&nbsp;&nbsp;&nbsp;Day 3: Full multi-modal support, including audio, images, and attachments
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/Aq-KLXPqnl0?si=NG_6-tTmoXvTOwi4"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+Langfuse now supports multi-modal traces including images, audio files, and attachments, enabling you to observe and debug multi-modal LLM applications end-to-end. Base64 encoded media is automatically handled by the SDKs across all integrations and SDKs, with no additional configuration required. You can also upload custom attachments or reference external media, with support for common formats like images (png, jpg, webp), audio files (mpeg, mp3, wav), and other attachments (pdf, plain text).
+
+See the [changelog](/changelog/2024-11-20-full-multi-modal-images-audio-attachments) for more details or watch the video above for a walkthrough.
+
+## 📚&nbsp;&nbsp;&nbsp;Day 4: All new Datasets and Evaluations documentation
+
+Today we're highlighting documentation - an often overlooked but critical element of great Developer Experience. Alongside major updates to our Datasets and Evaluations features, we've completely rebuilt their documentation to be more thorough and user-friendly than ever before. The new docs better explain how and when to use these features, introduce core data models, and provide end-to-end examples as Jupyter Notebooks. We've also revamped the `/docs` start page to reflect Langfuse's comprehensive platform scope, and added `llms.txt` for better LLM tool integration. Documentation is product at Langfuse - we take it seriously and have built many features to help users get the most value from it.
+
+See the [changelog](/changelog/2024-11-21-all-new-datasets-and-evals-documentation) for more details. It also includes a summary of all the features we added to the documentation over the last year to make it truly awesome.
+
+## 🧪&nbsp;&nbsp;&nbsp;Day 5: Prompt Experiments
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/5c6k5ImCeIk?si=Ne58BBZ8XZXgKhTw"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+Prompt Experiments are the final piece of the launch week theme of "closing the development loop". They allow you to test prompt versions from Langfuse Prompt Management on datasets of test inputs and expected outputs. You can optionally use LLM-as-a-Judge evaluators to automatically evaluate responses based on expected outputs, and compare results in the new side-by-side experiment comparison view. This powerful combination speeds up the feedback loop when working on prompts and prevents regressions when making rapid prompt changes
+
+See the [changelog](/changelog/2024-11-22-prompt-experimentation) for more details or watch the video above for a walkthrough.
+
+## 🍒&nbsp;&nbsp;Extra Goodies
+
+List of additional features that were released this week:
+
+- [`llms.txt`](/changelog/2024-11-17-llms-txt): Easily use the Langfuse documentation in Cursor and other LLM editors via the new `llms.txt` file.
+- [`/docs`](/docs): New documentation start page with a simplified overview of all Langfuse features.
+- [Self-hosted Pro Plan](/pricing-self-host): Get access to additional features without the need for a sales call or enterprise pricing. All core Langfuse features are OSS without limitations, see [comparison](/pricing-self-host) for more details.
+- [Developer Preview of v3 (self-hosted)](/self-hosting): v3 is the biggest release in Langfuse history. After running large parts of it on Langfuse Cloud for a while, an initial developer preview for self-hosted users is now available.
+
+## Don't Miss Out
+
+<Steps>
+
+### GitHub
+
+<Link href="https://github.com/langfuse/langfuse" target="_blank">
+  <img
+    alt="Langfuse GitHub stars"
+    src="https://img.shields.io/github/stars/langfuse/langfuse?label=langfuse&style=social"
+    className="mt-6"
+  />
+</Link>
+
+⭐️ [Star us](https://github.com/langfuse/langfuse/) on GitHub & see _all_ of our releases!
+
+### Channels
+
+[Twitter](https://x.com/langfuse) and [LinkedIn](https://www.linkedin.com/company/langfuse/) will be our main channels for launching a new feature every day.
+
+You can subscribe to our mailing list for daily updates:
+
+<ProductUpdateSignup source="launch-week-2" className="my-2" />
+
+### Wednesday: Virtual Town Hall [#townhall]
+
+<div className="md:flex md:justify-center">
+
+<Frame className="max-w-80">
+  ![Townhall Invite
+  Image](/images/blog/2024-11-17-launch-week-2/townhall-invite-image.jpeg)
+</Frame>
+
+<div className="md:p-6">
+
+You're invited to our [virtual town hall](https://lu.ma/c7zsbc3b) where we'll demo the new features and discuss how they integrate into your development workflow. We will also answer your questions and talk about the future of Langfuse (especially v3).
+
+- **When:** Wednesday, November 20, 2024, at 10 am PT / 7pm CET
+- **Where:** https://lu.ma/c7zsbc3b
+
+**Note:** The recording of the town hall is now on YouTube: https://www.youtube.com/watch?v=9MzdiL9tUe0
+
+</div>
+</div>
+
+### Friday: Product Hunt Launch
+
+<Link href="/ph" target="_blank">
+  <Frame className="max-w-80">
+    ![Product Hunt
+    Banner](/images/blog/2024-11-17-launch-week-2/product-hunt-banner.jpg)
+  </Frame>
+</Link>
+
+We are launching on Product Hunt for our third time on Friday, November 22nd. Stay tuned for the biggest launch of the week and get notified [here](/ph).
+
+### Chat with the community on Discord
+
+Join the community of over 2,000 members on [Discord](/discord) for banter and to talk directly to the team.
+
+</Steps>
+
+## Learn More About Langfuse
+
+import { FileCode, BookOpen, Video, Users, Joystick } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Docs" href="/docs" icon={<BookOpen />} arrow />
+  <Card title="Quickstart" href="/docs/get-started" icon={<FileCode />} arrow />
+  <Card title="Interactive Demo" href="/docs/demo" icon={<Joystick />} arrow />
+  <Card title="About Us" href="/about" icon={<Users />} arrow />
+</Cards>

@@ -1,0 +1,121 @@
+---
+title: Langfuse Documentation
+description: Langfuse is an open source LLM engineering platform. It includes observability, analytics, and experimentation features.
+---
+
+# Langfuse Overview
+
+Langfuse is an **open-source LLM engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow. Langfuse is open, self-hostable, and extensible ([_why langfuse?_](/why)).
+
+import { FeatureOverview } from "@/components/FeatureOverview";
+
+<FeatureOverview />
+
+## Observability [#observability]
+
+[Observability](/docs/observability/overview) is essential for understanding and debugging LLM applications. Unlike traditional software, LLM applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
+
+- Traces include all LLM and non-LLM calls, including retrieval, embedding, API calls, and more
+- Support for tracking multi-turn conversations as sessions and user tracking
+- Agents can be represented as graphs
+- Capture traces via our native SDKs for Python/JS, 50+ library/framework integrations, OpenTelemetry, or via an LLM Gateway such as LiteLLM
+
+Want to see an example? Play with the [interactive demo](/docs/demo).
+
+<Callout type="info" emoji="🎥">
+
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo) of Langfuse Observability and how to integrate it with your application.
+
+</Callout>
+
+import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
+
+<div className="h-6" />
+<TracingOverview />
+
+## Prompt Management [#prompts]
+
+[Prompt Management](/docs/prompt-management/overview) is critical in building effective LLM applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
+
+- [Get started](/docs/prompt-management/get-started) with prompt management
+- Manage, version, and optimize your prompts throughout the development lifecycle
+- Test prompts interactively in the [LLM Playground](/docs/prompt-management/features/playground)
+- Run [Prompt Experiments](/docs/evaluation/features/prompt-experiments) against datasets to test new prompt versions directly within Langfuse
+
+<Callout type="info" emoji="🎥">
+
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo#prompt) of Langfuse Prompt Management and how to integrate it with your application.
+
+</Callout>
+
+import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
+
+<div className="h-6" />
+<PromptOverview />
+
+## Evaluation [#evaluation]
+
+[Evaluation](/docs/evaluation/overview) is crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
+
+- Get started with different [evaluation methods](/docs/evaluation/overview): LLM-as-a-judge, user feedback, manual labeling, or custom
+- Identify issues early by running evaluations on production traces
+- Create and manage [Datasets](/docs/evaluation/features/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
+
+<Callout type="info" emoji="🎥">
+
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo#evaluation) of Langfuse Evaluation and how to use it to improve your LLM application.
+
+</Callout>
+
+import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
+
+<div className="h-6" />
+<EvaluationOverview />
+
+## Where to start?
+
+Setting up the full process of online tracing, prompt management, production evaluations to identify issues, and offline evaluations on datasets requires some time. This guide is meant to help you figure out what is most important for your use case.
+
+_Simplified lifecycle from PoC to production:_
+
+<Frame
+  transparent
+  fullWidth
+  className="mt-2 pt-4 rounded ring-primary/20 ring-1 dark:hidden"
+>
+  ![Langfuse Features along the development
+  lifecycle](/images/docs/features-light.png)
+</Frame>
+<Frame
+  transparent
+  fullWidth
+  className="mt-2 pt-4 rounded ring-primary/20 ring-1 hidden dark:block"
+>
+  ![Langfuse Features along the development
+  lifecycle](/images/docs/features-dark.png)
+</Frame>
+
+## Why Langfuse?
+
+- **Open source:** Fully open source with public API for custom integrations
+- **Production optimized:** Designed with minimal performance overhead
+- **Best-in-class SDKs:** Native SDKs for Python and JavaScript
+- **Framework support:** Integrated with popular frameworks like OpenAI SDK, LangChain, and LlamaIndex
+- **Multi-modal:** Support for tracing text, images and other modalities
+- **Full platform:** Suite of tools for the complete LLM application development lifecycle
+
+## Community & Contact
+
+We actively develop Langfuse in [open source](/open-source) together with our community:
+
+- Contribute and vote on the Langfuse [roadmap](/docs/roadmap).
+- Ask questions on [GitHub Discussions](/gh-support) or private [support channels](/support).
+- Report bugs via [GitHub Issues](/issue).
+- Chat with the Langfuse maintainers and community on [Discord](/discord).
+- [Why people choose Langfuse](/why)
+
+Langfuse evolves quickly, check out the [changelog](/changelog) for the latest updates. Subscribe to the **mailing list** to get notified about new major features:
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+<ProductUpdateSignup source="langfuse.com/docs" className="mt-4" />

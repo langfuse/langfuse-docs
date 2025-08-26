@@ -1,0 +1,178 @@
+---
+title: "AI Agent Observability with Langfuse"
+date: 2025/03/16
+description: Learn about agents and the importance of monitoring and tracking performance, cost, and user interactions. Explore tools like LangGraph, Llama Agents, Smolagents, OpenAI Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to trace and optimize your application.
+ogImage: /images/blog/ai-agent-observability/ai-agent-observability.png
+tag: agents, guide
+author: Jannik
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="AI Agent Observability with Langfuse"
+  description="Easily monitor, trace and debug your AI agents. Explore tools like LangGraph, Llama Agents, Dify, Flowise, and Langflow, and see how Langfuse helps to monitor and optimize your application."
+  date="March 16, 2025"
+  authors={["jannikmaierhoefer"]}
+/>
+
+<CloudflareVideo
+  videoId="dbe2ea8e8d64f27126a3734fa51cd0e7"
+  gifStyle
+  className="max-w-4xl"
+/>
+
+## What are AI Agents?
+
+An AI agent is a system that autonomously performs tasks by planning its task execution and utilizing available tools. AI Agents leverage large language models (LLMs) to understand and respond to user inputs step-by-step and decide when to call external tools.
+
+**To solve tasks, agents use:**
+
+- **planning** by devising step-by-step actions from the given task
+- **tools** to extend their capabilities like RAG, external APIs, or code interpretation/execution
+- **memory** to store and recall past interactions for additional contextual information
+
+## What are Agents Used For?
+
+**Common use cases include:**
+
+- **Customer Support:** AI agents use RAG to automate responses, autonomously take action and efficiently handle inquiries with accurate information.
+- **Market Research**: Agents collect and synthesize information from various sources, delivering accurate and concise summaries to users.
+- **Software Development:** AI agents break coding tasks into smaller sub-tasks and then recombine them to create a complete solution.
+
+## Design Patterns of AI Agents
+
+An AI agent usually consists of 5 parts: A language model with general-purpose capabilities that serves as the main brain or **coordinator**, and four sub-modules: a **planning module** to divide the task into smaller steps, an **action module** that enables the agent to use external tools, a **memory module** to store and recall past interactions and a **profile module**, to describe the behavior of the agent.
+
+<div className="max-w-sm my-10">
+  ![AI Agent Design](/images/blog/ai-agent-observability/agent-design.png)
+</div>
+
+In **single-agent setups**, one agent is responsible for solving the entire task autonomously. In **multi-agent setups**, multiple specialized agents collaborate, each handling different aspects of the task to achieve a common goal more efficiently. These agents are also often referred to as state-based or stateful agents as they route the task through different states.
+
+<div className="my-10">
+  ![Single and Multi Agent
+  Designs](/images/blog/ai-agent-observability/multi-agent.png)
+</div>
+
+## What is AI Agent Observability?
+
+Observing agents means tracking and analyzing the performance, behavior, and interactions of AI agents. This includes real-time monitoring of multiple LLM calls, control flows, decision-making processes, and outputs to ensure agents operate efficiently and accurately.
+
+[Langfuse](/) is an open-source LLM engineering platform that provides deep insights into metrics such as latency, cost, and error rates, enabling developers to debug, optimize, and enhance their AI systems. Using Langfuse observability, teams can identify and resolve issues, streamline workflows, and maintain high-quality outputs by evaluating agent responses in complex, multi-step AI agents.
+
+### Why AI Agent Observability is Important
+
+#### Debugging and Edge Cases
+
+Agents use multiple steps to solve complex tasks, and inaccurate intermediary results can cause failures of the entire system. [Tracing](/docs/tracing) these intermediate steps and testing your application on known edge cases is essential.
+
+When deploying LLMs, some edge cases will always slip through in initial testing. A proper analytics set-up helps identify these cases, allowing you to add them to future test sets for more robust agent evaluations. With [Datasets](/docs/datasets/overview), Langfuse allows you to collect examples of inputs and expected outputs to benchmark new releases before deployment. Datasets can be incrementally updated with new edge cases found in production and integrated with existing CI/CD pipelines.
+
+#### Tradeoff of Accuracy and Costs
+
+LLMs are stochastic by nature, meaning they are a statistical process that can produce errors or hallucinations. Calling language models multiple times while selecting the best or most common answer can increase accuracy. This can be a major advantage of using agentic workflows.
+
+However, this comes with a cost. The tradeoff between accuracy and costs in LLM-based agents is crucial, as higher accuracy often leads to increased operational expenses. Often, the agent decides autonomously how many LLM calls or paid external API calls it needs to make to solve a task, potentially leading to high costs for single-task executions. Therefore, it is important to monitor model usage and costs in real-time.
+
+Langfuse monitors both [costs](/docs/model-usage-and-cost) and [accuracy](/docs/scores/overview), enabling you to optimize your application for production.
+
+#### Understanding User Interactions
+
+AI agents analytics allows you to capture how users interact with your LLM applications. This information is crucial for refining your AI application and tailoring responses to better meet user needs.
+
+[Langfuse Analytics](/docs/analytics/overview) derives insights from production data, helping you measure quality through user feedback and model-based [scoring](/docs/scores/overview) over time and across different versions. It also allows you to monitor cost and latency metrics in real-time, broken down by user, session, geography, and model version, enabling precise optimizations for your LLM application.
+
+## Tools to build AI Agents
+
+You do not need any specific tools to build AI agents. However, there are several open-source frameworks that can help you build complex, stateful, multi-agent applications.
+
+### Application Frameworks
+
+#### LangGraph
+
+LangGraph ([GitHub](https://github.com/langchain-ai/langgraph)) is an open-source framework by the LangChain team for building complex, stateful, multi-agent applications. LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
+
+LangGraph agents can be [monitored with Langfuse](/guides/cookbook/integration_langgraph) to observe and debug the steps of an agent.
+
+<CloudflareVideo videoId="dbe2ea8e8d64f27126a3734fa51cd0e7" gifStyle />
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)_
+
+#### Llama Agents
+
+Llama Agents ([GitHub](https://github.com/run-llama/llama-agents)) is an open-source framework designed to simplify the process of building, iterating, and deploying multi-agent AI systems and turn your agents into production microservices.
+
+Langfuse offers a simple [integration](/integrations/frameworks/llamaindex) for automatic capture of traces and metrics generated in LlamaIndex applications.
+
+![Llama Agents Example trace in Langfuse](/images/blog/ai-agent-observability/llama-agents.png)
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a8b0cc9e-da3b-485f-a642-35431a6f9289)_
+
+#### OpenAI Agents SDK
+
+OpenAI Agents SDK provides a simple yet powerful framework for building and orchestrating AI agents. By instrumenting the SDK with Langfuse, you can capture detailed traces of agent execution, including planning, function calls, and multi-agent handoffs. This integration enables you to monitor performance metrics, trace issues in real time, and optimize your workflows effectively.
+
+For a comprehensive guide on setting up this integration, please refer to our [Trace the OpenAI Agents SDK with Langfuse](/integrations/frameworks/openai-agents) notebook.
+
+<CloudflareVideo videoId="1b048205cbf89ad4f14adf6248e970f7" gifStyle />
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/019593c74429a6d0489e9259703a1148?timestamp=2025-03-14T08%3A31%3A04.745Z&observation=e83609282c443b0d)_
+
+#### Hugging Face smolagents
+
+Hugging Face smolagents is a minimalist framework for building AI agents. With the Langfuse integration, you can effortlessly capture and visualize telemetry data from your agents. By initializing the SmolagentsInstrumentor, your agent interactions are traced using OpenTelemetry and displayed in Langfuse, enabling you to debug and optimize decision-making processes.
+
+For a comprehensive, step-by-step guide, see our integration notebook: [Observability for smolagents with Langfuse](/integrations/frameworks/smolagents).
+
+![Smolagents Example trace in Langfuse](/images/cookbook/integration-smolagents/smolagent_example_trace.png)
+
+_[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ce5160f9bfd5a6cd63b07d2bfcec6f54?timestamp=2025-02-11T09%3A25%3A45.163Z&display=details)_
+
+### No-code Agent Builders
+
+For prototypes and development by non-developers, no-code builders can be a great starting point.
+
+#### Flowise
+
+Flowise ([GitHub](https://github.com/FlowiseAI/Flowise)) is a no-code builder. It lets you build customized LLM flows with a drag-and-drop editor. With the native Langfuse [integration](/integrations/no-code/flowise), you can use Flowise to quickly create complex LLM applications in no-code and then use Langfuse to analyze and improve them.
+
+<Frame fullWidth border className="my-10">
+  ![Flowise Example](/images/blog/ai-agent-observability/flowise.jpg)
+</Frame>
+<span>
+  _Example of a catalog chatbot created in Flowise to answer any questions
+  related to shop products._
+</span>
+
+#### Langflow
+
+Langflow ([GitHub](https://github.com/logspace-ai/langflow)) is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows.
+
+With the native [integration](/integrations/no-code/langflow), you can use Langflow to quickly create complex LLM applications in no code and then use Langfuse to monitor and debug them.
+
+<Frame fullWidth border className="my-10">
+  ![Langflow Example](/images/blog/ai-agent-observability/langflow.jpg)
+</Frame>
+<span>
+  _Example of a chat agent with chain-of-thought reasoning built in Langflow by
+  [Cobus Greyling](https://cobusgreyling.medium.com)._
+</span>
+
+#### Dify
+
+Dify ([GitHub](https://github.com/langgenius/dify)) is an open-source LLM app development platform. Using their Agent Builder nd variety of templates, you can easily build an AI agent and then grow it into a more complex system via Dify workflows.
+
+With the native Langfuse [integration](/integrations/no-code/dify), you can use Dify to quickly create complex LLM applications and then use Langfuse to monitor and improve them.
+
+<Frame border fullWidth>
+  ![Dify Example](/images/blog/ai-agent-observability/dify.jpg)
+</Frame>
+
+<span>_Example of a Dify Agent that summarizes meetings._</span>
+
+## Get Started
+
+If you want to get started with building your AI Agents and monitoring them with Langfuse, check out our [end-to-end example](/guides/cookbook/integration_langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
+
+To get an in-depth guide on when to use which agent framework, check out our [AI Agent Comparison](/blog/2025-03-19-ai-agent-comparison) blog post.

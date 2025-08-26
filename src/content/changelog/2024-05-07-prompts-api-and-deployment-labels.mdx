@@ -1,0 +1,33 @@
+---
+date: 2024-05-07
+title: Prompt management REST API and deployment labels
+description: Manage prompts via the REST API and add labels to deploy prompts to different environments.
+author: Hassieb
+ogImage: /images/changelog/2024-05-07-prompts-api-and-deployment-labels-deployment-labels-og.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+## REST API for prompt management
+
+We revamped the API for prompt management to allow you to fully manage prompts via the REST API. You can now fetch, create, and update prompts programmatically.
+
+New endpoints ([API](/docs/api)):
+
+- `GET /api/public/v2/prompts`
+- `GET /api/public/v2/prompts/{promptName}`
+- `POST /api/public/v2/prompts`
+
+## Deployment labels for prompts
+
+<Frame border className="max-w-sm mt-10">
+  ![Deployment
+  labels](/images/changelog/2024-05-07-prompts-api-and-deployment-labels-deployment-labels.png)
+</Frame>
+
+You can now add labels to prompts to deploy different versions to different environments. Thereby, you can manage the lifecycle of prompts across different environments, such as development, staging, and production. The latest version is always available under the `latest` label for local development and testing.
+
+See [prompt management docs](/docs/prompts) for more details.

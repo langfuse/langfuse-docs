@@ -1,0 +1,56 @@
+---
+title: Authentication & Authorization (Langfuse Cloud)
+description: Overview of authentication and authorization methods in Langfuse, including social logins, SSO, and RBAC.
+---
+
+# Authentication & Authorization
+
+Langfuse provides robust mechanisms for both authenticating users and authorizing their access to specific resources within the platform.
+
+## Authentication
+
+Authentication verifies the identity of a user attempting to access Langfuse.
+
+This document covers Langfuse Cloud. For self-hosted instances, please refer to the [Self-hosted Authentication and SSO guide](/self-hosting/security/authentication-and-sso).
+
+### Email/Password authentication
+
+By default, Langfuse uses email and password authentication. Langfuse enforces standard password complexity requirements.
+
+If you signed up with a social login, you can add a password via the "reset password" link in the login page.
+
+### Social Logins
+
+For simplified access, users can sign in using their existing social accounts:
+
+- Google
+- GitHub
+- Azure AD (Entra ID)
+
+By default, Langfuse does not support switching between social logins or signing up with a social login after signing up with email/password. Please reach out to [support](/support) if you need help.
+
+### Enterprise SSO & SSO Enforcement [#sso]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+Langfuse supports **Enterprise SSO** (e.g. Okta, Azure AD, Keycloak etc.) via OIDC. Please reach out to [support](/support) to enable this feature.
+
+To sign in with an Enterprise SSO provider, please (1) enter your email address, and (2) press "Continue". You will be redirected to the Enterprise SSO provider to authenticate.
+
+<Frame border className="max-w-lg">
+  ![SSO Sign-in Flow](/images/security/sso-signin.png)
+</Frame>
+
+Optionally, you can **enforce the use of SSO / social logins for your domain**. Please reach out to [support](/support) to enable this feature.
+
+## Authorization (RBAC)
+
+Langfuse supports Role-based Access Control (RBAC). Please refer to the dedicated [RBAC documentation](/docs/rbac) for a detailed explanation of roles, permissions, and how to manage user access within organizations and projects.

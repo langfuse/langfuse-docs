@@ -1,0 +1,156 @@
+---
+date: 2024-11-21
+title: All new Datasets, Experimentation and Evaluation documentation
+badge: Launch Week 2 🚀
+description: We've completely rebuilt the documentation for Datasets and Evals to make it easier to get started with offline evaluation. To celebrate Launch Week, we've also summarized all the documentation improvements we've made over the past year.
+author: Marc
+ogImage: /images/changelog/2024-11-21-new-documentation.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+---
+
+Today, on Day 4 of [Langfuse Launch Week 2](/blog/2024-11-17-launch-week-2), we're highlighting an often overlooked but critical element of great Developer Experience: Documentation.
+
+This week, alongside major updates to our Datasets and Evaluations features, we've completely rebuilt their documentation to be more thorough and user-friendly than ever before. This emphasizes the theme of Launch Week: helping teams accelerate the development of their LLM applications.
+
+As the Langfuse community continues to grow ([see metrics](/blog/2024-11-most-used-oss-llmops)), comprehensive documentation has become essential for teams adopting our platform. To celebrate Launch Week, we've also summarized all the documentation improvements we've made over the past year. We think this is an interesting read and welcome any feedback you may have!
+
+_Coincidentally, this changelog post was added through the [1000th PR](https://github.com/langfuse/langfuse-docs/pull/1000) to the Langfuse Docs._
+
+## New Datasets and Evaluation documentation
+
+Based on this week's changes, we have have restructured the documentation to:
+
+1. Better explain **how and when to use Langfuse Datasets and Evals** to evaluate your LLM applications in development
+2. Introduce the **core data model** of `datasets`, experiment `runs`, and `scores`
+3. Provide **end-to-end examples** for common workflows as Jupyter Notebooks
+4. Add many **more gifs and toggles with additional explanations** throughout the docs
+
+### Evaluation
+
+<Callout>→ [Evaluation documentation](/docs/scores)</Callout>
+
+import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
+
+<EvaluationOverview />
+
+### Datasets
+
+<Callout>→ [Datasets & Experiments documentation](/docs/datasets)</Callout>
+
+import DatasetsOverview from "@/components-mdx/datasets-overview-gif.mdx";
+
+<DatasetsOverview />
+
+## Other documentation updates this week
+
+### New `/docs` start page
+
+<CloudflareVideo
+  videoId="774a4ec9ae41b1ea5b2c92b848609b5b"
+  aspectRatio={1568 / 1080}
+  title="Docs start page"
+  gifStyle
+/>
+
+We have updated the most important page of the docs, [`/docs`](/docs), to reflect the current product scope. Langfuse is now a comprehensive platform for LLM observability, experimentation, and evaluation. This new start page helps discover and navigate the different features.
+
+### `llms.txt`
+
+![llms.txt](/images/changelog/2024-11-17-llms-txt.png)
+
+We have added a new [`llms.txt`](/llms.txt) file to the Langfuse docs that allows you to easily use Langfuse documentation in Cursor and other LLM editors. The file follows the standard proposed by llmstxt.org and is automatically generated during the docs build process, making our documentation more accessible to LLM-powered tools. See [changelog post](/changelog/2024-11-17-llms-txt) for details.
+
+## Learn more about Documentation at Langfuse
+
+### Why is documentation important?
+
+> "Documentation is product"
+
+**Datasets, Experiments, and Evals are a great example on why documentation is essential**. They can be used flexibly via their APIs and SDKs, and we consistently hear from teams who [love](/why) Langfuse for this flexibility.
+
+At Langfuse, **we believe in building powerful, flexible abstractions** that can support a wide range of LLM application development workflows. Through deep collaboration with our [community](/ideas), we first understand how teams want to use Langfuse in their unique contexts. This helps us design foundational low-level APIs and SDKs that are flexible enough to support diverse use cases, rather than forcing teams into rigid, opinionated solutions. **Langfuse APIs are very stable** and you can build your own workflows on top of them without risking constant breaking changes.
+
+We then **layer on intuitive higher-level abstractions and thorough documentation** to make these capabilities accessible. This approach of starting with community needs to inform our low-level design requires excellent documentation to help teams map our flexible primitives to their specific workflows.
+
+Since releasing Langfuse last year, our [langfuse-docs](https://github.com/langfuse/langfuse-docs) repository has been similarly active as our main application and SDKs. Documentation is product and we take it very seriously. More on what we have built in langfuse-docs [below](#docs).
+
+<Frame border className="max-w-lg mt-8">
+  ![Repos](/images/changelog/2024-11-21-documentation-update/repos.png)
+</Frame>
+
+### Peak into our documentation [#docs]
+
+All of Langfuse Documentation is open source ([repo](https://github.com/langfuse/langfuse-docs)) and built with [Nextra](https://nextra.site/) to render markdown. We use Shadcn/UI and TailwindUI for the UI components.
+
+Over the last year we have added many features that help get the most out of the docs. See interactive demonstrations of these features below:
+
+#### Embedded GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<div className="p-2 rounded my-6 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <GhDiscussionsPreview
+    itemsPerPage={4}
+    className="mt-0 w-full bg-background p-4 rounded"
+  />
+</div>
+
+[GitHub Discussions](/ideas) has long been the best place to ask questions and provide feedback about Langfuse. It has helped scale support and foster collaboration on new features. To make it easier to discover answers to common questions and vote on feature requests, each documentation page shows relevant GitHub Discussions based on labels. Learn more in this [changelog post](/changelog/2024-09-23-github-discussion-across-documentation).
+
+#### Q&A Chatbot (Langfuse Demo)
+
+import { Chat } from "@/components/qaChatbot";
+
+<div className="p-2 rounded my-6 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <Chat className="h-96 my-0 bg-background/90" />
+</div>
+
+The [Q&A chatbot](/docs/demo) helps users find relevant information in the Langfuse docs. The chatbot is also a great example of how to use Langfuse for observability, analytics, and feedback collection. Learn more about the implementation in this [blog post](/blog/qa-chatbot-for-langfuse-docs).
+
+#### Feedback that pushes to Slack
+
+import { DocsFeedback } from "@/components/MainContentWrapper";
+
+<div className="w-fit p-2 rounded my-6 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <div className="bg-background p-4 rounded-sm">
+    <DocsFeedback />
+  </div>
+</div>
+
+At the bottom of each page, you will find a feedback widget that sends feedback to the Langfuse Slack. Thank to your input, many inconsistencies and issues in the documentation were fixed!
+
+#### "To App" / "Sign Up" button
+
+import { ToAppButton } from "@/components/ToAppButton";
+
+<div className="w-fit p-2 rounded my-6 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <div className="bg-background p-4 rounded-sm">
+    <ToAppButton />
+  </div>
+</div>
+
+Adding a "To App" / "Sign up" button seems simple, we put extra thought into making it context-aware. The button dynamically updates to show either "Sign up" or "To App" based on your authentication status. Since Langfuse offers both EU and US data regions, the button routes users to the appropriate instance - authenticated users are directed to their logged-in region, while new users are routed based on their geo-location.
+
+#### Jupyter Notebooks
+
+import { NotebookBanner } from "@/components/NotebookBanner";
+
+<div className="w-fit p-2 rounded my-6 bg-gradient-to-tr from-green-300 via-blue-500 to-purple-600">
+  <div className="bg-background p-4 pt-0.5 rounded-sm">
+    <NotebookBanner src="/cookbook/integration_openai_sdk.ipynb" />
+  </div>
+</div>
+
+Examples are great to explore and learn about a developer tool. Many end-to-end examples in the Langfuse docs are Jupyter Notebooks and rendered natively in the documentation. You can find the complete collection in our [cookbook](/guides#cookbook). For a seamless experience, each cookbook page displays a banner at the top that allows you to instantly open the notebook in Google Colab or view it directly on GitHub. This makes it easy to explore, run, and experiment with our examples.
+
+## Feedback?
+
+If you made it this far, documentation seems to matter to you. We would love to hear from you!
+
+Please reach out on [Discord](/discord) or [GitHub Discussions](/ideas) if you have any feedback on how we can improve the Langfuse docs. Also, we are happy to answer any questions you might have about our documentation setup. If you are curious how any of this is implemented, check out the [langfuse-docs repo](https://github.com/langfuse/langfuse-docs).

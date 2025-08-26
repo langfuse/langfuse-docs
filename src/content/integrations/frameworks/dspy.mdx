@@ -1,0 +1,137 @@
+---
+source: ⚠️ Jupyter Notebook
+title: DSPy - Observability & Tracing
+sidebarTitle: DSPy
+logo: /images/integrations/dspy_icon.png
+description: Open-source observability for DSPy, a framework that systematically optimizes language model prompts and weights.
+category: Integrations
+---
+
+# DSPy - Observability & Tracing
+
+This cookbook demonstrates how to use DSPy with Langfuse. 
+
+> **What is DSPy?** [DSPy](https://github.com/stanfordnlp/dspy) is a framework that systematically optimizes language model prompts and weights, making it easier to build and refine complex systems with LMs by automating the tuning process and improving reliability. For further information on DSPy, please visit the [documentation](https://dspy-docs.vercel.app/docs/intro).
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+
+## Prerequisites
+Install the latest versions of DSPy and langfuse. 
+
+
+```python
+%pip install langfuse dspy openinference-instrumentation-dspy -U
+```
+
+<Steps>
+## Step 1: Setup Langfuse Environment Variables
+
+First, we configure the environment variables. We set the OpenTelemetry endpoint, protocol, and authorization headers so that the traces from DSPy are correctly sent to Langfuse. You can get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your OpenAI key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..." 
+```
+
+With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+
+
+```python
+from langfuse import get_client
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+
+```
+
+## Step 2: Enable Tracing for DSPy
+
+Next, we use the [OpenInference Instrumentation](https://pypi.org/project/openinference-instrumentation-dspy/) module for DSPy to automatically capture your DSPy traces. This is done by a single call which instruments DSPy’s LM calls.
+
+
+```python
+from openinference.instrumentation.dspy import DSPyInstrumentor
+
+DSPyInstrumentor().instrument()
+```
+
+## Step 3: Configure DSPy
+
+Next, we set up DSPy. This involves initializing a language model and configuring DSPy to use it. You can then run various DSPy modules that showcase its features.
+
+
+```python
+import dspy
+lm = dspy.LM('openai/gpt-4o-mini')
+dspy.configure(lm=lm)
+```
+
+## Step 4: Running DSPy Modules with Observability
+
+Here are a few examples from the [DSPy documentation](https://dspy.ai/) showing core features. Each example automatically sends trace data to Langfuse.
+
+### Example 1: Using the Chain-of-Thought Module (Math Reasoning)
+
+
+```python
+math = dspy.ChainOfThought("question -> answer: float")
+math(question="Two dice are tossed. What is the probability that the sum equals two?")
+```
+
+### Example 2: Building a RAG Pipeline
+
+
+```python
+def search_wikipedia(query: str) -> list[str]:
+    results = dspy.ColBERTv2(url='http://20.102.90.50:2017/wiki17_abstracts')(query, k=3)
+    return [x['text'] for x in results]
+
+rag = dspy.ChainOfThought('context, question -> response')
+
+question = "What's the name of the castle that David Gregory inherited?"
+rag(context=search_wikipedia(question), question=question)
+```
+
+### Example 3: Running a Classification Module with DSPy Signatures
+
+
+```python
+def evaluate_math(expression: str):
+    return dspy.PythonInterpreter({}).execute(expression)
+
+def search_wikipedia(query: str):
+    results = dspy.ColBERTv2(url='http://20.102.90.50:2017/wiki17_abstracts')(query, k=3)
+    return [x['text'] for x in results]
+
+react = dspy.ReAct("question -> answer: float", tools=[evaluate_math, search_wikipedia])
+
+pred = react(question="What is 9362158 divided by the year of birth of David Gregory of Kinnairdy castle?")
+print(pred.answer)
+```
+
+## Step 5: Viewing Traces in Langfuse
+
+After running your DSPy application, you can inspect the traced events in Langfuse:
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration-dspy/dspy-example-trace.png)
+
+_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/c6182b14e8e7ac7543645e19cdf1a895?timestamp=2025-06-06T15%3A59%3A47.264Z&display=details&observation=dfec1f8a95e91773)_
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

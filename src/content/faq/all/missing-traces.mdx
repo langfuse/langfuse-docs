@@ -1,0 +1,22 @@
+---
+title: I have setup Langfuse, but I do not see any traces in the dashboard. How to solve this?
+tags: [evaluation, datasets, observability]
+---
+
+# I have setup Langfuse, but I do not see any traces in the dashboard ("Tracing Pending"). How to solve this?
+
+Langfuse runs all tracing integrations asynchronously ([learn more](/docs/tracing#queuing-batching)). Here are a few steps to resolve this issue:
+
+1. **Verify Integration**: Ensure that your application is correctly integrated with Langfuse. Follow the [quickstart guide](/docs/get-started) to verify your setup.
+2. **Check API Credentials**: Make sure that the API credentials used in your application match those created in your Langfuse project settings.
+3. **Inspect Tracing Configuration**: Ensure that your tracing configuration is correctly set up. For example, verify that the `LANGFUSE_HOST` (Python) or `LANGFUSE_BASEURL` (JS/TS) is set to the correct endpoint.
+4. **Review Logs**: Check the logs of your application to see if there are any errors related to Langfuse. This can help identify issues with the integration or network connectivity. Optionally, you can enable debug logging to get more detailed information.
+5. **Manual Flushing**: If you are using short-lived applications like serverless functions, local batch scripts or Jupyter Notebooks, ensure that you are manually flushing the events before the application exits. This is important to avoid losing events. Read more on this [here](/docs/tracing).
+6. **Network Issues**: Check for any network issues that might be preventing your application from sending data to Langfuse. Ensure that your firewall or network settings allow outbound connections to Langfuse endpoints.
+7. **Batching Configuration**: In high throughput applications, verify the batching configuration to ensure that events are being sent in a timely manner. You can adjust the `flushAt` and `flushInterval` settings to suit your needs.
+
+By following these steps, you should be able to identify and resolve the issue preventing traces from appearing in the Langfuse dashboard. If you continue to have issues, please [reach out](/support), we are happy to help.
+
+import GitHubStarCTA from "@/components-mdx/github-cta.mdx";
+
+<GitHubStarCTA />

@@ -1,0 +1,45 @@
+---
+date: 2025-07-01
+title: Pivot Tables in Custom Dashboards
+description: Analyze multi-dimensional data with the new pivot table widget in Langfuse custom dashboards.
+author: Steffen
+ogImage: /images/changelog/2025-07-01-pivot-tables.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're excited to introduce **pivot tables** to Langfuse custom dashboards!
+This new widget type enables multi-dimensional analysis of your LLM application data, making it easier to uncover patterns and insights across different segments and metrics.
+
+## What are Pivot Tables?
+
+Pivot tables provide a flexible way to summarize and analyze data by organizing it into rows, columns, and values.
+They excel at revealing relationships between multiple dimensions simultaneously, helping you answer complex analytical questions like:
+
+- **Cross-Model Performance**: How do latency and cost metrics compare across different models and user segments?
+- **Feature Analysis**: Which features drive the highest quality scores across different time periods?
+- **User Behavior Patterns**: How do usage patterns vary by user type, geography, and application features?
+- **Quality vs. Cost Trade-offs**: What's the relationship between model costs and quality scores across different use cases?
+
+## Getting Started
+
+Creating a pivot table is straightforward:
+
+1. Navigate to **Dashboards** → **Widgets** → **New Widget**
+2. Select your data source (traces, observations, or scores)
+3. Choose **Pivot Table** as your chart type
+4. Configure your pivot table:
+   - **Metrics**: Select which metrics you want to plot, e.g. different latency percentiles
+   - **Dimensions**: Select up to two dimensions that you want to group by
+5. Apply filters to narrow down your analysis
+6. Save and add to your dashboard
+
+## Get started
+
+import { Book } from "lucide-react";
+
+<Cards num={1}>
+  <Card title="Custom Dashboards Documentation" href="/docs/metrics/features/custom-dashboards" icon={<Book />} />
+</Cards>

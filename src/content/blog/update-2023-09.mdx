@@ -1,0 +1,228 @@
+---
+title: Langfuse Update — September 2023
+date: 2023/10/02
+description: "Model-based evals, datasets, core improvements (query engine, complex filters, exports, sharing) and new integrations (Langflow, Flowise, LiteLLM)."
+tag: update
+ogImage: /images/blog/update-september-2023/og-sep-2023.png
+author: Marc
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse Update — September 2023"
+  description="Model-based evals, datasets, core improvements (query engine, complex filters, exports, sharing) and new integrations (Flowise, Langflow, LiteLLM)"
+  date="Oct 2, 2023"
+  authors={["marcklingen"]}
+/>
+
+Hi everyone 👋, here's a quick overview of all the most notable new features we shipped in September:
+
+- [**Model-based evaluations**](#model-based-eval) via Python SDK
+
+- [**Datasets (beta)**](#datasets) to collect sets of inputs and expected outputs in Langfuse to evaluate your LLM app
+
+- [**In-app analytics**](#analytics) powered by new query engine
+
+- [**New integrations**](#integrations) with Flowise, Langflow and LiteLLM
+
+- **Improvements**
+
+  - [Complex filters](#filters) for all tables
+  - [Share traces](#link-sharing) via public link
+  - [Export generations](#export-generations) as CSV, JSON or JSONL (e.g. for fine-tuning)
+
+... and many small improvements and bug fixes.
+
+---
+
+The details 👇
+
+## 🚦 Model-based evaluations via Python SDK [#model-based-eval]
+
+We've added an [example implementation](/docs/scores/model-based-evals) on how to run model-based evaluations on production data in Langfuse using the Python SDK.
+
+The new `get_generations` method allows you to fetch all generations based on a filter (e.g. name). You can then run your eval function on each generation and add the scores to Langfuse for exploration.
+
+With this, you can run your favorite eval library (e.g. OpenAI evals, Langkit, Langchain) on all generations in Langfuse.
+
+```python filename="Example (python)"
+from langfuse import Langfuse
+
+langfuse = Langfuse(LF_PUBLIC_KEY, LF_SECRET_KEY)
+generations = langfuse.get_generations(name="my_generation_name").data
+
+for generation in generations:
+    # import function from an eval library, see docs for details
+    eval = hallucination_eval(
+      generation.prompt,
+      generation.completion
+    )
+
+    langfuse.score(
+      name="hallucination",
+      traceId=generation.trace_id,
+      observationId=generation.id,
+      value=eval["score"],
+      comment=eval['reasoning']
+    )
+```
+
+→ [Docs](/docs/scores/model-based-evals)
+
+## 🗂️ Datasets (beta) [#datasets]
+
+Systematically test new iterations of your LLM app with `datasets`.
+
+Datasets are collections of inputs and expected outputs that you can manage in Langfuse. Upload an existing dataset or create one based on production data (e.g. when discovering new edge cases).
+
+When combined with automated evals, Datasets in Langfuse make it easy to systematically evaluate new iterations of your LLM app.
+
+_Overview of dataset runs on a demo dataset_
+
+<Frame border>![Dataset runs](/images/docs/dataset_runs_table.png)</Frame>
+
+_Run experiment on dataset_
+
+<Tabs items={["Python", "JS/TS", "Langchain (Python)"]} storageKey="datasets">
+<Tab>
+
+```python
+
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # execute application function and get Langfuse parent observation (span/generation/event)
+    # output also returned as it is used to evaluate the run
+    generation, output = my_llm_application.run(item.input)
+
+    # link the execution trace to the dataset item and give it a run_name
+    item.link(generation, "<run_name>")
+
+    # optionally, evaluate the output to compare different runs more easily
+    generation.score(
+      name="<example_eval>",
+      # any float value
+      value=my_eval_fn(
+          item.input,
+          output,
+          item.expected_output
+      )
+    )
+```
+
+</Tab>
+<Tab>
+
+```ts
+const dataset = await langfuse.getDataset("<dataset_name>");
+
+for (const item of dataset.items) {
+  // execute application function and get Langfuse parent observation (span/generation/event)
+  // output also returned as it is used to evaluate the run
+  const [generation, output] = await myLlmApplication.run(item.input);
+
+  // link the execution trace to the dataset item and give it a run_name
+  await item.link(generation, "<run_name>");
+
+  // optionally, evaluate the output to compare different runs more easily
+  generation.score({
+    name: "<score_name>",
+    value: myEvalFunction(item.input, output, item.expectedOutput),
+  });
+}
+```
+
+</Tab>
+<Tab>
+
+```python
+dataset = langfuse.get_dataset("<dataset_name>")
+
+for item in dataset.items:
+    # Langchain calback handler that automatically links the execution trace to the dataset item
+    handler = item.get_langchain_handler(run_name="<run_name>")
+
+    # Execute application and pass custom handler
+    my_langchain_chain.run(item.input, callbacks=[handler])
+```
+
+</Tab>
+</Tabs>
+
+Datasets are currently in beta on Langfuse Cloud as the API might still slightly change. If you'd like to try it, let us know via the in-app chat.
+
+→ [Dataset docs](/docs/datasets/overview)
+→ [Python Cookbook](/docs/datasets/python-cookbook)
+
+## 📊 In-app dashboards [#analytics]
+
+Over the last weeks, [analytics features](/docs/analytics/overview) were in public alpha on Langfuse Cloud. We've now shipped a new _query engine_ as an underlying abstraction for the native in-app dashboards. This is a major step towards bringing all analytics features into the Langfuse core project and helps us move much faster on these.
+
+<CloudflareVideo
+  videoId="19e2674bc384b4adc6989cac6aba7b34"
+  aspectRatio={2.15}
+  className="max-w-2xl"
+  gifStyle
+/>
+
+Over the next days, you'll see more and more dashboards popping up in the app. If there is a specific analysis you'd like to see, suggest it on [Discord](/discord).
+
+## 🔄 New integrations [#integrations]
+
+The new integrations make it easier to get started with Langfuse. Thanks to the teams behind Langflow, Flowise and LiteLLM for building/collaborating on these integrations.
+
+See integrations docs for details:
+
+- [Langflow](/docs/langflow): No-code LLM app builder in Python
+- [Flowise](/docs/flowise): No-code LLM app builder in JS
+- [LiteLLM](/integrations/gateways/litellm): Python library to use any LLM model as drop in replacement of OpenAI API
+
+## 🔎 Complex filters for all tables [#filters]
+
+You can now filter all tables in Langfuse by multiple columns.
+
+<CloudflareVideo
+  videoId="7f83b19adfbccfc1cb5c915d49d879f8"
+  aspectRatio={1.38}
+  className="max-w-2xl"
+  gifStyle
+/>
+
+## 🌐 Share traces via public link [#link-sharing]
+
+Share traces with anyone via public links. The other person doesn't need a Langfuse account to view the trace.
+
+_Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99_
+
+<CloudflareVideo
+  videoId="2b49a3463199ecfc4dfc17380f016e6f"
+  aspectRatio={15.55 / 9}
+  gifStyle
+/>
+
+## 💾 Export generations (for fine-tuning) [#export-generations]
+
+In addition to the GET API, you can now directly export generations from the Langfuse UI. Supported formats: CSV, JSON, OpenAI-JSONL.
+
+Use Langfuse to capture high-quality production examples (e.g. from a larger model) and export them for fine-tuning.
+
+<Frame>
+  ![Export generations from
+  Langfuse](/images/blog/update-september-2023/export_generations.gif)
+</Frame>
+
+## 🚢 What's Next?
+
+There is more coming in October. Stay tuned! Based on the new query engine we'll ship extensive dashboards over the next weeks. Anything you'd like to see? Join us on [Discord](/discord) and share your thoughts.
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Subscribe to get monthly updates via email:
+
+<ProductUpdateSignup
+  source="Product update [September 2023]"
+  className="mt-3"
+/>
+
+Follow along on Twitter ([@Langfuse](https://twitter.com/langfuse), [@marcklingen](https://twitter.com/marcklingen))

@@ -1,0 +1,82 @@
+---
+date: 2024-07-11
+title: Create Non-Numeric Scores via SDKs
+description: The Langfuse API, Python and JS SDKs now support creating categorical, boolean and numeric scores.
+author: Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { BookOpen } from "lucide-react";
+
+<ChangelogHeader />
+
+Our improved API allows you to create categorical and boolean scores, in addition to the previously supported numeric scores. If you need your scores to follow a specific format (e.g. data type, range or name), you can now define a score configuration using the API or UI and validate scores against it.
+
+Check out our [scores documentation](/docs/evaluation/features/evaluation-methods/custom-scores) for score ingestion examples and code snippets.
+
+### New API routes
+
+- `GET /api/public/score-configs`
+- `GET /api/public/score-configs/{configId}`
+- `POST /api/public/score-configs`
+
+### Existing API Routes with new parameters
+
+- `GET /api/public/scores` can now retrieve scores by `dataType` and/or `configId`
+- `POST /api/public/scores` now supports defining `dataType` and/or `configId`
+
+### SDK methods
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Create a single numeric, categorical or boolean score
+langfuse.score(
+    score_name="accuracy",
+    score_value=0.95,
+    data_type="NUMERIC",
+    trace_id="traceId"
+)
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install langfuse
+```
+
+```ts
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+// Create a single numeric, categorical or boolean score
+await langfuse.score({
+  scoreName: "accuracy",
+  scoreValue: 0.95,
+  dataType: "NUMERIC",
+  traceId: "traceId",
+});
+```
+
+</Tab>
+</Tabs>
+
+## Learn more
+
+<Cards num={3}>
+  <Card title="Score Docs" href="/docs/evaluation/features/evaluation-methods/custom-scores" icon={<BookOpen />} />
+  <Card
+    title="API Reference"
+    href="https://api.reference.langfuse.com"
+    icon={<BookOpen />}
+  />
+</Cards>

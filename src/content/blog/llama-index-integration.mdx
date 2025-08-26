@@ -1,0 +1,65 @@
+---
+title: "Native LlamaIndex Integration"
+date: 2024/03/06
+description: "Context retrieval is a mainstay in LLM engineering. This latest integration brings Langfuse's observability to LlamaIndex applications for simple tracing, monitoring and evaluation of RAG applications."
+tag: integration
+ogImage: /images/changelog/2024-02-27-llama-index-integration.png
+author: Clemens
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Native LlamaIndex Integration"
+  description="Context retrieval is a mainstay in LLM engineering. This latest integration brings Langfuse's observability to LlamaIndex applications for simple tracing, monitoring and evaluation of RAG applications."
+  authors={["clemensrawert", "hassiebpakzad"]}
+/>
+
+We’re launching our latest major **integration with the LlamaIndex framework**. LlamaIndex is a darling of our community. This integration has been our users’ [most requested](https://github.com/orgs/langfuse/discussions/828) feature for a while. We're thrilled to publicly release the integration after getting great feedback from our initial beta users. Thanks again to everyone who contributed to this.
+
+<CloudflareVideo
+  videoId="0e68136ab943055101e74f1433ade583"
+  aspectRatio={16 / 9.39}
+  title="LlamaIndex Integration"
+/>
+
+## 🦙 LlamaIndex, RAG and 🪢 Langfuse
+
+[LlamaIndex](https://www.llamaindex.ai/) is a framework for augmenting LLMs with private data. The framework is extremely popular with developers (it is approaching [30k stars on GitHub](https://github.com/run-llama/llama_index)) and is used across the space, from hobbyists to enterprises.
+
+LLMs are trained on huge datasets. Popular models such as OpenAI's GPT, Anthropic's Claude or Mistral are general purpose in nature. That is, they are not trained for a specific use case or context but to provide answers to _any_ input that is provided to them. Retrieval-augmented-generation (RAG) tries to steer Large Language Models towards a _specific_ context again. By allowing the addition of private data sources and domain specific context to LLM apps, they can [significantly enhance the quality of an LLM’s response](https://www.pinecone.io/blog/rag-study/).
+
+**RAG has proven to be a pragmatic and efficient way of working with LLMs**. It is specifically suited to builders on the application layer, trying to tackle problems in a specific domain or context. It is already a much used technique in Langfuse user’s projects and we’re thrilled to more natively support its most popular framework.
+
+LlamaIndex completes our roster of major integrations next to existing integrations with [OpenAI](/integrations/model-providers/openai-py) and LLM framework [LangChain](/integrations/frameworks/langchain) (see [full list of integrations](/integrations)). We are committed to support the most popular ways developers build on top of LLMs and specifically to open source application frameworks.
+
+Thanks again to the team at LlamaIndex for their guidance which helped make this integration feature rich and stable in record time.
+
+## Integrating Langfuse with LlamaIndex
+
+<Callout type="info" emoji="💡">
+
+Since this post was written, we have released a new version of the LlamaIndex integration. Please check out the [integration docs](/integrations/frameworks/llamaindex) for the latest version.
+
+</Callout>
+
+Langfuse integrates with LlamaIndex via its global **callback manager**. This makes getting set up as easy as adding the following few lines to your LlamaIndex app:
+
+```python
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.llama_index import LlamaIndexCallbackHandler
+
+langfuse_callback_handler = LlamaIndexCallbackHandler(
+    public_key="pk-lf-...",
+    secret_key="sk-lf-...",
+    host="https://cloud.langfuse.com"
+)
+Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+```
+
+That’s it. Now your LlamaIndex app will automatically send detailed traces to Langfuse.
+
+While easy to set up, the integration makes extensive use of [Langfuse Tracing](/docs/tracing) to capture sessions, users, tags, versions, and additional metadata. Also, the integration is [fully interoperable](/integrations/frameworks/llamaindex#interoperability-with-langfuse-sdks) with the Langfuse Python SDK.
+
+Users can naturally continue layering other Langfuse features such as [evaluations](/docs/scores/model-based-evals), [datasets](/docs/datasets/overview) or [prompt management](/docs/prompts/get-started).

@@ -1,0 +1,94 @@
+---
+description: Learn how to integrate Goose, an open-source AI agent, with Langfuse for enhanced monitoring and automation of engineering tasks.
+category: Integrations
+sidebarTitle: Codename Goose
+logo: /images/integrations/goose_icon.png
+---
+
+# Integrating Goose with Langfuse
+
+[Goose](https://github.com/block/goose) is an open-source, on-machine AI agent that automates engineering tasks seamlessly. By integrating Goose with [Langfuse](https://langfuse.com), you can monitor your Goose requests and understand how the agent is performing.
+
+## About Goose
+
+<CloudflareVideo
+  videoId="11c21d83654cd5b1f993f3c4cbdda4ed"
+  aspectRatio={2702 / 1696}
+  gifStyle
+/>
+
+Goose is a powerful, open-source AI agent that runs locally on your machine to automate common engineering workflows. It's designed to help developers spend more time building and less time on repetitive tasks.
+
+Core capabilities:
+
+- Fully open source and extensible, enabling you to customize Goose for your specific needs
+- Local-first architecture that keeps you in control of execution and data
+- Flexible integration options with your preferred LLM providers and Model Context Protocol (MCP) servers
+- Built-in intelligence to handle complex engineering tasks with minimal supervision
+
+Here are some real-world examples of how developers use Goose:
+
+- Generate comprehensive test data that accurately reflects complex API business logic
+- Build automation scripts for Google Workspace to streamline team coordination
+- Execute large-scale codebase migrations, such as React component updates
+- Create and manage custom CLI tools to optimize development workflows
+
+GitHub: [https://github.com/block/goose](https://github.com/block/goose)
+
+## Get Started
+
+This guide will walk you through the steps to integrate Goose with Langfuse.
+
+<Steps>
+
+### Set up Langfuse
+
+Sign up for Langfuse Cloud [here](https://cloud.langfuse.com) or self-host Langfuse [Docker Compose](https://langfuse.com/self-hosting/deployment/docker-compose) to get your Langfuse API keys.
+
+### Configure Goose to Connect to Langfuse
+
+Set the environment variables so that Goose (written in Rust) can connect to the Langfuse server.
+
+```bash
+export LANGFUSE_INIT_PROJECT_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_INIT_PROJECT_SECRET_KEY=sk-lf-...
+export LANGFUSE_HOST=https://cloud.langfuse.com # EU data region 🇪🇺
+
+# https://us.cloud.langfuse.com if you're using the US region 🇺🇸
+# https://localhost:3000 if you're self-hosting
+```
+
+### Run Goose with Langfuse Integration
+
+Now, you can run Goose and monitor your AI requests and actions through Langfuse.
+
+With Goose running and the environment variables set, Langfuse will start capturing traces of your Goose activities.
+
+_[Example trace (public) in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/cea4ed38-0c44-4b0a-8c20-4b0b6b9e8d73?timestamp=2025-01-31T15%3A52%3A30.362Z&observation=7c8e5807-3c29-4c28-9c6f-7d7427be401f)_
+
+<Frame border fullWidth>
+  ![Goose trace in
+  Langfuse](/images/docs/goose-integration/goose-example-trace.png)
+</Frame>
+
+</Steps>
+
+## Demo
+
+Alice (Goose) and Marc (Langfuse) demo how Langfuse enables observability into Goose's actions—letting you trace LLM behavior and catch errors on the Goose YouTube channel:
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded border w-full"
+  src="https://www.youtube-nocookie.com/embed/W39BQjsTS9E?si=wLDFwDmfMBEOHQ2A"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## References
+
+- **Goose Docs:** [https://block.github.io/goose/docs/category/getting-started](https://block.github.io/goose/docs/category/getting-started)
+- **Langfuse Docs:** [https://langfuse.com/docs](https://langfuse.com/docs)

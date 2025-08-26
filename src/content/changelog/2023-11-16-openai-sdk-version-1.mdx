@@ -1,0 +1,27 @@
+---
+date: 2023-11-16
+title: OpenAI SDK integration now supports v1.x and v0.x
+description: OpenAI has released a major SDK update. The latest Langfuse integration now supports both the new and old versions, ensuring optimal backwards compatibility with other packages.
+author: Max
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+**Minor improvement to the integration:** environment variables can also be set as attributes on the `openai` object.
+
+```python
+# existing method
+import os
+os.environ["LANGFUSE_PUBLIC_KEY"] = "YOUR_PUBLIC_KEY"
+os.environ["LANGFUSE_SECRET_KEY"] = "YOUR_SECRET_KEY"
+from langfuse.openai import openai
+
+# additional method
+from langfuse.openai import openai
+openai.langfuse_public_key = "YOUR_PUBLIC_KEY"
+openai.langfuse_secret_key = "YOUR_SECRET_KEY"
+```
+
+See the [OpenAI SDK integration](/integrations/model-providers/openai-py) page for more information.

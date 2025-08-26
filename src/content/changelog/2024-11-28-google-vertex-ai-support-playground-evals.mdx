@@ -1,0 +1,38 @@
+---
+date: 2024-11-28
+title: Google Vertex AI support for LLM Playground and Evaluations incl. Gemini models
+description: Langfuse now supports Google Vertex AI incl. Gemini models for LLM Playground and Evaluations.
+author: Hassieb
+ogImage: /images/changelog/2024-11-28-google-vertex-support.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're excited that Langfuse now supports access to Google Vertex AI and the Gemini model family for both the LLM Playground and Evaluations. This integration allows users to leverage Google Vertex AI platform's powerful language models directly within the Langfuse ecosystem. Whether you're prototyping in the [Playground](/docs/playground) or conducting [LLM-as-a-judge evaluations](/docs/scores/model-based-evals), access to Gemini and other models on the Google Vertex AI platform enhances your toolkit for building and optimizing AI-powered features.
+
+## Key Features
+
+1. **LLM Playground Integration**: You can now use the Gemini model familiy and other Google Vertex AI models in the Langfuse LLM Playground. This enables quick experimentation and testing with various Vertex AI platform models.
+
+2. **Evaluations Support**: Google Vertex AI models can be utilized in Langfuse Evaluations, allowing for comprehensive assessment and comparison of model performance.
+
+3. **Easy Setup**: Adding your GCP service account JSON key is straightforward in the project settings, making it simple to get started with these new capabilities.
+
+## How to Get Started
+
+To begin accessing Google Vertex AI models in Langfuse (assuming you have already activated the Vertex API in your GCP project settings):
+
+1. Create a new service account and assign the `Vertex AI User` role to it in the GCP IAM settings
+2. Create a JSON key for the newly created service account
+3. Navigate to the LLM API Keys section in your Langfuse settings.
+4. Add a new LLM API Key for the adapter `vertex-ai`. Paste your service account's JSON key into the secret key field. API keys are stored encrypted on our servers.
+5. You're all set! You can now select Google Vertex AI models in the LLM Playground and Evaluations.
+
+## Learn more
+
+- [Google Vertex AI Platform](https://cloud.google.com/vertex-ai)
+- [Langfuse LLM Playground](/docs/playground)
+- [Langfuse Evaluations](/docs/scores/model-based-evals)

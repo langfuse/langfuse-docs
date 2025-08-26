@@ -1,0 +1,116 @@
+---
+description: Configure sampling to control the volume of traces collected by the Langfuse server.
+sidebarTitle: Sampling
+---
+
+# Sampling
+
+Sampling can be used to control the volume of traces collected by Langfuse. Sampling is handled client-side.
+
+You can configure the sample rate by setting the `LANGFUSE_SAMPLE_RATE` environment variable or by using the `sample_rate`/`sampleRate` constructor parameter. The value has to be between 0 and 1.
+
+The default value is 1, meaning that all traces are collected. A value of 0.2 means that only 20% of the traces are collected. The SDK samples on the trace level meaning that if a trace is sampled, all observations and scores within that trace will be sampled as well.
+
+<Tabs items={["Python SDK", "JS/TS", "OpenAI (JS/TS)", "Langchain (JS/TS)", "Vercel AI SDK (JS/TS)"]}>
+<Tab>
+With the Python SDK, you can configure sampling when initializing the client:
+
+```python
+from langfuse import Langfuse, get_client
+import os
+
+# Method 1: Set environment variable
+os.environ["LANGFUSE_SAMPLE_RATE"] = "0.5"  # As string in env var
+langfuse = get_client()
+
+# Method 2: Initialize with constructor parameter then get client
+Langfuse(sample_rate=0.5)  # 50% of traces will be sampled
+langfuse = get_client()
+```
+
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe, Langfuse, get_client
+
+# Initialize the client with sampling
+Langfuse(sample_rate=0.3)  # 30% of traces will be sampled
+
+@observe()
+def process_data():
+    # Only ~30% of calls to this function will generate traces
+    # The decision is made at the trace level (first span)
+    pass
+```
+
+If a trace is not sampled, none of its observations (spans or generations) or associated scores will be sent to Langfuse, which can significantly reduce data volume for high-traffic applications.
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse({
+  sampleRate: 0.5,
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
+
+</Tab>
+<Tab>
+
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "langfuse";
+
+const openai = observeOpenAI(new OpenAI(), {
+  clientInitParams: {
+    sampleRate: 0.5,
+  },
+});
+```
+
+See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
+
+</Tab>
+<Tab>
+
+```ts
+import { CallbackHandler } from "langfuse-langchain";
+
+const handler = new CallbackHandler({
+  sampleRate: 0.5,
+});
+```
+
+See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more details.
+
+</Tab>
+
+<Tab>
+
+When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sdk)
+
+```ts filename="instrumentation.ts" {/sampleRate: 0.5/}
+import { registerOTel } from "@vercel/otel";
+import { LangfuseExporter } from "langfuse-vercel";
+
+export function register() {
+  registerOTel({
+    serviceName: "langfuse-vercel-ai-nextjs-example",
+    traceExporter: new LangfuseExporter({ sampleRate: 0.5 }),
+  });
+}
+```
+
+</Tab>
+
+</Tabs>
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-sampling"]} />

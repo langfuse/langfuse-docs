@@ -1,0 +1,30 @@
+---
+date: 2025-07-03
+title: Gemini 2.5 Pro, Flash, and Flash Lite support for playground, evaluations, and cost tracking
+description: Langfuse says hello to Gemini 2.5 Pro (GA), Gemini 2.5 Flash (GA), and Gemini 2.5 Flash Lite (Preview). Support added for the LLM playground, evaluations, and cost tracking.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Google has expanded their Gemini 2.5 family of models with stable releases and new additions. From [Google release notes](https://blog.google/products/gemini/gemini-2-5-model-family-expands):
+
+- **Gemini 2.5 Pro**: Now generally available - Advanced model with enhanced reasoning capabilities, optimized for complex tasks and coding
+- **Gemini 2.5 Flash**: Now generally available - Faster, cost-effective variant with 1M token context window, designed for high-volume applications while maintaining strong performance
+- **Gemini 2.5 Flash-Lite**: New model in preview - Google's most cost-efficient and fastest 2.5 model yet, with all-around higher quality than 2.0 Flash-Lite on coding, math, science, reasoning and multimodal benchmarks
+
+All three models are now available in the Langfuse Playground for interactive testing and in LLM-as-a-judge evals. Additionally, we've added cost tracking support for both Gemini 2.5 Flash and Gemini 2.5 Flash-Lite to help you monitor your usage.
+
+(Gemini 2.5 Pro pricing is tiered by context window size and thus not yet supported for automatic cost tracking in Langfuse.)
+
+## Get started
+
+import { Book } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Playground Documentation" href="/docs/prompt-management/features/playground" icon={<Book />} />
+  <Card title="Evaluation Documentation" href="/docs/evaluation/overview" icon={<Book />} />
+  <Card title="Model Usage and Cost Tracking" href="/docs/model-usage-and-cost" icon={<Book />} />
+</Cards>

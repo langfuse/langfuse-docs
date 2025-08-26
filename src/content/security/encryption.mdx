@@ -1,0 +1,30 @@
+---
+description: Details on how Langfuse Cloud encrypts data both in transit and at rest.
+---
+
+# Encryption
+
+Langfuse employs robust encryption methods to protect your data both while it's being transferred and while it's stored.
+
+This page describes the encryption practices for Langfuse Cloud. For self-hosted deployments, please refer to the [Self-hosting Guide](/self-hosting/configuration/encryption).
+
+## Encryption in Transit
+
+All data transferred between your applications, the Langfuse SDKs, and the Langfuse server is encrypted using **TLS (Transport Layer Security)**. This ensures that data is protected from eavesdropping or tampering during transmission.
+
+## Encryption at Rest
+
+Data stored within the Langfuse infrastructure is encrypted at rest using **AES-256**, a strong industry-standard encryption algorithm.
+
+This applies to data stored in:
+
+| Service             | Encryption Standard |
+| ------------------- | ------------------- |
+| Elasticache (Redis) | AES-256             |
+| Aurora (Postgres)   | AES-256             |
+| Clickhouse          | AES-256             |
+| S3 / Blob Storage   | AES-256             |
+
+## Contact
+
+For questions regarding encryption practices, please contact security@langfuse.com.

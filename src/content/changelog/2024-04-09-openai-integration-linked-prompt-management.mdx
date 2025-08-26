@@ -1,0 +1,28 @@
+---
+date: 2024-04-09
+title: OpenAI Integration tracks used Langfuse Prompts
+description: The OpenAI SDK integration for Langfuse Tracing now supports capturing the used prompt (version) from Prompt Management.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+**Example**
+
+```python /langfuse_prompt=prompt/
+prompt = langfuse.get_prompt("calculator")
+
+openai.chat.completions.create(
+  model="gpt-4o",
+  messages=[
+    {"role": "system", "content": prompt.compile(base=10)},
+    {"role": "user", "content": "1 + 1 = "}],
+  langfuse_prompt=prompt
+)
+```
+
+Thanks to [@fancyweb](https://github.com/fancyweb) for the contribution on this!
+
+See [prompt management docs](/docs/prompts) for more details and [example notebook](/docs/prompts/example-openai-functions).

@@ -1,0 +1,73 @@
+---
+date: 2024-07-04
+title: Query Traces via SDKs
+description: The Langfuse Python and JS SDKs now support fetching traces and observations from the Langfuse API. Use them for custom analysis, few-shotting or fine-tuning workflows.
+ogImage: /images/changelog/2024-07-04-query-traces-via-sdks.png
+showOgInHeader: false
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Since the very beginning, all Langfuse Tracing data has been open and accessible via the Langfuse API. Today, we're excited to finally release the SDK methods to conveniently query traces, observations, and sessions directly from the Langfuse API.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+```python
+from langfuse import Langfuse
+langfuse = Langfuse()
+
+# Fetch list of traces, supports filters and pagination
+traces = langfuse.fetch_traces()
+
+# Fetch a single trace by ID
+trace = langfuse.fetch_trace("traceId")
+
+# Fetch list of observations, supports filters and pagination
+observations = langfuse.fetch_observations()
+
+# Fetch a single observation by ID
+observation = langfuse.fetch_observation("observationId")
+
+# Fetch list of sessions
+sessions = langfuse.fetch_sessions()
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install langfuse
+```
+
+```ts
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+// Fetch list of traces, supports filters and pagination
+const traces = await langfuse.fetchTraces();
+
+// Fetch a single trace by ID
+const trace = await langfuse.fetchTrace("traceId");
+
+// Fetch list of observations, supports filters and pagination
+const observations = await langfuse.fetchObservations();
+
+// Fetch a single observation by ID
+const observation = await langfuse.fetchObservation("observationId");
+
+// Fetch list of sessions
+const sessions = await langfuse.fetchSessions();
+```
+
+</Tab>
+</Tabs>
+
+See [docs](/docs/query-traces) to learn more.

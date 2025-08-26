@@ -1,0 +1,92 @@
+---
+title: "What is LangChain?"
+date: 2024/08/16
+description: The article answers the question - 'What is LangChain?' and provides insight into the advantages and disadvantages of using LangChain to build LLM applications. It also touches on LangServe, LangGraph, and LangSmith.
+ogImage: /images/blog/what-is-langchain.png
+tag: guide
+author: Clemens
+showInBlogIndex: false
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="LangChain: the LLM Framework Explained"
+  description="Learn more about the LLM framework LangChain as well as LangGraph, LangServe, and LangSmith."
+  date="August 16, 2024"
+  authors={["clemensrawert"]}
+/>
+
+<Frame border fullWidth>
+  ![What is LangChain?](/images/blog/what-is-langchain.png)
+</Frame>
+
+## What is LangChain?
+
+The answer is, **[LangChain](https://langchain.com) is an open-source LLM framework.** It is a programming library that provides tools and abstractions to work with Large Language Models (LLMs). You can find the LangChain library on [GitHub](https://github.com/langchain-ai/langchain).
+
+### What is LangChain Used For?
+
+At its core, LangChain standardizes common developer workflows for LLMs and offers pre-built templates for implementing LLM applications. These include **Prompt Templates**, **chaining LLM calls**, implementing [**LangChain Agents**](https://python.langchain.com/v0.1/docs/modules/agents/), **LLM memory**, **LangChain RAG** functionalities (like indexes, vector stores, retrieval), as well as a host of **utilities and third-party integrations**.
+
+There are many LangChain tutorials out there that provide easy ways for developers to implement common applications such as [chatbots](/blog/qa-chatbot-for-langfuse-docs), AI knowledge bases, or LangChain Agents.
+
+A much-used feature of LangChain is its **LangChain callbacks**, which can be used to send, e.g., logs and observability data to third-party services such as Langfuse. LangChain callbacks allow for [streamlined LLM observability](/integrations/frameworks/langchain) and are simple to integrate.
+
+### What is an LLM Framework?
+
+**An LLM framework is a pre-built set of tools that helps developers build LLM applications faster.**
+
+A framework provides structures through common features and guidelines, so developers don't have to start implementing common functionalities from scratch. It is a ready-made foundation for working with LLMs.
+
+### Is LangChain Useful?
+
+The answer is, **it is not clear if LangChain is helpful for developers**.
+
+It is a popular framework, and proponents highlight that LangChain allows for **rapid prototyping** of LLM apps and has a **large number of integrations with third-party tools**. LangChain **lowers entry barriers** to working with LLMs.
+
+However, many critics of LangChain argue that it **introduces unnecessary complexity** and abstraction to applications. While it can help to get off the ground fast, it may actually make it more difficult to customize applications for specific needs down the line.
+
+Developers have also highlighted **issues with the LangChain documentation and lackluster performance in production**. There is significant skepticism about the reliability and efficiency of the framework. Many professional developers prefer working without an LLM framework altogether or relying on more straightforward and less abstracted alternatives.
+
+Here are a few useful resources that summarize a range of views espoused by developers:
+
+- [Do you even need LangChain? - on Reddit](https://www.reddit.com/r/LangChain/comments/1cu6wjg/do_you_even_need_langchain/)
+- [LangChain is pointless - from Hacker News](https://news.ycombinator.com/item?id=36645575)
+- [Why we no longer use LangChain for building our AI agents - from AI agent startup Octomind](https://www.octomind.dev/blog/why-we-no-longer-use-langchain-for-building-our-ai-agents)
+
+#### Using Langfuse with LangChain
+
+**You can use Langfuse together with LangChain.**
+
+Langfuse has been supporting LangChain with [first-class integrations](/integrations/frameworks/langchain) since its inception. As the original LLM framework, we decided it was imperative to support this popular toolbox that has introduced many developers to our space.
+
+Langfuse has released integrations for [LangChain Python](/integrations/frameworks/langchain) as well as [LangChain JS/TS](/integrations/frameworks/langchain). The Langfuse integrations support all major LangChain features such as streaming, LCEL, async, batch(), or invoke().
+
+### What is LangSmith?
+
+The answer is, **[LangSmith](https://www.langchain.com/langsmith) is a developer platform for LLMs centered around observability, annotation, datasets, and prompt engineering/management.**
+
+LangSmith is a closed-source, commercial offering by the company behind the LangChain open-source framework. We have compiled more information about [LangSmith alternatives](/faq/all/langsmith-alternative) here.
+
+### What is LangGraph?
+
+The answer is, **[LangGraph](https://www.langchain.com/langgraph) is a framework for developing AI agents**. LangGraph [(GitHub)](https://github.com/langchain-ai/langgraph) represents LLM applications as graphs with nodes and edges. Each node represents a task, and an edge describes the flow of data.
+
+**Using Langfuse with LangGraph**: For observability into LangGraph Agents, you can integrate [LangServe with Langfuse](/guides/cookbook/integration_langgraph). Using the open-source Langfuse library, you can gain detailed traces and evaluate your LangChain agents.
+
+### What is LangServe?
+
+The answer is, **[LangServe](https://python.langchain.com/v0.2/docs/langserve/) is a library that helps deploy LangChain applications via a REST API**.
+
+Using LangServe will allow you to create a scalable Python web server for your LangChain application that you can then deploy and scale out to your Cloud provider of choice, such as GCP or Replit.
+
+**Logging and Debugging for LangServe**: You can integrate LangServe with Langfuse for [open-source observability](/integrations/frameworks/langserve). You can use the Langfuse UI to debug, analyze, and iterate on your LangServe application.
+
+## Langfuse - an alternative to LangChain?
+
+**Langfuse is a valuable tool for software engineers developing outside of the LangChain ecosystem.** Langfuse is not an LLM framework but an LLM engineering platform that brings together **observability, prompt management, evaluations, datasets, and a prompt playground**.
+
+Langfuse is used to gain insights into LLM applications built with or without LLM frameworks such as LangChain. Developers use Langfuse precisely because it is **framework-agnostic** and allows them to **pick-and-choose** and iterate on their LLM development stack. It can allow builders to avoid the abstraction and complexity that can come with LLM frameworks.
+
+In the context of LangChain, **Langfuse most closely replaces [LangSmith](/faq/all/langsmith-alternative)**.

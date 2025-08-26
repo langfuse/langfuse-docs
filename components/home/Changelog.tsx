@@ -1,29 +1,13 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Page } from "nextra";
-import { getPagesUnderRoute } from "nextra/context";
-
-const changelogItems = getPagesUnderRoute("/changelog") as Array<
-  Page & { frontMatter: any }
->;
 
 export default function Changelog({ className }: { className?: string }) {
-  const changelog = changelogItems
-    .filter(
-      (page) => page.route && page.frontMatter.title && page.frontMatter.date
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.frontMatter.date).getTime() -
-        new Date(a.frontMatter.date).getTime()
-    )
-    .slice(0, 20)
-    .map(({ route, frontMatter }) => ({
-      route,
-      title: frontMatter.title ?? null,
-      author: frontMatter.author ?? null,
-      date: new Date(frontMatter.date),
-    }));
+  const changelog: Array<{
+    route: string;
+    title: string | null;
+    author: string | null;
+    date: Date | null;
+  }> = [];
 
   return (
     <div

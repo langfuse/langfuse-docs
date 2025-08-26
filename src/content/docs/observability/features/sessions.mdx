@@ -1,0 +1,192 @@
+---
+title: Sessions (Chats, Threads, etc.)
+description: Track LLM chat conversations or threads across multiple traces in a single session. Replay the entire interaction to debug or analyze the conversation.
+sidebarTitle: Sessions (Chats, Threads, etc.)
+---
+
+# Sessions
+
+Many interactions with LLM applications span multiple traces. `Sessions` in Langfuse are a way to group these traces together and see a simple **session replay** of the entire interaction. Get started by adding a `sessionId` when creating a trace.
+
+```mermaid
+graph LR
+    A(Session) -->|1:n, sessionId| B(Trace)
+```
+
+Add a `sessionId` when creating/updating a trace. This can be any string that you use to identify the session. All traces with the same `sessionId` will be grouped together.
+
+<Tabs items={["Python SDK", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+
+<Tab>
+When using the `@observe()` decorator:
+
+```python
+from langfuse import observe, get_client
+
+@observe()
+def process_request():
+    # Get the client
+    langfuse = get_client()
+
+    # Add to the current trace
+    langfuse.update_current_trace(session_id="your-session-id")
+
+    # ...your processing logic...
+    return result
+```
+
+When creating spans directly:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# You can set the session_id when creating the root span
+with langfuse.start_as_current_span(
+    name="process-chat-message"
+) as root_span:
+    # Add session_id to the trace
+    root_span.update_trace(session_id="chat-session-123")
+
+    # All spans in this trace will belong to the same session
+    with root_span.start_as_current_generation(
+        name="generate-response",
+        model="gpt-4o"
+    ) as gen:
+        # ...generate response...
+        pass
+```
+
+You can also update the session_id of the current trace without a direct reference to a span:
+
+```python
+with langfuse.start_as_current_span(name="another-operation"):
+    # Add to the current trace
+    langfuse.update_current_trace(session_id="your-session-id")
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { Langfuse } from "langfuse";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  sessionId: "your-session-id",
+});
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab>
+
+```python
+from langfuse.openai import openai
+
+completion = openai.chat.completions.create(
+  name="test-chat",
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a calculator."},
+    {"role": "user", "content": "1 + 1 = "}],
+  temperature=0,
+  metadata={"langfuse_session_id": "your-session-id"}
+)
+```
+
+</Tab>
+<Tab>
+
+```python
+from langfuse.langchain import CallbackHandler
+
+handler = CallbackHandler()
+
+# Pass langfuse_session_id as metadata to the chain invocation
+chain.invoke(
+    {"animal": "dog"},
+    config={
+        "callbacks": [handler],
+        "metadata": {
+            "langfuse_session_id": "your-session-id",
+        },
+    },
+)
+```
+
+</Tab>
+<Tab>
+
+When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass the `sessionId` to the constructor:
+
+```ts
+const handler = new CallbackHandler({
+  sessionId: "your-session-id",
+});
+```
+
+You can also set the `session_id` dynamically via the runnable configuration in the chain invocation:
+
+```ts
+import { CallbackHandler } from "langfuse-langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+// Your existing Langchain code to create the chain
+...
+
+// Pass langfuseSessionId as metadata to the chain invocation to be parsed as the Langfuse session_id
+await chain.invoke(
+  { input: "<user_input>" },
+  { callbacks: [langfuseHandler], metadata: { langfuseSessionId: "your-session-id" } }
+);
+```
+
+When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set the sessionId via `langfuse.trace()`:
+
+```ts
+import { CallbackHandler, Langfuse } from "langfuse-langchain";
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({
+  sessionId: "your-session-id",
+});
+const langfuseHandler = new CallbackHandler({ root: trace });
+
+// Add Langfuse handler as callback to your langchain chain/agent
+await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
+```
+
+</Tab>
+
+<Tab>
+The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId to the Langfuse sessionId. Flowise 1.4.10 or higher is required.
+
+</Tab>
+
+</Tabs>
+
+## Example
+
+Try this feature using the public [example project](/docs/demo).
+
+_Example session spanning multiple traces_
+
+<Frame border fullWidth>
+  ![Session view](/images/docs/session.png)
+</Frame>
+
+## Other features
+
+- Publish a session to share with others as a public link ([example](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/sessions/lf.docs.conversation.TL4KDlo))
+- Bookmark a session to easily find it later
+- Annotate sessions by adding `scores` via the Langfuse UI to record human-in-the-loop evaluations
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-sessions"]} />

@@ -1,0 +1,22 @@
+---
+title: How to manage different environments in Langfuse?
+tags: [platform, self-hosting, cloud, observability]
+---
+
+# How to manage different environments in Langfuse?
+
+Langfuse allows you to effectively manage various environments, such as production, staging, and development, either through projects or tags.
+
+## Environments (Recommended)
+
+The recommended approach for managing different environments in Langfuse is to use the built-in [Environments](/docs/tracing-features/environments) feature. This allows you to organize your traces, observations, and scores from different contexts such as production, staging, or development within the same project.
+
+You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization:
+
+## Alternative Option 1: Projects
+
+If you need to specify different [role-based access controls](/docs/rbac) for each environment, consider using separate projects for each environment. You can still group all environments within the same organization to simplify access management. Each project will have its own set of members, prompts, and API keys.
+
+## Alternative Option 2: Tags
+
+[Tags](/docs/tracing-features/tags) are the preferred option if you don't have role-based access control requirements and want a consolidated view across all environments. Tags are fully supported across Langfuse features and make it easier to switch between different environments within the user interface and integrations as they share api keys, prompts, and members.

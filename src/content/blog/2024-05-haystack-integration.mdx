@@ -1,0 +1,135 @@
+---
+title: Haystack <> Langfuse Integration
+date: 2024/05/16
+description: Easily monitor and trace your Haystack pipelines with this new Langfuse integration.
+tag: integration
+ogImage: /images/blog/haystack/haystack_og.png
+author: Lydia
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Haystack <> Langfuse Integration"
+  description="OSS observability and analytics for the popular RAG application framework."
+  date="May 17, 2024"
+  authors={["lydiayou"]}
+/>
+
+We're excited to highlight a new Langfuse integration with Haystack!
+
+This integration allows you to easily trace your Haystack pipelines in the Langfuse UI. We've previously launched integrations with popular tools that devs love -- including [LlamaIndex](/blog/llama-index-integration), [LangChain](/integrations/frameworks/langchain) and [LiteLLM](/integrations/gateways/litellm) -- and we're excited to be continuing that with Haystack.
+
+Thanks to the team at deepset for developing the integration. We're excited to see how you use it!
+
+## What's New
+
+The `langfuse-haystack` package integrates tracing capabilities into Haystack (2.x) pipelines using Langfuse. You can then add `LangfuseConnector` as a tracer to automatically trace the operations and data flow within the pipeline.
+
+<CloudflareVideo
+  videoId="36a42457d879923f84681f8fe62443e4"
+  aspectRatio={16 / 10.26}
+  title="Haystack Trace"
+  gifStyle
+/>
+
+## What is Haystack?
+
+[Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative (RAG) pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
+
+**RAG has proven to be a pragmatic and efficient way of working with LLMs**. The integration of custom data sources through RAG can significantly enhance the quality of an LLM’s response, improving user experience. Haystack is a lightweight and powerful tool to build data-augmented LLM applications; you can read more about their approach to the building blocks of pipelines [here](https://docs.haystack.deepset.ai/docs/intro).
+
+Haytsack recently introduced Haystack 2.0 with a new architecture and modular design. Building on top of Haystack makes applications easier to understand, maintain and extend.
+
+## How Can Langfuse Help?
+
+[Langfuse tracing](/docs/tracing) can be helpful for Haystack pipelines in the following ways:
+
+- Capture comprehensive details of each execution trace in a beautiful UI dashboard
+  - Latency
+  - Token usage
+  - Cost
+  - Scores
+- Capture the full context of the execution
+- Monitor and score traces
+- Build fine-tuning and testing datasets
+
+Langfuse integration with a tool like Haystack can help monitor model performance, can assist with pinpointing areas for improvement, or create datasets from your pipeline executions for fine-tuning and testing.
+
+## Overview
+
+<CloudflareVideo
+  videoId="aaa30e674c281a9c9591af03b5f668d2"
+  aspectRatio={16 / 10}
+  title="Haystack Integration Overview"
+/>
+
+## Quickstart
+
+Here are the steps to get started! First, add your API keys. You can find your Langfuse public and private keys on the dashboard. Make sure to set `HAYSTACK_CONTENT_TRACING_ENABLED` to `"True"`.
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ["HAYSTACK_CONTENT_TRACING_ENABLED"] = "True"
+
+# Your openai key
+os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+Here's how you add `LangfuseConnector` as a tracer to the pipeline:
+
+```python
+from datasets import load_dataset
+from haystack import Document, Pipeline
+from haystack.components.builders import PromptBuilder
+from haystack.components.embedders import SentenceTransformersDocumentEmbedder, SentenceTransformersTextEmbedder
+from haystack.components.generators import OpenAIGenerator
+from haystack.components.retrievers import InMemoryEmbeddingRetriever
+from haystack.document_stores.in_memory import InMemoryDocumentStore
+from haystack_integrations.components.connectors.langfuse import LangfuseConnector
+
+basic_rag_pipeline = Pipeline()
+    # Add components to your pipeline
+    basic_rag_pipeline.add_component("tracer", LangfuseConnector("Basic RAG Pipeline"))
+    basic_rag_pipeline.add_component(
+        "text_embedder", SentenceTransformersTextEmbedder(model="sentence-transformers/all-MiniLM-L6-v2")
+    )
+    basic_rag_pipeline.add_component("retriever", retriever)
+    basic_rag_pipeline.add_component("prompt_builder", prompt_builder)
+    basic_rag_pipeline.add_component("llm", OpenAIGenerator(model="gpt-4o", generation_kwargs={"n": 2}))
+```
+
+For each trace, you can see:
+
+- Latency for each component of the pipeline
+- Input and output for each step
+- For generations, token usage and costs are automatically calculated.
+
+If you want to learn more about traces and what they can do in Langfuse, read our [documentation](/docs/tracing).
+
+## Dive In
+
+Head to the [Langfuse Docs](/integrations/frameworks/haystack) or see an example integration in this [end-to-end cookbook](/guides/cookbook/integration_haystack) to dive straight in.
+
+import { FileCode, BookOpen, Video } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Docs"
+    href="/integrations/frameworks/haystack"
+    icon={<BookOpen />}
+  />
+  <Card
+    title="Cookbook"
+    href="/guides/cookbook/integration_haystack"
+    icon={<FileCode />}
+  />
+  <Card title="Video" href="/guides/videos/haystack" icon={<Video />} />
+</Cards>

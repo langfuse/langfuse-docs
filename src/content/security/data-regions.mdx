@@ -1,0 +1,62 @@
+---
+description: Details on Langfuse Cloud data regions, high availability, and the self-hosted option.
+---
+
+# Data Regions & Availability
+
+Langfuse Cloud is designed for high availability and offers multiple data regions to meet your needs.
+
+Our database and application run on AWS infrastructure, partly managed by Clickhouse.
+
+## Langfuse Cloud Regions
+
+All data, user accounts, and infrastructure are completely separated between the regions. You can have accounts in each regions.
+
+| Region                                    | URL                                                                    | Location                  |
+| ----------------------------------------- | ---------------------------------------------------------------------- | ------------------------- |
+| **US**                                    | [`https://us.cloud.langfuse.com`](https://us.cloud.langfuse.com)       | Oregon (AWS `us-west-2`)  |
+| **EU**                                    | [`https://cloud.langfuse.com`](https://cloud.langfuse.com)             | Ireland (AWS `eu-west-1`) |
+| **HIPAA** ([learn more](/security/hipaa)) | [`https://hipaa.cloud.langfuse.com`](https://hipaa.cloud.langfuse.com) | Oregon (AWS `us-west-2`)  |
+
+## Connecting to a Region
+
+To connect to a specific data region using the Langfuse SDKs, you need to set the base URL environment variable or pass it during initialization:
+
+- **Python:** Set `LANGFUSE_HOST` environment variable or use the `host` parameter.
+- **JS/TS:** Set `LANGFUSE_BASEURL` environment variable or use the `baseUrl` parameter.
+
+Example base URLs:
+
+- US: `https://us.cloud.langfuse.com`
+- EU: `https://cloud.langfuse.com`
+- HIPAA: `https://hipaa.cloud.langfuse.com`
+
+Refer to the [SDK documentation](/docs/sdk) for detailed configuration instructions.
+
+## Choosing a Region
+
+When selecting a data region, consider the following factors:
+
+- **Compliance and data privacy requirements:** Choose the region that aligns with your organization's data residency needs (e.g., GDPR often favors the EU region).
+- **Latency for Prompt Management:** If using Langfuse [Prompt Management](/docs/prompts), select the region closer to your application servers for lower latency when fetching prompts. This is hardly noticeable as the prompts are cached by the Langfuse SDK.
+- **Latency for UI access:** Choose the region closer to your team's location for a faster experience when using the Langfuse web interface.
+
+Less critical factor:
+
+- **Tracing ingestion latency:** Trace data is sent asynchronously in batches, making ingestion latency less of a direct concern for application performance.
+
+## Business Continuity & Availability
+
+| Control               | Details                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| **High availability** | Multi‑AZ databases & load‑balanced stateless application layer on AWS.                           |
+| **Disaster recovery** | Encrypted backups stored cross‑region; tested at least annually                                  |
+| **Status page**       | [https://status.langfuse.com](https://status.langfuse.com) with historical uptime and incidents. |
+
+## Self-hosted Instances
+
+Alternatively, you can self-host Langfuse for full control over your data and infrastructure. For installation and configuration, see: [Self-hosting guide](/self-hosting)
+
+## Contact
+
+For questions about data regions or availability, contact security@langfuse.com.

@@ -1,0 +1,26 @@
+---
+title: How to trace the OpenAI Assistants API?
+tags: [integration, integration-openai]
+---
+
+# How to trace the OpenAI Assistants API?
+
+The native integrations for OpenAI (Python & JS/TS) do not instrument the Assistants API natively as it shifts state to OpenAI (threads, etc.). However, you can still trace the API calls via our Python and JS integrations and visualize the results in Langfuse.
+
+## Python
+
+You can instrument the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview) via the [Langfuse `observe()` decorator](/docs/sdk/python/decorators). We have prepared a simple example to demonstrate how to trace the API calls and visualize the results in Langfuse.
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="Cookbook: Tracing of OpenAI Assistants API"
+    href="/integrations/model-providers/openai-assistants-api"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## JS/TS
+
+We do not yet have a published example on how to do this via the [Langfuse JS/TS SDK](/docs/sdk/typescript). However, you can have a look at the Python example to understand the general approach: (1) create an assistant, (2) run it on a thread, and (3) observe the execution with Langfuse tracing.

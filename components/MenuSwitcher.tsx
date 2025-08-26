@@ -1,10 +1,10 @@
 import { Server, LibraryBig, BookOpen, FileCode, Unplug } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 export const MenuSwitcher = () => {
-  const { asPath } = useRouter();
+  const asPath = usePathname() || "/";
   return (
     <div className="-mx-2 hidden md:block">
       {[

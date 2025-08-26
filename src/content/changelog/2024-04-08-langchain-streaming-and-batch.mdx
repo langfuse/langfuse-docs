@@ -1,0 +1,27 @@
+---
+date: 2024-04-08
+title: Support for LangChain async, batch and streaming interfaces
+description: With this release, Langfuse Tracing integrates natively with all LangChain interfaces on Python and JS.
+author: Max
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Available as of [v2.22.0](https://github.com/langfuse/langfuse-python/releases/tag/v2.22.0) of the Langfuse Python SDK. Check out the [integration docs](/integrations/frameworks/langchain) for more details on how to use Langfuse with LangChain.
+
+Thanks to [@noble-varghese](https://github.com/noble-varghese) for your contribution on this!
+
+**Overview of supported Langchain interfaces**
+
+| Feature/interface | Python | JS/TS |
+| ----------------- | ------ | ----- |
+| LCEL              | ✅     | ✅    |
+| `invoke()`        | ✅     | ✅    |
+| `run()`           | ✅     | ✅    |
+| `call()`          | ✅     | ✅    |
+| `predict()`       | ✅     | ✅    |
+| async             | ✅     | ✅    |
+| `batch()`         | ✅     | (✅)  |
+| streaming         | ✅     | ✅    |

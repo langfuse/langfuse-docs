@@ -1,0 +1,18 @@
+---
+title: How can I restrict access on my self-hosted instance to internal users?
+tags: [self-hosting]
+---
+
+# How can I restrict access on my self-hosted instance to internal users?
+
+If you expose your self-hosted Langfuse instance to the public internet, you may want to restrict access to only internal users.
+
+**Recommended ways to restrict access:**
+
+1. Disable email/password authentication (`AUTH_DISABLE_USERNAME_PASSWORD=true`)
+2. Use an authentication provider supported by Langfuse, such as Google, GitHub, Okta, Auth0. See [docs](/self-hosting/security/authentication-and-sso) for details.
+3. Configure your authentication provider to restrict access to only internal users.
+
+**Optional: Restrict organization creation**
+
+You can rely on an allowlist of _Organization Creators_ to restrict who can create new organizations. See [docs](/self-hosting/administration/organization-creators) for details.

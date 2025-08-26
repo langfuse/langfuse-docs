@@ -1,0 +1,53 @@
+---
+title: Session Level Scores
+description: Create and manage scores at the session level for more comprehensive evaluation of conversational AI applications
+date: 2025-04-28
+author: Marlies
+ogCloudflareVideo: cbb30d66993bc254ec529c56f5162ee3
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Langfuse now supports session-level scores, enabling comprehensive evaluation of conversational experiences across multiple interactions rather than just individual traces or observations.
+
+## What's New
+
+- **Session-Level Scoring**: Create and manage scores at the session level for holistic evaluation of conversational AI applications
+- **Flexible API Design**: Updated APIs to accommodate both trace-level and session-level scoring needs
+- **UI Enhancements**: Visual indicators and aggregates for session scores throughout the interface
+
+## API Updates
+
+We have added a new v2 api and will continue to support the v1 api for the foreseeable future.
+POST and DELETE APIs will support both trace and session level scores across v1 and v2.
+
+For GET APIs:
+
+- **V1 API**: Only supports trace level scores, therefore requires `traceId` - to remain backwards compatible
+- **V2 API**: Either `traceId` or `sessionId` is now required (but not both) when creating scores
+
+
+## UI Improvements
+
+- **Multi-Level Annotation**: Support for score annotations at trace, observation, and session levels
+- **Sessions Table**: Added score aggregates to the sessions table view for quick assessment
+- **Consistent Experience**: Unified scoring experience across all levels of your application
+
+## Why Session Scores Matter
+
+Session-level scores are particularly valuable for conversational applications where user satisfaction spans multiple interactions rather than individual exchanges. This enables more accurate evaluation of:
+
+- Overall conversation quality
+- Multi-turn interaction effectiveness
+- End-to-end user experience metrics
+
+## Get Started
+
+import { Book } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Custom Scores Documentation" href="/docs/evaluation/evaluation-methods/custom-scores" icon={<Book />} />
+  <Card title="Session Documentation" href="/docs/observability/features/sessions" icon={<Book />} />
+</Cards>

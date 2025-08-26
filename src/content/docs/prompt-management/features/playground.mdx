@@ -1,0 +1,97 @@
+---
+description: Test, iterate, and compare different prompts and models within the LLM Playground.
+sidebarTitle: Playground
+---
+
+# LLM Playground
+
+Test and iterate on your prompts directly in the Langfuse Prompt Playground. Tweak the prompt and model parameters to see how different models respond to these input changes. This allows you to quickly iterate on your prompts and optimize them for the best results in your LLM app without having to switch between tools or use any code.
+
+<Frame border fullWidth>
+  ![LLM Playground](/images/docs/playground-overview.png)
+</Frame>
+
+## Core features
+
+### Side-by-Side Comparison View
+
+Compare multiple prompt variants alongside each other. Execute them all at once or focus on a single variant. Each variant keeps its own LLM settings, variables, tool definitions, and placeholders so you can immediately see the impact of every change.
+
+<CloudflareVideo
+  videoId="08cc4e34b6211f8f316a67df0a69c354"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+### Open your prompt in the playground
+
+You can open a prompt you created with [Langfuse Prompt Management](/docs/prompt-management/get-started) in the playground.
+
+<CloudflareVideo
+  videoId="31ea87009df96bcc685b0dc9bebe35a2"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+### Save your prompt to Prompt Management
+
+When you're satisfied with your prompt, you can save it to Prompt Management by clicking the save button.
+
+<CloudflareVideo
+  videoId="62427de4ef956d2d3119058c40e1a344"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+### Open a generation in the playground
+
+You can open a generation from [Langfuse Observability](/docs/observability) in the playground by clicking the `Open in Playground` button in the generation details page.
+
+<CloudflareVideo
+  videoId="31ea87009df96bcc685b0dc9bebe35a2"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+### Tool calling and structured outputs
+
+The Langfuse Playground supports tool calling and structured output schemas, enabling you to define, test, and validate LLM executions that rely on tool calls and enforce specific response formats.
+
+<CloudflareVideo videoId="8a19028067239a8e9ffe929d6dfd426e" gifStyle />
+
+**Tool Calling**
+
+- Define custom tools with JSON schema definitions
+- Test prompts relying on tools in real-time by mocking tool responses
+- Save tool definitions to your project
+
+**Structured Output**
+
+- Enforce response formats using JSON schemas
+- Save schemas to your project
+- Jump into the playground from your OpenAI generation using structured output
+
+### Add prompt variables
+
+You can add prompt variables in the playground to simulate different inputs to your prompt.
+
+<Frame border fullWidth>
+  ![Add prompt variables](/images/docs/playground-variables.png)
+</Frame>
+
+### Use your favorite model
+
+You can use your favorite model by adding the API key for the model you want to use in the Langfuse project settings. You can learn how to set up an LLM connection [here](/docs/administration/llm-connection).
+
+<Frame border fullWidth>
+  ![Select the model you want to
+  use](/images/docs/playground-model-selection.png)
+</Frame>
+
+Optionally, many LLM providers allow for additional parameters when invoking a model. You can pass these parameters in the playground when toggling "Additional Options" in the model selection dropdown. [Read this documentation about additional provider options](/docs/administration/llm-connection#advanced-configurations) for more information.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-playground"]} />

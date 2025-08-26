@@ -1,0 +1,41 @@
+---
+date: 2024-08-02
+title: Vercel AI SDK Integration
+description: The AI SDK now supports OpenTelemetry-based instrumentation. With the new LangfuseExporter, you can easily collect these traces in Langfuse.
+author: Hassieb
+ogImage: /images/changelog/2024-08-02-vercel-ai-sdk-integration.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+```ts filename="instrumentation.ts" {7}
+import { registerOTel } from "@vercel/otel";
+import { LangfuseExporter } from "langfuse-vercel";
+
+export function register() {
+  registerOTel({
+    serviceName: "langfuse-vercel-ai-example",
+    traceExporter: new LangfuseExporter(),
+  });
+}
+```
+
+```ts {4}
+const result = await generateText({
+  model: openai("gpt-4-turbo"),
+  prompt: "Write a short story about a cat.",
+  experimental_telemetry: { isEnabled: true },
+});
+```
+
+Example Trace:
+
+<Frame border fullWidth>
+  ![Vercel AI SDK Example Trace in
+  Langfuse](/images/docs/vercel-ai-sdk-example-trace.png)
+</Frame>
+
+See [docs](/integrations/frameworks/vercel-ai-sdk) to get started.

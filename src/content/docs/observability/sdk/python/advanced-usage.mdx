@@ -1,0 +1,369 @@
+---
+title: Advanced usage of the Langfuse Python SDK
+description: Advanced usage of the Langfuse Python SDK for data masking, logging, sampling, filtering, and more.
+category: SDKs
+---
+
+# Advanced Usage
+
+The Python SDK provides advanced usage options for your application. This includes data masking, logging, sampling, filtering, and more.
+
+## Masking Sensitive Data
+
+If your trace data (inputs, outputs, metadata) might contain sensitive information (PII, secrets), you can provide a `mask` function during client initialization. This function will be applied to all relevant data before it's sent to Langfuse.
+
+The `mask` function should accept `data` as a keyword argument and return the masked data. The returned data must be JSON-serializable.
+
+```python
+from langfuse import Langfuse
+import re
+
+def pii_masker(data: any, **kwargs) -> any:
+    # Example: Simple email masking. Implement your more robust logic here.
+    if isinstance(data, str):
+        return re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[EMAIL_REDACTED]", data)
+    elif isinstance(data, dict):
+        return {k: pii_masker(data=v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [pii_masker(data=item) for item in data]
+    return data
+
+langfuse = Langfuse(mask=pii_masker)
+
+# Now, any input/output/metadata will be passed through pii_masker
+with langfuse.start_as_current_span(name="user-query", input={"email": "test@example.com", "query": "..."}) as span:
+    # The 'email' field in the input will be masked.
+    pass
+```
+
+## Logging
+
+The Langfuse SDK uses Python's standard `logging` module. The main logger is named `"langfuse"`.
+To enable detailed debug logging, you can either:
+
+1.  Set the `debug=True` parameter when initializing the `Langfuse` client.
+2.  Set the `LANGFUSE_DEBUG="True"` environment variable.
+3.  Configure the `"langfuse"` logger manually:
+
+```python
+import logging
+
+langfuse_logger = logging.getLogger("langfuse")
+langfuse_logger.setLevel(logging.DEBUG)
+```
+
+The default log level for the `langfuse` logger is `logging.WARNING`.
+
+## Sampling
+
+You can configure the SDK to sample traces by setting the `sample_rate` parameter during client initialization (or via the `LANGFUSE_SAMPLE_RATE` environment variable). This value should be a float between `0.0` (sample 0% of traces) and `1.0` (sample 100% of traces).
+
+If a trace is not sampled, none of its observations (spans, generations) or associated scores will be sent to Langfuse.
+
+```python
+from langfuse import Langfuse
+
+# Sample approximately 20% of traces
+langfuse_sampled = Langfuse(sample_rate=0.2)
+```
+
+## Filtering by Instrumentation Scope
+
+You can configure the SDK to filter out spans from specific instrumentation libraries by using the `blocked_instrumentation_scopes` parameter. This is useful when you want to exclude infrastructure spans while keeping your LLM and application spans.
+
+```python
+from langfuse import Langfuse
+
+# Filter out database spans
+langfuse = Langfuse(
+    blocked_instrumentation_scopes=["sqlalchemy", "psycopg"]
+)
+```
+
+**How it works:**
+
+When third-party libraries create OpenTelemetry spans (through their instrumentation packages), each span has an associated "instrumentation scope" that identifies which library created it. The Langfuse SDK filters spans at the export level based on these scope names.
+
+You can see the instrumentation scope name for any span in the Langfuse UI under the span's metadata (`metadata.scope.name`). Use this to identify which scopes you want to filter.
+
+<Callout type="warning">
+**Cross-Library Span Relationships**
+
+When filtering instrumentation scopes, be aware that blocking certain libraries may break trace tree relationships if spans from blocked and non-blocked libraries are nested together.
+
+For example, if you block parent spans but keep child spans from a separate library, you may see "orphaned" LLM spans whose parent spans were filtered out. This can make traces harder to interpret.
+
+Consider the impact on trace structure when choosing which scopes to filter.
+</Callout>
+
+## Isolated TracerProvider
+
+You can configure a separate OpenTelemetry TracerProvider for use with Langfuse. This creates isolation between Langfuse tracing and your other observability systems.
+
+**Benefits of isolation:**
+- Langfuse spans won't be sent to your other observability backends (e.g., Datadog, Jaeger, Zipkin)
+- Third-party library spans won't be sent to Langfuse
+- Independent configuration and sampling rates
+
+<Callout type="warning">
+While TracerProviders are isolated, they share the same OpenTelemetry context for tracking active spans. This can cause span relationship issues where:
+- A parent span from one TracerProvider might have children from another TracerProvider
+- Some spans may appear "orphaned" if their parent spans belong to a different TracerProvider
+- Trace hierarchies may be incomplete or confusing
+
+Plan your instrumentation carefully to avoid confusing trace structures.
+</Callout>
+
+```python
+from opentelemetry.sdk.trace import TracerProvider
+
+from langfuse import Langfuse
+
+langfuse_tracer_provider = TracerProvider() # do not set to global tracer provider to keep isolation
+
+langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
+
+langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
+```
+
+## Using `ThreadPoolExecutors` or `ProcessPoolExecutors`
+
+The observe decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors _and_ when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
+
+The recommended workaround is to pass the parent observation id  and the trace ID as a keyword argument to each multithreaded execution, thus re-establishing the link to the parent span or trace:
+
+```python /langfuse_trace_id=trace_id/ /langfuse_parent_observation_id=observation_id/
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from langfuse import get_client, observe
+
+@observe
+def execute_task(*args):
+    return args
+
+@observe
+def execute_groups(task_args):
+    trace_id = get_client().get_current_trace_id()
+    observation_id = get_client().get_current_observation_id()
+
+    with ThreadPoolExecutor(3) as executor:
+        futures = [
+            executor.submit(
+                execute_task,
+                *task_arg,
+                langfuse_trace_id=trace_id,
+                langfuse_parent_observation_id=observation_id,
+            )
+            for task_arg in task_args
+        ]
+
+        for future in as_completed(futures):
+            future.result()
+
+    return [f.result() for f in futures]
+
+@observe()
+def main():
+    task_args = [["a", "b"], ["c", "d"]]
+
+    execute_groups(task_args)
+
+main()
+
+get_client().flush()
+```
+
+## Distributed tracing
+
+To maintain the trace context across service / process boundaries, please rely on the OpenTelemetry native context propagation across service / process boundaries as much as possible.
+
+Using the `trace_context` argument to 'force' the parent child relationship may lead to unexpected trace updates as the resulting span will be treated as a root span server side.
+
+- If you are using multiprocessing, [see here for details on how to propagate the OpenTelemetry context](https://github.com/open-telemetry/opentelemetry-python/issues/2765#issuecomment-1158402076).
+- If you are using Pydantic Logfire, please set `distributed_tracing` to `True`.
+
+
+## Multi-Project Setup (Experimental)
+
+<Callout type="warning">
+Multi-project setups are **experimental** and have important limitations regarding third-party OpenTelemetry integrations.
+</Callout>
+
+The Langfuse Python SDK supports routing traces to different projects within the same application by using multiple public keys. This works because the Langfuse SDK adds a specific span attribute containing the public key to all spans it generates.
+
+**How it works:**
+
+1. **Span Attributes**: The Langfuse SDK adds a specific span attribute containing the public key to spans it creates
+2. **Multiple Processors**: Multiple span processors are registered onto the global tracer provider, each with their respective exporters bound to a specific public key
+3. **Filtering**: Within each span processor, spans are filtered based on the presence and value of the public key attribute
+
+**Important Limitation with Third-Party Libraries:**
+
+Third-party libraries that emit OpenTelemetry spans automatically (e.g., HTTP clients, databases, other instrumentation libraries) do **not** have the Langfuse public key span attribute. As a result:
+
+- These spans cannot be routed to a specific project
+- They are processed by all span processors and sent to all projects
+- All projects will receive these third-party spans
+
+**Why is this experimental?**
+This approach requires that the `public_key` parameter be passed to all Langfuse SDK executions across all integrations to ensure proper routing, and third-party spans will appear in all projects.
+
+### Initialization
+
+To set up multiple projects, initialize separate Langfuse clients for each project:
+
+```python
+from langfuse import Langfuse
+
+# Initialize clients for different projects
+project_a_client = Langfuse(
+    public_key="pk-lf-project-a-...",
+    secret_key="sk-lf-project-a-...",
+    host="https://cloud.langfuse.com"
+)
+
+project_b_client = Langfuse(
+    public_key="pk-lf-project-b-...",
+    secret_key="sk-lf-project-b-...",
+    host="https://cloud.langfuse.com"
+)
+```
+
+### Integration Usage
+
+For all integrations in multi-project setups, you must specify the `public_key` parameter to ensure traces are routed to the correct project.
+
+**Observe Decorator:**
+
+Pass `langfuse_public_key` as a keyword argument to the *top-most* observed function (not the decorator). From Python SDK >= 3.2.2, nested decorated functions will automatically pick up the public key from the execution context they are currently into. Also, calls to `get_client` will be also aware of the current `langfuse_public_key` in the decorated function execution context, so passing the `langfuse_public_key` here again is not necessary.
+
+```python
+from langfuse import observe
+
+@observe
+def nested():
+    # get_client call is context aware
+    # if it runs inside another decorated function that has
+    # langfuse_public_key passed, it does not need passing here again
+    get_client().update_current_trace(user_id='myuser')
+
+
+@observe
+def process_data_for_project_a(data):
+    # passing `langfuse_public_key` here again is not necessarily
+    # as it is stored in execution context
+    nested()
+
+    return {"processed": data}
+
+@observe
+def process_data_for_project_b(data):
+    # passing `langfuse_public_key` here again is not necessarily
+    # as it is stored in execution context
+    nested()
+
+    return {"enhanced": data}
+
+# Route to Project A
+# Top-most decorated function needs `langfuse_public_key` kwarg
+result_a = process_data_for_project_a(
+    data="input data",
+    langfuse_public_key="pk-lf-project-a-..."
+)
+
+# Route to Project B
+# Top-most decorated function needs `langfuse_public_key` kwarg
+result_b = process_data_for_project_b(
+    data="input data",
+    langfuse_public_key="pk-lf-project-b-..."
+)
+```
+
+**OpenAI Integration:**
+
+Add `langfuse_public_key` as a keyword argument to the OpenAI execution:
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+# Route to Project A
+response_a = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello from Project A"}],
+    langfuse_public_key="pk-lf-project-a-..."
+)
+
+# Route to Project B
+response_b = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello from Project B"}],
+    langfuse_public_key="pk-lf-project-b-..."
+)
+```
+
+**Langchain Integration:**
+
+Add `public_key` to the CallbackHandler constructor:
+
+```python
+from langfuse.langchain import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+# Create handlers for different projects
+handler_a = CallbackHandler(public_key="pk-lf-project-a-...")
+handler_b = CallbackHandler(public_key="pk-lf-project-b-...")
+
+llm = ChatOpenAI(model_name="gpt-4o")
+prompt = ChatPromptTemplate.from_template("Tell me about {topic}")
+chain = prompt | llm
+
+# Route to Project A
+response_a = chain.invoke(
+    {"topic": "machine learning"},
+    config={"callbacks": [handler_a]}
+)
+
+# Route to Project B
+response_b = chain.invoke(
+    {"topic": "data science"},
+    config={"callbacks": [handler_b]}
+)
+```
+
+**Important Considerations:**
+
+- Every Langfuse SDK execution across all integrations must include the appropriate public key parameter
+- Missing public key parameters may result in traces being routed to the default project or lost
+- Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
+
+## Self-signed SSL certificates (self-hosted Langfuse)
+
+
+If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:
+
+<Callout type='warning'>
+Changing SSL settings has major security implications depending on your environment. Be sure you understand these implications before you proceed.
+</Callout>
+
+**1. Set OpenTelemetry span exporter to trust self-signed certificate**
+
+```bash filename=".env"
+OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE="/path/to/my-selfsigned-cert.crt"
+```
+
+**2. Set HTTPX to trust certificate for all other API requests to Langfuse instance**
+
+```python filename="main.py"
+import os
+
+import httpx
+
+from langfuse import Langfuse
+
+httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE"])
+
+langfuse = Langfuse(httpx_client=httpx_client)
+```
+

@@ -1,0 +1,49 @@
+---
+date: 2024-03-05
+title: "Uptrain.ai integration (cookbook)"
+description: Langfuse adds >20 open source evaluators through cookbook integration with open source project and fellow Y Combinator startup UpTrain.ai
+author: Clemens
+ogImage: /images/blog/uptrain/uptrain-ai.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+## How-to
+
+<Steps>
+
+### Trace your application with Langfuse
+
+Use any Langfuse [integration](/integrations).
+
+### Pull (a sample) via our Python SDK
+
+Define which traces/LLM-calls you want to evaluate and pull them via our Python SDK.
+
+### Run Uptrain OSS evals
+
+You can find the complete list of UpTrain evals [here](https://github.com/uptrain-ai/uptrain?tab=readme-ov-file#pre-built-evaluations-we-offer-).
+
+### Log scores to Langfuse
+
+Use Langfuse [Scores](/docs/scores) to track the eval results in Langfuse.
+
+</Steps>
+
+We have set up an end-to-end cookbook which makes evaluating your traces with UpTrain happen in a jiffy:
+
+import { FileCode } from "lucide-react";
+
+<Cards num={3}>
+  <Card
+    title="Uptrain + Langfuse Cookbook"
+    href="/guides/cookbook/evaluation_with_uptrain"
+    icon={<FileCode />}
+  />
+</Cards>
+
+## Sneak peak
+
+We are currently working on an evaluation service to automatically score all incoming observations by running custom evaluation templates. Ping us if you want to be among the first to try it: early-access@langfuse.com

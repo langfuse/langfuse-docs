@@ -1,0 +1,211 @@
+---
+title: Langfuse Update — October 2023
+date: 2023/11/01
+description: "Improved dashboard, OpenAI integration, RAG evals, doubled API speed, simplified Docker deployments."
+tag: update
+ogImage: /images/blog/update-october-2023/og.png
+author: Marc
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { NotebookBanner } from "@/components/NotebookBanner";
+
+<BlogHeader
+  title="Langfuse Update — October 2023"
+  description="Improved dashboard, OpenAI integration, RAG evals, doubled API performance, simplified Docker deployments."
+  date="Nov 1, 2023"
+  authors={["marcklingen"]}
+/>
+
+Hi everyone 👋, here's a quick overview of all the most notable new features we shipped in October:
+
+- [**Improved dashboard**](#dashboard)
+
+- [**OpenAI SDK integration**](#openai) (Python)
+
+- [**Cookbook for RAG evals**](#rag-evals) based on Ragas
+
+- [**2x API performance**](#doubled-api-performance)
+
+- [**Simplified Docker deployments**](#simplified-docker)
+
+- [**SDK improvements**](#sdk-improvements)
+
+  - SDKs expose trace URL
+  - Python SDK now supports Pydantic v1 and v2
+
+- [**UX improvements**](#ux-improvements)
+
+  - Quickly page through traces
+  - SSO via Google and GitHub
+  - Delete projects
+
+- [**Docs improvements**](#docs): Quickly open all Python docs as Jupyter notebooks
+
+... and many small improvements and bug fixes.
+
+---
+
+The details 👇
+
+## 📈 Enhancements to dashboard [#dashboard]
+
+<CloudflareVideo
+  videoId="8072f530d91328c4946f1435b52e08e5"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+**Now includes**
+
+- Costs broken down by model
+- Latency percentiles by model (50th, 90th, 95th, 99th)
+- Usage/cost by end-user
+- Usage by trace type to break it down by application use case
+- New date-range selection
+
+## 🤖 OpenAI SDK integration [#openai]
+
+Drop-in replacement for OpenAI's Python SDK to get full visibility by changing only one line of code. Automatically captures: prompts, completions, usage, latencies and API errors.
+
+```diff
+- import openai
++ from langfuse.openai import openai
+```
+
+```python
+# Use OpenAI Python SDK as usual
+openai.ChatCompletion.create(
+  model="gpt-4o",
+  messages=[
+      {"role": "system", "content": "You are a very accurate calculator. You output only the result of the calculation."},
+      {"role": "user", "content": "1 + 1 = "}],
+)
+```
+
+This integration fully supports grouping multiple requests into one trace if they belong to a single invocation. Also you can add scores to evaluate the outputs.
+
+See [integration docs](/integrations/model-providers/openai-py) for full details.
+
+Thanks to [@Dev-Khant](https://github.com/Dev-Khant) for contributing to this.
+
+## 📚 Cookbook for RAG evals [#rag-evals]
+
+Together with the [Ragas](https://docs.ragas.io/) team, we've added a [cookbook](/docs/scores/model-based-evals/ragas) on how to evaluate production RAG (Retrieval augmented generation) pipelines in Langfuse. They specifically evaluate the retrieved context and the generated answer.
+
+<Frame border>
+  [![RAG
+  evals](/images/blog/update-october-2023/ragas-notebook.png)](/docs/scores/model-based-evals/ragas)
+</Frame>
+
+## ⚡️ Doubled API performance [#doubled-api-performance]
+
+<Frame border>
+  ![RAG evals](/images/blog/update-october-2023/api-perf.png)
+</Frame>
+
+API authentication previously added a significant overhead to API requests. We've now optimized this and doubled the API performance.
+
+## 🐳 Simplified Docker deployments [#simplified-docker]
+
+We've integrated the application of migrations to the startup process of the Docker image. This makes it much easier to deploy and continuously update Langfuse via Docker.
+
+```bash
+docker pull ghcr.io/langfuse/langfuse:latest
+```
+
+Check [self-hosting docs](/self-hosting) for full details on how to deploy Langfuse in a production environment.
+
+Optionally, you can also one-click deploy Langfuse to Railway:
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/gmbqa_)
+
+## 🛠 SDK improvements [#sdk-improvements]
+
+### Expose Langfuse trace url
+
+In some cases, it is useful to get the trace URL directly from the SDK to add it to your logs or print it in a development environment. This is now possible in all SDKs.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+```python
+# trace object
+trace.get_trace_url()
+```
+
+```python
+# Langchain callback handler
+handler.get_trace_url()
+```
+
+</Tab>
+<Tab>
+```ts
+// trace object
+trace.getTraceUrl()
+```
+
+```ts
+// Langchain callback handler
+handler.getTraceUrl();
+```
+
+</Tab>
+
+</Tabs>
+
+### Python SDK now supports Pydantic v1 and v2
+
+The Python SDK uses Pydantic to validate the data you send to Langfuse at run time before it is asynchronously sent to the Langfuse API. Previously, the Python SDK used Pydantic v1 leading to incompatibilities with projects using Pydantic v2.
+
+From `1.1.3` onwards, the Python SDK supports both Pydantic v1 and v2.
+
+## 🎨 UX improvements [#ux-improvements]
+
+### Quickly page through traces
+
+<Frame>
+  ![Navigate
+  traces](https://static.langfuse.com/changelog-2023-10-06-faster-navigation.gif)
+</Frame>
+
+When you're browsing traces, you can now quickly page through them.
+
+_Use the `j` and `k` keys to navigate even faster._
+
+### Sign in via Google and GitHub
+
+You can now authenticate using **Google** and **GitHub**. Also supported for self-hosted deployments. Check [docs](/self-hosting) for details.
+
+### Delete projects
+
+Long overdue, you can now get rid of old projects. Thanks to [@DIWAKARKASHYAP](https://github.com/DIWAKARKASHYAP) for contributing to this.
+
+## 📖 Docs [#docs]
+
+_"Docs is product"_
+
+All Python docs are now Jupyter notebooks so you can quickly run them. They are in the [cookbook folder](https://github.com/langfuse/langfuse-docs/tree/main/cookbook) of the Langfuse docs repo.
+
+We've added a banner to the docs to make it easy to open them on GitHub and Google Colab.
+
+_Example pointing to new OpenAI integration_
+
+<NotebookBanner src="/cookbook/integration_openai_sdk.ipynb" />
+
+## 🚢 What's Next?
+
+A lot is to come in November. For starters, we'll invest into the core user experience, especially to make working with complex traces easier.
+
+If you have any feedback or feature requests on how to make Langfuse better for your user case, join us on [Discord](/discord) or open an [issue](/issue) on GitHub.
+
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+
+Subscribe to get monthly updates via email:
+
+<ProductUpdateSignup
+  source="Product update [September 2023]"
+  className="mt-3"
+/>
+
+Follow along on Twitter ([@Langfuse](https://twitter.com/langfuse), [@marcklingen](https://twitter.com/marcklingen))

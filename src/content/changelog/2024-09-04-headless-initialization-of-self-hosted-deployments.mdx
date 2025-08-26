@@ -1,0 +1,39 @@
+---
+date: 2024-09-04
+title: Headless Initialization of Self-Hosted Deployments
+description: Automatically initialize Langfuse resources on startup using environment variables, streamlining self-hosted deployments and infrastructure-as-code integrations.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+If you self-host Langfuse, you can now automatically initialize essential Langfuse resources (organization, project, user, and API keys) on startup using environment variables. This makes it easier to integrate Langfuse into your infrastructure-as-code and automated deployment pipelines. Previously, setting up a new Langfuse instance required manual creation of a user account, organization, and project through the UI before being able to use the API.
+
+Benefits:
+
+- Streamlined Deployments: Automate the initialization process for new Langfuse instances.
+- Infrastructure-as-Code: Easily integrate Langfuse resource initialization into your IaC workflows.
+- Consistent Environments: Ensure consistent resource initialization across different deployment environments.
+
+Resources that can be initialized:
+
+```
+Organization
+├── Project     (part of organization)
+│ └── API Keys  (set for project)
+└── User        (owner of organization)
+```
+
+## How It Works
+
+1. Set the desired `LANGFUSE_INIT_*` environment variables in your deployment configuration.
+2. On startup, Langfuse will check for these variables and initialize the specified resources if they don't already exist.
+3. Your application can immediately start using the initialized resources and API keys.
+
+## Get Started
+
+Checkout the [self-hosting documentation](/self-hosting/administration/headless-initialization) for a full list of available environment variables.
+
+We're excited to see how this new feature will simplify your Langfuse deployments. As always, we welcome your feedback and suggestions for further improvements!

@@ -1,18 +1,4 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
-import {
-  Puzzle,
-  Globe,
-  Server,
-  Wrench,
-  RectangleEllipsis,
-  ChartBar,
-  Code,
-  Database,
-} from "lucide-react";
-import nativeIntegrationsMeta from "../../pages/integrations/native/_meta";
-import dataPlatformIntegrationsMeta from "../../pages/integrations/data-platform/_meta";
+import { Callout } from "nextra/components";
 
 /**
  * Transforms meta config entries into integration page objects
@@ -101,83 +87,8 @@ function processPages(pages: IntegrationPage[]): ProcessedIntegrationPage[] {
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export const IntegrationIndex = () => {
-  // Infer category order from the keys of categoryConfig, preserving their order of appearance
-  const categoryOrder = Object.keys(categoryConfig);
-
-  // Get pages from each category by merging filesystem and additional links
-  const categorizedPages = {} as Record<string, ProcessedIntegrationPage[]>;
-
-  categoryOrder.forEach((category) => {
-    const config = categoryConfig[category];
-
-    // Always load from filesystem
-    const filesystemPages = loadFilesystemPages(category);
-
-    // Merge with additional links if they exist
-    const mergedPages = [
-      ...(config.additionalLinks ?? []),
-      ...(filesystemPages ?? []),
-    ];
-
-    // Only include categories that have pages
-    if (mergedPages.length > 0) {
-      categorizedPages[category] = processPages(mergedPages);
-    }
-  });
-
-  return (
-    <>
-      {categoryOrder
-        .filter(
-          (category) =>
-            categorizedPages[category] && categorizedPages[category].length > 0
-        )
-        .map((category) => {
-          const config = categoryConfig[category];
-          const pages = categorizedPages[category];
-
-          return (
-            <div key={category} className="my-10">
-              <div className="flex items-center gap-3 mb-4">
-                {config.icon}
-                <div>
-                  <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-2xl">
-                    {config.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {config.description}
-                  </p>
-                </div>
-              </div>
-              <Cards num={3}>
-                {pages.map((page) => (
-                  <Cards.Card
-                    href={page.route}
-                    key={page.route}
-                    title={page.title}
-                    icon={
-                      page.frontMatter?.logo ? (
-                        <div className="w-6 h-6  dark:bg-white rounded-sm p-1 flex items-center justify-center">
-                          <img
-                            src={page.frontMatter.logo}
-                            alt=""
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      ) : (
-                        config.icon
-                      )
-                    }
-                    arrow
-                  >
-                    {""}
-                  </Cards.Card>
-                ))}
-              </Cards>
-            </div>
-          );
-        })}
-    </>
-  );
-};
+export const IntegrationIndex = () => (
+  <Callout type="warning">
+    Integration index temporarily disabled during Nextra v4 migration. See Backlog.md.
+  </Callout>
+);

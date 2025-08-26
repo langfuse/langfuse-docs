@@ -41,7 +41,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/router";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { trustedByData } from "@/data/trusted-by";
 
 // Graduated pricing tiers
@@ -165,13 +165,15 @@ const PricingCalculatorModal = ({
   planName?: string;
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [monthlyEvents, setMonthlyEvents] = useState<string>("200,000");
   const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
   const [selectedPlan, setSelectedPlan] = useState<string>(planName);
   const [currentBaseFee, setCurrentBaseFee] = useState<number>(baseFee);
 
   // Read open state from URL
-  const isOpen = router.query.calculatorOpen === "true";
+  const isOpen = (searchParams?.get("calculatorOpen") ?? "") === "true";
 
   // Calculate price when events change
   useEffect(() => {
@@ -180,15 +182,11 @@ const PricingCalculatorModal = ({
   }, [monthlyEvents]);
 
   const handleOpenChange = (open: boolean) => {
-    const query = { ...router.query };
-    if (open) {
-      query.calculatorOpen = "true";
-    } else {
-      delete query.calculatorOpen;
-    }
-    router.replace({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
-    });
+    const params = new URLSearchParams(searchParams ?? undefined);
+    if (open) params.set("calculatorOpen", "true");
+    else params.delete("calculatorOpen");
+    const href = params.toString() ? `${pathname}?${params}` : pathname;
+    router.replace(href);
   };
 
   const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

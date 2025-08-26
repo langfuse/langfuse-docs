@@ -1,0 +1,19 @@
+---
+date: 2023-11-13
+title: Support for Langchain Expression Language (LCEL)
+description: LangChain Expression Language, or LCEL, is a declarative way to easily compose chains together. Langfuse natively supports the new expression language.
+ogImage: /images/changelog/2023-11-13-support-for-langchain-expression-language.jpg
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+To use Langfuse, simply add the callback handler to the invoke method:
+
+```python /config={"callbacks":[handler]}/
+chain.invoke(input, config={"callbacks":[handler]})
+```
+
+See [Langchain integration docs](/integrations/frameworks/langchain) for full details.

@@ -1,8 +1,7 @@
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
 import { useMemo } from "react";
+import { Callout } from "nextra/components";
 
 interface CustomerStory {
   route: string;
@@ -30,17 +29,17 @@ export const CustomerIndex = ({
   maxItems?: number;
   path?: string;
 }) => {
-  const customerStories = useMemo(
-    () =>
-      (getPagesUnderRoute(path) as Array<CustomerStory>)
-        .filter((page) => page.frontMatter?.showInCustomerIndex !== false)
-        .slice(0, maxItems),
-    [maxItems, path]
-  );
+  // TODO(nextra v4): Re-implement with nextra/page-map
+  const customerStories: CustomerStory[] = [];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      {customerStories.map((story) => (
+      {customerStories.length === 0 ? (
+        <Callout type="warning">
+          Customer stories temporarily disabled during Nextra v4 migration. See
+          Backlog.md.
+        </Callout>
+      ) : customerStories.map((story) => (
         <Link 
           key={story.route} 
           href={story.route} 

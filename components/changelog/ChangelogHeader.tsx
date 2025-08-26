@@ -1,19 +1,11 @@
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { Page } from "nextra";
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import { Author } from "../Authors";
 import { CloudflareVideo, Video } from "../Video";
 import { useConfig } from "nextra-theme-docs";
+import { Callout } from "nextra/components";
 
 export const ChangelogHeader = () => {
-  const router = useRouter();
-  const changelogPages = getPagesUnderRoute("/changelog");
-  const page = changelogPages.find(
-    (page) => page.route === router.pathname
-  ) as Page & { frontMatter: any };
-
   const { frontMatter } = useConfig();
   const {
     title,
@@ -30,14 +22,7 @@ export const ChangelogHeader = () => {
 
   return (
     <div className="md:mt-10 flex flex-col gap-10">
-      <Link
-        href={`/changelog${
-          page.route ? "#" + page.route.replace("/changelog/", "") : ""
-        }`}
-        className="md:mb-10"
-      >
-        ← Back to changelog
-      </Link>
+      <Callout type="info">Changelog navigation header pending v4 port.</Callout>
 
       <div>
         <div className="text-lg text-primary/60 mb-3">
@@ -74,10 +59,7 @@ export const ChangelogHeader = () => {
           width={1200}
           height={630}
           className="rounded border"
-          unoptimized={
-            page.frontMatter.gif !== undefined ||
-            page.frontMatter.ogImage?.endsWith(".gif")
-          }
+          unoptimized={gif !== undefined || ogImage?.endsWith(".gif")}
         />
       ) : null}
 

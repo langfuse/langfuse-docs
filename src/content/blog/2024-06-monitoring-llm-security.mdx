@@ -1,0 +1,201 @@
+---
+title: Monitoring LLM Security & Reducing LLM Risks
+date: 2024/06/06
+description: LLM security requires effective run-time checks and ex-post monitoring and evaluation. Learn how to use Langfuse together with popular security libraries to protect prevent common security risks.
+tag: guide, evaluation
+ogImage: /images/blog/2024-06-monitoring-llm-security.png
+author: Lydia You
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Monitoring LLM Security in Langfuse"
+  description="How to use Langfuse to trace, prevent, and evaluate security risks common to LLM-based applications."
+  date="2024/05/14"
+  authors={["lydiayou", "marcklingen"]}
+/>
+
+Protecting against security risks and attacks is becoming increasingly important for ensuring LLM apps are production-ready. Not only do LLM applications need to be secure to protect users' private and sensitive information, they also need ensure a level of quality and safety of responses to maintain product standards.
+
+This post offers an overview of how you can use security tools in conjunction with Langfuse to monitor and protect against common security risks. The [OWASP Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/) list is a useful resource on the topic. It provides a consensus of the most critical security risks for LLM applications.
+
+## Introduction
+
+In the video below, we walk through an example of how to use the open-source security library LLM Guard, and how to integrate Langfuse to monitor and protect against common security risks.
+
+<CloudflareVideo
+  videoId="3a89dd733399f0c9da4aa5ac9da80d78"
+  title="LLM Security Monitoring with Langfuse"
+  aspectRatio={16 / 9}
+  className="mt-6"
+  posterStartTime={112}
+/>
+
+## How to Monitor LLM Security
+
+<Callout type="info">
+
+LLM Security can be addressed with a combination of
+
+- LLM Security libraries for run-time security measures
+- Langfuse for the ex-post evaluation of the effectiveness of these measures
+
+</Callout>
+
+### 1. Run-time security measures with LLM security libraries
+
+There are several popular security libraries that can be used to mitigate security risks in LLM-based applications. These include: [LLM Guard](https://llm-guard.com), [Prompt Armor](https://promptarmor.com), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails), [Microsoft Azure AI Content Safety](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety), [Lakera](https://www.lakera.ai). These libraries help with security measures in the following ways:
+
+1. Catching and blocking a potentially harmful or inappropriate prompt before sending to the model
+2. Redacting sensitive PII before being sending into the model and then un-redacting in the response
+3. Evaluating prompts and completions on toxicity, relevance, or sensitive material at run-time and blocking the response if necessary
+
+### 2. Asynchronous monitoring and evaluation of security measures with Langfuse
+
+Use Langfuse [tracing](/docs/tracing) to gain visibility and confidence in each step of the security mechanism. These are common workflows:
+
+1. **Investigate security issues** by manually inspect traces.
+2. **Monitor security scores over time** in the Langfuse Dashboard.
+3. **Evaluate effectiveness of security measures**. Integrating Langfuse [scores](/docs/scores) into your team's workflow can help teams identify which security risks are most prevalent and build more robust tools around those specific issues. There are two main workflows to consider:
+   - [Annotations (in UI)](/docs/scores/annotation). If you establish a baseline by annotating a share of production traces, you can compare the security scores returned by the security tools with these annotations.
+   - [Automated evaluations](/docs/scores/model-based-evals). Langfuse's model-based evaluations will run asynchronously and can scan traces for things such as toxicity or sensitivity to flag potential risks and identify any gaps in your LLM security setup. Check out the docs to learn more about how to set up these evaluations.
+4. **Track latency to balance tradeoffs**. Some LLM security checks need to be awaited before the model can be called, others block the response to the user. Thus they quickly are an essential driver of overall latency of an LLM application. Langfuse can help disect the latencies of these checks within a trace to understand whether the checks are worth the wait.
+
+## Example Workflow: Anonymizing Personally Identifiable Information (PII)
+
+We redact and un-redact sensitive information using a security library before and after it is fed into the model. We wrap the whole process with the Langfuse [`observe` decorator](/docs/sdk/python/decorators) to trace and monitor the security process. _In the following example below we use the open source library [LLM Guard](https://llm-guard.com), an open-source security tool. All examples easily translate to other libraries._
+
+Exposing Personally Identifiable Information (PII) to models can pose security and privacy risks, such as violating contractual obligations or regulatory compliance requirements, or mitigating the risks of data leakage or a data breach.
+
+The example below shows a simple application that summarizes a given court transcript. For privacy reasons, the application wants to anonymize PII before the information is fed into the model, and then un-redact the response to produce a coherent summary.
+
+<Callout>
+  This is a Python example. It works similarly in other languages and can be
+  traced via the Langfuse SDKs or API.
+</Callout>
+
+<Steps>
+
+### Install packages
+
+```bash
+pip install llm-guard langfuse openai
+```
+
+First, import the security packages and Langfuse tools.
+
+```python
+from llm_guard.input_scanners import Anonymize
+from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
+from langfuse.openai import openai # OpenAI integration
+from langfuse import observe, langfuse
+from llm_guard.output_scanners import Deanonymize
+from llm_guard.vault import Vault
+```
+
+### Anonymize and deanonymize PII and trace with Langfuse
+
+We break up each step of the process into its own function so we can track each step separately in Langfuse.
+
+By decorating the functions with `@observe()`, we can trace each step of the process and monitor the risk scores returned by the security tools. This allows us to see how well the security tools are working and whether they are catching the PII as expected.
+
+```python
+vault = Vault()
+
+@observe()
+def anonymize(input: str):
+  scanner = Anonymize(vault, preamble="Insert before prompt", allowed_names=["John Doe"], hidden_names=["Test LLC"],
+                    recognizer_conf=BERT_LARGE_NER_CONF, language="en")
+  sanitized_prompt, is_valid, risk_score = scanner.scan(prompt)
+  return sanitized_prompt
+
+@observe()
+def deanonymize(sanitized_prompt: str, answer: str):
+  scanner = Deanonymize(vault)
+  sanitized_model_output, is_valid, risk_score = scanner.scan(sanitized_prompt, answer)
+
+  return sanitized_model_output
+```
+
+### Instrument LLM call
+
+In this example, we use the native OpenAI SDK integration, to instrument the LLM call. Thereby, we can automatically collect token counts, model parameters, and the exact prompt that was sent to the model.
+
+Note: Langfuse [natively integrates](/integrations) with a number of frameworks (e.g. LlamaIndex, LangChain, Haystack, ...) and you can easily instrument any LLM via the [SDKs](/docs/sdk).
+
+```python
+@observe()
+def summarize_transcript(prompt: str):
+  sanitized_prompt = anonymize(prompt)
+
+  answer = openai.chat.completions.create(
+        model="gpt-4o",
+        max_tokens=100,
+        messages=[
+          {"role": "system", "content": "Summarize the given court transcript."},
+          {"role": "user", "content": sanitized_prompt}
+        ],
+    ).choices[0].message.content
+
+  sanitized_model_output = deanonymize(sanitized_prompt, answer)
+
+  return sanitized_model_output
+```
+
+### Execute the application
+
+Run the function. In this example, we input a section of a court transcript. Applications that handle sensitive information will often need to use anonymize and deanonymize functionality to comply with data privacy policies such as HIPAA or GDPR.
+
+```python
+prompt = """
+Plaintiff, Jane Doe, by and through her attorneys, files this complaint
+against Defendant, Big Corporation, and alleges upon information and belief,
+except for those allegations pertaining to personal knowledge, that on or about
+July 15, 2023, at the Defendant's manufacturing facility located at 123 Industrial Way, Springfield, Illinois, Defendant negligently failed to maintain safe working conditions,
+leading to Plaintiff suffering severe and permanent injuries. As a direct and proximate
+result of Defendant's negligence, Plaintiff has endured significant physical pain, emotional distress, and financial hardship due to medical expenses and loss of income. Plaintiff seeks compensatory damages, punitive damages, and any other relief the Court deems just and proper.
+"""
+summarize_transcript(prompt)
+```
+
+### Inspect trace in Langfuse
+
+In this trace ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/43213866-3038-4706-ae3a-d39e9df459a2)), we can see how the name of the plaintiff is anonymized before being sent to the model, and then un-redacted in the response. We can now evaluate run evaluations in Langfuse to control for the effectiveness of these measures.
+
+<CloudflareVideo
+  videoId="68fb440bb7f5f7dbea1b4fa2829fffde"
+  title="LLM Security Monitoring with Langfuse"
+  aspectRatio={16 / 10.775}
+  className="mt-6"
+  gifStyle
+/>
+
+</Steps>
+
+## Get Started
+
+Run the end-to-end cookbook or check out our documentation.
+
+import { FileCode, BookOpen } from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    title="End-to-end cookbook"
+    href="/docs/security/example-python"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Documentation"
+    href="/docs/security/overview"
+    icon={<BookOpen />}
+  />
+</Cards>
+
+## About Langfuse
+
+[Langfuse](/docs) is the open source LLM engineering platform. It is used by teams to track and analyze their LLM app in production with regards to quality, cost, and latency across product releases and use cases.
+
+## Feedback / Questions?
+
+Join us on [GitHub Discussions](/gh-discussions)!

@@ -1,0 +1,104 @@
+---
+title: Migrate Langfuse v1 to v2 (self-hosted)
+description: A guide to upgrade a Langfuse v1 setup to v2.
+---
+
+# Migrate Langfuse v1 to v2
+
+Langfuse v2 ([released](https://github.com/langfuse/langfuse/releases/tag/v2.0.0) Jan 30, 2024) is a major release of Langfuse that introduces a rebuilt usage and cost tracking system for LLM generations. The update requires running a one-off migration script on historical data to ensure accurate LLM costs of existing traces.
+
+## Changes
+
+### What has changed?
+
+- Completely rebuilt usage/cost tracking system for LLM generations
+- New model definition abstraction that enables:
+  - Quick support for new emerging models
+  - Tracking of model price changes over time
+  - Custom models/prices at the project level
+- Added ability to set usage and cost via API when ingesting traces
+- Usage and cost information available on all UI tables and APIs
+
+### What has not changed?
+
+Everything else, including APIs and infrastructure components, remains the same. No breaking changes.
+
+## Who needs to take action during the upgrade?
+
+- **No action required** if you:
+
+  - Use Langfuse Cloud
+  - Only care about newly ingested traces
+  - Don't use the cost tracking features
+
+- **Action required** if you:
+  - Self-host Langfuse
+  - Want accurate cost data for historical traces
+
+## Migration Steps
+
+<Callout type="info">
+  This process is non-blocking and does not impact the availability of your
+  Langfuse deployment.
+</Callout>
+
+<Steps>
+
+### Update Langfuse to v2
+
+Follow the deployment guide to upgrade your Langfuse deployment to v2.
+
+- For production deployments, see the [upgrade guide](/self-hosting/v2/deployment-guide#update)
+- If you use docker compose, see the [upgrade guide](/self-hosting/v2/docker-compose)
+
+### Apply new model logic and prices to existing data
+
+Langfuse includes a list of supported models for [usage and cost tracking](/docs/model-usage-and-cost). If a Langfuse update includes support for new models, these will only be applied to newly ingested traces/generations.
+
+Optionally, you can apply the new model definitions to existing data using the following steps. During the migration, the database remains available (non-blocking).
+
+1. Clone the repository and create an `.env` file:
+
+   ```bash
+   # Clone the Langfuse repository
+   git clone https://github.com/langfuse/langfuse.git
+
+   # Navigate to the Langfuse directory
+   cd langfuse
+
+   # Checkout the Langfuse v2 branch
+   git checkout v2
+
+   # Install all dependencies
+   pnpm i
+
+   # Create an .env file
+   cp .env.dev.example .env
+   ```
+
+2. Edit the `.env` to connect to your database from your machine:
+
+   ```bash filename=".env"
+   NODE_ENV=production
+
+   # Replace with your database connection string
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+   ```
+
+3. Execute the migration. Depending on the size of your database, this might take a while.
+
+   ```bash
+   pnpm run models:migrate
+   ```
+
+4. Clean up: remove the `.env` file to avoid connecting to the production database from your local machine.
+
+</Steps>
+
+## Support
+
+If you experience any issues, please create an [issue on GitHub](/issues) or contact the maintainers ([support](/support)).
+
+For support with production deployments, the Langfuse team provides dedicated enterprise support. To learn more, reach out to enterprise@langfuse.com or [talk to us](/talk-to-us).
+
+Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. You can find more information about its security and privacy [here](/security).

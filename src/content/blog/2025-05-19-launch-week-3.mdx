@@ -1,0 +1,200 @@
+---
+title: "Langfuse Launch Week #3"
+date: 2025/05/19
+description: "A new feature launch every day. A week dedicated to deeper insights and seamless integrations."
+tag: launchweek
+ogImage: /images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png
+author: Clemens, Marc, Max
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import Link from "next/link";
+import { Cards } from "nextra/components";
+import {
+  FileCode,
+  BookOpen,
+  Users,
+  Joystick,
+  Star,
+  Twitter,
+  CalendarDays,
+  Rocket,
+} from "lucide-react";
+import { Frame } from "@/components/Frame";
+import { StartCard } from "@/components/cards";
+import { Video } from "@/components/Video";
+
+<BlogHeader
+  title="Langfuse Launch Week #3"
+  description="A week dedicated to deeper insights and seamless integrations"
+  authors={[
+    "clemensrawert",
+    "marcklingen",
+    "maxdeichmann",
+    "marliesmayerhofer",
+    "hassiebpakzad",
+    "jannikmaierhoefer",
+    "steffenschmitz",
+    "felixkrauth",
+  ]}
+  image="/images/blog/2025-05-19-launch-week-3/lw3-teaser-blog.png"
+/>
+
+We are excited to announce **Langfuse Launch Week #3**!
+
+Starting on **Monday, May 19&nbsp;–&nbsp;Saturday, May&nbsp;24, 2025**, we'll drop a fresh feature **every single day**. Expect to get deeper insights from your application data, more guidance on how to get started, improve and evaluate your LLM applications, and more ways to integrate with your favorite tools and frameworks.
+
+We'll celebrate with a mid-week [Virtual Community Hour](https://lu.ma/1q57o5ok) and our third [Product Hunt launch](/ph).
+
+[Star us](https://github.com/langfuse/langfuse/) on GitHub and follow us on [Twitter](https://x.com/langfuse) so you don't miss an announcement.
+
+_Want a taste of what's in store? Revisit last year's edition here → [Launch Week&nbsp;#2](/blog/2024-11-17-launch-week-2)._
+
+## Launch Week Focus
+
+This edition is all about **making your LLM data work harder for you**.
+
+- **Deeper insights** – New analytics and evaluation tools to get the most out of your application data.
+- **Seamless integrations** – connect your favorite tools and frameworks to Langfuse.
+
+Stay tuned for the daily reveals 👇
+
+<Steps>
+
+### 🔎&nbsp;&nbsp;&nbsp;Day&nbsp;1: Full text search
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/9gPDNtQj1uU"
+  title="Full Text Search Tutorial"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+This feature has received one of the highest numbers of upvotes in our [feature requests](https://github.com/orgs/langfuse/discussions/939), and we are thrilled to make it available. Finding all occurrences of a specific keyword or phrase across your Langfuse traces and observations can be extremely helpful.
+
+See the video above for a quick tutorial.
+
+### 📌&nbsp;&nbsp;&nbsp;Day&nbsp;2: Save and share table views
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/KOZ5qUFpw80"
+  title="Saved Table Views Tutorial"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+Save your most-used table configurations and instantly share them with teammates. Create custom views for different workflows—like filtering for failed traces or high-cost runs — and access them with a single click. Every saved view gets a unique permalink, making it easy to collaborate viewing the same data without having to recreate complex filters and sorting.
+
+Available across all major tables in Langfuse: Traces, Observations, Scores, Sessions, and Datasets.
+
+👉 **Read the full changelog → [Save & share table views](/changelog/2025-05-20-save-table-views)**
+
+### 📊&nbsp;&nbsp;&nbsp;Day&nbsp;3: Custom Dashboards
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/z6g9xmciaBE"
+  title="Custom Dashboards"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-6"
+  allowFullScreen
+></iframe>
+
+Create your own custom dashboards to analyze and understand your AI application deeply.
+Turn raw data into insights with a wide range of chart types, flexible metrics, and rich filtering options.
+Choose from our curated dashboards focused on Latency, Cost, and Langfuse usage to quickly get started, or build your own to visualize exactly what matters to your team.
+
+👉 **Read the full changelog → [Custom Dashboards](/changelog/2025-05-21-custom-dashboards)**
+
+Interested in how we built this? Check out the [technical deep dive](/blog/2025-05-21-customizable-dashboards).
+
+### 🏅 Day 4 — Hyperscaler Terraform Modules
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/EwMRnknjNxU"
+  title="Terraform Modules for AWS, Azure and GCP"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Deploy Langfuse on your own infrastructure in minutes using our new Terraform modules for **AWS**, **GCP**, and **Azure**. The modules provision everything you need—networking, databases, storage, and a production-ready Kubernetes cluster—so you can focus on building, not managing infrastructure.
+
+👉 **Read the full changelog → [Hyperscaler Terraform Modules](/changelog/2025-05-22-terraform-modules)**
+
+### 🔭&nbsp;&nbsp;&nbsp;Day&nbsp;5: OTEL-based Python SDK&nbsp;(beta)
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/md_TKMmNz28"
+  title="OTEL-based Python SDK (beta)"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Meet the next generation **Langfuse Python SDK** built on the [OpenTelemetry](https://opentelemetry.io/) standard! This big update simplifies tracing with unified context propagation that automatically nests operations, even across threads or async tasks. Instrument your code using three flexible styles: the `@observe` decorator, context managers, or manual observations, which can be mixed and matched.
+
+The SDK ships today in **public beta** (pip install `langfuse>=3.0.0b2`). We can't wait to hear your feedback!
+
+👉 **Read the full changelog → [OTEL-based Python SDK](/changelog/2025-05-23-otel-based-python-sdk)**
+
+### 📐 &nbsp;&nbsp;&nbsp;Day&nbsp;6: Langfuse Evaluator Library
+
+<iframe
+  width="100%"
+  className="aspect-video rounded border mt-6"
+  src="https://www.youtube-nocookie.com/embed/KTRz9Tv4CEE"
+  title="Langfuse Evaluator Library"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Making LLM evaluation easier, more powerful, and production-ready is now possible with the new Langfuse Evaluator Library that includes more prebuilt templates. It ships with **RAGAS evaluators** (context relevance, goal accuracy, SQL semantic equivalence, and more), Langfuse-managed evaluators, and the ability to build custom ones.
+
+In addition, we've revamped the setup flow when creating a new eval to make it easier to get started and understand how the different configurations work.
+
+👉 **Read the full changelog → [Langfuse Evaluator Library](/changelog/2025-05-24-langfuse-evaluator-library)**
+
+</Steps>
+
+## Learn More About Langfuse
+
+<Cards num={2} className="gap-6">
+  <Cards.Card
+    title="Docs"
+    href="/docs"
+    icon={<BookOpen className="w-6 h-6" />}
+    arrow
+  />
+  <Cards.Card
+    title="Quickstart"
+    href="/docs/get-started"
+    icon={<FileCode className="w-6 h-6" />}
+    arrow
+  />
+  <Cards.Card
+    title="Interactive Demo"
+    href="/docs/demo"
+    icon={<Joystick className="w-6 h-6" />}
+    arrow
+  />
+  <Cards.Card
+    title="About Us"
+    href="/about"
+    icon={<Users className="w-6 h-6" />}
+    arrow
+  />
+</Cards>
