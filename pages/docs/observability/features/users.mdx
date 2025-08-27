@@ -70,17 +70,20 @@ with langfuse.start_as_current_span(name="handle-user-interaction"):
 When using the context manager:
 
 ```ts
-import { startActiveObservation, startObservation, updateActiveTrace } from "@langfuse/tracing";
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
-    input: { query: "What is the capital of France?" }
+    input: { query: "What is the capital of France?" },
   });
 
   updateActiveTrace({
     userId: "user-123",
   });
-
 });
 ```
 
@@ -91,7 +94,6 @@ import { observe, updateActiveTrace } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-
   updateActiveTrace({
     userId: "user-123",
   });
@@ -102,7 +104,7 @@ async function fetchData(source: string) {
 
 // Wrap the function to trace it
 const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper"
+  name: "observe-wrapper",
 });
 
 const result = await tracedFetchData("API");
@@ -113,15 +115,15 @@ When creating spans manually:
 ```ts
 import { startObservation } from "@langfuse/tracing";
 
-const span = startObservation('manual-observation', {
-  input: { query: 'What is the capital of France?' },
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
 });
 
 span.updateTrace({
-  userId: 'user-123',
+  userId: "user-123",
 });
 
-span.update({ output: 'Paris'}).end();
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
