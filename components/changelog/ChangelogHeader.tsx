@@ -6,7 +6,8 @@ import { useConfig } from "nextra-theme-docs";
 import { Callout } from "nextra/components";
 
 export const ChangelogHeader = () => {
-  const { frontMatter } = useConfig();
+  const frontMatter = (useConfig() as any)?.normalizePagesResult?.activeData
+    ?.frontMatter || ({} as any);
   const {
     title,
     description,

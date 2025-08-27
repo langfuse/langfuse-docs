@@ -1,3 +1,5 @@
+"use client";
+
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, CheckCircle2, FileText, PlayCircle } from "lucide-react";

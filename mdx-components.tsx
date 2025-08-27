@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { useMDXComponents as getDocsMDXComponents } from "nextra-theme-docs";
 import { Tabs, Callout, Cards } from "nextra/components";
@@ -32,4 +31,3 @@ export function useMDXComponents(components?: Record<string, any>) {
     ),
   } as any;
 }
-

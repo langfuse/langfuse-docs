@@ -1,3 +1,5 @@
+"use client";
+
 import { Server, LibraryBig, BookOpen, FileCode, Unplug } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

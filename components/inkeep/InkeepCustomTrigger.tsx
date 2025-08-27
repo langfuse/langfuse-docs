@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import useInkeepSettings from "./useInkeepSettings";
 import type { InkeepModalSearchAndChatProps } from "@inkeep/cxkit-react";

@@ -3,8 +3,8 @@ import React from "react";
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
 import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
-import "nextra-theme-docs/style.css";
 import "../style.css";
+import "nextra-theme-docs/style-prefixed.css";
 import "vidstack/styles/base.css";
 import "../src/overrides.css";
 
@@ -67,20 +67,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <Head />
       <body className={`${GeistSans.variable} font-sans ${GeistMono.variable}`}>
-        <Layout
-          navbar={navbar}
-          footer={<Footer><FooterMenu /></Footer>}
-          search={<InkeepSearchBar />}
-          editLink="Edit this page on GitHub"
-          docsRepositoryBase="https://github.com/langfuse/langfuse-docs/tree/main"
-          sidebar={{ defaultMenuCollapseLevel: 1, toggleButton: true }}
-          toc={{ backToTop: true, extraContent: <DocsContributors /> }}
-          pageMap={pageMap}
-        >
+        <Layout navbar={navbar} pageMap={pageMap}>
           <ClientAnalytics>{children}</ClientAnalytics>
         </Layout>
       </body>
     </html>
   );
 }
-

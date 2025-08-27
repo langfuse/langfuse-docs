@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { useState, useMemo, useEffect } from "react";
 import { testimonials } from "../../data/testimonials";

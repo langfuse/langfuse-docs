@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { TrackballControls, Environment } from "@react-three/drei";

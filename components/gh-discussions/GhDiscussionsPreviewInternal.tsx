@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import discussionsCached from "../../src/langfuse_github_discussions.json";

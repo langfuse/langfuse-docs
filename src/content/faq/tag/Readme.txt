@@ -1,1 +1,0 @@
-- This folder has both the [tag] and usual pages. [tag] technically works SSR (build time) for all tags that exist in /all, but they do not render in the main menu. Thus we can copy paste the tag page for all tags that should show up in the main menu. 

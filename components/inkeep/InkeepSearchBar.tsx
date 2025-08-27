@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import type { InkeepSearchBarProps } from "@inkeep/cxkit-react";
 import useInkeepSettings from "./useInkeepSettings";

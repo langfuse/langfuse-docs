@@ -1,5 +1,6 @@
 import remarkGfm from 'remark-gfm';
 import nextra from 'nextra';
+import path from 'node:path';
 import NextBundleAnalyzer from '@next/bundle-analyzer';
 
 const withBundleAnalyzer = NextBundleAnalyzer({
@@ -155,6 +156,9 @@ const nextraConfig = withNextra({
       },
     ];
   },
+  webpack: (config) => {
+    return config;
+  }
 });
 
 const nonPermanentRedirects = [

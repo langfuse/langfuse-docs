@@ -210,3 +210,4 @@ export const BranchPage = ({ className, ...props }: BranchPageProps) => {
     </span>
   );
 };
+"use client";

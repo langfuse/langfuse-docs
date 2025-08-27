@@ -1,3 +1,5 @@
+"use client";
+
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useConfig } from "nextra-theme-docs";
@@ -148,7 +150,7 @@ const CopyMarkdownButton = () => {
 
 export const MainContentWrapper = (props) => {
   const pathname = usePathname() || "/";
-  const { frontMatter } = useConfig();
+  const frontMatter = (useConfig() as any)?.normalizePagesResult?.activeData?.frontMatter || ({} as any);
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
     (cookbook) => cookbook.path === pathname
   );
