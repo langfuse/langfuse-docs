@@ -61,6 +61,10 @@ export const ToAppButton = ({
     ) as Record<RegionKey, boolean>
   );
   const [continentCode, setContinentCode] = useState<string | null>(null);
+  const isUsingDefaultText =
+    signedInText === DEFAULT_BUTTON_TEXT.signedIn &&
+    signUpText === DEFAULT_BUTTON_TEXT.signUp &&
+    dropdownText === DEFAULT_BUTTON_TEXT.dropdown;
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") {
@@ -123,11 +127,7 @@ export const ToAppButton = ({
             size="xs"
             className={cn(
               "whitespace-nowrap",
-              !(
-                signedInText !== DEFAULT_BUTTON_TEXT.signedIn ||
-                signUpText !== DEFAULT_BUTTON_TEXT.signUp ||
-                dropdownText !== DEFAULT_BUTTON_TEXT.dropdown
-              ) && "w-[45px] sm:w-[70px]"
+              !isUsingDefaultText && "w-[45px] sm:w-[70px]"
             )}
           >
             <span className="sm:hidden">{dropdownText}</span>
@@ -157,11 +157,7 @@ export const ToAppButton = ({
         asChild
         className={cn(
           "whitespace-nowrap",
-          !(
-            signedInText !== DEFAULT_BUTTON_TEXT.signedIn ||
-            signUpText !== DEFAULT_BUTTON_TEXT.signUp ||
-            dropdownText !== DEFAULT_BUTTON_TEXT.dropdown
-          ) && "w-[45px] sm:w-[70px]"
+          !isUsingDefaultText && "w-[45px] sm:w-[70px]"
         )}
       >
         <Link href={signedInRegion![1].url}>
@@ -177,11 +173,7 @@ export const ToAppButton = ({
         asChild
         className={cn(
           "whitespace-nowrap",
-          !(
-            signedInText !== DEFAULT_BUTTON_TEXT.signedIn ||
-            signUpText !== DEFAULT_BUTTON_TEXT.signUp ||
-            dropdownText !== DEFAULT_BUTTON_TEXT.dropdown
-          ) && "w-[45px] sm:w-[70px]"
+          !isUsingDefaultText && "w-[45px] sm:w-[70px]"
         )}
       >
         <Link
