@@ -59,7 +59,7 @@ fun main() = runBlocking {
 }
 ```
 
-## What Gets Traced
+## See traces in Langfuse
 
 When enabled, the Langfuse exporter captures the same spans as Koog’s general OpenTelemetry integration, including:
 
@@ -69,6 +69,10 @@ When enabled, the Langfuse exporter captures the same spans as Koog’s general 
 - **System context** – metadata such as model name, environment, Koog version
 
 Koog also captures span attributes required by Langfuse to show [Agent Graphs](/docs/observability/features/agent-graphs). This allows you to correlate agent reasoning with API calls and user inputs in a structured way within Langfuse.
+
+![Koog example trace](/images/cookbook/integration_koog/koog-example-trace.png)
+
+[Public link to trace](https://cloud.langfuse.com/project/cmcmdwcag00c2ad077xp1qnyc/traces/dff173a675b759ce1b70e522b27d6846?timestamp=2025-08-26T19%3A40%3A59.145Z&display=details&observation=e44e72cf2d221781)
 
 For more details on Langfuse OTLP tracing, see the [Langfuse OpenTelemetry Docs](/integrations/native/opentelemetry#opentelemetry-endpoint).
 
