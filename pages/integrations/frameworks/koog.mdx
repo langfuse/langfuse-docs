@@ -1,0 +1,82 @@
+---
+title: Observability for Koog with Langfuse
+sidebarTitle: Koog
+logo: /images/integrations/koog_icon.png
+description: Learn how to instrument Koog agents with Langfuse via OpenTelemetry
+category: Integrations
+---
+
+# Tracing Koog Agents with Langfuse
+
+Koog provides built-in support for exporting agent traces to Langfuse. With Langfuse integration, you can visualize, analyze, and debug how your Koog agents interact with LLMs, APIs, and other components.
+
+> **What is Koog?** [Koog](https://docs.koog.ai/) Koog is a Kotlin-based framework designed to build and run AI agents entirely in idiomatic Kotlin. It lets you create agents that can interact with tools, handle complex workflows, and communicate with users. For background on Koog’s OpenTelemetry support, see the [OpenTelemetry support](https://docs.koog.ai/opentelemetry-support/).
+
+> **What is Langfuse?** [Langfuse](/) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+
+<Steps>
+## Setup Langfuse
+
+1. Sign up for [Langfuse Cloud](/) or [self-host Langfuse](/self-hosting).
+2. Create a Langfuse project. Follow the setup guide at [Create new project in Langfuse](/docs/get-started#create-new-project-in-langfuse)
+3. Obtain API credentials. Retrieve your Langfuse `public key` and `secret key` as described in [Where are Langfuse API keys?](/faq/all/where-are-langfuse-api-keys)
+4. Set environment variables. Add the following variables to your environment:
+
+```bash
+   export LANGFUSE_HOST="https://cloud.langfuse.com" # 🇪🇺 EU region
+   # export LANGFUSE_HOST="https://us.cloud.langfuse.com" # 🇺🇸 US region
+   
+   export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+   export LANGFUSE_SECRET_KEY="sk-lf-..."
+```
+
+Once configured, Koog automatically forwards OpenTelemetry traces to your Langfuse instance.
+
+## Configure Koog
+
+To enable Langfuse export, install the **OpenTelemetry feature** and add the `LangfuseExporter`.  
+The exporter uses `OtlpHttpSpanExporter` under the hood to send traces to Langfuse’s OpenTelemetry endpoint.
+
+**Example: Agent with Langfuse Tracing**
+
+```kotlin
+fun main() = runBlocking { 
+    val agent = AIAgent(
+        executor = simpleOpenAIExecutor(ApiKeyService.openAIApiKey),
+        llmModel = OpenAIModels.CostOptimized.GPT4oMini,
+        systemPrompt = "You are a code assistant. Provide concise code examples."
+    ) {
+        install(OpenTelemetry) {
+            addLangfuseExporter()
+        }
+    }
+
+    println("Running agent with Langfuse tracing")
+
+    val result = agent.run("Tell me a joke about programming")
+
+    println("Result: $result\nSee traces on the Langfuse instance")
+}
+```
+
+## What Gets Traced
+
+When enabled, the Langfuse exporter captures the same spans as Koog’s general OpenTelemetry integration, including:
+
+- **Agent lifecycle events** – agent start, stop, errors
+- **LLM interactions** – prompts, responses, token usage, latency
+- **Tool and API calls** – execution traces for function/tool invocations
+- **System context** – metadata such as model name, environment, Koog version
+
+Koog also captures span attributes required by Langfuse to show [Agent Graphs](/docs/observability/features/agent-graphs). This allows you to correlate agent reasoning with API calls and user inputs in a structured way within Langfuse.
+
+For more details on Langfuse OTLP tracing, see the [Langfuse OpenTelemetry Docs](/integrations/native/opentelemetry#opentelemetry-endpoint).
+
+</Steps>
+
+## Troubleshooting
+
+- **No traces appear in Langfuse**
+    - Double-check that `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` are set in your environment.
+    - If running on self-hosted Langfuse, confirm that the `LANGFUSE_HOST` is reachable from your application environment.
+    - Verify that the public/secret key pair belongs to the correct project.
