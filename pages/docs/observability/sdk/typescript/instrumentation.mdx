@@ -254,29 +254,34 @@ This is the recommended approach for most use cases as it prevents context leaka
 ```typescript /startActiveObservation/ /span.update/
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
-await startActiveObservation("user-request", async (span) => {
-  span.update({
-    input: { query: "What is the capital of France?" },
-  });
+await startActiveObservation(
+  // name
+  "user-request",
+  // callback
+  async (span) => {
+    span.update({
+      input: { query: "What is the capital of France?" },
+    });
 
-  // Example child, could also use startActiveObservation
-  // This manually created generation (see docs below) will automatically be a child of "user-request"
-  const generation = startObservation(
-    "llm-call",
-    {
-      model: "gpt-4",
-      input: [{ role: "user", content: "What is the capital of France?" }],
-    },
-    { asType: "generation" }
-  );
-  generation.update({
-    usageDetails: { input: 10, output: 5 },
-    output: { content: "The capital of France is Paris." },
-  });
-  generation.end();
+    // Example child, could also use startActiveObservation
+    // This manually created generation (see docs below) will automatically be a child of "user-request"
+    const generation = startObservation(
+      "llm-call",
+      {
+        model: "gpt-4",
+        input: [{ role: "user", content: "What is the capital of France?" }],
+      },
+      { asType: "generation" }
+    );
+    generation.update({
+      usageDetails: { input: 10, output: 5 },
+      output: { content: "The capital of France is Paris." },
+    });
+    generation.end();
 
-  span.update({ output: "Successfully answered." });
-});
+    span.update({ output: "Successfully answered." });
+  }
+);
 ```
 
 ### `observe` wrapper
@@ -294,7 +299,12 @@ async function fetchData(source: string) {
 }
 
 // Wrap the function to trace it
-const tracedFetchData = observe(fetchData);
+const tracedFetchData = observe(
+  // method
+  fetchData,
+  // options, optional, see below
+  {}
+);
 
 // Now, every time you call tracedFetchData, a span is created.
 // Its input and output are automatically populated with the
@@ -323,9 +333,14 @@ To create nested observations manually, use the methods on the returned object (
 import { startObservation } from "@langfuse/tracing";
 
 // Start a root span for a user request
-const span = startObservation("user-request", {
-  input: { query: "What is the capital of France?" },
-});
+const span = startObservation(
+  // name
+  "user-request",
+  // options, optional, see below
+  {
+    input: { query: "What is the capital of France?" },
+  }
+);
 
 // Create a nested span for a tool call
 const toolCall = span.startObservation(
