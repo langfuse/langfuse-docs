@@ -336,7 +336,7 @@ import { startObservation } from "@langfuse/tracing";
 const span = startObservation(
   // name
   "user-request",
-  // options, optional, see below
+  // params
   {
     input: { query: "What is the capital of France?" },
   }
@@ -344,10 +344,13 @@ const span = startObservation(
 
 // Create a nested span for a tool call
 const toolCall = span.startObservation(
+  // name
   "fetch-weather",
+  // params
   {
     input: { city: "Paris" },
   },
+  // options, optional, see below
   { asType: "tool" }
 );
 
