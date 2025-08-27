@@ -4,7 +4,7 @@ export default {
   instrumentation: "Instrumentation",
   evaluation: "Evaluation",
   "advanced-usage": "Advanced usage",
-  "upgrade-path": "Upgrade Path",
+  "upgrade-path": "Upgrade Path (v3 to v4)",
   "troubleshooting-and-faq": "Troubleshooting & FAQ",
   reference: {
     title: "Reference ↗",
