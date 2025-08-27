@@ -104,9 +104,9 @@ dataset = get_client().get_dataset("<dataset_name>")
 {/* JS/TS SDK */}
 
 ```ts
-import { LangfuseClient } from "@langfuse/client"
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new LangfuseClient()
+const langfuse = new LangfuseClient();
 
 const dataset = await langfuse.dataset.get("<dataset_name>");
 ```
@@ -155,7 +155,9 @@ _See [Python SDK](/docs/sdk/python/sdk-v3) docs for more details._
 <Tab>
 {/* JS/TS SDK */}
 
-Please make sure you have [OpenTelemetry](/docs/observability/sdk/typescript/setup) set up for tracing the dataset runs.
+Please make sure you have [the JS/TS SDK](/docs/observability/sdk/typescript/setup) set up for tracing of your application. If you use Langfuse for [observability](/docs/observability/overview), this is the same setup.
+
+Example:
 
 ```ts filename="app.ts"
 import { OpenAI } from "openai"
@@ -173,6 +175,8 @@ const myLLMApplication = async (input: string) => {
 
     span.update({ input, output: output.choices[0].message.content });
 
+    // return reference to span and output
+    // will be simplified in a future version of the SDK
     return [span, output] as const;
   }
 };
@@ -205,7 +209,7 @@ def my_llm_function(question):
 
 ```ts filename="app.ts" /callbacks: [langfuseHandler]/
 import { CallbackHandler } from "@langfuse/langchain";
- 
+
 const myLLMApplication = async (input: string) => {
   return startActiveObservation('my_llm_application', async (span) => {
     // ... your Langchain code ...
@@ -214,6 +218,8 @@ const myLLMApplication = async (input: string) => {
 
     span.update({ input, output });
 
+    // return reference to span and output
+    // will be simplified in a future version of the SDK
     return [span, output] as const;
   }
 }
@@ -241,6 +247,8 @@ const runMyLLMApplication = async (input: string, traceId: string) => {
 
     span.update({ input, output: output.text });
 
+    // return reference to span and output
+    // will be simplified in a future version of the SDK
     return [span, output] as const;
   }
 };
@@ -487,9 +495,9 @@ await langfuse.flush();
 <Tab>
 
 ```typescript /for (const item of dataset.items)/
-import { LangfuseClient } from "@langfuse/client"
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new LangfuseClient()
+const langfuse = new LangfuseClient();
 
 // iterate over the dataset items
 for (const item of dataset.items) {
@@ -615,4 +623,3 @@ Once configured, team members can trigger remote experiments via the `Run` butto
 </Steps>
 
 **Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Dataset Run.
-
