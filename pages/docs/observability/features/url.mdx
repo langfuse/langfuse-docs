@@ -55,11 +55,11 @@ with langfuse.start_as_current_span(name="process-request") as span:
 ```ts
 import { LangfuseClient } from "@langfuse/client";
 import { startObservation } from "@langfuse/tracing";
- 
+
 const langfuse = new LangfuseClient();
- 
+
 const rootSpan = startObservation("my-trace");
-const traceUrl = await langfuse.getTraceUrl(rootSpan.traceId)
+const traceUrl = await langfuse.getTraceUrl(rootSpan.traceId);
 
 console.log("Trace URL: ", traceUrl);
 ```
@@ -145,6 +145,7 @@ with langfuse.start_as_current_span(name="process-request") as span:
 
 </Tab>
 <Tab>
+
 ```ts /public: true/
 import { startObservation, updateTrace } from "@langfuse/tracing";
 

@@ -144,13 +144,17 @@ const externalId = "support-ticket-54321";
 const langfuseTraceId = await createTraceId(externalId);
 
 // You can now start a new trace with this ID
-const rootSpan = startObservation("process-ticket", {}, {
-  parentSpanContext: {
-    traceId: langfuseTraceId,
-    spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
-    traceFlags: 1 // mark trace as sampled
+const rootSpan = startObservation(
+  "process-ticket",
+  {},
+  {
+    parentSpanContext: {
+      traceId: langfuseTraceId,
+      spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+      traceFlags: 1, // mark trace as sampled
+    },
   }
-});
+);
 
 // Later, you can regenerate the same traceId to score or retrieve the trace
 const scoringTraceId = await createTraceId(externalId);
@@ -162,9 +166,9 @@ You may also access the current active trace ID via the `getActiveTraceId` funct
 ```ts
 import { startObservation, getActiveTraceId } from "@langfuse/tracing";
 
-await startObservation('run', async (span) => {
-    const traceId = getActiveTraceId();
-    console.log(`Current trace ID: ${traceId}`);
+await startObservation("run", async (span) => {
+  const traceId = getActiveTraceId();
+  console.log(`Current trace ID: ${traceId}`);
 });
 ```
 
@@ -217,7 +221,7 @@ completion = openai.chat.completions.create(
 from langfuse import observe, get_client
 from langfuse.openai import openai
 import uuid
- 
+
 @observe()
 def process_user_request(user_id, request_data):
     completion = openai.chat.completions.create(
@@ -229,14 +233,14 @@ def process_user_request(user_id, request_data):
         ]
     )
     return completion.choices[0].message.content
- 
+
 # Use custom trace ID by passing it as special keyword argument
 external_trace_id = "custom-" + str(uuid.uuid4())
- 
+
 # Get a consistent trace ID for the same user
 langfuse = get_client()
 trace_id = langfuse.create_trace_id(seed=external_trace_id) # 32 hexchar lowercase string, deterministic with seed
- 
+
 process_user_request(
     user_id="user_123",
     request_data={"query": "hello"},
@@ -281,15 +285,15 @@ To pass a custom trace ID to a Langchain execution, you can wrap the execution i
 ```python
 from langfuse import get_client, Langfuse
 from langfuse.langchain import CallbackHandler
- 
+
 langfuse = get_client()
- 
+
 # Generate deterministic trace ID from external system
 external_request_id = "req_12345"
 predefined_trace_id = Langfuse.create_trace_id(seed=external_request_id)
- 
+
 langfuse_handler = CallbackHandler()
- 
+
 # Use the predefined trace ID with trace_context
 with langfuse.start_as_current_span(
     name="langchain-request",
@@ -299,15 +303,15 @@ with langfuse.start_as_current_span(
         user_id="user_123",
         input={"person": "Ada Lovelace"}
     )
- 
+
     # LangChain execution will be part of this trace
     response = chain.invoke(
         {"person": "Ada Lovelace"},
         config={"callbacks": [langfuse_handler]}
     )
- 
+
     span.update_trace(output={"response": response})
- 
+
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
 ```
