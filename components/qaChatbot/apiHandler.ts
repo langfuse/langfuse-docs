@@ -9,8 +9,9 @@ import {
 } from "ai";
 import {
   observe,
-  startActiveSpan,
-  updateActiveSpan,
+  startActiveObservation,
+  startObservation,
+  updateActiveObservation,
   updateActiveTrace,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
@@ -43,7 +44,7 @@ export const handler = async (req: Request) => {
     (part) => part.type === "text",
   )?.text;
 
-  updateActiveSpan({
+  updateActiveObservation("span", {
     input: inputText,
   });
 
@@ -58,15 +59,18 @@ export const handler = async (req: Request) => {
   const prompt = await tracedGetPrompt("langfuse-docs-assistant-text");
 
   // Initialize MCP client using Streamable HTTP transport (works with our MCP server)
-  const mcpClient = await startActiveSpan("create-mcp-client", async () => {
-    const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
+  const mcpClient = await startActiveObservation(
+    "create-mcp-client",
+    async () => {
+      const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
 
-    return createMCPClient({
-      transport: new StreamableHTTPClientTransport(mcpUrl, {
-        sessionId: `qa-chatbot-${crypto.randomUUID()}`,
-      }) as MCPTransport,
-    });
-  });
+      return createMCPClient({
+        transport: new StreamableHTTPClientTransport(mcpUrl, {
+          sessionId: `qa-chatbot-${crypto.randomUUID()}`,
+        }) as MCPTransport,
+      });
+    },
+  );
 
   // Discover all tools exposed by the MCP server
   const tools = await mcpClient.tools();
@@ -91,7 +95,7 @@ export const handler = async (req: Request) => {
     onFinish: async (result) => {
       await mcpClient.close();
 
-      updateActiveSpan({
+      updateActiveObservation("span", {
         output: result.content,
       });
       updateActiveTrace({
