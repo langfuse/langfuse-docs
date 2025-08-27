@@ -249,7 +249,7 @@ To simplify nesting and context management, you can use `startActiveObservation`
 
 This is the recommended approach for most use cases as it prevents context leakage and ensures observations are properly ended.
 
-```typescript /startActiveObservation/ /startObservation/ /end/
+```typescript /startActiveObservation/ /span.update/
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
 await startActiveObservation("user-request", async (span) => {
@@ -257,7 +257,8 @@ await startActiveObservation("user-request", async (span) => {
     input: { query: "What is the capital of France?" },
   });
 
-  // This generation will automatically be a child of "user-request"
+  // Example child, could also use startActiveObservation
+  // This manually created generation (see docs below) will automatically be a child of "user-request"
   const generation = startObservation(
     "llm-call",
     {
@@ -266,14 +267,10 @@ await startActiveObservation("user-request", async (span) => {
     },
     { asType: "generation" }
   );
-
-  // ... LLM call logic ...
-
   generation.update({
     usageDetails: { input: 10, output: 5 },
     output: { content: "The capital of France is Paris." },
   });
-
   generation.end();
 
   span.update({ output: "Successfully answered." });
