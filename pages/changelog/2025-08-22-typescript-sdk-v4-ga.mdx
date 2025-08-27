@@ -17,12 +17,72 @@ Langfuse TypeScript SDK v4 is now GA. Rebuilt on OpenTelemetry JS v2, it brings 
 ## Highlights
 
 - Modular packages: `@langfuse/core`, `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`
-- First-class OpenTelemetry JS v2 with robust context propagation
-- Automatic tracing for OpenAI and LangChain
+- First-class OpenTelemetry JS v2 with robust context propagation, thus interoperable with all OpenTelemetry-based tools and instrumentation libraries
+- Automatic tracing for OpenAI, LangChain, and the Vercel AI SDK
 - Improved prompts, datasets, and scoring APIs
 
+You can now instrument your application with custom tracing in JavaScript/TypeScript using the same intuitive patterns as our Python SDK—context managers, decorators, and manual control:
 
-Have thoughts or issues? **Share feedback in the discussion:** [GitHub Discussions #8403](https://github.com/orgs/langfuse/discussions/8403).
+<Tabs items={["Context Manager", "Wrapper", "Manual"]}>
+
+<Tab>
+
+**`startActiveObservation`** - Recommended approach with automatic lifecycle management.
+
+```typescript
+import { startActiveObservation } from "@langfuse/tracing";
+
+await startActiveObservation("user-request", async (span) => {
+  span.update({ input: { query: "What is the capital of France?" } });
+  // Your logic here - any nested observations are automatically managed
+  span.update({ output: "Successfully answered." });
+});
+```
+
+[Learn more →](/docs/observability/sdk/typescript/instrumentation#custom-instrumentation)
+
+</Tab>
+
+<Tab>
+
+**`observe` wrapper** - Decorator pattern for existing functions.
+
+```typescript
+import { observe } from "@langfuse/tracing";
+
+const tracedFunction = observe(async (source: string) => {
+  // Your existing function logic
+  return { data: `some data from ${source}` };
+});
+
+const result = await tracedFunction("API");
+```
+
+[Learn more →](/docs/observability/sdk/typescript/instrumentation#observe-wrapper)
+
+</Tab>
+
+<Tab>
+
+**`startObservation`** - Full control over observation lifecycle.
+
+```typescript
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("user-request", {
+  input: { query: "What is the capital of France?" },
+});
+
+// Your logic here
+span.update({ output: "Successfully answered." });
+span.end(); // Required: manually end the observation
+```
+
+[Learn more →](/docs/observability/sdk/typescript/instrumentation#manual-observations)
+
+</Tab>
+
+</Tabs>
 
 ## Get started
 
@@ -40,3 +100,7 @@ Have thoughts or issues? **Share feedback in the discussion:** [GitHub Discussio
     arrow
   />
 </Cards>
+
+**Upgrading from v3?** Follow the [upgrade guide](/docs/observability/sdk/typescript/upgrade-path) for step-by-step migration instructions.
+
+Have thoughts or issues? **Share feedback in the discussion:** [GitHub Discussions #8403](https://github.com/orgs/langfuse/discussions/8403).
