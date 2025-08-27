@@ -154,12 +154,12 @@ When using the context manager:
 
 ```ts /usageDetails/, /costDetails/
 import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "@langfuse/tracing";
- 
+
 await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" }
   });
- 
+
   // This generation will automatically be a child of "user-request"
   const generation = startObservation(
     "llm-call",
@@ -169,7 +169,7 @@ await startActiveObservation("context-manager", async (span) => {
     },
     { asType: "generation" },
   );
- 
+
   // ... LLM call logic ...
 
   generation.update({
@@ -189,10 +189,10 @@ await startActiveObservation("context-manager", async (span) => {
       total: 3.5,
     }
   });
- 
-  generation.end({
+
+  generation.update({
     output: { content: "The capital of France is Paris." },
-  });
+  }).end();
 });
 ```
 
@@ -200,10 +200,10 @@ When using the `observe` wrapper:
 
 ```ts /usageDetails/, /costDetails/
 import { observe, updateActiveGeneration } from "@langfuse/tracing";
- 
+
 // An existing function
 async function fetchData(source: string) {
-  updateActiveGeneration({ 
+  updateActiveGeneration({
     usageDetails: {
       input: 10,
       output: 5,
@@ -218,13 +218,13 @@ async function fetchData(source: string) {
       cache_read_input_tokens: 0.5,
       some_other_token_count: 1,
       total: 3.5,
-    } 
+    }
 })
-  
+
   // ... logic to fetch data
   return { data: `some data from ${source}` };
 }
- 
+
 // Wrap the function to trace it
 const tracedFetchData = observe(fetchData, {
   name: "observe-wrapper",
@@ -242,7 +242,7 @@ const span = startObservation('manual-observation', {
 });
 
 const generation = span.startObservation(
-  'llm-call', 
+  'llm-call',
   {
     model: 'gpt-4',
     input: [{ role: 'user', content: 'What is the capital of France?' }],
@@ -269,11 +269,13 @@ generation.update({
   }
 });
 
-generation.end({
-  output: { content: 'The capital of France is Paris.' },
-});
+generation
+  .update({
+    output: { content: "The capital of France is Paris." },
+  })
+  .end();
 
-span.end({ output: 'Successfully answered user request.'});
+span.update({ output: "Successfully answered user request." }).end();
 ```
 
 You can also update the usage and cost via `generation.update()`.

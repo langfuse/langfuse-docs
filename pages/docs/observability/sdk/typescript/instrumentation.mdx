@@ -260,11 +260,10 @@ await startActiveObservation("user-request", async (span) => {
 
   generation.update({
     usageDetails: { input: 10, output: 5 },
-  });
-
-  generation.end({
     output: { content: "The capital of France is Paris." },
   });
+
+  generation.end();
 
   span.update({ output: "Successfully answered." });
 });
@@ -329,7 +328,7 @@ const toolCall = span.startObservation(
 
 // Simulate work and end the tool call span
 await new Promise((resolve) => setTimeout(resolve, 100));
-toolCall.end({ output: { temperature: "15°C" } });
+toolCall.update({ output: { temperature: "15°C" } }).end();
 
 // Create a nested generation for the LLM call
 const generation = span.startObservation(
@@ -345,12 +344,14 @@ generation.update({
   usageDetails: { input: 10, output: 5 },
 });
 
-generation.end({
-  output: { content: "The capital of France is Paris." },
-});
+generation
+  .update({
+    output: { content: "The capital of France is Paris." },
+  })
+  .end();
 
 // End the root span
-span.end({ output: "Successfully answered user request." });
+span.update({ output: "Successfully answered user request." }).end();
 ```
 
 <Callout type="warning" title="Manual Ending Required">
@@ -417,6 +418,6 @@ await startActiveObservation("user-request", async (span) => {
   });
 
   // ... continue logic ...
-  span.end({ output: { status: "success" } });
+  span.update({ output: { status: "success" } }).end();
 });
 ```

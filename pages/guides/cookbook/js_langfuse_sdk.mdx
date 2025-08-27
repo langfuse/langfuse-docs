@@ -125,9 +125,9 @@ await startActiveObservation("context-manager", async (span) => {
   });
  
   // End the generation with the LLM response
-  generation.end({
+  generation.update({
     output: { content: "The capital of France is Paris." },
-  });
+  }).end();
 
   // Example user information
   const user = { id: "user-5678", name: "Jane Doe", sessionId: "123" };
@@ -224,7 +224,7 @@ const toolCall = span.startObservation(
 
 await new Promise((r) => setTimeout(r, 100));
 // End the tool call with its output
-toolCall.end({ output: { temperature: '15°C' } });
+toolCall.update({ output: { temperature: '15°C' } }).end();
 
 // Create a generation span for the LLM call
 const generation = span.startObservation(
@@ -249,15 +249,15 @@ generation.update({
 });
 
 // End the generation with final output
-generation.end({
+generation.update({
   output: { content: 'The capital of France is Paris.' },
-});
+}).end();
 
 // End the root span with final status and session ID
-span.end({ 
+span.update({ 
   output: 'Successfully answered user request.', 
   sessionId: '123' 
-});
+}).end();
 
 // Ensure all spans are flushed to Langfuse
 await langfuseSpanProcessor.forceFlush();

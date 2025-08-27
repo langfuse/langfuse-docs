@@ -20,12 +20,12 @@ import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
 ```ts filename="server.ts"
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
- 
+
 await startActiveObservation("user-request", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" },
   });
- 
+
   // This generation will automatically be a child of "user-request"
   const generation = startObservation(
     "llm-call",
@@ -35,13 +35,15 @@ await startActiveObservation("user-request", async (span) => {
     },
     { asType: "generation" },
   );
- 
+
   // ... LLM call logic ...
- 
-  generation.end({
-    output: { content: "The capital of France is Paris." },
-  });
- 
+
+  generation
+    .update({
+      output: { content: "The capital of France is Paris." },
+    })
+    .end();
+
   span.update({ output: "Successfully answered." });
 });
 ```

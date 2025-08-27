@@ -73,7 +73,7 @@ When using the context manager:
 
 ```ts
 import { startActiveObservation, startObservation, updateActiveTrace } from "@langfuse/tracing";
- 
+
 await startActiveObservation("context-manager", async (span) => {
   span.update({
     input: { query: "What is the capital of France?" }
@@ -90,7 +90,7 @@ When using the `observe` wrapper:
 
 ```ts
 import { observe, updateActiveTrace } from "@langfuse/tracing";
- 
+
 // An existing function
 async function fetchData(source: string) {
 
@@ -101,12 +101,12 @@ async function fetchData(source: string) {
   // ... logic to fetch data
   return { data: `some data from ${source}` };
 }
- 
+
 // Wrap the function to trace it
 const tracedFetchData = observe(fetchData, {
   name: "observe-wrapper"
 });
- 
+
 const result = await tracedFetchData("API");
 ```
 
@@ -123,7 +123,7 @@ span.updateTrace({
   sessionId: 'session-123',
 });
 
-span.end({ output: 'Paris'});
+span.update({ output: 'Paris'}).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
