@@ -1672,7 +1672,7 @@ export default function Pricing({
                 }
               }}
             >
-              <TabsList>
+              <TabsList className="mx-auto">
                 {Object.keys(deploymentOptions).map((key) => (
                   <TabsTrigger key={key} value={key} asChild={isPricingPage}>
                     {isPricingPage ? (
