@@ -1018,6 +1018,10 @@ const nonPermanentRedirects = [
     "/docs/observability/sdk/typescript/example-notebook",
     "/docs/observability/sdk/typescript/overview",
   ],
+  [
+    "/guides/cookbook/js_integration_llamaindex",
+    "/docs/observability/sdk/typescript/overview",
+  ],
 ];
 
 const permanentRedirects = [];
