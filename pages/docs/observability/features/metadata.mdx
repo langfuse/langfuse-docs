@@ -85,30 +85,44 @@ with langfuse.start_as_current_span(name="operation") as span:
 When using the context manager:
 
 ```ts
-import { startActiveObservation, startObservation, updateActiveTrace } from "@langfuse/tracing";
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
+  // observation metadata
   span.update({
-    input: { query: "What is the capital of France?" }
+    input: { query: "What is the capital of France?" },
   });
 
+  // trace metadata
   updateActiveTrace({
-    metadata: { key: "value" }
+    metadata: { key: "value" },
   });
-
 });
 ```
 
 When using the `observe` wrapper:
 
 ```ts
-import { observe, updateActiveTrace } from "@langfuse/tracing";
+import {
+  observe,
+  updateActiveTrace,
+  updateActiveObservation,
+} from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
+  // observation metadata
+  updateActiveObservation("span", {
+    metadata: { key: "value" },
+  });
 
+  // trace metadata
   updateActiveTrace({
-    metadata: { key: "value" }
+    metadata: { key: "value" },
   });
 
   // ... logic to fetch data
@@ -117,7 +131,7 @@ async function fetchData(source: string) {
 
 // Wrap the function to trace it
 const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper"
+  name: "observe-wrapper",
 });
 
 const result = await tracedFetchData("API");
@@ -128,15 +142,16 @@ When creating spans manually:
 ```ts
 import { startObservation } from "@langfuse/tracing";
 
-const span = startObservation('manual-observation', {
-  input: { query: 'What is the capital of France?' },
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
+  metadata: { key: "value" },
 });
 
 span.updateTrace({
-  metadata: { key: "value" }
+  metadata: { key: "value" },
 });
 
-span.update({ output: 'Paris'}).end();
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
