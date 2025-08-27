@@ -50,7 +50,7 @@ os.environ["LANGFUSE_TRACING_ENVIRONMENT"] = "production"
 langfuse = get_client()
 
 # All operations will now be associated with the "production" environment
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     # Your code here
     pass
 

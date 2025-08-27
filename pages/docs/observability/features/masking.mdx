@@ -80,7 +80,7 @@ from langfuse import Langfuse
 
 langfuse = Langfuse(mask=masking_function)
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="sensitive-operation",
     input="SECRET_INPUT_DATA"
 ) as span:

@@ -63,7 +63,7 @@ def process_data():
 
 # With context managers
 langfuse = get_client()
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     span.update_trace(release="v2.1.24")
 ```
 
@@ -165,14 +165,15 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Set version when creating a span
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="process-data",
     version="1.0"
 ) as span:
     # Processing...
 
     # Create a generation with version
-    with span.start_as_current_generation(
+    with span.start_as_current_observation(
+        as_type="generation",
         name="guess-countries",
         model="gpt-4o",
         version="1.0"

@@ -39,7 +39,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="process-request") as span:
+with langfuse.start_as_current_observation(name="process-request") as span:
     # Get the URL of this trace
     trace_url = langfuse.get_trace_url()
     print(f"View trace at: {trace_url}")
@@ -125,7 +125,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="process-request") as span:
+with langfuse.start_as_current_observation(name="process-request") as span:
     # Make this trace public
     span.update_trace(public=True)
 

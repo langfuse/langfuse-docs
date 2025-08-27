@@ -51,7 +51,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="my-trace") as span:
+with langfuse.start_as_current_observation(name="my-trace") as span:
     
     # Run your application here
     output = my_llm_call(input)

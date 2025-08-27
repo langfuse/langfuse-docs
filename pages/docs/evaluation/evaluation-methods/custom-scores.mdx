@@ -55,7 +55,7 @@ langfuse.create_score(
 )
 
 # Method 2: Score current span/generation (within context)
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     # Score the current span
     span.score(
         name="correctness",
@@ -73,7 +73,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 
 
 # Method 3: Score via the current context
-with langfuse.start_as_current_span(name="my-operation"):
+with langfuse.start_as_current_observation(name="my-operation"):
     # Score the current span
     langfuse.score_current_span(
         name="correctness",
@@ -109,7 +109,7 @@ langfuse.create_score(
 )
 
 # Method 2: Score current span/generation (within context)
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     # Score the current span
     span.score(
         name="accuracy",
@@ -126,7 +126,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
     )
 
 # Method 3: Score via the current context
-with langfuse.start_as_current_span(name="my-operation"):
+with langfuse.start_as_current_observation(name="my-operation"):
     # Score the current span
     langfuse.score_current_span(
         name="accuracy",
@@ -162,7 +162,7 @@ langfuse.create_score(
 )
 
 # Method 2: Score current span/generation (within context)
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     # Score the current span
     span.score(
         name="helpfulness",
@@ -178,7 +178,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
         data_type="BOOLEAN"
     )
 # Method 3: Score via the current context
-with langfuse.start_as_current_span(name="my-operation"):
+with langfuse.start_as_current_observation(name="my-operation"):
     # Score the current span
     langfuse.score_current_span(
         name="helpfulness",
@@ -304,7 +304,7 @@ langfuse.create_score(
 )
 
 # Method 2: Score within context
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     span.score(
         name="accuracy",
         value=0.9,
@@ -335,7 +335,7 @@ langfuse.create_score(
 )
 
 # Method 2: Score within context
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     span.score(
         name="correctness",
         value="correct",
@@ -366,7 +366,7 @@ langfuse.create_score(
 )
 
 # Method 2: Score within context
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     span.score(
         name="helpfulness",
         value=1,

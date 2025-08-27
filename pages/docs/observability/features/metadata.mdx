@@ -46,7 +46,7 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Add metadata at trace level
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="process-request"
 ) as root_span:
     # Add metadata to the trace
@@ -56,7 +56,8 @@ with langfuse.start_as_current_span(
     root_span.update(metadata={"stage": "parsing"})
 
     # Create a child span with metadata
-    with root_span.start_as_current_generation(
+    with root_span.start_as_current_observation(
+        as_type="generation",
         name="generate-response",
         model="gpt-4o",
         metadata={"temperature": 0.7, "max_tokens": 1000}
@@ -69,7 +70,7 @@ You can add new keys to the metadata object by continuously updating the entity.
 We strongly discourage writing the same top-level key multiple times as this will produce an undefined behaviour.
 
 ```python
-with langfuse.start_as_current_span(name="operation") as span:
+with langfuse.start_as_current_observation(name="operation") as span:
     # First write
     span.update(metadata={"status": "started"})
 
@@ -181,7 +182,7 @@ prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
 # Set trace attributes dynamically via enclosing span
-with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
+with langfuse.start_as_current_observation(name="dynamic-langchain-trace") as span:
     span.update_trace(
         metadata={"foo": "bar", "baz": "qux"}
     )

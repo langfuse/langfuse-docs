@@ -43,14 +43,15 @@ from langfuse import get_client
 langfuse = get_client()
 
 # You can set the session_id when creating the root span
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="process-chat-message"
 ) as root_span:
     # Add session_id to the trace
     root_span.update_trace(session_id="chat-session-123")
 
     # All spans in this trace will belong to the same session
-    with root_span.start_as_current_generation(
+    with root_span.start_as_current_observation(
+        as_type="generation",
         name="generate-response",
         model="gpt-4o"
     ) as gen:
@@ -61,7 +62,7 @@ with langfuse.start_as_current_span(
 You can also update the session_id of the current trace without a direct reference to a span:
 
 ```python
-with langfuse.start_as_current_span(name="another-operation"):
+with langfuse.start_as_current_observation(name="another-operation"):
     # Add to the current trace
     langfuse.update_current_trace(session_id="your-session-id")
 ```
