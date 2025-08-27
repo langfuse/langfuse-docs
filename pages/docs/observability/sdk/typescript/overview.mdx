@@ -104,6 +104,14 @@ The Langfuse SDK is designed to be modular. Here's an overview of the available 
 | **`@langfuse/openai`** | Automatic tracing integration for the OpenAI SDK. | Universal JS |
 | **`@langfuse/langchain`** | CallbackHandler for tracing LangChain applications. | Universal JS |
 
+## OpenTelemetry foundation
+
+Building on OpenTelemetry is a core design choice for this SDK. It offers several key advantages:
+
+- **Standardization**: It aligns with the industry standard for observability, making it easier to integrate with existing monitoring and APM tools.
+- **Robust Context Management**: OpenTelemetry provides reliable context propagation, ensuring that traces are correctly linked even in complex, asynchronous applications.
+- **Ecosystem & Interoperability**: You can leverage a vast ecosystem of third-party instrumentations. If a library you use supports OpenTelemetry, its traces can be sent to Langfuse automatically.
+
 ## Learn more
 
 import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
@@ -149,10 +157,3 @@ import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react
 </Cards>
 
 
-## OpenTelemetry foundation
-
-Building on OpenTelemetry is a core design choice for this SDK. It offers several key advantages:
-
-- **Standardization**: It aligns with the industry standard for observability, making it easier to integrate with existing monitoring and APM tools.
-- **Robust Context Management**: OpenTelemetry provides reliable context propagation, ensuring that traces are correctly linked even in complex, asynchronous applications.
-- **Ecosystem & Interoperability**: You can leverage a vast ecosystem of third-party instrumentations. If a library you use supports OpenTelemetry, its traces can be sent to Langfuse automatically.

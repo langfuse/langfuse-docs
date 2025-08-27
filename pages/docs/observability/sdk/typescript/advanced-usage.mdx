@@ -57,6 +57,15 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+If you want to include only LLM observability related spans, you can configure an allowlist like so:
+
+```ts filename="instrumentation.ts"
+import { ShouldExportSpan } from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentation.scope.name)
+```
+
 <Callout type="info">
 If you would like to exclude Langfuse spans from being sent to third-party observability backends configured in your OpenTelemetry setup, see [the documentation on isolating the Langfuse tracer provider](#isolated-tracer-provider).
 </Callout>
@@ -260,13 +269,9 @@ const langfuseTracerProvider = new NodeTracerProvider(
 setLangfuseTracerProvider(langfuseTracerProvider)
 ```
 
-## Multi-project Setup (Experimental)
+## Multi-project Setup
 
 You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
-
-<Callout type="warning" title="Multi-project setup is experimental">
-The multi-project setup is experimental and may change in the future. Please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) if you have any feedback.
-</Callout>
 
 ```ts filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
