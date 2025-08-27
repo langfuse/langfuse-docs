@@ -12,8 +12,8 @@ The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces seve
 1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the `LangfuseSpanProcessor` with an OpenTelemetry `NodeSDK`.
 2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by `startObservation`, `startActiveObservation`, etc., from the `@langfuse/tracing` package.
 3.  **Separation of Concerns**:
-      * The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
-      * The **`@langfuse/client`** package and the `LangfuseClient` class are now only for non-tracing features like scoring, prompt management, and datasets.
+    - The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
+    - The **`@langfuse/client`** package and the `LangfuseClient` class are now only for non-tracing features like scoring, prompt management, and datasets.
 
 See the [SDK v4 docs](/docs/observability/sdk/typescript/overview) for details on each.
 
@@ -46,7 +46,6 @@ const response = await openai.chat.completions.create({
 const prompt = await langfuse.prompt.get("my-prompt", { version: "1.0" });
 ```
 
-
 ## OpenAI integration
 
 - **Import**: The import of the OpenAI integration is now:
@@ -60,6 +59,7 @@ import { observeOpenAI } from "@langfuse/openai";
 ## Vercel AI SDK
 
 Please see here for a [full example on usage with the AI SDK](/docs/observability/sdk/typescript/instrumentation#vercel-ai-sdk).
+
 ## Langchain integration
 
 - **Import**: The import of the Langchain integration is now:
@@ -71,6 +71,7 @@ import { CallbackHandler } from "@langfuse/langchain";
 - You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
 
 ## `langfuseClient.getTraceUrl`
+
 - method is now asynchronous and returns a promise
 
 ```typescript
@@ -102,4 +103,3 @@ See [custom scores documentation](/docs/evaluation/evaluation-methods/custom-sco
 ## Datasets
 
 See [datasets section above](#datasets) for new dataset methods.
-

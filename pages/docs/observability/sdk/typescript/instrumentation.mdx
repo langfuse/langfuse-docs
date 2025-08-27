@@ -1,6 +1,7 @@
 ---
 title: TypeScript SDK - Instrumentation
 description: Instrumentation methods for the TypeScript SDK.
+label: "Version: JS SDK v4"
 ---
 
 # TypeScript SDK - Instrumentation
@@ -13,21 +14,28 @@ import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 To instrument your application to send traces to Langfuse, you can use either native library instrumentations that work out of the box, or use custom instrumentation methods for fine-grained control.
 
-import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
+import {
+  Rocket,
+  Plug,
+  Beaker,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
 
 <Cards num={2}>
-    <Card
-        icon={<Rocket size="24" />}
-        title="Cookbook: Instrumentation"
-        href="/guides/cookbook/js_langfuse_sdk"
-        arrow
-    />
-    <Card
-        icon={<Plug size="24" />}
-        title="All Langfuse Integrations"
-        href="/integrations"
-        arrow
-    />
+  <Card
+    icon={<Rocket size="24" />}
+    title="Cookbook: Instrumentation"
+    href="/guides/cookbook/js_langfuse_sdk"
+    arrow
+  />
+  <Card
+    icon={<Plug size="24" />}
+    title="All Langfuse Integrations"
+    href="/integrations"
+    arrow
+  />
 </Cards>
 
 ## Native instrumentations
@@ -104,9 +112,12 @@ tracerProvider.register();
 ```
 
 <Callout>
-If you are using Next.js, please use a manual OpenTelemetry setup via the `NodeTracerProvider` rather than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
+  If you are using Next.js, please use a manual OpenTelemetry setup via the
+  `NodeTracerProvider` rather than via `registerOTel` from `@vercel/otel`. This
+  is because [the `@vercel/otel` package does not yet support the OpenTelemetry
+  JS SDK v2](https://github.com/vercel/otel/issues/154) on which the
+  `@langfuse/tracing` and `@langfuse/otel` packages are based.
 </Callout>
-
 
 ```ts filename="route.ts"
 import { streamText } from "ai";
@@ -132,7 +143,7 @@ const handler = async (req: Request) => {
 
   // Set session id and user id on active trace
   const inputText = messages[messages.length - 1].parts.find(
-    (part) => part.type === "text",
+    (part) => part.type === "text"
   )?.text;
 
   updateActiveObservation({
@@ -149,7 +160,7 @@ const handler = async (req: Request) => {
   const result = streamText({
     // ... other streamText options ...
     experimental_telemetry: {
-      isEnabled: true
+      isEnabled: true,
     },
     onFinish: async (result) => {
       updateActiveObservation({
@@ -253,7 +264,7 @@ await startActiveObservation("user-request", async (span) => {
       model: "gpt-4",
       input: [{ role: "user", content: "What is the capital of France?" }],
     },
-    { asType: "generation" },
+    { asType: "generation" }
   );
 
   // ... LLM call logic ...
@@ -294,18 +305,18 @@ const result = await tracedFetchData("API");
 
 You can configure the `observe` wrapper by passing an options object as the second argument:
 
-| Option          | Description                                                                                          | Default                       |
-| --------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| `name`          | The name of the observation.                                                                           | The original function's name. |
-| `asType`        | The type of observation to create (`span` or `generation`).                                            | `"span"`                      |
-| `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                         | `true`                        |
-| `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation.     | `true`                        |
+| Option          | Description                                                                                        | Default                       |
+| --------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `name`          | The name of the observation.                                                                       | The original function's name. |
+| `asType`        | The type of observation to create (`span` or `generation`).                                        | `"span"`                      |
+| `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                     | `true`                        |
+| `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation. | `true`                        |
 
 ### Manual observations
 
 The core tracing function (`startObservation`) gives you full control over creating observations. You can pass the `asType` option to specify the type of observation to create.
 
-When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the *original* parent, not the one you just created.
+When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the _original_ parent, not the one you just created.
 
 To create nested observations manually, use the methods on the returned object (e.g., `parentSpan.startObservation(...)`).
 
@@ -323,7 +334,7 @@ const toolCall = span.startObservation(
   {
     input: { city: "Paris" },
   },
-  { asType: "tool" },
+  { asType: "tool" }
 );
 
 // Simulate work and end the tool call span
@@ -337,7 +348,7 @@ const generation = span.startObservation(
     model: "gpt-4",
     input: [{ role: "user", content: "What is the capital of France?" }],
   },
-  { asType: "generation" },
+  { asType: "generation" }
 );
 
 generation.update({
@@ -355,7 +366,9 @@ span.update({ output: "Successfully answered user request." }).end();
 ```
 
 <Callout type="warning" title="Manual Ending Required">
-If you use `startObservation()`, you are responsible for calling `.end()` on the returned observation object. Failure to do so will result in incomplete or missing observations in Langfuse.
+  If you use `startObservation()`, you are responsible for calling `.end()` on
+  the returned observation object. Failure to do so will result in incomplete or
+  missing observations in Langfuse.
 </Callout>
 
 ### Updating Traces
@@ -388,7 +401,7 @@ rootSpan.updateTrace({
 const generation = rootSpan.startObservation(
   "llm-call",
   {},
-  { asType: "generation" },
+  { asType: "generation" }
 );
 
 generation.end();
@@ -408,7 +421,7 @@ await startActiveObservation("user-request", async (span) => {
   span.update({ input: { path: "/api/process" } });
 
   // Simulate fetching user data
-  await new Promise(resolve => setTimeout(resolve, 50));
+  await new Promise((resolve) => setTimeout(resolve, 50));
   const user = { id: "user-5678", name: "Jane Doe" };
 
   // Update the active trace with the user's information

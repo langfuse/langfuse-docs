@@ -1,11 +1,12 @@
 ---
 title: TypeScript SDK - Evaluation
 description: Evaluation methods for the TypeScript SDK.
+label: "Version: JS SDK v4"
 ---
 
 # TypeScript SDK - Evaluation
 
-## Custom scores 
+## Custom scores
 
 You can score traces and observations via the `langfuse.score` methods on the Langfuse client. This is useful for automated evaluations or for capturing user feedback. See [the custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for a detailed reference.
 
@@ -20,7 +21,7 @@ const rootSpan = startObservation("my-trace");
 const generation = rootSpan.startObservation(
   "my-generation",
   {},
-  { asType: "generation" },
+  { asType: "generation" }
 );
 generation.end();
 rootSpan.end();
@@ -57,19 +58,26 @@ await langfuse.flush();
 
 ## Learn more
 
-import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
+import {
+  Rocket,
+  Plug,
+  Beaker,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
 
 <Cards num={2}>
-    <Card
-        icon={<Rocket size="24" />}
-        title="Evaluation Methods"
-        href="/docs/evaluation/overview#evaluation-methods"
-        arrow
-    />
-    <Card
-        icon={<Plug size="24" />}
-        title="Dataset Runs"
-        href="/docs/evaluation/overview#dataset-runs"
-        arrow
-    />
+  <Card
+    icon={<Rocket size="24" />}
+    title="Evaluation Methods"
+    href="/docs/evaluation/overview#evaluation-methods"
+    arrow
+  />
+  <Card
+    icon={<Plug size="24" />}
+    title="Dataset Runs"
+    href="/docs/evaluation/overview#dataset-runs"
+    arrow
+  />
 </Cards>

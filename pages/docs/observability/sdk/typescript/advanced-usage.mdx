@@ -1,6 +1,7 @@
 ---
 title: TypeScript SDK - Advanced Configuration
 description: Advanced configuration options for the TypeScript SDK.
+label: "Version: JS SDK v4"
 ---
 
 # TypeScript SDK - Advanced Configuration
@@ -33,13 +34,15 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-
 ## Filtering Spans
 
 You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
 
 <Callout type="warning" title="Filtering Spans May Break Trace Trees">
-Filtering spans may break the parent-child relationships in your traces. For example, if you filter out a parent span but keep its children, you may see "orphaned" observations in the Langfuse UI. Consider the impact on trace structure when configuring `shouldExportSpan`.
+  Filtering spans may break the parent-child relationships in your traces. For
+  example, if you filter out a parent span but keep its children, you may see
+  "orphaned" observations in the Langfuse UI. Consider the impact on trace
+  structure when configuring `shouldExportSpan`.
 </Callout>
 
 ```ts filename="instrumentation.ts" /shouldExportSpan/
@@ -63,11 +66,14 @@ If you want to include only LLM observability related spans, you can configure a
 import { ShouldExportSpan } from "@langfuse/otel";
 
 const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
-  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name)
+  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
 ```
 
 <Callout type="info">
-If you would like to exclude Langfuse spans from being sent to third-party observability backends configured in your OpenTelemetry setup, see [the documentation on isolating the Langfuse tracer provider](#isolated-tracer-provider).
+  If you would like to exclude Langfuse spans from being sent to third-party
+  observability backends configured in your OpenTelemetry setup, see [the
+  documentation on isolating the Langfuse tracer
+  provider](#isolated-tracer-provider).
 </Callout>
 
 ## Sampling
@@ -96,8 +102,8 @@ For more advanced sampling strategies, refer to the [OpenTelemetry JS Sampling D
 
 In Langfuse, every trace and observation has a unique identifier. Understanding their format and how to set them is useful for integrating with other systems.
 
-  - **Trace IDs** are 32-character lowercase hexadecimal strings, representing 16 bytes of data
-  - **Observation IDs** (also known as Span IDs in OpenTelemetry) are 16-character lowercase hexadecimal strings, representing 8 bytes
+- **Trace IDs** are 32-character lowercase hexadecimal strings, representing 16 bytes of data
+- **Observation IDs** (also known as Span IDs in OpenTelemetry) are 16-character lowercase hexadecimal strings, representing 8 bytes
 
 While the SDK handles ID generation automatically, you may manually set them to align with external systems or create specific trace structures. This is done using the `parentSpanContext` option in tracing methods.
 
@@ -114,13 +120,17 @@ const externalId = "support-ticket-54321";
 const langfuseTraceId = await createTraceId(externalId);
 
 // You can now start a new trace with this ID
-const rootSpan = startObservation("process-ticket", {}, {
-  parentSpanContext: {
-    traceId: langfuseTraceId,
-    spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
-    traceFlags: 1 // mark trace as sampled
+const rootSpan = startObservation(
+  "process-ticket",
+  {},
+  {
+    parentSpanContext: {
+      traceId: langfuseTraceId,
+      spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+      traceFlags: 1, // mark trace as sampled
+    },
   }
-});
+);
 
 // Later, you can regenerate the same traceId to score or retrieve the trace
 const scoringTraceId = await createTraceId(externalId);
@@ -132,9 +142,9 @@ You may also access the current active trace ID via the `getActiveTraceId` funct
 ```typescript
 import { startObservation, getActiveTraceId } from "@langfuse/tracing";
 
-await startObservation('run', async (span) => {
-    const traceId = getActiveTraceId();
-    console.log(`Current trace ID: ${traceId}`);
+await startObservation("run", async (span) => {
+  const traceId = getActiveTraceId();
+  console.log(`Current trace ID: ${traceId}`);
 });
 ```
 
@@ -165,8 +175,6 @@ export LANGFUSE_LOG_LEVEL="DEBUG"
 
 In short-lived environments such as serverless functions (e.g., Vercel Functions, AWS Lambda), you must explicitly flush the traces before the process exits or the runtime environment is frozen.
 
-
-
 <Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
 <Tab>
 {/* Generic serverless */}
@@ -184,8 +192,8 @@ const sdk = new NodeSDK({
 });
 
 sdk.start();
-
 ```
+
 In your serverless function handler, call `forceFlush()` on the span processor before the function exits.
 
 ```ts filename="handler.ts" /forceFlush/
@@ -198,6 +206,7 @@ export async function handler(event, context) {
   await langfuseSpanProcessor.forceFlush();
 }
 ```
+
 </Tab>
 
 <Tab>
@@ -224,7 +233,7 @@ In Vercel Cloud Functions, please use the `after` utility to schedule a flush af
 ```ts filename="route.ts" /after/ /forceFlush/
 import { after } from "next/server";
 
-import { langfuseSpanProcessor } from "./instrumentation.ts"
+import { langfuseSpanProcessor } from "./instrumentation.ts";
 
 export async function POST() {
   // ... existing request logic ...
@@ -232,14 +241,14 @@ export async function POST() {
   // Schedule flush after request has completed
   after(async () => {
     await langfuseSpanProcessor.forceFlush();
-  })
+  });
 
   // ... send response ...
 }
 ```
+
 </Tab>
 </Tabs>
-
 
 ## Isolated tracer provider
 
@@ -248,11 +257,18 @@ The Langfuse JS SDK uses the global OpenTelemetry TracerProvider to attach its s
 If you'd like to avoid sending Langfuse spans to third-party observability backends in your existing OpenTelemetry setup, you will need to use an isolated OpenTelemetry TracerProvider that is separate from the global one.
 
 <Callout type="info">
-If you would like to simply limit the spans that are sent to Langfuse and you have no third-party observability backend where you'd like to exclude Langfuse spans from, [see filtering spans instead](#filtering-spans).
+  If you would like to simply limit the spans that are sent to Langfuse and you
+  have no third-party observability backend where you'd like to exclude Langfuse
+  spans from, [see filtering spans instead](#filtering-spans).
 </Callout>
 
 <Callout type="warning" title="Isolated TracerProvider may break trace trees">
-Using an isolated TracerProvider may break the parent-child relationships in your traces, as all TracerProviders still share the same active span context. For example, if you have an active parent span from the global TracerProvider but children from an isolated TracerProvider, you may see "orphaned" observations in the Langfuse UI. Consider the impact on trace structure when configuring an isolated tracer provider.
+  Using an isolated TracerProvider may break the parent-child relationships in
+  your traces, as all TracerProviders still share the same active span context.
+  For example, if you have an active parent span from the global TracerProvider
+  but children from an isolated TracerProvider, you may see "orphaned"
+  observations in the Langfuse UI. Consider the impact on trace structure when
+  configuring an isolated tracer provider.
 </Callout>
 
 ```typescript /setLangfuseTracerProvider/ /LangfuseSpanProcessor/ /langfuseTracerProvider/
@@ -294,4 +310,3 @@ sdk.start();
 ```
 
 This configuration will send every trace to both projects. You can also configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
-

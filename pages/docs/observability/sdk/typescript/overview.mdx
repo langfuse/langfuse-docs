@@ -2,6 +2,7 @@
 title: TypeScript SDK - Overview
 description: Improved OTEL-based TypeScript SDK (v4) with better developer experience and third-party integrations.
 category: SDKs
+label: "Version: JS SDK v4"
 ---
 
 # TypeScript SDK - Overview
@@ -22,6 +23,8 @@ The modular Langfuse TypeScript SDK (v4) is built on **[OpenTelemetry](https://o
 ## Quickstart
 
 Get your first trace into Langfuse in just a few minutes.
+
+<Steps>
 
 ### Install packages
 
@@ -66,7 +69,11 @@ Learn more about setting up OpenTelemetry [here](/docs/observability/sdk/typescr
 
 ### Instrument your application
 
-Use the `startActiveObservation` function to start a trace. This function takes a callback and automatically manages the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+Use one of the native Langfuse framework [integrations](/integrations) to automatically trace your application.
+
+Alternatively, manually instrument your application, e.g. by using the `startActiveObservation`. This function takes a callback and automatically manages the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+
+This is just an example, check out the [instrumentation](/docs/observability/sdk/typescript/instrumentation) page for more details.
 
 ```ts filename="index.ts" /startActiveObservation/
 import "./instrumentation";
@@ -84,8 +91,6 @@ async function main() {
 main();
 ```
 
-Learn more about instrumenting your application [here](/docs/observability/sdk/typescript/instrumentation).
-
 ### Run your application
 
 Execute your application. You should see your trace appear in the Langfuse UI.
@@ -94,18 +99,20 @@ Execute your application. You should see your trace appear in the Langfuse UI.
 npx tsx index.ts
 ```
 
+</Steps>
+
 ## Packages
 
 The Langfuse SDK is designed to be modular. Here's an overview of the available packages:
 
-| Package                   | Description                                                            | Environment  |
-| :------------------------ | :--------------------------------------------------------------------- | :----------- |
-| **`@langfuse/core`**      | Core utilities, types, and logger shared across packages.              | Universal JS |
-| **`@langfuse/client`**    | Client for features like prompts, datasets, and scores.                | Universal JS |
-| **`@langfuse/tracing`**   | Core OpenTelemetry-based tracing functions (`startObservation`, etc.). | Universal JS |
-| **`@langfuse/otel`**      | The `LangfuseSpanProcessor` to export traces to Langfuse.              | Node.js ≥ 20 |
-| **`@langfuse/openai`**    | Automatic tracing integration for the OpenAI SDK.                      | Universal JS |
-| **`@langfuse/langchain`** | CallbackHandler for tracing LangChain applications.                    | Universal JS |
+| Package                                                                        | Description                                                            | Environment  |
+| :----------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :----------- |
+| [**`@langfuse/core`**](https://www.npmjs.com/package/@langfuse/core)           | Core utilities, types, and logger shared across packages.              | Universal JS |
+| [**`@langfuse/client`**](https://www.npmjs.com/package/@langfuse/client)       | Client for features like prompts, datasets, and scores.                | Universal JS |
+| [**`@langfuse/tracing`**](https://www.npmjs.com/package/@langfuse/tracing)     | Core OpenTelemetry-based tracing functions (`startObservation`, etc.). | Universal JS |
+| [**`@langfuse/otel`**](https://www.npmjs.com/package/@langfuse/otel)           | The `LangfuseSpanProcessor` to export traces to Langfuse.              | Node.js ≥ 20 |
+| [**`@langfuse/openai`**](https://www.npmjs.com/package/@langfuse/openai)       | Automatic tracing integration for the OpenAI SDK.                      | Universal JS |
+| [**`@langfuse/langchain`**](https://www.npmjs.com/package/@langfuse/langchain) | CallbackHandler for tracing LangChain applications.                    | Universal JS |
 
 ## OpenTelemetry foundation
 
