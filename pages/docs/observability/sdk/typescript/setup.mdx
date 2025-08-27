@@ -1,18 +1,23 @@
 ---
 title: TypeScript SDK - Setup
 description: Tracing setup for the TypeScript SDK.
+label: "Version: JS SDK v4"
 ---
 
 # TypeScript SDK - Setup
 
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+The Langfuse TypeScript SDK offers two setup approaches:
+
+1. [**Tracing**](#tracing-setup) for [Langfuse Observability](/docs/observability/overview) using OpenTelemetry
+2. [**Client**](#client-setup) for other Langfuse features like prompt management, evaluation, or accessing the Langfuse API
+
+## Tracing Setup [#tracing-setup]
+
 <Steps>
-## Installation
 
-The Langfuse TypeScript SDK is modular, so you can install only the packages you need.
-
-<Tabs items={["Full Tracing install", "Client-only install"]}>
-
-<Tab>
+### Installation
 
 Install the relevant packages for a full tracing setup:
 
@@ -26,27 +31,13 @@ npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 
 Learn more about the packages [here](/docs/observability/sdk/typescript/overview#packages).
 
-</Tab>
-<Tab>
-
-If you do not use Langfuse tracing in your application and rely on features such as prompt management, you only need the `@langfuse/client` package.
-
-```bash
-npm install @langfuse/client
-```
-
-</Tab>
-</Tabs>
-
-## Register your credentials
-
-import EnvJS from "@/components-mdx/env-js.mdx";
+### Register your credentials
 
 Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
 
 <EnvJS />
 
-## Initialize OpenTelemetry
+### Initialize OpenTelemetry
 
 The Langfuse TypeScript SDK's tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The `LangfuseSpanProcessor` is the key component that sends traces to Langfuse.
 
@@ -71,25 +62,78 @@ You can learn more about setting up OpenTelemetry in your JS environment [here](
 **Next.js users:**
 
 If you are using Next.js, please use the OpenTelemetry setup via the `NodeSDK` described above rather than via `registerOTel` from `@vercel/otel`. This is because [the `@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based.
+
 </Callout>
+
+</Steps>
+
+## Client Setup [#client-setup]
+
+<Steps>
+
+### Installation
+
+```bash
+npm install @langfuse/client
+```
+
+### Register your credentials
+
+Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+
+<EnvJS />
+
+### Initialize the client
+
+Initialize the `LangfuseClient` to interact with Langfuse. The client will automatically use the environment variables you set above.
+
+```ts filename="client.ts"
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+```
+
+<details>
+<summary>Alternative: Configure via constructor</summary>
+
+You can also pass configuration options directly to the constructor:
+
+```ts filename="client.ts"
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient({
+  publicKey: "your-public-key",
+  secretKey: "your-secret-key",
+  baseUrl: "https://cloud.langfuse.com", // or your self-hosted instance
+});
+```
+
+</details>
 
 </Steps>
 
 ## Learn more
 
-import { Rocket, Plug, Beaker, Settings, LifeBuoy, BookOpen } from "lucide-react";
+import {
+  Rocket,
+  Plug,
+  Beaker,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
 
 <Cards num={2}>
-    <Card
-        icon={<Rocket size="24" />}
-        title="Cookbook: Instrumentation"
-        href="/guides/cookbook/js_langfuse_sdk"
-        arrow
-    />
-    <Card
-        icon={<Settings size="24" />}
-        title="Advanced Usage"
-        href="/docs/observability/sdk/typescript/advanced-usage"
-        arrow
-    />
+  <Card
+    icon={<Rocket size="24" />}
+    title="Cookbook: Instrumentation"
+    href="/guides/cookbook/js_langfuse_sdk"
+    arrow
+  />
+  <Card
+    icon={<Settings size="24" />}
+    title="Advanced Usage"
+    href="/docs/observability/sdk/typescript/advanced-usage"
+    arrow
+  />
 </Cards>
