@@ -63,7 +63,7 @@ If you want to include only LLM observability related spans, you can configure a
 import { ShouldExportSpan } from "@langfuse/otel";
 
 const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
-  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentation.scope.name)
+  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name)
 ```
 
 <Callout type="info">
