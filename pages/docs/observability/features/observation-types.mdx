@@ -63,7 +63,7 @@ with langfuse.start_as_current_observation(
 transform_span = langfuse.start_observation(
     as_type="chain",
     name="transform-text"
-):
+)
 transformed_text = transform_text(["text to transform"])
 transform_span.update(output=transformed_text)
 ```
