@@ -367,3 +367,65 @@ httpx_client = httpx.Client(verify=os.environ["OTEL_EXPORTER_OTLP_TRACES_CERTIFI
 langfuse = Langfuse(httpx_client=httpx_client)
 ```
 
+## Observation Types
+
+Langfuse supports multiple observation types to provide context for different components of LLM applications.
+The full list of the observation types is document here: [Observation types](/docs/observability/features/observation-types).
+
+### Setting observation types with the `@observe` decorator
+
+By setting the `as_type` parameter in the `@observe` decorator, you can specify the observation type for a method:
+
+```python /as_type="tool"/
+from langfuse import observe
+
+# Tool calls to external services
+@observe(as_type="tool")
+def retrieve_context(query):
+    results = vector_store.get(query)
+    return results
+```
+
+### Setting observation types with client methods and context manager
+
+With the Langfuse client, you can directly create an observation with a defined type:
+
+```python /as_type="embedding"/
+from langfuse import get_client()
+langfuse = get_client()
+
+def process_with_manual_tracing():
+    trace = langfuse.trace(name="document-processing")
+
+    # Create different observation types
+    embedding_obs = trace.start_observation(
+        as_type="embedding",
+        name="document-embedding",
+        input={"document": "text content"}
+    )
+
+    embeddings = generate_embeddings("text content")
+    embedding_obs.update(output={"embeddings": embeddings})
+    embedding_obs.end()
+```
+
+The context manager approach provides automatic resource cleanup:
+
+```python /as_type="chain"/
+from langfuse import get_client
+langfuse = get_client()
+
+def process_with_context_managers():
+    with langfuse.start_as_current_observation(
+        as_type="chain",
+        name="retrieval-pipeline",
+    ) as chain:
+
+        # Retrieval step
+        with langfuse.start_as_current_observation(
+            as_type="retriever",
+            name="vector-search",
+        ) as retriever:
+            search_results = perform_vector_search("user question")
+            retriever.update(output={"results": search_results})
+```

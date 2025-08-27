@@ -13,19 +13,15 @@ Tracing in Langfuse is a way to log and analyze the execution of your LLM applic
 A `trace` typically represents a single request or operation.
 It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
-import { CircleDot, MoveHorizontal, Fan, ListTree } from "lucide-react";
+import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 ### Observations
 Each trace can contain multiple `observations` to log the individual steps of the execution. Usually, a trace corresponds to a single api call of an application.
 
 #### Types
 
-- <CircleDot size={16} className="text-muted-green inline mr-1" /> `Events` are the
-  basic building blocks. They are used to track discrete events in a trace.
-- <MoveHorizontal size={16} className="text-muted-blue inline mr-1" /> `Spans` represent
-  durations of units of work in a trace.
-- <Fan size={16} className="text-muted-magenta inline mr-1" /> `Generations` are
-  spans used to log generations of AI models incl. prompts, [token usage and costs](/docs/observability/features/token-and-cost-tracking).
+<ObservationTypesList />
+
 
 #### Nesting
 
