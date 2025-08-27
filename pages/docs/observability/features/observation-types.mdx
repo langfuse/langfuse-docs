@@ -1,0 +1,77 @@
+---
+title: Observation Types
+description: Structured tracing with observation types in Langfuse
+---
+
+# Observation Types
+
+Langfuse supports different observation types to provide more context to your spans and allow efficient filtering.
+
+import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
+
+## Available Types
+
+<ObservationTypesList />
+
+## How to Use Observation Types
+
+The [integrations with agent frameworks](/docs/integrations) automatically set the observation types. For example, marking a method with `@tool` in langchain will automatically set the Langfuse observation type to `tool`.
+
+You can also manually set the observation types for your application within the Langfuse SDK. Set the `as_type` parameter to the desired observation type when creating an observation.
+
+<Tabs items={["Python SDK", "JS/TS"]}>
+<Tab>
+
+<Callout type="info">
+  Observation types require Python SDK `version>=3.3.1`.
+</Callout>
+
+Using `@observe` decorator:
+
+```python /as_type="agent"/ /as_type="tool"/
+from langfuse import observe
+
+# Agent workflow
+@observe(as_type="agent")
+def run_agent_workflow(query):
+    # Agent reasoning and tool orchestration
+    return process_with_tools(query)
+
+# Tool calls
+@observe(as_type="tool")
+def call_weather_api(location):
+    # External API call
+    return weather_service.get_weather(location)
+```
+
+Calling the `start_as_current_observation` or `start_observation` method:
+
+```python /as_type="embedding"/ /as_type="chain"/
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Start observation with specific type
+with langfuse.start_as_current_observation(
+    as_type="embedding",
+    name="embedding-generation"
+) as obs:
+    embeddings = model.encode(["text to embed"])
+    obs.update(output=embeddings)
+
+# Start observation with specific type
+transform_span = langfuse.start_observation(
+    as_type="chain",
+    name="transform-text"
+)
+transformed_text = transform_text(["text to transform"])
+transform_span.update(output=transformed_text)
+```
+
+</Tab>
+<Tab>
+
+Coming soon in version 4.0, see the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/8403) for more context.
+
+</Tab>
+</Tabs>
