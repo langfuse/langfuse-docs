@@ -125,13 +125,32 @@ with langfuse.start_as_current_span(name="outer-operation") as span:
     current_span_id = langfuse.get_current_observation_id()
 
     print(f"Current trace ID: {current_trace_id}")
-    print(f"Direct access: {span.trace_id}")
+
 ```
 
 </Tab>
 <Tab title="JS/TS SDK">
+The Python SDK uses W3C Trace Context IDs by default, which are:
 
-When starting a new trace by setting a `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist but is only used for trace ID inheritance of the created observation.
+- 32-character lowercase hexadecimal string for trace IDs
+- 16-character lowercase hexadecimal string for observation (span) IDs
+
+### Accessing the current trace ID
+
+You may access the current active trace ID via the `getActiveTraceId` function:
+
+```ts
+import { startObservation, getActiveTraceId } from "@langfuse/tracing";
+
+await startObservation("run", async (span) => {
+  const traceId = getActiveTraceId();
+  console.log(`Current trace ID: ${traceId}`);
+});
+```
+
+### Deterministic trace IDs
+
+When starting a new trace with a predetermined `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist within the trace but is only used for trace ID inheritance of the created observation.
 
 You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
 
@@ -161,16 +180,8 @@ const scoringTraceId = await createTraceId(externalId);
 // scoringTraceId will be the same as langfuseTraceId
 ```
 
-You may also access the current active trace ID via the `getActiveTraceId` function:
+Setting a parentSpanContext will detach the created span from the active span context as it no longer inherits from the current active span in the context.
 
-```ts
-import { startObservation, getActiveTraceId } from "@langfuse/tracing";
-
-await startObservation("run", async (span) => {
-  const traceId = getActiveTraceId();
-  console.log(`Current trace ID: ${traceId}`);
-});
-```
 
 Learn more in the [JS/TS SDK](/docs/observability/sdk/typescript/advanced-usage#managing-trace-and-observation-ids) docs.
 
