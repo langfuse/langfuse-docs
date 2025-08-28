@@ -50,14 +50,22 @@ with langfuse.start_as_current_span(name="process-request") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
 ```ts
-const trace = langfuse.trace(...)
-trace.getTraceUrl()
+import { LangfuseClient } from "@langfuse/client";
+import { startObservation } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+const rootSpan = startObservation("my-trace");
+const traceUrl = await langfuse.getTraceUrl(rootSpan.traceId);
+
+console.log("Trace URL: ", traceUrl);
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/integrations/frameworks/langchain#interoperability)).
 
@@ -103,7 +111,7 @@ _Example: https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d
 />
 
 </Tab>
-<Tab>
+<Tab title="Python SDK (v3)">
 
 When using the `@observe()` decorator:
 
@@ -137,12 +145,17 @@ with langfuse.start_as_current_span(name="process-request") as span:
 
 </Tab>
 <Tab>
-```diff
-const trace = langfuse.trace({
-    ...
-+   public: true,
-    ...
+
+```ts /public: true/
+import { startObservation, updateTrace } from "@langfuse/tracing";
+
+const rootSpan = startObservation("my-trace");
+
+rootSpan.updateTrace({
+  public: true,
 });
+
+rootSpan.end();
 ```
 
 </Tab>

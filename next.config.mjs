@@ -4,14 +4,16 @@ import NextBundleAnalyzer from '@next/bundle-analyzer';
 import { nonPermanentRedirects, permanentRedirects } from './lib/redirects.js';
 
 const withBundleAnalyzer = NextBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})
+  enabled: process.env.ANALYZE === "true",
+});
 
 /**
  * CSP headers
  * img-src https to allow loading images from SSO providers
  */
-const cspHeader = process.env.NODE_ENV === 'production' ? `
+const cspHeader =
+  process.env.NODE_ENV === "production"
+    ? `
   default-src 'self' https: wss:;
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https:;
   style-src 'self' 'unsafe-inline' https:;
@@ -26,51 +28,48 @@ const cspHeader = process.env.NODE_ENV === 'production' ? `
   frame-ancestors 'none';
   upgrade-insecure-requests;
   block-all-mixed-content;
-`: "";
+`
+    : "";
 
 // nextra config
 const withNextra = nextra({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
+  theme: "nextra-theme-docs",
+  themeConfig: "./theme.config.tsx",
   mdxOptions: {
     remarkPlugins: [remarkGfm],
   },
   defaultShowCopyCode: true,
-})
+});
 
 // next config
 const nextraConfig = withNextra({
   // Enable static export when STATIC_EXPORT env var is set
-  ...(process.env.STATIC_EXPORT === 'true' && {
-    output: 'export',
+  ...(process.env.STATIC_EXPORT === "true" && {
+    output: "export",
     trailingSlash: true,
     // Disable server-side features for static export
-    distDir: 'out',
+    distDir: "out",
   }),
   experimental: {
     scrollRestoration: true,
   },
-  transpilePackages: [
-    'react-tweet',
-    'react-syntax-highlighter',
-    'geist'
-  ],
+  transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
   images: {
     // Disable image optimization for static export
-    ...(process.env.STATIC_EXPORT === 'true' && { unoptimized: true }),
+    ...(process.env.STATIC_EXPORT === "true" && { unoptimized: true }),
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'static.langfuse.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "static.langfuse.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'github.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "github.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
@@ -117,13 +116,13 @@ const nextraConfig = withNextra({
     ];
 
     // Do not index Vercel preview deployments
-    if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') {
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV === "preview") {
       headers.push({
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-Robots-Tag',
-            value: 'noindex',
+            key: "X-Robots-Tag",
+            value: "noindex",
           },
         ],
       });

@@ -1,0 +1,83 @@
+---
+title: TypeScript SDK - Evaluation
+description: Evaluation methods for the TypeScript SDK.
+label: "Version: JS SDK v4"
+---
+
+# TypeScript SDK - Evaluation
+
+## Custom scores
+
+You can score traces and observations via the `langfuse.score` methods on the Langfuse client. This is useful for automated evaluations or for capturing user feedback. See [the custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for a detailed reference.
+
+```typescript /langfuse.score.observation/ /langfuse.score.trace/ /langfuse.score.activeObservation/ /langfuse.score.activeTrace/
+import { LangfuseClient } from "@langfuse/client";
+import { startObservation, startActiveObservation } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+// First, create a trace and an observation
+const rootSpan = startObservation("my-trace");
+const generation = rootSpan.startObservation(
+  "my-generation",
+  {},
+  { asType: "generation" }
+);
+generation.end();
+rootSpan.end();
+
+// Score the specific generation (an observation)
+langfuse.score.observation(generation, {
+  name: "accuracy",
+  value: 1,
+  comment: "The answer was factually correct.",
+});
+
+// Score the entire trace
+langfuse.score.trace(rootSpan, {
+  name: "user-satisfaction",
+  value: 0.9,
+  comment: "User was happy with the overall result.",
+});
+
+// You can also score the currently active observation or trace
+startActiveObservation("another-trace", (span) => {
+  langfuse.score.activeObservation({
+    name: "latency-score",
+    value: 0.95,
+  });
+  langfuse.score.activeTrace({
+    name: "quality-score",
+    value: 0.88,
+  });
+});
+
+// Finally, ensure scores are sent to the server
+await langfuse.flush();
+```
+
+## Learn more
+
+import {
+  Rocket,
+  Plug,
+  Beaker,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    icon={<Rocket size="24" />}
+    title="Evaluation Methods"
+    href="/docs/evaluation/overview#evaluation-methods"
+    arrow
+  />
+  <Card
+    icon={<Plug size="24" />}
+    title="Dataset Runs"
+    href="/docs/evaluation/overview#dataset-runs"
+    arrow
+  />
+</Cards>

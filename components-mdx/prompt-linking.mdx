@@ -45,12 +45,58 @@ with langfuse.start_as_current_generation(
 
 <Tab>
 
-```diff
-langfuse.generation({
-    ...
-+   prompt: prompt
-    ...
-})
+**Manual observations**
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { startObservation } from "@langfuse/tracing";
+
+const prompt = new LangfuseClient().prompt.get("my-prompt");
+
+startObservation(
+  "llm",
+  {
+    prompt,
+  },
+  { asType: "generation" },
+);
+```
+
+**Context manager**
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { updateActiveObservation } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+startActiveObservation(
+  "llm",
+  async (generation) => {
+    const prompt = langfuse.prompt.get("my-prompt");
+    generation.update({ prompt });
+  },
+  { asType: "generation" },
+);
+```
+
+**Observe wrapper**
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { observe } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+const callLLM = async (input: string) => {
+  const prompt = langfuse.prompt.get("my-prompt");
+
+  updateActiveObservation({ prompt }, { asType: "generation" });
+
+  return await invokeLLM(input);
+};
+
+export const observedCallLLM = observe(callLLM);
 ```
 
 </Tab>
@@ -77,12 +123,13 @@ openai.chat.completions.create(
 </Tab>
 
 <Tab>
+Please make sure you have [OpenTelemetry already set up](/docs/observability/sdk/typescript/setup) for tracing.
 
 ```ts /langfusePrompt,/
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 import OpenAI from "openai";
 
-const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
+const langfusePrompt = await langfuse.prompt.get("prompt-name"); // Fetch a previously created prompt
 
 const res = await observeOpenAI(new OpenAI(), {
   langfusePrompt,
@@ -102,7 +149,7 @@ from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI, OpenAI
- 
+
 langfuse = get_client()
 
 # Initialize the Langfuse handler
@@ -113,17 +160,17 @@ langfuse_handler = CallbackHandler()
 
 ```python /"langfuse_prompt"/
 langfuse_text_prompt = langfuse.get_prompt("movie-critic")
- 
+
 ## Pass the langfuse_text_prompt to the PromptTemplate as metadata to link it to generations that use it
 langchain_text_prompt = PromptTemplate.from_template(
     langfuse_text_prompt.get_langchain_prompt(),
     metadata={"langfuse_prompt": langfuse_text_prompt},
 )
- 
+
 ## Use the text prompt in a Langchain chain
 llm = OpenAI()
 completion_chain = langchain_text_prompt | llm
- 
+
 completion_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"}, config={"callbacks": [langfuse_handler]})
 ```
 
@@ -131,14 +178,14 @@ completion_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"}, config={"c
 
 ```python /"langfuse_prompt"/
 langfuse_chat_prompt = langfuse.get_prompt("movie-critic-chat", type="chat")
- 
+
 ## Manually set the metadata on the langchain_chat_prompt to link it to generations that use it
 langchain_chat_prompt = ChatPromptTemplate.from_messages(
     langfuse_chat_prompt.get_langchain_prompt()
 )
 
 langchain_chat_prompt.metadata = {"langfuse_prompt": langfuse_chat_prompt}
- 
+
 ## or use the ChatPromptTemplate constructor directly.
 ## Note that using ChatPromptTemplate.from_template led to issues in the past
 ## See: https://github.com/langfuse/langfuse/issues/5374
@@ -146,11 +193,11 @@ langchain_chat_prompt = ChatPromptTemplate(
     langfuse_chat_prompt.get_langchain_prompt(),
     metadata={"langfuse_prompt": langfuse_chat_prompt}
 )
- 
+
 ## Use the chat prompt in a Langchain chain
 chat_llm = ChatOpenAI()
 chat_chain = langchain_chat_prompt | chat_llm
- 
+
 chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"}, config={"callbacks": [langfuse_handler]})
 ```
 
@@ -169,12 +216,15 @@ chat_chain.invoke({"movie": "Dune 2", "criticlevel": "expert"}, config={"callbac
 
 <Tab>
 
+Please make sure you have [OpenTelemetry already set up](/docs/observability/sdk/typescript/setup) for tracing.
+
 ```ts
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
+import { CallbackHandler } from "@langfuse/langchain";
+
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI, OpenAI } from "@langchain/openai";
-import { CallbackHandler } from "langfuse-langchain";
- 
+
 const langfuseHandler = new CallbackHandler({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
@@ -188,7 +238,7 @@ const langfuse = new Langfuse();
 **Text prompts**
 
 ```ts /metadata: { langfusePrompt:/
-const langfuseTextPrompt = await langfuse.getPrompt("movie-critic"); // Fetch a previously created text prompt
+const langfuseTextPrompt = await langfuse.prompt.get("movie-critic"); // Fetch a previously created text prompt
 
 // Pass the langfuseTextPrompt to the PromptTemplate as metadata to link it to generations that use it
 const langchainTextPrompt = PromptTemplate.fromTemplate(
@@ -207,9 +257,8 @@ await chain.invoke({ movie: "Dune 2", criticlevel: "expert" }, { callbacks: [lan
 **Chat prompts**
 
 ```ts /metadata: { langfusePrompt:/
-const langfuseChatPrompt = await langfuse.getPrompt(
+const langfuseChatPrompt = await langfuse.prompt.get(
   "movie-critic-chat",
-  undefined,
   {
     type: "chat",
   }
@@ -235,11 +284,11 @@ Link Langfuse prompts to Vercel AI SDK generations by setting the `langfusePromp
 
 ```typescript /langfusePrompt: fetchedPrompt.toJSON()/
 import { generateText } from "ai";
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
-const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+const fetchedPrompt = await langfuse.prompt.get("my-prompt");
 
 const result = await generateText({
   model: openai("gpt-4o"),

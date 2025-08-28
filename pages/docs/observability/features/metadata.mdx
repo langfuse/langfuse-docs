@@ -80,25 +80,84 @@ with langfuse.start_as_current_span(name="operation") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
 
-const trace = langfuse.trace({
+await startActiveObservation("context-manager", async (span) => {
+  // observation metadata
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
+
+  // trace metadata
+  updateActiveTrace({
+    metadata: { key: "value" },
+  });
+});
+```
+
+When using the `observe` wrapper:
+
+```ts
+import {
+  observe,
+  updateActiveTrace,
+  updateActiveObservation,
+} from "@langfuse/tracing";
+
+// An existing function
+async function fetchData(source: string) {
+  // observation metadata
+  updateActiveObservation("span", {
+    metadata: { key: "value" },
+  });
+
+  // trace metadata
+  updateActiveTrace({
+    metadata: { key: "value" },
+  });
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper",
+});
+
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
   metadata: { key: "value" },
 });
 
-const span = trace.span({
+span.updateTrace({
   metadata: { key: "value" },
 });
+
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (Python v2)">
 
 When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), pass `metadata` as an additional argument:
 
@@ -119,7 +178,7 @@ completion = openai.chat.completions.create(
 ```
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (JS/TS)">
 
 When using the [OpenAI SDK Integration (JS)](/integrations/model-providers/openai-js), pass `metadata` as an additional argument:
 
@@ -192,7 +251,7 @@ with langfuse.start_as_current_span(name="dynamic-langchain-trace") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `metadata` to the constructor:
 
@@ -219,7 +278,7 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 </Tab>
 
-<Tab>
+<Tab title="Flowise">
 You can set the `metadata` via the override configs, see the [Flowise Integration docs](/docs/flowise) for more details.
 
 </Tab>

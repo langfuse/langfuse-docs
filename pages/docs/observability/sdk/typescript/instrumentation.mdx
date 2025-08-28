@@ -1,0 +1,452 @@
+---
+title: TypeScript SDK - Instrumentation
+description: Instrumentation methods for the TypeScript SDK.
+label: "Version: JS SDK v4"
+---
+
+# TypeScript SDK - Instrumentation
+
+To instrument your application to send traces to Langfuse, you can use
+
+1. [**Native instrumentation**](#native-instrumentation) of llm/agent libraries for out-of-the-box tracing
+2. [**Custom instrumentation**](#custom-instrumentation) methods for fine-grained control
+   - Context manager: `startActiveObservation`
+   - Wrapper: `observe`
+   - Manual: `startObservation`
+
+## Native instrumentation [#native-instrumentation]
+
+Langfuse integrates with many llm/agent libraries to automatically trace your application. For a full list, see the [Langfuse Integrations](/integrations) page.
+
+These are the most popular ones:
+
+<Tabs items={["OpenAI SDK", "Vercel AI SDK", "LangChainJS", "Third-party OTel Instrumentations"]}>
+
+<Tab>
+
+The `@langfuse/openai` package provides a wrapper to automatically trace calls to the OpenAI SDK.
+
+For an end-to-end example, see the [Langfuse + OpenAI JS/TS Cookbook](https://langfuse.com/guides/cookbook/js_integration_openai).
+
+**Installation:**
+
+```bash
+npm install @langfuse/openai
+```
+
+**Usage:**
+
+The `observeOpenAI` function wraps your OpenAI client instance. All subsequent API calls made with the wrapped client will be traced as generations and nested automatically in the current trace tree. If there's no active trace in context, a new one will be created automatically.
+
+```typescript /observeOpenAI/
+import { OpenAI } from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+
+// Instantiate the OpenAI client as usual
+const openai = new OpenAI();
+
+// Wrap it with Langfuse
+const tracedOpenAI = observeOpenAI(openai, {
+  // Pass trace-level attributes that will be applied to all calls
+  traceName: "my-openai-trace",
+  sessionId: "user-session-123",
+  userId: "user-abc",
+  tags: ["openai-integration"],
+});
+
+// Use the wrapped client just like the original
+const completion = await tracedOpenAI.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "What is OpenTelemetry?" }],
+});
+```
+
+</Tab>
+
+<Tab>
+
+The Vercel AI SDK offers native instrumentation with OpenTelemetry. You can enable the Vercel AI SDK telemetry by passing `{ experimental_telemetry: { isEnabled: true }}` to your AI SDK function calls.
+
+The LangfuseSpanProcessor is automatically detecting multimodal data in your traces and is handling it automatically.
+
+Here is a full example on how to set up tracing with the
+
+- AI SDK v5
+- Next JS
+- deployed on Vercel
+
+```ts filename="instrumentation.ts"
+import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+
+// Optional: filter our NextJS infra spans
+const shouldExportSpan: ShouldExportSpan = (span) => {
+  return span.otelSpan.instrumentationScope.name !== "next.js";
+};
+
+const langfuseSpanProcessor = new LangfuseSpanProcessor({
+  shouldExportSpan,
+});
+
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+tracerProvider.register();
+```
+
+<Callout>
+  If you are using Next.js, please use a manual OpenTelemetry setup via the
+  `NodeTracerProvider` rather than via `registerOTel` from `@vercel/otel`. This
+  is because [the `@vercel/otel` package does not yet support the OpenTelemetry
+  JS SDK v2](https://github.com/vercel/otel/issues/154) on which the
+  `@langfuse/tracing` and `@langfuse/otel` packages are based.
+</Callout>
+
+```ts filename="route.ts"
+import { streamText } from "ai";
+import { after } from "next/server";
+
+import { openai } from "@ai-sdk/openai";
+import {
+  observe,
+  updateActiveObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
+import { trace } from "@opentelemetry/api";
+
+import { langfuseSpanProcessor } from "@/src/instrumentation";
+
+const handler = async (req: Request) => {
+  const {
+    messages,
+    chatId,
+    userId,
+  }: { messages: UIMessage[]; chatId: string; userId: string } =
+    await req.json();
+
+  // Set session id and user id on active trace
+  const inputText = messages[messages.length - 1].parts.find(
+    (part) => part.type === "text"
+  )?.text;
+
+  updateActiveObservation({
+    input: inputText,
+  });
+
+  updateActiveTrace({
+    name: "my-ai-sdk-trace",
+    sessionId: chatId,
+    userId,
+    input: inputText,
+  });
+
+  const result = streamText({
+    // ... other streamText options ...
+    experimental_telemetry: {
+      isEnabled: true,
+    },
+    onFinish: async (result) => {
+      updateActiveObservation({
+        output: result.content,
+      });
+      updateActiveTrace({
+        output: result.content,
+      });
+
+      // End span manually after stream has finished
+      trace.getActiveSpan().end();
+    },
+  });
+
+  // Important in serverless environments: schedule flush after request is finished
+  after(async () => await langfuseSpanProcessor.forceFlush());
+
+  return result.toUIMessageStreamResponse();
+};
+
+export const POST = observe(handler, {
+  name: "handle-chat-message",
+  endOnExit: false, // end observation _after_ stream has finished
+});
+```
+
+Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry).
+
+</Tab>
+
+<Tab>
+
+The `@langfuse/langchain` package offers a `CallbackHandler` to integrate Langfuse tracing into your LangChain applications.
+
+For an end-to-end example, see the [Langfuse + LangChain JS/TS Cookbook](https://langfuse.com/guides/cookbook/js_integration_langchain).
+
+**Installation:**
+
+```bash
+npm install @langfuse/core @langfuse/langchain
+```
+
+**Usage:**
+
+Instantiate the `CallbackHandler` and pass it to your chain's `.invoke()` or `.stream()` method in the `callbacks` array. All operations within the chain will be traced as nested observations.
+
+```typescript /CallbackHandler/ /langfuseHandler/
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { CallbackHandler } from "@langfuse/langchain";
+
+// 1. Initialize the Langfuse callback handler
+const langfuseHandler = new CallbackHandler({
+  sessionId: "user-session-123",
+  userId: "user-abc",
+  tags: ["langchain-test"],
+});
+
+// 2. Define your chain
+const model = new ChatOpenAI({ model: "gpt-4o" });
+const prompt = ChatPromptTemplate.fromTemplate("Tell me a joke about {topic}.");
+const chain = prompt.pipe(model);
+
+// 3. Add the handler to the callbacks array
+const result = await chain.invoke(
+  { topic: "developers" },
+  {
+    callbacks: [langfuseHandler],
+    // This becomes the trace name if no active OTEL span is in the context
+    runName: "joke-generator",
+  }
+);
+
+console.log(result.content);
+```
+
+</Tab>
+
+<Tab>
+
+Many LLM and data libraries are built with OpenTelemetry support. If a library you use supports OTEL, you just need to ensure the `LangfuseSpanProcessor` is registered in your OTEL setup. All traces generated by that library will automatically be sent to Langfuse.
+
+</Tab>
+
+</Tabs>
+
+## Custom instrumentation [#custom-instrumentation]
+
+You can add custom instrumentations to your application via
+
+- the `observe` wrapper
+- `startActiveObservation` context managers
+- manually managing the observation lifecycle and its nesting with the `startObservation` function
+
+<Callout>
+
+For an end-to-end example, see the [JS Instrumentation Cookbook](/guides/cookbook/js_langfuse_sdk).
+
+</Callout>
+
+### Context management with callbacks
+
+To simplify nesting and context management, you can use `startActiveObservation`. These functions take a callback and automatically manage the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+
+This is the recommended approach for most use cases as it prevents context leakage and ensures observations are properly ended.
+
+```typescript /startActiveObservation/ /span.update/
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
+
+await startActiveObservation(
+  // name
+  "user-request",
+  // callback
+  async (span) => {
+    span.update({
+      input: { query: "What is the capital of France?" },
+    });
+
+    // Example child, could also use startActiveObservation
+    // This manually created generation (see docs below) will automatically be a child of "user-request"
+    const generation = startObservation(
+      "llm-call",
+      {
+        model: "gpt-4",
+        input: [{ role: "user", content: "What is the capital of France?" }],
+      },
+      { asType: "generation" }
+    );
+    generation.update({
+      usageDetails: { input: 10, output: 5 },
+      output: { content: "The capital of France is Paris." },
+    });
+    generation.end();
+
+    span.update({ output: "Successfully answered." });
+  }
+);
+```
+
+### `observe` wrapper
+
+The `observe` wrapper is a powerful tool for tracing existing functions without modifying their internal logic. It acts as a decorator that automatically creates a **span** or **generation** around the function call. You can use the `updateActiveObservation` function to add attributes to the observation from within the wrapped function.
+
+```typescript /observe/ /updateActiveObservation/
+import { observe, updateActiveObservation } from "@langfuse/tracing";
+
+// An existing function
+async function fetchData(source: string) {
+  updateActiveObservation({ metadata: { source: "API" } }, "span");
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+
+// Wrap the function to trace it
+const tracedFetchData = observe(
+  // method
+  fetchData,
+  // options, optional, see below
+  {}
+);
+
+// Now, every time you call tracedFetchData, a span is created.
+// Its input and output are automatically populated with the
+// function's arguments and return value.
+const result = await tracedFetchData("API");
+```
+
+You can configure the `observe` wrapper by passing an options object as the second argument:
+
+| Option          | Description                                                                                        | Default                       |
+| --------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `name`          | The name of the observation.                                                                       | The original function's name. |
+| `asType`        | The type of observation to create (e.g. `span`, `generation`).                                        | `"span"`                      |
+| `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                     | `true`                        |
+| `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation. | `true`                        |
+
+### Manual observations
+
+The core tracing function (`startObservation`) gives you full control over creating observations. You can pass the `asType` option to specify the type of observation to create.
+
+When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the _original_ parent, not the one you just created.
+
+To create nested observations manually, use the methods on the returned object (e.g., `parentSpan.startObservation(...)`).
+
+```typescript /startObservation/ /end/ /asType/
+import { startObservation } from "@langfuse/tracing";
+
+// Start a root span for a user request
+const span = startObservation(
+  // name
+  "user-request",
+  // params
+  {
+    input: { query: "What is the capital of France?" },
+  }
+);
+
+// Create a nested span for a e.g. tool call
+const toolCall = span.startObservation(
+  // name
+  "fetch-weather",
+  // params
+  {
+    input: { city: "Paris" },
+  },
+  // Specify observation type in asType
+  // This will type the attributes argument accordingly
+  // Default is 'span'
+  { asType: "tool" }
+);
+
+// Simulate work and end the tool call span
+await new Promise((resolve) => setTimeout(resolve, 100));
+toolCall.update({ output: { temperature: "15°C" } }).end();
+
+// Create a nested generation for the LLM call
+const generation = span.startObservation(
+  "llm-call",
+  {
+    model: "gpt-4",
+    input: [{ role: "user", content: "What is the capital of France?" }],
+  },
+  { asType: "generation" }
+);
+
+generation.update({
+  usageDetails: { input: 10, output: 5 },
+  output: { content: "The capital of France is Paris." },
+});
+
+generation.end();
+
+// End the root span
+span.update({ output: "Successfully answered user request." }).end();
+```
+
+<Callout type="warning" title="Manual Ending Required">
+  If you use `startObservation()`, you are responsible for calling `.end()` on
+  the returned observation object. Failure to do so will result in incomplete or
+  missing observations in Langfuse.
+</Callout>
+
+### Updating Traces
+
+Often, you might not have all the information about a trace (like a `userId` or `sessionId`) when you start it. The SDK lets you add or update trace-level attributes at any point during its execution.
+
+#### `.updateTrace()` on an observation
+
+When you create an observation manually with `startObservation`, the returned object has an `.updateTrace()` method. You can call this at any time before the root span ends to apply attributes to the entire trace.
+
+```typescript /updateTrace/
+import { startObservation } from "@langfuse/tracing";
+
+// Start a trace without knowing the user yet
+const rootSpan = startObservation("data-processing");
+
+// ... some initial steps ...
+
+// Later, once the user is authenticated, update the trace
+const userId = "user-123";
+const sessionId = "session-abc";
+rootSpan.updateTrace({
+  userId: userId,
+  sessionId: sessionId,
+  tags: ["authenticated-user"],
+  metadata: { plan: "premium" },
+});
+
+// ... continue with the rest of the trace ...
+const generation = rootSpan.startObservation(
+  "llm-call",
+  {},
+  { asType: "generation" }
+);
+
+generation.end();
+
+rootSpan.end();
+```
+
+#### `updateActiveTrace()`
+
+When you're inside a callback from `startActiveObservation`, or a function wrapped with `observe`, you might not have a direct reference to an observation object. In these cases, use the `updateActiveTrace()` function. It automatically finds the currently active trace in the context and applies the new attributes.
+
+```typescript /updateActiveTrace/
+import { startActiveObservation, updateActiveTrace } from "@langfuse/tracing";
+
+await startActiveObservation("user-request", async (span) => {
+  // Initial part of the request
+  span.update({ input: { path: "/api/process" } });
+
+  // Simulate fetching user data
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const user = { id: "user-5678", name: "Jane Doe" };
+
+  // Update the active trace with the user's information
+  updateActiveTrace({
+    userId: user.id,
+    metadata: { userName: user.name },
+  });
+
+  // ... continue logic ...
+  span.update({ output: { status: "success" } }).end();
+});
+```
