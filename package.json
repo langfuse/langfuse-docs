@@ -8,7 +8,7 @@
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
     "build:static": "cross-env STATIC_EXPORT=true pnpm run prebuild && cross-env STATIC_EXPORT=true next build && pnpm run postbuild:static",
-    "postbuild:static": "pnpm run postbuild && node scripts/generate-cloudflare-redirects.js",
+    "postbuild:static": "pnpm run postbuild && node scripts/generate-cloudflare-redirects.js && cp lib/_headers out/",
     "start": "next start -p 3333",
     "analyze": "cross-env ANALYZE=true next build",
     "postbuild:sitemap": "next-sitemap",
