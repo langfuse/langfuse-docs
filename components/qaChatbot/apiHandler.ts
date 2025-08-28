@@ -27,7 +27,7 @@ const langfuseClient = new LangfuseClient({
 });
 const tracedGetPrompt = observe(
   langfuseClient.prompt.get.bind(langfuseClient.prompt),
-  { name: "get-langfuse-prompt" }
+  { name: "get-langfuse-prompt" },
 );
 
 export const handler = async (req: Request) => {
@@ -40,12 +40,10 @@ export const handler = async (req: Request) => {
 
   // Set session id and user id on active trace
   const inputText = messages[messages.length - 1].parts.find(
-    (part) => part.type === "text"
+    (part) => part.type === "text",
   )?.text;
 
-  updateActiveObservation("span", {
-    input: inputText,
-  });
+  updateActiveObservation({ input: inputText });
 
   updateActiveTrace({
     name: "QA-Chatbot",
@@ -68,7 +66,7 @@ export const handler = async (req: Request) => {
           sessionId: `qa-chatbot-${crypto.randomUUID()}`,
         }) as MCPTransport,
       });
-    }
+    },
   );
 
   // Discover all tools exposed by the MCP server
@@ -94,9 +92,7 @@ export const handler = async (req: Request) => {
     onFinish: async (result) => {
       await mcpClient.close();
 
-      updateActiveObservation("span", {
-        output: result.content,
-      });
+      updateActiveObservation({ output: result.content });
       updateActiveTrace({
         output: result.content,
       });
