@@ -1,7 +1,8 @@
-import remarkGfm from 'remark-gfm';
-import nextra from 'nextra';
-import NextBundleAnalyzer from '@next/bundle-analyzer';
-import { nonPermanentRedirects, permanentRedirects } from './lib/redirects.js';
+import remarkGfm from "remark-gfm";
+import nextra from "nextra";
+import NextBundleAnalyzer from "@next/bundle-analyzer";
+
+import * as redirects from "./lib/redirects.js";
 
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -131,12 +132,12 @@ const nextraConfig = withNextra({
     return headers;
   },
   redirects: async () => [
-    ...nonPermanentRedirects.map(([source, destination]) => ({
+    ...redirects.nonPermanentRedirects.map(([source, destination]) => ({
       source,
       destination,
       permanent: false,
     })),
-    ...permanentRedirects.map(([source, destination]) => ({
+    ...redirects.permanentRedirects.map(([source, destination]) => ({
       source,
       destination,
       permanent: true,
