@@ -72,7 +72,7 @@ The LangfuseSpanProcessor is automatically detecting multimodal data in your tra
 Here is a full example on how to set up tracing with the
 
 - AI SDK v5
-- Next JS deployed
+- Next JS
 - deployed on Vercel
 
 ```ts filename="instrumentation.ts"
@@ -317,7 +317,7 @@ You can configure the `observe` wrapper by passing an options object as the seco
 | Option          | Description                                                                                        | Default                       |
 | --------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `name`          | The name of the observation.                                                                       | The original function's name. |
-| `asType`        | The type of observation to create (`span` or `generation`).                                        | `"span"`                      |
+| `asType`        | The type of observation to create (e.g. `span`, `generation`).                                        | `"span"`                      |
 | `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                     | `true`                        |
 | `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation. | `true`                        |
 
@@ -342,7 +342,7 @@ const span = startObservation(
   }
 );
 
-// Create a nested span for a tool call
+// Create a nested span for a e.g. tool call
 const toolCall = span.startObservation(
   // name
   "fetch-weather",
@@ -350,7 +350,9 @@ const toolCall = span.startObservation(
   {
     input: { city: "Paris" },
   },
-  // options, optional, see below
+  // Specify observation type in asType
+  // This will type the attributes argment accordingly
+  // Default is 'span'
   { asType: "tool" }
 );
 
@@ -370,13 +372,10 @@ const generation = span.startObservation(
 
 generation.update({
   usageDetails: { input: 10, output: 5 },
+  output: { content: "The capital of France is Paris." },
 });
 
-generation
-  .update({
-    output: { content: "The capital of France is Paris." },
-  })
-  .end();
+generation.end();
 
 // End the root span
 span.update({ output: "Successfully answered user request." }).end();

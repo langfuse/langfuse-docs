@@ -187,12 +187,11 @@ await startActiveObservation("context-manager", async (span) => {
       cache_read_input_tokens: 0.5,
       some_other_token_count: 1,
       total: 3.5,
-    }
+    },
+    output: { content: "The capital of France is Paris." },
   });
 
-  generation.update({
-    output: { content: "The capital of France is Paris." },
-  }).end();
+  generation.end();
 });
 ```
 

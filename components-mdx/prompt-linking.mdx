@@ -45,16 +45,58 @@ with langfuse.start_as_current_generation(
 
 <Tab>
 
-```diff
+**Manual observations**
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { startObservation } from "@langfuse/tracing";
+
+const prompt = new LangfuseClient().prompt.get("my-prompt");
+
 startObservation(
-  "llm", 
+  "llm",
   {
-    ...
-+ prompt: prompt
-    ...
+    prompt,
   },
   { asType: "generation" },
-)
+);
+```
+
+**Context manager**
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { updateActiveObservation } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+startActiveObservation(
+  "llm",
+  async (generation) => {
+    const prompt = langfuse.prompt.get("my-prompt");
+    generation.update({ prompt });
+  },
+  { asType: "generation" },
+);
+```
+
+**Observe wrapper**
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+import { observe } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+
+const callLLM = async (input: string) => {
+  const prompt = langfuse.prompt.get("my-prompt");
+
+  updateActiveObservation({ prompt }, { asType: "generation" });
+
+  return await invokeLLM(input);
+};
+
+export const observedCallLLM = observe(callLLM);
 ```
 
 </Tab>

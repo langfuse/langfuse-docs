@@ -1012,15 +1012,15 @@ const nonPermanentRedirects = [
   ],
   [
     "/docs/observability/sdk/typescript/guide-web",
-    "/docs/observability/sdk/typescript/overview",
+    "/docs/observability/sdk/typescript/advanced-usage#custom-scores-from-browser",
   ],
   [
     "/docs/observability/sdk/typescript/example-notebook",
-    "/docs/observability/sdk/typescript/overview",
+    "/guides/cookbook/js_langfuse_sdk",
   ],
   [
     "/guides/cookbook/js_integration_llamaindex",
-    "/docs/observability/sdk/typescript/overview",
+    "/guides/cookbook/js_langfuse_sdk",
   ],
 ];
 
