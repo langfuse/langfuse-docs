@@ -134,7 +134,6 @@ await startActiveObservation("context-manager", async (span) => {
 
   // Add an optional log level of type warning to the active span
   updateActiveObservation(
-    "span",
     { level: "WARNING", statusMessage: "This is a warning" },
   );
  
@@ -165,11 +164,11 @@ import { observe, updateActiveObservation } from "npm:@langfuse/tracing@^4.0.0-b
  
 // An existing function
 async function fetchData(source: string) {
-  updateActiveObservation("span", { usageDetails: {
+  updateActiveObservation({ usageDetails: {
     // usage
     input: 10,
     output: 5,
-  }, 
+  }, { asType: 'generation' }
 })
   
   // ... logic to fetch data

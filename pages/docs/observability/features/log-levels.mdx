@@ -97,7 +97,6 @@ await startActiveObservation("context-manager", async (span) => {
   });
 
   updateActiveObservation(
-    "span",
     {
       level: "WARNING",
       statusMessage: "This is a warning",
@@ -116,7 +115,6 @@ import { observe, updateActiveObservation } from "@langfuse/tracing";
 async function fetchData(source: string) {
 
   updateActiveObservation(
-    "span",
     {
       level: "WARNING",
       statusMessage: "This is a warning",

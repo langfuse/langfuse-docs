@@ -293,7 +293,7 @@ import { observe, updateActiveObservation } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-  updateActiveObservation({ metadata: { source: "API" } }, "span");
+  updateActiveObservation({ metadata: { source: "API" } });
   // ... logic to fetch data
   return { data: `some data from ${source}` };
 }
