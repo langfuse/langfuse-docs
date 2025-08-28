@@ -314,16 +314,16 @@ const result = await tracedFetchData("API");
 
 You can configure the `observe` wrapper by passing an options object as the second argument:
 
-| Option          | Description                                                                                        | Default                       |
-| --------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `name`          | The name of the observation.                                                                       | The original function's name. |
-| `asType`        | The type of observation to create (e.g. `span`, `generation`).                                        | `"span"`                      |
-| `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                     | `true`                        |
-| `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation. | `true`                        |
+| Option          | Description                                                                                                      | Default                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `name`          | The name of the observation.                                                                                     | The original function's name. |
+| `asType`        | The [type of observation](/docs/observability/features/observation-types) to create (e.g. `span`, `generation`). | `"span"`                      |
+| `captureInput`  | Whether to capture the function's arguments as the `input` of the observation.                                   | `true`                        |
+| `captureOutput` | Whether to capture the function's return value or thrown error as the `output` of the observation.               | `true`                        |
 
 ### Manual observations
 
-The core tracing function (`startObservation`) gives you full control over creating observations. You can pass the `asType` option to specify the type of observation to create.
+The core tracing function (`startObservation`) gives you full control over creating observations. You can pass the `asType` option to specify the [type of observation](/docs/observability/features/observation-types) to create.
 
 When you call one of these functions, the new observation is automatically linked as a child of the currently active operation in the OpenTelemetry context. However, it does **not** make this new observation the active one. This means any further operations you trace will still be linked to the _original_ parent, not the one you just created.
 
