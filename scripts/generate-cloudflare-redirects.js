@@ -97,8 +97,8 @@ function generateRedirectsContent(nonPermanentRedirects, permanentRedirects) {
 /**
  * Write _redirects file to the output directory
  */
-function writeRedirectsFile(content, outputDir = 'out') {
-    const outputPath = path.join(__dirname, `../${outputDir}`);
+function writeRedirectsFile(content) {
+    const outputPath = path.join(__dirname, `../out`);
     const redirectsFile = path.join(outputPath, '_redirects');
 
     // Ensure output directory exists
@@ -142,14 +142,8 @@ async function main() {
         // Generate _redirects content
         const content = generateRedirectsContent(nonPermanentRedirects, permanentRedirects);
 
-        // Determine output directory (use 'out' for static export, 'public' for regular builds)
-        const isStaticExport = process.env.STATIC_EXPORT === 'true';
-        const outputDir = isStaticExport ? 'out' : 'public';
-
-        console.log(`📁 Output directory: ${outputDir}`);
-
         // Write the file
-        const redirectsFile = writeRedirectsFile(content, outputDir);
+        const redirectsFile = writeRedirectsFile(content);
 
         console.log('✨ Cloudflare Pages _redirects file generated successfully!');
 
