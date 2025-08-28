@@ -199,11 +199,11 @@ await startActiveObservation("context-manager", async (span) => {
 When using the `observe` wrapper:
 
 ```ts /usageDetails/, /costDetails/
-import { observe, updateActiveGeneration } from "@langfuse/tracing";
+import { observe, updateActiveObservation } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-  updateActiveGeneration({
+  updateActiveObservation({
     usageDetails: {
       input: 10,
       output: 5,
@@ -219,7 +219,7 @@ async function fetchData(source: string) {
       some_other_token_count: 1,
       total: 3.5,
     }
-})
+}, { asType: "generation" })
 
   // ... logic to fetch data
   return { data: `some data from ${source}` };
