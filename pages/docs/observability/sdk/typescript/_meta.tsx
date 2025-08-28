@@ -1,10 +1,13 @@
 export default {
-  guide: "Guide",
-  "guide-web": "Guide (Web)",
-  "example-notebook": "Example Notebook",
+  overview: "Overview",
+  setup: "Setup",
+  instrumentation: "Instrumentation",
+  "advanced-usage": "Advanced usage",
+  "upgrade-path": "Upgrade Path (v3 to v4)",
+  "troubleshooting-and-faq": "Troubleshooting & FAQ",
   reference: {
     title: "Reference ↗",
-    href: "https://js.reference.langfuse.com",
+    href: "https://langfuse-js-git-main-langfuse.vercel.app/",
     newWindow: true,
   },
 };

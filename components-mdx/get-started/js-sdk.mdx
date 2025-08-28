@@ -1,68 +1,49 @@
-```bash
-npm i langfuse
-```
-<Tabs items={["Environment variables", "Constructor parameters"]}>
-<Tab>
-
-```bash filename=".env"
-LANGFUSE_SECRET_KEY = "sk-lf-...";
-LANGFUSE_PUBLIC_KEY = "pk-lf-...";
-LANGFUSE_BASEURL = "https://cloud.langfuse.com"; 🇪🇺 EU region
-# LANGFUSE_BASEURL = "https://us.cloud.langfuse.com"; 🇺🇸 US region
+**Install package**
+```sh
+npm install @langfuse/openai
 ```
 
-```ts
-import { Langfuse } from "langfuse"; // or "langfuse-node"
+**Add credentials**
 
-const langfuse = new Langfuse();
-```
+Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
 
-</Tab>
-<Tab>
+import EnvJS from "@/components-mdx/env-js.mdx";
+import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
-```ts
-import { Langfuse } from "langfuse"; // or "langfuse-node"
+<EnvJS />
 
-const langfuse = new Langfuse({
-  secretKey: "sk-lf-...",
-  publicKey: "pk-lf-...",
-  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
-  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+**Initialize OpenTelemetry**
 
-  // optional
-  release: "v1.0.0",
-  requestTimeout: 10000,
-  enabled: true, // set to false to disable sending events
-});
-```
+<SetupOtelJS />
 
-</Tab>
-</Tabs>
-
+**Instrument application**
 
 ```ts filename="server.ts"
-const trace = langfuse.trace({
-  name: "my-AI-application-endpoint",
-});
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
-// Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-4o",
-  input: messages,
-});
+await startActiveObservation("user-request", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
 
-// Application code
-const chatCompletion = await llm.respond(prompt);
+  // This generation will automatically be a child of "user-request"
+  const generation = startObservation(
+    "llm-call",
+    {
+      model: "gpt-4",
+      input: [{ role: "user", content: "What is the capital of France?" }],
+    },
+    { asType: "generation" },
+  );
 
-// End generation - sets endTime
-generation.end({
-  output: chatCompletion,
+  // ... LLM call logic ...
+
+  generation
+    .update({
+      output: { content: "The capital of France is Paris." },
+    })
+    .end();
+
+  span.update({ output: "Successfully answered." });
 });
 ```
-
-<Callout type="info">
-  In short-lived environments (e.g. serverless functions), make sure to always
-  call `langfuse.shutdownAsync()` at the end to await all pending requests.
-  ([Learn more](#lambda))
-</Callout>

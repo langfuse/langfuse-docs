@@ -46,20 +46,28 @@ def process_data():
 If a trace is not sampled, none of its observations (spans or generations) or associated scores will be sent to Langfuse, which can significantly reduce data volume for high-traffic applications.
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
 
-```ts
-import { Langfuse } from "langfuse";
+Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
 
-const langfuse = new Langfuse({
-  sampleRate: 0.5,
+Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
+
+```ts filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  // Sample 20% of all traces
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessors: [new LangfuseSpanProcessor()],
 });
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (JS/TS)">
 
 ```ts
 import OpenAI from "openai";
@@ -89,7 +97,7 @@ See [Langchain Integration (JS/TS)](/integrations/frameworks/langchain) for more
 
 </Tab>
 
-<Tab>
+<Tab title="Vercel AI SDK (JS/TS)">
 
 When using the [Vercel AI SDK Integration](/integrations/frameworks/vercel-ai-sdk)
 

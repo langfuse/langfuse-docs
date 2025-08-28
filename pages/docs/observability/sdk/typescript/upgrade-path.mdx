@@ -1,0 +1,111 @@
+---
+title: TypeScript SDK - Upgrade Path
+description: Upgrade path from v3 to v4 for the TypeScript SDK.
+---
+
+# TypeScript SDK - Upgrade Path v3 to v4
+
+Please follow each section below to upgrade your application from v3 to v4.
+
+If you encounter any questions or issues while upgrading, please raise an [issue](/issues) on GitHub.
+
+## Tracing
+
+The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces several breaking changes.
+
+1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the `LangfuseSpanProcessor` with an OpenTelemetry `NodeSDK`.
+2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by `startObservation`, `startActiveObservation`, etc., from the `@langfuse/tracing` package.
+3.  **Separation of Concerns**:
+    - The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
+    - The **`@langfuse/client`** package and the `LangfuseClient` class are now only for non-tracing features like scoring, prompt management, and datasets.
+
+See the [SDK v4 docs](/docs/observability/sdk/typescript/overview) for details on each.
+
+## Prompt Management
+
+- **Import**: The import of the Langfuse client is now:
+
+  ```typescript
+  import { LangfuseClient } from "@langfuse/client";
+  ```
+
+- **Usage**: The usage of the Langfuse client is now:
+
+  ```typescript
+  const langfuse = new LangfuseClient();
+
+  const prompt = await langfuse.prompt.get("my-prompt");
+
+  const compiledPrompt = prompt.compile({ topic: "developers" });
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: compiledPrompt }],
+  });
+  ```
+
+- `version` is now an optional property of the options object of `langfuse.prompt.get()` instead of a positional argument.
+
+  ```typescript
+  const prompt = await langfuse.prompt.get("my-prompt", { version: "1.0" });
+  ```
+
+## OpenAI integration
+
+- **Import**: The import of the OpenAI integration is now:
+
+  ```typescript
+  import { observeOpenAI } from "@langfuse/openai";
+  ```
+
+- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+
+## Vercel AI SDK
+
+Works very similarly to v3, but replaces `LangfuseExporter` from `langfuse-vercel` with the regular `LangfuseSpanProcessor` from `@langfuse/otel`.
+
+Please see [full example on usage with the AI SDK](/docs/observability/sdk/typescript/instrumentation#vercel-ai-sdk) for more details.
+
+## Langchain integration
+
+- **Import**: The import of the Langchain integration is now:
+
+  ```typescript
+  import { CallbackHandler } from "@langfuse/langchain";
+  ```
+
+- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+
+## `langfuseClient.getTraceUrl`
+
+- method is now asynchronous and returns a promise
+
+  ```typescript
+  const traceUrl = await langfuseClient.getTraceUrl(traceId);
+  ```
+
+## Scoring
+
+- **Import**: The import of the Langfuse client is now:
+
+  ```typescript
+  import { LangfuseClient } from "@langfuse/client";
+  ```
+
+- **Usage**: The usage of the Langfuse client is now:
+
+  ```typescript
+  const langfuse = new LangfuseClient();
+
+  await langfuse.score.create({
+    traceId: "trace_id_here",
+    name: "accuracy",
+    value: 0.9,
+  });
+  ```
+
+See [custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for new scoring methods.
+
+## Datasets
+
+See [datasets documentation](/docs/evaluation/dataset-runs/remote-run#setup--run-via-sdk) for new dataset methods.

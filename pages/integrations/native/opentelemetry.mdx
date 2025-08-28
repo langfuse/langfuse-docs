@@ -250,11 +250,11 @@ Langfuse aims to be compliant with the [OpenTelemetry GenAI semantic conventions
 Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map OpenTelemetry span attributes directly to the Langfuse data model. These specific attributes always take precedence over the generic OpenTelemetry conventions and are recommended for all users that are manually instrumenting their applications.
 
 <Callout type="info">
-Please [raise an issue on GitHub](/issues) if any mapping or integration does not work as expected or does not parse the correct attributes.
+  Please [raise an issue on GitHub](/issues) if any mapping or integration does
+  not work as expected or does not parse the correct attributes.
 </Callout>
 
 Below is a non-exhaustive mapping of Langfuse data model attributes to OpenTelemetry span attributes.
-
 
 ### Trace-Level Attributes
 
@@ -264,48 +264,47 @@ These attributes are applied to the trace record in Langfuse. They may be set on
 
 The name of the trace.
 
-* `langfuse.trace.name`: `string`
-* Span name of the root span
-
+- `langfuse.trace.name`: `string`
+- Span name of the root span
 
 #### `userId`
 
 The unique identifier for the end-user.
 
-* `langfuse.user.id`: `string`
-* `user.id`: `string`
+- `langfuse.user.id`: `string`
+- `user.id`: `string`
 
 #### `sessionId`
 
 The unique identifier for the user session.
 
-* `langfuse.session.id`: `string`
-* `session.id`: `string`
+- `langfuse.session.id`: `string`
+- `session.id`: `string`
 
 #### `release`
 
 The release version of your application.
 
-* `langfuse.release`: `string`
+- `langfuse.release`: `string`
 
 #### `public`
 
 A boolean flag to mark a trace as public, allowing it to be shared via a URL.
 
-* `langfuse.trace.public`: `boolean`
+- `langfuse.trace.public`: `boolean`
 
 #### `tags`
 
 An array of strings to categorize or label the trace.
 
-* `langfuse.trace.tags`: `string[]`
+- `langfuse.trace.tags`: `string[]`
 
 #### `metadata`
 
 A flexible object for storing any additional, unstructured data on the trace.
 
-* `langfuse.trace.metadata.*`: `string`
-* Root span's observation metadata (see below for mapping)
+- `langfuse.trace.metadata.*`: `string`
+- Root span's observation metadata (see below for mapping)
 
 <Callout type="info">
 **Filtering by metadata key in Langfuse**
@@ -328,59 +327,58 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 The initial input for the entire trace.
 
-* `langfuse.trace.input`: `string`
-* Root span's observation input (see below for mapping)
+- `langfuse.trace.input`: `string`
+- Root span's observation input (see below for mapping)
 
 #### `output`
 
 The final output for the entire trace.
 
-* `langfuse.trace.output`: `string`
-* Root span's observation output (see below for mapping)
+- `langfuse.trace.output`: `string`
+- Root span's observation output (see below for mapping)
 
 #### `version`
 
-The version of the trace, useful for tracking changes to your application logic.
+The [version](/docs/observability/features/releases-and-versioning) of the trace, useful for tracking changes to your application logic.
 
-* Root span's attributes mapped to `version`
-
+- Root span's attributes mapped to `version`
 
 #### `environment`
 
-The deployment environment where the trace was generated.
+The deployment [environment](/docs/observability/features/environments) where the trace was generated.
 
-* Root span's attributes mapped to `environment`
+- Root span's attributes mapped to `environment`
 
 ### Observation-Level Attributes
 
-These attributes are applied to individual observations (spans) within a trace.
+These attributes are applied to individual observations (spans) within a trace ([data model](/docs/observability/data-model)).
 
 #### `type`
 
-The type of observation
+The [type of observation](/docs/observability/features/observation-types)
 
-* `langfuse.observation.type`: `"span" | "generation" | "event"`, default: `"span"`
-* Any span that includes an attribute mapped to `model` is considered an LLM call and thus tracked as a `generation` observation.
+- `langfuse.observation.type`: `"span" | "generation" | "event"`, default: `"span"`
+- Any span that includes an attribute mapped to `model` is considered an LLM call and thus tracked as a `generation` observation.
 
 #### `level`
 
-The severity level of the observation
+The [severity level](/docs/observability/features/log-levels) of the observation
 
-* `langfuse.observation.level`: `"DEBUG" | "DEFAULT" | "WARNING" | "ERROR"`, default: `"DEFAULT"`
-* Inferred from OpenTelemetry `span.status.code`
+- `langfuse.observation.level`: `"DEBUG" | "DEFAULT" | "WARNING" | "ERROR"`, default: `"DEFAULT"`
+- Inferred from OpenTelemetry `span.status.code`
 
 #### `statusMessage`
 
 A message describing the status of the observation, often used for errors.
 
-* `langfuse.observation.status_message`: `string`
-* Inferred from OpenTelemetry `span.status.message`
+- `langfuse.observation.status_message`: `string`
+- Inferred from OpenTelemetry `span.status.message`
 
 #### `metadata`
 
 A flexible object for storing any additional, unstructured data on the observation. Example key: `langfuse.observation.metadata.user_name`.
 
-* `langfuse.observation.metadata.*`: `string`
+- `langfuse.observation.metadata.*`: `string`
 
 <Callout type="info">
 **Filtering by metadata key in Langfuse**
@@ -403,21 +401,19 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 The input data for this specific observation.
 
-* `langfuse.observation.input`: `(JSON) string`
-* `gen_ai.prompt`: `string`; OTEL GenAI SemConv
-* `input.value`: `string`; used by OpenInference
-* `mlflow.spanInputs`: `string`; used by MLFlow
-
+- `langfuse.observation.input`: `(JSON) string`
+- `gen_ai.prompt`: `string`; OTEL GenAI SemConv
+- `input.value`: `string`; used by OpenInference
+- `mlflow.spanInputs`: `string`; used by MLFlow
 
 #### `output`
 
 The output data from this specific observation.
 
-* `langfuse.observation.output`: `(JSON) string`
-* `gen_ai.completion`: `string`; OTEL GenAI SemConv
-* `output.value`: `string`; used by OpenInference
-* `mlflow.spanOutputs`: `string`; used by MLFlow
-
+- `langfuse.observation.output`: `(JSON) string`
+- `gen_ai.completion`: `string`; OTEL GenAI SemConv
+- `output.value`: `string`; used by OpenInference
+- `mlflow.spanOutputs`: `string`; used by MLFlow
 
 #### `model`
 
@@ -425,11 +421,11 @@ The output data from this specific observation.
 
 The name of the generative model used.
 
-* `langfuse.observation.model.name`: `string`
-* `gen_ai.request.model`: `string`; OTEL GenAI SemConv
-* `gen_ai.response.model`: `string`; OTEL GenAI SemConv
-* `llm.model_name`: `string`
-* `model`: `string`
+- `langfuse.observation.model.name`: `string`
+- `gen_ai.request.model`: `string`; OTEL GenAI SemConv
+- `gen_ai.response.model`: `string`; OTEL GenAI SemConv
+- `llm.model_name`: `string`
+- `model`: `string`
 
 #### `modelParameters`
 
@@ -437,9 +433,9 @@ The name of the generative model used.
 
 Key-value pairs representing the settings used for the model invocation.
 
-* `langfuse.observation.model.parameters`: `JSON string of Record<string, string>`
-* `gen_ai.request.*`: string | int; OTEL GenAI SemConv
-* `llm.invocation_parameters.*`: string | int; OTEL GenAI SemConv
+- `langfuse.observation.model.parameters`: `JSON string of Record<string, string>`
+- `gen_ai.request.*`: string | int; OTEL GenAI SemConv
+- `llm.invocation_parameters.*`: string | int; OTEL GenAI SemConv
 
 #### `usage`
 
@@ -447,9 +443,9 @@ Key-value pairs representing the settings used for the model invocation.
 
 An object detailing the token counts for the generation.
 
-* `langfuse.observation.usage_details`: `JSON string of Record<string, integer>`
-* `gen_ai.usage.*`: integer
-* `llm.token_count.*`: integer
+- `langfuse.observation.usage_details`: `JSON string of Record<string, integer>`
+- `gen_ai.usage.*`: integer
+- `llm.token_count.*`: integer
 
 #### `cost`
 
@@ -457,8 +453,8 @@ An object detailing the token counts for the generation.
 
 The calculated cost of the generation in USD.
 
-* `langfuse.observation.cost_details`: `JSON string of Record<string, float>`
-* `gen_ai.usage.cost`: float; will be set as the `total` cost key
+- `langfuse.observation.cost_details`: `JSON string of Record<string, float>`
+- `gen_ai.usage.cost`: float; will be set as the `total` cost key
 
 #### `prompt`
 
@@ -466,9 +462,8 @@ The calculated cost of the generation in USD.
 
 The name of a versioned prompt managed in Langfuse.
 
-* `langfuse.observation.prompt.name`: `string`
-* `langfuse.observation.prompt.version`: `integer`
-
+- `langfuse.observation.prompt.name`: `string`
+- `langfuse.observation.prompt.version`: `integer`
 
 #### `completionStartTime`
 
@@ -476,24 +471,21 @@ The name of a versioned prompt managed in Langfuse.
 
 The timestamp for when the model began generating the completion.
 
-* `langfuse.observation.completion_start_time`: `ISO 8601 date string`
-
+- `langfuse.observation.completion_start_time`: `ISO 8601 date string`
 
 #### `version`
 
-The version of the observation, useful for tracking changes to your application logic.
+The [version](/docs/observability/features/releases-and-versioning) of the observation, useful for tracking changes to your application logic.
 
-* `langfuse.version`: `string`
-
+- `langfuse.version`: `string`
 
 #### `environment`
 
-The deployment environment where the observation was generated.
+The deployment [environment](/docs/observability/features/environments) where the observation was generated.
 
-* `langfuse.environment`: `string`
-* `deployment.environment`: `string`
-* `deployment.environment.name`: `string`
-
+- `langfuse.environment`: `string`
+- `deployment.environment`: `string`
+- `deployment.environment.name`: `string`
 
 ## Troubleshooting
 

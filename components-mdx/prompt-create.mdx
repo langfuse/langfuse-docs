@@ -62,7 +62,7 @@ If you already have a prompt with the same `name`, the prompt will be added as a
 <Tab>
 
 ```bash
-npm i langfuse
+npm i @langfuse/client
 ```
 <Tabs items={["Environment variables", "Constructor parameters"]}>
 <Tab>
@@ -70,32 +70,27 @@ npm i langfuse
 ```bash filename=".env"
 LANGFUSE_SECRET_KEY = "sk-lf-...";
 LANGFUSE_PUBLIC_KEY = "pk-lf-...";
-LANGFUSE_BASEURL = "https://cloud.langfuse.com"; 🇪🇺 EU region
-# LANGFUSE_BASEURL = "https://us.cloud.langfuse.com"; 🇺🇸 US region
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com"; 🇪🇺 EU region
+# LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com"; 🇺🇸 US region
 ```
 
 ```ts
-import { Langfuse } from "langfuse"; // or "langfuse-node"
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 ```
 
 </Tab>
 <Tab>
 
 ```ts
-import { Langfuse } from "langfuse"; // or "langfuse-node"
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse({
+const langfuse = new LangfuseClient({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
   baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
   // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
-
-  // optional
-  release: "v1.0.0",
-  requestTimeout: 10000,
-  enabled: true, // set to false to disable sending events
 });
 ```
 
@@ -106,7 +101,7 @@ Use the JS/TS SDK to create a new prompt or update an existing one.
 
 ```ts
 // Create a text prompt
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic",
   type: "text",
   prompt: "As a {{criticlevel}} critic, do you like {{movie}}?",
@@ -119,7 +114,7 @@ await langfuse.createPrompt({
 });
 
 // Create a chat prompt
-await langfuse.createPrompt({
+await langfuse.prompt.create({
   name: "movie-critic-chat",
   type: "chat",
   prompt: [

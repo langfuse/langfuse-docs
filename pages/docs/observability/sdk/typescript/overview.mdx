@@ -1,0 +1,161 @@
+---
+title: TypeScript SDK - Overview
+description: Improved OTEL-based TypeScript SDK (v4) with better developer experience and third-party integrations.
+category: SDKs
+label: "Version: JS SDK v4"
+---
+
+# TypeScript SDK - Overview
+
+The modular Langfuse TypeScript SDK (v4) is built on **[OpenTelemetry](https://opentelemetry.io/)** for robust observability, better context management, and easy integration with third-party libraries.
+
+<Callout type="info">
+  This documentation is for the TypeScript SDK v4. If you are looking for the
+  documentation for the TypeScript SDK v3, please [click
+  here](https://js-sdk-v3.docs-snapshot.langfuse.com/docs/observability/sdk/typescript/guide/).
+</Callout>
+
+<Callout type="info">
+  If you are self-hosting Langfuse, the TypeScript SDK v4 requires **Langfuse
+  platform version ≥ 3.95.0** for all features to work correctly.
+</Callout>
+
+## Quickstart
+
+Get your first trace into Langfuse in just a few minutes.
+
+<Steps>
+
+### Install packages
+
+Install the relevant packages to get started with tracing:
+
+```bash
+npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+```
+
+Learn more about the packages [here](/docs/observability/sdk/typescript/overview#packages).
+
+### Set up environment variables
+
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+
+<EnvJS />
+
+### Set up OpenTelemetry
+
+Create a file named `instrumentation.ts` to initialize the OpenTelemetry SDK. The **`LangfuseSpanProcessor`** is the key component that sends traces to Langfuse.
+
+```ts filename="instrumentation.ts" /LangfuseSpanProcessor/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+Import the `instrumentation.ts` file at the very top of your application's entry point (e.g., `index.ts`).
+
+```ts filename="index.ts"
+import "./instrumentation"; // Must be the first import
+```
+
+Learn more about setting up OpenTelemetry [here](/docs/observability/sdk/typescript/setup).
+
+### Instrument your application
+
+Use one of the native Langfuse framework [integrations](/integrations) to automatically trace your application.
+
+Alternatively, manually instrument your application, e.g. by using the `startActiveObservation`. This function takes a callback and automatically manages the observation's lifecycle and the OpenTelemetry context. Any observation created inside the callback will automatically be nested under the active observation, and the observation will be ended when the callback finishes.
+
+This is just an example, check out the [instrumentation](/docs/observability/sdk/typescript/instrumentation) page for more details.
+
+```ts filename="index.ts" /startActiveObservation/
+import "./instrumentation";
+import { startActiveObservation } from "@langfuse/tracing";
+
+async function main() {
+  await startActiveObservation("my-first-trace", async (span) => {
+    span.update({
+      input: "Hello, Langfuse!",
+      output: "This is my first trace!",
+    });
+  });
+}
+
+main();
+```
+
+### Run your application
+
+Execute your application. You should see your trace appear in the Langfuse UI.
+
+```bash
+npx tsx index.ts
+```
+
+</Steps>
+
+## Packages
+
+import JSSDKPackages from "@/components-mdx/js-sdk-packages.mdx";
+
+<JSSDKPackages />
+
+## OpenTelemetry foundation
+
+Building on OpenTelemetry is a core design choice for this SDK. It offers several key advantages:
+
+- **Standardization**: It aligns with the industry standard for observability, making it easier to integrate with existing monitoring and APM tools.
+- **Robust Context Management**: OpenTelemetry provides reliable context propagation, ensuring that traces are correctly linked even in complex, asynchronous applications.
+- **Ecosystem & Interoperability**: You can leverage a vast ecosystem of third-party instrumentations. If a library you use supports OpenTelemetry, its traces can be sent to Langfuse automatically.
+
+## Learn more
+
+import {
+  Rocket,
+  Plug,
+  Beaker,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
+
+<Cards num={2}>
+  <Card
+    icon={<Rocket size="24" />}
+    title="Setup"
+    href="/docs/observability/sdk/typescript/setup"
+    arrow
+  />
+  <Card
+    icon={<Plug size="24" />}
+    title="Instrumentation"
+    href="/docs/observability/sdk/typescript/instrumentation"
+    arrow
+  />
+  <Card
+    icon={<Settings size="24" />}
+    title="Advanced usage"
+    href="/docs/observability/sdk/typescript/advanced-usage"
+    arrow
+  />
+  <Card
+    icon={<LifeBuoy size="24" />}
+    title="Troubleshooting & FAQ"
+    href="/docs/observability/sdk/typescript/troubleshooting-and-faq"
+    arrow
+  />
+  <Card
+    icon={<BookOpen size="24" />}
+    title="Reference"
+    href="https://js.reference.langfuse.com/"
+    newWindow
+    arrow
+  />
+</Cards>

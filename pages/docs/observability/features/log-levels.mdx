@@ -84,30 +84,81 @@ with langfuse.start_as_current_generation(
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
-const trace = langfuse.trace();
+await startActiveObservation("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" }
+  });
 
-// Add an observation (span) with a level and status message
-trace.span({
-  level: "WARNING",
-  statusMessage: "This is a warning",
+  updateActiveObservation(
+    {
+      level: "WARNING",
+      statusMessage: "This is a warning",
+    },
+  );
+
 });
+```
+
+When using the `observe` wrapper:
+
+```ts
+import { observe, updateActiveObservation } from "@langfuse/tracing";
+
+// An existing function
+async function fetchData(source: string) {
+
+  updateActiveObservation(
+    {
+      level: "WARNING",
+      statusMessage: "This is a warning",
+    },
+  );
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper"
+});
+
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation('manual-observation', {
+  input: { query: 'What is the capital of France?' },
+});
+
+span.update({
+  level: "WARNING",
+  statusMessage: "This is a warning"
+});
+
+span.update({ output: 'Paris'}).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 
 </Tab>
-<Tab>
+<Tab title="OpenAI SDK">
 
 When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), `level` and `statusMessage` are automatically set based on the OpenAI API response. See [example](/integrations/model-providers/openai-py).
 
 </Tab>
-<Tab>
+<Tab title="Langchain">
 
 When using the [LangChain Integration](/integrations/frameworks/langchain), `level` and `statusMessage` are automatically set for each step in the LangChain pipeline.
 
