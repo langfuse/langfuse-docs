@@ -47,7 +47,7 @@ With the environment variables set, we can now initialize the `langfuseSpanProce
 // Import required dependencies
 import 'npm:dotenv/config';
 import { NodeSDK } from "npm:@opentelemetry/sdk-node";
-import { LangfuseSpanProcessor } from "npm:@langfuse/otel@^4.0.0-alpha";
+import { LangfuseSpanProcessor } from "npm:@langfuse/otel";
  
 // Export the processor to be able to flush it later
 // This is important for ensuring all spans are sent to Langfuse
@@ -92,7 +92,7 @@ This is the recommended approach for most use cases as it prevents context leaka
 
 ```typescript
 // Import necessary functions from the tracing package
-import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "npm:@langfuse/tracing@^4.0.0-beta.8";
+import { startActiveObservation, startObservation, updateActiveTrace, updateActiveObservation } from "npm:@langfuse/tracing";
  
 // Start a new span with automatic context management
 await startActiveObservation("context-manager", async (span) => {
@@ -161,7 +161,7 @@ The `observe` wrapper is a powerful tool for tracing existing functions without 
 
 
 ```typescript
-import { observe, updateActiveObservation } from "npm:@langfuse/tracing@^4.0.0-beta.8";
+import { observe, updateActiveObservation } from "npm:@langfuse/tracing";
  
 // An existing function
 async function fetchData(source: string) {
@@ -207,7 +207,7 @@ Teams typically wrap their LLM SDK calls in a helper function that manages traci
 
 ```typescript
 // Import the startObservation function for manual span creation
-import { startObservation } from 'npm:@langfuse/tracing@^4.0.0-beta.8';
+import { startObservation } from 'npm:@langfuse/tracing';
 
 // Create the root span for this operation
 const span = startObservation('manual-observation', {
@@ -279,7 +279,7 @@ Since this is a native integration, the model parameters and outputs are automat
 ```typescript
 // Import required packages
 import OpenAI from "npm:openai@^4";
-import { observeOpenAI } from "npm:@langfuse/openai@^4.0.0-alpha";
+import { observeOpenAI } from "npm:@langfuse/openai";
  
 // Initialize the OpenAI client
 const openai = new OpenAI();
@@ -312,9 +312,9 @@ Since this is a native integration, the model parameters and outputs are automat
 
 ```typescript
 // Import required LangChain and Langfuse packages
-import { ChatOpenAI } from "npm:@langchain/openai@^0.3.1";
+import { ChatOpenAI } from "npm:@langchain/openai";
 import { ChatPromptTemplate } from "npm:@langchain/core/prompts";
-import { CallbackHandler } from "npm:@langfuse/langchain@^4.0.0-alpha";
+import { CallbackHandler } from "npm:@langfuse/langchain";
  
 // Initialize the Langfuse callback handler with tracing configuration
 const langfuseHandler = new CallbackHandler({
