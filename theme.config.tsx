@@ -201,20 +201,23 @@ const config: DocsThemeConfig = {
     CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "town-hall-2025-07-16",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/frqm1umn">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "snapshot-notice-python-sdk-v2",
+    dismissible: false,
+    content: (
+      <span>
+        ⚠️ Snapshot (as of Python SDK v2) ⚠️ {"  "}
+        <Link
+          href="https://langfuse.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline cursor-pointer"
+        >
+          view latest ↗
+        </Link>
+      </span>
+    ),
+  },
 };
 
 export default config;
