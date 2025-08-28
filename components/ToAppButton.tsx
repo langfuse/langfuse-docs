@@ -127,7 +127,7 @@ export const ToAppButton = ({
             size="xs"
             className={cn(
               "whitespace-nowrap",
-              !isUsingDefaultText && "w-[45px] sm:w-[70px]"
+              isUsingDefaultText && "w-[45px] sm:w-[70px]"
             )}
           >
             <span className="sm:hidden">{dropdownText}</span>
@@ -157,7 +157,7 @@ export const ToAppButton = ({
         asChild
         className={cn(
           "whitespace-nowrap",
-          !isUsingDefaultText && "w-[45px] sm:w-[70px]"
+          isUsingDefaultText && "w-[45px] sm:w-[70px]"
         )}
       >
         <Link href={signedInRegion![1].url}>
@@ -173,7 +173,7 @@ export const ToAppButton = ({
         asChild
         className={cn(
           "whitespace-nowrap",
-          !isUsingDefaultText && "w-[45px] sm:w-[70px]"
+          isUsingDefaultText && "w-[45px] sm:w-[70px]"
         )}
       >
         <Link
