@@ -34,14 +34,14 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Add tags when creating the root span
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="my-operation"
 ) as root_span:
     # Add tags to the trace
     root_span.update_trace(tags=["tag-1", "tag-2"])
 
     # You can add more tags later from any span in the same trace
-    with root_span.start_as_current_generation(name="llm-call", model="gpt-4o") as gen:
+    with root_span.start_as_current_observation(as_type="generation", name="llm-call", model="gpt-4o") as gen:
         # Processing...
         gen.update_trace(tags=["llm-gen"])  # Adds another tag to the same trace
 ```
@@ -49,7 +49,7 @@ with langfuse.start_as_current_span(
 You can also update the tags of the current trace without a direct reference to a span:
 
 ```python
-with langfuse.start_as_current_span(name="another-operation"):
+with langfuse.start_as_current_observation(name="another-operation"):
     # ... processing ...
     langfuse.update_current_trace(tags=["processing", "beta-feature"])
 ```

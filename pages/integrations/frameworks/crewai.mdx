@@ -101,7 +101,7 @@ crew = Crew(
     tasks=[task1],
 )
 
-with langfuse.start_as_current_span(name="crewai-index-trace"):
+with langfuse.start_as_current_observation(name="crewai-index-trace"):
     result = crew.kickoff()
     print(result)
 
@@ -129,7 +129,7 @@ The following code demonstrates how to start a custom span with `langfuse.start_
 
 
 ```python
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="crewai-index-trace",
     ) as span:
     
@@ -165,7 +165,7 @@ In the example below, we demonstrate how to score a specific span for `relevance
 
 
 ```python
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="crewai-index-trace",
     ) as span:
     
@@ -218,7 +218,7 @@ crew_with_prompt = Crew(
 )
 
 # Run your application
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="crewai-index-trace",
     ) as span:
     
@@ -273,7 +273,7 @@ current_run_description="Evaluation run for CrewAI model on June 4th"
  
 # Assume 'your_application' is your instrumented application function
 def your_application(country):
-    with langfuse.start_as_current_span(name="crewai-trace") as span:
+    with langfuse.start_as_current_observation(name="crewai-trace") as span:
 
         # Define your agents with roles and goals
         geography_expert = Agent(

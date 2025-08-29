@@ -144,7 +144,7 @@ def process_document():
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="analyze-document") as span: # Include media in the span input, output, or metadata
+with langfuse.start_as_current_observation(name="analyze-document") as span: # Include media in the span input, output, or metadata
     span.update(
         input={"document": pdf_media},
         metadata={"file_size": len(pdf_bytes)}

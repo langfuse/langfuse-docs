@@ -41,16 +41,17 @@ from langfuse import get_client
 langfuse = get_client()
 
 # You can set the user_id when creating the root span via update_trace
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="process-user-request"
 ) as root_span:
     # Add user_id to the trace
     root_span.update_trace(user_id="user_12345")
 
     # All spans in this trace will be associated with this user
-    with root_span.start_as_current_generation(
+    with root_span.start_as_current_observation(
         name="generate-response",
-        model="gpt-4o"
+        model="gpt-4o",
+        as_type="generation"
     ) as gen:
         # ...generate response...
         pass
@@ -59,7 +60,7 @@ with langfuse.start_as_current_span(
 You can also update the user_id of the current trace without a direct reference to a span:
 
 ```python
-with langfuse.start_as_current_span(name="handle-user-interaction"):
+with langfuse.start_as_current_observation(name="handle-user-interaction"):
     # Add user_id to the current trace
     langfuse.update_current_trace(user_id="user_12345")
 ```

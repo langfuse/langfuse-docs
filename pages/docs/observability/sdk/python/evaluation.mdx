@@ -27,7 +27,7 @@ This page shows the evaluation methods that are supported by the Python SDK. Ple
 
     langfuse = get_client()
 
-    with langfuse.start_as_current_generation(name="summary_generation") as gen:
+    with langfuse.start_as_current_observation(as_type="generation", name="summary_generation") as gen:
         # ... LLM call ...
         gen.update(output="summary text...")
         # Score this specific generation
@@ -47,7 +47,7 @@ This page shows the evaluation methods that are supported by the Python SDK. Ple
 
     langfuse = get_client()
 
-    with langfuse.start_as_current_span(name="complex_task") as task_span:
+    with langfuse.start_as_current_observation(name="complex_task") as task_span:
         # ... perform task ...
         langfuse.score_current_span(name="task_component_quality", value=True, data_type="BOOLEAN")
         # ...
@@ -159,7 +159,8 @@ current_run_name = "qna_model_v3_run_05_20" # Identifies this specific evaluatio
 
 # Assume 'my_qna_app' is your instrumented application function
 def my_qna_app(question: str, context: str, item_id: str, run_name: str):
-    with langfuse.start_as_current_generation(
+    with langfuse.start_as_current_observation(
+        as_type="generation",
         name="qna-llm-call",
         input={"question": question, "context": context},
         metadata={"item_id": item_id, "run": run_name}, # Example metadata for the generation
@@ -210,4 +211,3 @@ print(f"\nFinished processing dataset '{dataset_name}' for run '{current_run_nam
 ```
 
 By using `item.run()`, you ensure each dataset item's processing is neatly encapsulated in its own trace, and these traces are aggregated under the specified `run_name` in the Langfuse UI. This allows for systematic review of results, comparison across runs, and deep dives into individual processing traces.
-
