@@ -10,7 +10,7 @@ category: Integrations
 
 Koog provides built-in support for exporting agent traces to Langfuse. With Langfuse integration, you can visualize, analyze, and debug how your Koog agents interact with LLMs, APIs, and other components.
 
-> **What is Koog?** [Koog](https://docs.koog.ai/) Koog is a Kotlin-based framework designed to build and run AI agents entirely in idiomatic Kotlin. It lets you create agents that can interact with tools, handle complex workflows, and communicate with users. For background on Koog’s OpenTelemetry support, see the [OpenTelemetry support](https://docs.koog.ai/opentelemetry-support/).
+> **What is Koog?** [Koog](https://docs.koog.ai/) is a Kotlin-based framework designed to build and run AI agents entirely in idiomatic Kotlin. It lets you create agents that can interact with tools, handle complex workflows, and communicate with users. For background on Koog’s OpenTelemetry support, see the [OpenTelemetry support](https://docs.koog.ai/opentelemetry-support/).
 
 > **What is Langfuse?** [Langfuse](/) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
 
@@ -25,7 +25,7 @@ Koog provides built-in support for exporting agent traces to Langfuse. With Lang
 ```bash
    export LANGFUSE_HOST="https://cloud.langfuse.com" # 🇪🇺 EU region
    # export LANGFUSE_HOST="https://us.cloud.langfuse.com" # 🇺🇸 US region
-   
+
    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
    export LANGFUSE_SECRET_KEY="sk-lf-..."
 ```
@@ -40,7 +40,7 @@ The exporter uses `OtlpHttpSpanExporter` under the hood to send traces to Langfu
 **Example: Agent with Langfuse Tracing**
 
 ```kotlin
-fun main() = runBlocking { 
+fun main() = runBlocking {
     val agent = AIAgent(
         executor = simpleOpenAIExecutor(ApiKeyService.openAIApiKey),
         llmModel = OpenAIModels.CostOptimized.GPT4oMini,
@@ -81,6 +81,6 @@ For more details on Langfuse OTLP tracing, see the [Langfuse OpenTelemetry Docs]
 ## Troubleshooting
 
 - **No traces appear in Langfuse**
-    - Double-check that `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` are set in your environment.
-    - If running on self-hosted Langfuse, confirm that the `LANGFUSE_HOST` is reachable from your application environment.
-    - Verify that the public/secret key pair belongs to the correct project.
+  - Double-check that `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` are set in your environment.
+  - If running on self-hosted Langfuse, confirm that the `LANGFUSE_HOST` is reachable from your application environment.
+  - Verify that the public/secret key pair belongs to the correct project.
