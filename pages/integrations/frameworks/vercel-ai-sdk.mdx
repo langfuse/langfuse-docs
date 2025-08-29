@@ -196,15 +196,14 @@ We created a sample repository ([langfuse/langfuse-vercel-ai-nextjs-example](htt
 You can open a Langfuse trace and pass the trace ID to AI SDK calls to group multiple execution spans under one trace. The passed name in functionId will be the root span name of the respective execution.
 
 ```typescript
+import "./instrumentation"; // Must be the first import
 import { randomUUID } from "crypto";
-import { Langfuse } from "langfuse";
+import { startObservation } from "@langfuse/tracing";
 
-const langfuse = new Langfuse();
 const parentTraceId = randomUUID();
 
-langfuse.trace({
+const parentTrace = startObservation("holiday-traditions", {
   id: parentTraceId,
-  name: "holiday-traditions",
 });
 
 for (let i = 0; i < 3; i++) {
@@ -225,8 +224,8 @@ for (let i = 0; i < 3; i++) {
   console.log(result.text);
 }
 
-await langfuse.flushAsync();
-await sdk.shutdown();
+// End the parent trace
+parentTrace.end();
 ```
 
 The resulting trace hierarchy will be:
@@ -243,11 +242,11 @@ You can link Langfuse prompts to Vercel AI SDK generations by setting the `langf
 
 ```typescript
 import { generateText } from "ai";
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
-const fetchedPrompt = await langfuse.getPrompt("my-prompt");
+const fetchedPrompt = await langfuse.prompt.get("my-prompt");
 
 const result = await generateText({
   model: openai("gpt-4o"),

@@ -122,19 +122,18 @@ The dedicated `fetch*` methods for core entities are covered by tests and semant
 </Callout>
 
 ```bash
-npm install langfuse
+npm install @langfuse/client
 ```
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse({
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient({
   secretKey: "sk-lf-...",
   publicKey: "pk-lf-...",
   baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
   // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
 });
-
-
 
 // Dedicated fetch* methods for core entities
 
@@ -152,8 +151,6 @@ const observation = await langfuse.fetchObservation("observationId");
 
 // Fetch list of sessions
 const sessions = await langfuse.fetchSessions();
-
-
 
 // Methods on langfuse.api namespace for other entities (generated from the API reference)
 
@@ -177,4 +174,18 @@ JS/TS SDK reference including all available filters:
 
 </Tab>
 </Tabs>
+
+## API [#api]
+
+For direct API access, you can use the [Public API](/docs/api-and-data-platform/features/public-api) to query data programmatically via HTTP requests. This is useful when you need to integrate with systems that don't support the SDKs or when you need more granular control over the requests.
+
+The Public API provides endpoints for all the same entities available through the SDKs:
+- Traces
+- Observations  
+- Sessions
+- Scores
+- Datasets
+- Metrics
+
+See the [Public API documentation](/docs/api-and-data-platform/features/public-api) for detailed information on available endpoints, authentication, and request/response formats.
 

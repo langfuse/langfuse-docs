@@ -17,7 +17,7 @@ The Langfuse JS/TS SDK offers a wrapper function around the OpenAI SDK, enabling
 
 ```ts {2, 4}
 import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
@@ -71,7 +71,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
 
     ```ts
     import OpenAI from "openai";
-    import { observeOpenAI } from "langfuse";
+    import { observeOpenAI } from "@langfuse/openai";
 
     const openai = observeOpenAI(new OpenAI());
 
@@ -88,7 +88,7 @@ import EnvJS from "@/components-mdx/env-js.mdx";
 
     ```ts
     import OpenAI from "openai";
-    import { observeOpenAI } from "langfuse";
+    import { observeOpenAI } from "@langfuse/openai";
 
     const res = await observeOpenAI(new OpenAI(), {
       clientInitParams: {
@@ -194,7 +194,7 @@ const res = await observeOpenAI(new OpenAI(), {
 With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
 
 ```ts
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 import OpenAI from "openai";
 
 const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
@@ -218,7 +218,7 @@ OpenAI returns the token usage on streamed responses only when in `stream_option
 
 ```typescript /{"include_usage": True}/
 import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
@@ -273,24 +273,25 @@ TRACE: capital-poem-generator
 
 **Implementation**
 
-```ts {12, 17, 30}
-import Langfuse, { observeOpenAI } from "langfuse";
+```ts
+import "./instrumentation"; // Must be the first import
+import { startObservation } from "@langfuse/tracing";
+import { observeOpenAI } from "@langfuse/openai";
+import OpenAI from "openai";
 
-// Initialize SDKs
-const langfuse = new Langfuse();
+// Initialize OpenAI client
 const openai = new OpenAI();
 
 // Create trace and add params
-const trace = langfuse.trace({ name: "capital-poem-generator" });
+const trace = startObservation("capital-poem-generator");
 
-// Create span
+// Create span for specific country
 const country = "France";
-const span = trace.span({ name: country });
+const span = trace.startObservation(country);
 
-// Call OpenAI
+// Call OpenAI for capital
 const capital = (
   await observeOpenAI(openai, {
-    parent: span,
     generationName: "get-capital",
   }).chat.completions.create({
     model: "gpt-3.5-turbo",
@@ -301,9 +302,9 @@ const capital = (
   })
 ).choices[0].message.content;
 
+// Call OpenAI for poem
 const poem = (
   await observeOpenAI(openai, {
-    parent: span,
     generationName: "generate-poem",
   }).chat.completions.create({
     model: "gpt-3.5-turbo",
@@ -317,11 +318,9 @@ const poem = (
   })
 ).choices[0].message.content;
 
-// End span to get span-level latencies
+// End span and trace
 span.end();
-
-// Flush the Langfuse client belonging to the parent span
-await langfuse.flushAsync();
+trace.end();
 ```
 
 ## FAQ

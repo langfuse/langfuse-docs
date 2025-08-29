@@ -107,7 +107,7 @@ print(response.choices[0].message.content)
 <Tab>
 
 ```typescript
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 import OpenAI from "openai";
 
 // Create an OpenAI client with the Vercel AI Gateway base URL
@@ -214,12 +214,10 @@ analyze_text(text_to_analyze)
 By using the Langfuse SDK, we can manually create traces and generations to capture nested LLM calls.
 
 ```typescript
-import { Langfuse } from "langfuse";
-import { observeOpenAI } from "langfuse";
+import "./instrumentation"; // Must be the first import
+import { startActiveObservation } from "@langfuse/tracing";
+import { observeOpenAI } from "@langfuse/openai";
 import OpenAI from "openai";
-
-// Initialize Langfuse
-const langfuse = new Langfuse();
 
 // Create an OpenAI client with the Vercel AI Gateway base URL
 const openaiClient = new OpenAI({
@@ -227,40 +225,37 @@ const openaiClient = new OpenAI({
 });
 
 async function analyzeText(text: string) {
-    // Create a trace for the entire analysis
-    const trace = langfuse.trace({
-        name: "analyze-text",
-        input: { text }
+    return await startActiveObservation("analyze-text", async (trace) => {
+        trace.update({ input: { text } });
+
+        try {
+            // First LLM call: Summarize the text
+            const summaryResponse = await summarizeText(text);
+            const summary = summaryResponse.choices[0].message.content;
+
+            // Second LLM call: Analyze the sentiment of the summary
+            const sentimentResponse = await analyzeSentiment(summary!);
+            const sentiment = sentimentResponse.choices[0].message.content;
+
+            const result = {
+                summary,
+                sentiment
+            };
+
+            // Update trace with output
+            trace.update({ output: result });
+            
+            return result;
+        } catch (error) {
+            trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
+            throw error;
+        }
     });
-
-    try {
-        // First LLM call: Summarize the text
-        const summaryResponse = await summarizeText(text, trace);
-        const summary = summaryResponse.choices[0].message.content;
-
-        // Second LLM call: Analyze the sentiment of the summary
-        const sentimentResponse = await analyzeSentiment(summary!, trace);
-        const sentiment = sentimentResponse.choices[0].message.content;
-
-        const result = {
-            summary,
-            sentiment
-        };
-
-        // Update trace with output
-        trace.update({ output: result });
-        
-        return result;
-    } catch (error) {
-        trace.update({ output: { error: error instanceof Error ? error.message : String(error) } });
-        throw error;
-    }
 }
 
-async function summarizeText(text: string, trace: any) {
+async function summarizeText(text: string) {
     const client = observeOpenAI(openaiClient, {
-        generationName: "summarize-text",
-        parent: trace
+        generationName: "summarize-text"
     });
     
     return await client.chat.completions.create({
@@ -272,10 +267,9 @@ async function summarizeText(text: string, trace: any) {
     });
 }
 
-async function analyzeSentiment(summary: string, trace: any) {
+async function analyzeSentiment(summary: string) {
     const client = observeOpenAI(openaiClient, {
-        generationName: "analyze-sentiment",
-        parent: trace
+        generationName: "analyze-sentiment"
     });
     
     return await client.chat.completions.create({

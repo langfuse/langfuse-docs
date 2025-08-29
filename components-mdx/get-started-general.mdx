@@ -50,32 +50,29 @@ main()
 
 <Tab>
 ```ts filename="server.ts"
-import { Langfuse } from "langfuse";
+import "./instrumentation"; // Must be the first import
+import { startActiveObservation } from "@langfuse/tracing";
 
-const langfuse = new Langfuse();
+await startActiveObservation("my-AI-application-endpoint", async (span) => {
+  // Example generation creation
+  await startActiveObservation("chat-completion", async (generation) => {
+    generation.update({
+      model: "gpt-4o",
+      modelParameters: {},
+      input: messages,
+    });
 
-const trace = langfuse.trace({
-  name: "my-AI-application-endpoint",
+    // Application code
+    const chatCompletion = await llm.respond(prompt);
+
+    // Update generation with output
+    generation.update({
+      output: chatCompletion,
+    });
+    
+    return chatCompletion;
+  });
 });
-
-// Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-4o",
-  modelParameters: {
-  },
-  input: messages,
-});
-
-// Application code
-const chatCompletion = await llm.respond(prompt);
-
-// End generation - sets endTime
-generation
-  .update({
-    output: chatCompletion,
-  })
-  .end();
 ```
 </Tab>
 
