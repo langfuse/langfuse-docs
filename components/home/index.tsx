@@ -8,6 +8,12 @@ import { CTASocial } from "./CTASocial";
 const FeatureBento = dynamic(() => import("./FeatureBento"), {
   ssr: false,
 });
+const ContinuousEvaluationLoop = dynamic(
+  () => import("./ContinuousEvaluationLoop"),
+  {
+    ssr: false,
+  }
+);
 const IntegrationsGrid = dynamic(() => import("./IntegrationsGrid"), {
   ssr: false,
 });
@@ -24,6 +30,7 @@ const WallOfLove = dynamic(() => import("./WallOfLove"), {
 export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
+      <ContinuousEvaluationLoop />
       <Hero />
       <Usage />
       <FeatureBento />
