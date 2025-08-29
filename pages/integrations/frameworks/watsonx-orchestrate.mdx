@@ -1,12 +1,24 @@
+---
+title: Observability for IBM watsonx Orchestrate ADK with Langfuse
+sidebarTitle: Watsonx Orchestrate ADK
+logo: /images/integrations/watsonx-orchestrate_icon.png
+description: Learn how to integrate Langfuse with IBM watsonx Orchestrate, a TypeScript agent framework, to monitor, debug, and analyze your AI applications.
+---
+
 # IBM watsonx Orchestrate
 
 Monitor agents and tools built with IBM watsonx Orchestrate ADK in Langfuse. Orchestrate has a native integration that forwards telemetry (traces, spans, logs) to Langfuse for rich observability.
 
+> **What is IBM watsonx Orchestrate?** [IBM watsonx Orchestrate ADK](https://developer.watson-orchestrate.ibm.com/) is a framework that lets developers build and publish custom skills (actions) that watsonx Orchestrate can execute within automated workflows.
+
+> **What is Langfuse?** [Langfuse](/) is a platform for monitoring, debugging, and analyzing your AI applications. It provides a set of tools and services to help you monitor, debug, and analyze your AI applications.
+
 ## Prerequisites
 
-- A Langfuse project with a Public Key and Secret Key
 - Langfuse Cloud (`https://cloud.langfuse.com`) or a self-hosted Langfuse instance
 - IBM watsonx Orchestrate ADK installed
+
+To enable IBM's native observability framework, start the Orchestrate server with the `--with-ibm-telemetry` or `-i` flag, then go to `https://localhost:8765` in your browser.
 
 ## Quick start (CLI)
 
@@ -20,9 +32,10 @@ orchestrate settings observability langfuse configure \
   --config-json '{"public_key": "pk-lf-0000-0000-0000-0000-0000"}'
 ```
 
-Notes:
+<Callout type="info">
 - For self-hosted Langfuse, set `--url` to `https://<your-langfuse-host>/api/public/otel` and `--health-uri` to `https://<your-langfuse-host>`.
 - You can also provide `--project-id` (or `-p`) if not part of the config file.
+</Callout>
 
 ## Alternative: YAML config file
 
@@ -58,15 +71,6 @@ orchestrate start -i
 # Open the console
 # https://localhost:8765
 ```
-
-## Verify in Langfuse
-
-- Go to your project in Langfuse and open Traces to see agent runs and tool calls
-- Explore spans, inputs/outputs, metadata, tokens and costs
-- Learn more:
-  - [/docs/observability/get-started](/docs/observability/get-started)
-  - [/docs/observability/features/agent-graphs](/docs/observability/features/agent-graphs)
-  - [/docs/observability/features/token-and-cost-tracking](/docs/observability/features/token-and-cost-tracking)
 
 ## Troubleshooting
 
