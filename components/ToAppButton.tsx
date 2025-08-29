@@ -7,6 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+const DEFAULT_BUTTON_TEXT = {
+  signedIn: "To App",
+  signUp: "Sign Up",
+  dropdown: "App",
+} as const;
 
 const regions = {
   eu: {
@@ -35,7 +42,17 @@ const continentHostMapping = {
 
 type RegionKey = keyof typeof regions;
 
-export const ToAppButton = () => {
+interface ToAppButtonProps {
+  signedInText?: string;
+  signUpText?: string;
+  dropdownText?: string;
+}
+
+export const ToAppButton = ({
+  signedInText = DEFAULT_BUTTON_TEXT.signedIn,
+  signUpText = DEFAULT_BUTTON_TEXT.signUp,
+  dropdownText = DEFAULT_BUTTON_TEXT.dropdown,
+}: ToAppButtonProps = {}) => {
   const [signedInRegions, setSignedInRegions] = useState<
     Record<RegionKey, boolean>
   >(
@@ -44,6 +61,10 @@ export const ToAppButton = () => {
     ) as Record<RegionKey, boolean>
   );
   const [continentCode, setContinentCode] = useState<string | null>(null);
+  const isUsingDefaultText =
+    signedInText === DEFAULT_BUTTON_TEXT.signedIn &&
+    signUpText === DEFAULT_BUTTON_TEXT.signUp &&
+    dropdownText === DEFAULT_BUTTON_TEXT.dropdown;
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") {
@@ -102,9 +123,15 @@ export const ToAppButton = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="xs" className="whitespace-nowrap w-[45px] sm:w-[70px]">
-            <span className="sm:hidden">App</span>
-            <span className="hidden sm:inline">To App</span>
+          <Button
+            size="xs"
+            className={cn(
+              "whitespace-nowrap",
+              isUsingDefaultText && "w-[45px] sm:w-[70px]"
+            )}
+          >
+            <span className="sm:hidden">{dropdownText}</span>
+            <span className="hidden sm:inline">{signedInText}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -128,11 +155,14 @@ export const ToAppButton = () => {
       <Button
         size="xs"
         asChild
-        className="whitespace-nowrap w-[45px] sm:w-[70px]"
+        className={cn(
+          "whitespace-nowrap",
+          isUsingDefaultText && "w-[45px] sm:w-[70px]"
+        )}
       >
         <Link href={signedInRegion![1].url}>
-          <span className="sm:hidden">App</span>
-          <span className="hidden sm:inline">To App</span>
+          <span className="sm:hidden">{dropdownText}</span>
+          <span className="hidden sm:inline">{signedInText}</span>
         </Link>
       </Button>
     );
@@ -141,15 +171,18 @@ export const ToAppButton = () => {
       <Button
         size="xs"
         asChild
-        className="whitespace-nowrap w-[45px] sm:w-[70px]"
+        className={cn(
+          "whitespace-nowrap",
+          isUsingDefaultText && "w-[45px] sm:w-[70px]"
+        )}
       >
         <Link
           href={
             continentCode ? continentHostMapping[continentCode] : regions.eu.url
           }
         >
-          <span className="sm:hidden">App</span>
-          <span className="hidden sm:inline">Sign Up</span>
+          <span className="sm:hidden">{dropdownText}</span>
+          <span className="hidden sm:inline">{signUpText}</span>
         </Link>
       </Button>
     );

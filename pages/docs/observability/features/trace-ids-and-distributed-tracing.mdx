@@ -125,42 +125,68 @@ with langfuse.start_as_current_span(name="outer-operation") as span:
     current_span_id = langfuse.get_current_observation_id()
 
     print(f"Current trace ID: {current_trace_id}")
-    print(f"Direct access: {span.trace_id}")
+
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+The Python SDK uses W3C Trace Context IDs by default, which are:
+
+- 32-character lowercase hexadecimal string for trace IDs
+- 16-character lowercase hexadecimal string for observation (span) IDs
+
+### Accessing the current trace ID
+
+You may access the current active trace ID via the `getActiveTraceId` function:
 
 ```ts
-import { Langfuse } from "langfuse";
-import { v4 as uuidv4 } from "uuid";
+import { startObservation, getActiveTraceId } from "@langfuse/tracing";
 
-const langfuse = new Langfuse();
-
-// Create trace with custom ID
-const traceId = uuidv4();
-const trace = langfuse.trace({
-  id: traceId,
-  name: "chat-app-session",
-  userId: "user_123456789",
-  metadata: { user: "user@langfuse.com" },
-  tags: ["production"],
-});
-
-// Create observations with custom IDs
-const span = trace.span({
-  id: "custom-span-id",
-  name: "chat-interaction",
-});
-
-const generation = trace.generation({
-  id: "custom-generation-id",
-  name: "chat-completion",
+await startObservation("run", async (span) => {
+  const traceId = getActiveTraceId();
+  console.log(`Current trace ID: ${traceId}`);
 });
 ```
 
+### Deterministic trace IDs
+
+When starting a new trace with a predetermined `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist within the trace but is only used for trace ID inheritance of the created observation.
+
+You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
+
+```typescript
+import { createTraceId, startObservation } from "@langfuse/tracing";
+
+const externalId = "support-ticket-54321";
+
+// Generate a valid, deterministic traceId from the external ID
+const langfuseTraceId = await createTraceId(externalId);
+
+// You can now start a new trace with this ID
+const rootSpan = startObservation(
+  "process-ticket",
+  {},
+  {
+    parentSpanContext: {
+      traceId: langfuseTraceId,
+      spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+      traceFlags: 1, // mark trace as sampled
+    },
+  }
+);
+
+// Later, you can regenerate the same traceId to score or retrieve the trace
+const scoringTraceId = await createTraceId(externalId);
+// scoringTraceId will be the same as langfuseTraceId
+```
+
+Setting a parentSpanContext will detach the created span from the active span context as it no longer inherits from the current active span in the context.
+
+
+Learn more in the [JS/TS SDK](/docs/observability/sdk/typescript/advanced-usage#managing-trace-and-observation-ids) docs.
+
 </Tab>
-<Tab>
+<Tab title="OpenTelemetry">
 
 When using [OpenTelemetry](/docs/opentelemetry/get-started), trace IDs are handled automatically by the OpenTelemetry SDK. You can access and set trace IDs using the OpenTelemetry context:
 
@@ -179,7 +205,7 @@ with tracer.start_as_current_span("my-operation") as span:
 ```
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (Python v2)">
 
 When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), you have two options for working with trace IDs:
 
@@ -206,7 +232,7 @@ completion = openai.chat.completions.create(
 from langfuse import observe, get_client
 from langfuse.openai import openai
 import uuid
- 
+
 @observe()
 def process_user_request(user_id, request_data):
     completion = openai.chat.completions.create(
@@ -218,14 +244,14 @@ def process_user_request(user_id, request_data):
         ]
     )
     return completion.choices[0].message.content
- 
+
 # Use custom trace ID by passing it as special keyword argument
 external_trace_id = "custom-" + str(uuid.uuid4())
- 
+
 # Get a consistent trace ID for the same user
 langfuse = get_client()
 trace_id = langfuse.create_trace_id(seed=external_trace_id) # 32 hexchar lowercase string, deterministic with seed
- 
+
 process_user_request(
     user_id="user_123",
     request_data={"query": "hello"},
@@ -240,7 +266,7 @@ The decorator approach is recommended when you want to:
 - Track the entire function execution, not just the OpenAI call
 
 </Tab>
-<Tab>
+<Tab title="OpenAI (JS/TS)">
 
 ```ts
 import OpenAI from "openai";
@@ -270,15 +296,15 @@ To pass a custom trace ID to a Langchain execution, you can wrap the execution i
 ```python
 from langfuse import get_client, Langfuse
 from langfuse.langchain import CallbackHandler
- 
+
 langfuse = get_client()
- 
+
 # Generate deterministic trace ID from external system
 external_request_id = "req_12345"
 predefined_trace_id = Langfuse.create_trace_id(seed=external_request_id)
- 
+
 langfuse_handler = CallbackHandler()
- 
+
 # Use the predefined trace ID with trace_context
 with langfuse.start_as_current_span(
     name="langchain-request",
@@ -288,21 +314,21 @@ with langfuse.start_as_current_span(
         user_id="user_123",
         input={"person": "Ada Lovelace"}
     )
- 
+
     # LangChain execution will be part of this trace
     response = chain.invoke(
         {"person": "Ada Lovelace"},
         config={"callbacks": [langfuse_handler]}
     )
- 
+
     span.update_trace(output={"response": response})
- 
+
 print(f"Trace ID: {predefined_trace_id}")  # Use this for scoring later
 print(f"Trace ID: {langfuse_handler.last_trace_id}") # Care needed in concurrent environments where handler is reused
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 ```ts
 import { CallbackHandler, Langfuse } from "langfuse-langchain";
@@ -324,7 +350,7 @@ const chain = new LLMChain({
 ```
 
 </Tab>
-<Tab>
+<Tab title="LiteLLM">
 
 When using [LiteLLM](/integrations/frameworks/litellm-sdk):
 

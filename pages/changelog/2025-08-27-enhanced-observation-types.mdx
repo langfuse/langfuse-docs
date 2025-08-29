@@ -1,0 +1,38 @@
+---
+date: 2025-08-27
+title: Additional Observation Types for More Meaningful Span Context
+description: New observation types including Agent, Tool, Chain, Retriever, Evaluator, Embedding, and Guardrail provide semantic meaning to your traces.
+author: Nimar
+ogImage: /images/changelog/2025-08-27-additional-observation-types.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
+
+<ChangelogHeader />
+
+We've expanded the supported observation types to bring more meaning to your spans. Now, you can easily identify the type of action an observation represents, such as tool calls, embeddings or agents.
+
+For most [integrations with agent frameworks](/docs/integrations) the observation types are automatically detected. You can also manually set them via the Langfuse SDK as explained in the [docs](/docs/observability/features/observation-types).
+
+### Full List of Available Observation Types:
+
+<ObservationTypesList />
+
+<Callout type="info">
+  Setting new observation types requires Python SDK `version>=3.3.1`. Support
+  for the JS SDK will land in [version
+  4.0](https://github.com/orgs/langfuse/discussions/8403).
+</Callout>
+
+**Learn more**
+
+import { Book } from "lucide-react";
+
+<Cards num={1}>
+  <Card
+    title="Observation Types Documentation"
+    href="/docs/observability/features/observation-types"
+    icon={<Book />}
+  />
+</Cards>

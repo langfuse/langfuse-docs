@@ -1,7 +1,7 @@
 ---
 title: Sessions (Chats, Threads, etc.)
 description: Track LLM chat conversations or threads across multiple traces in a single session. Replay the entire interaction to debug or analyze the conversation.
-sidebarTitle: Sessions (Chats, Threads, etc.)
+sidebarTitle: Sessions
 ---
 
 # Sessions
@@ -17,7 +17,7 @@ Add a `sessionId` when creating/updating a trace. This can be any string that yo
 
 <Tabs items={["Python SDK", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 
-<Tab>
+<Tab title="Python SDK (v3)">
 When using the `@observe()` decorator:
 
 ```python
@@ -67,15 +67,68 @@ with langfuse.start_as_current_span(name="another-operation"):
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
 
-const trace = langfuse.trace({
-  sessionId: "your-session-id",
+await startActiveObservation("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
+
+  // set sessionId on the trace
+  updateActiveTrace({
+    sessionId: "session-123",
+  });
 });
+```
+
+When using the `observe` wrapper:
+
+```ts
+import { observe, updateActiveTrace } from "@langfuse/tracing";
+
+// An existing function
+async function fetchData(source: string) {
+  // set sessionId on the trace
+  updateActiveTrace({
+    sessionId: "session-123",
+  });
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper",
+});
+
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
+});
+
+// set sessionId on the trace
+span.updateTrace({
+  sessionId: "session-123",
+});
+
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -118,7 +171,7 @@ chain.invoke(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass the `sessionId` to the constructor:
 
@@ -162,7 +215,7 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 </Tab>
 
-<Tab>
+<Tab title="Flowise">
 The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId to the Langfuse sessionId. Flowise 1.4.10 or higher is required.
 
 </Tab>
