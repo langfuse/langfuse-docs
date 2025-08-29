@@ -16,7 +16,9 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["jannikmaierhoefer"]}
 />
 
-To improve your LLM app, you must understand **how it fails**. Aggregate metrics won't tell you if your system retrieves the wrong documents or if the model's tone alienates users. Error analysis provides this crucial context.
+To improve your LLM app, you must understand **how it fails**. Aggregate metrics won't tell you if your system retrieves the wrong documents or if the model's tone alienates users. **Error analysis** provides this crucial context.
+
+---
 
 This guide describes a four-step process to **identify, categorize, and quantify your application's unique failure modes**. The result is a specific evaluation framework that is far more useful than generic metrics:
 
@@ -24,6 +26,8 @@ This guide describes a four-step process to **identify, categorize, and quantify
 2. [Open code to surface failure patterns](#open-coding)
 3. [Structure failure modes](#structure-failure-modes)
 4. [Label and quantify](#label-and-quantify)
+
+---
 
 I'll demonstrate this process using a [demo chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The demo chat app logs traces into the Langfuse demo project and has already answered 19k user queries in the past year.
 
@@ -49,7 +53,7 @@ In Langfuse, you can add traces to an annotation queue by clicking the "Add to A
   Queue](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/add-to-annotation-queue.png)
 </Frame>
 
-**Synthetic Dataset:** If you lack production data, generate a synthetic dataset covering anticipated user behaviors and potential failure points. We have a Python cookbook that shows how to do this [here](/guides/cookbook/example_synthetic_datasets). Once created, add these traces to a Langfuse Annotation Queue.
+**Synthetic Dataset:** If you lack production data, generate a synthetic dataset covering anticipated user behaviors and potential failure points. We have a Python cookbook that shows how to do this [here](/guides/cookbook/example_synthetic_datasets). Once created, add these traces to a Langfuse Annotation Queue. Note that the quality of your dataset matters a lot for the success of your error analysis; it needs to be diverse and representative of the real world.
 
 The [Annotation Queue](/docs/evaluation/evaluation-methods/annotation#annotation-queues) we created will serve as your workspace for the analysis. For our demo chatbot, we selected 40 traces reflecting different user questions, from simple definitions to complex comparisons:
 
@@ -118,9 +122,7 @@ Export your comments from the Langfuse annotation job (you can query your commen
 
 For our docs chatbot, we used the following prompt on our exported annotations:
 
-```text
-You are given a list of open-ended annotations describing failures of an LLM-powered assistant that answers questions about Langfuse. Organize these into a small set of coherent failure categories, grouping similar mistakes together. For each category, provide a concise descriptive title and a one-line definition. Only cluster based on the issues in the annotations—do not invent new failure types.
-```
+> You are given a list of open-ended annotations describing failures of an LLM-powered assistant that answers questions about Langfuse. Organize these into a small set of coherent failure categories, grouping similar mistakes together. For each category, provide a concise descriptive title and a one-line definition. Only cluster based on the issues in the annotations—do not invent new failure types.
 
 This produced a clear taxonomy:
 
@@ -158,6 +160,6 @@ Here are the results after labeling our dataset:
 
 This error analysis produces a quantified, application-specific understanding of your primary issues. These insights provide a clear roadmap for targeted improvements, whether in your prompts, RAG pipeline, or model selection.
 
-The structured failure modes you defined also serve as the perfect foundation for building automated evaluators, which can scale this analysis across your entire application. However, before setting up automated evaluators, make sure to first fix the obvious issues you encountered during the error analysis.
+The structured failure modes you defined serve as the foundation for building automated evaluators, which can scale this analysis across your application. However, before setting up automated evaluators, ensure you first address the obvious issues encountered during the error analysis. You can typically go through multiple rounds of this process before reaching a plateau.
 
 In the next blog post, we will set up automated evaluators and use them to continuously improve our demo chatbot.
