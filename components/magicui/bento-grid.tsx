@@ -80,7 +80,7 @@ const BentoCard = ({
           asChild
         >
           <Link href={demoHref}>
-            See demo
+            Watch demo
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
