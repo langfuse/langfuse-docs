@@ -269,23 +269,29 @@ The decorator approach is recommended when you want to:
 <Tab title="OpenAI (JS/TS)">
 
 ```ts
+import "./instrumentation"; // Must be the first import
 import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
+import { startObservation } from "@langfuse/tracing";
 
-// Create a trace with custom ID
-const trace = langfuse.trace({
-  id: "custom-trace-id",
-  name: "openai-chat",
+// Create a trace with custom ID using parentSpanContext
+const trace = startObservation("openai-chat", {}, {
+  parentSpanContext: {
+    traceId: "custom-trace-id",
+    spanId: "0123456789abcdef", // Valid 16 hexchar string; value is irrelevant
+    traceFlags: 1, // mark trace as sampled
+  },
 });
 
-const openai = observeOpenAI(new OpenAI(), {
-  parent: trace, // Link OpenAI calls to the trace
-});
+const openai = observeOpenAI(new OpenAI());
 
 const completion = await openai.chat.completions.create({
   model: "gpt-3.5-turbo",
   messages: [{ role: "user", content: "Hello!" }],
 });
+
+// End the trace
+trace.end();
 ```
 
 </Tab>

@@ -164,11 +164,11 @@ with langfuse.start_as_current_span(name="analyze-document") as span: # Include 
 <Tab>
 
 ```typescript
-import { Langfuse, LangfuseMedia } from "langfuse";
+import { LangfuseClient, LangfuseMedia } from "@langfuse/client";
 import fs from "fs";
 
 // Initialize Langfuse client
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 // Wrap media in LangfuseMedia class
 const wrappedMedia = new LangfuseMedia({
@@ -322,10 +322,10 @@ resolved_trace = langfuse.resolve_media_references(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
 // Initialize Langfuse client
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 // Example object with media references
 const obj = {

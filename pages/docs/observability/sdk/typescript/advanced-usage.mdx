@@ -325,7 +325,7 @@ The TypeScript SDK can be used to report custom scores client-side directly from
 <Tab>
 
 ```ts
-import { LangfuseWeb } from "langfuse";
+import { LangfuseWeb } from "@langfuse/client";
 
 export function UserFeedbackComponent(props: { traceId: string }) {
   const langfuseWeb = new LangfuseWeb({
@@ -362,7 +362,7 @@ export function UserFeedbackComponent(props: { traceId: string }) {
 </template>
 
 <script>
-  import { LangfuseWeb } from "langfuse";
+  import { LangfuseWeb } from "@langfuse/client";
 
   export default {
     props: {
@@ -410,7 +410,7 @@ npm i langfuse # this is still the v3 installation as v4 does not yet support sc
 In your application, set the **public api key** to create a client.
 
 ```ts
-import { LangfuseWeb } from "langfuse";
+import { LangfuseWeb } from "@langfuse/client";
 
 const langfuseWeb = new LangfuseWeb({
   publicKey: "pk-lf-...",
