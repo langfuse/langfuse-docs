@@ -364,7 +364,7 @@ Please refer to the [integrations](/docs/integrations/overview) page for details
 
 When running an experiment on a dataset, the application that shall be tested is executed for each item in the dataset. The execution trace is then linked to the dataset item. This allows you to compare different runs of the same application on the same dataset. Each experiment is identified by a `run_name`.
 
-<LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (JS/TS)", "Vercel AI SDK", "Other frameworks"]}>
 <Tab>
 
 You may then execute that LLM-app for each dataset item to create a dataset run:
@@ -431,30 +431,6 @@ for (const item of dataset.items) {
 
 // Flush the langfuse client to ensure all score data is sent to the server at the end of the experiment run
 await langfuse.flush();
-```
-
-</Tab>
-<Tab>
-
-```python /for item in dataset.items:/
-from langfuse import get_client
-
-# Load the dataset
-dataset = get_client().get_dataset("<dataset_name>")
-
-# Loop over the dataset items
-for item in dataset.items:
-    # Langchain callback handler that automatically links the execution trace to the dataset item
-    handler = item.get_langchain_handler(run_name="<run_name>")
-
-    # Execute application and pass custom handler
-    my_langchain_chain.run(item.input, callbacks=[handler])
-
-    # Optionally: Add scores computed in your experiment runner, e.g. json equality check
-    langfuse.score(trace_id=handler.get_trace_id(), name="my_score", value=1)
-
-# Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-langfuse.flush()
 ```
 
 </Tab>
