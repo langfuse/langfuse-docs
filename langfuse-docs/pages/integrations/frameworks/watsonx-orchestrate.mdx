@@ -1,0 +1,80 @@
+# IBM watsonx Orchestrate
+
+Monitor agents and tools built with IBM watsonx Orchestrate ADK in Langfuse. Orchestrate has a native integration that forwards telemetry (traces, spans, logs) to Langfuse for rich observability.
+
+## Prerequisites
+
+- A Langfuse project with a Public Key and Secret Key
+- Langfuse Cloud (`https://cloud.langfuse.com`) or a self-hosted Langfuse instance
+- IBM watsonx Orchestrate ADK installed
+
+## Quick start (CLI)
+
+Configure Orchestrate to send telemetry to Langfuse. Replace placeholders with your values.
+
+```bash
+orchestrate settings observability langfuse configure \
+  --url "https://cloud.langfuse.com/api/public/otel" \
+  --api-key "sk-lf-0000-0000-0000-0000-0000" \
+  --health-uri "https://cloud.langfuse.com" \
+  --config-json '{"public_key": "pk-lf-0000-0000-0000-0000-0000"}'
+```
+
+Notes:
+- For self-hosted Langfuse, set `--url` to `https://<your-langfuse-host>/api/public/otel` and `--health-uri` to `https://<your-langfuse-host>`.
+- You can also provide `--project-id` (or `-p`) if not part of the config file.
+
+## Alternative: YAML config file
+
+Create a YAML file and reference it from the CLI. Example:
+
+```yaml
+spec_version: v1
+kind: langfuse
+project_id: default
+api_key: sk-lf-00000-00000-00000-00000-00000
+url: https://cloud.langfuse.com/api/public/otel
+host_health_uri: https://cloud.langfuse.com
+config_json:
+  public_key: pk-lf-00000-00000-00000-00000-00000
+  mask_pii: true
+```
+
+Apply it:
+
+```bash
+orchestrate settings observability langfuse configure --config-file=path_to_file.yml
+```
+
+## Enable telemetry in Orchestrate
+
+Start the Orchestrate server with telemetry enabled, then open the local console:
+
+```bash
+orchestrate start --with-ibm-telemetry
+# or shorthand
+orchestrate start -i
+
+# Open the console
+# https://localhost:8765
+```
+
+## Verify in Langfuse
+
+- Go to your project in Langfuse and open Traces to see agent runs and tool calls
+- Explore spans, inputs/outputs, metadata, tokens and costs
+- Learn more:
+  - [/docs/observability/get-started](/docs/observability/get-started)
+  - [/docs/observability/features/agent-graphs](/docs/observability/features/agent-graphs)
+  - [/docs/observability/features/token-and-cost-tracking](/docs/observability/features/token-and-cost-tracking)
+
+## Troubleshooting
+
+- Connection/health: Ensure `--health-uri` responds and the ingest URL points to `/api/public/otel`
+- Auth: Verify the `api_key` (Secret Key) and `public_key` (Public Key) belong to the same Langfuse project
+- Self-hosted: Confirm your Langfuse instance is reachable from Orchestrate and TLS is configured correctly
+
+## Reference
+
+- IBM documentation: [Monitoring your LLMs with Langfuse](https://developer.watson-orchestrate.ibm.com/llm/observability)
+
