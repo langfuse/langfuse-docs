@@ -2,7 +2,7 @@
 title: "Error Analysis to Evaluate LLM Applications"
 date: 2025/08/29
 description: A practical guide to identifying, categorizing, and analyzing failure modes in LLM applications using Langfuse.
-ogImage: public/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/error-analysis-og.png
+ogImage: /images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/error-analysis-og.png
 tag: guide
 author: jannikmaierhoefer
 ---
@@ -16,54 +16,57 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["jannikmaierhoefer"]}
 />
 
-To improve your LLM app, you must understand **how it fails**. Aggregate metrics won't tell you if your system retrieves the wrong documents or if the model's tone alienates users. Error analysis provides this important context.
+To improve your LLM app, you must understand **how it fails**. Aggregate metrics won't tell you if your system retrieves the wrong documents or if the model's tone alienates users. Error analysis provides this crucial context.
 
 This guide describes a four-step process to **identify, categorize, and quantify your application's unique failure modes**. The result is a specific evaluation framework that is far more useful than generic metrics:
 
-- Gather a diverse dataset of traces
-- Open code to surface failure patterns
-- Structure failure modes
-- Label and quantify
+1. [Gather a diverse dataset of traces](#gather-dataset)
+2. [Open code to surface failure patterns](#open-coding)
+3. [Structure failure modes](#structure-failure-modes)
+4. [Label and quantify](#label-and-quantify)
 
-I'll demonstrate this process based on a [demo chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The demo chat app logs traces into the Langfuse demo project and already answered 19k user queries in the past year. 
+I'll demonstrate this process using a [demo chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The demo chat app logs traces into the Langfuse demo project and has already answered 19k user queries in the past year.
 
-This is the chat interface (You can find the demo chat app [here](/docs/demo).):
-
-<Frame className="rounded-lg overflow-hidden">
-![Chat Interface](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
-</Frame>
-
-## 1. Gather a Diverse Dataset
-
-To start our error analysis, we assemble a representative dataset of 50-100 traces which are produced by the demo chat app. The quality of your analysis depends on the diversity of this initial data.
-
-**Existing Production Traces:** In case you already have real user traces as in our example, you create your dataset based on them. I recommend to first manually click through your traces, focus only on the user input and try to add a diverse set of traces to an annotation queue. 
-
-Then you can also query for traces with negative user feedback, long conversations, high latency, or specific user metadata. The goal is not a random sample, but a set that covers a wide range of user intents and potential edge cases.
-
-In Langfuse you can add those traces to an annotation queue by clicking on the "Add to Annotation Queue" button:
+Here's the chat interface (you can find the demo chat app [here](/docs/demo)):
 
 <Frame className="rounded-lg overflow-hidden">
-![Add to Annotation Queue](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/add-to-annotation-queue.png)
+  ![Chat
+  Interface](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
 </Frame>
 
-**Synthetic Dataset:** If you lack production data, generate a synthetic dataset covering anticipated user behaviors and potential failure points. We have a Python cookbook that shows you how to do this [here](/guides/cookbook/example_synthetic_datasets). Once created, add these traces to a Langfuse Annotation Queue. 
+## 1. Gather a Diverse Dataset [#gather-dataset]
+
+To start our error analysis, we assemble a representative dataset of 50-100 traces produced by the demo chat app. The quality of your analysis depends on the diversity of this initial data.
+
+**Existing Production Traces:** If you already have real user traces, as in our example, create your dataset based on them. I recommend first manually clicking through your traces, focusing only on the user input, and adding a diverse set of traces to an annotation queue.
+
+You can also query for traces with negative user feedback, long conversations, high latency, or specific user metadata. The goal is not a random sample, but a set that covers a wide range of user intents and potential edge cases.
+
+In Langfuse, you can add traces to an annotation queue by clicking the "Add to Annotation Queue" button:
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Add to Annotation
+  Queue](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/add-to-annotation-queue.png)
+</Frame>
+
+**Synthetic Dataset:** If you lack production data, generate a synthetic dataset covering anticipated user behaviors and potential failure points. We have a Python cookbook that shows how to do this [here](/guides/cookbook/example_synthetic_datasets). Once created, add these traces to a Langfuse Annotation Queue.
 
 The [Annotation Queue](/docs/evaluation/evaluation-methods/annotation#annotation-queues) we created will serve as your workspace for the analysis. For our demo chatbot, we selected 40 traces reflecting different user questions, from simple definitions to complex comparisons:
 
 <Frame className="rounded-lg overflow-hidden">
-![Annotation Queue](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/annotation-queue.png)
+  ![Annotation
+  Queue](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/annotation-queue.png)
 </Frame>
 
-## 2. Open Coding: Surface Failure Patterns
+## 2. Open Coding: Surface Failure Patterns [#open-coding]
 
-In the next step, we open our Annotation queue and carefully review every trace and the associated tool use. The objective is to apply raw, descriptive labels without forcing them into predefined categories.
+In the next step, we open our Annotation Queue and carefully review every trace and its associated tool use. The objective is to apply raw, descriptive labels without forcing them into predefined categories.
 
 For each trace, assign two annotations:
 
 - A binary score: Pass or Fail. This forces a clear judgment call.
 
-- A free-text comment: Describe the first point of failure you observe. This process is called [open coding](https://hamel.dev/blog/posts/evals-faq/#open-coding) as we are not forcing any categories on the data.
+- A free-text comment: Describe the first point of failure you observe. This process is called [open coding](https://hamel.dev/blog/posts/evals-faq/#open-coding), as we are not forcing any categories on the data.
 
 If you have traces with multiple errors, focusing on the first failure is efficient. A single upstream error, like incorrect document retrieval, often causes multiple downstream issues. Fixing the root cause resolves them all. Your comment should be a raw observation, not a premature diagnosis.
 
@@ -85,24 +88,33 @@ import {
 >
   <CarouselContent>
     <CarouselItem>
-      <Frame className="rounded-lg overflow-hidden">![Open Coding 1](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/open-coding-1.png)</Frame>
+      <Frame className="rounded-lg overflow-hidden">
+        ![Open Coding
+        1](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/open-coding-1.png)
+      </Frame>
     </CarouselItem>
     <CarouselItem>
-      <Frame className="rounded-lg overflow-hidden">![Open Coding 2](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/open-coding-2.png)</Frame>
+      <Frame className="rounded-lg overflow-hidden">
+        ![Open Coding
+        2](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/open-coding-2.png)
+      </Frame>
     </CarouselItem>
     <CarouselItem>
-      <Frame className="rounded-lg overflow-hidden">![Open Coding 3](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/open-coding-3.png)</Frame>
+      <Frame className="rounded-lg overflow-hidden">
+        ![Open Coding
+        3](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/open-coding-3.png)
+      </Frame>
     </CarouselItem>
   </CarouselContent>
   <CarouselPrevious />
   <CarouselNext />
 </Carousel>
 
-## 3. Structure Failure Modes
+## 3. Structure Failure Modes [#structure-failure-modes]
 
 After annotating all traces, the next step is to structure your free-text comments into a coherent taxonomy.
 
-Export your comments from the Langfuse annotation job (You can query your comments via the Langfuse API). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
+Export your comments from the Langfuse annotation job (you can query your comments via the Langfuse API). You can use an LLM to perform an initial clustering of these notes into related themes. Review and manually refine the LLM's output to ensure the categories are distinct, comprehensive, and accurately reflect your application's specific issues.
 
 For our docs chatbot, we used the following prompt on our exported annotations:
 
@@ -112,28 +124,28 @@ You are given a list of open-ended annotations describing failures of an LLM-pow
 
 This produced a clear taxonomy:
 
-| Failure Mode   | Definition  |
-|----------|-----------------|
-| Hallucinations / Incorrect Information | The assistant gives factually wrong answers or shows lack of knowledge about the domain.    |
-| Context Retrieval / RAG Issues      | Failures related to retrieving or using the right documents. |
-| Irrelevant or Off-Topic Responses   | The assistant produces content unrelated to the user’s question.         |
-| Generic or Unhelpful Responses      | Answers are too broad, vague, or do not directly address the user’s question.                       |
-| Formatting / Presentation Issues    | Problems with response delivery, such as missing code blocks or links. |
+| Failure Mode                           | Definition                                                                                      |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Hallucinations / Incorrect Information | The assistant gives factually wrong answers or shows lack of knowledge about the domain.        |
+| Context Retrieval / RAG Issues         | Failures related to retrieving or using the right documents.                                    |
+| Irrelevant or Off-Topic Responses      | The assistant produces content unrelated to the user’s question.                                |
+| Generic or Unhelpful Responses         | Answers are too broad, vague, or do not directly address the user’s question.                   |
+| Formatting / Presentation Issues       | Problems with response delivery, such as missing code blocks or links.                          |
 | Interaction Style / Missing Follow-ups | The assistant fails to ask clarifying questions or misses opportunities for guided interaction. |
 
+## 4. Label and Quantify [#label-and-quantify]
 
-## 4. Label and Quantify
+With our error labels in place, we can now annotate our dataset with these failure modes.
 
-With our error labels in place, we can now go ahead and annotate our dataset with these failure modes. 
+First, create a new Score configuration in Langfuse containing each failure mode as a boolean or categorical option. Then, re-annotate your dataset using this new, structured schema.
 
-First, create a new Score configuration in Langfuse containing each failure mode as a boolean or categorical option. Then, re-annotate your dataset using this new, structured schema. 
-
-This labeled dataset allows you to use Langfuse analytics to pivot and aggregate the data. You can now answer critical questions like, "What is our most frequent failure mode?" For our demo chatbot, analysis revealed that Context Retrieval Issues were the most common problem.
+This labeled dataset allows you to use Langfuse analytics to pivot and aggregate the data. You can now answer critical questions like, "What is our most frequent failure mode?" For our demo chatbot, the analysis revealed that Context Retrieval Issues were the most common problem.
 
 Here are the results after labeling our dataset:
 
 <Frame className="rounded-lg overflow-hidden">
-![Failure Modes](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/failure-modes.png)
+  ![Failure
+  Modes](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/failure-modes.png)
 </Frame>
 
 ## Common Pitfalls
@@ -146,9 +158,6 @@ Here are the results after labeling our dataset:
 
 This error analysis produces a quantified, application-specific understanding of your primary issues. These insights provide a clear roadmap for targeted improvements, whether in your prompts, RAG pipeline, or model selection.
 
-The structured failure modes you defined also serve as the perfect foundation for building automated evaluators, which can scale this analysis across your entire application. However, before we set up automated evaluators, we make sure to first fix the obvious issues we encountered during the error analysis.
+The structured failure modes you defined also serve as the perfect foundation for building automated evaluators, which can scale this analysis across your entire application. However, before setting up automated evaluators, make sure to first fix the obvious issues you encountered during the error analysis.
 
 In the next blog post, we will set up automated evaluators and use them to continuously improve our demo chatbot.
-
-
-
