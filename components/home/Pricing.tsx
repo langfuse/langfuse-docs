@@ -488,7 +488,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited annotation queues",
         "High rate limits",
         "SOC2 & ISO27001 reports, BAA available (HIPAA)",
-        "Support via Slack, Chat",
+        "Support via dedicated Slack Channel, Chat",
       ],
       addOn: {
         name: "Teams",
@@ -568,10 +568,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Billing via Invoice",
       ],
       cta: "Talk to sales",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
       learnMore: "/enterprise",
     },
   ],
