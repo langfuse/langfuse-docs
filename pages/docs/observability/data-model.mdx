@@ -10,18 +10,15 @@ Tracing in Langfuse is a way to log and analyze the execution of your LLM applic
 ## Traces and Observations
 
 ### Traces
+
 A `trace` typically represents a single request or operation.
 It contains the overall input and output of the function, as well as metadata about the request ( i.e. user, session, tags, etc.).
 
 import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 
 ### Observations
+
 Each trace can contain multiple `observations` to log the individual steps of the execution. Usually, a trace corresponds to a single api call of an application.
-
-#### Types
-
-<ObservationTypesList />
-
 
 #### Nesting
 
@@ -60,6 +57,12 @@ Example trace in Langfuse UI
 </div>
 
 </div>
+
+#### Types
+
+Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types):
+
+<ObservationTypesList />
 
 ## Sessions
 
