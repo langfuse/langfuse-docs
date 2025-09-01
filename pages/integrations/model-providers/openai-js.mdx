@@ -17,7 +17,7 @@ The Langfuse JS/TS SDK offers a wrapper function around the OpenAI SDK, enabling
 
 ```ts {2, 4}
 import OpenAI from "openai";
-import { observeOpenAI } from "npm:@langfuse/openai";
+import { observeOpenAI } from "@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
@@ -189,8 +189,8 @@ When working with chat prompts, you must typecast the compiled prompt messages a
 OpenAI returns the token usage on streamed responses only when in `stream_options` the `include_usage` parameter is set to `true`. If you would like to benefit from OpenAI's directly provided token usage, you can set `{ include_usage: true }` in the `stream_options` argument.
 
 ```typescript /{"include_usage": True}/
-import OpenAI from "npm:openai";
-import { observeOpenAI } from "npm:@langfuse/openai";
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
