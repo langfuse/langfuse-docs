@@ -415,16 +415,22 @@ langfuse.create_score(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
-
-const langfuse = new Langfuse();
-
-await langfuse.score({
-  traceId: predefinedRunId,
-  name: "user-feedback",
-  value: 1,
-  comment: "This was correct, thank you",
+import { LangfuseClient } from "@langfuse/client";
+ 
+const langfuse = new LangfuseClient()
+ 
+langfuse.score.create({
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "correctness",
+  value: 0.9,
+  dataType: "NUMERIC", // optional, inferred if not provided
+  comment: "Factually correct", // optional
 });
+ 
+// Flush the scores in short-lived environments
+await langfuse.flush();
 ```
 
 </Tab>
