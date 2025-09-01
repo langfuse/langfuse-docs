@@ -164,28 +164,30 @@ with langfuse.start_as_current_span(name="analyze-document") as span: # Include 
 <Tab>
 
 ```typescript
-import { Langfuse, LangfuseMedia } from "langfuse";
 import fs from "fs";
-
-// Initialize Langfuse client
-const langfuse = new Langfuse();
-
+import { LangfuseMedia } from "@langfuse/core";
+ 
 // Wrap media in LangfuseMedia class
 const wrappedMedia = new LangfuseMedia({
-  contentBytes: fs.readFileSync("./static/bitcoin.pdf"),
+  source: "bytes",
+  contentBytes: fs.readFileSync(new URL("./bitcoin.pdf", import.meta.url)),
   contentType: "application/pdf",
 });
-
+ 
 // Optionally, access media via wrappedMedia.obj
 console.log(wrappedMedia.obj);
-
+ 
 // Include media in any trace or observation
-const trace = langfuse.trace({
-  name: "test-trace-10",
-  metadata: {
-    context: wrappedMedia,
-  },
-});
+const span3 = startObservation("media-pdf-generation");
+
+const generation3 = span3.startObservation('llm-call', {
+  model: 'gpt-4',
+  input: wrappedMedia,
+}, {asType: "generation"});
+
+generation3.end();
+
+span3.end();
 ```
 
 </Tab>
