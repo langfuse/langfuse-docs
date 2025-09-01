@@ -17,7 +17,7 @@ The Langfuse JS/TS SDK offers a wrapper function around the OpenAI SDK, enabling
 
 ```ts {2, 4}
 import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "npm:@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
@@ -50,64 +50,48 @@ _In the Langfuse Console_
 The integration is compatible with OpenAI SDK versions `>=4.0.0`.
 
 ```sh
-npm install langfuse openai
+npm install @langfuse/openai openai
+```
+
+### Register your credentials
+
+Add your Langfuse credentials to your environment variables. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
+
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+<EnvJS />
+
+### Initialize OpenTelemetry
+
+The Langfuse TypeScript SDK’s tracing is built on top of OpenTelemetry, so you need to set up the OpenTelemetry SDK. The `LangfuseSpanProcessor` is the key component that sends traces to Langfuse.
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+ 
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+ 
+sdk.start();
 ```
 
 ### Call OpenAI methods with the wrapped client
 
-Langfuse wraps the OpenAI SDK and provides the functionality and method signatures. You can call them as usual.
+With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
 
-The `observeOpenAI` function automatically instantiates a Langfuse client in the background. You can either configure the client with environment variables or pass the configuration directly to the `observeOpenAI` function.
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
 
-import EnvJS from "@/components-mdx/env-js.mdx";
+const openai = observeOpenAI(new OpenAI());
 
-<Tabs items={["Environment variables", "Directly passed variables"]}>
-  <Tab>
-    Add your Langfuse credentials to your environment variables. You can find your credentials in your project settings in the Langfuse UI. Make sure that you have a `.env` file in your project root and a package like `dotenv` to load the variables.
-
-    <EnvJS />
-
-    With your environment configured, call OpenAI SDK methods as usual from the wrapped client.
-
-    ```ts
-    import OpenAI from "openai";
-    import { observeOpenAI } from "langfuse";
-
-    const openai = observeOpenAI(new OpenAI());
-
-    const res = await openai.chat.completions.create({
-      messages: [{ role: "system", content: "Tell me a story about a dog." }],
-      model: "gpt-4o",
-      max_tokens: 300,
-    });
-    ```
-
-  </Tab>
-  <Tab>
-    Pass your Langfuse credentials directly as `clientInitParams` to the `observeOpenAI` function. You can find your credentials in your project settings in the Langfuse UI.
-
-    ```ts
-    import OpenAI from "openai";
-    import { observeOpenAI } from "langfuse";
-
-    const res = await observeOpenAI(new OpenAI(), {
-      clientInitParams: {
-        publicKey: "pk-lf-...",
-        secretKey: "sk-lf-...",
-        baseUrl: "https://cloud.langfuse.com",
-      },
-    }).chat.completions.create({
-      messages: [{ role: "system", content: "Tell me a story about a dog." }],
-      model: "gpt-3.5-turbo",
-      max_tokens: 300,
-    });
-    ```
-
-  <Callout type="info">
-    The Langfuse client is a singleton to efficiently batch events to the Langfuse API. Initialization params are only used for the first time an openAI client is wrapped. Subsequently wrapped OpenAI clients will use the same Langfuse client.
-  </Callout>
-  </Tab>
-</Tabs>
+const res = await openai.chat.completions.create({
+  messages: [{ role: "system", content: "Tell me a story about a dog." }],
+  model: "gpt-4o",
+  max_tokens: 300,
+});
+```
 
 Done!✨ You now have full observability of your OpenAI calls in Langfuse.
 
@@ -134,10 +118,10 @@ The Langfuse SDKs queue and batches events in the background to reduce the numbe
 If you are running a short-lived application, you need to flush Langfuse to ensure that all events are flushed before the application exits.
 
 ```ts
-await openai.flushAsync(); // method added by Langfuse wrapper
+await langfuseSpanProcessor.forceFlush();
 
-// If you have previously passed a parent span or trace for nesting, use that client for the flush call
-await langfuse.flushAsync();
+// If you have previously initialized a Langfuse client, you can use that for the flush call
+await langfuse.flush();
 ```
 
 Learn more about queuing and batching of events [here](/docs/tracing).
@@ -159,8 +143,6 @@ You can add the following properties to the `langfuseConfig` of the `observeOpen
 | `metadata`       | Set `metadata` with additional information that you want to see in Langfuse. |
 | `sessionId`      | The current [session](/docs/tracing-features/sessions).                      |
 | `userId`         | The current [user_id](/docs/tracing-features/users).                         |
-| `version`        | Track different versions in Langfuse analytics                               |
-| `release`        | Track different releases in Langfuse analytics                               |
 | `tags`           | Set [tags](/docs/tracing-features/tags) to categorize and filter traces.     |
 
 Example:
@@ -172,8 +154,6 @@ const res = await observeOpenAI(new OpenAI(), {
   sessionId: "session-id",
   userId: "user-id",
   tags: ["tag1", "tag2"],
-  version: "0.0.1",
-  release: "beta",
 }).chat.completions.create({
   messages: [{ role: "system", content: "Tell me a story about a dog." }],
   model: "gpt-3.5-turbo",
@@ -194,11 +174,11 @@ const res = await observeOpenAI(new OpenAI(), {
 With [Langfuse Prompt management](/docs/prompts/get-started) you can effectively manage and version your prompts. You can link your OpenAI generations to a prompt by passing the `langfusePrompt` property to the `observeOpenAI` function.
 
 ```ts
-import { observeOpenAI } from "langfuse";
+import { observeOpenAI } from "@langfuse/openai";
 import OpenAI from "openai";
-
-const langfusePrompt = await langfuse.getPrompt("prompt-name"); // Fetch a previously created prompt
-
+ 
+const langfusePrompt = await langfuse.prompt.get("my-prompt"); // Fetch a previously created prompt
+ 
 const res = await observeOpenAI(new OpenAI(), {
   langfusePrompt,
 }).completions.create({
@@ -217,8 +197,8 @@ When working with chat prompts, you must typecast the compiled prompt messages a
 OpenAI returns the token usage on streamed responses only when in `stream_options` the `include_usage` parameter is set to `true`. If you would like to benefit from OpenAI's directly provided token usage, you can set `{ include_usage: true }` in the `stream_options` argument.
 
 ```typescript /{"include_usage": True}/
-import OpenAI from "openai";
-import { observeOpenAI } from "langfuse";
+import OpenAI from "npm:openai";
+import { observeOpenAI } from "npm:@langfuse/openai";
 
 const openai = observeOpenAI(new OpenAI());
 
@@ -235,93 +215,6 @@ for await (const chunk of stream) {
   // Check if chunk choices are not empty. OpenAI returns token usage in a final chunk with an empty choices list.
   result += chunk.choices[0]?.delta?.content || "";
 }
-
-await openai.flushAsync();
-```
-
-### Nested traces
-
-[Langfuse Tracing](/docs/tracing) groups multiple observations (can be any LLM or non-LLM calls) into a single trace. This integration by default creates a single trace for each OpenAI call.
-
-By passing an existing trace or span to the `observeOpenAI` function as the `parent`, you can:
-
-- add non-OpenAI related observations to the trace.
-- group multiple OpenAI calls into a single trace while customizing the trace.
-- exert more control over the trace structure.
-- leverage all Langfuse Tracing features.
-
-<Callout type="info">
-  New to Langfuse Tracing? Checkout this [introduction](/docs/tracing) to the
-  basic concepts.
-</Callout>
-
-Use the [Langfuse JS/TS SDK](/docs/sdk/typescript/guide) to create traces or spans manually and add OpenAI calls to it.
-
-#### Example
-
-**Desired trace structure**
-
-```
-TRACE: capital-poem-generator
-|
-|-- SPAN: France
-|   |
-|   |-- GENERATION: get-capital
-|   |
-|   |-- GENERATION: generate-poem
-```
-
-**Implementation**
-
-```ts {12, 17, 30}
-import Langfuse, { observeOpenAI } from "langfuse";
-
-// Initialize SDKs
-const langfuse = new Langfuse();
-const openai = new OpenAI();
-
-// Create trace and add params
-const trace = langfuse.trace({ name: "capital-poem-generator" });
-
-// Create span
-const country = "France";
-const span = trace.span({ name: country });
-
-// Call OpenAI
-const capital = (
-  await observeOpenAI(openai, {
-    parent: span,
-    generationName: "get-capital",
-  }).chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-      { role: "system", content: "What is the capital of the country?" },
-      { role: "user", content: country },
-    ],
-  })
-).choices[0].message.content;
-
-const poem = (
-  await observeOpenAI(openai, {
-    parent: span,
-    generationName: "generate-poem",
-  }).chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-      {
-        role: "system",
-        content: "You are a poet. Create a poem about this city.",
-      },
-      { role: "user", content: capital },
-    ],
-  })
-).choices[0].message.content;
-
-// End span to get span-level latencies
-span.end();
-
-// Flush the Langfuse client belonging to the parent span
-await langfuse.flushAsync();
 ```
 
 ## FAQ

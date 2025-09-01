@@ -117,54 +117,45 @@ See the Public API for the exact parameters per resource.
 
 <Callout type="info">
 
-The dedicated `fetch*` methods for core entities are covered by tests and semantic versioning. The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities.
+The methods on the `langfuse.api` are auto-generated from the API reference and cover all entities. You can explore more entities via Intellisense
 
 </Callout>
 
 ```bash
-npm install langfuse
+npm install @langfuse/client
 ```
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse({
-  secretKey: "sk-lf-...",
-  publicKey: "pk-lf-...",
-  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
-  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
-});
+import { LangfuseClient } from "@langfuse/client";
+ 
+const langfuse = new LangfuseClient();
 
-
-
-// Dedicated fetch* methods for core entities
 
 // Fetch list of traces, supports filters and pagination
-const traces = await langfuse.fetchTraces();
+const traces = await langfuse.api.trace.list();
 
 // Fetch a single trace by ID
-const trace = await langfuse.fetchTrace("traceId");
+const trace = await langfuse.api.trace.get("traceId");
 
 // Fetch list of observations, supports filters and pagination
-const observations = await langfuse.fetchObservations();
+const observations = await langfuse.api.observations.getMany();
 
 // Fetch a single observation by ID
-const observation = await langfuse.fetchObservation("observationId");
+const observation = await langfuse.api.observations.get("observationId");
 
 // Fetch list of sessions
-const sessions = await langfuse.fetchSessions();
+const sessions = await langfuse.api.sessions.list();
 
-
-
-// Methods on langfuse.api namespace for other entities (generated from the API reference)
+// Fetch a single session by ID
+const session = await langfuse.api.sessions.get("sessionId");
 
 // Fetch list of scores
-const scores = await langfuse.api.scoreGet();
+const scores = await await langfuse.api.scoreV2.get();
 
 // Fetch a single score by ID
-const score = await langfuse.api.scoreGetById("scoreId");
+const score = await langfuse.api.scoreV2.getById("scoreId");
 
 // Explore more entities via Intellisense
-langfuse.api.*
 ```
 
 JS/TS SDK reference including all available filters:
