@@ -17,6 +17,8 @@ import telusLight from "../home/img/telus_light.png";
 import telusDark from "../home/img/telus_dark.png";
 import magicPatternsLight from "../home/img/magicpatterns_light.png";
 import magicPatternsDark from "../home/img/magicpatterns_dark.png";
+import merckLight from "../home/img/merck-dark.png";
+import merckDark from "../home/img/merck-light.png";
 
 type User = {
   name: string;
@@ -61,11 +63,18 @@ const users: User[] = [
     href: "https://magicpatterns.com",
     customerStoryPath: "/customers/magic-patterns-ai-design-tools",
   },
+  // {
+  //   name: "Springer Nature",
+  //   lightImage: springernatureLight,
+  //   darkImage: springernatureDark,
+  //   href: "https://www.springernature.com",
+  // },
   {
-    name: "Springer Nature",
-    lightImage: springernatureLight,
-    darkImage: springernatureDark,
-    href: "https://www.springernature.com",
+    name: "Merck",
+    lightImage: merckLight,
+    darkImage: merckDark,
+    href: "https://www.merckgroup.com",
+    customerStoryPath: "/customers/merckgroup",
   },
   {
     name: "Telus",
