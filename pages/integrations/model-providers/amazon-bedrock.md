@@ -236,5 +236,4 @@ You can define custom price information via the Langfuse dashboard or UI ([see d
 ## Additional Resources
 
 - [langfuse-genaiops Notebook](https://github.com/aws-samples/genai-ml-platform-examples/blob/main/integration/langfuse/langfuse-genaiops.ipynb) maintained by the AWS team including a collection of AWS-specific examples.
-- Metadocs, [Monitoring your Langchain app's cost using Bedrock with Langfuse](https://www.metadocs.co/2024/07/03/monitor-your-langchain-app-cost-using-bedrock-with-langfuse/), featuring Langchain integration and custom model price definitions for Bedrock models.
 - [Self-hosting guide](https://langfuse.com/self-hosting) to deploy Langfuse on AWS.
