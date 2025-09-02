@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Marquee from "@/components/magicui/marquee";
+import Link from "next/link";
 
 import Image, { type StaticImageData } from "next/image";
 import pigmentLight from "./img/pigment_light.svg";
@@ -25,6 +26,7 @@ type User = {
   lightImage: StaticImageData;
   darkImage: StaticImageData;
   href: string;
+  caseStudyHref?: string;
   className?: string;
 };
 
@@ -53,6 +55,7 @@ const users: User[] = [
     lightImage: khanacademyLight,
     darkImage: khanacademyDark,
     href: "https://www.khanacademy.org",
+    caseStudyHref: "/customers/khan-academy",
     className: "w-30 sm:w-44",
   },
   {
@@ -79,20 +82,13 @@ const users: User[] = [
     lightImage: sumupLight,
     darkImage: sumupDark,
     href: "https://sumup.com",
+    caseStudyHref: "/customers/sumup",
   },
 ];
 
 const UserLogo = ({ user }: { user: User }) => {
-  return (
-    <a
-      href={user.href}
-      className={cn(
-        "relative h-12 sm:h-16 w-20 sm:w-36 cursor-pointer",
-        user.className
-      )}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+  const content = (
+    <>
       <Image
         src={user.lightImage}
         alt={user.name}
@@ -107,6 +103,35 @@ const UserLogo = ({ user }: { user: User }) => {
         sizes="(min-width: 768px) 20vw, 40vw"
         fill={true}
       />
+      {user.caseStudyHref && (
+        <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          Case Study
+        </div>
+      )}
+    </>
+  );
+
+  const className = cn(
+    "relative h-12 sm:h-16 w-20 sm:w-36 cursor-pointer group",
+    user.className
+  );
+
+  if (user.caseStudyHref) {
+    return (
+      <Link href={user.caseStudyHref} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <a
+      href={user.href}
+      className={className}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {content}
     </a>
   );
 };
