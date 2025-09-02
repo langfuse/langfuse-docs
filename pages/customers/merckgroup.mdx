@@ -1,0 +1,114 @@
+---
+title: "How Merck is serving 80+ AI project teams globally on Langfuse"
+date: September 2, 2025
+description: Learn how Merck uses Langfuse to turn black-box models into auditable, optimizable assets for 80+ project teams globally
+ogImage: 
+tag: customer-story
+author: Felix
+customerLogo: "/images/customers/merck/merck-light.png"
+customerLogoDark: "/images/customers/merck/merck-dark.png"
+customerQuote: "Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets."
+quoteAuthor: "Walid Mehanna"
+quoteRole: "Chief Data & AI Officer"
+quoteCompany: "Merck"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+
+<BlogHeader
+  title="How Merck is serving 80+ AI project teams globally on Langfuse"
+  description="Learn how Merck uses Langfuse to turn black-box models into auditable, optimizable assets for 80+ project teams globally"
+  customerLogo="/images/customers/merck/merck-light.png"
+  authors={["felixkrauth"]}
+/>
+
+Big shout out to the team at Merck! Without them, this story would not have been possible: Harsha Gurulingappa (Global Head of AI & Machine Learning Practice), Shikhar Bhardwaj (Product Owner for AI-ML Services), Shashi Kumar (Senior AI-ML Architect), and Geoffrey Dominic Lobo (AI-ML Engineer).
+
+## About Merck
+Merck Group, founded in 1668 and headquartered in Darmstadt, Germany, is the world's oldest chemical and pharmaceutical company, operating in over 60 countries with around 66,000 employees. With three core business sectors—Healthcare, Life Science, and Electronics—Merck delivers prescription medicines, biopharmaceutical innovations, laboratory solutions, and advanced materials for high-tech industries.
+
+## Deploying Langfuse Globally
+At Merck, the AI & Machine Learning Team, led by Harsha Gurulingappa, serves and orchestrates platforms and tools centrally to all three business sectors and all functions such as R&D, manufacturing, commercial, safety, etc. Whenever any Merck team globally is building an AI application and they need [LLM Observability](/docs/observability/overview), they get access to Langfuse and build there.
+
+To globally provision all different platforms and tools, Merck has built their own "use case portal" where builders across the organization document what they are building and also request access to platforms like Langfuse.
+
+When approved, automated pipelines automatically provision all tools and spin up compute resources suitable for the project. This is powered by [Langfuse's API-first philosophy](/docs/api-and-data-platform/overview), even with regards to user management and API-key orchestration.
+
+There are currently over 300 use cases across different maturity levels (POC, Development, or Production) powered by GenAI. Approximately **80 run on Langfuse** which translates to over **200 people at Merck building on and working with Langfuse regularly.**
+
+<CustomerQuote
+  quote="Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets."
+  name="Walid Mehanna"
+  role="Chief Data & AI Officer"
+  company="Merck"
+  image="/images/customers/merck/walid.jpeg"
+/>
+
+## Example Projects
+Here are the platform team's favorite use cases and implementations within Merck:
+
+- **Electronics Lab Assistant:** A chatbot agent providing seamless and secure access to R&D knowledge at Merck Electronics. Connected to 80k+ diverse documents and experimental data on SharePoints and Electronic Lab Notebooks, R&D scientists can leverage internal historical experience to efficiently design future materials and plan new experiments. A test-driven development approach and direct incorporation of feedback enable user-centric and robust productive use at scale.
+- **Generative Medical Insights:** A multi-agent, web application that serves as an AI co-creator to help the Medical Information team draft and update Response Documents (RD) for unsolicited questions from healthcare professionals (HCPs) around Merck products. By accelerating content creation and updates, it reduces turnaround time, streamlines Medical Information workflows, and improves communication efficiency with HCPs.
+- **myGPT Suite:** Merck's internal enterprise AI assistant that serves 27,000 regular users across the organization. It provides centralized AI capabilities to support various business functions and workflows across Merck's global operations.
+
+## RAG applications lead the pack
+- With so many teams building AI use cases, the Platform team gets a good impression of what works and what patterns are emerging
+- **By far, the majority of use cases are [1] RAG applications**, typically merging different data sources
+- Those are followed by **[2] specialized coding assistants**, **[3] SQL analytics tools**, and **[4] Translation & Content improvement tools**
+
+## How Merck chose Langfuse for global LLM Observability
+Choosing an Observability provider for a global enterprise like Merck required a very structured, multi-step process of evaluating all solutions in the market.
+
+Langfuse made the cut for several reasons:
+
+- **Flexibility to power 100s of use cases on a single platform** to avoid platform redundancies and technical silos
+- **Integration depth:** Merck's observability platform needed to be reachable from any type of application and development platform ([see integrations](/docs/integrations/overview))
+- **Programmatic orchestration and administration capabilities:** Automating administration and provisioning to potentially 100s of teams building on Langfuse requires deep programmatic access
+- **Clear and exhaustive documentation:** Having up-to-date documentation for all features, edge cases, & code examples was non-negotiable
+- **Balance between developer experience and business user friendliness:** Depending on the role and experience, users can dig deeper. Langfuse serves the needs of developers as well as unit managers.
+- **Self-Hosting & Security:** Langfuse enables Merck to keep sensitive pharmaceutical data within their own infrastructure, meeting strict enterprise and pharma industry security standards and data sovereignty requirements.
+- **Public roadmap and shipping velocity:** Harsha Gurulingappa and the team were especially excited about how Langfuse manages a public Roadmap and especially how fast changes actually go live
+
+## Moving on to enterprise-wide evaluation Datasets
+
+Within Merck, AI adoption is trending upward steeply, with more and more use cases being deployed to production every month. "We don't see any saturation happening anytime soon," says Harsha Gurulingappa.
+
+Now that Observability is widely adopted globally, the team will move into more elaborate enterprise-wide systems for [LLM Evaluation](/docs/evaluation/overview), also powered by Langfuse. The idea is to create a Merck benchmark dataset. Each AI use case in production can create vetted data points of expected vs. actual outcomes to be added to [Datasets](/docs/evaluation/features/datasets) in Langfuse.
+
+<CustomerQuote
+  quote="Langfuse lets our teams compare models side-by-side, define evaluation criteria, surface hallucinations before they hit production, and attach quality & cost metrics to every outcome – all without exposing sensitive data to third-party clouds."
+  name="Walid Mehanna"
+  role="Chief Data & AI Officer"
+  company="Merck"
+  image="/images/customers/merck/walid.jpeg"
+/>
+
+## Business Impact
+
+<ImpactChart
+  items={[
+    {
+      area: "Iteration Velocity",
+      impact: "Langfuse's real-time tracing and debugging capabilities enable developers to quickly identify and fix issues, reducing development cycles from weeks to days.",
+    },
+    {
+      area: "Compliance evidence",
+      impact: "Langfuse provides comprehensive audit trails and documentation of every AI interaction, ensuring Merck meets regulatory requirements and maintains transparency for AI governance.",
+    },
+    {
+      area: "Lower total cost of ownership",
+      impact:
+        "By centralizing observability on a single platform and eliminating redundant tools, Langfuse reduces infrastructure costs and operational overhead across Merck's 300+ AI use cases.",
+    }
+  ]}
+/>
+
+
+
+
+
+
+
