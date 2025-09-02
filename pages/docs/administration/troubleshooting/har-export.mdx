@@ -1,0 +1,218 @@
+---
+title: HAR File Export Guide
+description: Step-by-step guide to export HAR files for troubleshooting SSO and authentication issues
+---
+
+# HAR File Export Guide
+
+When troubleshooting SSO (Single Sign-On) or authentication issues, support teams often need detailed information about network requests and responses. A HAR (HTTP Archive) file captures this information, providing valuable insights into what happens during the authentication process.
+
+## What is a HAR File?
+
+A HAR file is a JSON-formatted archive that logs all HTTP requests made by your browser during a specific timeframe. It includes:
+
+- Request and response headers
+- Cookies and session data
+- Timing information
+- Response content
+- Error details
+
+This information helps identify issues like failed API calls, incorrect redirects, missing headers, or network timeouts.
+
+## When to Generate a HAR File
+
+Generate a HAR file when experiencing:
+
+- SSO login failures or redirects not working
+- Authentication tokens not being properly exchanged
+- Unexpected errors during the login process
+- Slow or hanging authentication requests
+- Cookie or session-related issues
+
+## Browser-Specific Instructions
+
+### Google Chrome
+
+1. **Open Developer Tools**
+   - Navigate to the Langfuse page where you're experiencing issues
+   - Press `F12` or `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Option+I` (Mac)
+   - Or right-click on the page and select "Inspect"
+
+2. **Access the Network Tab**
+   - Click on the "Network" tab in the Developer Tools panel
+   - If you don't see the Network tab, click the `>>` button to expand more tabs
+
+3. **Configure Recording Settings**
+   - Ensure the red record button (🔴) is active (it should be red)
+   - Check the "Preserve log" checkbox to keep logs during page navigation
+   - Optionally, check "Disable cache" to ensure fresh requests
+
+4. **Clear Existing Logs** (recommended)
+   - Click the clear button (🚫) to remove any existing network logs
+
+5. **Reproduce the Issue**
+   - Refresh the page or navigate to trigger the SSO process
+   - Perform the exact steps that lead to the authentication issue
+   - Wait for all network requests to complete
+
+6. **Export the HAR File**
+   - Right-click anywhere in the network log area
+   - Select "Save all as HAR with content"
+   - Choose a location and filename to save the HAR file
+
+> **Note**: In Chrome 130+, HAR exports exclude sensitive data by default. To include sensitive data when requested by support:
+> - Click the gear icon (⚙️) in Developer Tools
+> - Go to "Preferences" → "Network"
+> - Check "Allow to generate HAR with sensitive data"
+> - When exporting, long-press the download button and select "Export HAR (with sensitive data)"
+
+### Mozilla Firefox
+
+1. **Open Developer Tools**
+   - Navigate to the problematic page
+   - Press `F12` or `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Option+I` (Mac)
+   - Or go to Menu → "More Tools" → "Web Developer Tools"
+
+2. **Access the Network Tab**
+   - Click on the "Network" tab in the Developer Tools
+
+3. **Configure Settings**
+   - Ensure the "Persist Logs" option is checked
+   - Clear existing logs by clicking the trash can icon
+
+4. **Reproduce the Issue**
+   - Refresh the page and perform the steps that cause the problem
+   - Wait for all requests to finish loading
+
+5. **Export the HAR File**
+   - Right-click anywhere in the network requests list
+   - Select "Save All As HAR"
+   - Choose a location and save the file
+
+### Microsoft Edge
+
+1. **Open Developer Tools**
+   - Navigate to the page with issues
+   - Press `F12` or `Ctrl+Shift+I`
+   - Or click the three-dot menu → "More tools" → "Developer tools"
+
+2. **Access the Network Tab**
+   - Click on the "Network" tab
+
+3. **Configure Recording**
+   - Ensure recording is active (red dot should be visible)
+   - Check "Preserve log" to maintain logs across navigations
+
+4. **Reproduce the Issue**
+   - Clear existing logs and refresh the page
+   - Perform the authentication steps that cause issues
+
+5. **Export the HAR File**
+   - Click the download icon (⬇️) in the Network tab
+   - Or right-click in the network log and select "Save as HAR with Content"
+   - Save the file to your desired location
+
+### Safari
+
+1. **Enable Developer Menu** (if not already enabled)
+   - Go to Safari → "Preferences" → "Advanced"
+   - Check "Show Develop menu in menu bar"
+
+2. **Open Web Inspector**
+   - Navigate to the problematic page
+   - Go to "Develop" → "Show Web Inspector"
+   - Or press `Cmd+Option+I`
+
+3. **Access the Network Tab**
+   - Click on the "Network" tab in the Web Inspector
+
+4. **Configure Settings**
+   - Ensure "Preserve Log" is enabled
+
+5. **Reproduce the Issue**
+   - Clear the network log and refresh the page
+   - Perform the steps that trigger the authentication problem
+
+6. **Export the HAR File**
+   - Click the export icon (📤) in the Network tab
+   - Choose "Export HAR" from the dropdown
+   - Save the file to your computer
+
+## Security and Privacy Considerations
+
+⚠️ **Important**: HAR files contain sensitive information including:
+
+- Authentication tokens and session cookies
+- API keys and passwords (if transmitted)
+- Personal data in request/response bodies
+- Internal URLs and system information
+
+### Before Sharing a HAR File:
+
+1. **Review the Contents**
+   - Open the HAR file in a text editor to check for sensitive data
+   - Look for authentication tokens, passwords, or personal information
+
+2. **Redact Sensitive Information**
+   - Remove or replace sensitive values with placeholders like `[REDACTED]`
+   - Pay special attention to Authorization headers and cookie values
+
+3. **Use Secure Channels**
+   - Only share HAR files through secure, encrypted channels
+   - Consider using password-protected archives for additional security
+
+4. **Delete After Use**
+   - Remove the HAR file from your computer once the issue is resolved
+   - Ask the recipient to delete their copy as well
+
+## What to Include When Submitting
+
+When sending a HAR file to support, also include:
+
+- **Detailed Description**: Explain what you were trying to do when the error occurred
+- **Expected vs. Actual Behavior**: What should have happened vs. what actually happened  
+- **Browser Information**: Browser type and version
+- **Timestamp**: When the issue occurred
+- **User Account**: Which user account experienced the issue (if applicable)
+- **Environment**: Which Langfuse environment (production, staging, etc.)
+
+## Troubleshooting HAR Export Issues
+
+### No Network Requests Visible
+
+- Ensure the record button is active before reproducing the issue
+- Check that you're on the correct tab when the requests are made
+- Try refreshing the page with Developer Tools open
+
+### HAR File Too Large
+
+- Clear browser cache and cookies before recording
+- Focus on reproducing just the specific issue
+- Use shorter time windows for recording
+
+### Missing Authentication Requests
+
+- Ensure "Preserve log" is enabled before starting the authentication flow
+- Don't close or refresh Developer Tools during the process
+- Start recording before clicking any login buttons
+
+## Alternative Tools
+
+If browser Developer Tools aren't suitable, consider these alternatives:
+
+- **Fiddler**: Comprehensive HTTP debugging proxy
+- **Charles Proxy**: HTTP proxy for monitoring network traffic
+- **Postman**: For testing API endpoints directly
+- **curl**: Command-line tool for making HTTP requests
+
+These tools can provide similar network debugging capabilities and may be more suitable for certain scenarios.
+
+## Next Steps
+
+After generating and reviewing your HAR file:
+
+1. Follow the security guidelines above to protect sensitive information
+2. Include the HAR file with your support request along with the additional context mentioned
+3. Be prepared to provide additional information if requested by the support team
+
+For immediate assistance with HAR file analysis or other authentication issues, contact our support team through your preferred channel.

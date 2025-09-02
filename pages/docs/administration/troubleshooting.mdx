@@ -1,0 +1,138 @@
+---
+title: Troubleshooting
+description: Common troubleshooting steps and solutions for Langfuse administration issues
+---
+
+# Troubleshooting
+
+This section provides solutions to common issues you may encounter while administering Langfuse, including authentication, SSO setup, user management, and other administrative tasks.
+
+## Authentication & SSO Issues
+
+### SSO Login Failures
+
+If users are experiencing issues with Single Sign-On (SSO) authentication:
+
+1. **Verify SSO Configuration**
+   - Check that your identity provider (IdP) configuration matches the Langfuse SSO settings
+   - Ensure all required fields are properly configured
+   - Verify that the SSO domain mapping is correct
+
+2. **Check User Permissions**
+   - Confirm that users have the appropriate permissions in your IdP
+   - Verify that user attributes are being passed correctly
+   - Check RBAC settings if applicable
+
+3. **Network Connectivity**
+   - Ensure that Langfuse can reach your identity provider
+   - Check for firewall or proxy issues that might block SSO requests
+   - Verify SSL certificates are valid and trusted
+
+4. **Generate HAR File for Support**
+   - If the issue persists, generate a HAR file to help with troubleshooting
+   - See our [HAR File Export Guide](/docs/administration/troubleshooting/har-export) for detailed instructions
+
+### Authentication Token Issues
+
+**Problem**: Users receive "Invalid token" or "Token expired" errors
+
+**Solutions**:
+- Check if the system clock is synchronized across all services
+- Verify JWT token expiration settings
+- Ensure proper token refresh mechanisms are in place
+
+## User Management Issues
+
+### Users Not Appearing in Organization
+
+**Problem**: Invited users don't appear in the organization or can't access resources
+
+**Solutions**:
+1. Verify the user accepted the invitation email
+2. Check that the user is logging in with the correct email address
+3. Ensure the user has the appropriate role assignments
+4. Check organization membership settings
+
+### Role-Based Access Control (RBAC) Issues
+
+**Problem**: Users can't access expected features or see certain data
+
+**Solutions**:
+1. Review the user's assigned roles and permissions
+2. Check if custom roles are configured correctly
+3. Verify that resource-level permissions are properly set
+4. Ensure role inheritance is working as expected
+
+## Data and Performance Issues
+
+### Slow Dashboard Loading
+
+**Problem**: Dashboards and metrics take a long time to load
+
+**Solutions**:
+1. Check if you're within your plan's usage limits
+2. Review data retention settings and consider archiving old data
+3. Optimize queries by using appropriate date ranges and filters
+4. Contact support if performance issues persist
+
+### Missing Data or Metrics
+
+**Problem**: Expected traces, metrics, or observations are not appearing
+
+**Solutions**:
+1. Verify that your applications are properly instrumented
+2. Check API key configuration and permissions
+3. Review sampling settings that might be filtering data
+4. Ensure proper project and environment configuration
+
+## API and Integration Issues
+
+### API Rate Limiting
+
+**Problem**: Receiving rate limit errors when using the Langfuse API
+
+**Solutions**:
+1. Review your current API usage against plan limits
+2. Implement proper retry logic with exponential backoff
+3. Consider batching requests where possible
+4. Upgrade your plan if you need higher rate limits
+
+### Webhook Failures
+
+**Problem**: Webhooks are not being delivered or are failing
+
+**Solutions**:
+1. Verify webhook endpoint URL is accessible
+2. Check that the endpoint returns proper HTTP status codes
+3. Ensure webhook payload format is handled correctly
+4. Review webhook logs for error details
+
+## Getting Additional Help
+
+If you're still experiencing issues after trying these troubleshooting steps:
+
+1. **Check the Documentation**: Review relevant sections of the Langfuse documentation
+2. **Community Support**: Visit our [GitHub Discussions](https://github.com/langfuse/langfuse/discussions) for community help
+3. **Contact Support**: For paid plans, reach out to our support team with:
+   - Detailed description of the issue
+   - Steps to reproduce the problem
+   - Screenshots or error messages
+   - HAR file if it's a browser-related issue (see [HAR Export Guide](/docs/administration/troubleshooting/har-export))
+
+## Frequently Asked Questions
+
+### How do I reset a user's password?
+
+Users can reset their own passwords using the "Forgot Password" link on the login page. As an administrator, you cannot directly reset user passwords for security reasons.
+
+### Can I migrate data between organizations?
+
+Data migration between organizations requires careful planning. Contact support for assistance with data migration procedures.
+
+### How do I delete an organization?
+
+Organization deletion is a permanent action that cannot be undone. Contact support to initiate organization deletion with proper data backup procedures.
+
+### Why can't I see certain projects or traces?
+
+This is typically due to RBAC permissions. Check your role assignments and ensure you have access to the specific projects or environments you're trying to view.
