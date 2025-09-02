@@ -81,7 +81,7 @@ The decorator should:
 
 The power of observability is most visible in complex applications with production workloads. Async and concurrent environments are common in these applications, and the decorator should work seamlessly in these environments. The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. This allows you to use the decorator in reliably in async functions.
 
-However, an important exception are Python's ThreadPoolExecutors and ProcessPoolExecutors. The decorator will not work correctly in these environments, as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
+However, an important exception are Python's ThreadPoolExecutors and ProcessPoolExecutors. The decorator will not work correctly in these environments, as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/fastapi/fastapi/discussions/9006) in the fastapi repo that discusses this limitation.
 
 In short, the decorator will work correctly in async environments, but not in ThreadPoolExecutors or ProcessPoolExecutors.
 
