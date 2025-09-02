@@ -1,0 +1,149 @@
+---
+title: User can't access expected features or data (RBAC issues)
+description: Troubleshooting role-based access control issues when users can't see projects, traces, or features they should have access to
+tags: [platform, auth, administration, rbac, permissions]
+---
+
+# Why can't users access expected features or data?
+
+If users in your Langfuse organization can't access features, projects, or data they should be able to see, this is typically related to Role-Based Access Control (RBAC) permissions.
+
+## Understanding Langfuse RBAC
+
+Langfuse uses a hierarchical permission system:
+- **Organization-level roles**: Control access to organization settings and features
+- **Project-level roles**: Control access to specific projects and their data
+- **Custom roles**: Allow fine-grained permission control
+
+## Common access issues and solutions
+
+### 1. User can't see specific projects
+
+**Symptoms**: User is logged in but doesn't see expected projects in the project list.
+
+**Solutions**:
+- **Check project membership**: Go to Project Settings → Members and verify the user is added
+- **Add user to project**: Click "Add Member" and invite the user with appropriate role
+- **Verify role permissions**: Ensure the assigned role has project access permissions
+- **Check organization membership**: User must be an organization member first
+
+### 2. User can't see traces or observations
+
+**Symptoms**: User can access the project but sees no data or limited data.
+
+**Solutions**:
+- **Check project role**: Ensure user has at least "Viewer" role for the project
+- **Verify environment access**: Check if the user has access to the specific environment
+- **Review data filters**: User might have filters applied that hide the data
+- **Check date range**: Ensure the selected date range includes the expected data
+
+### 3. User can't access organization settings
+
+**Symptoms**: User doesn't see organization settings or admin features.
+
+**Solutions**:
+- **Check organization role**: User needs "Admin" or "Owner" role for organization settings
+- **Verify permissions**: Review what the current role allows in the RBAC documentation
+- **Update role**: Assign appropriate organization-level role if needed
+
+### 4. User can't create or modify resources
+
+**Symptoms**: User can view data but can't create projects, invite users, or modify settings.
+
+**Solutions**:
+- **Check write permissions**: Ensure the role includes necessary write permissions
+- **Review role hierarchy**: Some actions require higher-level roles
+- **Verify project-specific permissions**: Some actions are project-scoped
+- **Check organization policies**: Some organizations restrict certain actions
+
+### 5. Custom role not working as expected
+
+**Symptoms**: Users with custom roles can't access features that should be permitted.
+
+**Solutions**:
+- **Review custom role configuration**: Check all permission settings in the role
+- **Verify role assignment**: Ensure the custom role is properly assigned to the user
+- **Check permission inheritance**: Understand how permissions combine across roles
+- **Test with standard role**: Temporarily assign a standard role to isolate the issue
+
+## Troubleshooting steps
+
+### For administrators:
+
+1. **Audit user permissions**:
+   ```
+   Organization Settings → Members → [User] → View Roles
+   Project Settings → Members → [User] → Check Role
+   ```
+
+2. **Review role definitions**:
+   - Check what permissions each role includes
+   - Verify custom roles have necessary permissions
+   - Compare with working user accounts
+
+3. **Test access systematically**:
+   - Log in as the affected user (if possible)
+   - Test each feature that should be accessible
+   - Document what works vs. what doesn't
+
+### For users experiencing issues:
+
+1. **Check your current roles**:
+   - Go to your profile settings
+   - Review organization and project memberships
+   - Note your assigned roles
+
+2. **Clear browser cache**:
+   - Clear cookies and cache for Langfuse
+   - Try in an incognito/private window
+   - Refresh the page after clearing cache
+
+3. **Verify you're in the right context**:
+   - Check you're viewing the correct organization
+   - Ensure you've selected the right project
+   - Verify the correct environment is selected
+
+## Common permission patterns
+
+### Minimum roles for common tasks:
+
+- **View traces and data**: Project Viewer
+- **Create annotations and scores**: Project Editor  
+- **Invite project members**: Project Admin
+- **Manage organization settings**: Organization Admin
+- **Create new projects**: Organization Member (with project creation permissions)
+
+### Role hierarchy:
+- Organization Owner > Organization Admin > Organization Member
+- Project Admin > Project Editor > Project Viewer
+
+## Environment-specific access
+
+If your organization uses multiple environments (dev, staging, prod):
+
+1. **Check environment permissions**: Users might have access to some environments but not others
+2. **Verify environment selection**: Ensure the user is viewing the correct environment
+3. **Review environment-specific roles**: Some organizations have environment-scoped permissions
+
+## API key permissions
+
+If issues involve API access:
+
+1. **Check API key scope**: API keys inherit permissions from the user who created them
+2. **Verify key expiration**: Ensure API keys haven't expired
+3. **Review key permissions**: API keys might have more restrictive permissions than user accounts
+
+## When to contact support
+
+Contact support if:
+- Permission issues persist after checking roles and assignments
+- Custom roles aren't working as configured
+- Users are missing from organization or project member lists
+- You need help designing a complex RBAC structure
+
+Include this information:
+- Affected user email addresses
+- Specific features or data they can't access
+- Current role assignments (organization and project level)
+- Screenshots of error messages or missing features
+- Steps already attempted to resolve the issue
