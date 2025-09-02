@@ -189,16 +189,16 @@ const myLLMApplication = async (input: string) => {
 ```python filename="app.py" /config={"callbacks": [langfuse_handler]}/
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-
-def my_llm_function(question):
+ 
+def my_langchain_chain(question, langfuse_handler):
   llm = ChatOpenAI(model_name="gpt-4o")
   prompt = ChatPromptTemplate.from_template("Answer the question: {question}")
   chain = prompt | llm
-
+ 
   response = chain.invoke(
       {"question": question},
       config={"callbacks": [langfuse_handler]})
-
+ 
   return response
 ```
 
@@ -438,23 +438,38 @@ await langfuse.flush();
 
 ```python /for item in dataset.items:/
 from langfuse import get_client
-
+from langfuse.langchain import CallbackHandler
+#from .app import my_llm_application
+ 
 # Load the dataset
 dataset = get_client().get_dataset("<dataset_name>")
 
+# Initialize the Langfuse handler
+langfuse_handler = CallbackHandler()
+ 
 # Loop over the dataset items
 for item in dataset.items:
-    # Langchain callback handler that automatically links the execution trace to the dataset item
-    handler = item.get_langchain_handler(run_name="<run_name>")
+    # Use the item.run() context manager for automatic trace linking
+    with item.run(
+        run_name="<run_name>",
+        run_description="My first run",
+        run_metadata={"model": "llama3"},
+    ) as root_span:
+        # Execute your LLM-app against the dataset item input
+        output = my_langchain_chain(item.input, langfuse_handler)
 
-    # Execute application and pass custom handler
-    my_langchain_chain.run(item.input, callbacks=[handler])
-
-    # Optionally: Add scores computed in your experiment runner, e.g. json equality check
-    langfuse.score(trace_id=handler.get_trace_id(), name="my_score", value=1)
-
+        # Update top-level trace input and output
+        root_span.update_trace(input=item.input, output=output.content)
+ 
+        # Optionally: Add scores computed in your experiment runner, e.g. json equality check
+        root_span.score_trace(
+            name="<example_eval>",
+            value=my_eval_fn(item.input, output, item.expected_output),
+            comment="This is a comment",  # optional, useful to add reasoning
+        )
+ 
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
-langfuse.flush()
+get_client().flush()
 ```
 
 </Tab>
