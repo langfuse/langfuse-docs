@@ -108,7 +108,7 @@ const GhDiscussionsPreviewInternal = ({
 
     return (
       <>
-        <ul className="space-y-3">
+        <ul className="space-y-3 pt-3">
           {displayedDiscussions.map((discussion) => (
             <li
               key={discussion.number}
