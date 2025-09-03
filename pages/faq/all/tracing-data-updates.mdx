@@ -1,0 +1,35 @@
+---
+title: How do I update traces, observations, and scores?
+tags: [observability]
+---
+
+
+<Callout type="info">
+  Langfuse is moving to a mostly immutable data model. If you want to enrich traces or observations after they were ingested, please look into scores ([docs](docs/evaluation/evaluation-methods/custom-scores)). If you want to connect multiple traces, please look into sessions ([docs](docs/observability/features/sessions)).
+</Callout>
+
+# How do I update traces, observations, and scores?
+
+This guide covers how to update traces, observations, and scores in Langfuse, highlighting differences between available update methods.
+
+### Update Methods
+
+**Via the Langfuse UI**
+- UI-based updates (tags, bookmarks, publishing) can be made at any time and will produce expected results.
+- No time restrictions apply.
+
+**Via SDK or Ingestion API**
+- Updates are only accepted within **60 days** of creation.
+- **After 60 days:** Updates create duplicate entries containing only the changed fields.
+- Duplicates may cause inconsistencies in dashboards and historical filtering.
+
+
+### Langfuse Cloud vs. Self-Hosted
+
+The above mentioned behavior only applies to Langfuse Cloud. In self-hosted environments, the blob storage for raw events of scores, traces, and observations is never expired. With that, Langfuse is able to process updates indefinitely.
+
+---
+
+import GitHubStarCTA from "@/components-mdx/github-cta.mdx";
+
+<GitHubStarCTA />
