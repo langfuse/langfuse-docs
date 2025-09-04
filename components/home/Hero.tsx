@@ -4,11 +4,9 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import phLight from "./img/ph_product_of_the_day_light.png";
 import phDark from "./img/ph_product_of_the_day_dark.png";
-// import { CloudflareVideo } from "../Video";
 import GoldenKittyAwardSVG from "./img/ph_gke_ai_infra.svg";
 import GoldenKittyAwardSVGWhite from "./img/ph_gke_ai_infra_white.svg";
 import { HomeSection } from "./components/HomeSection";
-import { CloudflareVideo } from "../Video";
 
 export function Hero() {
   return (
