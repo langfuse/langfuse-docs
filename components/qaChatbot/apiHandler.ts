@@ -73,7 +73,6 @@ export const handler = async (req: Request) => {
   // Discover all tools exposed by the MCP server
   const tools = await mcpClient.tools();
 
-  console.log("tools", tools);
 
   const reasoningSummary = prompt.config
     .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
