@@ -1,29 +1,22 @@
 ---
 title: How to export HAR file for SSO troubleshooting
 description: Step-by-step guide to export HAR files from different browsers when experiencing SSO authentication issues in Langfuse
-tags: [platform, auth, administration, sso, troubleshooting]
+tags: [administration]
 ---
 
 # How to export HAR file for SSO troubleshooting
 
-When experiencing Single Sign-On (SSO) issues in Langfuse, support teams often need detailed network information to diagnose the problem. A HAR (HTTP Archive) file captures all HTTP requests and responses, providing valuable insights into authentication flows.
+When experiencing Single Sign-On (SSO) issues in Langfuse, you need to export a HAR file to help Langfuse support to diagnose the problem.
 
 ## What is a HAR file?
 
-A HAR file is a JSON-formatted archive that logs all HTTP requests made by your browser, including:
+A [HAR file](<https://en.wikipedia.org/wiki/HAR_(file_format)>) is a JSON-formatted archive that logs all HTTP requests made by your browser, including:
+
 - Request and response headers
 - Cookies and session data
 - Timing information
 - Response content
 - Error details
-
-## When to generate a HAR file
-
-Generate a HAR file when experiencing:
-- SSO login failures or redirects not working
-- Authentication tokens not being properly exchanged
-- Unexpected errors during the login process
-- Slow or hanging authentication requests
 
 ## Browser-specific instructions
 
@@ -31,14 +24,12 @@ Generate a HAR file when experiencing:
 
 1. **Open Developer Tools**: Press `F12` or `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Option+I` (Mac)
 2. **Access Network Tab**: Click on the "Network" tab
-3. **Configure settings**: 
+3. **Configure settings**:
    - Ensure the red record button is active
    - Check "Preserve log" to keep logs during navigation
 4. **Clear existing logs**: Click the clear button (🚫)
 5. **Reproduce the issue**: Refresh the page and perform the SSO steps that cause problems
 6. **Export**: Right-click in the network log and select "Save all as HAR with content"
-
-> **Chrome 130+**: For sensitive data, go to Developer Tools settings → Network → Check "Allow to generate HAR with sensitive data", then long-press download and select "Export HAR (with sensitive data)"
 
 ### Mozilla Firefox
 
@@ -64,34 +55,3 @@ Generate a HAR file when experiencing:
 4. **Configure**: Enable "Preserve Log"
 5. **Reproduce the issue**: Clear logs, refresh, and perform SSO steps
 6. **Export**: Click the export icon (📤) and choose "Export HAR"
-
-## Security considerations
-
-⚠️ **Important**: HAR files contain sensitive information including authentication tokens, session cookies, and personal data.
-
-**Before sharing**:
-- Review the HAR file contents in a text editor
-- Remove or redact sensitive values (replace with `[REDACTED]`)
-- Pay attention to Authorization headers and cookie values
-- Use secure, encrypted channels for sharing
-- Delete the file after the issue is resolved
-
-## What to include with your HAR file
-
-When submitting to support, include:
-- **Detailed description** of what you were trying to do
-- **Expected vs. actual behavior**
-- **Browser type and version**
-- **Timestamp** of when the issue occurred
-- **User account** that experienced the issue
-- **Environment** (production, staging, etc.)
-
-## Alternative tools
-
-If browser Developer Tools aren't suitable:
-- **Fiddler**: HTTP debugging proxy
-- **Charles Proxy**: HTTP monitoring tool
-- **Postman**: For direct API testing
-- **curl**: Command-line HTTP requests
-
-For additional help with HAR file analysis or SSO configuration, contact support through your preferred channel.
