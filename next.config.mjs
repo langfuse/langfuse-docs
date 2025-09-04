@@ -137,6 +137,11 @@ const nextraConfig = withNextra({
       destination,
       permanent: false,
     })),
+    ...redirects.permanentRedirects.map(([source, destination]) => ({
+      source,
+      destination,
+      permanent: true,
+    })),
   ],
   async rewrites() {
     // Serve any ".md" path by mapping to the static copy in public/md-src
