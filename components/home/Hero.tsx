@@ -87,7 +87,7 @@ export function Hero() {
       </div>
       {/* <div className="aspect-video bg-blue-200"></div>
       <Video
-        videoId="283c0c6812251552c3997c7b62af269e"
+        src="https://static.langfuse.com/docs-videos/langfuse-10min-demo-4k-60fps.mp4"
         aspectRatio={16 / 9}
         title="Langfuse Walkthrough"
         posterStartTime={86}
