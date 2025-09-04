@@ -143,7 +143,7 @@ export const ChangelogIndex = ({
             <div className="md:col-span-3">
               <Link key={page.route} href={page.route} className="block group">
                 {page.frontMatter?.ogCloudflareVideo ? (
-                  <CloudflareVideo
+                  <Video
                     videoId={page.frontMatter?.ogCloudflareVideo}
                     gifStyle
                     aspectRatio={16 / 9}

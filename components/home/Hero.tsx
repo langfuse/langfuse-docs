@@ -86,7 +86,7 @@ export function Hero() {
         </div>
       </div>
       {/* <div className="aspect-video bg-blue-200"></div>
-      <CloudflareVideo
+      <Video
         videoId="283c0c6812251552c3997c7b62af269e"
         aspectRatio={16 / 9}
         title="Langfuse Walkthrough"

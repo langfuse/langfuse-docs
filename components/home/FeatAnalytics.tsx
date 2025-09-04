@@ -39,7 +39,7 @@ export const FeatAnalytics = () => (
     <div className="mx-auto max-w-7xl px-6 xl:px-8">
       <div className="mx-auto grid max-w-3xl grid-cols-1 gap-x-8 gap-y-8 sm:gap-y-20 xl:mx-0 xl:max-w-none xl:grid-cols-2">
         <div className="flex items-start justify-end  xl:order-last">
-          <CloudflareVideo
+          <Video
             videoId="8072f530d91328c4946f1435b52e08e5"
             aspectRatio={16 / 9}
             gifStyle

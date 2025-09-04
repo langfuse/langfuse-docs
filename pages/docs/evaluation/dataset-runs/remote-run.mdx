@@ -189,16 +189,16 @@ const myLLMApplication = async (input: string) => {
 ```python filename="app.py" /config={"callbacks": [langfuse_handler]}/
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
- 
+
 def my_langchain_chain(question, langfuse_handler):
   llm = ChatOpenAI(model_name="gpt-4o")
   prompt = ChatPromptTemplate.from_template("Answer the question: {question}")
   chain = prompt | llm
- 
+
   response = chain.invoke(
       {"question": question},
       config={"callbacks": [langfuse_handler]})
- 
+
   return response
 ```
 
@@ -440,13 +440,13 @@ await langfuse.flush();
 from langfuse import get_client
 from langfuse.langchain import CallbackHandler
 #from .app import my_llm_application
- 
+
 # Load the dataset
 dataset = get_client().get_dataset("<dataset_name>")
 
 # Initialize the Langfuse handler
 langfuse_handler = CallbackHandler()
- 
+
 # Loop over the dataset items
 for item in dataset.items:
     # Use the item.run() context manager for automatic trace linking
@@ -460,14 +460,14 @@ for item in dataset.items:
 
         # Update top-level trace input and output
         root_span.update_trace(input=item.input, output=output.content)
- 
+
         # Optionally: Add scores computed in your experiment runner, e.g. json equality check
         root_span.score_trace(
             name="<example_eval>",
             value=my_eval_fn(item.input, output, item.expected_output),
             comment="This is a comment",  # optional, useful to add reasoning
         )
- 
+
 # Flush the langfuse client to ensure all data is sent to the server at the end of the experiment run
 get_client().flush()
 ```
@@ -582,7 +582,7 @@ import { Lightbulb } from "lucide-react";
 
 After each experiment run on a dataset, you can check the aggregated score in the dataset runs table and compare results side-by-side.
 
-<CloudflareVideo
+<Video
   videoId="f8f2cf7ff86f2b54d1b90c0921d2c7e9"
   aspectRatio={16 / 9}
   gifStyle

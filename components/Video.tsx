@@ -8,37 +8,37 @@ import {
 import { Play } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-export const CloudflareVideo = ({
-  videoId,
-  aspectRatio,
-  className,
-  gifStyle = false,
-  poster,
-  posterStartTime = 1,
-  title,
-}: {
-  videoId: string;
-  aspectRatio?: number;
-  gifStyle?: boolean;
-  className?: string;
-  poster?: string;
-  posterStartTime?: number;
-  title?: string;
-}) => {
-  return (
-    <Video
-      src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
-      poster={
-        poster ??
-        `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif?time=${posterStartTime}s`
-      }
-      aspectRatio={aspectRatio}
-      gifStyle={gifStyle}
-      className={className}
-      title={title}
-    />
-  );
-};
+// export const CloudflareVideo = ({
+//   videoId,
+//   aspectRatio,
+//   className,
+//   gifStyle = false,
+//   poster,
+//   posterStartTime = 1,
+//   title,
+// }: {
+//   videoId: string;
+//   aspectRatio?: number;
+//   gifStyle?: boolean;
+//   className?: string;
+//   poster?: string;
+//   posterStartTime?: number;
+//   title?: string;
+// }) => {
+//   return (
+//     <Video
+//       src={`https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/manifest/video.m3u8`}
+//       poster={
+//         poster ??
+//         `https://customer-xnej9vqjtgxpafyk.cloudflarestream.com/${videoId}/thumbnails/thumbnail.gif?time=${posterStartTime}s`
+//       }
+//       aspectRatio={aspectRatio}
+//       gifStyle={gifStyle}
+//       className={className}
+//       title={title}
+//     />
+//   );
+// };
 
 export const Video = ({
   src,

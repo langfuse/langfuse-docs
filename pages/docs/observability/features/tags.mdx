@@ -60,17 +60,20 @@ with langfuse.start_as_current_span(name="another-operation"):
 When using the context manager:
 
 ```ts
-import { startActiveObservation, startObservation, updateActiveTrace } from "@langfuse/tracing";
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
 
 await startActiveObservation("context-manager", async (span) => {
   span.update({
-    input: { query: "What is the capital of France?" }
+    input: { query: "What is the capital of France?" },
   });
 
   updateActiveTrace({
-    tags: ["tag-1", "tag-2"]
+    tags: ["tag-1", "tag-2"],
   });
-
 });
 ```
 
@@ -81,9 +84,8 @@ import { observe, updateActiveTrace } from "@langfuse/tracing";
 
 // An existing function
 async function fetchData(source: string) {
-
   updateActiveTrace({
-    tags: ["tag-1", "tag-2"]
+    tags: ["tag-1", "tag-2"],
   });
 
   // ... logic to fetch data
@@ -92,7 +94,7 @@ async function fetchData(source: string) {
 
 // Wrap the function to trace it
 const tracedFetchData = observe(fetchData, {
-  name: "observe-wrapper"
+  name: "observe-wrapper",
 });
 
 const result = await tracedFetchData("API");
@@ -103,15 +105,15 @@ When creating spans manually:
 ```ts
 import { startObservation } from "@langfuse/tracing";
 
-const span = startObservation('manual-observation', {
-  input: { query: 'What is the capital of France?' },
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
 });
 
 span.updateTrace({
-  tags: ['tag-1', 'tag-2']
+  tags: ["tag-1", "tag-2"],
 });
 
-span.update({ output: 'Paris'}).end();
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -201,7 +203,7 @@ Tags enable you to flexibly add metadata to your traces. You can filter for tags
 
 When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod'). See [Intent Classification Notebook](/docs/analytics/example-intent-classification) for an end-to-end example on how tags can be created programmatically.
 
-<CloudflareVideo
+<Video
   videoId="3c5431bdbb11980bfc1558766fe33923"
   aspectRatio={1840 / 1080}
   gifStyle
