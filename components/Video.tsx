@@ -67,49 +67,16 @@ export const Video = ({
       ).padStart(2, "0")} min`
     : null;
 
-  useEffect(() => {
-    if (!gifStyle) return;
-
-    // Small delay to ensure video is ready
-    const timeoutId = setTimeout(() => {
-      remote.seek(0);
-      remote.play();
-    }, 200);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            remote.seek(0);
-            remote.play();
-          } else {
-            remote.pause();
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      clearTimeout(timeoutId);
-      observer.disconnect();
-    };
-  }, [gifStyle, remote]);
-
   return (
     <div ref={containerRef}>
       <MediaPlayer
         ref={mediaPlayerRef}
         src={src}
         controls={gifStyle || panelDismissed}
-        autoplay={false} // We'll handle autoplay ourselves
+        autoplay={gifStyle}
         muted={gifStyle}
         loop={gifStyle}
-        load={gifStyle ? "eager" : "custom"}
+        load={"visible"}
         playsinline={gifStyle}
         aspectRatio={aspectRatio}
         className={cn(
