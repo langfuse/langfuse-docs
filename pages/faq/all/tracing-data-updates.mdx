@@ -1,35 +1,30 @@
 ---
-title: How do I update traces, observations, and scores?
+title: How to update traces, observations, and scores?
 tags: [observability]
 ---
 
-
-<Callout type="info">
-  Langfuse is moving to a mostly immutable data model. If you want to enrich traces or observations after they were ingested, please look into scores ([docs](docs/evaluation/evaluation-methods/custom-scores)). If you want to connect multiple traces, please look into sessions ([docs](docs/observability/features/sessions)).
-</Callout>
-
-# How do I update traces, observations, and scores?
+# How to update traces, observations, and scores?
 
 This guide covers how to update traces, observations, and scores in Langfuse, highlighting differences between available update methods.
 
-### Update Methods
+## What can I update?
+
+Langfuse is moving to a mostly immutable data model for observability data (traces and observations in the Langfuse [data model](/docs/observability/data-model)).
+
+If you want to enrich traces or observations after they were ingested with evaluations/annotations, please look into scores ([docs](docs/evaluation/evaluation-methods/custom-scores)) that can be added to traces, observations, sessions, and dataset runs at any time.
+
+## Updating Traces and Observations
 
 **Via the Langfuse UI**
-- UI-based updates (tags, bookmarks, publishing) can be made at any time and will produce expected results.
-- No time restrictions apply.
+
+UI-based updates ([tags](/docs/observability/features/tags), bookmarks, [publishing](/docs/observability/features/url.mdx)) can be made at any time
 
 **Via SDK or Ingestion API**
-- Updates are only accepted within **60 days** of creation.
-- **After 60 days:** Updates create duplicate entries containing only the changed fields.
-- Duplicates may cause inconsistencies in dashboards and historical filtering.
 
+- You can upsert traces and observations based on their `id`
+- Within 60 days of creation, updates will replace the existing trace or observation.
+- After 60 days, updates create duplicate entries containing only the changed fields. This can lead to inconsistencies in dashboards and historical filtering.
 
-### Langfuse Cloud vs. Self-Hosted
+## Updating Scores
 
-The above mentioned behavior only applies to Langfuse Cloud. In self-hosted environments, the blob storage for raw events of scores, traces, and observations is never expired. With that, Langfuse is able to process updates indefinitely.
-
----
-
-import GitHubStarCTA from "@/components-mdx/github-cta.mdx";
-
-<GitHubStarCTA />
+Scores can be updated at any time. You can upsert scores based on their `id` ([docs](/docs/evaluation/evaluation-methods/custom-scores#update)).
