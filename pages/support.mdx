@@ -5,19 +5,17 @@ description: Overview of available support options for Langfuse.
 
 # Support
 
-> Langfuse is open source and we prefer open, searchable support to provide a basic level of support to everyone. For non‑sensitive questions, please use **[GitHub Discussions](/gh-support)**. If you’re on a paid plan, additional support is available as described below.
+> Langfuse is Open Source. If you have a question, it's likely someone else has it, too. We'd love to answer in the open and use **[GitHub Discussions](/gh-support)** whenever possible.
 
-| Support type               |      Self-Hosted (FOSS)      |        Langfuse Cloud        | Enterprise |
+| Support type               |      Self-Hosted (OSS)       |        Langfuse Cloud        | Enterprise |
 | -------------------------- | :--------------------------: | :--------------------------: | :--------: |
 | **Ask AI**                 |              ✅              |              ✅              |     ✅     |
-| **Official Support**       |                              |              ✅              |     ✅     |
+| **Community (GitHub)**     |              ✅              |              ✅              |     ✅     |
+| **In-app Support**         |                              |              ✅              |     ✅     |
 | **Dedicated Slack**        |                              |         Teams Add-on         |     ✅     |
 | **Onboarding support**     |                              |                              |     ✅     |
 | **Architectural guidance** |                              |                              |     ✅     |
-| **Terms and Conditions**   |         MIT License          |           Standard           |    MSA     |
 | **Security assessment**    | Standard assessment provided | Standard assessment provided |     ✅     |
-| **Bespoke pricing**        |                              |                              |     ✅     |
-| **Payment via invoicing**  |                              |                              |     ✅     |
 
 ---
 
@@ -27,45 +25,46 @@ Langfuse Ask AI can answer many questions about Langfuse, how to integrate, and 
 
 import { Bot } from "lucide-react";
 
-<Cards num={2}>
+<Cards num={1}>
   <Card title="Ask AI" href="/ask-ai" icon={<Bot />} arrow />
 </Cards>
 
-## Official support
+## Community (GitHub)
 
-There are three primary ways to get help from the Langfuse team:
+Langfuse is Open Source. If you have a question, it's likely someone else has it, too. We'd love to answer in the open on GitHub whenever possible.
 
-1. **Open a request via the in‑app help** (Cloud Core and above)
-2. **Ask the community in public:** Start a thread in **[GitHub Discussions](/gh-support)**.
-3. **Report a bug:** File an issue in **[langfuse/langfuse Issues](/issues)** with a minimal reproduction and logs.
+import { MessageCircle, Bug, Lightbulb } from "lucide-react";
 
-### In‑app support (by Langfuse Engineering)
+<Cards num={3}>
+  <Card
+    title="Ask a question"
+    href="/gh-support"
+    icon={<MessageCircle />}
+    arrow
+  />
+  <Card title="Report a bug" href="/issues" icon={<Bug />} arrow />
+  <Card title="Suggest a feature" href="/ideas" icon={<Lightbulb />} arrow />
+</Cards>
 
-- Available to **Cloud Core, Pro, Teams, and Enterprise** customers.
-- Open the **help/chat** widget in the Langfuse UI to create a ticket. We’ll route it to the right team and reply via email.
-- For non‑urgent questions, public **GitHub Discussions** remains the fastest way to get searchable answers.
+## In‑app Support
 
-<details>
-<summary>Severity levels</summary>
+> Available to **Cloud Core, Pro, Teams, and Enterprise** customers.
 
-When you contact us, please indicate one of the following severities to help us prioritize:
-
-- **P0 – Critical:** Langfuse is unavailable or there is security risk or data loss. Examples: API/ingestion outage, authentication failure across users, confirmed security incident.
-- **P1 – High:** Key functionality is severely degraded. Examples: traces not ingesting reliably, prompt management read/write failures, dashboards consistently failing to load, SDK regression with common paths.
-- **P2 – Medium:** Partial impact or inconvenient issues. Examples: slow queries or UI, intermittent errors with workarounds, minor SDK bugs.
-- **P3 – Low:** Questions, feature requests, cosmetic issues.
-
-</details>
+Open the **help/chat** widget in the Langfuse UI to create a ticket. We’ll route it to the right team and reply via email.
 
 ## Dedicated Slack
+
+> Available to **Cloud Teams and Enterprise** customers.
 
 For qualifying customers, we provide support via Slack Connect. This brings all parties together on both sides and makes collaboration much faster for everyone involved.
 
 You will directly chat with the engineers building Langfuse to find the best solutions to your questions.
 
-Please reach out via In-app support to request a private Slack channel.
+Please reach out via the in-app support to request a private Slack channel for your team.
 
-## Onboarding & Architectural guidance
+## Onboarding & Architectural Guidance
+
+> Available on **Enterprise** plans. Ask your account team.
 
 We can help teams get value from Langfuse quickly:
 
@@ -73,39 +72,10 @@ We can help teams get value from Langfuse quickly:
 - Best‑practice setup for tracing, evaluations, and prompt management
 - Architectural reviews when integrating Langfuse into your existing platform
 
-Available on Enterprise plans. Ask your account team.
-
-## Licensing, terms & privacy
-
-**Open‑source license**
-
-- Core Langfuse is **MIT‑licensed**. See **[LICENSE](https://github.com/langfuse/langfuse/blob/main/LICENSE)**.
-- [Enterprise features](/self-hosting/license-key) are commercially licensed.
-
-**Contracts & policies**
-
-- [Terms & Conditions](/terms)
-- [Data Processing Agreement (DPA)](/security/dpa)
-- [Privacy Policy](/privacy)
-- [GDPR](/security/gdpr)
-- [BAA (HIPAA)](/baa)
-- [Security & Compliance Overview](/docs/data-security-privacy)
-- [Data regions & availability](/security/data-regions)
-- [Incident & breach notifications](/security/incident-and-breach)
-- [Responsible disclosure](/security/responsible-disclosure)
-
 ## Security Assessment
 
 We maintain a comprehensive set of internal [security policies and documentation](/security) that address key requirements for GDPR, SOC 2, and HIPAA compliance.
 
 For Enterprise customers, we are glad to support your security assessment process. This may involve empowering your internal team (who retain responsibility for information security when self-hosting), or responding to your questions and updating our policies as needed.
 
-## Bespoke pricing
-
-Please reach out to your Langfuse account team for bespoke pricing available for Enterprise customers with volume commitments on annual plans.
-
-## Payment via invoicing
-
-We only take payments via credit or debit card, processed via Stripe.
-
-Invoice based payments are available on Enterprise plans. Please reach out to the [Langfuse Sales team](/talk-to-us) for more information.
+Please check out the [security and compliance overview](/security) for more details.
