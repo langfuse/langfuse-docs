@@ -14,7 +14,7 @@ import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
-import { CloudflareVideo, Video } from "./components/Video";
+import { Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
 
@@ -91,19 +91,19 @@ const config: DocsThemeConfig = {
     const section = asPath.startsWith("/docs")
       ? "Docs"
       : asPath.startsWith("/changelog/")
-        ? "Changelog"
-        : asPath.startsWith("/cookbook/")
-          ? "Cookbook"
-          : asPath.startsWith("/faq/")
-            ? "FAQ"
-            : "";
+      ? "Changelog"
+      : asPath.startsWith("/cookbook/")
+      ? "Cookbook"
+      : asPath.startsWith("/faq/")
+      ? "FAQ"
+      : "";
 
     const image = frontMatter.ogImage
       ? "https://langfuse.com" + frontMatter.ogImage
       : `https://langfuse.com/api/og?title=${encodeURIComponent(
-          title,
+          title
         )}&description=${encodeURIComponent(
-          description,
+          description
         )}&section=${encodeURIComponent(section)}`;
 
     const video = frontMatter.ogVideo
@@ -111,7 +111,7 @@ const config: DocsThemeConfig = {
       : null;
 
     const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-      (cookbook) => cookbook.path === asPath,
+      (cookbook) => cookbook.path === asPath
     );
     const canonical: string | undefined = cookbook?.canonicalPath
       ? "https://langfuse.com" + cookbook.canonicalPath
@@ -123,10 +123,10 @@ const config: DocsThemeConfig = {
       asPath === "/"
         ? "Langfuse"
         : asPath.startsWith("/blog/")
-          ? "%s - Langfuse Blog"
-          : asPath.startsWith("/docs/guides/")
-            ? "%s - Langfuse Guides"
-            : "%s - Langfuse";
+        ? "%s - Langfuse Blog"
+        : asPath.startsWith("/docs/guides/")
+        ? "%s - Langfuse Guides"
+        : "%s - Langfuse";
 
     const isDev =
       typeof process !== "undefined" && process.env.NODE_ENV === "development";
@@ -198,7 +198,6 @@ const config: DocsThemeConfig = {
     Cards,
     AvailabilityBanner,
     Callout,
-    CloudflareVideo,
     Video,
   },
   banner: {
