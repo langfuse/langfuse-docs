@@ -31,7 +31,7 @@ If a score is ingested manually using a `trace_id` to link the score to a trace,
 
 Here are examples by `Score` data types
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 <Tabs items={["Numeric", "Categorical", "Boolean"]}>
@@ -273,7 +273,7 @@ await langfuse.flush();
 </Tabs>
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 → More details in [Python SDK docs](/docs/observability/sdk/python/evaluation#create-scores) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
@@ -299,7 +299,7 @@ Whenever you provide a `ScoreConfig`, the score data will be validated against t
 - **Score Value when Type is categorical**: Value must map to one of the categories defined in the config
 - **Score Value when Type is boolean**: Value must equal `0` or `1`
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 
 <Tab>
 
@@ -403,7 +403,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
 </Tab>
 <Tab>
 
-<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
+<LangTabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores"]}>
 <Tab>
 When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
 
@@ -482,7 +482,7 @@ await langfuse.flush();
 
 → More details in [Python SDK docs](/docs/observability/sdk/python/evaluation#create-scores) and [JS/TS SDK docs](/docs/sdk/typescript/guide#score). See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
 
-</Tabs>
+</LangTabs>
 
 ### Inferred Score Properties
 

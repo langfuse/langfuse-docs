@@ -49,7 +49,7 @@ If available in the LLM response, ingesting usage and/or cost is the most accura
 
 Many of the Langfuse integrations automatically capture usage details and cost details data from the LLM response. If this does not work as expected, please create an [issue](/issue) on GitHub.
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 When using the `@observe()` decorator:
@@ -288,13 +288,13 @@ span.update({ output: "Successfully answered user request." }).end();
 You can also update the usage and cost via `generation.update()`.
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### Compatibility with OpenAI
 
 For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
 
-<Tabs items={["Python SDK", "JS/TS SDK"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -350,7 +350,7 @@ const generation = langfuse.generation({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 You can also ingest OpenAI-style usage via `generation.update()` and `generation.end()`.
 
@@ -384,7 +384,7 @@ Langfuse automatically calculates cost for ingested generations at the time of i
 
 You can flexibly add your own model definitions to Langfuse. This is especially useful for self-hosted or fine-tuned models which are not included in the list of Langfuse maintained models.
 
-<Tabs items={["UI", "API"]}>
+<LangTabs items={["Langfuse UI", "API"]}>
 
 <Tab>
   <Frame border>![Add model in UI](/images/docs/create-model.gif)</Frame>
@@ -403,7 +403,7 @@ DELETE /api/public/models/{id}
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 Models are matched to generations based on:
 
