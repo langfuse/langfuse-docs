@@ -462,7 +462,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "90 days data access",
         "Unlimited users",
         "Unlimited evaluators",
-        "Support via Chat",
+        "In-app support",
       ],
       cta: "Sign up",
     },
@@ -488,7 +488,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited annotation queues",
         "High rate limits",
         "SOC2 & ISO27001 reports, BAA available (HIPAA)",
-        "Support via dedicated Slack Channel, Chat",
+        "Prioritized in-app support",
       ],
       addOn: {
         name: "Teams",
@@ -498,6 +498,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "SSO enforcement",
           "Fine-grained RBAC",
           "Data retention management",
+          "Support via Dedicated Slack Channel",
         ],
       },
       cta: "Sign up",
@@ -854,6 +855,16 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Webhooks & Slack",
+        description:
+          "Trigger webhooks for prompt changes and integrate with Slack",
+        href: "/docs/prompt-management/features/webhooks-slack-integrations",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
         name: "Protected Deployment Labels",
         description:
           "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
@@ -869,16 +880,6 @@ const sections: Section[] = [
             "Open Source": false,
             Enterprise: true,
           },
-        },
-      },
-      {
-        name: "Webhooks & Slack",
-        description:
-          "Trigger webhooks for prompt changes and integrate with Slack",
-        href: "/docs/prompt-management/features/webhooks-slack-integrations",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
     ],
@@ -1138,32 +1139,28 @@ const sections: Section[] = [
       },
       {
         name: "Community (GitHub)",
+        href: "/support#community",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
-        name: "Chat",
+        name: "In-app support",
+        href: "/support#in-app",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
-        name: "Email",
-        tiers: {
-          cloud: { Hobby: false, Core: false, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
         name: "Private Slack channel",
+        href: "/support#slack",
         tiers: {
           cloud: {
             Hobby: false,
             Core: false,
-            Pro: true,
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: {
@@ -1174,6 +1171,7 @@ const sections: Section[] = [
       },
       {
         name: "Dedicated Support Engineer",
+        href: "/support#onboarding",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1182,6 +1180,22 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Onboarding & Architectural guidance",
+        href: "/support#onboarding",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+          },
         },
       },
       {
@@ -1199,21 +1213,6 @@ const sections: Section[] = [
       },
       {
         name: "Support SLA",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "Architectural guidance",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1473,6 +1472,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
+        href: "/security/dpa",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: true },
@@ -1480,6 +1480,7 @@ const sections: Section[] = [
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
+        href: "/security",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1492,6 +1493,7 @@ const sections: Section[] = [
       },
       {
         name: "HIPAA compliance",
+        href: "/security/hipaa",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1503,6 +1505,7 @@ const sections: Section[] = [
       },
       {
         name: "InfoSec/legal reviews",
+        href: "/security",
         tiers: {
           cloud: {
             Hobby: false,
