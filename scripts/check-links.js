@@ -27,6 +27,11 @@ const config = {
         {
             pattern: '^https?://(?!localhost:3333|langfuse\\.com)'
         },
+        // Ignore specific redirects to external sites that block automated requests
+        // Product Hunt
+        {
+            pattern: '^http://localhost:3333/ph$'
+        },
         {
             pattern: '^#'
         },
@@ -53,7 +58,7 @@ function extractHrefLinks(content) {
     const hrefRegex = /href=["']([^"']+)["']/g;
     const links = [];
     let match;
-    
+
     while ((match = hrefRegex.exec(content)) !== null) {
         const href = match[1];
         // Include internal links (starting with / or https://langfuse.com)
@@ -65,7 +70,7 @@ function extractHrefLinks(content) {
             links.push(relativePath);
         }
     }
-    
+
     return links;
 }
 
@@ -73,12 +78,12 @@ async function checkHrefLinks(links, filePath) {
     if (links.length === 0) {
         return false;
     }
-    
+
     // Create a fake markdown content with just the href links to reuse existing functionality
     const fakeMarkdown = links.map(link => `[link](${link})`).join('\n');
-    
+
     const results = await markdownLinkCheckAsync(fakeMarkdown, config);
-    
+
     let hasErrors = false;
     results.forEach(result => {
         if (result.status === 'dead') {
@@ -95,7 +100,7 @@ async function checkHrefLinks(links, filePath) {
             }
         }
     });
-    
+
     return hasErrors;
 }
 
