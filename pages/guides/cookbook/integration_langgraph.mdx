@@ -506,7 +506,7 @@ from langchain_core.tools import tool
 def langgraph_research(question):
   """Conducts research for various topics."""
 
-  with langfuse.start_as_current_span(
+  with langfuse.start_as_current_observation(
       name="🤖-sub-research-agent",
       trace_context={"trace_id": predefined_trace_id}
   ) as span:
@@ -540,7 +540,7 @@ main_agent = create_react_agent(
 user_question = "What is Langfuse?"
 
 # Use the predefined trace ID with trace_context
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="🤖-main-agent",
     trace_context={"trace_id": predefined_trace_id}
 ) as span:
@@ -576,7 +576,7 @@ from langfuse import get_client
 langfuse = get_client()
  
 # Option 1: Use the yielded span object from the context manager
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="langgraph-request") as span:
     # ... LangGraph execution ...
  

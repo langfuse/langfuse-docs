@@ -31,7 +31,7 @@ def pii_masker(data: any, **kwargs) -> any:
 langfuse = Langfuse(mask=pii_masker)
 
 # Now, any input/output/metadata will be passed through pii_masker
-with langfuse.start_as_current_span(name="user-query", input={"email": "test@example.com", "query": "..."}) as span:
+with langfuse.start_as_current_observation(name="user-query", input={"email": "test@example.com", "query": "..."}) as span:
     # The 'email' field in the input will be masked.
     pass
 ```
@@ -123,7 +123,7 @@ langfuse_tracer_provider = TracerProvider() # do not set to global tracer provid
 
 langfuse = Langfuse(tracer_provider=langfuse_tracer_provider)
 
-langfuse.start_span(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
+langfuse.start_observation(name="myspan").end() # Span will be isolated from remaining OTEL instrumentation
 ```
 
 ## Using `ThreadPoolExecutors` or `ProcessPoolExecutors`
