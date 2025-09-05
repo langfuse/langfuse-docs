@@ -11,29 +11,18 @@ const markdownLinkCheckAsync = promisify(markdownLinkCheck);
 const config = {
     // Show progress bar
     // showProgressBar: true,
-    // Replace patterns for internal and langfuse.com links
-    replacementPatterns: [
-        {
-            pattern: '^/',
-            replacement: 'http://localhost:3333/'
-        },
-        {
-            pattern: '^https://langfuse.com',
-            replacement: 'http://localhost:3333'
-        },
-    ],
-    // Ignore patterns for external links and anchors
+
+    // 1. Ignore patterns for external links and anchors
     ignorePatterns: [
         {
             pattern: '^https?://(?!localhost:3333|langfuse\\.com)'
         },
-        // Ignore specific redirects to external sites that block automated requests
-        // Product Hunt
-        {
-            pattern: '^http://localhost:3333/ph$'
-        },
         {
             pattern: '^#'
+        },
+        // Ignore specific paths that redirect to external sites that block automated requests
+        {
+            pattern: '^/ph$'
         },
         // Ignore template literals and variables
         {
@@ -47,6 +36,19 @@ const config = {
             pattern: '[{}\\[\\]]'
         }
     ],
+
+    // 2. Replace patterns for internal and langfuse.com links
+    replacementPatterns: [
+        {
+            pattern: '^/',
+            replacement: 'http://localhost:3333/'
+        },
+        {
+            pattern: '^https://langfuse.com',
+            replacement: 'http://localhost:3333'
+        },
+    ],
+
     timeout: '20s',
     retryOn429: true,
     retryCount: 5,
