@@ -178,7 +178,7 @@ We are interested in your feedback! Raise an issue on [GitHub](/ideas) to reques
 
 ### Configuration Options
 
-<LangTabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 The `CallbackHandler` does not accept any constructor arguments for trace attributes or global settings.
@@ -208,7 +208,7 @@ The following optional constructor arguments are supported:
 
 You can set trace attributes dynamically for each LangChain execution. The approach differs between SDK versions:
 
-<LangTabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 With Python SDK, you have two options to set trace attributes dynamically:
@@ -301,7 +301,7 @@ await chain.invoke(
 
 **Predefined Trace ID**
 
-<LangTabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 To score a Langchain execution, you can capture the trace ID for the score by either wrapping the execution in a span that sets a predefined trace ID, or retrieve the last trace ID a callback handler has created via `langfuse_handler.last_trace_id`.
@@ -367,7 +367,7 @@ await chain.invoke(
 
 There are multiple ways to score a trace in Python SDK. See [Scoring documentation](/docs/scores/overview) for more details.
 
-<LangTabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -449,7 +449,7 @@ The Langchain integration works seamlessly with the Langfuse SDK to create compr
 
 Learn more about the structure of a trace [here](/docs/tracing).
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<Tabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 **Using the `@observe()` decorator:**
@@ -587,7 +587,7 @@ The Langfuse SDKs queue and batch events in the background to reduce the number 
 
 If you are running a short-lived application, you need to shutdown Langfuse to ensure that all events are flushed before the application exits.
 
-<LangTabs items={["Python", "JS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -609,7 +609,7 @@ await langfuseHandler.shutdownAsync();
 
 If you want to flush events synchronously at a certain point, you can use the `flush` method. This will wait for all events that are still in the background queue to be sent to the Langfuse API. This is usually discouraged in production environments.
 
-<LangTabs items={["Python", "JS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -642,7 +642,7 @@ Read more about awaiting callbacks here in the [Langchain docs](https://js.langc
 
 Please add the `model` keyword argument to the `AzureOpenAI` or `AzureChatOpenAI` class to have the model name parsed correctly in Langfuse.
 
-<LangTabs items={["Python", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python

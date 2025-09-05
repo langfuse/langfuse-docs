@@ -109,7 +109,7 @@ Supported formats:
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 ```python
 from langfuse import get_client, observe
@@ -256,7 +256,7 @@ Based on this token, the Langfuse UI can automatically detect the `mediaId` and 
 
 When dealing with traces, observations, or dataset items that include media references, you can convert them back to their base64 data URI format using the `resolve_media_references` utility method provided by the Langfuse client. This is particularly useful for reinserting the original content during fine-tuning, dataset runs, or replaying a generation. The utility method traverses the parsed object and returns a deep copy with all media reference strings replaced by the corresponding base64 data URI representations.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<LangTabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS SDK"]}>
 <Tab>
 
 ```python
