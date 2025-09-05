@@ -19,7 +19,7 @@ To use placeholders in your application, you need at least `langfuse >= 3.1.0` (
 
 ## Create prompt with placeholders
 
-<Tabs items={["UI","Python", "JS/TS"]}>
+<LangTabs items={["UI","Python", "JS/TS"]}>
 <Tab>
 
 <Frame border fullWidth>
@@ -71,14 +71,14 @@ await langfuse.prompt.create({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Resolve placeholders at runtime
 
 In the SDKs, use the `.compile(variables, placeholders)` method on a `ChatPromptClient` to set the values to be filled in for the placeholders.
 The filled in messages should be of the `ChatMessage` format with a `role` and `content` property, but custom formats are also accepted as `compile` does not validate the format of the messages.
 
-<Tabs items={["Python", "JS/TS", "LangChain (Python)", "LangChain (JS/TS)"]}>
+<LangTabs items={["Python", "JS/TS", "LangChain (Python)", "LangChain (JS/TS)"]}>
 <Tab>
 
 ```python
@@ -193,6 +193,6 @@ const langchainPrompt = ChatPromptTemplate.fromTemplate(
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 </Steps>
