@@ -38,11 +38,11 @@ We store all images in the `public/images/` directory. To use them in the markdo
 
 ### Videos / Gifs
 
-We use Cloudflare Video as a video hosting provider. Ping one of the maintainers to upload a video to Cloudflare Video and get the video id.
+We use a bucket on Cloudflare R2 to store all video. It is hosted on https://static.langfuse.com/docs-videos. Ping one of the maintainers to upload a video to the bucket and get the src.
 
-To embed a video, use the CloudflareVideo component and set a title and fixed aspect ratio.
+To embed a video, use the Video component and set a title and fixed aspect ratio. Point src to the mp4 file in the bucket.
 
-To embed a "gif", actually embed a video via the CloudflareVideo component and use `gifMode` (`<CloudflareVideo videoId="" gifMode />`). This will look like a gif, but at a much smaller file size and higher quality.
+To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMode />`). This will look like a gif, but at a much smaller file size and higher quality.
 
 ## Stack
 

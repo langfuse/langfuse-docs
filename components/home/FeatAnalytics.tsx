@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { CloudflareVideo } from "@/components/Video";
+import { Video } from "@/components/Video";
 
 const features = [
   {
@@ -39,8 +39,8 @@ export const FeatAnalytics = () => (
     <div className="mx-auto max-w-7xl px-6 xl:px-8">
       <div className="mx-auto grid max-w-3xl grid-cols-1 gap-x-8 gap-y-8 sm:gap-y-20 xl:mx-0 xl:max-w-none xl:grid-cols-2">
         <div className="flex items-start justify-end  xl:order-last">
-          <CloudflareVideo
-            videoId="8072f530d91328c4946f1435b52e08e5"
+          <Video
+            src="https://static.langfuse.com/docs-videos/home_dashboard.mp4"
             aspectRatio={16 / 9}
             gifStyle
             className="w-full max-w-none rounded-md shadow-xl ring-0 xl:w-[120%]"
