@@ -322,6 +322,12 @@ with langfuse.start_as_current_span(
      - `enabled` → `tracing_enabled`
      - `threads` → `media_upload_thread_count`
 
+8. **Datasets**
+
+The `link` method on the dataset item objects has been replaced by a context manager that can be accessed via the `run` method on the dataset items. This is a higher level abstraction that manages trace creation and linking of the dataset item with the resulting trace.
+
+See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for more details.
+
 ## Detailed Change Summary
 
 1.  **Core Change: OpenTelemetry Foundation**

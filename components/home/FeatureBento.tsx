@@ -61,6 +61,7 @@ const features = [
     description: "Detailed production traces to debug LLM applications faster.",
     href: "/docs/observability/overview",
     cta: "Learn more",
+    demoHref: "/watch-demo?tab=observability",
     background: (
       <BentoBgImage
         imgLight={bentoTracePng}
@@ -77,6 +78,7 @@ const features = [
       "Version and deploy prompts collaboratively and retrieve them with low latency.",
     href: "/docs/prompt-management/overview",
     cta: "Learn more",
+    demoHref: "/watch-demo?tab=prompt",
     background: (
       <BentoBgImage
         imgLight={bentoPromptPng}
@@ -102,6 +104,7 @@ const features = [
       "Collect user feedback, annotate in Langfuse, and run evaluation functions in Langfuse.",
     href: "/docs/evaluation/overview",
     cta: "Learn more",
+    demoHref: "/watch-demo?tab=evaluation",
     background: null,
     className: "md:col-start-3 md:col-end-3 md:row-start-1 md:row-end-2",
   },
@@ -112,6 +115,7 @@ const features = [
       "Derive datasets from production data to fine-tune models and test your LLM application.",
     href: "/docs/evaluation/features/datasets",
     cta: "Learn more",
+    demoHref: "/watch-demo?tab=evaluation",
     background: null,
     className: "md:col-start-3 md:col-end-3 md:row-start-2 md:row-end-3",
   },

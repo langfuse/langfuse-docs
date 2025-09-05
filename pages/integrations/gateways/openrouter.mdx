@@ -9,7 +9,9 @@ description: "Learn how to integrate Langfuse with OpenRouter using the OpenAI S
 
 In this guide, we'll show you how to integrate [Langfuse](/) with [OpenRouter](https://openrouter.ai/).
 
-[OpenRouter](https://openrouter.ai/) provides an OpenAI-compatible completion API to +280 language models and providers that you can call directly or using the OpenAI SDK. This allows developers to access a variety of LLMs through a single, unified interface.
+> **What is OpenRouter?** [OpenRouter](https://openrouter.ai/) provides an OpenAI-compatible completion API to +280 language models and providers that you can call directly or using the OpenAI SDK. This allows developers to access a variety of LLMs through a single, unified interface.
+
+> **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
 
 Since OpenRouter uses the OpenAI API schema, we can utilize Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
 
@@ -41,6 +43,7 @@ Since OpenRouter provides an OpenAI-compatible API, we can use the [Langfuse Ope
 - The `base_url` is set to OpenRouter's API endpoint.
 - You can replace `"qwen/qwen-plus"` with any model available on OpenRouter.
 - The `default_headers` can include optional headers as per OpenRouter's documentation.
+- The `extra_body={"usage": {"include": True}}` includes the costs that OpenRouter returns.
 
 ```python
 # Import the Langfuse OpenAI SDK wrapper
@@ -62,6 +65,7 @@ response = client.chat.completions.create(
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Tell me a fun fact about space."}
     ],
+    extra_body={"usage": {"include": True}},
     name="fun-fact-request"  # Optional: Name of the generation in Langfuse
 )
 
@@ -109,6 +113,7 @@ def summarize_text(text: str):
             {"role": "system", "content": "You summarize texts in a concise manner."},
             {"role": "user", "content": f"Summarize the following text:\n{text}"}
         ],
+        extra_body={"usage": {"include": True}},
         name="summarize-text"
     )
 
@@ -120,6 +125,7 @@ def analyze_sentiment(summary: str):
             {"role": "system", "content": "You analyze the sentiment of texts."},
             {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}
         ],
+        extra_body={"usage": {"include": True}},
         name="analyze-sentiment"
     )
 
@@ -128,15 +134,12 @@ text_to_analyze = "OpenAI's GPT-4 model has significantly advanced the field of 
 analyze_text(text_to_analyze)
 ```
 
-<Frame border fullWidth>
-  ![Example trace in
-  Langfuse](/images/docs/openrouter-example-trace/openrouter-example-trace.png)
-</Frame>
+![Example trace in Langfuse](/images/docs/openrouter-example-trace/openrouter-example-trace.png)
 
-_[Public link to example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6114e4e9-7844-44f8-9d2a-372bb8fdf61f?timestamp=2025-02-03T14%3A13%3A38.878Z)_
+_[Public link to example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/f0f78d8887011612a3c25bdcb8fe75fd?timestamp=2025-09-04T09:39:47.697Z&display=details)_
 
-## Learn More
 
-- **OpenRouter Quick Start Guide**: [https://openrouter.ai/docs/quick-start](https://openrouter.ai/docs/quick-start)
-- **Langfuse OpenAI Integration**: [https://langfuse.com/integrations/model-providers/openai-py](/integrations/model-providers/openai-py)
-- **Langfuse `@observe()` Decorator**: [https://langfuse.com/docs/sdk/python/decorators](/docs/sdk/python/decorators)
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+

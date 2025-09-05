@@ -6,13 +6,11 @@ sidebarTitle: Datasets
 
 # Datasets
 
-A dataset is a collection of inputs and expected outputs and is used to test your application. Before executing your first dataset run, you need to create a dataset. 
+A dataset is a collection of inputs and expected outputs and is used to test your application. Before executing your first dataset run, you need to create a dataset.
 
 <Frame border fullWidth>
-![Datasets](/images/docs/datasets-overview.png)
+  ![Datasets](/images/docs/datasets-overview.png)
 </Frame>
-
-
 
 ## Why use datasets?
 
@@ -41,7 +39,6 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 
 <CreateDatasetItem />
 </Steps>
-
 
 ## Create synthetic datasets
 
@@ -82,9 +79,9 @@ langfuse.create_dataset_item(
 <Tab>
 
 ```ts
-import { LangfuseClient } from "@langfuse/client"
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new LangfuseClient()
+const langfuse = new LangfuseClient();
 
 await langfuse.api.datasetItems.create({
   datasetName: "<dataset_name>",
@@ -101,8 +98,8 @@ await langfuse.api.datasetItems.create({
 <Tab>
 In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
 
-<CloudflareVideo
-  videoId="51ba46cebd0431f9e5483082a8470206"
+<Video
+  src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"
   aspectRatio={16 / 9}
   gifStyle
 />
@@ -134,9 +131,9 @@ langfuse.create_dataset_item(
 You can upsert items by providing the `id` of the item you want to update.
 
 ```ts
-import { LangfuseClient } from "@langfuse/client"
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new LangfuseClient()
+const langfuse = new LangfuseClient();
 
 await langfuse.api.datasetItems.create({
   id: "<item_id>",
@@ -149,9 +146,7 @@ await langfuse.api.datasetItems.create({
 <Tab>
 In the UI, you can edit the item by clicking on the item id. To archive or delete the item, click on the dots next to the item and select `Archive` or `Delete`.
 
-<Frame fullWidth>
-![Delete items](/images/docs/dataset-delete-items.png)
-</Frame>
+<Frame fullWidth>![Delete items](/images/docs/dataset-delete-items.png)</Frame>
 
 </Tab>
 </Tabs>
@@ -160,7 +155,7 @@ In the UI, you can edit the item by clicking on the item id. To archive or delet
 
 Once you created a dataset, you can test and evaluate your application based on it.
 
-import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
+import { Table, WandSparkles, CodeXml, Database } from "lucide-react";
 
 <Cards num={1}>
 

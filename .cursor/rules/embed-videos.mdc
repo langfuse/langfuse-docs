@@ -1,8 +1,9 @@
 ---
 description: Follow this rule when adding embedding videos or gifs in the documentation files.
-globs: 
+globs:
 alwaysApply: false
 ---
+
 ## General rules
 
 We use the components from [Video.tsx](mdc:components/Video.tsx) across our documentation to embed videos in the docs.
@@ -11,22 +12,26 @@ You can use the gifStyle flag for short videos, they will autoplay and look like
 
 Always include a placeholder for the dimensions, thereby the user can add these to reduce layout shift.
 
-<CloudflareVideo> is available globally without adding an import
+<Video> is available globally without adding an import
 
 ## Recording Videos
 
 - ScreenStudio to record videos
 - 16:9 aspect ratio
 - Light mode (not dark mode)
-- Do not use a frame or border around the video. <CloudflareVideo> will do this automatically.
+- Do not use a frame or border around the video. <Video> will do this automatically.
+
+## Publish
+
+Publish videos to the [docs-videos](https://static.langfuse.com/docs-videos) bucket on Cloudflare.
 
 ## Examples
 
 Example
 
 ```
-<CloudflareVideo
-  videoId="<videoid>"
+<Video
+  src="https://static.langfuse.com/docs-videos/<video>.mp4"
   aspectRatio={16 / 9}
   title="<title>"
 />
@@ -35,10 +40,9 @@ Example
 Example gifmode
 
 ```
-<CloudflareVideo
-  videoId="<videoid>"
+<Video
+  src="https://static.langfuse.com/docs-videos/<video>.mp4"
   aspectRatio={16 / 9}
   gifStyle
 />
 ```
-

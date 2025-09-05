@@ -1,0 +1,57 @@
+---
+title: How to export HAR file for SSO troubleshooting
+description: Step-by-step guide to export HAR files from different browsers when experiencing SSO authentication issues in Langfuse
+tags: [administration]
+---
+
+# How to export HAR file for SSO troubleshooting
+
+When experiencing Single Sign-On (SSO) issues in Langfuse, you need to export a HAR file to help Langfuse support to diagnose the problem.
+
+## What is a HAR file?
+
+A [HAR file](<https://en.wikipedia.org/wiki/HAR_(file_format)>) is a JSON-formatted archive that logs all HTTP requests made by your browser, including:
+
+- Request and response headers
+- Cookies and session data
+- Timing information
+- Response content
+- Error details
+
+## Browser-specific instructions
+
+### Google Chrome
+
+1. **Open Developer Tools**: Press `F12` or `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Option+I` (Mac)
+2. **Access Network Tab**: Click on the "Network" tab
+3. **Configure settings**:
+   - Ensure the red record button is active
+   - Check "Preserve log" to keep logs during navigation
+4. **Clear existing logs**: Click the clear button (🚫)
+5. **Reproduce the issue**: Refresh the page and perform the SSO steps that cause problems
+6. **Export**: Right-click in the network log and select "Save all as HAR with content"
+
+### Mozilla Firefox
+
+1. **Open Developer Tools**: Press `F12` or `Ctrl+Shift+I`
+2. **Access Network Tab**: Click on the "Network" tab
+3. **Configure**: Check "Persist Logs" and clear existing logs
+4. **Reproduce the issue**: Refresh and perform the problematic SSO steps
+5. **Export**: Right-click in the network requests and select "Save All As HAR"
+
+### Microsoft Edge
+
+1. **Open Developer Tools**: Press `F12` or `Ctrl+Shift+I`
+2. **Access Network Tab**: Click on the "Network" tab
+3. **Configure**: Ensure recording is active and "Preserve log" is checked
+4. **Reproduce the issue**: Clear logs, refresh, and perform SSO steps
+5. **Export**: Click the download icon (⬇️) or right-click and select "Save as HAR with Content"
+
+### Safari
+
+1. **Enable Developer Menu**: Safari → Preferences → Advanced → Check "Show Develop menu"
+2. **Open Web Inspector**: Develop → Show Web Inspector or `Cmd+Option+I`
+3. **Access Network Tab**: Click on the "Network" tab
+4. **Configure**: Enable "Preserve Log"
+5. **Reproduce the issue**: Clear logs, refresh, and perform SSO steps
+6. **Export**: Click the export icon (📤) and choose "Export HAR"

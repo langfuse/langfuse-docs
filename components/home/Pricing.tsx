@@ -404,6 +404,10 @@ type Tier = {
     name: string;
     href: string;
   };
+  calloutLink?: {
+    text: string;
+    href: string;
+  };
   addOn?: {
     name: string;
     price: string;
@@ -445,6 +449,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         name: "Discounts available",
         href: "/pricing#discounts",
       },
+      calloutLink: {
+        text: "Startup? Get 50% off",
+        href: "/startups",
+      },
       mainFeatures: [
         "Everything in Hobby",
         <>
@@ -466,6 +474,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "$199",
       description:
         "For scaling projects. Unlimited history, high rate limits, all features.",
+      calloutLink: {
+        text: "Startup? Get 50% off",
+        href: "/startups",
+      },
       mainFeatures: [
         "Everything in Core",
         <>
@@ -476,7 +488,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited annotation queues",
         "High rate limits",
         "SOC2 & ISO27001 reports, BAA available (HIPAA)",
-        "Support via Slack, Chat",
+        "Support via dedicated Slack Channel, Chat",
       ],
       addOn: {
         name: "Teams",
@@ -497,6 +509,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       description: "Enterprise-grade support and security features.",
       price: "Custom",
+      calloutLink: {
+        text: "Enterprise FAQ",
+        href: "/enterprise",
+      },
       mainFeatures: [
         "Everything in Pro and Teams add-on",
         "Custom rate limits",
@@ -537,6 +553,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       price: "Custom",
       description: "Enterprise-grade support and security features.",
+      calloutLink: {
+        text: "Enterprise FAQ",
+        href: "/enterprise",
+      },
       mainFeatures: [
         "All Open Source features",
         "Project-level RBAC",
@@ -548,10 +568,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Billing via Invoice",
       ],
       cta: "Talk to sales",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
       learnMore: "/enterprise",
     },
   ],
@@ -1708,7 +1724,7 @@ export default function Pricing({
                   {variant === "cloud" &&
                     (tier.name === "Core" || tier.name === "Pro") && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium">
+                        <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium text-center whitespace-nowrap inline-block">
                           Unlimited Users
                         </div>
                       </div>
@@ -1777,16 +1793,15 @@ export default function Pricing({
                       )}
                     </div>
 
-                    {/* Startup discount callout for Core and Pro - always render container for alignment */}
+                    {/* Callouts for different tiers - always render container for alignment */}
                     <div className="p-6 h-[30px] flex items-center justify-center">
-                      {variant === "cloud" &&
-                      (tier.name === "Core" || tier.name === "Pro") ? (
+                      {tier.calloutLink ? (
                         <div className="text-xs text-muted-foreground text-center">
                           <Link
-                            href="/startups"
+                            href={tier.calloutLink.href}
                             className="underline hover:text-primary"
                           >
-                            Startup? Get 50% off
+                            {tier.calloutLink.text}
                           </Link>
                         </div>
                       ) : null}

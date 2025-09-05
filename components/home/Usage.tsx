@@ -11,7 +11,7 @@ export const Usage = () => {
   ];
 
   return (
-    <HomeSection className="pt-2 sm:pt-2 lg:pt-2 xl:pt-2">
+    <HomeSection>
       <div className="py-14">
         <h2 className="text-center text-lg font-semibold leading-8 mb-8">
           Teams building complex LLM apps rely on Langfuse
