@@ -39,3 +39,171 @@ import { Terminal, FileCode } from "lucide-react";
     icon={<FileCode />}
   />
 </Cards>
+
+## Best practices: pass functions and schemas via config
+
+- **Structured outputs (JSON schema)**: Prefer `response_format` with `type: "json_schema"` and `strict: true` to enforce schema. You can store the schema and flags in the prompt `config` so they version with the prompt. See also [Structured Outputs cookbook](/guides/cookbook/integration_openai_structured_output).
+- **Function/tool calling**: Store `tools` (function definitions) and optionally `tool_choice` in the prompt `config`. Tools (aka functions) should define parameters as JSON Schema.
+- **Typed models (Pydantic)**: If you use Pydantic types, convert them to an OpenAI `response_format` with `type_to_response_format_param`. See [OpenAI Python integration](/integrations/model-providers/openai-py#structured-output).
+- **Model and runtime params**: Keep `model`, `temperature`, `top_p`, `max_tokens`, etc. inside the prompt `config` to switch models and tune behavior without code changes.
+- **Link prompts to traces**: Pass `langfuse_prompt=prompt` on model calls to record the exact prompt version.
+
+## Example (Python): Structured output via prompt config
+
+Below, the prompt `config` contains either a full `response_format` or a plain `json_schema` which we wrap into `response_format`.
+
+```python
+# pip install langfuse openai --upgrade
+from langfuse import get_client
+from langfuse.openai import OpenAI  # drop-in for tracing
+
+langfuse = get_client()
+client = OpenAI()
+
+# 1) Fetch prompt (type can be "text" or "chat"; here we build system message manually)
+prompt = langfuse.get_prompt("invoice-extractor")
+
+# 2) Prepare system prompt (add your own placeholders)
+system_message = prompt.compile()
+
+# 3) Parse config
+cfg = prompt.config or {}
+model = cfg.get("model", "gpt-4o")
+temperature = cfg.get("temperature", 0)
+
+# Prefer using a full response_format if present
+response_format = cfg.get("response_format")
+
+# Back-compat: if only a plain json_schema is stored, wrap it
+if not response_format and "json_schema" in cfg:
+  response_format = {
+    "type": "json_schema",
+    "json_schema": {
+      "name": cfg.get("schema_name", prompt.name or "schema"),
+      "schema": cfg["json_schema"],
+      "strict": True,
+    }
+  }
+
+# 4) Call OpenAI
+res = client.chat.completions.create(
+  model=model,
+  temperature=temperature,
+  messages=[
+    {"role": "system", "content": system_message},
+    {"role": "user", "content": "Please extract invoice number and total from: ..."},
+  ],
+  response_format=response_format,
+  # Record prompt version in Langfuse tracing
+  langfuse_prompt=prompt,
+)
+
+content = res.choices[0].message.content  # JSON string when using response_format
+```
+
+### Example config payloads
+
+```json
+{
+  "model": "gpt-4o-2024-08-06",
+  "temperature": 0,
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "invoice_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoice_number": {"type": "string"},
+          "total": {"type": "number"}
+        },
+        "required": ["invoice_number", "total"],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  }
+}
+```
+
+```json
+{
+  "model": "gpt-4o",
+  "temperature": 0,
+  "json_schema": {
+    "type": "object",
+    "properties": {
+      "invoice_number": {"type": "string"},
+      "total": {"type": "number"}
+    },
+    "required": ["invoice_number", "total"],
+    "additionalProperties": false
+  }
+}
+```
+
+## Example (Python): Function/tool calling via prompt config
+
+Store your function definitions in `config.tools` and choose a `tool_choice`.
+
+```python
+# pip install langfuse openai --upgrade
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+client = OpenAI()
+
+prompt = langfuse.get_prompt("weather-agent")
+system_message = prompt.compile()
+
+cfg = prompt.config or {}
+model = cfg.get("model", "gpt-4o")
+temperature = cfg.get("temperature", 0)
+tools = cfg.get("tools", [])
+tool_choice = cfg.get("tool_choice")  # e.g. {"type": "function", "function": {"name": "get_current_weather"}}
+
+res = client.chat.completions.create(
+  model=model,
+  temperature=temperature,
+  messages=[
+    {"role": "system", "content": system_message},
+    {"role": "user", "content": "What's the weather in Berlin?"},
+  ],
+  tools=tools,
+  tool_choice=tool_choice,
+  langfuse_prompt=prompt,
+)
+```
+
+### Example config payload for tools
+
+```json
+{
+  "model": "gpt-4o",
+  "temperature": 0,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_current_weather",
+        "description": "Get the current weather in a given location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {"type": "string", "description": "City and country"},
+            "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+          },
+          "required": ["location"],
+          "additionalProperties": false
+        }
+      }
+    }
+  ],
+  "tool_choice": {"type": "auto"}
+}
+```
+
+<Callout>
+Looking for a full end-to-end notebook? See the [OpenAI functions cookbook](/guides/cookbook/prompt_management_openai_functions) and the [Structured Outputs cookbook](/guides/cookbook/integration_openai_structured_output).
+</Callout>
