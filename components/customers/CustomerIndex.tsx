@@ -9,6 +9,7 @@ interface CustomerStory {
   frontMatter: {
     title: string;
     description: string;
+    date?: string;
     customerLogo?: string;
     customerLogoDark?: string;
     customerQuote?: string;
@@ -26,16 +27,45 @@ interface CustomerStory {
 export const CustomerIndex = ({
   maxItems,
   path = "/customers",
+  filterByMonth,
+  filterByYear,
 }: {
   maxItems?: number;
   path?: string;
+  filterByMonth?: string;
+  filterByYear?: number;
 }) => {
   const customerStories = useMemo(
     () =>
       (getPagesUnderRoute(path) as Array<CustomerStory>)
-        .filter((page) => page.frontMatter?.showInCustomerIndex !== false)
+        .filter((page) => {
+          // Filter by showInCustomerIndex
+          if (page.frontMatter?.showInCustomerIndex === false) {
+            return false;
+          }
+          
+          // Filter by date if filterByMonth or filterByYear is provided
+          if (filterByMonth || filterByYear) {
+            const pageDate = page.frontMatter?.date;
+            if (!pageDate) return false;
+            
+            const pageDateLower = pageDate.toLowerCase();
+            
+            // Check month filter
+            if (filterByMonth && !pageDateLower.includes(filterByMonth.toLowerCase())) {
+              return false;
+            }
+            
+            // Check year filter
+            if (filterByYear && !pageDateLower.includes(filterByYear.toString())) {
+              return false;
+            }
+          }
+          
+          return true;
+        })
         .slice(0, maxItems),
-    [maxItems, path]
+    [maxItems, path, filterByMonth, filterByYear]
   );
 
   return (
