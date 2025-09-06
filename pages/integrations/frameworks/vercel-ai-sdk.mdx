@@ -33,7 +33,7 @@ const shouldExportSpan: ShouldExportSpan = (span) => {
   return span.otelSpan.instrumentationScope.name !== "next.js";
 };
 
-const langfuseSpanProcessor = new LangfuseSpanProcessor({
+export const langfuseSpanProcessor = new LangfuseSpanProcessor({
   shouldExportSpan,
 });
 
