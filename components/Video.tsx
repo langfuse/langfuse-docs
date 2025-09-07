@@ -59,7 +59,7 @@ export const Video = ({
   const mediaPlayerRef = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const remote = useMediaRemote(mediaPlayerRef);
-  const { duration } = useMediaStore(mediaPlayerRef);
+  const { duration, currentTime } = useMediaStore(mediaPlayerRef);
 
   const durationString = duration
     ? `${Math.floor(duration / 60)}:${String(
@@ -67,12 +67,29 @@ export const Video = ({
       ).padStart(2, "0")} min`
     : null;
 
+  // Calculate progress percentage for gif mode
+  const progressPercentage = duration && currentTime 
+    ? (currentTime / duration) * 100 
+    : 0;
+
+  // Handle seeking in gif mode
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!gifStyle || !duration) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = clickX / rect.width;
+    const newTime = percentage * duration;
+    
+    remote.seek(newTime);
+  };
+
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="relative">
       <MediaPlayer
         ref={mediaPlayerRef}
         src={src}
-        controls={gifStyle || panelDismissed}
+        controls={!gifStyle && panelDismissed}
         autoplay={gifStyle}
         muted={gifStyle}
         loop={gifStyle}
@@ -114,6 +131,19 @@ export const Video = ({
         ) : null}
         <MediaOutlet />
       </MediaPlayer>
+      
+      {/* Custom progress bar for gif mode */}
+      {gifStyle && (
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 cursor-pointer group/progress"
+          onClick={handleProgressClick}
+        >
+          <div 
+            className="h-full bg-white/80 group-hover/progress:bg-white transition-colors duration-200"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 };
