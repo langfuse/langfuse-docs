@@ -1,0 +1,128 @@
+---
+title: How to evaluate sessions or conversations using LLM-as-a-Judge?
+tags: [evaluation, observability]
+---
+
+# How to evaluate sessions or conversations using LLM-as-a-Judge?
+
+This guide explains how to evaluate entire sessions or conversations in Langfuse using LLM-as-a-Judge, rather than just individual traces.
+
+## Understanding the Challenge
+
+Currently, Langfuse's LLM-as-a-Judge evaluators can only be applied to **single traces**, not to full sessions directly. This is because Langfuse cannot automatically determine when a session actually concludes - sessions are ongoing conversational threads that may span multiple interactions over time.
+
+## Recommended Approach: Evaluate the Final Trace
+
+The recommended approach is to **evaluate a single trace that contains the complete conversation history**. This can be implemented in two main ways:
+
+### Method 1: Manual Span with Full Conversation
+
+Create a manual span that captures the entire conversation history:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Create a trace with the full conversation context
+trace = langfuse.trace(
+    name="conversation-evaluation",
+    session_id="your-session-id",
+    input={
+        "conversation_history": [
+            {"role": "user", "content": "Hello, I need help with..."},
+            {"role": "assistant", "content": "I'd be happy to help..."},
+            {"role": "user", "content": "Thanks, but I also need..."},
+            {"role": "assistant", "content": "Of course! Here's how..."}
+        ]
+    },
+    output={
+        "final_response": "The complete conversation concluded successfully",
+        "conversation_summary": "User received comprehensive help with their query"
+    }
+)
+```
+
+### Method 2: Include Message History in LLM Calls
+
+When making the final LLM call in your conversation, include the full message history as input:
+
+```python
+# Your final LLM call that includes the complete conversation
+completion = openai.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, I need help with..."},
+        {"role": "assistant", "content": "I'd be happy to help..."},
+        {"role": "user", "content": "Thanks, but I also need..."},
+        {"role": "assistant", "content": "Of course! Here's how..."}
+    ],
+    # Langfuse will automatically capture this full message history
+    metadata={"langfuse_session_id": "your-session-id"}
+)
+```
+
+## Key Implementation Details
+
+### 1. Session Context is Preserved
+
+Since you're using `session_id` when creating traces, **the message history of the session is already captured within each trace**. The conversation context exists in:
+
+- The `input` and `output` fields of your traces
+- The message history passed to LLM calls
+- Manual spans that you create to log conversation state
+
+### 2. Evaluate the Final Trace
+
+Set up your LLM-as-a-Judge evaluator to run on traces that represent the end of a conversation:
+
+1. **Tag final traces**: Add a specific tag like `conversation_end` to the final trace of each session
+2. **Configure evaluator filters**: Set up your evaluator to only run on traces with this tag
+3. **Run evaluation once**: The evaluator will process the complete conversation context from that final trace
+
+### 3. Example Evaluator Setup
+
+When configuring your LLM-as-a-Judge evaluator in the Langfuse UI:
+
+- **Filter by tags**: Set the evaluator to only run on traces tagged with `conversation_end`
+- **Map variables**: Map the conversation history from the trace input to your evaluation prompt
+- **Evaluation prompt example**:
+  ```
+  Please evaluate this complete conversation between a user and an AI assistant.
+  
+  Conversation: {{input}}
+  
+  Rate the overall conversation quality on a scale of 1-5 considering:
+  - Helpfulness across all interactions
+  - Coherence and consistency
+  - Problem resolution effectiveness
+  - User satisfaction throughout the conversation
+  ```
+
+## Alternative: Session-Level Scores
+
+For evaluating sessions as a whole, you can also use [session-level scores](/docs/evaluation/evaluation-methods/custom-scores):
+
+```python
+# Create a score at the session level
+langfuse.score(
+    session_id="your-session-id",  # Score the entire session
+    name="conversation_quality",
+    value=4.5,
+    comment="Overall conversation was helpful and resolved user's issues"
+)
+```
+
+## Best Practices
+
+1. **Consistent tagging**: Always tag your final conversation traces consistently
+2. **Include full context**: Ensure your final trace contains or references the complete conversation
+3. **One evaluation per session**: Run the evaluator only once per session on the final trace
+4. **Clear evaluation criteria**: Design your evaluation prompt to assess conversation-level qualities
+
+## What About Session-Level Evaluation?
+
+While Langfuse supports session-level scores, LLM-as-a-Judge evaluators currently only work at the trace level. However, since the conversation history is captured within traces (especially the final trace), this approach effectively evaluates the entire session's content.
+
+The session serves as a grouping mechanism, but the actual evaluation happens on the trace that contains the full conversational context.
