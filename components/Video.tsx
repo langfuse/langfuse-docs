@@ -130,20 +130,20 @@ export const Video = ({
           </div>
         ) : null}
         <MediaOutlet />
-      </MediaPlayer>
-      
-      {/* Custom progress bar for gif mode */}
-      {gifStyle && (
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 cursor-pointer group/progress"
-          onClick={handleProgressClick}
-        >
+        
+        {/* Custom progress bar for gif mode */}
+        {gifStyle && (
           <div 
-            className="h-full bg-white/80 group-hover/progress:bg-white transition-colors duration-200"
-            style={{ width: `${progressPercentage}%` }}
-          />
-        </div>
-      )}
+            className="absolute bottom-0 left-0 right-0 h-2 bg-black/60 cursor-pointer group/progress z-20"
+            onClick={handleProgressClick}
+          >
+            <div 
+              className="h-full bg-white group-hover/progress:bg-blue-400 transition-all duration-200"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        )}
+      </MediaPlayer>
     </div>
   );
 };
