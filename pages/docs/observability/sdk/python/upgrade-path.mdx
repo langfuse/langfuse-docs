@@ -17,7 +17,7 @@ The Python SDK v3 introduces significant improvements and changes compared to th
 - **OpenTelemetry Foundation**: v3 is built on OpenTelemetry standards
 - **Trace Input/Output**: Now derived from root observation by default
 - **Trace Attributes** (`user_id`, `session_id`, etc.) Can be set via enclosing spans OR directly on integrations using metadata fields (OpenAI call, Langchain invocation)
-- **Context Management**: Automatic OTEL context propagation
+- **Context Management**: Automatic OTEL [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
 
 ## Migration Path by Integration Type
 
@@ -354,7 +354,7 @@ See the [datasets documentation](/docs/evaluation/dataset-runs/remote-run) for m
 
 5.  **IDs and Context**:
 
-    - **v3**: W3C Trace Context format, automatic context propagation
+    - **v3**: W3C Trace Context format, automatic [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/)
     - **Migration**: Use `langfuse.get_current_trace_id()` instead of `get_trace_id()`
 
 6.  **Event Size Limitations**:
