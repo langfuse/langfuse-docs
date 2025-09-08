@@ -21,7 +21,7 @@ UI-based updates ([tags](/docs/observability/features/tags), bookmarks, [publish
 
 **Via SDK or Ingestion API**
 
-- You can upsert traces, observations, and scores based on their `id` (and, optionally `timestamp` and `startTime`, respectively).
+- You can upsert traces, observations, and scores based on their `id` (and, optionally, `timestamp` for traces, `startTime` for observations, and `timestamp` for scores, respectively).
 - Within 60 days of creation, updates will be merged into the existing trace, observation, or score.
 - After 60 days, updates may create duplicate entries containing only the changed fields. This can lead to inconsistencies in dashboards and historical filtering.
 - Sending a full event with `id`, same `timestamp/startTime`, and all desired properties will always replace the existing record instead of producing a duplicate and is recommended for long-term updates.
