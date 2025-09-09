@@ -1,24 +1,16 @@
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
-import {
-  defaultLayoutIcons,
-  DefaultVideoLayout,
-} from "@vidstack/react/player/layouts/default";
 
 export const Video = ({
   src,
-  poster,
   aspectRatio,
   className,
   gifStyle = false,
-  title,
 }: {
   src: string;
-  poster?: string;
   aspectRatio?: number;
   gifStyle?: boolean;
   className?: string;
-  title?: string;
 }) => {
   return (
     <MediaPlayer
@@ -36,7 +28,6 @@ export const Video = ({
       )}
     >
       <MediaProvider />
-      <DefaultVideoLayout icons={defaultLayoutIcons} />
     </MediaPlayer>
   );
 };
