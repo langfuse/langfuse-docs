@@ -171,3 +171,7 @@ To setup user provisioning in Okta, follow these steps:
    - Select the users you want to assign to the Langfuse SCIM application. You can overwrite the role here.
    - Click **Done** and then **Save**.
    - Users should appear as Member within your Langfuse Organization.
+
+#### Troubleshooting
+
+- **Users are provisioned with NONE/VIEWER permissions instead of their intended `role`**: This usually happens if the `roles` attribute has an attribute type `Group` instead of `Personal`.
