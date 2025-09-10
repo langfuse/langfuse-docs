@@ -151,7 +151,6 @@ const handler = async (req: Request) => {
 
   // Add these lines to fetch and link a prompt
   const prompt = await langfuse.prompt.get("my-prompt");
-  updateActiveObservation({ prompt }, { asType: "generation" });
 
   const result = streamText({
     // ... other streamText options ...
