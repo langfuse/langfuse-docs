@@ -41,6 +41,11 @@ export default {
     title: "FAQ",
     // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
   },
+  handbook: {
+    type: "page",
+    title: "Handbook",
+    // hidden from main menu via overrides.css, nextra display:hidden otherwise breaks type:page
+  },
   pricing: {
     title: "Pricing",
     type: "page",
