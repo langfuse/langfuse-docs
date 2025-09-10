@@ -1,0 +1,59 @@
+# Product Ops
+
+We maintain an increasingly large product surface area with a small team.
+Processes matter in order to fix important bugs fast, and ship highly requested improvements for customers.
+
+## Overview
+
+For product engineering, we use:
+
+- GitHub
+  - Issues for bug reports and near term improvements
+  - Discussions for feature requests
+- Linear for internal ticketing
+- Plain for managing support across all channels (in-app, GitHub Discussions Support, Shared Slack Channels, Shared Email inboxes)
+
+We do not use:
+
+- Our individual email inboxes
+
+## Workflow Integration
+
+The following diagram shows how issues and requests flow between our different platforms:
+
+```mermaid
+graph TD
+    A[GitHub Issues (Bug Reports)] -->|Automatically added to triage, respond/resolve from Linear| H[Linear Issues]
+
+    C[GitHub Ideas Discussions] --> D[Plain Tickets]
+    E[GitHub Support Discussions] --> D[Plain Tickets]
+
+    I[Slack Channels] --> D[Plain Tickets]
+    J[Email] --> D[Plain Tickets]
+    K[In-app Support] --> D[Plain Tickets]
+
+    D -->|Link to Linear issue via Customer Request, close the loop when done| G[Linear Customer Requests]
+
+    G --> H[Linear Issues]
+
+    subgraph "GitHub"
+        A
+        C
+        E
+    end
+
+    subgraph "Private Support Channels"
+        I
+        J
+        K
+    end
+
+    subgraph "Plain"
+        D
+    end
+
+    subgraph "Linear"
+        G
+        H
+    end
+```
