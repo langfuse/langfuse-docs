@@ -86,39 +86,11 @@ The following SCIM endpoints are available:
 - `GET /Users/{id}`
 - `DELETE /Users/{id}`
 
-## Okta Setup Guide
+### SCIM Vendor Guides
 
-This guide will cover how to setup Okta authentication and user provisioning for Langfuse.
-Authentication and provisioning are two separate steps in Okta.
-Follow the one that is applicable to your use case.
+#### Okta
 
-### Authentication
-
-For authentication, Langfuse supports the [OpenID Connect (OIDC)](https://openid.net/connect/) protocol.
-This allows you to use Okta as an identity provider for Langfuse.
-To set up Okta authentication, follow these steps:
-
-1. **Create an Okta Application**:
-   - Log in to your Okta admin console.
-   - Navigate to **Applications** > **Create App Integration**.
-   - Choose **OIDC - OpenID Connect** as the sign-in method and click **Next**.
-   - Choose **Web Application** as the application type and click **Next**.
-   - Fill in the application settings. Use your self-hosted domain or one of the Langfuse Cloud domains.
-     - **App name**: `Langfuse`
-     - **Login redirect URIs**: `https://your-langfuse-domain.com/api/auth/callback/okta`
-     - **Logout redirect URIs**: `https://your-langfuse-domain.com/`
-   - Click **Save**.
-2. **Setup Langfuse (Cloud)**:
-   - Please reach out to the Langfuse support team at via the [in-app support](/support).
-   - Once the SSO is configured, you can type in your email on the sign-in page and are automatically redirected to Okta.
-3. **Setup Langfuse (Self-Hosted)**:
-   - Follow the Langfuse [SSO guide](/self-hosting/security/authentication-and-sso#okta) to configure Okta as an identity provider.
-   - Once the environment variables are set, you will see an "Okta" button on your sign-in page.
-4. **Test the Integration**:
-   - Assign users to your Okta application and test the login flow.
-   - For any issues, please create an issue on [GitHub](/issues) or contact support.
-
-### User Provisioning
+This guide will cover how to setup Okta user provisioning for Langfuse. First, you will need to setup [authentication via OIDC](/docs/administration/authentication-and-sso).
 
 <Video
   src="https://static.langfuse.com/docs-videos/2025-08-06-okta-scim-setup.mov.mp4"
@@ -135,7 +107,7 @@ To setup user provisioning in Okta, follow these steps:
    - Choose **SAML 2.0** as the sign-in method and click **Next**.
    - Fill in the application settings. Use your self-hosted domain or one of the Langfuse Cloud domains.
      - **App name**: `Langfuse SCIM`
-     - **Single sign-on URL**: `https://your-langfuse-domain.com/api/auth/callback/okta`
+     - **Single sign-on URL**: `https://your-langfuse-domain.com` (langfuse uses OIDC for authentication, see above, this will not be used)
      - **Audience URI**: `langfuse`
    - Click **Next** and then **Finish**.
 2. **Configure SCIM Settings**:
@@ -171,3 +143,7 @@ To setup user provisioning in Okta, follow these steps:
    - Select the users you want to assign to the Langfuse SCIM application. You can overwrite the role here.
    - Click **Done** and then **Save**.
    - Users should appear as Member within your Langfuse Organization.
+
+##### Troubleshooting
+
+- **Users are provisioned with NONE/VIEWER permissions instead of their intended `role`**: This usually happens if the `roles` attribute has an attribute type `Group` instead of `Personal`.

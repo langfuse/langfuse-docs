@@ -1,5 +1,5 @@
 import "../style.css";
-import "vidstack/styles/base.css";
+import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
 import Script from "next/script";
 import { useEffect } from "react";
