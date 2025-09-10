@@ -113,45 +113,34 @@ interface ImageCarouselProps extends React.ComponentProps<typeof Carousel> {
 export const ImageCarousel = React.forwardRef<HTMLDivElement, ImageCarouselProps>(
   ({ children, className, ...props }, ref) => {
     const [api, setApi] = useState<CarouselApi>();
+    const carouselRef = React.useRef<HTMLDivElement>(null);
     const [zoomedImage, setZoomedImage] = useState<{
       images: { src: string; alt: string }[];
       currentIndex: number;
     } | null>(null);
 
-    // Extract image data from children
+    // Extract all images from this carousel instance
     const extractImages = useCallback(() => {
       const images: { src: string; alt: string }[] = [];
       
-      React.Children.forEach(children, (child) => {
-        if (React.isValidElement(child) && child.props.children) {
-          // Look for images in CarouselContent -> CarouselItem -> Frame -> img
-          React.Children.forEach(child.props.children, (item) => {
-            if (React.isValidElement(item) && item.props.children) {
-              React.Children.forEach(item.props.children, (frame) => {
-                if (React.isValidElement(frame) && frame.props.children) {
-                  // Handle markdown image syntax
-                  const imgMatch = String(frame.props.children).match(/!\[([^\]]*)\]\(([^)]+)\)/);
-                  if (imgMatch) {
-                    images.push({
-                      alt: imgMatch[1] || 'Image',
-                      src: imgMatch[2],
-                    });
-                  }
-                }
-              });
-            }
+      if (carouselRef.current) {
+        const imgElements = carouselRef.current.querySelectorAll('img');
+        imgElements.forEach((img) => {
+          images.push({
+            src: img.src,
+            alt: img.alt || 'Image',
           });
-        }
-      });
+        });
+      }
       
       return images;
-    }, [children]);
+    }, []);
 
     const handleImageClick = useCallback((e: MouseEvent) => {
       const target = e.target as HTMLElement;
       
-      // Check if clicked on an image inside the carousel
-      if (target.tagName === 'IMG' && target.closest('[data-image-carousel]')) {
+      // Check if clicked on an image inside this carousel
+      if (target.tagName === 'IMG' && carouselRef.current?.contains(target)) {
         // Only handle clicks on desktop (screens wider than 500px)
         if (window.innerWidth <= 500) {
           return;
@@ -162,7 +151,7 @@ export const ImageCarousel = React.forwardRef<HTMLDivElement, ImageCarouselProps
         
         const images = extractImages();
         const imgSrc = (target as HTMLImageElement).src;
-        const currentIndex = images.findIndex(img => img.src.endsWith(imgSrc.split('/').pop() || ''));
+        const currentIndex = images.findIndex(img => img.src === imgSrc);
         
         if (currentIndex !== -1) {
           setZoomedImage({ images, currentIndex });
@@ -192,15 +181,16 @@ export const ImageCarousel = React.forwardRef<HTMLDivElement, ImageCarouselProps
 
     return (
       <>
-        <Carousel
-          ref={ref}
-          className={cn("image-carousel", className)}
-          setApi={setApi}
-          data-image-carousel
-          {...props}
-        >
-          {children}
-        </Carousel>
+        <div ref={carouselRef}>
+          <Carousel
+            ref={ref}
+            className={cn("image-carousel", className)}
+            setApi={setApi}
+            {...props}
+          >
+            {children}
+          </Carousel>
+        </div>
         
         {zoomedImage && (
           <ImageCarouselZoomModal
