@@ -21,8 +21,10 @@ The LangfuseSpanProcessor is automatically detecting multimodal data in your tra
 Here is a full example on how to set up tracing with the
 
 - AI SDK v5
-- Next JS
-- deployed on Vercel
+- Next.js
+- Deployed on Vercel
+
+Create a new file [`instrumentation.ts`](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) in your project root with the following content:
 
 ```ts filename="instrumentation.ts"
 import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
@@ -106,6 +108,18 @@ const handler = async (req: Request) => {
       // End span manually after stream has finished
       trace.getActiveSpan().end();
     },
+    onError: async (error) => {
+      updateActiveObservation({
+        output: error,
+        level: "ERROR"
+      });
+      updateActiveTrace({
+        output: error,
+      });
+
+      // End span manually after stream has finished
+      trace.getActiveSpan()?.end();
+    },
   });
 
   // Important in serverless environments: schedule flush after request is finished
@@ -121,6 +135,43 @@ export const POST = observe(handler, {
 ```
 
 Learn more about the AI SDK Telemetry in the [Vercel AI SDK documentation on Telemetry](https://ai-sdk.dev/docs/ai-sdk-core/telemetry).
+
+### Using Prompt Management
+
+If you want to use [Langfuse Prompt Management](/docs/prompt-management) to link traces to prompt versions so you can understand how your prompts are performing and run experiments, you can do the following:
+
+```ts filename="route.ts"
+// ... existing imports ...
+import { LangfuseClient } from "@langfuse/client"; // Add this import
+
+const langfuse = new LangfuseClient();
+
+const handler = async (req: Request) => {
+  // ... existing code ...
+
+  // Add these lines to fetch and link a prompt
+  const prompt = await langfuse.prompt.get("my-prompt");
+
+  const result = streamText({
+    // ... other streamText options ...
+    experimental_telemetry: {
+      isEnabled: true,
+      metadata: { 
+        langfusePrompt: prompt.toJSON() // This links the Generation to your prompt in Langfuse
+      },
+    },
+    // ... rest of the configuration remains the same ...
+  });
+
+  // ... rest of the handler remains the same ...
+};
+```
+
+The key changes are:
+1. Import the Langfuse client
+2. Fetch your prompt using `langfuse.prompt.get()`
+3. Add the prompt to the observation metadata
+4. Pass `langfusePrompt: prompt.toJSON()` in the telemetry metadata
 
 ### Short-lived environments
 
