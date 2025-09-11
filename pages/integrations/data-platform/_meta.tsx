@@ -15,4 +15,8 @@ export default {
     title: "Prompt Webhooks",
     href: "/docs/prompts/get-started#webhooks",
   },
+  "export-blob-storage": {
+    title: "Export to Blob Storage (e.g., S3)",
+    href: "/docs/api-and-data-platform/features/export-to-blob-storage",
+  },
 };
