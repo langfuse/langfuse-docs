@@ -19,20 +19,20 @@ We do not use:
 
 ## Workflow Integration
 
-The following diagram shows how issues and requests flow between our different platforms:
+The following diagram shows how bug reports and feature requests are handled:
 
 ```mermaid
-graph TD
-    A["GitHub Issues (Bug Reports)"] -->|Automatically added to triage, respond/resolve from Linear| H[Linear Issues]
+graph LR
+    A["GitHub Issues (Bug Reports)"] -->|Automatically added to triage via native integration. Respond/resolve/deduplicate from Linear| H[Linear Issues]
 
     C[GitHub Ideas Discussions] --> D[Plain Tickets]
     E[GitHub Support Discussions] --> D[Plain Tickets]
 
     I[Slack Channels] --> D[Plain Tickets]
-    J[Email] --> D[Plain Tickets]
+    J[Group Email Inboxes] --> D[Plain Tickets]
     K[In-app Support] --> D[Plain Tickets]
 
-    D -->|Link to Linear issue via Customer Request, close the loop when done| G[Linear Customer Requests]
+    D -->|"Link to Linear issue via Customer Request. Create Linear issue if none exists yet. Close the loop when done."| G[Linear Customer Requests]
 
     G --> H[Linear Issues]
 
