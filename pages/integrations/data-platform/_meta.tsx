@@ -1,7 +1,7 @@
 export default {
   "public-api": {
     title: "Public API",
-    href: "/docs/api",
+    href: "/docs/api-and-data-platform/features/public-api",
   },
   "exports-to-s3": {
     title: "Exports to S3",
