@@ -29,7 +29,7 @@ const integrations: IntegrationTileProps[] = [
   },
   {
     title: "API",
-    href: "/docs/api",
+    href: "/docs/api-and-data-platform/features/public-api",
     icon: <Code className="h-6 w-6" />,
   },
   {
