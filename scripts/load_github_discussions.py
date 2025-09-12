@@ -2,8 +2,44 @@ import requests
 import json
 import os
 import csv
+import time
 from datetime import datetime, timezone
 import xml.dom.minidom as md
+
+# Retry configuration
+RETRY_CONFIG = {
+    'max_retries': 3,
+    'base_delay': 1.0,  # 1 second base delay
+    'max_delay': 30.0,  # 30 seconds max delay
+    'backoff_multiplier': 2
+}
+
+def with_retry(func, description, *args, **kwargs):
+    """Retry wrapper with exponential backoff"""
+    last_error = None
+    
+    for attempt in range(1, RETRY_CONFIG['max_retries'] + 1):
+        try:
+            return func(*args, **kwargs)
+        except Exception as error:
+            last_error = error
+            
+            if attempt == RETRY_CONFIG['max_retries']:
+                print(f"❌ {description} failed after {RETRY_CONFIG['max_retries']} attempts")
+                raise error
+            
+            # Calculate delay with exponential backoff
+            delay = min(
+                RETRY_CONFIG['base_delay'] * (RETRY_CONFIG['backoff_multiplier'] ** (attempt - 1)),
+                RETRY_CONFIG['max_delay']
+            )
+            
+            print(f"⚠️  {description} failed (attempt {attempt}/{RETRY_CONFIG['max_retries']}): {error}")
+            print(f"🔄 Retrying in {delay}s...")
+            
+            time.sleep(delay)
+    
+    raise last_error
 
 def run_query(query, variables):
     url = 'https://api.github.com/graphql'
@@ -15,13 +51,13 @@ def run_query(query, variables):
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json',
     }
-    response = requests.post(url, json={'query': query, 'variables': variables}, headers=headers)
     
-    if response.status_code == 401:
-        raise ValueError("GitHub API returned 401 Unauthorized. Please check if your GITHUB_TOKEN is valid and has the necessary permissions.")
+    def _make_request():
+        response = requests.post(url, json={'query': query, 'variables': variables}, headers=headers)
+        response.raise_for_status()
+        return response.json()
     
-    response.raise_for_status()
-    return response.json()
+    return with_retry(_make_request, f"GitHub GraphQL API query")
 
 def load_github_discussions():
     query = """
@@ -216,9 +252,13 @@ if __name__ == "__main__":
         discussions = load_github_discussions()
         save_discussions_to_json(discussions)
         generate_sitemap(discussions)
+        print("✅ Successfully loaded GitHub discussions, saved JSON, and generated sitemap")
     except ValueError as e:
-        print(f"Error: {e}")
+        print(f"❌ Configuration error: {e}")
+        exit(1)
     except requests.exceptions.RequestException as e:
-        print(f"Network error occurred: {e}")
+        print(f"❌ Network error occurred (after retries): {e}")
+        exit(1)
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"❌ An unexpected error occurred: {e}")
+        exit(1)
