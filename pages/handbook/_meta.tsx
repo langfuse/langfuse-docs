@@ -2,7 +2,7 @@ import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 
 export const TEAMS_PATHS = {
   "product-engineering": "Product Engineering",
-  support: "Support",
+  gtm: "GTM",
   operations: "Operations",
 };
 
