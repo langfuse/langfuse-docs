@@ -338,8 +338,37 @@ response_b = chain.invoke(
 - Missing public key parameters may result in traces being routed to the default project or lost
 - Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
 
-## Self-signed SSL certificates (self-hosted Langfuse)
+## Passing `completion_start_time` for TTFT tracking
 
+If you are using the Python SDK to manually create generations, you can pass the `completion_start_time` parameter. This allows langfuse to calculate the time to first token for you.
+
+```python
+from langfuse import get_client
+import datetime
+import time
+ 
+langfuse = get_client()
+ 
+# Start observation with specific type
+with langfuse.start_as_current_observation(
+    as_type="generation",
+    name="TTFT-Generation"
+) as generation:
+
+    # simulate LLM time to first token
+    time.sleep(3)
+
+    # Update the generation with the time the model started to generate
+    generation.update(
+        completion_start_time=datetime.datetime.now(),
+        output="some response",
+    )
+ 
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+## Self-signed SSL certificates (self-hosted Langfuse)
 
 If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:
 
