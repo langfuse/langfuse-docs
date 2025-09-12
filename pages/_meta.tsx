@@ -109,15 +109,6 @@ export default {
     type: "page",
     display: "hidden",
   },
-  why: {
-    title: "Why Langfuse",
-    type: "page",
-    display: "hidden",
-    theme: {
-      typesetting: "article",
-      timestamp: false,
-    },
-  },
   enterprise: {
     title: "Enterprise",
     type: "page",
