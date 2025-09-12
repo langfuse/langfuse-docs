@@ -19,8 +19,6 @@ Optionally, you can also trigger Remote Dataset Runs via the Langfuse UI which w
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
 
-## Setup & Run via SDK
-
 <details>
 <summary>Sequence Diagram</summary>
 
@@ -82,6 +80,533 @@ sequenceDiagram
 ```
 
 </details>
+
+## Experiment runner SDK
+
+Both the Python and JS/TS SDKs provide a high-level abstraction for running an experiment on a dataset. The dataset can be both local or hosted on Langfuse. Using the Experiment runner is the recommended way to run an experiment on a dataset with our SDK.
+
+The experiment runner automatically handles:
+- **Concurrent execution** of tasks with configurable limits
+- **Automatic tracing** of all executions for observability
+- **Flexible evaluation** with both item-level and run-level evaluators  
+- **Error isolation** so individual failures don't stop the experiment
+- **Dataset integration** for easy comparison and tracking
+
+### Basic Usage
+
+Start with the simplest possible experiment to test your task function on local data.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+from langfuse import get_client
+from langfuse.experiment import format_experiment_result
+from langfuse.openai import OpenAI
+
+# Initialize client
+langfuse = get_client()
+
+
+# Define your task function
+def my_task(*, item, **kwargs):
+    # Process the input from each dataset item
+    question = item["input"]
+
+    # Your application logic here
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1", messages=[{"role": "user", "content": question}]
+    )
+
+    return response.choices[0].message.content
+
+
+# Run experiment on local data
+local_data = [
+    {"input": "What is the capital of France?"},
+    {"input": "What is the capital of Germany?"},
+]
+
+result = langfuse.run_experiment(
+    name="Geography Quiz",
+    description="Testing basic functionality",
+    data=local_data,
+    task=my_task,
+)
+
+# Use prettyPrint to display results
+print(format_experiment_result(result))
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+Make sure that OpenTelemetry is properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/typescript/setup#tracing-setup) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
+
+```typescript
+import { OpenAI } from "openai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+import {
+  LangfuseClient,
+  ExperimentTask,
+  ExperimentItem,
+} from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Initialize OpenTelemetry
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
+
+// Initialize client
+const langfuse = new LangfuseClient();
+
+// Run experiment on local data
+const localData: ExperimentItem[] = [
+  { input: "What is the capital of France?" },
+  { input: "What is the capital of Germany?" },
+];
+
+// Define your task function
+const myTask: ExperimentTask = async (item) => {
+  const question = item.input;
+
+  const response = await observeOpenAI(new OpenAI()).chat.completions.create({
+    model: "gpt-4.1",
+    messages: [
+      {
+        role: "user",
+        content: question,
+      },
+    ],
+  });
+
+  return response;
+};
+
+// Run the experiment
+const result = await langfuse.experiment.run({
+  name: "Geography Quiz",
+  description: "Testing basic functionality",
+  data: localData,
+  task: myTask,
+});
+
+// Use prettyPrint to display results
+console.log(await result.prettyPrint());
+
+// Important: shut down OTEL SDK to deliver traces
+await otelSdk.shutdown();
+```
+
+**Note for JS/TS SDK**: OpenTelemetry must be properly set up for traces to be delivered to Langfuse. See the [tracing setup documentation](/docs/observability/sdk/typescript/setup#tracing-setup) for configuration details. Always flush the span processor at the end of execution to ensure all traces are sent.
+
+</Tab>
+</LangTabs>
+
+When running experiments on local data, only traces are created in Langfuse - no dataset runs are generated. Each task execution creates an individual trace for observability and debugging.
+
+### Usage with Langfuse Datasets
+
+Run experiments directly on datasets stored in Langfuse for automatic tracing and comparison.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+# Get dataset from Langfuse
+dataset = langfuse.get_dataset("my-evaluation-dataset")
+
+# Run experiment directly on the dataset
+result = dataset.run_experiment(
+    name="Production Model Test",
+    description="Monthly evaluation of our production model",
+    task=my_task
+)
+
+# Use prettyPrint to display results
+print(format_experiment_result(result))
+```
+
+</Tab>
+
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+// Get dataset from Langfuse
+const dataset = await langfuse.dataset.get("my-evaluation-dataset");
+
+// Run experiment directly on the dataset
+const result = await dataset.runExperiment({
+  name: "Production Model Test",
+  description: "Monthly evaluation of our production model",
+  task: myTask
+});
+
+// Use prettyPrint to display results
+console.log(await result.prettyPrint());
+
+// Important: shut down OpenTelemetry to ensure traces are sent
+await otelSdk.shutdown()
+```
+
+</Tab>
+</LangTabs>
+
+When using Langfuse datasets, dataset runs are automatically created in Langfuse and are available for comparison in the UI. This enables tracking experiment performance over time and comparing different approaches on the same dataset.
+
+### Advanced Features
+
+Enhance your experiments with evaluators and advanced configuration options.
+
+#### Evaluators
+
+Evaluators assess the quality of task outputs at the item level. They receive the input, metadata, output, and expected output for each item and return evaluation metrics that are reported as scores on the traces in Langfuse.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+# Define evaluation functions
+def accuracy_evaluator(*, input, output, expected_output, **kwargs):
+    if expected_output and expected_output.lower() in output.lower():
+        return {
+            "name": "accuracy",
+            "value": 1.0,
+            "comment": "Correct answer found"
+        }
+    return {
+        "name": "accuracy", 
+        "value": 0.0,
+        "comment": "Incorrect answer"
+    }
+
+def length_evaluator(*, input, output, **kwargs):
+    return {
+        "name": "response_length",
+        "value": len(output),
+        "comment": f"Response has {len(output)} characters"
+    }
+
+# Use multiple evaluators
+result = langfuse.run_experiment(
+    name="Multi-metric Evaluation",
+    data=test_data,
+    task=my_task,
+    evaluators=[accuracy_evaluator, length_evaluator]
+)
+
+print(format_experiment_result(result))
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+// Define evaluation functions
+const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
+  if (expectedOutput && output.toLowerCase().includes(expectedOutput.toLowerCase())) {
+    return {
+      name: "accuracy",
+      value: 1.0,
+      comment: "Correct answer found"
+    };
+  }
+  return {
+    name: "accuracy",
+    value: 0.0,
+    comment: "Incorrect answer"
+  };
+};
+
+const lengthEvaluator = async ({ input, output }) => {
+  return {
+    name: "response_length",
+    value: output.length,
+    comment: `Response has ${output.length} characters`
+  };
+};
+
+// Use multiple evaluators
+const result = await langfuse.experiment.run({
+  name: "Multi-metric Evaluation",
+  data: testData,
+  task: myTask,
+  evaluators: [accuracyEvaluator, lengthEvaluator]
+});
+
+console.log(await result.prettyPrint());
+```
+
+</Tab>
+</LangTabs>
+
+#### Run-level Evaluators
+
+Run-level evaluators assess the full experiment results and compute aggregate metrics. When run on Langfuse datasets, these scores are attached to the full dataset run for tracking overall experiment performance.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+def average_accuracy(*, item_results, **kwargs):
+    """Calculate average accuracy across all items"""
+    accuracies = [
+        eval["value"] for result in item_results 
+        for eval in result["evaluations"] 
+        if eval["name"] == "accuracy"
+    ]
+    
+    if not accuracies:
+        return {"name": "avg_accuracy", "value": None}
+    
+    avg = sum(accuracies) / len(accuracies)
+    return {
+        "name": "avg_accuracy",
+        "value": avg,
+        "comment": f"Average accuracy: {avg:.2%}"
+    }
+
+result = langfuse.run_experiment(
+    name="Comprehensive Analysis",
+    data=test_data,
+    task=my_task,
+    evaluators=[accuracy_evaluator],
+    run_evaluators=[average_accuracy]
+)
+
+print(format_experiment_result(result))
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+const averageAccuracy = async ({ itemResults }) => {
+  // Calculate average accuracy across all items
+  const accuracies = itemResults
+    .flatMap(result => result.evaluations)
+    .filter(evaluation => evaluation.name === "accuracy")
+    .map(evaluation => evaluation.value as number);
+  
+  if (accuracies.length === 0) {
+    return { name: "avg_accuracy", value: null };
+  }
+  
+  const avg = accuracies.reduce((sum, val) => sum + val, 0) / accuracies.length;
+
+  return {
+    name: "avg_accuracy",
+    value: avg,
+    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`
+  };
+};
+
+const result = await langfuse.experiment.run({
+  name: "Comprehensive Analysis",
+  data: testData,
+  task: myTask,
+  evaluators: [accuracyEvaluator],
+  runEvaluators: [averageAccuracy]
+});
+
+console.log(await result.prettyPrint());
+```
+
+</Tab>
+</LangTabs>
+
+#### Async Tasks and Evaluators
+
+Both task functions and evaluators can be asynchronous.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+import asyncio
+from langfuse.openai import AsyncOpenAI
+
+async def async_llm_task(*, item, **kwargs):
+    """Async task using OpenAI"""
+    client = AsyncOpenAI()
+    response = await client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": item["input"]}]
+    )
+
+    return response.choices[0].message.content
+
+# Works seamlessly with async functions
+result = langfuse.run_experiment(
+    name="Async Experiment",
+    data=test_data,
+    task=async_llm_task,
+    max_concurrency=5  # Control concurrent API calls
+)
+
+print(format_experiment_result(result))
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+import OpenAI from "openai";
+
+const asyncLlmTask = async (item) => {
+  // Async task using OpenAI
+  const client = new OpenAI();
+  const response = await client.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: item.input }]
+  });
+
+  return response.choices[0].message.content;
+};
+
+// Works seamlessly with async functions
+const result = await langfuse.experiment.run({
+  name: "Async Experiment",
+  data: testData,
+  task: asyncLlmTask,
+  maxConcurrency: 5  // Control concurrent API calls
+});
+
+console.log(await result.prettyPrint());
+```
+
+</Tab>
+</LangTabs>
+
+#### Configuration Options
+
+Customize experiment behavior with various configuration options.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+result = langfuse.run_experiment(
+    name="Configurable Experiment",
+    description="Experiment with custom configuration",
+    data=test_data,
+    task=my_task,
+    evaluators=[accuracy_evaluator],
+    run_evaluators=[average_accuracy],
+    max_concurrency=10,  # Max concurrent executions
+    metadata={  # Attached to all traces
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "version": "v1.2.0"
+    }
+)
+
+print(result.prettyPrint())
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+const result = await langfuse.experiment.run({
+  name: "Configurable Experiment",
+  description: "Experiment with custom configuration",
+  data: testData,
+  task: myTask,
+  evaluators: [accuracyEvaluator],
+  runEvaluators: [averageAccuracy],
+  maxConcurrency: 10,  // Max concurrent executions
+  metadata: {  // Attached to all traces
+    model: "gpt-4",
+    temperature: 0.7,
+    version: "v1.2.0"
+  }
+});
+
+console.log(await result.prettyPrint());
+```
+
+</Tab>
+</LangTabs>
+
+### Autoevals Integration
+
+Access pre-built evaluation functions through the [autoevals library](https://github.com/braintrustdata/autoevals) integration.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+The Python SDK supports AutoEvals evaluators through direct integration:
+
+```python
+from langfuse.experiment import createEvaluatorFromAutoevals
+from autoevals.llm import Factuality
+
+evaluator = create_evaluator_from_autoevals(Factuality())
+
+result = langfuse.run_experiment(
+    name="Autoevals Integration Test",
+    data=test_data,
+    task=my_task,
+    evaluators=[evaluator]
+)
+
+print(format_experiment_result(result))
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+The JS SDK provides seamless integration with the AutoEvals library for pre-built evaluation functions:
+
+```typescript
+import { Factuality, Levenshtein } from "autoevals";
+import { createEvaluatorFromAutoevals } from "@langfuse/client";
+
+// Convert AutoEvals evaluators to Langfuse-compatible format
+const factualityEvaluator = createEvaluatorFromAutoevals(Factuality());
+const levenshteinEvaluator = createEvaluatorFromAutoevals(Levenshtein());
+
+// Use with additional parameters
+const customFactualityEvaluator = createEvaluatorFromAutoevals(
+  Factuality,
+  { model: "gpt-4o" }  // Additional AutoEvals parameters
+);
+
+const result = await langfuse.experiment.run({
+  name: "AutoEvals Integration Test",
+  data: testDataset,
+  task: myTask,
+  evaluators: [
+    factualityEvaluator,
+    levenshteinEvaluator,
+    customFactualityEvaluator
+  ]
+});
+
+console.log(await result.prettyPrint());
+```
+</Tab>
+</LangTabs>
+
+## Low-level SDK methods
+
+If you need more control over the dataset run, you can use the low-level SDK methods in order to loop through the dataset items and execute your application logic.
 
 <Steps>
 
