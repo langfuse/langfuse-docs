@@ -6,6 +6,15 @@ export const TEAMS_PATHS = {
 };
 
 export default {
+  "-- Company": {
+    type: "separator",
+    title: <MenuSubSeparator>Company</MenuSubSeparator>,
+  },
+
+  "-- Main Handbook": {
+    type: "separator",
+    title: <MenuSubSeparator>Main Handbook</MenuSubSeparator>,
+  },
   index: "Start",
   chapters: "Chapters",
   "working-at-langfuse": "Working at Langfuse",
