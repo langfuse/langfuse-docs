@@ -3,45 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
-// Configuration - All settings centralized here for easy maintenance
-const CONFIG = {
-    // Output file
-    contributors: path.join(__dirname, '../../data/generated/contributors.json'),
-
-    // Documentation sections to analyze
-    sections: [
-        {
-            name: 'docs',
-            dirPath: path.join(__dirname, '../../pages/docs'),
-            gitPath: 'pages/docs/',
-            urlPrefix: '/docs'
-        },
-        {
-            name: 'selfHosting',
-            dirPath: path.join(__dirname, '../../pages/self-hosting'),
-            gitPath: 'pages/self-hosting/',
-            urlPrefix: '/self-hosting'
-        },
-        {
-            name: 'security',
-            dirPath: path.join(__dirname, '../../pages/security'),
-            gitPath: 'pages/security/',
-            urlPrefix: '/security'
-        }
-    ],
-
-    // GitHub API settings
-    github: {
-        repo: 'langfuse/langfuse-docs',
-        apiBase: 'https://api.github.com',
-        batchSize: 10,
-        batchDelay: 100
-    },
-
-    // Contributors to exclude from the widget
-    excludedContributors: ['cursoragent']
-};
+const { CONFIG } = require('./config');
 
 // Single cache for all GitHub API responses
 const cache = new Map();

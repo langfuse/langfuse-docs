@@ -3,18 +3,18 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
-const authorsPath = path.join(__dirname, '../../data/authors.json');
+const { CONFIG } = require('./config');
 
 // Helper function to read the authors JSON file
 function getCurrentAuthors() {
-  return JSON.parse(fs.readFileSync(authorsPath, 'utf8'));
+  return JSON.parse(fs.readFileSync(CONFIG.authors, 'utf8'));
 }
 
 // Helper function to get all unique emails from git history
 function getAllGitEmails() {
   try {
-    const output = execSync('git log --pretty=format:"%ae" --no-merges -- pages/docs/ 2>/dev/null || true', {
+    const gitPaths = CONFIG.sections.map(section => section.gitPath).join(' ');
+    const output = execSync(`git log --pretty=format:"%ae" --no-merges -- ${gitPaths} 2>/dev/null || true`, {
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'ignore']
     });
@@ -131,7 +131,7 @@ function addEmailMapping(authorKey, email, isAlternative = false) {
   }
 
   // Write the updated JSON back to file
-  fs.writeFileSync(authorsPath, JSON.stringify(allAuthors, null, 2));
+  fs.writeFileSync(CONFIG.authors, JSON.stringify(allAuthors, null, 2));
   console.log(`✅ Added email '${email}' to author '${authorKey}' ${isAlternative ? '(alternative)' : '(primary)'}`);
   return true;
 }
