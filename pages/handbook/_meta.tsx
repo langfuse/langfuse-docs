@@ -3,19 +3,15 @@ import { MenuSubSeparator } from "@/components/MenuSubSeparator";
 export const TEAMS_PATHS = {
   "product-engineering": "Product Engineering",
   support: "Support",
+  operations: "Operations",
 };
 
 export default {
-  "-- Company": {
-    type: "separator",
-    title: <MenuSubSeparator>Company</MenuSubSeparator>,
-  },
-
   "-- Main Handbook": {
     type: "separator",
     title: <MenuSubSeparator>Main Handbook</MenuSubSeparator>,
   },
-  index: "Start",
+  index: "Overview",
   chapters: "Chapters",
   "working-at-langfuse": "Working at Langfuse",
   "-- Teams": {
