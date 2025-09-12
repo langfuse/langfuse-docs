@@ -6,27 +6,15 @@ const CONFIG = {
     contributors: path.join(__dirname, '../../data/generated/contributors.json'),
     authors: path.join(__dirname, '../../data/authors.json'),
 
-    // Documentation sections to analyze
-    sections: [
-        {
-            name: 'docs',
-            dirPath: path.join(__dirname, '../../pages/docs'),
-            gitPath: 'pages/docs/',
-            urlPrefix: '/docs'
-        },
-        {
-            name: 'selfHosting',
-            dirPath: path.join(__dirname, '../../pages/self-hosting'),
-            gitPath: 'pages/self-hosting/',
-            urlPrefix: '/self-hosting'
-        },
-        {
-            name: 'security',
-            dirPath: path.join(__dirname, '../../pages/security'),
-            gitPath: 'pages/security/',
-            urlPrefix: '/security'
-        }
-    ],
+    // Documentation sections to analyze for contributor data
+    // Each section corresponds to a top-level directory in the pages folder
+    // and represents a major documentation area (e.g., /docs, /self-hosting)
+    sections: ['docs', 'self-hosting', 'security', 'guides', 'integrations', 'faq', 'handbook'].map(section => ({
+        name: section.replace('-', ''),
+        dirPath: path.join(__dirname, `../../pages/${section}`),
+        gitPath: `pages/${section}/`,
+        urlPrefix: `/${section}`
+    })),
 
     // GitHub API settings
     github: {
