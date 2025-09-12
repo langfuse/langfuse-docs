@@ -1,0 +1,193 @@
+---
+date: 2025-09-12
+title: Experiment runner SDK
+description: New high-level SDK abstraction for running experiments on datasets with automatic tracing, concurrent execution, and flexible evaluation.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Both the Python and JS/TS SDKs now provide a high-level abstraction for running experiments on datasets. The dataset can be both local or hosted on Langfuse. Using the Experiment runner is the recommended way to run an experiment on a dataset with our SDK.
+
+## Key Features
+
+The experiment runner automatically handles:
+
+- **Concurrent execution** of tasks with configurable limits
+- **Automatic tracing** of all executions for observability
+- **Flexible evaluation** with both item-level and run-level evaluators
+- **Error isolation** so individual failures don't stop the experiment
+- **Dataset integration** for easy comparison and tracking
+
+## Basic Usage
+
+Start with the simplest possible experiment to test your task function on local data:
+
+### Python SDK
+
+```python
+from langfuse import get_client
+from langfuse.experiment import format_experiment_result
+from langfuse.openai import OpenAI
+
+# Initialize client
+langfuse = get_client()
+
+# Define your task function
+def my_task(*, item, **kwargs):
+    question = item["input"]
+    
+    response = OpenAI().chat.completions.create(
+        model="gpt-4", messages=[{"role": "user", "content": question}]
+    )
+    
+    return response.choices[0].message.content
+
+# Run experiment on local data
+local_data = [
+    {"input": "What is the capital of France?"},
+    {"input": "What is the capital of Germany?"},
+]
+
+result = langfuse.run_experiment(
+    name="Geography Quiz",
+    description="Testing basic functionality",
+    data=local_data,
+    task=my_task,
+)
+
+# Use prettyPrint to display results
+print(format_experiment_result(result))
+```
+
+### JS/TS SDK
+
+```typescript
+import { OpenAI } from "openai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import {
+  LangfuseClient,
+  ExperimentTask,
+  ExperimentItem,
+} from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Initialize OpenTelemetry
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
+
+// Initialize client
+const langfuse = new LangfuseClient();
+
+// Define your task function
+const myTask: ExperimentTask = async (item) => {
+  const question = item.input;
+
+  const response = await observeOpenAI(new OpenAI()).chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: question }],
+  });
+
+  return response;
+};
+
+// Run experiment on local data
+const localData: ExperimentItem[] = [
+  { input: "What is the capital of France?" },
+  { input: "What is the capital of Germany?" },
+];
+
+const result = await langfuse.experiment.run({
+  name: "Geography Quiz",
+  description: "Testing basic functionality",
+  data: localData,
+  task: myTask,
+});
+
+console.log(await result.prettyPrint());
+await otelSdk.shutdown();
+```
+
+## Advanced Features
+
+### Evaluators
+
+Add item-level evaluators to assess the quality of task outputs:
+
+```python
+def accuracy_evaluator(*, input, output, expected_output, **kwargs):
+    if expected_output and expected_output.lower() in output.lower():
+        return {
+            "name": "accuracy",
+            "value": 1.0,
+            "comment": "Correct answer found"
+        }
+    return {
+        "name": "accuracy", 
+        "value": 0.0,
+        "comment": "Incorrect answer"
+    }
+
+result = langfuse.run_experiment(
+    name="Multi-metric Evaluation",
+    data=test_data,
+    task=my_task,
+    evaluators=[accuracy_evaluator]
+)
+```
+
+### Run-level Evaluators
+
+Assess full experiment results with aggregate metrics:
+
+```python
+def average_accuracy(*, item_results, **kwargs):
+    accuracies = [
+        eval["value"] for result in item_results 
+        for eval in result["evaluations"] 
+        if eval["name"] == "accuracy"
+    ]
+    
+    if not accuracies:
+        return {"name": "avg_accuracy", "value": None}
+    
+    avg = sum(accuracies) / len(accuracies)
+    return {
+        "name": "avg_accuracy",
+        "value": avg,
+        "comment": f"Average accuracy: {avg:.2%}"
+    }
+
+result = langfuse.run_experiment(
+    name="Comprehensive Analysis",
+    data=test_data,
+    task=my_task,
+    evaluators=[accuracy_evaluator],
+    run_evaluators=[average_accuracy]
+)
+```
+
+### AutoEvals Integration
+
+Access pre-built evaluation functions through the [autoevals library](https://github.com/braintrustdata/autoevals):
+
+```python
+from langfuse.experiment import createEvaluatorFromAutoevals
+from autoevals.llm import Factuality
+
+evaluator = create_evaluator_from_autoevals(Factuality())
+
+result = langfuse.run_experiment(
+    name="Autoevals Integration Test",
+    data=test_data,
+    task=my_task,
+    evaluators=[evaluator]
+)
+```
+
+## Get Started
+
+Learn more about the experiment runner in our [remote dataset runs documentation](/docs/evaluation/dataset-runs/remote-run#experiment-runner-sdk).

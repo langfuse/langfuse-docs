@@ -108,13 +108,9 @@ from langfuse.openai import OpenAI
 # Initialize client
 langfuse = get_client()
 
-
 # Define your task function
 def my_task(*, item, **kwargs):
-    # Process the input from each dataset item
     question = item["input"]
-
-    # Your application logic here
     response = OpenAI().chat.completions.create(
         model="gpt-4.1", messages=[{"role": "user", "content": question}]
     )
