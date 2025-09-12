@@ -27,6 +27,48 @@ const cache = new Map();
 // Cache for email to GitHub username mapping
 const emailToUsernameCache = new Map();
 
+// Retry configuration
+const RETRY_CONFIG = {
+    maxRetries: 3,
+    baseDelay: 1000, // 1 second base delay
+    maxDelay: 30000, // 30 seconds max delay
+    backoffMultiplier: 2
+};
+
+// Sleep utility function
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Retry wrapper with exponential backoff
+async function withRetry(fn, description, endpoint) {
+    let lastError;
+
+    for (let attempt = 1; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error;
+
+            if (attempt === RETRY_CONFIG.maxRetries) {
+                console.warn(`GitHub API failed for ${endpoint} after ${RETRY_CONFIG.maxRetries} attempts: ${error.message}`);
+                return null;
+            }
+
+            // Calculate delay with exponential backoff
+            const delay = Math.min(
+                RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffMultiplier, attempt - 1),
+                RETRY_CONFIG.maxDelay
+            );
+
+            console.warn(`GitHub API failed for ${endpoint} (attempt ${attempt}/${RETRY_CONFIG.maxRetries}): ${error.message}`);
+            console.warn(`Retrying in ${delay}ms...`);
+
+            await sleep(delay);
+        }
+    }
+
+    return null;
+}
+
 // GitHub API helper
 async function fetchFromGitHub(endpoint) {
     if (cache.has(endpoint)) return cache.get(endpoint);
@@ -40,21 +82,21 @@ async function fetchFromGitHub(endpoint) {
         headers['Authorization'] = `token ${process.env.GITHUB_ACCESS_TOKEN}`;
     }
 
-    try {
+    const data = await withRetry(async () => {
         const response = await fetch(`${GITHUB_CONFIG.apiBase}${endpoint}`, { headers });
 
         if (!response.ok) {
-            if (response.status === 404) return null;
             throw new Error(`GitHub API: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
+        return await response.json();
+    }, 'GitHub API fetch', endpoint);
+
+    if (data) {
         cache.set(endpoint, data);
-        return data;
-    } catch (error) {
-        console.warn(`GitHub API failed for ${endpoint}:`, error.message);
-        return null;
     }
+
+    return data;
 }
 
 // Contributor resolution helpers
