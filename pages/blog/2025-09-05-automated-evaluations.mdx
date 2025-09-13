@@ -52,7 +52,7 @@ Before building an evaluator, it's important to differentiate between two types 
 
 **Model Limitations:** The second type occur when the LLM fails to perform correctly despite receiving clear and precise instructions. These are the ideal candidates for automated evaluation because they represent the model's inherent limitations, not a misunderstanding of your intent.
 
-Let's apply this to the [Langfuse Demo App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex Generalization Failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
+Let's apply this to the [Langfuse Demo App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
 
 * **Out of Scope**: The agent answers a question not related to Langfuse or the LLM/AI space.
 * **Generic Responses**: The answer is technically correct but doesn't resolve the user's issue. The metric is to assess if the agent's final answer is helpful and directly addresses the user's question.
