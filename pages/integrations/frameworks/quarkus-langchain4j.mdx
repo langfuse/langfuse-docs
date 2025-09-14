@@ -34,7 +34,7 @@ For Maven, add the following to your `pom.xml` (Gradle users can include equival
 **Configure OpenTelemetry exporter** (`application.properties`):
 
 ```properties
-quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
+quarkus.otel.exporter.otlp.traces.protocol=http/json
 ```
 
 With these configurations and dependencies in place, your Quarkus application is ready to produce OpenTelemetry traces. Quarkus LangChain4j internal calls (e.g. when you invoke a chat model) will be recorded as spans.
@@ -78,7 +78,7 @@ Making the following configuration in `application.properties`:
 ```bash
 quarkus.otel.exporter.otlp.headers=Authorization=Basic <base64 of public:key>
 quarkus.otel.exporter.otlp.endpoint=https://cloud.langfuse.com/api/public/otel
-quarkus.otel.exporter.otlp.traces.protocol=http/protobuf
+quarkus.otel.exporter.otlp.traces.protocol=http/json
 ```
 
 </Tab>
