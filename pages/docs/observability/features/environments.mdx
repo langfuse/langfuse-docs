@@ -208,6 +208,14 @@ In the Langfuse UI, you can filter events by environment using the environment f
 
 See our [API Reference](/docs/api) for details on how to filter by environment on our API.
 
+## Managing Envrionment
+
+Environments are created the first time data is ingested with a given `environment` value and are persistent. They cannot currently be deleted or renamed via the UI.
+
+The environment filter shows only environments that have activity within the selected time range of the table. If you stop sending data for an environment, it will disappear from the filter list once its events fall outside the chosen time window.
+
+For guidance on how to structure, separate, and work with multiple environments across projects and stages, see the FAQ: [Managing different environments](/faq/all/managing-different-environments).
+
 ## Best Practices
 
 1. **Consistent Environment Names**: Use consistent environment names across your application to make filtering and analysis easier.
