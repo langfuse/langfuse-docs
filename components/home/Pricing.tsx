@@ -2184,6 +2184,11 @@ const faqs = [
       "Our graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for units 100k-1M, $7/100k for 1M-10M units, $6.5/100k for 10M-50M units, and $6/100k for 50M+ units. This ensures you get better rates as you scale up your usage. Use the pricing calculator to estimate your bill.",
   },
   {
+    question: "When do I get billed?",
+    answer:
+      "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
+  },  
+  {
     question: "Can I self-host Langfuse?",
     answer:
       "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/deployment/docker-compose'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",
