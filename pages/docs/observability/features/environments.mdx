@@ -131,15 +131,15 @@ completion = openai.chat.completions.create(
 </Tab>
 <Tab>
 
+```bash filename=".env"
+LANGFUSE_TRACING_ENVIRONMENT=production
+```
+
 ```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
 
-const openai = observeOpenAI(new OpenAI(), {
-  clientInitParams: {
-    environment: "production",
-  },
-});
+const openai = observeOpenAI(new OpenAI());
 ```
 
 See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
