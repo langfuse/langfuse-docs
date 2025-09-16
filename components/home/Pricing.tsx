@@ -461,7 +461,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         </>,
         "90 days data access",
         "Unlimited users",
-        "Unlimited evaluators",
         "In-app support",
       ],
       cta: "Sign up",
@@ -934,6 +933,32 @@ const sections: Section[] = [
         },
       },
       {
+        name: "External Evaluation Pipelines",
+        href: "/guides/cookbook/example_external_evaluation_pipelines",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        description:
+          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
+        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
         href: "/docs/scores/annotation",
@@ -950,32 +975,6 @@ const sections: Section[] = [
           cloud: {
             Hobby: "1 queue",
             Core: "3 queues",
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "External Evaluation Pipelines",
-        href: "/guides/cookbook/example_external_evaluation_pipelines",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Enterprise: true },
-        },
-      },
-      {
-        name: "LLM-as-judge evaluators",
-        description:
-          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
-        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
-        tiers: {
-          cloud: {
-            Hobby: "1 evaluator",
-            Core: true,
             Pro: true,
             Enterprise: true,
           },
