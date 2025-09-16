@@ -1,0 +1,145 @@
+---
+title: Trace Swiftide with Langfuse
+sidebarTitle: Swiftide
+logo: /images/integrations/swiftide.png
+description: Learn how to use Langfuse to monitor Swiftide applications to debug and evaluate your LLM workflows
+category: Integrations
+---
+
+# Tracing Swiftide with Langfuse
+
+This guide demonstrates how to **integrate Langfuse** into your **Swiftide** workflows to monitor, debug, and evaluate your LLM applications.
+
+> **What is Swiftide?**: [Swiftide](https://github.com/bosun-ai/swiftide) is a Rust library for building LLM applications. It provides simple primitives for prompt completion, streaming indexing and querying pipelines, and agents that can use tools or call other agents. It has integrations with popular LLMs and storage providers, a modular API, and first-class support for tracing and Langfuse. Documentation is available at [swiftide.rs](https://swiftide.rs).
+
+<Steps>
+
+## Install Dependencies
+
+Enable the `langfuse` feature when adding Swiftide to your `Cargo.toml`:
+
+```toml
+swiftide = { version = "0.31", features = ["langfuse", "openai"] }
+````
+
+Also add `tracing-subscriber` to configure tracing:
+
+```toml
+tracing-subscriber = "0.3"
+```
+
+## Configure Environment & Langfuse Credentials
+
+Set the required environment variables for Langfuse. You can obtain these keys from the [Langfuse Cloud](https://cloud.langfuse.com/) project settings page or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
+```bash
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+# optional, defaults to http://localhost:3000
+export LANGFUSE_URL=https://cloud.langfuse.com
+```
+
+## Instrumenting Swiftide with Langfuse
+
+Swiftide integrates with `tracing`. To send traces to Langfuse, set up the `LangfuseLayer` alongside your normal tracing layers.
+
+```rust
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::{
+    EnvFilter, Layer as _, layer::SubscriberExt as _, util::SubscriberInitExt as _,
+};
+use swiftide::langfuse::LangfuseLayer;
+
+let fmt_layer = tracing_subscriber::fmt::layer()
+    .compact()
+    .with_target(false)
+    .boxed();
+
+let langfuse_layer = LangfuseLayer::default()
+    .with_filter(LevelFilter::DEBUG)
+    .boxed();
+
+let registry = tracing_subscriber::registry()
+    .with(EnvFilter::from_default_env())
+    .with(vec![fmt_layer, langfuse_layer]);
+
+registry.init();
+```
+
+Once this is set up, any instrumented spans or Swiftide operations will be reported to Langfuse.
+
+## Hello World Example
+
+Here is a minimal Swiftide program with Langfuse enabled. It sends a simple prompt to OpenAI through Swiftide and logs the trace to Langfuse.
+
+```rust
+//! This is an example of using the langfuse integration with Swiftide.
+//!
+//! Langfuse is a platform for tracking and monitoring LLM usage and performance.
+//!
+//! When the feature `langfuse` is enabled, Swiftide can report tracing information,
+//! usage, inputs, and outputs to langfuse.
+//!
+//! For this to work, you need to set the LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY
+//! to the appropriate values. You can also set the LANGFUSE_URL environment variable
+//! to overwrite the default URL (http://localhost:3000).
+use anyhow::Result;
+use swiftide::traits::SimplePrompt;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::{
+    EnvFilter, Layer as _, layer::SubscriberExt as _, util::SubscriberInitExt as _,
+};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    println!("Hello, langfuse!");
+
+    let fmt_layer = tracing_subscriber::fmt::layer()
+        .compact()
+        .with_target(false)
+        .boxed();
+
+    let langfuse_layer = swiftide::langfuse::LangfuseLayer::default()
+        .with_filter(LevelFilter::DEBUG)
+        .boxed();
+
+    let registry = tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .with(vec![fmt_layer, langfuse_layer]);
+
+    registry.init();
+
+    prompt_openai().await?;
+
+    Ok(())
+}
+
+#[tracing::instrument]
+async fn prompt_openai() -> Result<()> {
+    let openai = swiftide::integrations::openai::OpenAI::builder()
+        .default_prompt_model("gpt-5")
+        .build()
+        .unwrap();
+
+    let paris = openai
+        .prompt("What is the capital of France?".into())
+        .await?;
+
+    println!("The capital of France is {paris}");
+
+    Ok(())
+}
+```
+
+</Steps>
+
+Running this program will create a Langfuse trace for the prompt, including input, output, usage, and metadata.
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+## Learn More
+
+For more details on using Swiftide, check out the following resources:
+
+* [Swiftide on GitHub](https://github.com/bosun-ai/swiftide)
+* [Swiftide documentation](https://swiftide.rs)
