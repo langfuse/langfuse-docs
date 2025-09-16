@@ -92,9 +92,11 @@ The experiment runner automatically handles:
 - **Error isolation** so individual failures don't stop the experiment
 - **Dataset integration** for easy comparison and tracking
 
+The experiment runner SDK supports both datasets hosted on Langfuse and datasets hosted locally. If you are using a dataset hosted on Langfuse for your experiment, the SDK will automatically create a dataset run for you that you can inspect and compare in the Langfuse UI. For locally hosted datasets not on Langfuse, only traces and scores (if evaluations are used) are tracked in Langfuse.
+
 ### Basic Usage
 
-Start with the simplest possible experiment to test your task function on local data.
+Start with the simplest possible experiment to test your task function on local data. If you already have a dataset in Langfuse, [see here](#usage-with-langfuse-datasets).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -269,7 +271,7 @@ Evaluators assess the quality of task outputs at the item level. They receive th
 
 ```python
 # Define evaluation functions
-def accuracy_evaluator(*, input, output, expected_output, **kwargs):
+def accuracy_evaluator(*, input, output, expected_output, metadata, **kwargs):
     if expected_output and expected_output.lower() in output.lower():
         return {
             "name": "accuracy",
@@ -574,6 +576,23 @@ def accuracy_evaluator(*, input, output, expected_output, **kwargs):
         return {"name": "accuracy", "value": 1.0}
     return {"name": "accuracy", "value": 0.0}
 
+def average_accuracy_evaluator(*, item_results, **kwargs):
+    """Run evaluator that calculates average accuracy across all items"""
+    accuracies = [
+        eval["value"] for result in item_results
+        for eval in result["evaluations"] if eval["name"] == "accuracy"
+    ]
+
+    if not accuracies:
+        return {"name": "avg_accuracy", "value": None}
+
+    avg = sum(accuracies) / len(accuracies)
+    return {
+        "name": "avg_accuracy",
+        "value": avg,
+        "comment": f"Average accuracy: {avg:.2%}"
+    }
+
 @pytest.fixture
 def langfuse_client():
     """Initialize Langfuse client for testing"""
@@ -585,20 +604,18 @@ def test_geography_accuracy_passes(langfuse_client):
         name="Geography Test - Should Pass",
         data=test_data,
         task=geography_task,
-        evaluators=[accuracy_evaluator]
+        evaluators=[accuracy_evaluator],
+        run_evaluators=[average_accuracy_evaluator]
     )
 
-    # Extract accuracy scores
-    accuracies = [
-        eval["value"] for item in result.item_results
-        for eval in item["evaluations"] if eval["name"] == "accuracy"
-    ]
-
-    avg_accuracy = sum(accuracies) / len(accuracies)
+    # Access the run evaluator result directly
+    avg_accuracy = next(
+        eval["value"] for eval in result.run_evaluations
+        if eval["name"] == "avg_accuracy"
+    )
 
     # Assert minimum accuracy threshold
     assert avg_accuracy >= 0.8, f"Average accuracy {avg_accuracy:.2f} below threshold 0.8"
-    assert len([a for a in accuracies if a == 1.0]) >= 2, "At least 2 questions must be correct"
 
 def test_geography_accuracy_fails(langfuse_client):
     """Example test that demonstrates failure conditions"""
@@ -611,15 +628,15 @@ def test_geography_accuracy_fails(langfuse_client):
         name="Geography Test - Should Fail",
         data=test_data,
         task=failing_task,
-        evaluators=[accuracy_evaluator]
+        evaluators=[accuracy_evaluator],
+        run_evaluators=[average_accuracy_evaluator]
     )
 
-    accuracies = [
-        eval["value"] for item in result.item_results
-        for eval in item["evaluations"] if eval["name"] == "accuracy"
-    ]
-
-    avg_accuracy = sum(accuracies) / len(accuracies)
+    # Access the run evaluator result directly
+    avg_accuracy = next(
+        eval["value"] for eval in result.run_evaluations
+        if eval["name"] == "avg_accuracy"
+    )
 
     # This test will fail because the task gives wrong answers
     with pytest.raises(AssertionError):
@@ -680,26 +697,42 @@ const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
   return { name: "accuracy", value: 0 };
 };
 
+const averageAccuracyEvaluator = async ({ itemResults }) => {
+  // Calculate average accuracy across all items
+  const accuracies = itemResults
+    .flatMap(result => result.evaluations)
+    .filter(evaluation => evaluation.name === "accuracy")
+    .map(evaluation => evaluation.value as number);
+
+  if (accuracies.length === 0) {
+    return { name: "avg_accuracy", value: null };
+  }
+
+  const avg = accuracies.reduce((sum, val) => sum + val, 0) / accuracies.length;
+  return {
+    name: "avg_accuracy",
+    value: avg,
+    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`
+  };
+};
+
 describe('Geography Experiment Tests', () => {
   it('should pass when accuracy is above threshold', async () => {
     const result = await langfuse.experiment.run({
       name: "Geography Test - Should Pass",
       data: testData,
       task: geographyTask,
-      evaluators: [accuracyEvaluator]
+      evaluators: [accuracyEvaluator],
+      runEvaluators: [averageAccuracyEvaluator]
     });
 
-    // Extract accuracy scores
-    const accuracies = result.itemResults
-      .flatMap(item => item.evaluations)
-      .filter(eval => eval.name === "accuracy")
-      .map(eval => eval.value as number);
-
-    const avgAccuracy = accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length;
+    // Access the run evaluator result directly
+    const avgAccuracy = result.runEvaluations.find(
+      eval => eval.name === "avg_accuracy"
+    )?.value as number;
 
     // Assert minimum accuracy threshold
     expect(avgAccuracy).toBeGreaterThanOrEqual(0.8);
-    expect(accuracies.filter(a => a === 1.0).length).toBeGreaterThanOrEqual(2);
   }, 30_000); // 30 second timeout for API calls
 
   it('should fail when accuracy is below threshold', async () => {
@@ -712,15 +745,14 @@ describe('Geography Experiment Tests', () => {
       name: "Geography Test - Should Fail",
       data: testData,
       task: failingTask,
-      evaluators: [accuracyEvaluator]
+      evaluators: [accuracyEvaluator],
+      runEvaluators: [averageAccuracyEvaluator]
     });
 
-    const accuracies = result.itemResults
-      .flatMap(item => item.evaluations)
-      .filter(eval => eval.name === "accuracy")
-      .map(eval => eval.value as number);
-
-    const avgAccuracy = accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length;
+    // Access the run evaluator result directly
+    const avgAccuracy = result.runEvaluations.find(
+      eval => eval.name === "avg_accuracy"
+    )?.value as number;
 
     // This test will fail because the task gives wrong answers
     expect(() => {
