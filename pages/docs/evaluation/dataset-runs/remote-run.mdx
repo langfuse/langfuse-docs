@@ -104,7 +104,6 @@ Start with the simplest possible experiment to test your task function on local 
 
 ```python
 from langfuse import get_client
-from langfuse.experiment import format_experiment_result
 from langfuse.openai import OpenAI
 
 # Initialize client
@@ -133,8 +132,8 @@ result = langfuse.run_experiment(
     task=my_task,
 )
 
-# Use prettyPrint to display results
-print(format_experiment_result(result))
+# Use format method to display results
+print(result.format())
 ```
 
 </Tab>
@@ -192,8 +191,8 @@ const result = await langfuse.experiment.run({
   task: myTask,
 });
 
-// Use prettyPrint to display results
-console.log(await result.prettyPrint());
+// Print formatted result
+console.log(await result.format());
 
 // Important: shut down OTEL SDK to deliver traces
 await otelSdk.shutdown();
@@ -225,8 +224,8 @@ result = dataset.run_experiment(
     task=my_task
 )
 
-# Use prettyPrint to display results
-print(format_experiment_result(result))
+# Use format method to display results
+print(result.format())
 ```
 
 </Tab>
@@ -245,10 +244,10 @@ const result = await dataset.runExperiment({
   task: myTask
 });
 
-// Use prettyPrint to display results
-console.log(await result.prettyPrint());
+// Use format method to display results
+console.log(await result.format());
 
-// Important: shut down OpenTelemetry to ensure traces are sent
+// Important: shut down OpenTelemetry to ensure traces are sent to Langfuse
 await otelSdk.shutdown()
 ```
 
@@ -270,26 +269,17 @@ Evaluators assess the quality of task outputs at the item level. They receive th
 {/* PYTHON SDK */}
 
 ```python
+from langfuse import Evaluation
+
 # Define evaluation functions
 def accuracy_evaluator(*, input, output, expected_output, metadata, **kwargs):
     if expected_output and expected_output.lower() in output.lower():
-        return {
-            "name": "accuracy",
-            "value": 1.0,
-            "comment": "Correct answer found"
-        }
-    return {
-        "name": "accuracy",
-        "value": 0.0,
-        "comment": "Incorrect answer"
-    }
+        return Evaluation(name="accuracy", value=1.0, comment="Correct answer found")
+
+    return Evaluation(name="accuracy", value=0.0, comment="Incorrect answer")
 
 def length_evaluator(*, input, output, **kwargs):
-    return {
-        "name": "response_length",
-        "value": len(output),
-        "comment": f"Response has {len(output)} characters"
-    }
+    return Evaluation(name="response_length", value=len(output), comment=f"Response has {len(output)} characters")
 
 # Use multiple evaluators
 result = langfuse.run_experiment(
@@ -299,7 +289,7 @@ result = langfuse.run_experiment(
     evaluators=[accuracy_evaluator, length_evaluator]
 )
 
-print(format_experiment_result(result))
+print(result.format())
 ```
 
 </Tab>
@@ -339,7 +329,7 @@ const result = await langfuse.experiment.run({
   evaluators: [accuracyEvaluator, lengthEvaluator]
 });
 
-console.log(await result.prettyPrint());
+console.log(await result.format());
 ```
 
 </Tab>
@@ -354,23 +344,22 @@ Run-level evaluators assess the full experiment results and compute aggregate me
 {/* PYTHON SDK */}
 
 ```python
+from langfuse import Evaluation
+
 def average_accuracy(*, item_results, **kwargs):
     """Calculate average accuracy across all items"""
     accuracies = [
-        eval["value"] for result in item_results
-        for eval in result["evaluations"]
-        if eval["name"] == "accuracy"
+        eval.value for result in item_results
+        for eval in result.evaluations
+        if eval.name == "accuracy"
     ]
 
     if not accuracies:
-        return {"name": "avg_accuracy", "value": None}
+        return Evaluation(name="avg_accuracy", value=None)
 
     avg = sum(accuracies) / len(accuracies)
-    return {
-        "name": "avg_accuracy",
-        "value": avg,
-        "comment": f"Average accuracy: {avg:.2%}"
-    }
+
+    return Evaluation(name="avg_accuracy", value=avg, comment=f"Average accuracy: {avg:.2%}")
 
 result = langfuse.run_experiment(
     name="Comprehensive Analysis",
@@ -380,7 +369,7 @@ result = langfuse.run_experiment(
     run_evaluators=[average_accuracy]
 )
 
-print(format_experiment_result(result))
+print(result.format())
 ```
 
 </Tab>
@@ -416,7 +405,7 @@ const result = await langfuse.experiment.run({
   runEvaluators: [averageAccuracy]
 });
 
-console.log(await result.prettyPrint());
+console.log(await result.format());
 ```
 
 </Tab>
@@ -452,7 +441,7 @@ result = langfuse.run_experiment(
     max_concurrency=5  # Control concurrent API calls
 )
 
-print(format_experiment_result(result))
+print(result.format())
 ```
 
 </Tab>
@@ -481,7 +470,7 @@ const result = await langfuse.experiment.run({
   maxConcurrency: 5  // Control concurrent API calls
 });
 
-console.log(await result.prettyPrint());
+console.log(await result.format());
 ```
 
 </Tab>
@@ -498,6 +487,7 @@ Customize experiment behavior with various configuration options.
 ```python
 result = langfuse.run_experiment(
     name="Configurable Experiment",
+    run_name="Custom Run Name", # will be dataset run name if dataset is used
     description="Experiment with custom configuration",
     data=test_data,
     task=my_task,
@@ -511,7 +501,7 @@ result = langfuse.run_experiment(
     }
 )
 
-print(format_experiment_result(result))
+print(result.format())
 ```
 
 </Tab>
@@ -521,6 +511,7 @@ print(format_experiment_result(result))
 ```typescript
 const result = await langfuse.experiment.run({
   name: "Configurable Experiment",
+  runName: "Custom Run Name", // will be dataset run name if dataset is used
   description: "Experiment with custom configuration",
   data: testData,
   task: myTask,
@@ -534,7 +525,7 @@ const result = await langfuse.experiment.run({
   }
 });
 
-console.log(await result.prettyPrint());
+console.log(await result.format());
 ```
 
 </Tab>
@@ -551,7 +542,7 @@ Integrate the experiment runner with testing frameworks like Pytest and Vitest t
 ```python
 # test_geography_experiment.py
 import pytest
-from langfuse import get_client
+from langfuse import get_client, Evaluation
 from langfuse.openai import OpenAI
 
 # Test data for European capitals
@@ -573,25 +564,23 @@ def geography_task(*, item, **kwargs):
 def accuracy_evaluator(*, input, output, expected_output, **kwargs):
     """Evaluator that checks if the expected answer is in the output"""
     if expected_output and expected_output.lower() in output.lower():
-        return {"name": "accuracy", "value": 1.0}
-    return {"name": "accuracy", "value": 0.0}
+        return Evaluation(name="accuracy", value=1.0)
+
+    return Evaluation(name="accuracy", value=0.0)
 
 def average_accuracy_evaluator(*, item_results, **kwargs):
     """Run evaluator that calculates average accuracy across all items"""
     accuracies = [
-        eval["value"] for result in item_results
-        for eval in result["evaluations"] if eval["name"] == "accuracy"
+        eval.value for result in item_results
+        for eval in result.evaluations if eval.name == "accuracy"
     ]
 
     if not accuracies:
-        return {"name": "avg_accuracy", "value": None}
+        return Evaluation(name="avg_accuracy", value=None)
 
     avg = sum(accuracies) / len(accuracies)
-    return {
-        "name": "avg_accuracy",
-        "value": avg,
-        "comment": f"Average accuracy: {avg:.2%}"
-    }
+
+    return Evaluation(name="avg_accuracy", value=avg, comment=f"Average accuracy: {avg:.2%}")
 
 @pytest.fixture
 def langfuse_client():
@@ -610,8 +599,8 @@ def test_geography_accuracy_passes(langfuse_client):
 
     # Access the run evaluator result directly
     avg_accuracy = next(
-        eval["value"] for eval in result.run_evaluations
-        if eval["name"] == "avg_accuracy"
+        eval.value for eval in result.run_evaluations
+        if eval.name == "avg_accuracy"
     )
 
     # Assert minimum accuracy threshold
@@ -634,8 +623,8 @@ def test_geography_accuracy_fails(langfuse_client):
 
     # Access the run evaluator result directly
     avg_accuracy = next(
-        eval["value"] for eval in result.run_evaluations
-        if eval["name"] == "avg_accuracy"
+        eval.value for eval in result.run_evaluations
+        if eval.name == "avg_accuracy"
     )
 
     # This test will fail because the task gives wrong answers
@@ -790,7 +779,7 @@ result = langfuse.run_experiment(
     evaluators=[evaluator]
 )
 
-print(format_experiment_result(result))
+print(result.format())
 ```
 
 </Tab>
@@ -824,7 +813,7 @@ const result = await langfuse.experiment.run({
   ]
 });
 
-console.log(await result.prettyPrint());
+console.log(await result.format());
 ```
 </Tab>
 </LangTabs>

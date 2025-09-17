@@ -1,5 +1,5 @@
 ---
-date: 2025-09-16
+date: 2025-09-17
 title: Experiment Runner SDK
 description: New high-level SDK abstraction for running experiments on datasets with automatic tracing, concurrent execution, and flexible evaluation.
 author: Hassieb
@@ -30,7 +30,6 @@ The experiment runner automatically handles:
 
 ```python
 from langfuse import get_client
-from langfuse.experiment import format_experiment_result
 from langfuse.openai import OpenAI
 
 # Initialize client
@@ -60,7 +59,7 @@ result = langfuse.run_experiment(
 )
 
 # Pretty print results
-print(format_experiment_result(result))
+print(result.format())
 ```
 
 This prints:
@@ -130,7 +129,7 @@ const result = await langfuse.experiment.run({
   task: myTask,
 });
 
-console.log(await result.prettyPrint());
+console.log(await result.format());
 
 // Important: shut down OpenTelemetry to ensure traces are sent to Langfuse
 await otelSdk.shutdown();
