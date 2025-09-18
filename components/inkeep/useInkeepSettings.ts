@@ -8,6 +8,8 @@ import type {
 } from "@inkeep/cxkit-react";
 import { useTheme } from "nextra-theme-docs";
 import { type PostHog, usePostHog } from "posthog-js/react";
+import { useRouter } from "next/router";
+import { useMemo } from "react";
 
 const customAnalyticsCallback = (
   event: InkeepCallbackEvent,
@@ -24,6 +26,16 @@ const customAnalyticsCallback = (
   });
 };
 
+const inkeepCustomTabsToSlugs: { tab: string; slug: string | string[] }[] = [
+  { tab: "Docs", slug: "/docs" },
+  { tab: "Integrations", slug: "/integrations" },
+  { tab: "Self Hosting", slug: "/self-hosting" },
+  { tab: "FAQ & Guides", slug: ["/faq", "/guides"] },
+  { tab: "Security", slug: "/security" },
+  { tab: "Handbook", slug: "/handbook" },
+  { tab: "Blog", slug: "/blog" },
+];
+
 type InkeepSharedSettings = {
   baseSettings: InkeepBaseSettings;
   aiChatSettings: InkeepAIChatSettings;
@@ -34,6 +46,14 @@ type InkeepSharedSettings = {
 const useInkeepSettings = (): InkeepSharedSettings => {
   const { resolvedTheme } = useTheme();
   const posthog = usePostHog();
+  const router = useRouter();
+
+  const currentTab = useMemo(() => {
+    return inkeepCustomTabsToSlugs.find((t) => {
+      const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
+      return slugs.some((slug) => router.pathname.startsWith(slug));
+    })?.tab;
+  }, [router.pathname]);
 
   const baseSettings: InkeepBaseSettings = {
     apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY! || "",
@@ -44,6 +64,22 @@ const useInkeepSettings = (): InkeepSharedSettings => {
       forcedColorMode: resolvedTheme, // to sync dark mode with the widget
     },
     onEvent: (event) => customAnalyticsCallback(event, posthog),
+    transformSource: (source, type, opts) => {
+      // Transform based on source type
+      const tab = inkeepCustomTabsToSlugs.find((t) => {
+        const slugs = Array.isArray(t.slug) ? t.slug : [t.slug];
+        return slugs.some((slug) =>
+          source.url.startsWith("https://langfuse.com" + slug)
+        );
+      })?.tab;
+      if (type === "searchResultItem") {
+        return {
+          ...source,
+          ...(tab ? { tabs: [tab] } : {}),
+        };
+      }
+      return source;
+    },
   };
 
   const modalSettings: InkeepModalSettings = {
@@ -55,6 +91,17 @@ const useInkeepSettings = (): InkeepSharedSettings => {
 
   const searchSettings: InkeepSearchSettings = {
     placeholder: "Search...",
+    tabs: inkeepCustomTabsToSlugs
+      .map((t) => t.tab)
+      .concat(["GitHub", "All"])
+      // show current tab first
+      .sort((a, b) => {
+        if (a === currentTab) return -1;
+        if (b === currentTab) return 1;
+        return 0;
+      })
+      // add isAlwaysVisible to current tab
+      .map((t) => (t === currentTab ? [t, { isAlwaysVisible: true }] : t)),
   };
 
   const disclaimerSettings: AIChatDisclaimerSettings = {

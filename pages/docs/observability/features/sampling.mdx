@@ -69,15 +69,29 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide#sampling) for more details.
 </Tab>
 <Tab title="OpenAI (JS/TS)">
 
+Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
+
+Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
+
+```ts filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  // Sample 20% of all traces
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+```
+
+Initialize the OpenAI integration as usual:
+
 ```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";
 
-const openai = observeOpenAI(new OpenAI(), {
-  clientInitParams: {
-    sampleRate: 0.5,
-  },
-});
+const openai = observeOpenAI(new OpenAI());
 ```
 
 See [OpenAI Integration (JS/TS)](/integrations/model-providers/openai-js) for more details.
