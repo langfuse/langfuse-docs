@@ -13,7 +13,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
+with langfuse.start_as_current_observation(name="complex-pipeline") as root_span:
     # Root span has its own input/output
     root_span.update(input="Step 1 data", output="Step 1 result")
 

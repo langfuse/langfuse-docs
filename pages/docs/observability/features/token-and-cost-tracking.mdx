@@ -117,10 +117,11 @@ import anthropic
 langfuse = get_client()
 anthropic_client = anthropic.Anthropic()
 
-with langfuse.start_as_current_generation(
+with langfuse.start_as_current_observation(
     name="anthropic-completion",
     model="claude-3-opus-20240229",
-    input=[{"role": "user", "content": "Hello, Claude"}]
+    input=[{"role": "user", "content": "Hello, Claude"}],
+    as_type="generation"
 ) as generation:
     response = anthropic_client.messages.create(
         model="claude-3-opus-20240229",

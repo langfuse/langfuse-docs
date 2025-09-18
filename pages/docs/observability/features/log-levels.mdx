@@ -40,9 +40,9 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Using context managers (recommended)
-with langfuse.start_as_current_span(name="my-operation") as span:
+with langfuse.start_as_current_observation(name="my-operation") as span:
     # Set level and status message on creation
-    with span.start_as_current_span(
+    with span.start_as_current_observation(
         name="potentially-risky-operation",
         level="WARNING",
         status_message="Operation may fail"
@@ -56,7 +56,7 @@ with langfuse.start_as_current_span(name="my-operation") as span:
         )
 
 # You can also update the currently active span without a direct reference
-with langfuse.start_as_current_span(name="another-operation"):
+with langfuse.start_as_current_observation(name="another-operation"):
     # ... some processing ...
     langfuse.update_current_span(
         level="DEBUG",
@@ -69,7 +69,8 @@ Levels can also be set when creating generations:
 ```python
 langfuse = get_client()
 
-with langfuse.start_as_current_generation(
+with langfuse.start_as_current_observation(
+    as_type="generation",
     name="llm-call",
     model="gpt-4o",
     level="DEFAULT"  # Default level

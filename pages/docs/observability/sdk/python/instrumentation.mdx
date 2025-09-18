@@ -69,15 +69,15 @@ The observe decorator is capturing the args, kwargs and return value of decorate
 
 You can create spans or generations anywhere in your application. If you need more control than the `@observe` decorator, the primary way to do this is using context managers (with `with` statements), which ensure that observations are properly started and ended.
 
-- `langfuse.start_as_current_span()`: Creates a new span and sets it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children.
-- `langfuse.start_as_current_generation()`: Similar to the above, but creates a specialized "generation" observation for LLM calls.
+- `langfuse.start_as_current_observation()`: Creates a new span and sets it as the currently active observation in the OTel context for its duration. Any new observations created within this block will be its children.
+- `langfuse.start_as_current_observation(as_type="generation")`: Similar to the above, but creates a specialized "generation" observation for LLM calls.
 
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="user-request-pipeline",
     input={"user_query": "Tell me a joke about OpenTelemetry"},
 ) as root_span:
@@ -91,7 +91,8 @@ with langfuse.start_as_current_span(
     )
 
     # Create a nested generation
-    with langfuse.start_as_current_generation(
+    with langfuse.start_as_current_observation(
+        as_type="generation",
         name="joke-generation",
         model="gpt-4o",
         input=[{"role": "user", "content": "Tell me a joke about OpenTelemetry"}],
@@ -140,8 +141,8 @@ span.end() # Important: Manually end the span
 - **Parenting**: The observation created by `start_span()` or `start_generation()` will still be a child of the span that was active in the context at the moment of its creation.
 - **Manual Lifecycle**: These observations are not managed by a `with` block and therefore **must be explicitly ended** by calling their `.end()` method.
 - **Nesting Children**:
-  - Subsequent observations created using the global `langfuse.start_as_current_span()` (or similar global methods) will _not_ be children of these "manual" observations. Instead, they will be parented by the original active span.
-  - To create children directly under a "manual" observation, you would use methods _on that specific observation object_ (e.g., `manual_span.start_as_current_span(...)`).
+  - Subsequent observations created using the global `langfuse.start_as_current_observation()` (or similar global methods) will _not_ be children of these "manual" observations. Instead, they will be parented by the original active span.
+  - To create children directly under a "manual" observation, you would use methods _on that specific observation object_ (e.g., `manual_span.start_as_current_observation(...)`).
 
 **When to Use:**
 
@@ -159,7 +160,7 @@ from langfuse import get_client
 langfuse = get_client()
 
 # This outer span establishes an active context.
-with langfuse.start_as_current_span(name="main-operation") as main_operation_span:
+with langfuse.start_as_current_observation(name="main-operation") as main_operation_span:
     # 'main_operation_span' is the current active context.
 
     # 1. Create a "manual" span using langfuse.start_span().
@@ -172,7 +173,7 @@ with langfuse.start_as_current_span(name="main-operation") as main_operation_spa
     # 2. Start another operation that DOES become the active context.
     #    This will be a child of 'main_operation_span', NOT 'manual_side_task',
     #    because 'manual_side_task' did not alter the active context.
-    with langfuse.start_as_current_span(name="core-step-within-main") as core_step_span:
+    with langfuse.start_as_current_observation(name="core-step-within-main") as core_step_span:
         # 'core_step_span' is now the active context.
         # 'manual_side_task' is still open but not active in the global context.
         core_step_span.update(input="Data for core step")
@@ -222,25 +223,25 @@ def main_function(data, parameter):
 </Tab>
 <Tab title="Context Managers">
 
-Nesting is handled automatically by OpenTelemetry's context propagation. When you create a new observation (span or generation) using `start_as_current_span` or `start_as_current_generation`, it becomes a child of the observation that was active in the context when it was created.
+Nesting is handled automatically by OpenTelemetry's context propagation. When you create a new observation (span or generation) using `start_as_current_observation` or `start_as_current_observation(as_type="generation")`, it becomes a child of the observation that was active in the context when it was created.
 
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="outer-process") as outer_span:
+with langfuse.start_as_current_observation(name="outer-process") as outer_span:
     # outer_span is active
 
-    with langfuse.start_as_current_generation(name="llm-step-1") as gen1:
+    with langfuse.start_as_current_observation(as_type="generation", name="llm-step-1") as gen1:
         # gen1 is active, child of outer_span
         gen1.update(output="LLM 1 output")
 
-    with outer_span.start_as_current_span(name="intermediate-step") as mid_span:
+    with outer_span.start_as_current_observation(name="intermediate-step") as mid_span:
         # mid_span is active, also a child of outer_span
         # This demonstrates using the yielded span object to create children
 
-        with mid_span.start_as_current_generation(name="llm-step-2") as gen2:
+        with mid_span.start_as_current_observation(as_type="generation", name="llm-step-2") as gen2:
             # gen2 is active, child of mid_span
             gen2.update(output="LLM 2 output")
 
@@ -304,7 +305,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_generation(name="llm-call", model="gpt-3.5-turbo") as gen:
+with langfuse.start_as_current_observation(as_type="generation", name="llm-call", model="gpt-3.5-turbo") as gen:
     gen.update(input={"prompt": "Why is the sky blue?"})
     # ... make LLM call ...
     response_text = "Rayleigh scattering..."
@@ -315,7 +316,7 @@ with langfuse.start_as_current_generation(name="llm-call", model="gpt-3.5-turbo"
     )
 
 # Alternatively, update the current observation in context:
-with langfuse.start_as_current_span(name="data-processing"):
+with langfuse.start_as_current_observation(name="data-processing"):
     # ... some processing ...
     langfuse.update_current_span(metadata={"step1_complete": True})
     # ... more processing ...
@@ -350,7 +351,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="initial-operation") as span:
+with langfuse.start_as_current_observation(name="initial-operation") as span:
     # Set trace attributes early
     span.update_trace(
         user_id="user_xyz",
@@ -359,7 +360,7 @@ with langfuse.start_as_current_span(name="initial-operation") as span:
     )
     # ...
     # Later, from another span in the same trace:
-    with span.start_as_current_generation(name="final-generation") as gen:
+    with span.start_as_current_observation(as_type="generation", name="final-generation") as gen:
         # ...
         langfuse.update_current_trace(output={"final_status": "success"}, public=True)
 ```
@@ -375,12 +376,13 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="user-request",
     input={"query": "What is the capital of France?"}  # This becomes the trace input
 ) as root_span:
 
-    with langfuse.start_as_current_generation(
+    with langfuse.start_as_current_observation(
+        as_type="generation",
         name="llm-call",
         model="gpt-4o",
         input={"messages": [{"role": "user", "content": "What is the capital of France?"}]}
@@ -401,7 +403,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="complex-pipeline") as root_span:
+with langfuse.start_as_current_observation(name="complex-pipeline") as root_span:
     # Root span has its own input/output
     root_span.update(input="Step 1 data", output="Step 1 result")
 
@@ -460,7 +462,7 @@ from langfuse import get_client, Langfuse
 langfuse = get_client()
 
 # Get current IDs
-with langfuse.start_as_current_span(name="my-op") as current_op:
+with langfuse.start_as_current_observation(name="my-op") as current_op:
     trace_id = langfuse.get_current_trace_id()
     observation_id = langfuse.get_current_observation_id()
     print(f"Current Trace ID: {trace_id}, Current Observation ID: {observation_id}")
@@ -484,7 +486,7 @@ langfuse = get_client()
 existing_trace_id = "abcdef1234567890abcdef1234567890" # From an upstream service
 existing_parent_span_id = "fedcba0987654321" # Optional parent span in that trace
 
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="process-downstream-task",
     trace_context={
         "trace_id": existing_trace_id,
@@ -562,7 +564,7 @@ Langfuse offers a drop-in replacement for the OpenAI Python SDK to automatically
 - **Cost**: Estimated cost in USD (based on model and token usage).
 - **Media**: Input audio and output audio from speech-to-text and text-to-speech endpoints.
 
-The integration is fully interoperable with `@observe` and manual tracing methods (`start_as_current_span`, etc.). If an OpenAI call is made within an active Langfuse span, the OpenAI generation will be correctly nested under it.
+The integration is fully interoperable with `@observe` and manual tracing methods (`start_as_current_observation`, etc.). If an OpenAI call is made within an active Langfuse span, the OpenAI generation will be correctly nested under it.
 
 **Passing Langfuse arguments to OpenAI calls:**
 
@@ -576,7 +578,7 @@ langfuse = get_client()
 
 client = openai.OpenAI()
 
-with langfuse.start_as_current_span(name="qna-bot-openai") as span:
+with langfuse.start_as_current_observation(name="qna-bot-openai") as span:
     langfuse.update_current_trace(tags=["qna-bot-openai"])
 
     # This will be traced as a Langfuse generation
@@ -642,7 +644,7 @@ llm = ChatOpenAI(model_name="gpt-4o")
 prompt = ChatPromptTemplate.from_template("Tell me a joke about {topic}")
 chain = prompt | llm
 
-with langfuse.start_as_current_span(name="joke-chain") as span:
+with langfuse.start_as_current_observation(name="joke-chain") as span:
     langfuse.update_current_trace(tags=["joke-chain"])
 
     response = chain.invoke({"topic": "cats"}, config={"callbacks": [langfuse_handler]})
@@ -823,7 +825,7 @@ AnthropicInstrumentor().instrument()
 langfuse = get_client()
 anthropic_client = Anthropic()
 
-with langfuse.start_as_current_span(name="myspan"):
+with langfuse.start_as_current_observation(name="myspan"):
     # This will be traced as a Langfuse generation nested under the current span
     message = anthropic_client.messages.create(
         model="claude-3-7-sonnet-20250219",
@@ -857,7 +859,7 @@ LlamaIndexInstrumentor().instrument()
 langfuse = get_client()
 llm = OpenAI(model="gpt-4o")
 
-with langfuse.start_as_current_span(name="myspan"):
+with langfuse.start_as_current_observation(name="myspan"):
     response = llm.complete("Hello, world!")
     print(response)
 
@@ -869,4 +871,3 @@ Learn more in the [Llamaindex integration](/integrations/frameworks/llamaindex) 
 </Tab>
 
 </Tabs>
-

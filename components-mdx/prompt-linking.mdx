@@ -32,10 +32,11 @@ langfuse = get_client()
 
 prompt = langfuse.get_prompt("movie-critic")
 
-with langfuse.start_as_current_generation(
+with langfuse.start_as_current_observation(
     name="movie-generation",
     model="gpt-4o",
-    prompt=prompt
+    prompt=prompt,
+    as_type="generation"
 ) as generation:
     # Your LLM call here
     generation.update(output="LLM response")

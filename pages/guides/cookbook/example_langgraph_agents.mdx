@@ -394,7 +394,7 @@ from langfuse import get_client
 langfuse = get_client()
  
 # Option 1: Use the yielded span object from the context manager
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="langgraph-request") as span:
     # ... LangGraph execution ...
  
@@ -596,7 +596,7 @@ graph = graph_builder.compile()
 def my_agent(question, langfuse_handler):
     
     # Create a trace via Langfuse spans and use Langchain within it
-    with langfuse.start_as_current_span(name="my-langgraph-agent") as root_span:
+    with langfuse.start_as_current_observation(name="my-langgraph-agent") as root_span:
     
         # Step 2: LangChain processing
         response = graph.invoke(
@@ -639,7 +639,8 @@ for item in dataset.items:
         
         # Call your application logic - this can use any combination of decorators, 
         # context managers, or manual observations
-        with langfuse.start_as_current_generation(
+        with langfuse.start_as_current_observation(
+            as_type="generation",
             name="llm-call",
             model="gpt-4o",
             input=item.input

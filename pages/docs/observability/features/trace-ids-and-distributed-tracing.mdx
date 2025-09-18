@@ -85,7 +85,7 @@ external_id = "request_12345"
 trace_id = langfuse.create_trace_id(seed=external_id)
 
 # Use this trace ID in a span
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="process-request",
     trace_context={"trace_id": trace_id}
 ) as span:
@@ -101,7 +101,7 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Use a predefined trace ID with trace_context parameter
-with langfuse.start_as_current_span(
+with langfuse.start_as_current_observation(
     name="my-operation",
     trace_context={
         "trace_id": "abcdef1234567890abcdef1234567890",  # Must be 32 hex chars
@@ -119,7 +119,7 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-with langfuse.start_as_current_span(name="outer-operation") as span:
+with langfuse.start_as_current_observation(name="outer-operation") as span:
     # Access the trace ID of the current span
     current_trace_id = langfuse.get_current_trace_id()
     current_span_id = langfuse.get_current_observation_id()

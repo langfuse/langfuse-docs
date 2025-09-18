@@ -30,12 +30,12 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Create a span using a context manager
-with langfuse.start_as_current_span(name="process-request") as span:
+with langfuse.start_as_current_observation(name="process-request") as span:
     # Your processing logic here
     span.update(output="Processing complete")
 
     # Create a nested generation for an LLM call
-    with langfuse.start_as_current_generation(name="llm-response", model="gpt-3.5-turbo") as generation:
+    with langfuse.start_as_current_observation(name="llm-response", model="gpt-3.5-turbo", as_type="generation") as generation:
         # Your LLM call logic here
         generation.update(output="Generated response")
 
@@ -57,13 +57,13 @@ from langfuse import get_client
 langfuse = get_client()
 
 # Create a span without a context manager
-span = langfuse.start_span(name="user-request")
+span = langfuse.start_observation(name="user-request")
 
 # Your processing logic here
 span.update(output="Request processed")
 
 # Child spans must be created using the parent span object
-nested_span = span.start_span(name="nested-span")
+nested_span = span.start_observation(name="nested-span")
 nested_span.update(output="Nested span output")
 
 # Important: Manually end the span
