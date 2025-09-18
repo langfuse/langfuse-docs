@@ -1,5 +1,5 @@
 export default {
-  overview: "Overview",
+  configurations: "Configurations",
   datasets: "Datasets",
   "experiments-via-sdk": "Experiments via SDK",
   "experiments-via-ui": "Experiments via UI",
