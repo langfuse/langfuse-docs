@@ -11,24 +11,18 @@ const markdownLinkCheckAsync = promisify(markdownLinkCheck);
 const config = {
     // Show progress bar
     // showProgressBar: true,
-    // Replace patterns for internal and langfuse.com links
-    replacementPatterns: [
-        {
-            pattern: '^/',
-            replacement: 'http://localhost:3333/'
-        },
-        {
-            pattern: '^https://langfuse.com',
-            replacement: 'http://localhost:3333'
-        },
-    ],
-    // Ignore patterns for external links and anchors
+
+    // 1. Ignore patterns for external links and anchors
     ignorePatterns: [
         {
             pattern: '^https?://(?!localhost:3333|langfuse\\.com)'
         },
         {
             pattern: '^#'
+        },
+        // Ignore specific paths that redirect to external sites that block automated requests
+        {
+            pattern: '^/ph$'
         },
         // Ignore template literals and variables
         {
@@ -42,6 +36,19 @@ const config = {
             pattern: '[{}\\[\\]]'
         }
     ],
+
+    // 2. Replace patterns for internal and langfuse.com links
+    replacementPatterns: [
+        {
+            pattern: '^/',
+            replacement: 'http://localhost:3333/'
+        },
+        {
+            pattern: '^https://langfuse.com',
+            replacement: 'http://localhost:3333'
+        },
+    ],
+
     timeout: '20s',
     retryOn429: true,
     retryCount: 5,
@@ -53,7 +60,7 @@ function extractHrefLinks(content) {
     const hrefRegex = /href=["']([^"']+)["']/g;
     const links = [];
     let match;
-    
+
     while ((match = hrefRegex.exec(content)) !== null) {
         const href = match[1];
         // Include internal links (starting with / or https://langfuse.com)
@@ -65,7 +72,7 @@ function extractHrefLinks(content) {
             links.push(relativePath);
         }
     }
-    
+
     return links;
 }
 
@@ -73,12 +80,12 @@ async function checkHrefLinks(links, filePath) {
     if (links.length === 0) {
         return false;
     }
-    
+
     // Create a fake markdown content with just the href links to reuse existing functionality
     const fakeMarkdown = links.map(link => `[link](${link})`).join('\n');
-    
+
     const results = await markdownLinkCheckAsync(fakeMarkdown, config);
-    
+
     let hasErrors = false;
     results.forEach(result => {
         if (result.status === 'dead') {
@@ -95,7 +102,7 @@ async function checkHrefLinks(links, filePath) {
             }
         }
     });
-    
+
     return hasErrors;
 }
 

@@ -1,0 +1,451 @@
+---
+title: TypeScript SDK - Advanced Configuration
+description: Advanced configuration options for the TypeScript SDK.
+label: "Version: JS SDK v4"
+---
+
+# TypeScript SDK - Advanced Configuration
+
+## Masking
+
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
+
+The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
+
+```ts filename="instrumentation.ts" /mask:/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    // A simple regex to mask credit card numbers
+    const maskedData = data.replace(
+      /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
+      "***MASKED_CREDIT_CARD***"
+    );
+    return maskedData;
+  },
+});
+
+const sdk = new NodeSDK({
+  spanProcessors: [spanProcessor],
+});
+
+sdk.start();
+```
+
+## Filtering Spans
+
+You can provide a predicate function `shouldExportSpan` to the `LangfuseSpanProcessor` to decide on a per-span basis whether it should be exported to Langfuse.
+
+<Callout type="warning" title="Filtering Spans May Break Trace Trees">
+  Filtering spans may break the parent-child relationships in your traces. For
+  example, if you filter out a parent span but keep its children, you may see
+  "orphaned" observations in the Langfuse UI. Consider the impact on trace
+  structure when configuring `shouldExportSpan`.
+</Callout>
+
+```ts filename="instrumentation.ts" /shouldExportSpan/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor, ShouldExportSpan } from "@langfuse/otel";
+
+// Example: Filter out all spans from the 'express' instrumentation
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  otelSpan.instrumentationScope.name !== "express";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
+});
+
+sdk.start();
+```
+
+If you want to include only LLM observability related spans, you can configure an allowlist like so:
+
+```ts filename="instrumentation.ts"
+import { ShouldExportSpan } from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  ["langfuse-sdk", "ai"].includes(otelSpan.instrumentationScope.name);
+```
+
+<Callout type="info">
+  If you would like to exclude Langfuse spans from being sent to third-party
+  observability backends configured in your OpenTelemetry setup, see [the
+  documentation on isolating the Langfuse tracer
+  provider](#isolated-tracer-provider).
+</Callout>
+
+## Sampling
+
+Langfuse respects OpenTelemetry's sampling decisions. You can configure a sampler in your OTEL SDK to control which traces are sent to Langfuse. This is useful for managing costs and reducing noise in high-volume applications.
+
+Here is an example of how to configure a `TraceIdRatioBasedSampler` to send only 20% of traces:
+
+```ts filename="instrumentation.ts" /new TraceIdRatioBasedSampler(0.2)/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+
+const sdk = new NodeSDK({
+  // Sample 20% of all traces
+  sampler: new TraceIdRatioBasedSampler(0.2),
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+For more advanced sampling strategies, refer to the [OpenTelemetry JS Sampling Documentation](https://opentelemetry.io/docs/languages/js/sampling/).
+
+## Managing trace and observation IDs
+
+In Langfuse, every trace and observation has a unique identifier. Understanding their format and how to set them is useful for integrating with other systems.
+
+- **Trace IDs** are 32-character lowercase hexadecimal strings, representing 16 bytes of data
+- **Observation IDs** (also known as Span IDs in OpenTelemetry) are 16-character lowercase hexadecimal strings, representing 8 bytes
+
+While the SDK handles ID generation automatically, you may manually set them to align with external systems or create specific trace structures. This is done using the `parentSpanContext` option in tracing methods.
+
+When starting a new trace by setting a `traceId`, you must also provide an arbitrary parent-`spanId` for the parent observation. The parent span ID value is irrelevant as long as it is a valid 16-hexchar string as the span does not actually exist but is only used for trace ID inheritance of the created observation.
+
+You can create valid, deterministic trace IDs from a seed string using `createTraceId`. This is useful for correlating Langfuse traces with IDs from external systems, like a support ticket ID.
+
+```typescript
+import { createTraceId, startObservation } from "@langfuse/tracing";
+
+const externalId = "support-ticket-54321";
+
+// Generate a valid, deterministic traceId from the external ID
+const langfuseTraceId = await createTraceId(externalId);
+
+// You can now start a new trace with this ID
+const rootSpan = startObservation(
+  "process-ticket",
+  {},
+  {
+    parentSpanContext: {
+      traceId: langfuseTraceId,
+      spanId: "0123456789abcdef", // A valid 16 hexchar string; value is irrelevant as parent span does not exist but only used for inheritance
+      traceFlags: 1, // mark trace as sampled
+    },
+  }
+);
+
+// Later, you can regenerate the same traceId to score or retrieve the trace
+const scoringTraceId = await createTraceId(externalId);
+// scoringTraceId will be the same as langfuseTraceId
+```
+
+You may also access the current active trace ID via the `getActiveTraceId` function:
+
+```typescript
+import { startObservation, getActiveTraceId } from "@langfuse/tracing";
+
+await startObservation("run", async (span) => {
+  const traceId = getActiveTraceId();
+  console.log(`Current trace ID: ${traceId}`);
+});
+```
+
+## Logging
+
+You can configure the global SDK logger to control the verbosity of log output. This is useful for debugging.
+
+**In code:**
+
+```typescript /configureGlobalLogger/
+import { configureGlobalLogger, LogLevel } from "@langfuse/core";
+
+// Set the log level to DEBUG to see all log messages
+configureGlobalLogger({ level: LogLevel.DEBUG });
+```
+
+Available log levels are `DEBUG`, `INFO`, `WARN`, and `ERROR`.
+
+**Via environment variable:**
+
+You can also set the log level using the `LANGFUSE_LOG_LEVEL` environment variable.
+
+```bash
+export LANGFUSE_LOG_LEVEL="DEBUG"
+```
+
+## Serverless environments
+
+In short-lived environments such as serverless functions (e.g., Vercel Functions, AWS Lambda), you must explicitly flush the traces before the process exits or the runtime environment is frozen.
+
+<Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
+<Tab>
+{/* Generic serverless */}
+Export the processor from your OTEL SDK setup file in order to flush it later.
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor to be able to flush it
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+```
+
+In your serverless function handler, call `forceFlush()` on the span processor before the function exits.
+
+```ts filename="handler.ts" /forceFlush/
+import { langfuseSpanProcessor } from "./instrumentation";
+
+export async function handler(event, context) {
+  // ... your application logic ...
+
+  // Flush before exiting
+  await langfuseSpanProcessor.forceFlush();
+}
+```
+
+</Tab>
+
+<Tab>
+{/* Vercel Cloud Functions */}
+
+Export the processor from your `instrumentation.ts` file in order to flush it later.
+
+```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor to be able to flush it
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+```
+
+In Vercel Cloud Functions, please use the `after` utility to schedule a flush after the request has completed.
+
+```ts filename="route.ts" /after/ /forceFlush/
+import { after } from "next/server";
+
+import { langfuseSpanProcessor } from "./instrumentation.ts";
+
+export async function POST() {
+  // ... existing request logic ...
+
+  // Schedule flush after request has completed
+  after(async () => {
+    await langfuseSpanProcessor.forceFlush();
+  });
+
+  // ... send response ...
+}
+```
+
+</Tab>
+</Tabs>
+
+## Isolated tracer provider
+
+The Langfuse JS SDK uses the global OpenTelemetry TracerProvider to attach its span processor and create tracers that emit spans. This means that if you have an existing OpenTelemetry setup with another destination configured for your spans (e.g., Datadog), you will see Langfuse spans in those third-party observability backends as well.
+
+If you'd like to avoid sending Langfuse spans to third-party observability backends in your existing OpenTelemetry setup, you will need to use an isolated OpenTelemetry TracerProvider that is separate from the global one.
+
+<Callout type="info">
+  If you would like to simply limit the spans that are sent to Langfuse and you
+  have no third-party observability backend where you'd like to exclude Langfuse
+  spans from, [see filtering spans instead](#filtering-spans).
+</Callout>
+
+<Callout type="warning" title="Isolated TracerProvider may break trace trees">
+  Using an isolated TracerProvider may break the parent-child relationships in
+  your traces, as all TracerProviders still share the same active span context.
+  For example, if you have an active parent span from the global TracerProvider
+  but children from an isolated TracerProvider, you may see "orphaned"
+  observations in the Langfuse UI. Consider the impact on trace structure when
+  configuring an isolated tracer provider.
+</Callout>
+
+```typescript /setLangfuseTracerProvider/ /LangfuseSpanProcessor/ /langfuseTracerProvider/
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
+
+// Create a new TracerProvider and register the LangfuseSpanProcessor
+// do not set this TracerProvider as the global TracerProvider
+const langfuseTracerProvider = new NodeTracerProvider(
+  spanProcessors: [new LangfuseSpanProcessor()],
+)
+
+// Register the isolated TracerProvider
+setLangfuseTracerProvider(langfuseTracerProvider)
+```
+
+## Multi-project Setup
+
+You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
+
+```ts filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      publicKey: "pk-lf-public-key-project-1",
+      secretKey: "sk-lf-secret-key-project-1",
+    }),
+    new LangfuseSpanProcessor({
+      publicKey: "pk-lf-public-key-project-2",
+      secretKey: "sk-lf-secret-key-project-2",
+    }),
+  ],
+});
+
+sdk.start();
+```
+
+This configuration will send every trace to both projects. You can also configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
+
+## Custom scores from browser
+
+<Callout>
+  Sending custom scores directly from the browser is not yet supported in the TypeScript SDK v4. The docs below describe the still valid approach with the SDK v3.
+</Callout>
+
+The TypeScript SDK can be used to report custom scores client-side directly from the browser. It is commonly used to ingest scores into Langfuse which are based on implicit user interactions and feedback.
+
+**Example**
+
+<Tabs items={["React", "Vue"]}>
+<Tab>
+
+```ts
+import { LangfuseWeb } from "langfuse";
+
+export function UserFeedbackComponent(props: { traceId: string }) {
+  const langfuseWeb = new LangfuseWeb({
+    publicKey: env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
+    baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+    // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+  });
+
+  const handleUserFeedback = async (value: number) =>
+    await langfuseWeb.score({
+      traceId: props.traceId,
+      name: "user_feedback",
+      value,
+    });
+
+  return (
+    <div>
+      <button onClick={() => handleUserFeedback(1)}>👍</button>
+      <button onClick={() => handleUserFeedback(0)}>👎</button>
+    </div>
+  );
+}
+```
+
+</Tab>
+<Tab>
+
+```html
+<template>
+  <div>
+    <button @click="handleUserFeedback(1)">👍</button>
+    <button @click="handleUserFeedback(0)">👎</button>
+  </div>
+</template>
+
+<script>
+  import { LangfuseWeb } from "langfuse";
+
+  export default {
+    props: {
+      traceId: {
+        type: String,
+        required: true,
+      },
+    },
+    data() {
+      return {
+        langfuseWeb: null,
+      };
+    },
+    created() {
+      this.langfuseWeb = new LangfuseWeb({
+        publicKey: process.env.VUE_APP_LANGFUSE_PUBLIC_KEY,
+        baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+        // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+      });
+    },
+    methods: {
+      async handleUserFeedback(value) {
+        await this.langfuseWeb.score({
+          traceId: this.traceId,
+          name: "user_feedback",
+          value,
+        });
+      },
+    },
+  };
+</script>
+```
+
+</Tab>
+</Tabs>
+
+We integrated the Web SDK into the Vercel AI Chatbot project to collect user feedback on individual messages. Read the [blog post](/blog/showcase-llm-chatbot) for more details and code examples.
+
+**Installation**
+
+```sh npm2yarn
+npm i langfuse # this is still the v3 installation as v4 does not yet support scores from browser env
+```
+
+In your application, set the **public api key** to create a client.
+
+```ts
+import { LangfuseWeb } from "langfuse";
+
+const langfuseWeb = new LangfuseWeb({
+  publicKey: "pk-lf-...",
+  baseUrl: "https://cloud.langfuse.com", // 🇪🇺 EU region
+  // baseUrl: "https://us.cloud.langfuse.com", // 🇺🇸 US region
+});
+```
+
+Hint for Next.js users: you need to prefix the public key with `NEXT_PUBLIC_` to expose it in the frontend.
+
+<Callout type="warning">
+
+  Never set your Langfuse **secret key** in public browser code. The `LangfuseWeb` requires only the public key.
+
+</Callout>
+
+**Create custom scores**
+
+Scores are used to evaluate executions/traces. They are attached to a single trace. If the score relates to a specific step of the trace, the score can optionally also be attached to the observation to enable evaluating it specifically.
+
+<Callout type="info">
+  While integrating Langfuse, it is important to either include the Langfuse Ids
+  in the response to the frontend or to use an own id as the trace id which is
+  available in both backend and frontend.
+</Callout>
+
+```ts
+// pass traceId and observationId to front end
+await langfuseWeb.score({
+  traceId: message.traceId,
+  observationId: message.observationId,
+  name: "user-feedback",
+  value: 1,
+  comment: "I like how personalized the response is",
+});
+```
+
+Learn more about [custom scores here](/docs/evaluation/evaluation-methods/custom-scores).

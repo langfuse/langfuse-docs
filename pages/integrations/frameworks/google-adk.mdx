@@ -22,33 +22,22 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 
 
 ```python
-%pip install langfuse google-adk -q
+%pip install langfuse google-adk openinference-instrumentation-google-adk -q
 ```
 
 ## Step 2: Set up environment variables
 
-Fill in the **Langfuse** and **OpenTelemetry** credentials for your project. Also set your **Gemini API key**.
+Fill in the **Langfuse** and your **Gemini API key**.
 
 
 ```python
 import os
-import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
 os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
 # os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
-
-# Build Basic Auth header.
-LANGFUSE_AUTH = base64.b64encode(
-    f"{os.environ.get('LANGFUSE_PUBLIC_KEY')}:{os.environ.get('LANGFUSE_SECRET_KEY')}".encode()
-).decode()
- 
-# Configure OpenTelemetry endpoint & headers
-os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_HOST") + "/api/public/otel"
-os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
-
 
 # Gemini API Key (Get from Google AI Studio: https://aistudio.google.com/app/apikey)
 os.environ["GOOGLE_API_KEY"] = "..." 
@@ -71,6 +60,17 @@ else:
 
     Langfuse client is authenticated and ready!
 
+
+## Step 3: OpenTelemetry Instrumentation
+
+Use the [`GoogleADKInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-google-adk) library to wrap ADK calls and send OpenTelemetry spans to Langfuse.
+
+
+```python
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor
+
+GoogleADKInstrumentor().instrument()
+```
 
 ## Step 3: Build a hello world agent
 
@@ -109,20 +109,13 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
         print(event.content.parts[0].text)
 ```
 
-    Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
-
-
-    Hello Langfuse 👋!
-    
-
-
 ## Step 4: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
 
 ![Google ADK example trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
 
-[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e59666703bedc7090229c4b7357e5ef3?timestamp=2025-08-19T08%3A59%3A53.529Z&display=details)
+[Link to trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/b82a0bdc1994fc5d1c8576ca032543f7?timestamp=2025-08-28T07:32:30.303Z&display=details)
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

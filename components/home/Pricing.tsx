@@ -404,6 +404,10 @@ type Tier = {
     name: string;
     href: string;
   };
+  calloutLink?: {
+    text: string;
+    href: string;
+  };
   addOn?: {
     name: string;
     price: string;
@@ -445,6 +449,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         name: "Discounts available",
         href: "/pricing#discounts",
       },
+      calloutLink: {
+        text: "Startup? Get 50% off",
+        href: "/startups",
+      },
       mainFeatures: [
         "Everything in Hobby",
         <>
@@ -453,8 +461,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         </>,
         "90 days data access",
         "Unlimited users",
-        "Unlimited evaluators",
-        "Support via Chat",
+        "In-app support",
       ],
       cta: "Sign up",
     },
@@ -466,6 +473,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "$199",
       description:
         "For scaling projects. Unlimited history, high rate limits, all features.",
+      calloutLink: {
+        text: "Startup? Get 50% off",
+        href: "/startups",
+      },
       mainFeatures: [
         "Everything in Core",
         <>
@@ -476,7 +487,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Unlimited annotation queues",
         "High rate limits",
         "SOC2 & ISO27001 reports, BAA available (HIPAA)",
-        "Support via Slack, Chat",
+        "Prioritized in-app support",
       ],
       addOn: {
         name: "Teams",
@@ -486,6 +497,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
           "SSO enforcement",
           "Fine-grained RBAC",
           "Data retention management",
+          "Support via Dedicated Slack Channel",
         ],
       },
       cta: "Sign up",
@@ -497,6 +509,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       description: "Enterprise-grade support and security features.",
       price: "Custom",
+      calloutLink: {
+        text: "Enterprise FAQ",
+        href: "/enterprise",
+      },
       mainFeatures: [
         "Everything in Pro and Teams add-on",
         "Custom rate limits",
@@ -537,6 +553,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       price: "Custom",
       description: "Enterprise-grade support and security features.",
+      calloutLink: {
+        text: "Enterprise FAQ",
+        href: "/enterprise",
+      },
       mainFeatures: [
         "All Open Source features",
         "Project-level RBAC",
@@ -548,10 +568,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Billing via Invoice",
       ],
       cta: "Talk to sales",
-      ctaCallout: {
-        text: "Request trial",
-        href: "/request-trial",
-      },
       learnMore: "/enterprise",
     },
   ],
@@ -838,6 +854,16 @@ const sections: Section[] = [
         },
       },
       {
+        name: "Webhooks & Slack",
+        description:
+          "Trigger webhooks for prompt changes and integrate with Slack",
+        href: "/docs/prompt-management/features/webhooks-slack-integrations",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
         name: "Protected Deployment Labels",
         description:
           "Prevent certain prompt labels from being modified or deleted by non-admins/owners",
@@ -853,16 +879,6 @@ const sections: Section[] = [
             "Open Source": false,
             Enterprise: true,
           },
-        },
-      },
-      {
-        name: "Webhooks & Slack",
-        description:
-          "Trigger webhooks for prompt changes and integrate with Slack",
-        href: "/docs/prompt-management/features/webhooks-slack-integrations",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
     ],
@@ -917,6 +933,32 @@ const sections: Section[] = [
         },
       },
       {
+        name: "External Evaluation Pipelines",
+        href: "/guides/cookbook/example_external_evaluation_pipelines",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        description:
+          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
+        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
         href: "/docs/scores/annotation",
@@ -933,32 +975,6 @@ const sections: Section[] = [
           cloud: {
             Hobby: "1 queue",
             Core: "3 queues",
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "External Evaluation Pipelines",
-        href: "/guides/cookbook/example_external_evaluation_pipelines",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Enterprise: true },
-        },
-      },
-      {
-        name: "LLM-as-judge evaluators",
-        description:
-          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
-        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
-        tiers: {
-          cloud: {
-            Hobby: "1 evaluator",
-            Core: true,
             Pro: true,
             Enterprise: true,
           },
@@ -1122,32 +1138,28 @@ const sections: Section[] = [
       },
       {
         name: "Community (GitHub)",
+        href: "/support#community",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
-        name: "Chat",
+        name: "In-app support",
+        href: "/support#in-app",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
-        name: "Email",
-        tiers: {
-          cloud: { Hobby: false, Core: false, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
         name: "Private Slack channel",
+        href: "/support#slack",
         tiers: {
           cloud: {
             Hobby: false,
             Core: false,
-            Pro: true,
+            Pro: TEAMS_ADDON,
             Enterprise: true,
           },
           selfHosted: {
@@ -1158,6 +1170,7 @@ const sections: Section[] = [
       },
       {
         name: "Dedicated Support Engineer",
+        href: "/support#onboarding",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1166,6 +1179,22 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Onboarding & Architectural guidance",
+        href: "/support#onboarding",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+          },
         },
       },
       {
@@ -1183,21 +1212,6 @@ const sections: Section[] = [
       },
       {
         name: "Support SLA",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "Architectural guidance",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1457,6 +1471,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
+        href: "/security/dpa",
         tiers: {
           cloud: { Hobby: false, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: true },
@@ -1464,6 +1479,7 @@ const sections: Section[] = [
       },
       {
         name: "SOC2 Type II & ISO27001 reports",
+        href: "/security",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1476,6 +1492,7 @@ const sections: Section[] = [
       },
       {
         name: "HIPAA compliance",
+        href: "/security/hipaa",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1487,6 +1504,7 @@ const sections: Section[] = [
       },
       {
         name: "InfoSec/legal reviews",
+        href: "/security",
         tiers: {
           cloud: {
             Hobby: false,
@@ -1708,7 +1726,7 @@ export default function Pricing({
                   {variant === "cloud" &&
                     (tier.name === "Core" || tier.name === "Pro") && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium">
+                        <div className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-medium text-center whitespace-nowrap inline-block">
                           Unlimited Users
                         </div>
                       </div>
@@ -1777,16 +1795,15 @@ export default function Pricing({
                       )}
                     </div>
 
-                    {/* Startup discount callout for Core and Pro - always render container for alignment */}
+                    {/* Callouts for different tiers - always render container for alignment */}
                     <div className="p-6 h-[30px] flex items-center justify-center">
-                      {variant === "cloud" &&
-                      (tier.name === "Core" || tier.name === "Pro") ? (
+                      {tier.calloutLink ? (
                         <div className="text-xs text-muted-foreground text-center">
                           <Link
-                            href="/startups"
+                            href={tier.calloutLink.href}
                             className="underline hover:text-primary"
                           >
-                            Startup? Get 50% off
+                            {tier.calloutLink.text}
                           </Link>
                         </div>
                       ) : null}

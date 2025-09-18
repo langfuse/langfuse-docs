@@ -90,7 +90,7 @@ const menuItems: {
       },
       {
         name: "API",
-        href: "/docs/api",
+        href: "/docs/api-and-data-platform/features/public-api",
       },
     ],
   },

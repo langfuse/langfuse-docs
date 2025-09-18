@@ -11,7 +11,7 @@ To tag a trace, add a list of tags to the tags field of the trace object.
 Tags are strings and a trace may have multiple tags.
 Trace tags can be added, but not removed.
 
-<Tabs items={["Python SDK", "JS/TS", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "Langchain (Python)", "Langchain (JS/TS)"]}>
 <Tab>
 When using the [`@observe()` decorator](/docs/sdk/python/decorators):
 
@@ -55,15 +55,65 @@ with langfuse.start_as_current_observation(name="another-operation"):
 ```
 
 </Tab>
-<Tab>
+<Tab title="JS/TS SDK">
+
+When using the context manager:
 
 ```ts
-import { Langfuse } from "langfuse";
-const langfuse = new Langfuse();
+import {
+  startActiveObservation,
+  startObservation,
+  updateActiveTrace,
+} from "@langfuse/tracing";
 
-const trace = langfuse.trace({
+await startActiveObservation("context-manager", async (span) => {
+  span.update({
+    input: { query: "What is the capital of France?" },
+  });
+
+  updateActiveTrace({
+    tags: ["tag-1", "tag-2"],
+  });
+});
+```
+
+When using the `observe` wrapper:
+
+```ts
+import { observe, updateActiveTrace } from "@langfuse/tracing";
+
+// An existing function
+async function fetchData(source: string) {
+  updateActiveTrace({
+    tags: ["tag-1", "tag-2"],
+  });
+
+  // ... logic to fetch data
+  return { data: `some data from ${source}` };
+}
+
+// Wrap the function to trace it
+const tracedFetchData = observe(fetchData, {
+  name: "observe-wrapper",
+});
+
+const result = await tracedFetchData("API");
+```
+
+When creating spans manually:
+
+```ts
+import { startObservation } from "@langfuse/tracing";
+
+const span = startObservation("manual-observation", {
+  input: { query: "What is the capital of France?" },
+});
+
+span.updateTrace({
   tags: ["tag-1", "tag-2"],
 });
+
+span.update({ output: "Paris" }).end();
 ```
 
 See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
@@ -86,7 +136,7 @@ completion = openai.chat.completions.create(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (Python)">
 
 Use metadata in chain invocation:
 
@@ -105,7 +155,7 @@ chain.invoke(
 ```
 
 </Tab>
-<Tab>
+<Tab title="Langchain (JS/TS)">
 
 When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `tags` to the constructor:
 
@@ -145,7 +195,7 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 
 </Tab>
 
-</Tabs>
+</LangTabs>
 
 ### Working with tags
 
@@ -153,8 +203,8 @@ Tags enable you to flexibly add metadata to your traces. You can filter for tags
 
 When choosing tags, consider what aspects of the traces you might want to filter for or group by in your analysis. You may use tags to indicate specific versions of your app ('app-v1', 'app-v2'), specific LLM techniques you used ('rag', 'one-shot', 'few-shot'), or the environment of your app ('local', 'staging', 'prod'). See [Intent Classification Notebook](/docs/analytics/example-intent-classification) for an end-to-end example on how tags can be created programmatically.
 
-<CloudflareVideo
-  videoId="3c5431bdbb11980bfc1558766fe33923"
+<Video
+  src="https://static.langfuse.com/docs-videos/trace-tags.mp4"
   aspectRatio={1840 / 1080}
   gifStyle
 />

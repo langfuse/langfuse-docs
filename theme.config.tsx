@@ -14,7 +14,7 @@ import IconDiscord from "./components/icons/discord";
 import FooterMenu from "./components/FooterMenu";
 import Link from "next/link";
 import { AvailabilityBanner } from "./components/availability";
-import { CloudflareVideo, Video } from "./components/Video";
+import { Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
 
@@ -198,23 +198,22 @@ const config: DocsThemeConfig = {
     Cards,
     AvailabilityBanner,
     Callout,
-    CloudflareVideo,
     Video,
   },
-  // banner: {
-  //   key: "town-hall-2025-07-16",
-  //   dismissible: true,
-  //   content: (
-  //     <Link href="https://lu.ma/frqm1umn">
-  //       {/* mobile */}
-  //       <span className="sm:hidden">SF, Wednesday: Agent Evals 101 →</span>
-  //       {/* desktop */}
-  //       <span className="hidden sm:inline">
-  //         San Francisco, Wednesday - Marc (Langfuse CEO) on Agent Evals 101 →
-  //       </span>
-  //     </Link>
-  //   ),
-  // },
+  banner: {
+    key: "js-sdk-v4-ga",
+    dismissible: true,
+    content: (
+      <Link href="/changelog/2025-08-28-typescript-sdk-v4-ga">
+        {/* mobile */}
+        <span className="sm:hidden">TypeScript SDK v4 GA →</span>
+        {/* desktop */}
+        <span className="hidden sm:inline">
+          Langfuse TypeScript SDK v4 is here →
+        </span>
+      </Link>
+    ),
+  },
 };
 
 export default config;

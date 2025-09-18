@@ -29,7 +29,7 @@ Label your prompt versions (e.g., `prod-a` and `prod-b`) to identify different v
 
 ### Fetch Prompts and Run A/B Test
 
-<Tabs items={["Python", "JavaScript"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -62,20 +62,22 @@ result_text = response.choices[0].message.content
 <Tab>
 
 ```js
-import { Langfuse, observeOpenAI } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+
 import OpenAI from "openai";
 
 // Requires environment variables for initialization
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 // Create and wrap OpenAI client
 const openai = observeOpenAI(new OpenAI());
 
 // Fetch prompt versions
-const promptA = await langfuse.getPrompt("my-prompt-name", undefined, {
+const promptA = await langfuse.prompt.get("my-prompt-name", {
   label: "prod-a",
 });
-const promptB = await langfuse.getPrompt("my-prompt-name", undefined, {
+const promptB = await langfuse.prompt.get("my-prompt-name", {
   label: "prod-b",
 });
 
@@ -98,7 +100,7 @@ const resultText = completion.choices[0].message.content;
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 <Callout type="info">
 
@@ -110,8 +112,8 @@ Refer to [prompt management documentation](/docs/prompts/get-started) for additi
 
 Compare metrics for each prompt version in the Langfuse UI:
 
-<CloudflareVideo
-  videoId="82868148f98f377f2d7fd05226e639d6"
+<Video
+  src="https://static.langfuse.com/docs-videos/prompt-metrics.mp4"
   aspectRatio={1696 / 1080}
   gifStyle
 />

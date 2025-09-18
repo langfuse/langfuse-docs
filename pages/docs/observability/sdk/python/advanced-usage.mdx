@@ -128,7 +128,7 @@ langfuse.start_observation(name="myspan").end() # Span will be isolated from rem
 
 ## Using `ThreadPoolExecutors` or `ProcessPoolExecutors`
 
-The observe decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors _and_ when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
+The observe decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. However, when using Python's ThreadPoolExecutors and ProcessPoolExecutors _and_ when spawning threads from inside a trace (i.e. the executor is run inside a decorated function) the decorator will not work correctly as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/fastapi/fastapi/discussions/9006) in the fastapi repo that discusses this limitation.
 
 The recommended workaround is to pass the parent observation id  and the trace ID as a keyword argument to each multithreaded execution, thus re-establishing the link to the parent span or trace:
 
@@ -174,7 +174,7 @@ get_client().flush()
 
 ## Distributed tracing
 
-To maintain the trace context across service / process boundaries, please rely on the OpenTelemetry native context propagation across service / process boundaries as much as possible.
+To maintain the trace context across service / process boundaries, please rely on the OpenTelemetry native [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/) across service / process boundaries as much as possible.
 
 Using the `trace_context` argument to 'force' the parent child relationship may lead to unexpected trace updates as the resulting span will be treated as a root span server side.
 
@@ -338,8 +338,37 @@ response_b = chain.invoke(
 - Missing public key parameters may result in traces being routed to the default project or lost
 - Third-party OpenTelemetry spans (from HTTP clients, databases, etc.) will appear in all projects since they lack the Langfuse public key attribute
 
-## Self-signed SSL certificates (self-hosted Langfuse)
+## Passing `completion_start_time` for TTFT tracking
 
+If you are using the Python SDK to manually create generations, you can pass the `completion_start_time` parameter. This allows langfuse to calculate the time to first token (TTFT) for you.
+
+```python
+from langfuse import get_client
+import datetime
+import time
+ 
+langfuse = get_client()
+ 
+# Start observation with specific type
+with langfuse.start_as_current_observation(
+    as_type="generation",
+    name="TTFT-Generation"
+) as generation:
+
+    # simulate LLM time to first token
+    time.sleep(3)
+
+    # Update the generation with the time the model started to generate
+    generation.update(
+        completion_start_time=datetime.datetime.now(),
+        output="some response",
+    )
+ 
+# Flush events in short-lived applications
+langfuse.flush()
+```
+
+## Self-signed SSL certificates (self-hosted Langfuse)
 
 If you are [self-hosting](/docs/deployment/self-host) Langfuse and you'd like to use self-signed SSL certificates, you will need to configure the SDK to trust the self-signed certificate:
 

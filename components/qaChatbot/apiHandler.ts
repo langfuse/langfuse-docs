@@ -9,8 +9,8 @@ import {
 } from "ai";
 import {
   observe,
-  startActiveSpan,
-  updateActiveSpan,
+  startActiveObservation,
+  updateActiveObservation,
   updateActiveTrace,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
@@ -25,6 +25,7 @@ const langfuseClient = new LangfuseClient({
   publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
 });
+
 const tracedGetPrompt = observe(
   langfuseClient.prompt.get.bind(langfuseClient.prompt),
   { name: "get-langfuse-prompt" },
@@ -43,9 +44,7 @@ export const handler = async (req: Request) => {
     (part) => part.type === "text",
   )?.text;
 
-  updateActiveSpan({
-    input: inputText,
-  });
+  updateActiveObservation({ input: inputText }, { asType: "generation" });
 
   updateActiveTrace({
     name: "QA-Chatbot",
@@ -58,26 +57,37 @@ export const handler = async (req: Request) => {
   const prompt = await tracedGetPrompt("langfuse-docs-assistant-text");
 
   // Initialize MCP client using Streamable HTTP transport (works with our MCP server)
-  const mcpClient = await startActiveSpan("create-mcp-client", async () => {
-    const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
+  const mcpClient = await startActiveObservation(
+    "create-mcp-client",
+    async () => {
+      const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
 
-    return createMCPClient({
-      transport: new StreamableHTTPClientTransport(mcpUrl, {
-        sessionId: `qa-chatbot-${crypto.randomUUID()}`,
-      }) as MCPTransport,
-    });
-  });
+      return createMCPClient({
+        transport: new StreamableHTTPClientTransport(mcpUrl, {
+          sessionId: `qa-chatbot-${crypto.randomUUID()}`,
+        }) as MCPTransport,
+      });
+    },
+  );
 
   // Discover all tools exposed by the MCP server
   const tools = await mcpClient.tools();
 
+
+  const reasoningSummary = prompt.config
+    .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
+  const textVerbosity = prompt.config
+    .textVerbosity as 'low' | 'medium' | 'high' | undefined;
+  const reasoningEffort = prompt.config
+    .reasoningEffort as 'low' | 'medium' | 'high' | undefined;
+
   const result = streamText({
-    model: openai("gpt-5-nano"),
+    model: openai(String(prompt.config.model)),
     providerOptions: {
       openai: {
-        reasoningSummary: "detailed",
-        textVerbosity: "low",
-        reasoningEffort: "low",
+        reasoningSummary,
+        textVerbosity,
+        reasoningEffort,
       } satisfies OpenAIResponsesProviderOptions,
     },
     system: prompt.prompt,
@@ -91,11 +101,15 @@ export const handler = async (req: Request) => {
     onFinish: async (result) => {
       await mcpClient.close();
 
-      updateActiveSpan({
-        output: result.content,
-      });
+      const latestText = Array.isArray((result as any).content)
+        ? [...((result as any).content as Array<any>)]
+            .reverse()
+            .find((part: any) => part?.type === "text")?.text
+        : (result as any).content;
+
+      updateActiveObservation({ output: latestText }, { asType: "generation" });
       updateActiveTrace({
-        output: result.content,
+        output: latestText,
       });
       trace.getActiveSpan().end();
     },

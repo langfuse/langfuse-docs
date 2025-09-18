@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, CheckCircle2, FileText, PlayCircle } from "lucide-react";
 import { Quote } from "@/components/Quote";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { Cards as NextraCards } from "nextra/components";
 import { HomeSection } from "./home/components/HomeSection";
 
@@ -103,32 +103,26 @@ const DEMO_TABS = [
 ];
 
 export function WatchDemoPage() {
-  const [activeTab, setActiveTab] = useState(DEMO_TABS[0].id);
+  const router = useRouter();
 
-  // Read hash from URL on mount and hash changes
-  useEffect(() => {
-    const updateTabFromHash = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (hash && DEMO_TABS.some((t) => t.id === hash)) {
-        setActiveTab(hash);
-      }
-    };
+  // Get current tab from query param or default to first tab
+  const activeTab = (() => {
+    const tab = router.query.tab as string;
+    if (tab && DEMO_TABS.some((t) => t.id === tab)) {
+      return tab;
+    }
+    return DEMO_TABS[0].id;
+  })();
 
-    // Set initial tab from hash
-    updateTabFromHash();
-
-    // Listen for hash changes
-    window.addEventListener("hashchange", updateTabFromHash);
-
-    return () => {
-      window.removeEventListener("hashchange", updateTabFromHash);
-    };
-  }, []);
-
-  // Handle tab change and update URL hash
+  // Handle tab change and update URL query param
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    window.history.pushState(null, "", `#${value}`);
+    const query = { ...router.query };
+
+    query.tab = value;
+
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
   };
 
   return (
@@ -213,7 +207,7 @@ export const WatchDemoCards = () => (
       <NextraCards.Card
         key={tab.id}
         title={tab.title}
-        href={`/watch-demo#${tab.id}`}
+        href={`/watch-demo?tab=${tab.id}`}
         icon={<tab.icon />}
       />
     ))}

@@ -109,7 +109,7 @@ Supported formats:
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, or metadata. See the multi-modal documentation for examples.
 
-<Tabs items={["Python SDK", "JS/TS"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 ```python
 from langfuse import get_client, observe
@@ -164,32 +164,34 @@ with langfuse.start_as_current_observation(name="analyze-document") as span: # I
 <Tab>
 
 ```typescript
-import { Langfuse, LangfuseMedia } from "langfuse";
 import fs from "fs";
-
-// Initialize Langfuse client
-const langfuse = new Langfuse();
-
+import { LangfuseMedia } from "@langfuse/core";
+ 
 // Wrap media in LangfuseMedia class
 const wrappedMedia = new LangfuseMedia({
-  contentBytes: fs.readFileSync("./static/bitcoin.pdf"),
+  source: "bytes",
+  contentBytes: fs.readFileSync(new URL("./bitcoin.pdf", import.meta.url)),
   contentType: "application/pdf",
 });
-
+ 
 // Optionally, access media via wrappedMedia.obj
 console.log(wrappedMedia.obj);
-
+ 
 // Include media in any trace or observation
-const trace = langfuse.trace({
-  name: "test-trace-10",
-  metadata: {
-    context: wrappedMedia,
-  },
-});
+const span3 = startObservation("media-pdf-generation");
+
+const generation3 = span3.startObservation('llm-call', {
+  model: 'gpt-4',
+  input: wrappedMedia,
+}, {asType: "generation"});
+
+generation3.end();
+
+span3.end();
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ### API
 
@@ -254,7 +256,7 @@ Based on this token, the Langfuse UI can automatically detect the `mediaId` and 
 
 When dealing with traces, observations, or dataset items that include media references, you can convert them back to their base64 data URI format using the `resolve_media_references` utility method provided by the Langfuse client. This is particularly useful for reinserting the original content during fine-tuning, dataset runs, or replaying a generation. The utility method traverses the parsed object and returns a deep copy with all media reference strings replaced by the corresponding base64 data URI representations.
 
-<Tabs items={["Python SDK (v3)", "Python SDK (v2)", "JS/TS"]}>
+<LangTabs items={["Python SDK", "Python SDK (v2)", "JS/TS SDK"]}>
 <Tab>
 
 ```python
@@ -322,10 +324,9 @@ resolved_trace = langfuse.resolve_media_references(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
-
-// Initialize Langfuse client
-const langfuse = new Langfuse();
+import { LangfuseClient } from "@langfuse/client";
+ 
+const langfuse = new LangfuseClient()
 
 // Example object with media references
 const obj = {
@@ -351,7 +352,7 @@ const resolvedTrace = await langfuse.resolveMediaReferences({
 ```
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## GitHub Discussions
 

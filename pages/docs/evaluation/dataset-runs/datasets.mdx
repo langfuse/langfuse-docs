@@ -6,13 +6,11 @@ sidebarTitle: Datasets
 
 # Datasets
 
-A dataset is a collection of inputs and expected outputs and is used to test your application. Before executing your first dataset run, you need to create a dataset. 
+A dataset is a collection of inputs and expected outputs and is used to test your application. Before executing your first dataset run, you need to create a dataset.
 
 <Frame border fullWidth>
-![Datasets](/images/docs/datasets-overview.png)
+  ![Datasets](/images/docs/datasets-overview.png)
 </Frame>
-
-
 
 ## Why use datasets?
 
@@ -42,7 +40,6 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 <CreateDatasetItem />
 </Steps>
 
-
 ## Create synthetic datasets
 
 Frequently, you want to create synthetic examples to test your application to bootstrap your dataset. LLMs are great at generating these by prompting for common questions/tasks.
@@ -63,7 +60,7 @@ import { FileCode } from "lucide-react";
 
 A common workflow is to select production traces where the application did not perform as expected. Then you let an expert add the expected output to test new versions of your application on the same data.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
 <Tab>
 
 ```python
@@ -82,7 +79,11 @@ langfuse.create_dataset_item(
 <Tab>
 
 ```ts
-langfuse.createDatasetItem({
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.api.datasetItems.create({
   datasetName: "<dataset_name>",
   input: { text: "hello world" },
   expectedOutput: { text: "hello world" },
@@ -97,20 +98,20 @@ langfuse.createDatasetItem({
 <Tab>
 In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
 
-<CloudflareVideo
-  videoId="51ba46cebd0431f9e5483082a8470206"
+<Video
+  src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"
   aspectRatio={16 / 9}
   gifStyle
 />
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Edit/archive dataset items
 
 You can edit or archive dataset items. Archiving items will remove them from future experiment runs.
 
-<Tabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
 
 <Tab>
 
@@ -130,7 +131,11 @@ langfuse.create_dataset_item(
 You can upsert items by providing the `id` of the item you want to update.
 
 ```ts
-langfuse.createDatasetItem({
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.api.datasetItems.create({
   id: "<item_id>",
   // example: update status to "ARCHIVED"
   status: "ARCHIVED",
@@ -141,18 +146,16 @@ langfuse.createDatasetItem({
 <Tab>
 In the UI, you can edit the item by clicking on the item id. To archive or delete the item, click on the dots next to the item and select `Archive` or `Delete`.
 
-<Frame fullWidth>
-![Delete items](/images/docs/dataset-delete-items.png)
-</Frame>
+<Frame fullWidth>![Delete items](/images/docs/dataset-delete-items.png)</Frame>
 
 </Tab>
-</Tabs>
+</LangTabs>
 
 ## Dataset runs
 
 Once you created a dataset, you can test and evaluate your application based on it.
 
-import { Table, WandSparkles, CodeXml, Database} from "lucide-react";
+import { Table, WandSparkles, CodeXml, Database } from "lucide-react";
 
 <Cards num={1}>
 

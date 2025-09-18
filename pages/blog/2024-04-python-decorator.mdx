@@ -41,8 +41,8 @@ _tldr:_
 
 In this video, we introduce the decorator and why we think it's an awesome abstraction to merge all Langfuse integrations. _If you are familiar with it, skip this video and jump to the next section._
 
-<CloudflareVideo
-  videoId="8a1f9282ef64c2bd0d932c92d6185668"
+<Video
+  src="https://static.langfuse.com/docs-videos/launch-week-decorator-walkthrough-1080.mp4"
   aspectRatio={16 / 9.37}
   title="Decorator Integration"
 />
@@ -53,8 +53,8 @@ When starting to work on the decorator, we wanted to make everything simple that
 
 _Example of a nested trace with multiple LLM, non-LLM calls and a LangChain chain_
 
-<CloudflareVideo
-  videoId="5a6976312744d4e2e890c6caf814c8db"
+<Video
+  src="https://static.langfuse.com/docs-videos/decorator-complex-trace.mp4"
   gifStyle
   aspectRatio={16 / 9.93}
 />
@@ -81,7 +81,7 @@ The decorator should:
 
 The power of observability is most visible in complex applications with production workloads. Async and concurrent environments are common in these applications, and the decorator should work seamlessly in these environments. The decorator uses Python's `contextvars` to store the current trace context and to ensure that the observations are correctly associated with the current execution context. This allows you to use the decorator in reliably in async functions.
 
-However, an important exception are Python's ThreadPoolExecutors and ProcessPoolExecutors. The decorator will not work correctly in these environments, as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/tiangolo/fastapi/issues/2776#issuecomment-776659392) in the fastapi repo that discusses this limitation.
+However, an important exception are Python's ThreadPoolExecutors and ProcessPoolExecutors. The decorator will not work correctly in these environments, as the `contextvars` are not correctly copied to the new threads or processes. There is an [existing issue](https://github.com/python/cpython/pull/9688#issuecomment-544304996) in Python's standard library and a [great explanation](https://github.com/fastapi/fastapi/discussions/9006) in the fastapi repo that discusses this limitation.
 
 In short, the decorator will work correctly in async environments, but not in ThreadPoolExecutors or ProcessPoolExecutors.
 
