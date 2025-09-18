@@ -14,73 +14,12 @@ Experiments via SDK are used to programmatically loop your applications or promp
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
 
-<details>
-<summary>Sequence Diagram</summary>
-
-```mermaid
-sequenceDiagram
-    actor Person as User
-    participant User as Experiment Runner
-    participant App as LLM Application
-    participant LF as Langfuse Server
-
-    Note over Person, LF: Setup & Execute Experiment via SDK
-
-    %% Trigger dataset run
-    Person->>User: Trigger experiment via SDK
-
-    %% Load Dataset
-    User->>LF: get_dataset("dataset_name")
-    LF-->>User: Return dataset with items
-
-    %% Loop through dataset items
-    loop For each dataset item
-        Note over User, LF: Process dataset item
-
-        %% Start dataset run context
-        User->>LF: item.run(run_name, description, metadata)
-        LF-->>User: Return run context (root_span)
-
-        %% Execute LLM application
-        User->>App: Execute LLM app with item.input
-        Note over App: Create Langfuse trace<br/>for execution
-        App->>LF: App is instrumented with Langfuse and reports traces
-        App-->>User: Return application output
-
-        %% Optional: Add evaluation scores from experiment runner
-        opt Add Custom Scores
-            Note over User: Run evaluation function locally
-            User->>LF: root_span.score_trace(name, value, comment)
-        end
-
-        %% Link execution to dataset item
-        Note over User, LF: Trace automatically linked<br/>to experiment run
-    end
-
-    %% Flush data to server
-    User->>LF: flush() - Send all pending data
-    LF-->>User: Confirm data received
-    User-->>Person: Experiment run complete
-
-    %% Optional: Langfuse server-side evaluations
-    opt Server-side Evaluations
-        Note over LF: Run configured evaluations<br/>(e.g., LLM-as-a-judge)
-        LF->>LF: Add evaluation scores to experiment run
-    end
-
-    %% View results in UI
-    Note over Person, LF: Analyze experiment run results
-    Person->>LF: Access experiment runs UI
-    LF-->>Person: Display aggregated scores and comparisons
-```
-
-</details>
-
 ## Experiment runner SDK
 
 Both the Python and JS/TS SDKs provide a high-level abstraction for running an experiment on a dataset. The dataset can be both local or hosted on Langfuse. Using the Experiment runner is the recommended way to run an experiment on a dataset with our SDK.
 
 The experiment runner automatically handles:
+
 - **Concurrent execution** of tasks with configurable limits
 - **Automatic tracing** of all executions for observability
 - **Flexible evaluation** with both item-level and run-level evaluators
@@ -216,7 +155,7 @@ dataset = langfuse.get_dataset("my-evaluation-dataset")
 result = dataset.run_experiment(
     name="Production Model Test",
     description="Monthly evaluation of our production model",
-    task=my_task
+    task=my_task # see above for the task definition
 )
 
 # Use format method to display results
@@ -236,14 +175,14 @@ const dataset = await langfuse.dataset.get("my-evaluation-dataset");
 const result = await dataset.runExperiment({
   name: "Production Model Test",
   description: "Monthly evaluation of our production model",
-  task: myTask
+  task: myTask, // see above for the task definition
 });
 
 // Use format method to display results
 console.log(await result.format());
 
 // Important: shut down OpenTelemetry to ensure traces are sent to Langfuse
-await otelSdk.shutdown()
+await otelSdk.shutdown();
 ```
 
 </Tab>
@@ -294,17 +233,20 @@ print(result.format())
 ```typescript
 // Define evaluation functions
 const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
-  if (expectedOutput && output.toLowerCase().includes(expectedOutput.toLowerCase())) {
+  if (
+    expectedOutput &&
+    output.toLowerCase().includes(expectedOutput.toLowerCase())
+  ) {
     return {
       name: "accuracy",
       value: 1.0,
-      comment: "Correct answer found"
+      comment: "Correct answer found",
     };
   }
   return {
     name: "accuracy",
     value: 0.0,
-    comment: "Incorrect answer"
+    comment: "Incorrect answer",
   };
 };
 
@@ -312,7 +254,7 @@ const lengthEvaluator = async ({ input, output }) => {
   return {
     name: "response_length",
     value: output.length,
-    comment: `Response has ${output.length} characters`
+    comment: `Response has ${output.length} characters`,
   };
 };
 
@@ -321,7 +263,7 @@ const result = await langfuse.experiment.run({
   name: "Multi-metric Evaluation",
   data: testData,
   task: myTask,
-  evaluators: [accuracyEvaluator, lengthEvaluator]
+  evaluators: [accuracyEvaluator, lengthEvaluator],
 });
 
 console.log(await result.format());
@@ -375,9 +317,9 @@ print(result.format())
 const averageAccuracy = async ({ itemResults }) => {
   // Calculate average accuracy across all items
   const accuracies = itemResults
-    .flatMap(result => result.evaluations)
-    .filter(evaluation => evaluation.name === "accuracy")
-    .map(evaluation => evaluation.value as number);
+    .flatMap((result) => result.evaluations)
+    .filter((evaluation) => evaluation.name === "accuracy")
+    .map((evaluation) => evaluation.value as number);
 
   if (accuracies.length === 0) {
     return { name: "avg_accuracy", value: null };
@@ -388,7 +330,7 @@ const averageAccuracy = async ({ itemResults }) => {
   return {
     name: "avg_accuracy",
     value: avg,
-    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`
+    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`,
   };
 };
 
@@ -397,7 +339,7 @@ const result = await langfuse.experiment.run({
   data: testData,
   task: myTask,
   evaluators: [accuracyEvaluator],
-  runEvaluators: [averageAccuracy]
+  runEvaluators: [averageAccuracy],
 });
 
 console.log(await result.format());
@@ -451,7 +393,7 @@ const asyncLlmTask = async (item) => {
   const client = new OpenAI();
   const response = await client.chat.completions.create({
     model: "gpt-4",
-    messages: [{ role: "user", content: item.input }]
+    messages: [{ role: "user", content: item.input }],
   });
 
   return response.choices[0].message.content;
@@ -462,7 +404,7 @@ const result = await langfuse.experiment.run({
   name: "Async Experiment",
   data: testData,
   task: asyncLlmTask,
-  maxConcurrency: 5  // Control concurrent API calls
+  maxConcurrency: 5, // Control concurrent API calls
 });
 
 console.log(await result.format());
@@ -512,12 +454,13 @@ const result = await langfuse.experiment.run({
   task: myTask,
   evaluators: [accuracyEvaluator],
   runEvaluators: [averageAccuracy],
-  maxConcurrency: 10,  // Max concurrent executions
-  metadata: {  // Attached to all traces
+  maxConcurrency: 10, // Max concurrent executions
+  metadata: {
+    // Attached to all traces
     model: "gpt-4",
     temperature: 0.7,
-    version: "v1.2.0"
-  }
+    version: "v1.2.0",
+  },
 });
 
 console.log(await result.format());
@@ -633,7 +576,7 @@ def test_geography_accuracy_fails(langfuse_client):
 
 ```typescript
 // test/geography-experiment.test.ts
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { OpenAI } from "openai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseClient, ExperimentItem } from "@langfuse/client";
@@ -675,7 +618,10 @@ const geographyTask = async (item: ExperimentItem) => {
 };
 
 const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
-  if (expectedOutput && output.toLowerCase().includes(expectedOutput.toLowerCase())) {
+  if (
+    expectedOutput &&
+    output.toLowerCase().includes(expectedOutput.toLowerCase())
+  ) {
     return { name: "accuracy", value: 1 };
   }
   return { name: "accuracy", value: 0 };
@@ -684,9 +630,9 @@ const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
 const averageAccuracyEvaluator = async ({ itemResults }) => {
   // Calculate average accuracy across all items
   const accuracies = itemResults
-    .flatMap(result => result.evaluations)
-    .filter(evaluation => evaluation.name === "accuracy")
-    .map(evaluation => evaluation.value as number);
+    .flatMap((result) => result.evaluations)
+    .filter((evaluation) => evaluation.name === "accuracy")
+    .map((evaluation) => evaluation.value as number);
 
   if (accuracies.length === 0) {
     return { name: "avg_accuracy", value: null };
@@ -696,30 +642,30 @@ const averageAccuracyEvaluator = async ({ itemResults }) => {
   return {
     name: "avg_accuracy",
     value: avg,
-    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`
+    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`,
   };
 };
 
-describe('Geography Experiment Tests', () => {
-  it('should pass when accuracy is above threshold', async () => {
+describe("Geography Experiment Tests", () => {
+  it("should pass when accuracy is above threshold", async () => {
     const result = await langfuse.experiment.run({
       name: "Geography Test - Should Pass",
       data: testData,
       task: geographyTask,
       evaluators: [accuracyEvaluator],
-      runEvaluators: [averageAccuracyEvaluator]
+      runEvaluators: [averageAccuracyEvaluator],
     });
 
     // Access the run evaluator result directly
     const avgAccuracy = result.runEvaluations.find(
-      eval => eval.name === "avg_accuracy"
+      (eval) => eval.name === "avg_accuracy"
     )?.value as number;
 
     // Assert minimum accuracy threshold
     expect(avgAccuracy).toBeGreaterThanOrEqual(0.8);
   }, 30_000); // 30 second timeout for API calls
 
-  it('should fail when accuracy is below threshold', async () => {
+  it("should fail when accuracy is below threshold", async () => {
     // Task that gives wrong answers to demonstrate test failure
     const failingTask = async (item: ExperimentItem) => {
       return "I don't know";
@@ -730,12 +676,12 @@ describe('Geography Experiment Tests', () => {
       data: testData,
       task: failingTask,
       evaluators: [accuracyEvaluator],
-      runEvaluators: [averageAccuracyEvaluator]
+      runEvaluators: [averageAccuracyEvaluator],
     });
 
     // Access the run evaluator result directly
     const avgAccuracy = result.runEvaluations.find(
-      eval => eval.name === "avg_accuracy"
+      (eval) => eval.name === "avg_accuracy"
     )?.value as number;
 
     // This test will fail because the task gives wrong answers
@@ -794,7 +740,7 @@ const levenshteinEvaluator = createEvaluatorFromAutoevals(Levenshtein());
 // Use with additional parameters
 const customFactualityEvaluator = createEvaluatorFromAutoevals(
   Factuality,
-  { model: "gpt-4o" }  // Additional AutoEvals parameters
+  { model: "gpt-4o" } // Additional AutoEvals parameters
 );
 
 const result = await langfuse.experiment.run({
@@ -804,12 +750,13 @@ const result = await langfuse.experiment.run({
   evaluators: [
     factualityEvaluator,
     levenshteinEvaluator,
-    customFactualityEvaluator
-  ]
+    customFactualityEvaluator,
+  ],
 });
 
 console.log(await result.format());
 ```
+
 </Tab>
 </LangTabs>
 

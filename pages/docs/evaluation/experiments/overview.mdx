@@ -19,20 +19,20 @@ The matrix below shows the different experiment configurations based on where yo
       **Langfuse Execution**
     </div>
     <div className="text-center font-medium p-3 bg-gray-50 rounded border">
-      **Local Execution**
+      **Local/CI Execution**
     </div>
-    
+
     {/* Langfuse Data row */}
     <div className="font-medium p-3 bg-gray-50 rounded border text-center">
       **Langfuse Dataset**
     </div>
     <div className="p-3 border rounded text-center bg-green-50">
-      [Experiments in UI](/docs/evaluation/experiments/experiments-via-ui)
+      [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
     </div>
     <div className="p-3 border rounded text-center bg-blue-50">
       [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
     </div>
-    
+
     {/* Local Data row */}
     <div className="font-medium p-3 bg-gray-50 rounded border text-center">
       **Local Dataset**
@@ -43,7 +43,15 @@ The matrix below shows the different experiment configurations based on where yo
     <div className="p-3 border rounded text-center bg-blue-50">
       [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
     </div>
+
   </div>
 </div>
 
-In general, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) on the Langfuse platform for the best experiment run comparison experience.
+<Callout type="info">
+
+While it's optional, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) in Langfuse:
+
+- In-UI comaparison tables of different experiments on the same data
+- Iteratively improve dataset based on production/staging traces
+
+</Callout>
