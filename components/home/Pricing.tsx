@@ -89,7 +89,7 @@ type PlanConfig = {
 };
 
 const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 59 },
+  { name: "Core", baseFee: 29 },
   { name: "Pro", baseFee: 199 },
   { name: "Pro + Teams", baseFee: 499 },
 ];
@@ -444,7 +444,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: true,
       description:
         "For production projects. Longer data retention and unlimited users.",
-      price: "$59",
+      price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
         href: "/pricing#discounts",
@@ -2182,6 +2182,11 @@ const faqs = [
     answer:
       "Our graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for units 100k-1M, $7/100k for 1M-10M units, $6.5/100k for 10M-50M units, and $6/100k for 50M+ units. This ensures you get better rates as you scale up your usage. Use the pricing calculator to estimate your bill.",
   },
+  {
+    question: "When do I get billed?",
+    answer:
+      "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
+  },  
   {
     question: "Can I self-host Langfuse?",
     answer:
