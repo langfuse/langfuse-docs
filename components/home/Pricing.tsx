@@ -444,7 +444,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: true,
       description:
         "For production projects. Longer data retention and unlimited users.",
-      price: "$59",
+      price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
         href: "/pricing#discounts",
@@ -2205,7 +2205,7 @@ const faqs = [
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we do offer customized contracts as an add-on on Langfuse Enterprise agreements. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Do you offer billing via AWS Marketplace?",
