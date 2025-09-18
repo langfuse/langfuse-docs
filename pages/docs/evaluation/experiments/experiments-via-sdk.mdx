@@ -1,21 +1,16 @@
 ---
-title: Remote Dataset Runs via the SDK
-description: Start remote dataset runs via the Langfuse SDK to programmatically test prompt versions and models.
+title: Experiments via SDK
+description: Start experiments via the Langfuse SDK to programmatically test your application
 ---
 
-# Remote Dataset Runs
+# Experiments via SDK
 
-Once you [created a dataset](/docs/evaluation/dataset-runs/datasets), you can use the dataset to test how your application performs on different inputs.
-Remote Dataset Runs are used to programmatically loop your applications or prompts through a dataset and optionally apply Evaluation Methods to the results.
+Experiments via SDK are used to programmatically loop your applications or prompts through a dataset and optionally apply Evaluation Methods to the results. You can use a dataset hosted on Langfuse or a local dataset as the foundation for your experiment.
 
-They are called "Remote Dataset Runs" because they can make use of "remote" or external logic and code.
-
-Optionally, you can also trigger Remote Dataset Runs via the Langfuse UI which will call them via a webhook.
-
-## Why use Remote Dataset Runs?
+## Why use Experiments via SDK?
 
 - Full flexibility to use your own application logic
-- Use custom scoring functions to evaluate the outputs
+- Use custom scoring functions to evaluate the outputs of a single item and the full run
 - Run multiple experiments on the same dataset in parallel
 - Easy to integrate with your existing evaluation infrastructure
 
@@ -29,10 +24,10 @@ sequenceDiagram
     participant App as LLM Application
     participant LF as Langfuse Server
 
-    Note over Person, LF: Setup & Execute Remote Dataset Run
+    Note over Person, LF: Setup & Execute Experiment via SDK
 
     %% Trigger dataset run
-    Person->>User: Trigger dataset run
+    Person->>User: Trigger experiment via SDK
 
     %% Load Dataset
     User->>LF: get_dataset("dataset_name")
@@ -59,23 +54,23 @@ sequenceDiagram
         end
 
         %% Link execution to dataset item
-        Note over User, LF: Trace automatically linked<br/>to dataset run
+        Note over User, LF: Trace automatically linked<br/>to experiment run
     end
 
     %% Flush data to server
     User->>LF: flush() - Send all pending data
     LF-->>User: Confirm data received
-    User-->>Person: Dataset run complete
+    User-->>Person: Experiment run complete
 
     %% Optional: Langfuse server-side evaluations
     opt Server-side Evaluations
         Note over LF: Run configured evaluations<br/>(e.g., LLM-as-a-judge)
-        LF->>LF: Add evaluation scores to dataset run
+        LF->>LF: Add evaluation scores to experiment run
     end
 
     %% View results in UI
-    Note over Person, LF: Analyze dataset run results
-    Person->>LF: Access dataset runs UI
+    Note over Person, LF: Analyze experiment run results
+    Person->>LF: Access experiment runs UI
     LF-->>Person: Display aggregated scores and comparisons
 ```
 
@@ -1328,9 +1323,9 @@ After each experiment run on a dataset, you can check the aggregated score in th
 />
 </Steps>
 
-## Optional: Trigger Remote Dataset Runs via UI
+## Optional: Trigger SDK Experiment from UI
 
-When setting up Remote Dataset Runs via the SDK, it can be useful to expose a trigger in the Langfuse UI that helps you trigger the experiment runs.
+When setting up Experiments via SDK, it can be useful to allow triggering the experiment runs from the Langfuse UI.
 
 You need to set up a webhook to receive the trigger request from Langfuse.
 
@@ -1376,4 +1371,4 @@ Once configured, team members can trigger remote experiments via the `Run` butto
 
 </Steps>
 
-**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Dataset Run.
+**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Experiment run.
