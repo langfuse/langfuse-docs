@@ -89,7 +89,7 @@ type PlanConfig = {
 };
 
 const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 59 },
+  { name: "Core", baseFee: 29 },
   { name: "Pro", baseFee: 199 },
   { name: "Pro + Teams", baseFee: 499 },
 ];
@@ -2198,19 +2198,14 @@ const faqs = [
       "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
-    question: "How do I activate my self-hosted Enterprise plan?",
-    answer:
-      "Once you've deployed Langfuse OSS, you can activate your Enterprise plan by adding the <a class='underline' href='/self-hosting/license-key'>license key</a> you received from the Langfuse team to your deployment.",
-  },
-  {
     question: "How can I manage my subscription?",
     answer:
-      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='/billing-portal'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
+      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='/billing-portal'>Customer Portal</a>.",
   },
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we do offer customized contracts as an add-on on Langfuse Teams (cloud) and as a part of an Enterprise agreement (self-hosted). Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we do offer customized contracts as an add-on on Langfuse Enterprise agreements. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Do you offer billing via AWS Marketplace?",
