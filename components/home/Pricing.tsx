@@ -89,7 +89,7 @@ type PlanConfig = {
 };
 
 const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 59 },
+  { name: "Core", baseFee: 29 },
   { name: "Pro", baseFee: 199 },
   { name: "Pro + Teams", baseFee: 499 },
 ];
@@ -444,7 +444,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: true,
       description:
         "For production projects. Longer data retention and unlimited users.",
-      price: "$59",
+      price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
         href: "/pricing#discounts",
