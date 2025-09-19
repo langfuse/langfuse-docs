@@ -897,20 +897,20 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Remote Dataset Runs (via SDK)",
+        name: "Experiments via SDK",
         description:
           "Experiment on your Datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
-        href: "/docs/evaluation/dataset-runs/remote-run",
+        href: "/docs/evaluation/experiments/experiments-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
-        name: "Native Dataset Runs (via UI)",
+        name: "Experiments via UI",
         description:
           "Test different versions of your prompts or models in the UI using Datasets you manage in Langfuse.",
-        href: "/docs/evaluation/dataset-runs/native-run",
+        href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
