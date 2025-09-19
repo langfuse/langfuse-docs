@@ -164,6 +164,7 @@ Ensures all trace data is sent to the Langfuse server.
 
 ## Future Improvements
 - Add error handling for MariaDB connections and query failures.
+  
 - Support dynamic document ingestion from external sources.
 - Enhance Langfuse tracing with additional metadata (e.g., search latency, result count).
 - Allow configuration of the Sentence Transformer model via command-line arguments.
