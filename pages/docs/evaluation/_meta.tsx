@@ -1,6 +1,6 @@
 export default {
   overview: "Overview",
   "evaluation-methods": "Evaluation Methods",
-  "dataset-runs": "Dataset Runs",
+  experiments: "Experiments",
   "troubleshooting-and-faq": "Troubleshooting & FAQ",
 };
