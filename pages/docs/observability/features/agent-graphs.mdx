@@ -22,10 +22,15 @@ _Example trace with agent graph view ([public link](https://cloud.langfuse.com/p
 
 <Callout type="info">
 
-The graph view is currently in beta and supports LangGraph. We are working on a more generalized implementation and expanding support for other frameworks in the future.
+The graph view is currently in beta, please feel free to share feedback.
 
 </Callout>
 
+There are currently two ways to display the graph.
+First, have an observation with any observation type except for `span`, `event` or `generation` in your trace. Then, Langfuse interprets the trace as agentic and will show a graph. The graph is automatically inferred from the observation timings as well as their nesting.
+Second, when you use the LangGraph integration the graph automatically shows in Langfuse.
+
+**Observation Types**: See all available [Observation Types](/docs/observability/features/observation-types) and how to set them.
 **LangGraph**: See the [LangGraph integration guide](/guides/cookbook/integration_langgraph) for an end-to-end example on how to natively integrate LangGraph with Langfuse for LLM Agent tracing.
 
 ## GitHub Discussions

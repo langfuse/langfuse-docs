@@ -89,7 +89,7 @@ type PlanConfig = {
 };
 
 const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 59 },
+  { name: "Core", baseFee: 29 },
   { name: "Pro", baseFee: 199 },
   { name: "Pro + Teams", baseFee: 499 },
 ];
@@ -444,7 +444,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: true,
       description:
         "For production projects. Longer data retention and unlimited users.",
-      price: "$59",
+      price: "$29",
       priceDiscountCta: {
         name: "Discounts available",
         href: "/pricing#discounts",
@@ -461,7 +461,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         </>,
         "90 days data access",
         "Unlimited users",
-        "Unlimited evaluators",
         "In-app support",
       ],
       cta: "Sign up",
@@ -898,20 +897,20 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Remote Dataset Runs (via SDK)",
+        name: "Experiments via SDK",
         description:
           "Experiment on your Datasets via the SDK. This can for example be used to benchmark an agent in CI on a daily basis.",
-        href: "/docs/evaluation/dataset-runs/remote-run",
+        href: "/docs/evaluation/experiments/experiments-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
-        name: "Native Dataset Runs (via UI)",
+        name: "Experiments via UI",
         description:
           "Test different versions of your prompts or models in the UI using Datasets you manage in Langfuse.",
-        href: "/docs/evaluation/dataset-runs/native-run",
+        href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -934,6 +933,32 @@ const sections: Section[] = [
         },
       },
       {
+        name: "External Evaluation Pipelines",
+        href: "/guides/cookbook/example_external_evaluation_pipelines",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "LLM-as-judge evaluators",
+        description:
+          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
+        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
+        tiers: {
+          cloud: {
+            Hobby: true,
+            Core: true,
+            Pro: true,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+          },
+        },
+      },
+      {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
         href: "/docs/scores/annotation",
@@ -950,32 +975,6 @@ const sections: Section[] = [
           cloud: {
             Hobby: "1 queue",
             Core: "3 queues",
-            Pro: true,
-            Enterprise: true,
-          },
-          selfHosted: {
-            "Open Source": true,
-            Enterprise: true,
-          },
-        },
-      },
-      {
-        name: "External Evaluation Pipelines",
-        href: "/guides/cookbook/example_external_evaluation_pipelines",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Enterprise: true },
-        },
-      },
-      {
-        name: "LLM-as-judge evaluators",
-        description:
-          "Fully managed LLM-as-judge evaluators within Langfuse. Can be run on any dataset or LLM trace.",
-        href: "/docs/evaluation/evaluation-methods/llm-as-a-judge",
-        tiers: {
-          cloud: {
-            Hobby: "1 evaluator",
-            Core: true,
             Pro: true,
             Enterprise: true,
           },
@@ -2184,6 +2183,11 @@ const faqs = [
       "Our graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for units 100k-1M, $7/100k for 1M-10M units, $6.5/100k for 10M-50M units, and $6/100k for 50M+ units. This ensures you get better rates as you scale up your usage. Use the pricing calculator to estimate your bill.",
   },
   {
+    question: "When do I get billed?",
+    answer:
+      "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
+  },  
+  {
     question: "Can I self-host Langfuse?",
     answer:
       "Yes, Langfuse is open source and you can run Langfuse <a class='underline' href='/self-hosting/deployment/docker-compose'>locally using docker compose<a/> or for <a class='underline' href='/self-hosting'>production use via docker<a/> and a standalone database.",
@@ -2199,19 +2203,14 @@ const faqs = [
       "Yes, we offer discounts for startups (request <a class='underline' href='https://forms.gle/eJAYjRWeCZU1Mn6j8'>here</a>), students, academics and open-source projects. If you believe your situation warrants a discount, please contact us at support@langfuse.com with details about your project.",
   },
   {
-    question: "How do I activate my self-hosted Enterprise plan?",
-    answer:
-      "Once you've deployed Langfuse OSS, you can activate your Enterprise plan by adding the <a class='underline' href='/self-hosting/license-key'>license key</a> you received from the Langfuse team to your deployment.",
-  },
-  {
     question: "How can I manage my subscription?",
     answer:
-      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='/billing-portal'>Customer Portal</a> for both Langfuse Cloud and Self-Hosted subscriptions.",
+      "You can manage your subscription through the organization settings in Langfuse Cloud or by using this <a class='underline' href='/billing-portal'>Customer Portal</a>.",
   },
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we do offer customized contracts as an add-on on Langfuse Teams (cloud) and as a part of an Enterprise agreement (self-hosted). Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Do you offer billing via AWS Marketplace?",

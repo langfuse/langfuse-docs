@@ -8,3 +8,4 @@ Please check the following:
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest to consolidate them in `components-mdx` to improve maintainability and consistency.
 - When embedding videos from youtube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
+- We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.

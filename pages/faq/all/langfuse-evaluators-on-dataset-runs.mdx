@@ -1,0 +1,16 @@
+---
+title: How to use Langfuse-hosted Evaluators on Dataset Runs?
+sidebarTitle: Langfuse-hosted Evaluators on Dataset Runs
+description: How to use Langfuse-hosted Evaluators on Dataset Runs?
+tags: [evaluation]
+---
+
+# How to use Langfuse-hosted Evaluators on Dataset Runs?
+
+Before running an [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk), you will need to set up which evaluators you want to run in the Langfuse UI. You will need to configure a running evaluator in the following format:
+
+- **Dataset**: Filter which source dataset the evaluator should run on.
+- **Scope**: Choose whether to target only new Dataset Runs and/or execute the evaluator on past Dataset Runs (for backfilling).
+- **Sampling**: To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of Dataset Run items.
+
+See the [llm-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) documentation for more details.
