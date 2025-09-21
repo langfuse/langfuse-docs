@@ -1,0 +1,117 @@
+---
+title: "Automated Evaluations of LLM Applications"
+date: 2025/09/12
+description: A practical guide to setting up automated evaluations for LLM applications and AI agents using Langfuse.
+ogImage: /images/blog/2025-09-05-automated-evaluations/automated-evaluations.png
+tag: guide
+author: Jannik
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Automated Evaluations of LLM Applications"
+  description="A practical guide to setting up automated evaluations for LLM applications and AI agents using Langfuse."
+  date="September 12, 2025"
+  authors={["jannikmaierhoefer"]}
+/>
+
+In AI development, iterating quickly is important. Whether you're refining a prompt, swapping a model, or changing your application logic, you need to understand the impact of each change on performance. Manually annotating outputs after every modification is slow and expensive, especially when you want to integrate evaluations into a CI/CD pipeline. 
+
+**Automated evaluators** solve this problem by providing a scalable way to measure and monitor your application's failure modes, enabling a fast and effective development loop.
+
+_The framework in this guide is adapted from Hamel Husain's [Eval FAQ](https://hamel.dev/blog/posts/evals-faq/)._
+
+---
+
+This guide describes a process to **build automated evaluators** for your application. This is a robust evaluator that you can scale for different tests and evolutions of your application:
+
+1. [What to Measure](#what-to-measure)
+2. [How to Measure](#how-to-measure)
+3. [Draft your LLM-as-a-Judge prompt](#draft-prompt)
+4. [Validate your evaluator](#validate-evaluator)
+
+---
+
+I'll demonstrate this process using a [demo chatbot in the Langfuse documentation](/docs/demo) that uses the Vercel AI SDK and has access to a RAG tool to retrieve documents from the Langfuse documentation. The demo chat app logs traces into the Langfuse demo project and has already answered 19k user queries in the past year.
+
+Here's the chat interface (you can find the demo chat app [here](/docs/demo)):
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Chat
+  Interface](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/demo-chat.png)
+</Frame>
+
+## What to Measure [#what-to-measure]
+
+In the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications), we showed how to perform **error analysis** and identify failure modes in your application. Now we will focus on building automated evaluators to measure these failure modes.
+
+Before building an evaluator, it's important to differentiate between two types of failures to prioritize your efforts:
+
+**Missing Instructions:** The first type are errors caused by vague or incomplete instructions in your prompt. For instance if your agent uses too many bullet points or doesn't ask follow-up questions, and you never instructed it to do so, the first step is to fix the prompt. Creating an evaluator for a failure that a simple prompt tweak can solve is often unnecessary effort.
+
+**Model Limitations:** The second type occur when the LLM fails to perform correctly despite receiving clear and precise instructions. These are the ideal candidates for automated evaluation because they represent the model's inherent limitations, not a misunderstanding of your intent.
+
+Let's apply this to the [Langfuse Demo App](/docs/demo). First, we fix some obvious issues by clarifying the prompt: "use a maximum of three bullet points" and "ask for more context when the user's query is ambiguous." With those fixed, we can focus on measuring the more complex model limitation failures we identified in the [previous blog post](/blog/2025-08-29-error-analysis-to-evaluate-llm-applications):
+
+* **Out of Scope**: The agent answers a question not related to Langfuse or the LLM/AI space.
+* **Generic Responses**: The answer is technically correct but doesn't resolve the user's issue. The metric is to assess if the agent's final answer is helpful and directly addresses the user's question.
+* **Context Retrieval / RAG Issues**: The agent uses the wrong retrieval tool. The metric needs to judge if the correct tool was chosen based on the user's query.
+
+For this guide, we will set up an evaluator for the "Out of Scope" failure mode.
+
+## How to Measure [#how-to-measure]
+
+In Langfuse, all evaluations are tracked as **Scores**, which [can be attached to traces, observations, sessions or dataset runs](/docs/evaluation/evaluation-methods/data-model). Evaluations in Langfuse can be set up in two main ways:
+
+**In the Langfuse UI:** In Langfuse, you can set up **LLM-as-a-Judge Evaluators** that use another LLM to evaluate your application's output on subjective and nuanced criteria. These are easily configured directly in Langfuse. For a guide on setting them up in the UI, check the documentation on **[LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)**.
+
+**External Evaluators:** In your code, you can set up **Custom Evaluators** and use the Langfuse SDKs to send the scores back to the evaluated traces. This allows you to set up code-based evaluators or any other custom evaluation logic. For an example of a custom pipeline, see the guide on **[setting up an external evaluation pipelines](/guides/cookbook/example_external_evaluation_pipelines)**.
+
+In this guide, we will set up an LLM-as-a-Judge evaluator in the Langfuse UI.
+
+## Drafting your LLM-as-a-Judge Prompt [#draft-prompt]
+
+A good LLM-as-a-Judge prompt is narrowly focused and well-structured:
+
+1.  **Pick one Failure Mode**: Focus on one specific failure mode. Do not try to cover multiple failure modes at once.
+2.  **Pass/Fail Definitions**: Clearly define what constitutes a "Pass" (failure is absent) and a "Fail" (failure is present).
+3.  **Examples**: Include clear examples of both "Pass" and "Fail" cases.
+
+Here is an example prompt I use in our Demo App example to check if the agent's answer is within its scope:
+
+<Frame className="rounded-lg overflow-hidden">
+  ![LLM-as-a-Judge Prompt](/images/blog/2025-09-05-automated-evaluations/prompt.png)
+</Frame>
+
+Once you drafted your prompt, you can set up the LLM-as-a-Judge evaluator in the Langfuse UI. You can find a guide on how to set them up in the UI [here](/docs/evaluation/evaluation-methods/llm-as-a-judge).
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Evaluator Setup](/images/blog/2025-09-05-automated-evaluations/setup-evaluator.png)
+</Frame>
+
+## Validating Your Evaluator [#validate-evaluator]
+
+To build an evaluator you can trust, you must validate its performance against human judgment, a process similar to testing a machine learning classifier.
+
+First, split a set of human-labeled traces into a **development set** and a **test set**. In Langfuse, you can use tags to manage these sets. The **development set** is used to iteratively refine your judge's prompt. Run the evaluator on this set, compare its scores to the human labels, analyze the disagreements, and adjust the prompt's definitions or examples until its judgments closely align with yours:
+
+<Frame className="rounded-lg overflow-hidden">
+  ![Evaluator Tuning](/images/blog/2025-09-05-automated-evaluations/evaluator-tuning.png)
+</Frame>
+
+Additionally, you can measure the judge's alignment with human labels. The best metrics for this are **True Positive Rate (TPR)** and **True Negative Rate (TNR)**. TPR measures what fraction of actual "Passes" your judge correctly identifies, while TNR measures what fraction of actual "Fails" it correctly identifies. 
+
+You can calculate these metrics by querying the data from the trace table (via [UI export](/docs/api-and-data-platform/features/export-from-ui) or [SDKs](/docs/api-and-data-platform/features/query-via-sdk)) and calculating the metrics.
+
+Once your judge performs well on the dev set (e.g., TPR and TNR \>90%), run it a final time on the held-out **test set** to get an unbiased measure of its real-world performance. A validated evaluator with high TPR and TNR gives you confidence that your automated metrics are meaningful.
+
+You can now repeat this process for both your Evaluators in the Langfuse UI and your custom evaluators as part of an [external evaluation pipeline](/guides/cookbook/example_external_evaluation_pipelines).
+
+## Next Steps [#operationalize-evaluator]
+
+With good automated evaluators in place, the next step is to operationalize your workflow. The goal is to create a CI/CD pipeline where every code change (to a prompt, model, or tool) automatically triggers an evaluation run on a **golden [Langfuse Dataset](/docs/datasets)**. 
+
+Your automated evaluators will score these runs, providing immediate feedback on how your changes impacted key failure modes. This continuous monitoring loop helps you develop faster while maintaining a high quality bar for your application.
+
+_Note: A guide on this is coming soon._
