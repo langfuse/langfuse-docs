@@ -126,6 +126,8 @@ const config: DocsThemeConfig = {
         ? "%s - Langfuse Blog"
         : asPath.startsWith("/docs/guides/")
         ? "%s - Langfuse Guides"
+        : asPath.startsWith("/handbook/")
+        ? "%s - Langfuse Handbook"
         : "%s - Langfuse";
 
     const isDev =
