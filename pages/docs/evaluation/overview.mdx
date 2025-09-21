@@ -53,8 +53,8 @@ _Adapted from: “How to continuously improve LLM products?”, Evidently_
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **Scores**             | Scores are a flexible data object that can be used to store any evaluation metric and link it to other objects in Langfuse. |
 | **Evaluation Methods** | Evaluation methods are functions or tools to assign scores to other objects.                                                |
-| **Datasets**           | Datasets are a collection of inputs and, optionally, expected outputs that can be during Dataset runs.                      |
-| **Dataset Runs**       | Dataset runs are used to run a dataset through your LLM application and optionally apply evaluation methods to the results. |
+| **Datasets**           | Datasets are a collection of inputs and, optionally, expected outputs that can be used during Experiments (formerly Dataset runs).                      |
+| **Experiments / Dataset Runs**       | Experiments (formerly Dataset runs) are used to run a dataset through your LLM application and optionally apply evaluation methods to the results. |
 
 ## Evaluation Methods [#evaluation-methods]
 
@@ -87,13 +87,13 @@ import { Lightbulb, SquarePercent, ClipboardPen } from "lucide-react";
 
 Learn more about the [Scores Data Model](/docs/evaluation/evaluation-methods/data-model).
 
-## Dataset Runs [#dataset-runs]
+## Experiments [#experiments]
 
-**Dataset Runs** are used to loop your LLM application through **Datasets** and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions.
+**Experiments** are used to loop your LLM application through **Datasets** (local or hosted on Langfuse) and **optionally apply Evaluation Methods** to the results. This lets you strategically evaluate your application and compare the performance of different inputs, prompts, models, or other parameters side-by-side against controlled conditions.
 
-In Langfuse we differentiate between **Native** vs. **Remote** Dataset Runs. Native Dataset Runs rely on Dataset, Prompts and optionally LLM-as-a-Judge Evaluators all being on the Langfuse platform. Remote Dataset Runs rely only on Datasets being on the Langfuse platform, prompts and evaluation methods can be managed off platform – they are run via code.
+In Langfuse we differentiate between **Experiments via SDK** vs. **Experiments via UI**. Experiments via UI rely on Dataset, Prompts and optionally LLM-as-a-Judge Evaluators all being on the Langfuse platform and can be thus triggered and executed directly on the platform. Experiments via SDK are fully flexible and can be triggered from any external system.
 
-All require managing the [Datasets](/docs/evaluation/dataset-runs/datasets) on the Langfuse platform.
+For the best experiment run comparison experience, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) on the Langfuse platform.
 
 import {
   Table,
@@ -107,24 +107,24 @@ import {
   <Card
     icon={<Table size="24" />}
     title="Create a Dataset"
-    href="/docs/evaluation/dataset-runs/datasets"
+    href="/docs/evaluation/experiments/datasets"
     arrow
   />
   <Card
     icon={<CodeXml size="24" />}
-    title="Remote Dataset Runs"
-    href="/docs/evaluation/dataset-runs/remote-run"
+    title="Experiments via SDK"
+    href="/docs/evaluation/experiments/experiments-via-sdk"
     arrow
   />
   <Card
     icon={<WandSparkles size="24" />}
-    title="Native Dataset Runs"
-    href="/docs/evaluation/dataset-runs/native-run"
+    title="Experiments via UI"
+    href="/docs/evaluation/experiments/experiments-via-ui"
     arrow
   />
 </Cards>
 
-Learn more about the [Dataset Runs Data Model](/docs/evaluation/dataset-runs/data-model).
+Learn more about the [Experiments Data Model](/docs/evaluation/experiments/data-model).
 
 ## GitHub Discussions
 
