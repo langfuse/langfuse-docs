@@ -8,6 +8,9 @@ This document describes a Python script (`main.py`) that integrates Langfuse for
 - Add documents to the vector store and perform a similarity search.
 - Log results to Langfuse for observability.
 
+## Architecture Flow
+<img width="1681" height="754" alt="image" src="https://github.com/user-attachments/assets/7fa03ecd-6332-44e6-9a82-4909527ecd39" />
+
 ## Prerequisites
 To run the script, ensure the following are installed and configured:
 - **Python 3.8+**
@@ -143,6 +146,8 @@ Ensures all trace data is sent to the Langfuse server.
      Search results: [Document(page_content='The sun is a star.'), Document(page_content='The moon is a natural satellite.')]
      ```
 5. Check the Langfuse dashboard (`https://cloud.langfuse.com`) for trace details under the `mariadb-trace` span.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a6ddd9dc-6dcb-4e52-913d-e8c3bf89c8d7" />
+
 
 ## Notes
 - **Embedding Model**: The `all-MiniLM-L6-v2` model is used for its balance of performance and efficiency. Other models can be used by changing the `model_name` parameter, but ensure the `embedding_length` matches the model's output dimension.
@@ -164,7 +169,6 @@ Ensures all trace data is sent to the Langfuse server.
 
 ## Future Improvements
 - Add error handling for MariaDB connections and query failures.
-  
 - Support dynamic document ingestion from external sources.
 - Enhance Langfuse tracing with additional metadata (e.g., search latency, result count).
 - Allow configuration of the Sentence Transformer model via command-line arguments.
