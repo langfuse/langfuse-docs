@@ -4,11 +4,29 @@ title: Releases
 
 # Releases
 
+## Release on Langfuse Cloud
+
+We deploy incremental changes to Langfuse Cloud production multiple times per day.
+
 - How to release a change
   - Langfuse Cloud: the `production` branch deploys to all Langfuse Cloud regions. We frequently first release changes to Langfuse Cloud this way in order to monitor for potential failures before cutting an OSS release.
-  - OSS: create a new semantic release (`pnpm run release`), this bumps version numbers across packages, pushes commit to main, and triggers release note on GitHub. GitHub Actions will force push this commit to the `production` branch for a deployment to Langfuse Cloud
-- When we release new features
-  - Let customers know who asked for this or shared feedback
-    - Linked plain threads on linear issue (see support workflow)
-  - Update the documentation
-  - Create a changelog post
+  - OSS:
+
+## Release OSS
+
+We cut new releases multiple times per week. We follow semantic versioning.
+
+1. Make sure you are on `main`, run `git status` to make sure that you track `origin:MAIN`.
+2. Run `pnpm run release`, this:
+   1. bumps version numbers across packages
+   2. pushes commit to main
+   3. and triggers release note on GitHub (please group the changes according to conventional commit type, see previous releases for reference)
+3. GitHub Actions will automatically force push this commit to the `production` branch for a deployment to Langfuse Cloud (see above), no additional action necessary.
+
+## New features
+
+When we release a new feature:
+
+- Let customers know who asked for this or shared feedback, if you link Plain threads to linear issues they are automatically changed to `close the loop` status when issue is marked as done in Linear (see [product ops](/handbook/product-engineering/product-ops))
+- Update the documentation
+- Create a changelog post
