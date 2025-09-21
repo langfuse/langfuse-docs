@@ -1,5 +1,5 @@
 export default {
-  index: {},
+  overview: {},
   "*": {
     layout: "default",
   },
