@@ -183,7 +183,7 @@ async function main() {
         console.log(`Found ${files.length} files to check (.md, .mdx, .tsx)\n`);
 
         // Process files with a constant throughput of 10 concurrent checks
-        const maxConcurrent = 10;
+        const maxConcurrent = 1;
         let index = 0;
         let completed = 0;
         const total = files.length;
