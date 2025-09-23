@@ -182,13 +182,35 @@ async function main() {
         const files = findFiles(pagesDir);
         console.log(`Found ${files.length} files to check (.md, .mdx, .tsx)\n`);
 
-        // Process files in parallel with a limit of 10 concurrent checks
-        const batchSize = 10;
-        for (let i = 0; i < files.length; i += batchSize) {
-            const batch = files.slice(i, i + batchSize);
-            const results = await Promise.all(batch.map(file => checkFile(file)));
-            hasErrors = hasErrors || results.some(result => result);
-        }
+        // Process files with a constant throughput of 10 concurrent checks
+        const maxConcurrent = 10;
+        let index = 0;
+        let completed = 0;
+        const total = files.length;
+
+        const processFile = async () => {
+            while (index < total) {
+                const fileIndex = index++;
+                const file = files[fileIndex];
+
+                try {
+                    const result = await checkFile(file);
+                    hasErrors = hasErrors || result;
+                } catch (error) {
+                    console.error(`Error processing ${file}:`, error);
+                    hasErrors = true;
+                }
+
+                completed++;
+                if (completed % 10 === 0 || completed === total) {
+                    console.log(`Processed ${completed}/${total} files`);
+                }
+            }
+        };
+
+        // Start worker pool
+        const workers = Array.from({ length: Math.min(maxConcurrent, files.length) }, () => processFile());
+        await Promise.all(workers);
 
         if (hasErrors) {
             console.error('\nLink check failed: Some links are dead or invalid');
