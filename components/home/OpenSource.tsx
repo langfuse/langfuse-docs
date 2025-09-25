@@ -401,7 +401,7 @@ export default function OpenSource() {
           <StatBox
             title="# Feature Discussions"
             mainValue={ideasCount.toLocaleString()}
-            subtitle={`last thread ${formatTimeDiff(latestIdeasActivity)}`}
+            subtitle={`threads (last ${formatTimeDiff(latestIdeasActivity)})`}
             linkHref="/ideas"
             isExternal={true}
             discussions={ideasDiscussionsTop50}
