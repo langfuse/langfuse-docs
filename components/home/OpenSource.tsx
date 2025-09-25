@@ -1,10 +1,67 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Changelog from "./Changelog";
 import { HomeSection } from "./components/HomeSection";
 import { Header } from "../Header";
 
 import { GITHUB_STARS } from "../../src/github-stars";
 import discussionsData from "../../src/langfuse_github_discussions.json";
+
+// API response interface
+interface ReleaseData {
+  repo: string;
+  latestRelease?: string;
+  publishedAt?: string;
+  url?: string;
+}
+
+// Reusable StatBox component
+interface StatBoxProps {
+  title: string;
+  mainValue: string;
+  subtitle?: string;
+  linkHref: string;
+  linkText?: string;
+  isExternal?: boolean;
+}
+
+function StatBox({
+  title,
+  mainValue,
+  subtitle,
+  linkHref,
+  linkText = "View all →",
+  isExternal = false,
+}: StatBoxProps) {
+  const linkProps = isExternal
+    ? { target: "_blank", rel: "noopener noreferrer" }
+    : {};
+
+  return (
+    <div className="rounded border bg-card overflow-hidden h-full flex flex-col">
+      <div className="px-5 py-2 text-center border-b text-xs sm:text-base font-medium">
+        <h3>{title}</h3>
+      </div>
+      <div className="flex-1 flex flex-col justify-center items-center space-y-4 px-2 py-4">
+        <div className="text-center">
+          <div className="font-bold text-primary text-3xl sm:text-4xl">
+            {mainValue}
+          </div>
+          {subtitle && (
+            <div className="text-sm text-primary/70">{subtitle}</div>
+          )}
+        </div>
+        <Link
+          href={linkHref}
+          className="text-sm text-primary/70 hover:text-primary"
+          {...linkProps}
+        >
+          {linkText}
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 const supportDiscussions =
   discussionsData.categories.find((cat) => cat.category === "Support")
@@ -31,6 +88,31 @@ const latestSupportActivity = getLatestActivity(supportDiscussions);
 const latestIdeasActivity = getLatestActivity(ideasDiscussions);
 
 export default function OpenSource() {
+  const [releaseData, setReleaseData] = useState<ReleaseData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch latest release data
+  useEffect(() => {
+    const fetchReleaseData = async () => {
+      try {
+        const response = await fetch("/api/latest-releases");
+        if (response.ok) {
+          const data: ReleaseData[] = await response.json();
+          const langfuseRelease = data.find(
+            (release) => release.repo === "langfuse/langfuse"
+          );
+          setReleaseData(langfuseRelease || null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch release data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReleaseData();
+  }, []);
+
   // Format time difference
   const formatTimeDiff = (date: Date | null) => {
     if (!date) return "no activity";
@@ -80,99 +162,51 @@ export default function OpenSource() {
       <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-3 w-full max-w-6xl mx-auto px-5">
         <Changelog />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Latest Releases Box */}
-          <div className="rounded border p-5 bg-card">
-            <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
-              <h3>latest releases</h3>
-            </div>
-            <div className="flex flex-col justify-center items-center h-32 space-y-4">
-              <div className="text-center">
-                <div className="font-bold text-primary text-4xl">v3.112.1</div>
-                <div className="text-sm text-primary/70">2 days ago</div>
-              </div>
-              <Link
-                href="https://github.com/langfuse/langfuse/releases"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary/70 hover:text-primary"
-              >
-                view all →
-              </Link>
-            </div>
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          <StatBox
+            title="Latest Release"
+            mainValue={
+              isLoading ? "loading..." : releaseData?.latestRelease || "unknown"
+            }
+            subtitle={
+              isLoading
+                ? ""
+                : formatTimeDiff(
+                    releaseData?.publishedAt
+                      ? new Date(releaseData.publishedAt)
+                      : null
+                  )
+            }
+            linkHref={
+              releaseData?.url ||
+              "https://github.com/langfuse/langfuse/releases"
+            }
+            isExternal={true}
+            linkText="View on GitHub →"
+          />
 
-          {/* GitHub Stars Box */}
-          <div className="rounded border p-5 bg-card">
-            <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
-              <h3>stars</h3>
-            </div>
-            <div className="flex flex-col justify-center items-center h-32 space-y-4">
-              <div className="text-center">
-                <div className="font-bold text-primary text-4xl">
-                  {GITHUB_STARS.toLocaleString()}
-                </div>
-              </div>
-              <Link
-                href="https://github.com/langfuse/langfuse"
-                className="text-sm text-primary/70 hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                view all →
-              </Link>
-            </div>
-          </div>
+          <StatBox
+            title="Stars"
+            mainValue={GITHUB_STARS.toLocaleString()}
+            linkHref="https://github.com/langfuse/langfuse"
+            isExternal={true}
+          />
 
-          {/* Community Questions Box */}
-          <div className="rounded border p-5 bg-card">
-            <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
-              <h3># community q&a</h3>
-            </div>
-            <div className="flex flex-col justify-center items-center h-32 space-y-4">
-              <div className="text-center">
-                <div className="font-bold text-primary text-4xl">
-                  {supportCount.toLocaleString()}
-                </div>
-                <div className="text-sm text-primary/70">
-                  latest {formatTimeDiff(latestSupportActivity)}
-                </div>
-              </div>
-              <Link
-                href="/gh-support"
-                className="text-sm text-primary/70 hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                view all →
-              </Link>
-            </div>
-          </div>
+          <StatBox
+            title="# Community Q&A"
+            mainValue={supportCount.toLocaleString()}
+            subtitle={`threads (last ${formatTimeDiff(latestSupportActivity)})`}
+            linkHref="/gh-support"
+            isExternal={true}
+          />
 
-          {/* Feature Discussions Box */}
-          <div className="rounded border p-5 bg-card">
-            <div className="px-5 py-2 text-center -mt-5 -mx-5 mb-5 border-b font-medium">
-              <h3># feature discussions</h3>
-            </div>
-            <div className="flex flex-col justify-center items-center h-32 space-y-4">
-              <div className="text-center">
-                <div className="font-bold text-primary text-4xl">
-                  {ideasCount.toLocaleString()}
-                </div>
-                <div className="text-sm text-primary/70">
-                  latest {formatTimeDiff(latestIdeasActivity)}
-                </div>
-              </div>
-              <Link
-                href="/ideas"
-                className="text-sm text-primary/70 hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                view all →
-              </Link>
-            </div>
-          </div>
+          <StatBox
+            title="# Feature Discussions"
+            mainValue={ideasCount.toLocaleString()}
+            subtitle={`last thread ${formatTimeDiff(latestIdeasActivity)}`}
+            linkHref="/ideas"
+            isExternal={true}
+          />
         </div>
       </div>
     </HomeSection>

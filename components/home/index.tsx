@@ -1,6 +1,5 @@
 import { Background } from "../Background";
 import { Hero } from "./Hero";
-import Security from "./Security";
 import { Usage } from "./Usage";
 import dynamic from "next/dynamic";
 
@@ -16,6 +15,9 @@ const OpenSource = dynamic(() => import("./OpenSource"), {
 const Pricing = dynamic(() => import("./Pricing"), {
   ssr: false,
 });
+const Security = dynamic(() => import("./Security"), {
+  ssr: false,
+});
 const WallOfLove = dynamic(() => import("./WallOfLove"), {
   ssr: false,
 });
@@ -29,19 +31,16 @@ const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
 export const Home = () => (
   <>
     <main className="relative overflow-hidden w-full">
-      {/* <Hero />
+      <Hero />
       <Usage />
       <FeatureBento />
-      <IntegrationsGrid /> */}
+      <IntegrationsGrid />
       <OpenSource />
-      {/* <Security />
+      <Security />
       <CustomerStories />
       <Pricing />
       <WallOfLove />
-      <CTAGetStarted /> */}
-      {/* <FromTheBlog /> */}
-      {/* <CTA /> */}
-      {/* <Footer /> */}
+      <CTAGetStarted />
     </main>
     <Background />
   </>
