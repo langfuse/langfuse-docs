@@ -6,9 +6,12 @@ import { Header } from "../Header";
 import ShimmerButton from "../magicui/shimmer-button";
 import IconGithub from "../icons/github";
 import { StarCount } from "../GitHubBadge";
+import { Button } from "../ui/button";
 
-import { GITHUB_STARS } from "../../src/github-stars";
 import discussionsData from "../../src/langfuse_github_discussions.json";
+import IconAWS from "../icons/aws";
+import IconAzure from "../icons/azure";
+import IconGCP from "../icons/gcp";
 
 // Discussion item interface
 interface Discussion {
@@ -127,7 +130,7 @@ function StatBox({
         )}
 
         {/* Foreground Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center space-y-4 px-2 py-4 h-full">
+        <div className="relative z-10 flex flex-col justify-center items-center space-y-1 px-2 py-4 h-full">
           <div className="text-center bg-background/40 backdrop-blur-[2px] rounded-md px-3 py-2">
             <div className="font-bold text-primary text-3xl sm:text-4xl">
               {mainValue}
@@ -283,12 +286,109 @@ export default function OpenSource() {
             linkText="View on GitHub →"
           />
 
-          <StatBox
-            title="Stars"
-            mainValue={GITHUB_STARS.toLocaleString()}
-            linkHref="https://github.com/langfuse/langfuse"
-            isExternal={true}
-          />
+          {/* Self-Host Langfuse Card */}
+          <div className="rounded border bg-card overflow-hidden h-full flex flex-col">
+            {/* Title Section */}
+            <div className="px-5 py-2 text-center border-b text-xs sm:text-base font-medium">
+              <h3>Self-Host Langfuse</h3>
+            </div>
+
+            {/* Main Content Section */}
+            <div className="flex-1 relative">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10"></div>
+                <div className="absolute top-4 right-4 text-6xl opacity-20">
+                  🚀
+                </div>
+                <div className="absolute bottom-4 left-4 text-4xl opacity-15">
+                  ⚡
+                </div>
+              </div>
+
+              {/* Foreground Content */}
+              <div className="relative z-10 flex flex-col justify-center items-center space-y-3 px-3 py-4 h-full">
+                {/* Deployment Options */}
+                <div className="space-y-2 w-full">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start h-auto py-2"
+                  >
+                    <Link href="/self-hosting/deployment/docker-compose">
+                      <span className="flex items-center gap-2">
+                        <span>🐳</span>
+                        Docker Compose
+                      </span>
+                    </Link>
+                  </Button>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start h-auto py-2"
+                  >
+                    <Link href="/self-hosting/deployment/kubernetes-helm">
+                      <span className="flex items-center gap-2">
+                        <span>⚓</span>
+                        Kubernetes (Helm)
+                      </span>
+                    </Link>
+                  </Button>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start h-auto py-2"
+                  >
+                    <Link href="/self-hosting/deployment/aws">
+                      <span className="flex items-center gap-2">
+                        <span>
+                          <IconAWS />
+                        </span>
+                        AWS (Terraform)
+                      </span>
+                    </Link>
+                  </Button>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start h-auto py-2"
+                  >
+                    <Link href="/self-hosting/deployment/gcp">
+                      <span className="flex items-center gap-2">
+                        <span>
+                          <IconGCP />
+                        </span>
+                        GCP (Terraform)
+                      </span>
+                    </Link>
+                  </Button>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start h-auto py-2"
+                  >
+                    <Link href="/self-hosting/deployment/azure">
+                      <span className="flex items-center gap-2">
+                        <span>
+                          <IconAzure />
+                        </span>
+                        Azure (Terraform)
+                      </span>
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <StatBox
             title="# Community Q&A"
