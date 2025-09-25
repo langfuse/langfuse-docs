@@ -19,6 +19,9 @@ const Pricing = dynamic(() => import("./Pricing"), {
 const WallOfLove = dynamic(() => import("./WallOfLove"), {
   ssr: false,
 });
+const CustomerStories = dynamic(() => import("./CustomerStories"), {
+  ssr: false,
+});
 const CTAGetStarted = dynamic(() => import("./CTAGetStarted"), {
   ssr: false,
 });
@@ -32,6 +35,7 @@ export const Home = () => (
       <IntegrationsGrid />
       <OpenSource />
       <Security />
+      <CustomerStories />
       <Pricing />
       <WallOfLove />
       <CTAGetStarted />
