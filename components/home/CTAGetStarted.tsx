@@ -164,7 +164,8 @@ export default function CTAGetStarted() {
                         Read Documentation
                       </h4>
                       <p className="text-sm text-primary/70 text-wrap">
-                        Technical docs, examples, and guides
+                        Technical docs, examples, and guides to understand all
+                        details of the platform
                       </p>
                     </div>
                     <ArrowRight size={16} className="text-primary/50" />
